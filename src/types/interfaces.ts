@@ -69,3 +69,29 @@ export interface Guide {
   hours_color: string;
   hours: number;
 }
+
+export interface AlertProps {
+  readonly type: "success" | "error";
+  readonly message: string;
+  readonly duration?: number;
+}
+
+export interface GameDetails {
+  release_year?: number | null;
+  developer?: string | null;
+  publisher?: string | null;
+  genre?: string | null;
+  slug?: string | null;
+  metacritic?: number | null;
+  rating?: number | null;
+  platforms?: string[] | null;
+  esrb_rating?: string | null;
+}
+
+export interface GuideProps {
+  id: number;
+  steps: Step[];
+}
+export interface TrophyGuidesProps {
+  guides: GuideProps[];
+}

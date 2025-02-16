@@ -2,20 +2,40 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
-import { Guide, ApiGame } from "@/types/interfaces";
+import { Guide, ApiGame, GameDetails } from "@/types/interfaces";
+import AlertMessage from "@/app/components/ui/AlertMessage";
+import { Info } from "lucide-react";
+import Skeleton from "@/app/components/ui/Skeleton";
+import TrophyGuides from "@/app/components/game-details/TrophyGuides";
+import EditGuideButton from "@/app/components/game-details/EditGuideButton";
+import UpdateGameInfoButton from "@/app/components/game-details/UpdateGameInfoButton";
+import GamePlatforms from "@/app/components/game-details/GamePlatforms";
+import GameDetailsInfo from "@/app/components/game-details/GameDetailsInfo";
+import TrophyStats from "@/app/components/game-details/TrophyStats";
+import GuideStats from "@/app/components/game-details/GuideStats";
 
-export default function GameDetails() {
+export default function GameDetailsPage() {
   const { slug } = useParams();
   const [game, setGame] = useState<ApiGame | null>(null);
   const [guides, setGuides] = useState<Guide[]>([]);
+  const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
+  const [trophies, setTrophies] = useState<{
+    platinum: number;
+    gold: number;
+    silver: number;
+    bronze: number;
+  } | null>(null);
 
   useEffect(() => {
-    const fetchGameAndGuides = async () => {
+    const fetchGameData = async () => {
+      if (!slug) return; // 🚀 Αν δεν υπάρχει slug, δεν ξεκινάμε το fetch
+
       try {
-        // 1️⃣ Παίρνουμε όλα τα παιχνίδια και βρίσκουμε το ID με βάση το slug
         const gameResponse = await fetch("/api/games");
         if (!gameResponse.ok) throw new Error("Failed to fetch games");
 
@@ -31,12 +51,15 @@ export default function GameDetails() {
 
         setGame(matchedGame);
 
-        // 2️⃣ Φέρνουμε το αντίστοιχο guide
-        const guideResponse = await fetch(`/api/guides/${matchedGame.id}`);
-        if (!guideResponse.ok) throw new Error("Failed to fetch guide data");
+        const [guideData, detailsData, trophiesData] = await Promise.all([
+          fetch(`/api/guides/${matchedGame.id}`).then((res) => res.json()),
+          fetch(`/api/game-details/${matchedGame.id}`).then((res) => res.json()),
+          fetch(`/api/game/${matchedGame.id}`).then((res) => res.json()),
+        ]);
 
-        const guideData: Guide[] = await guideResponse.json();
         setGuides(guideData);
+        setGameDetails(detailsData);
+        setTrophies(trophiesData);
       } catch (err) {
         console.error("❌ Σφάλμα στη φόρτωση:", err);
       } finally {
@@ -44,36 +67,44 @@ export default function GameDetails() {
       }
     };
 
-    fetchGameAndGuides();
+    fetchGameData();
   }, [slug]);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
-        {/* Skeleton Loader για το παιχνίδι */}
-        <div className="max-w-3xl w-full bg-gray-900 p-6 rounded-lg shadow-lg animate-pulse">
-          <div className="flex justify-center mb-4">
-            <div className="w-48 h-48 bg-gray-700 rounded-lg"></div>
-          </div>
-          <div className="h-6 bg-gray-700 w-3/4 mx-auto rounded"></div>
-          <div className="h-4 bg-gray-700 w-1/2 mx-auto rounded mt-2"></div>
-        </div>
+  const handleUpdateInfo = async () => {
+    if (!game) return;
 
-        {/* Skeleton Loader για τα trophy guides */}
-        <div className="w-full max-w-3xl mt-6">
-          {Array(2)
-            .fill(null)
-            .map((_, index) => (
-              <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-md mb-6 animate-pulse">
-                <div className="h-6 bg-gray-700 w-1/2 rounded"></div>
-                <div className="h-4 bg-gray-700 w-full rounded mt-3"></div>
-                <div className="h-4 bg-gray-700 w-3/4 rounded mt-2"></div>
-                <div className="h-4 bg-gray-700 w-2/4 rounded mt-2"></div>
-              </div>
-            ))}
-        </div>
-      </div>
-    );
+    setUpdating(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/update-game-info/${game.id}`, {
+        method: "POST",
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage("✅ Πληροφορίες ενημερώθηκαν!");
+        setGameDetails({
+          ...gameDetails,
+          ...result.updatedData, // Ενημέρωση των δεδομένων με τις νέες πληροφορίες
+        });
+        setMessageType("success");
+      } else {
+        setMessage("❌ Σφάλμα κατά την ενημέρωση!");
+        setMessageType("error");
+      }
+    } catch (error) {
+      console.error("❌ Σφάλμα:", error);
+      setMessage("❌ Αποτυχία ενημέρωσης!");
+      setMessageType("error");
+    }
+
+    setUpdating(false);
+  };
+
+  if (loading || !game) {
+    return <Skeleton type="page" />;
   }
 
   return (
@@ -83,7 +114,7 @@ export default function GameDetails() {
           {/* 🖼️ Εικόνα Παιχνιδιού */}
           <div className="flex justify-center mb-4">
             <Image
-              src={game.game_image || "/default-image.png"}
+              src={game.game_image ?? "/default-image.png"}
               alt={game.title}
               width={200}
               height={200}
@@ -91,69 +122,54 @@ export default function GameDetails() {
             />
           </div>
 
-          {/* 🎮 Τίτλος Παιχνιδιού */}
           <h1 className="text-3xl font-extrabold text-blue-400 text-center">{game.title}</h1>
-          <p className="text-lg text-gray-400 text-center">{game.platform}</p>
 
-          {/* 📊 Στατιστικά Guide */}
           {guides.length > 0 && (
-            <div className="flex justify-center mt-4 gap-4 text-lg">
-              <span className="text-yellow-400">🔥 Δυσκολία: {guides[0].difficulty}</span>
-              <span className="text-orange-400">🎮 Playthroughs: {guides[0].playthroughs}</span>
-              <span className="text-blue-300">⏳ Ώρες: {guides[0].hours}</span>
+            <GuideStats
+              difficulty={guides[0].difficulty}
+              difficultyColor={guides[0].difficulty_color}
+              playthroughs={guides[0].playthroughs}
+              playthroughsColor={guides[0].playthroughs_color}
+              hours={guides[0].hours}
+              hoursColor={guides[0].hours_color}
+            />
+          )}
+
+          {trophies && <TrophyStats trophies={trophies} />}
+
+          {gameDetails && (
+            <div className="mt-6 p-6 bg-gray-900 rounded-lg shadow-lg border border-gray-700">
+              <h2 className="text-lg font-bold text-yellow-400 text-center flex items-center justify-center mb-4">
+                <Info className="w-5 h-5 mr-2 text-blue-400" /> Game Information
+              </h2>
+              <GameDetailsInfo
+                releaseYear={gameDetails.release_year}
+                developer={gameDetails.developer}
+                publisher={gameDetails.publisher}
+                genre={gameDetails.genre}
+                rating={gameDetails.rating}
+                metacritic={gameDetails.metacritic}
+                esrbRating={gameDetails.esrb_rating}
+              />
+
+              <GamePlatforms platforms={gameDetails.platforms} />
+
+              {/* Το κουμπί εμφανίζεται μόνο αν υπάρχουν πεδία που είναι null */}
+              <UpdateGameInfoButton
+                handleUpdateInfo={handleUpdateInfo}
+                updating={updating}
+                gameDetails={gameDetails}
+              />
+
+              {message && messageType && <AlertMessage type={messageType} message={message} />}
             </div>
           )}
 
-          {/* ✏️ Κουμπί Επεξεργασίας Guide */}
-          <div className="text-center mt-6">
-            <Link
-              href={`/pages/edit-guide/${game.id}`}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg text-lg transition"
-            >
-              ✏️ Επεξεργασία Guide
-            </Link>
-          </div>
+          <EditGuideButton gameId={game.id} />
         </div>
       )}
 
-      {/* 📜 Trophy Guides */}
-      {guides.length > 0 ? (
-        <div className="w-full max-w-3xl mt-6">
-          {guides.map((guide) => (
-            <div key={guide.id} className="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
-              <h2 className="text-2xl font-bold text-yellow-400 text-center">📜 Trophy Guide</h2>
-              {guide.steps.map((step, index) => (
-                <div key={index} className="mt-6">
-                  <h3 className="text-xl font-semibold text-blue-300">{step.title}</h3>
-                  <p className="text-gray-400">{step.description}</p>
-
-                  {step.trophies.length > 0 && (
-                    <ul className="mt-3 space-y-2">
-                      {step.trophies.map((trophy, i) => {
-                        let trophyIcon = "🥉"; // Default bronze
-                        if (trophy.type === "Platinum") trophyIcon = "🏆";
-                        else if (trophy.type === "Gold") trophyIcon = "🥇";
-                        else if (trophy.type === "Silver") trophyIcon = "🥈";
-
-                        return (
-                          <li key={i} className="text-gray-300">
-                            {trophyIcon} <span className="text-white">{trophy.name}</span> -{" "}
-                            {trophy.description}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-lg text-gray-400 text-center mt-6">
-          ❌ Δεν υπάρχουν guides για αυτό το παιχνίδι.
-        </p>
-      )}
+      <TrophyGuides guides={guides} />
     </div>
   );
 }

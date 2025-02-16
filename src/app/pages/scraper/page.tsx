@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { ScrapedGameData } from "@/types/interfaces";
 import Image from "next/image";
+import AlertMessage from "../../components/ui/AlertMessage";
 
 export default function ScraperPage() {
   const [url, setUrl] = useState("");
@@ -14,9 +15,10 @@ export default function ScraperPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
   const handleScrape = async () => {
-    if (!url) return alert("Βάλε ένα έγκυρο URL!");
+    if (!url) return setMessageState("error", "Βάλε ένα έγκυρο URL!");
 
     setLoading(true);
     setData(null);
@@ -32,16 +34,17 @@ export default function ScraperPage() {
       const result = await response.json();
 
       if (response.status === 409) {
-        setMessage(result.message);
+        setMessageState("error", result.message);
         setData(result.existingData);
       } else if (response.ok) {
+        setMessageState("success", "✅ Scraping επιτυχές!");
         setData(result);
       } else {
-        setMessage("❌ Σφάλμα κατά το Scraping!");
+        setMessageState("error", "❌ Σφάλμα κατά το Scraping!");
       }
     } catch (error) {
       console.error("❌ Σφάλμα:", error);
-      setMessage("❌ Αποτυχία Scraping! Δοκίμασε ξανά.");
+      setMessageState("error", "❌ Αποτυχία Scraping! Δοκίμασε ξανά.");
     }
 
     setLoading(false);
@@ -60,24 +63,32 @@ export default function ScraperPage() {
       });
 
       if (response.status === 409) {
-        setMessage("⚠️ Ο οδηγός υπάρχει ήδη στη βάση!");
+        setMessageState("error", "⚠️ Ο οδηγός υπάρχει ήδη στη βάση!");
       } else if (response.ok) {
-        setMessage("✅ Ο οδηγός αποθηκεύτηκε επιτυχώς!");
+        setMessageState("success", "✅ Ο οδηγός αποθηκεύτηκε επιτυχώς!");
+        setUrl(""); // 🔹 Reset του input
+        setData(null); // 🔹 Clear τα προηγούμενα δεδομένα
       } else {
-        setMessage("❌ Κάτι πήγε στραβά κατά την αποθήκευση!");
+        setMessageState("error", "❌ Κάτι πήγε στραβά κατά την αποθήκευση!");
       }
     } catch (error) {
       console.error("❌ Σφάλμα:", error);
-      setMessage("❌ Αποτυχία αποθήκευσης στη βάση!");
+      setMessageState("error", "❌ Αποτυχία αποθήκευσης στη βάση!");
     }
 
     setSaving(false);
   };
 
+  const setMessageState = (type: "success" | "error", msg: string) => {
+    setMessageType(type);
+    setMessage(msg);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 overflow-hidden">
+      {message && messageType && <AlertMessage type={messageType} message={message} />}
       <motion.div
-        className="max-w-2xl w-full text-center flex flex-col items-center gap-3 mt-[-500px]"
+        className="max-w-2xl w-full text-center flex flex-col items-center gap-3 mt-[-200px]"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
@@ -97,9 +108,6 @@ export default function ScraperPage() {
             {loading ? "⏳ Φόρτωση..." : "Scrape"}
           </Button>
         </div>
-
-        {message && <p className="text-red-500">{message}</p>}
-
         {data && (
           <Card className="mt-6 p-6 bg-gray-900 rounded-lg">
             {data.gameImage && (
