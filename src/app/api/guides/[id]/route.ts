@@ -1,21 +1,28 @@
 import { NextResponse } from "next/server";
-import pool from "@/lib/db";
+import supabase from "@/lib/db";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: { id: string } }) {
   try {
+    const params = await context.params; //NOSONAR
     const { id } = params;
-    const result = await pool.query("SELECT * FROM guides WHERE game_id = $1", [id]);
 
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: "Δεν υπάρχουν guides για αυτό το παιχνίδι" },
-        { status: 404 }
-      );
+    console.log("📥 Ανάκτηση οδηγού για game_id:", id);
+
+    // 📡 Query στη βάση για τα guides που αντιστοιχούν στο game_id
+    const { data: guides, error } = await supabase.from("guides").select("*").eq("game_id", id);
+
+    if (error) {
+      console.error("❌ Σφάλμα στη λήψη δεδομένων από τη βάση:", error);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
-    return NextResponse.json(result.rows);
+    if (!guides || guides.length === 0) {
+      return NextResponse.json({ error: "Guide not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(guides);
   } catch (error) {
-    console.error("❌ Σφάλμα στη φόρτωση των guides:", error);
+    console.error("❌ Σφάλμα διακομιστή:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

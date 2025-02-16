@@ -1,11 +1,12 @@
-import type { NextConfig } from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: false,
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'i.psnprofiles.com',
+        protocol: "https",
+        hostname: "i.psnprofiles.com",
       },
     ],
   },

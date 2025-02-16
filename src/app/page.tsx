@@ -13,23 +13,7 @@ export default function Home() {
         transition={{ duration: 1.2, ease: "easeOut" }}
       >
         {/* Τίτλος με γυαλιστερό εφέ */}
-        <motion.h1
-          className="text-6xl font-extrabold text-blue-400 drop-shadow-lg relative inline-block"
-          animate={{
-            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-          }}
-          transition={{
-            duration: 2,
-            ease: "linear",
-            repeat: Infinity,
-          }}
-          style={{
-            backgroundImage: "linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd, #3b82f6)",
-            backgroundSize: "200% auto",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-          }}
-        >
+        <motion.h1 className="text-6xl font-extrabold drop-shadow-lg text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 animate-gradient">
           Platinum Hunters
         </motion.h1>
 
@@ -64,7 +48,7 @@ export default function Home() {
           whileHover={{ scale: 1.1 }}
         >
           <Link
-            href="/guide"
+            href="/pages/guide"
             className="inline-block px-6 py-3 text-lg font-semibold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg transition"
           >
             Start Hunting 🎮

@@ -1,30 +1,37 @@
-import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import { NextResponse } from "next/server";
+import supabase from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
+    // Ανάγνωση δεδομένων από το request
     const { title, platform, gameImage, trophies } = await req.json();
 
-    const gameInsertQuery = `
-      INSERT INTO games (title, platform, game_image, platinum, gold, silver, bronze)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *;
-    `;
+    // Εισαγωγή δεδομένων στον πίνακα "games"
+    const { data, error } = await supabase
+      .from("games") // Πίνακας "games"
+      .insert([
+        {
+          title,
+          platform,
+          game_image: gameImage,
+          platinum: parseInt(trophies?.Platinum) || 0,
+          gold: parseInt(trophies?.Gold) || 0,
+          silver: parseInt(trophies?.Silver) || 0,
+          bronze: parseInt(trophies?.Bronze) || 0,
+        },
+      ])
+      .select("*") // Επιστροφή των εισαγόμενων δεδομένων
+      .single(); // Μία μόνο εγγραφή
 
-    const gameValues = [
-      title,
-      platform,
-      gameImage,
-      parseInt(trophies?.Platinum) || 0,
-      parseInt(trophies?.Gold) || 0,
-      parseInt(trophies?.Silver) || 0,
-      parseInt(trophies?.Bronze) || 0,
-    ];
+    // Αν υπάρχει σφάλμα στην αποθήκευση
+    if (error) {
+      console.error("❌ Σφάλμα αποθήκευσης:", error);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
 
-    const result = await pool.query(gameInsertQuery, gameValues);
-    return NextResponse.json({ message: '✅ Ο οδηγός αποθηκεύτηκε!', game: result.rows[0] });
+    return NextResponse.json({ message: "✅ Ο οδηγός αποθηκεύτηκε!", game: data });
   } catch (error) {
-    console.error('❌ Σφάλμα αποθήκευσης:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("❌ Σφάλμα αποθήκευσης:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

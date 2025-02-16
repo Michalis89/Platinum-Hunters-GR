@@ -10,9 +10,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
     "framer-motion": "^12.4.3",
     "glob": "^11.0.1",
     "lodash.clonedeep": "^4.5.0",
+    "lucide-react": "^0.475.0",
     "next": "15.1.7",
     "nodemailer": "^6.10.0",
     "pg": "^8.13.3",

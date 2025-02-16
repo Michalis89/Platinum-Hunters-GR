@@ -11,6 +11,8 @@ export default function Guides() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    console.log("🔄 Το component Guides.tsx έκανε re-render!");
+
     const fetchGames = async () => {
       try {
         const response = await fetch("/api/games");
@@ -18,7 +20,6 @@ export default function Guides() {
 
         const data: ApiGame[] = await response.json();
 
-        // Κανονικοποίηση των δεδομένων
         const normalizedGames: Game[] = data.map((game) => ({
           id: game.id,
           title: game.title,
@@ -98,7 +99,7 @@ export default function Guides() {
             {filteredGames.map((game) => (
               <a
                 key={game.id}
-                href={`/guide/${encodeURIComponent(game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}`}
+                href={`/pages/guide/${encodeURIComponent(game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}`}
                 className="relative p-6 bg-gray-900/90 backdrop-blur-lg rounded-xl shadow-xl transform transition duration-300 hover:scale-105 hover:bg-gray-800/90 flex flex-col items-center border border-gray-700/50 group overflow-hidden"
               >
                 {/* Glow Effect */}
