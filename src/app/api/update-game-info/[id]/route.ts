@@ -65,9 +65,12 @@ async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
   }
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function POST(req: Request, context: any) {
   try {
-    const gameId = parseInt(params.id);
+    const { params } = await context;
+    const gameId = parseInt(params.id as string);
+
     if (isNaN(gameId)) {
       return NextResponse.json({ error: "Invalid game ID" }, { status: 400 });
     }
@@ -83,7 +86,6 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       console.error("❌ Game not found in DB:", gameError);
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
-
     // 🔄 Παίρνουμε πληροφορίες από RAWG API
     const gameInfo = await fetchGameInfo(gameData.title);
     if (!gameInfo) {

@@ -1,21 +1,25 @@
 import { NextResponse } from "next/server";
 import supabase from "@/lib/db";
 
-export async function GET(req: Request, context: { params: { game_id: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(req: Request, context: any) {
   try {
-    const { game_id } = context.params;
+    const { params } = await context;
+    const gameId = params.game_id as string;
 
-    console.log("📥 Ανάκτηση λεπτομερειών για game_id:", game_id);
+    if (!gameId) {
+      return NextResponse.json({ error: "Λάθος ID παιχνιδιού" }, { status: 400 });
+    }
 
-    // 📡 Query στη βάση για το game_details με βάση το game_id
+    console.log("📥 Ανάκτηση λεπτομερειών για game_id:", gameId);
+
     const { data, error } = await supabase
       .from("game_details")
       .select("*")
-      .eq("game_id", game_id)
+      .eq("game_id", gameId)
       .single();
 
     if (error) {
-      console.error("❌ Σφάλμα στη λήψη δεδομένων από τη βάση:", error);
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 

@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
 import supabase from "@/lib/db";
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(req: Request, context: any) {
   try {
-    const params = await context.params; //NOSONAR
-    const { id } = params;
+    const { params } = await context; // ✅ Σωστό await
+    const id = params.id as string;
+
+    if (!id) {
+      return NextResponse.json({ error: "Λάθος ID οδηγού" }, { status: 400 });
+    }
 
     console.log("📥 Ανάκτηση οδηγού για game_id:", id);
 
-    // 📡 Query στη βάση για τα guides που αντιστοιχούν στο game_id
     const { data: guides, error } = await supabase.from("guides").select("*").eq("game_id", id);
 
     if (error) {
-      console.error("❌ Σφάλμα στη λήψη δεδομένων από τη βάση:", error);
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 

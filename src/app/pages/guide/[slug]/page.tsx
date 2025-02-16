@@ -2,21 +2,36 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import dynamic from "next/dynamic"; // 🚀 Lazy Loading για components
 import Image from "next/image";
 import { Guide, ApiGame, GameDetails } from "@/types/interfaces";
 import AlertMessage from "@/app/components/ui/AlertMessage";
 import { Info } from "lucide-react";
 import Skeleton from "@/app/components/ui/Skeleton";
-import TrophyGuides from "@/app/components/game-details/TrophyGuides";
 import EditGuideButton from "@/app/components/game-details/EditGuideButton";
 import UpdateGameInfoButton from "@/app/components/game-details/UpdateGameInfoButton";
 import GamePlatforms from "@/app/components/game-details/GamePlatforms";
 import GameDetailsInfo from "@/app/components/game-details/GameDetailsInfo";
-import TrophyStats from "@/app/components/game-details/TrophyStats";
 import GuideStats from "@/app/components/game-details/GuideStats";
 
+// 🚀 Lazy Loading για TrophyStats και TrophyGuides
+const TrophyStats = dynamic(() => import("@/app/components/game-details/TrophyStats"), {
+  ssr: false,
+});
+const TrophyGuides = dynamic(() => import("@/app/components/game-details/TrophyGuides"), {
+  ssr: false,
+});
+
 export default function GameDetailsPage() {
-  const { slug } = useParams();
+  const params = useParams();
+  const [slug, setSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (params?.slug) {
+      setSlug(params.slug as string);
+    }
+  }, [params]);
+
   const [game, setGame] = useState<ApiGame | null>(null);
   const [guides, setGuides] = useState<Guide[]>([]);
   const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
@@ -32,9 +47,9 @@ export default function GameDetailsPage() {
   } | null>(null);
 
   useEffect(() => {
-    const fetchGameData = async () => {
-      if (!slug) return; // 🚀 Αν δεν υπάρχει slug, δεν ξεκινάμε το fetch
+    if (!slug) return; // 🚀 Αν δεν υπάρχει slug, δεν ξεκινάμε το fetch
 
+    const fetchGameData = async () => {
       try {
         const gameResponse = await fetch("/api/games");
         if (!gameResponse.ok) throw new Error("Failed to fetch games");
@@ -45,9 +60,7 @@ export default function GameDetailsPage() {
             encodeURIComponent(game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")) === slug
         );
 
-        if (!matchedGame) {
-          throw new Error("Game not found");
-        }
+        if (!matchedGame) throw new Error("Game not found");
 
         setGame(matchedGame);
 
@@ -77,17 +90,14 @@ export default function GameDetailsPage() {
     setMessage("");
 
     try {
-      const response = await fetch(`/api/update-game-info/${game.id}`, {
-        method: "POST",
-      });
-
+      const response = await fetch(`/api/update-game-info/${game.id}`, { method: "POST" });
       const result = await response.json();
 
       if (response.ok) {
         setMessage("✅ Πληροφορίες ενημερώθηκαν!");
         setGameDetails({
           ...gameDetails,
-          ...result.updatedData, // Ενημέρωση των δεδομένων με τις νέες πληροφορίες
+          ...result.updatedData,
         });
         setMessageType("success");
       } else {
@@ -111,7 +121,6 @@ export default function GameDetailsPage() {
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
       {game && (
         <div className="max-w-3xl w-full bg-gray-900 p-6 rounded-lg shadow-lg">
-          {/* 🖼️ Εικόνα Παιχνιδιού */}
           <div className="flex justify-center mb-4">
             <Image
               src={game.game_image ?? "/default-image.png"}
@@ -142,25 +151,13 @@ export default function GameDetailsPage() {
               <h2 className="text-lg font-bold text-yellow-400 text-center flex items-center justify-center mb-4">
                 <Info className="w-5 h-5 mr-2 text-blue-400" /> Game Information
               </h2>
-              <GameDetailsInfo
-                releaseYear={gameDetails.release_year}
-                developer={gameDetails.developer}
-                publisher={gameDetails.publisher}
-                genre={gameDetails.genre}
-                rating={gameDetails.rating}
-                metacritic={gameDetails.metacritic}
-                esrbRating={gameDetails.esrb_rating}
-              />
-
+              <GameDetailsInfo {...gameDetails} />
               <GamePlatforms platforms={gameDetails.platforms} />
-
-              {/* Το κουμπί εμφανίζεται μόνο αν υπάρχουν πεδία που είναι null */}
               <UpdateGameInfoButton
                 handleUpdateInfo={handleUpdateInfo}
                 updating={updating}
                 gameDetails={gameDetails}
               />
-
               {message && messageType && <AlertMessage type={messageType} message={message} />}
             </div>
           )}
