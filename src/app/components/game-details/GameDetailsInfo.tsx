@@ -1,32 +1,32 @@
 import { Calendar, Building2, BookOpen, Joystick, Trophy, Star, ShieldAlert } from "lucide-react";
 
 interface GameDetailsInfoProps {
-  readonly releaseYear?: number | null;
+  readonly release_year?: number | null;
   readonly developer?: string | null;
   readonly publisher?: string | null;
   readonly genre?: string | null;
   readonly rating?: number | null;
   readonly metacritic?: number | null;
-  readonly esrbRating?: string | null;
+  readonly esrb_rating?: string | null;
 }
 
 export default function GameDetailsInfo({
-  releaseYear,
+  release_year,
   developer,
   publisher,
   genre,
   rating,
   metacritic,
-  esrbRating,
+  esrb_rating,
 }: GameDetailsInfoProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
       <div className="flex flex-col space-y-2">
-        {releaseYear && (
+        {typeof release_year === "number" && (
           <p className="flex items-center">
             <Calendar className="w-4 h-4 mr-2 text-red-400" />
             <span className="font-semibold">Release Year:</span>
-            <span className="ml-2 text-white">{releaseYear}</span>
+            <span className="ml-2 text-white">{release_year}</span>
           </p>
         )}
         {developer && (
@@ -53,25 +53,25 @@ export default function GameDetailsInfo({
       </div>
 
       <div className="flex flex-col space-y-2">
-        {rating && (
+        {typeof rating === "number" && (
           <p className="flex items-center">
             <Trophy className="w-4 h-4 mr-2 text-green-400" />
             <span className="font-semibold">Rating:</span>
             <span className="ml-2 text-white">{rating}</span>
           </p>
         )}
-        {metacritic && (
+        {typeof metacritic === "number" && (
           <p className="flex items-center">
             <Star className="w-4 h-4 mr-2 text-yellow-500" />
             <span className="font-semibold">Metacritic:</span>
             <span className="ml-2 text-white">{metacritic}</span>
           </p>
         )}
-        {esrbRating && (
+        {esrb_rating && (
           <p className="flex items-center">
             <ShieldAlert className="w-4 h-4 mr-2 text-red-500" />
             <span className="font-semibold">ESRB Rating:</span>
-            <span className="ml-2 text-white">{esrbRating}</span>
+            <span className="ml-2 text-white">{esrb_rating}</span>
           </p>
         )}
       </div>
