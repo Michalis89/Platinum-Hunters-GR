@@ -1,14 +1,20 @@
-import { Paperclip, Bug } from "lucide-react";
+"use client";
+
 import { useState } from "react";
+import { Paperclip, Bug } from "lucide-react";
 import Image from "next/image";
-import Dropdown from "@/app/components/ui/Dropdown"; // Προσθήκη του Dropdown
+import Dropdown from "@/app/components/ui/Dropdown";
 import FormErrorMessage from "../ui/FormErrorMessage";
+import AlertMessage from "../ui/AlertMessage";
 
 export default function BugReportForm() {
-  const [form, setForm] = useState({ type: "bug_report" });
+  const [form, setForm] = useState({ type: "" }); // Required επιλογή
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
-  const [bugDescription, setBugDescription] = useState(""); // State για το input
-  const [error, setError] = useState(""); // Error state
+  const [bugDescription, setBugDescription] = useState("");
+  const [error, setError] = useState({ type: "", description: "" });
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   const requestTypes = [
     { value: "UI", label: "UI Issue", icon: <Bug className="w-4 h-4 text-white" /> },
@@ -20,29 +26,54 @@ export default function BugReportForm() {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!bugDescription.trim()) {
-      setError("Η περιγραφή του bug είναι υποχρεωτική.");
-      return;
+    setLoading(true);
+    setAlert(null);
+
+    const formData = new FormData();
+    formData.append("bug_type", form.type);
+    formData.append("description", bugDescription);
+
+    if (file) {
+      formData.append("screenshot", file);
     }
 
-    setError(""); // Clear error if valid
-    console.log("Bug Report Submitted:", { type: form.type, description: bugDescription });
+    try {
+      const response = await fetch("/api/contact/forms/bug-report", {
+        method: "POST",
+        body: formData, // Δεν χρειάζεται headers, το κάνει αυτόματα
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      setAlert({ type: "success", message: "✅ Η αναφορά υποβλήθηκε!" });
+      setBugDescription("");
+      setScreenshotPreview(null);
+      setFile(null);
+    } catch (err) {
+      setAlert({ type: "error", message: "❌ " + err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-6">
+      {alert && <AlertMessage type={alert.type} message={alert.message} />}
+
       {/* Dropdown για τύπο προβλήματος */}
       <Dropdown
         label="Τύπος Προβλήματος"
         options={requestTypes}
         selectedValue={form.type}
-        isOpen={false}
         onSelect={(value) => setForm({ type: value })}
+        isOpen={false}
         zIndex={2}
       />
+      <FormErrorMessage message={error.type} />
 
       {/* Textarea για περιγραφή του bug */}
       <label htmlFor="bugDescription" className="block text-gray-300 text-sm font-medium">
@@ -54,12 +85,17 @@ export default function BugReportForm() {
         placeholder="Περιγραφή του bug..."
         rows={4}
         value={bugDescription}
-        onChange={(e) => setBugDescription(e.target.value)}
+        onChange={(e) => {
+          setBugDescription(e.target.value);
+          if (error.description) {
+            setError((prev) => ({ ...prev, description: undefined }));
+          }
+        }}
         className={`w-full p-3 bg-gray-800 rounded-lg border ${
-          error ? "border-red-500" : "border-gray-700"
+          error.description ? "border-red-500" : "border-gray-700"
         } text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
       ></textarea>
-      <FormErrorMessage message={error} />
+      <FormErrorMessage message={error.description} />
 
       {/* Upload Screenshot */}
       <div className="mt-4">
@@ -80,7 +116,12 @@ export default function BugReportForm() {
             name="bugScreenshot"
             accept="image/*"
             className="hidden"
-            onChange={(e) => setScreenshotPreview(URL.createObjectURL(e.target.files[0]))}
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                setFile(e.target.files[0]);
+                setScreenshotPreview(URL.createObjectURL(e.target.files[0]));
+              }
+            }}
           />
         </div>
 
@@ -101,10 +142,17 @@ export default function BugReportForm() {
       {/* Submit Button */}
       <button
         type="submit"
+        disabled={loading}
         className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold transition flex items-center justify-center space-x-2"
       >
-        <Bug className="w-5 h-5 text-white" />
-        <span>Υποβολή Αναφοράς</span>
+        {loading ? (
+          "Υποβολή..."
+        ) : (
+          <>
+            <Bug className="w-5 h-5 text-white" />
+            <span>Υποβολή Αναφοράς</span>
+          </>
+        )}
       </button>
     </form>
   );
