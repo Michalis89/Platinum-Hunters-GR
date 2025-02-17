@@ -11,21 +11,17 @@ export async function PUT(
       return NextResponse.json({ error: "Missing game ID" }, { status: 400 });
     }
 
-    const gameId = Number(context.params.id); // ✅ Cast ώστε να είναι σίγουρα `number`
+    const gameId = Number(context.params.id);
     const { steps } = await req.json();
-
-    console.log("📤 Ενημέρωση οδηγού για game_id:", gameId);
-    console.log("📥 Βήματα που λαμβάνονται:", steps);
 
     if (!steps || !Array.isArray(steps)) {
       return NextResponse.json({ error: "Invalid steps data" }, { status: 400 });
     }
 
-    // 🔎 Βεβαιώσου ότι υπάρχει ο οδηγός πριν τον ενημερώσεις
     const { data: existingGuide, error: fetchError } = await supabase
       .from("guides")
       .select("*")
-      .eq("game_id", gameId) // ✅ Τώρα ψάχνουμε με game_id
+      .eq("game_id", gameId)
       .maybeSingle();
 
     console.log("🔎 Supabase query result:", existingGuide, "Error:", fetchError);

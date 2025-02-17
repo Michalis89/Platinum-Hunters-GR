@@ -5,11 +5,13 @@ import { useParams } from "next/navigation";
 import { Button } from "../../../components/ui/Button";
 import { Card } from "../../../components/ui/Card";
 import { motion } from "framer-motion";
+import AlertMessage from "@/app/components/ui/AlertMessage";
 
 export default function EditGuide() {
   const { id } = useParams(); // Παίρνουμε το ID από το URL
   const [steps, setSteps] = useState<{ title: string; description: string }[]>([]);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -20,14 +22,15 @@ export default function EditGuide() {
         const response = await fetch(`/api/guides/${id}`);
         const data = await response.json();
         if (response.ok && data) {
-          console.log("📥 Guide Data:", data); // Debugging
           setSteps(data[0]?.steps ?? []);
         } else {
           setMessage("❌ Σφάλμα φόρτωσης οδηγού!");
+          setMessageType("error");
         }
       } catch (error) {
         console.error("❌ Σφάλμα:", error);
         setMessage("❌ Αποτυχία φόρτωσης!");
+        setMessageType("error");
       }
       setLoading(false);
     };
@@ -47,8 +50,6 @@ export default function EditGuide() {
     setSaving(true);
     setMessage("");
 
-    console.log("📤 Sending steps:", steps); // Debugging
-
     try {
       const response = await fetch(`/api/update-guide/${id}`, {
         method: "PUT",
@@ -59,12 +60,15 @@ export default function EditGuide() {
       const result = await response.json();
       if (response.ok) {
         setMessage("✅ Ο οδηγός ενημερώθηκε επιτυχώς!");
+        setMessageType("success");
       } else {
         setMessage(result.error || "❌ Σφάλμα κατά την ενημέρωση!");
+        setMessageType("error");
       }
     } catch (error) {
       console.error("❌ Σφάλμα:", error);
       setMessage("❌ Σφάλμα κατά την αποθήκευση!");
+      setMessageType("error");
     }
 
     setSaving(false);
@@ -106,7 +110,7 @@ export default function EditGuide() {
           </Button>
         </div>
 
-        {message && <p className="mt-4 text-center text-gray-300">{message}</p>}
+        {message && messageType && <AlertMessage type={messageType} message={message} />}
       </motion.div>
     </div>
   );

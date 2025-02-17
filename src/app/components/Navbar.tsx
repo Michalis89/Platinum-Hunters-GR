@@ -4,15 +4,18 @@ import Link from "next/link";
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import { Book, Search, Mail, Trophy } from "lucide-react";
+import { Book, Search, Mail, Trophy, Star, Newspaper } from "lucide-react";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const isDev = process.env.NODE_ENV === "development"; // Ελέγχουμε αν είμαστε σε development
 
   const navLinks = [
+    { href: "/pages/reviews", label: "Reviews", icon: <Star size={18} /> },
+    { href: "/pages/news", label: "News", icon: <Newspaper size={18} /> },
     { href: "/pages/guide", label: "Guides", icon: <Book size={18} /> },
-    { href: "/pages/scraper", label: "Scraper", icon: <Search size={18} /> },
     { href: "/pages/contact", label: "Contact", icon: <Mail size={18} /> },
+    ...(isDev ? [{ href: "/pages/scraper", label: "Scraper", icon: <Search size={18} /> }] : []), // Μόνο στο local
   ];
 
   return (
