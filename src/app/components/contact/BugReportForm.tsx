@@ -11,10 +11,12 @@ export default function BugReportForm() {
   const [form, setForm] = useState({ type: "" }); // Required επιλογή
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [bugDescription, setBugDescription] = useState("");
-  const [error, setError] = useState({ type: "", description: "" });
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [file, setFile] = useState<File | null>(null);
+
+  // ✅ Διαχείριση Errors ξεχωριστά για κάθε πεδίο
+  const [errors, setErrors] = useState<{ type?: string; description?: string }>({});
 
   const requestTypes = [
     { value: "UI", label: "UI Issue", icon: <Bug className="w-4 h-4 text-white" /> },
@@ -28,9 +30,19 @@ export default function BugReportForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
     setAlert(null);
+
+    // ✅ Έλεγχος αν όλα τα required πεδία είναι συμπληρωμένα
+    const newErrors: { type?: string; description?: string } = {};
+    if (!form.type) newErrors.type = "Ο τύπος προβλήματος είναι υποχρεωτικός.";
+    if (!bugDescription.trim()) newErrors.description = "Η περιγραφή του bug είναι υποχρεωτική.";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setLoading(false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("bug_type", form.type);
@@ -43,7 +55,7 @@ export default function BugReportForm() {
     try {
       const response = await fetch("/api/contact/forms/bug-report", {
         method: "POST",
-        body: formData, // Δεν χρειάζεται headers, το κάνει αυτόματα
+        body: formData,
       });
 
       const result = await response.json();
@@ -53,6 +65,7 @@ export default function BugReportForm() {
       setBugDescription("");
       setScreenshotPreview(null);
       setFile(null);
+      setForm({ type: "" });
     } catch (err) {
       setAlert({ type: "error", message: "❌ " + err.message });
     } finally {
@@ -69,11 +82,14 @@ export default function BugReportForm() {
         label="Τύπος Προβλήματος"
         options={requestTypes}
         selectedValue={form.type}
-        onSelect={(value) => setForm({ type: value })}
+        onSelect={(value) => {
+          setForm({ type: value });
+          setErrors((prev) => ({ ...prev, type: undefined })); // ✅ Αφαιρεί το error όταν επιλέγεται τύπος
+        }}
         isOpen={false}
         zIndex={2}
       />
-      <FormErrorMessage message={error.type} />
+      <FormErrorMessage message={errors.type} />
 
       {/* Textarea για περιγραφή του bug */}
       <label htmlFor="bugDescription" className="block text-gray-300 text-sm font-medium">
@@ -87,15 +103,11 @@ export default function BugReportForm() {
         value={bugDescription}
         onChange={(e) => {
           setBugDescription(e.target.value);
-          if (error.description) {
-            setError((prev) => ({ ...prev, description: undefined }));
-          }
+          setErrors((prev) => ({ ...prev, description: undefined })); // ✅ Αφαιρεί το error όταν ο χρήστης γράψει κάτι
         }}
-        className={`w-full p-3 bg-gray-800 rounded-lg border ${
-          error.description ? "border-red-500" : "border-gray-700"
-        } text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
+        className={`w-full p-3 bg-gray-800 rounded-lg border ${errors.description ? "border-red-500" : "border-gray-700"} text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
       ></textarea>
-      <FormErrorMessage message={error.description} />
+      <FormErrorMessage message={errors.description} />
 
       {/* Upload Screenshot */}
       <div className="mt-4">
