@@ -1,93 +1,176 @@
-# Platinum Hunters GR
+<div id="top"></div>
 
-Platinum Hunters GR είναι μια εφαρμογή που βοηθά τους χρήστες να βρουν πληροφορίες για **trophies** και **achievements** από διάφορα παιχνίδια, με σκοπό την εύκολη παρακολούθηση των στόχων και την αναζήτηση οδηγών για την επίτευξή τους.
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-## Table of Contents
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+    <img src="assets/logo.png" alt="Logo" width="339" height="149">
 
-- [Περιγραφή](#περιγραφή)
-- [Τεχνολογίες](#τεχνολογίες)
-- [Χρήση](#χρήση)
-- [Εγκατάσταση και Ρύθμιση](#εγκατάσταση-και-ρύθμιση)
-- [Contributing](#contributing)
-- [Άδεια Χρήσης](#άδεια-χρήσης)
-- [MVP Deployment](#mvp-deployment)
+  <h3 align="center">Platinum Hunters GR</h3>
 
-## Περιγραφή
+  <p align="center">
+    This is a Reactjs app for tracking the Covid 19 cases recoveries and deaths worldwide and per country.
+    <br />
+    <br />
+    <a href="https://platinum-hunters-gr.vercel.app/" target="_blank">View MVP</a>
+    ·
+    <a href="https://platinum-hunters-gr.vercel.app/pages/contact">Report Bug</a>
+    ·
+    <a href="https://github.com/Michalis89/Platinum-Hunters-GR/issues">Request Feature</a>
+  </p>
+</div>
 
-Αυτή η εφαρμογή επιτρέπει στους χρήστες να:
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#deployment">Deployment</a></li>
+      </ul>
+    </li>
+    <li><a href="#api-usage">API</a></li>
+    <li><a href="#license">License</a></li>
+  </ol>
+</details>
 
-- Αναζητούν trophies και achievements για συγκεκριμένα παιχνίδια.
-- Δημιουργούν και κοινοποιούν οδηγούς για την ολοκλήρωση αυτών των στόχων.
-- Ενημερώνουν τις πληροφορίες παιχνιδιών και οδηγών.
-- Συμμετέχουν σε μια κοινότητα που μοιράζεται τα επιτεύγματά τους.
+<!-- ABOUT THE PROJECT -->
 
-## Τεχνολογίες
+## About The Project
 
-Η εφαρμογή έχει αναπτυχθεί με τις παρακάτω τεχνολογίες:
+[![Product Name Screen Shot][product-screenshot]](https://platinum-hunters-gr.vercel.app/)
 
-- **Next.js** - Για το frontend και την δημιουργία server-side rendering.
-- **Supabase** - Για την διαχείριση της βάσης δεδομένων και την αυθεντικοποίηση χρηστών.
-- **Tailwind CSS** - Για το responsive και μοντέρνο UI.
-- **PostgreSQL** - Η βάση δεδομένων για την αποθήκευση δεδομένων χρηστών και παιχνιδιών.
-- **Vercel** - Για τη φιλοξενία της εφαρμογής.
+Platinum Hunters GR is a platform to help users find trophies guides for various games. Users can:
 
-## Χρήση
+- Search for trophies guides.
+- Browse and create guides to achieve trophies (TBD).
+- Track their progress in different games.
 
-1. **Σύνδεση και Εγγραφή**:
-   Οι χρήστες μπορούν να δημιουργήσουν λογαριασμό και να συνδεθούν με τον Supabase authentication.
+<p align="right">(<a href="#top">back to top</a>)</p>
 
-2. **Περιήγηση και Αναζήτηση**:
-   Οι χρήστες μπορούν να περιηγηθούν σε οδηγούς για συγκεκριμένα παιχνίδια και να αναζητήσουν trophies.
+### Built With
 
-3. **Δημιουργία Οδηγών**:
-   Οι χρήστες με τα κατάλληλα δικαιώματα μπορούν να δημιουργήσουν και να δημοσιεύσουν οδηγούς για τη συλλογή trophies.
+Below are the technologies used to bootstrap and deploy the project:
 
-## Εγκατάσταση και Ρύθμιση
+- [Next.js](https://nextjs.org/)
+- [Supabase](https://supabase.io/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Rawg API](https://rawg.io/apidocs)
+- [Vercel](https://vercel.com/)
 
-Ακολουθήστε τα βήματα παρακάτω για να ρυθμίσετε το project τοπικά:
+<!-- GETTING STARTED -->
 
-### 1. Κλωνοποιήστε το repository:
+## Getting Started
 
-```bash
-git clone https://github.com/Michalis89/platinum-hunters-gr.git
-cd platinum-hunters-gr
-```
+Set up your project locally.
+To get a local copy up and running follow these simple steps.
 
-### 2. Εγκαταστήστε τις εξαρτήσεις:
+### Prerequisites
 
-```bash
-npm install
-```
+For starters if don't have NodeJs at your local machine you have to install <a href="https://nodejs.org/en/download/">from here</a>
 
-### 3. Ρυθμίστε το περιβάλλον:
+- npm
 
-Δημιουργήστε το αρχείο .env.local και προσθέστε τις παρακάτω μεταβλητές:
+  ```sh
+  npm install npm@latest -g
 
-```bash
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+  ```
 
-### 4. Ξεκινήστε την εφαρμογή:
+### Installation
 
-```bash
-npm run dev
-```
+1. Clone the repo
 
-### 5. Ανοίξτε την εφαρμογή στον browser:
+   ```sh
+   git clone https://github.com/Michalis89/Platinum-Hunters-GR.git
 
-Πηγαίνετε στο [http://localhost:3000](http://localhost:3000) για να δείτε την εφαρμογή.
+   ```
 
-## Άδεια Χρήσης
+2. Install NPM packages
 
-Αυτό το project χρησιμοποιεί την άδεια **MIT License**.
+   ```sh
+   npm install
 
-## MVP Deployment
+   ```
 
-Το MVP της εφαρμογής είναι ήδη αναπτυγμένο και φιλοξενείται στο Vercel. Μπορείς να το δεις στον εξής σύνδεσμο:
+3. Set up the environment:
+   Create the `.env.local` file and add the following variables:
 
-[platinum-hunters-gr.vercel.app](https://platinum-hunters-gr.vercel.app)
+   ```sh
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   RAWG_API_KEY=your_api_key
 
-### Screenshot της εφαρμογής
+   ```
 
-![Screenshot](assets/screenshot.png)
+4. Run the development server
+
+   ```sh
+   npm run dev
+
+   ```
+
+### Deployment
+
+To deploy the app on Vercel:
+
+1. Build the app
+
+   ```sh
+   npm run build
+
+   ```
+
+## Deploy using Vercel's CLI or GUI
+
+1. **Install Vercel CLI**
+
+   ```sh
+   npm install -g vercel
+
+   ```
+
+2. **Login to Vercel**
+
+   ```sh
+   vercel login
+
+   ```
+
+3. **Deploy the project**
+
+   ```sh
+   vercel
+
+   ```
+
+  <p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- LICENSE -->
+
+## License
+
+Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+
+[issues-shield]: https://img.shields.io/github/issues/Michalis89/platinum-hunters-gr.svg?style=for-the-badge
+[issues-url]: https://github.com/Michalis89/platinum-hunters-gr/issues
+[license-shield]: https://img.shields.io/github/license/Michalis89/platinum-hunters-gr.svg?style=for-the-badge
+[license-url]: https://github.com/Michalis89/platinum-hunters-gr/blob/develop/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/michalis-mouzakitis-b80891126/
+[product-screenshot]: assets/screenshot.png
