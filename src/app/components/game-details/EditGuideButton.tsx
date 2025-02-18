@@ -5,6 +5,10 @@ interface EditGuideButtonProps {
 }
 
 export default function EditGuideButton({ gameId }: EditGuideButtonProps) {
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
+
   return (
     <div className="text-center mt-6">
       <Link
