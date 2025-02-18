@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Bug, Lightbulb, HelpCircle, BookOpen } from "lucide-react";
+import { Mail, Bug, Lightbulb, HelpCircle, BookOpen, DollarSign } from "lucide-react";
 import Skeleton from "@/app/components/ui/Skeleton";
 import NewGuideForm from "@/app/components/contact/NewGuideForm";
 import BugReportForm from "@/app/components/contact/BugReportForm";
@@ -14,27 +14,27 @@ const requestTypes = [
   {
     value: "new_guide",
     label: "Νέος οδηγός Trophy",
-    icon: <BookOpen size={16} className="inline-block mr-2" />,
+    icon: <BookOpen size={16} className="mr-2 inline-block align-middle" />,
   },
   {
     value: "bug_report",
     label: "Αναφορά Bug",
-    icon: <Bug size={16} className="inline-block mr-2" />,
+    icon: <Bug size={16} className="mr-2 inline-block align-middle" />,
   },
   {
     value: "feature_request",
     label: "Αίτημα νέου feature",
-    icon: <Lightbulb size={16} className="inline-block mr-2" />,
+    icon: <Lightbulb size={16} className="mr-2 inline-block align-middle" />,
   },
   {
     value: "general_question",
     label: "Επικοινωνήστε μαζί μας",
-    icon: <HelpCircle size={16} className="inline-block mr-2" />,
+    icon: <HelpCircle size={16} className="mr-2 inline-block align-middle" />,
   },
   {
     value: "support",
     label: "Υποστήριξη / Δωρεά",
-    icon: <Mail size={16} className="inline-block mr-2" />,
+    icon: <DollarSign size={16} className="mr-2 inline-block align-middle" />,
   },
 ];
 
@@ -78,7 +78,7 @@ export default function ContactPage() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
-      <div className="max-w-lg w-full bg-gray-900 p-6 rounded-lg shadow-lg">
+      <div className="max-w-xl w-full bg-gray-900 p-6 rounded-lg shadow-lg">
         <h1 className="text-3xl font-extrabold text-blue-400 text-center flex items-center justify-center gap-2">
           <Mail size={24} /> Επικοινωνία
         </h1>

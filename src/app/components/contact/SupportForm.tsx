@@ -1,8 +1,10 @@
 "use client";
 
+import { CheckCircle, Lightbulb } from "lucide-react";
+
 export default function SupportForm() {
   return (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-6">
       <p className="text-gray-300 text-center">
         Αν θέλεις να υποστηρίξεις το project, μπορείς να κάνεις δωρεά μέσω:
       </p>
@@ -26,15 +28,6 @@ export default function SupportForm() {
       </a>
 
       <a
-        href="https://ko-fi.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full block text-center p-3 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-lg font-semibold transition"
-      >
-        ☕ Υποστήριξέ μας στο Ko-fi
-      </a>
-
-      <a
         href="https://www.buymeacoffee.com/"
         target="_blank"
         rel="noopener noreferrer"
@@ -43,17 +36,50 @@ export default function SupportForm() {
         ☕ Buy Me a Coffee
       </a>
 
-      <div className="bg-gray-800 p-4 rounded-lg shadow-md text-center space-y-2">
-        <h2 className="text-lg font-bold text-white">Γιατί ζητάμε υποστήριξη; 💡</h2>
+      {/* 🔹 Βελτιωμένο Box */}
+      <div className="bg-gray-800 p-5 rounded-lg shadow-md text-center space-y-4 border border-gray-700">
+        <h2 className="text-xl font-bold text-white flex items-center justify-center gap-2">
+          <Lightbulb className="w-6 h-6 text-yellow-400" />
+          Γιατί ζητάμε υποστήριξη;
+        </h2>
         <p className="text-gray-300 text-sm">
           Κάθε δωρεά συμβάλλει στη διατήρηση του project, καλύπτοντας έξοδα όπως:
         </p>
-        <ul className="text-gray-400 text-sm space-y-1">
-          <li>✅ Κόστος Hosting & Domain</li>
-          <li>✅ Συντήρηση & Βελτιώσεις</li>
-          <li>✅ Υποστήριξη νέων λειτουργιών</li>
-          <li>✅ Συνεχής ανάπτυξη & βελτιστοποίηση</li>
-        </ul>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-400 text-sm">
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            Κόστος Hosting & Domain
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            Βάση δεδομένων & Αποθήκευση
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            APIs & Third-party υπηρεσίες
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            Συντήρηση & Βελτιώσεις
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            Υποστήριξη νέων λειτουργιών
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            Εργαλεία ανάπτυξης
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            Διαχείριση κοινότητας
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            Διαφημίσεις & Προώθηση
+          </p>
+        </div>
       </div>
 
       <p className="text-gray-400 text-sm text-center">
