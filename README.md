@@ -32,7 +32,6 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#deployment">Deployment</a></li>
       </ul>
@@ -45,6 +44,8 @@
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
+
+<div id="about-the-project"></div>
 
 [![Product Name Screen Shot][product-screenshot]](https://platinum-hunters-gr.vercel.app/pages/guide)
 
@@ -75,6 +76,8 @@ Platinum Hunters GR is constantly evolving to provide a better experience for it
 
 ### Built With
 
+<div id="built-with"></div>
+
 Below are the technologies used to bootstrap and deploy the project:
 
 - [Next.js](https://nextjs.org/)
@@ -87,10 +90,10 @@ Below are the technologies used to bootstrap and deploy the project:
 
 ## Getting Started
 
+<div id="getting-started"></div>
+
 Set up your project locally.
 To get a local copy up and running follow these simple steps.
-
-### Prerequisites
 
 For starters if don't have NodeJs at your local machine you have to install <a href="https://nodejs.org/en/download/">from here</a>
 
@@ -102,6 +105,8 @@ For starters if don't have NodeJs at your local machine you have to install <a h
   ```
 
 ### Installation
+
+<div id="installation"></div>
 
 1. Clone the repo
 
@@ -135,6 +140,8 @@ For starters if don't have NodeJs at your local machine you have to install <a h
    ```
 
 ### Deployment
+
+<div id="deployment"></div>
 
 To deploy the app on Vercel:
 
@@ -170,9 +177,32 @@ To deploy the app on Vercel:
 
   <p align="right">(<a href="#top">back to top</a>)</p>
 
+<!-- API -->
+
+## API
+
+<div id="api-usage"></div>
+
+Platinum Hunters GR uses the [RAWG API](https://rawg.io/apidocs) to enrich game guides with additional information. This API provides valuable data such as:
+
+- **Release Year**: The release year of the game.
+- **Publishers**: The publishers of the game.
+- **Developers**: The developers behind the game.
+- **Genre**: The genre(s) of the game.
+- **Metacritic Score**: The Metacritic rating for the game.
+- **Rating**: The user rating for the game.
+- **Platforms**: The platforms available for the game (e.g., PC, PS5, Xbox).
+- **ESRB Rating**: The ESRB rating for the game (for age restrictions).
+
+This data is used to provide users with comprehensive and up-to-date information to make their experience on Platinum Hunters GR more informative and engaging.
+
+You can access the [API Documentation here](https://rawg.io/apidocs) for more details on how to integrate additional features.
+
 <!-- LICENSE -->
 
 ## License
+
+<div id="license"></div>
 
 Distributed under the [MIT License](./LICENSE.txt). See for more information.
 
