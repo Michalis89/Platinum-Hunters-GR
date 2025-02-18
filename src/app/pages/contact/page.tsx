@@ -28,7 +28,7 @@ const requestTypes = [
   },
   {
     value: "general_question",
-    label: "Γενική ερώτηση",
+    label: "Επικοινωνήστε μαζί μας",
     icon: <HelpCircle size={16} className="inline-block mr-2" />,
   },
   {
@@ -41,6 +41,7 @@ const requestTypes = [
 export default function ContactPage() {
   const [form, setForm] = useState({ type: "new_guide" });
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [pageTitle, setPageTitle] = useState("Ρώτησε μας ό,τι θέλεις!");
 
   useEffect(() => {
     setTimeout(() => setIsPageLoading(false), 1000);
@@ -59,7 +60,7 @@ export default function ContactPage() {
       case "feature_request":
         return <FeatureRequestForm />;
       case "general_question":
-        return <GeneralQuestionForm />;
+        return <GeneralQuestionForm onTitleChange={setPageTitle} />;
       case "support":
         return <SupportForm />;
       default:
@@ -73,7 +74,6 @@ export default function ContactPage() {
     feature_request: "Πρότεινε ένα νέο feature για το project",
     general_question: "Ρώτησε μας ό,τι θέλεις!",
     support: "Υποστήριξε το project μέσω δωρεάς",
-    other: "Στείλε μας το μήνυμά σου",
   };
 
   return (
@@ -82,8 +82,11 @@ export default function ContactPage() {
         <h1 className="text-3xl font-extrabold text-blue-400 text-center flex items-center justify-center gap-2">
           <Mail size={24} /> Επικοινωνία
         </h1>
+        {/* Δυναμικός τίτλος */}
         <p className="text-gray-400 text-center">
-          {requestMessages[form.type] || "Στείλε μας το μήνυμά σου"}
+          {form.type === "general_question"
+            ? pageTitle
+            : requestMessages[form.type] || "Στείλε μας το μήνυμά σου"}
         </p>
 
         <div className="mt-6">
@@ -96,7 +99,6 @@ export default function ContactPage() {
             zIndex={2}
           />
         </div>
-
         {renderFormComponent()}
       </div>
     </div>

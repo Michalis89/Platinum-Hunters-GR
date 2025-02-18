@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { HelpCircle, Wrench, Info, MessageSquare, Star } from "lucide-react";
 import Dropdown from "@/app/components/ui/Dropdown";
 import FormErrorMessage from "../ui/FormErrorMessage";
 import AlertMessage from "../ui/AlertMessage";
 
-export default function GeneralQuestionForm() {
+export default function GeneralQuestionForm({
+  onTitleChange,
+}: Readonly<{ onTitleChange: (title: string) => void }>) {
   const [category, setCategory] = useState("");
   const [question, setQuestion] = useState("");
   const [email, setEmail] = useState("");
@@ -37,55 +39,99 @@ export default function GeneralQuestionForm() {
     { value: "Other", label: "Άλλο", icon: <MessageSquare className="w-4 h-4 text-white" /> },
   ];
 
+  const categoryTitles = useMemo(
+    () => ({
+      Support: "Χρειάζεστε βοήθεια; Στείλτε μας το πρόβλημά σας!",
+      Info: "Χρειάζεστε πληροφορίες; Ρωτήστε μας!",
+      Feedback: "Μοιραστείτε την άποψή σας μαζί μας!",
+      Other: "Ρώτησε μας ό,τι θέλεις!",
+    }),
+    []
+  );
+
+  const buttonTexts: Record<string, string> = {
+    Support: "Αποστολή Αιτήματος",
+    Info: "Αποστολή Ερώτησης",
+    Feedback: "Υποβολή Feedback",
+    Other: "Υποβολή Ερώτησης",
+  };
+
+  const dynamicButtonText = buttonTexts[category] || "Υποβολή";
+
+  type FormData = {
+    category: string;
+    email: string;
+    question?: string;
+    serviceName?: string;
+    serviceDescription?: string;
+    infoType?: string;
+    infoDetails?: string;
+    feedbackRating?: string;
+  };
+
+  const validateForm = (formData: FormData) => {
+    const newErrors: Partial<FormData> = {};
+
+    if (!formData.email.trim() || !isValidEmail(formData.email))
+      newErrors.email = "Το email είναι υποχρεωτικό και πρέπει να είναι έγκυρο.";
+
+    const validations = {
+      Support: () => {
+        if (!formData.serviceName?.trim()) newErrors.serviceName = "Η υπηρεσία είναι υποχρεωτική.";
+        if (!formData.serviceDescription?.trim())
+          newErrors.serviceDescription = "Η περιγραφή είναι υποχρεωτική.";
+      },
+      Info: () => {
+        if (!formData.infoType?.trim())
+          newErrors.infoType = "Το θέμα πληροφορίας είναι υποχρεωτικό.";
+        if (!formData.infoDetails?.trim()) newErrors.infoDetails = "Η περιγραφή είναι υποχρεωτική.";
+      },
+      Feedback: () => {
+        if (!formData.feedbackRating) newErrors.feedbackRating = "Επιλέξτε βαθμολογία.";
+      },
+      Other: () => {
+        if (!formData.question?.trim()) newErrors.question = "Η ερώτηση είναι υποχρεωτική.";
+      },
+    };
+
+    validations[formData.category]?.();
+    return newErrors;
+  };
+
+  const submitForm = async (formData: FormData) => {
+    const formatCategory = (category: string) => {
+      const allowedCategories = ["Support", "Info", "Feedback", "Other"];
+      return allowedCategories.includes(category) ? category : "";
+    };
+
+    const response = await fetch("/api/contact/forms/general-question", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        category: formatCategory(formData.category),
+        question: formData.category === "Other" ? formData.question : null,
+        email: formData.email,
+        serviceName: formData.category === "Support" ? formData.serviceName : null,
+        serviceDescription: formData.category === "Support" ? formData.serviceDescription : null,
+        infoType: formData.category === "Info" ? formData.infoType : null,
+        infoDetails: formData.category === "Info" ? formData.infoDetails : null,
+        feedbackRating: formData.category === "Feedback" ? formData.feedbackRating : null,
+      }),
+    });
+
+    return response;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setAlert(null);
     setLoading(true);
 
-    // ✅ Έλεγχος required fields
-    const newErrors: {
-      email?: string;
-      question?: string;
-      serviceName?: string;
-      serviceDescription?: string;
-      infoType?: string;
-      infoDetails?: string;
-      feedbackRating?: string;
-      guestion?: string;
-    } = {};
-
-    if (!email.trim() || !isValidEmail(email))
-      newErrors.email = "Το email είναι υποχρεωτικό και πρέπει να είναι έγκυρο.";
-
-    if (category === "Support" && !serviceName.trim())
-      newErrors.serviceName = "Η υπηρεσία είναι υποχρεωτική.";
-    if (category === "Support" && !serviceDescription.trim())
-      newErrors.serviceDescription = "Η περιγραφή είναι υποχρεωτική.";
-    if (category === "Info" && !infoType.trim())
-      newErrors.infoType = "Το θέμα πληροφορίας είναι υποχρεωτικός.";
-    if (category === "Info" && !infoDetails.trim())
-      newErrors.infoDetails = "Η περιγραφή είναι υποχρεωτική.";
-    if (category === "Feedback" && !feedbackRating)
-      newErrors.feedbackRating = "Επιλέξτε βαθμολογία.";
-    if (category === "Other" && !question.trim())
-      newErrors.question = "Η ερώτηση είναι υποχρεωτική.";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setLoading(false);
-      return;
-    }
-
-    const formatCategory = (category: string) => {
-      const allowedCategories = ["Support", "Info", "Feedback", "Other"];
-      return allowedCategories.includes(category) ? category : "";
-    };
-
-    console.log("📩 Payload:", {
+    const newErrors = validateForm({
       category,
-      question,
       email,
+      question,
       serviceName,
       serviceDescription,
       infoType,
@@ -93,27 +139,31 @@ export default function GeneralQuestionForm() {
       feedbackRating,
     });
 
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch("/api/contact/forms/general-question", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: formatCategory(category),
-          question,
-          email,
-          serviceName: category === "Support" ? serviceName : null,
-          serviceDescription: category === "Support" ? serviceDescription : null,
-          infoType: category === "Info" ? infoType : null,
-          infoDetails: category === "Info" ? infoDetails : null,
-          feedbackRating: category === "Feedback" ? feedbackRating : null,
-        }),
+      const response = await submitForm({
+        category,
+        email,
+        question,
+        serviceName,
+        serviceDescription,
+        infoType,
+        infoDetails,
+        feedbackRating,
       });
 
       const result = await response.json();
+
       if (!response.ok) throw new Error(result.error);
 
       setAlert({ type: "success", message: "✅ Η ερώτησή σας υποβλήθηκε επιτυχώς!" });
 
+      setCategory("");
       setQuestion("");
       setEmail("");
       setServiceName("");
@@ -121,7 +171,6 @@ export default function GeneralQuestionForm() {
       setInfoType("");
       setInfoDetails("");
       setFeedbackRating("");
-      setCategory("");
     } catch (err) {
       setAlert({ type: "error", message: "❌ " + err.message });
     } finally {
@@ -132,6 +181,10 @@ export default function GeneralQuestionForm() {
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // ✅ Καλύτερη regex για email
   };
+
+  useEffect(() => {
+    onTitleChange(categoryTitles[category] || "Ρώτησε μας ό,τι θέλεις!");
+  }, [category, onTitleChange, categoryTitles]);
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
@@ -346,7 +399,7 @@ export default function GeneralQuestionForm() {
             ) : (
               <>
                 <HelpCircle className="w-5 h-5 text-white" />
-                <span>Υποβολή Ερώτησης</span>
+                <span>{dynamicButtonText}</span>
               </>
             )}
           </button>
