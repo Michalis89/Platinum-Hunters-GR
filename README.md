@@ -1,9 +1,5 @@
 <div id="top"></div>
 
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -50,7 +46,7 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://platinum-hunters-gr.vercel.app/)
+[![Product Name Screen Shot][product-screenshot]](https://platinum-hunters-gr.vercel.app/pages/guide)
 
 Platinum Hunters GR is a platform to help users find trophies guides for various games. Users can:
 
@@ -167,10 +163,4 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 
-[issues-shield]: https://img.shields.io/github/issues/Michalis89/platinum-hunters-gr.svg?style=for-the-badge
-[issues-url]: https://github.com/Michalis89/platinum-hunters-gr/issues
-[license-shield]: https://img.shields.io/github/license/Michalis89/platinum-hunters-gr.svg?style=for-the-badge
-[license-url]: https://github.com/Michalis89/platinum-hunters-gr/blob/develop/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/michalis-mouzakitis-b80891126/
 [product-screenshot]: assets/screenshot.png
