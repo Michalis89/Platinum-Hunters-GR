@@ -48,11 +48,28 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://platinum-hunters-gr.vercel.app/pages/guide)
 
-Platinum Hunters GR is a platform to help users find trophies guides for various games. Users can:
+# Platinum Hunters GR
 
-- Search for trophies guides.
-- Browse and create guides to achieve trophies (TBD).
-- Track their progress in different games.
+Platinum Hunters GR is a platform designed to help users find **trophy guides** for various games. It offers a variety of features to enhance the gaming experience:
+
+- **Search for Trophy Guides**: Users can search for detailed guides on how to achieve specific trophies for their favorite games.
+- **Browse and Create Guides**: In the future, users will be able to create their own guides, share them with the community, and help others earn trophies.
+
+## Upcoming Features
+
+In the future, Platinum Hunters GR will include more advanced functionalities:
+
+1. **User Accounts**: Users will be able to create an account and save their progress.
+2. **Request Permissions**: Users can request permissions to:
+   - Create and manage their own **guides**.
+   - Write **reviews** on existing guides and games.
+   - Publish **news articles** related to trophies and gaming.
+3. **Create Guides, Reviews, and Articles**: Users will have the ability to contribute to the platform by creating:
+   - **Guides** to help other users achieve specific trophies.
+   - **Reviews** to share their thoughts on games and guides.
+   - **Articles** to stay updated on the latest gaming news, tips, and tricks.
+
+Platinum Hunters GR is constantly evolving to provide a better experience for its community. Stay tuned for these exciting updates!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -128,7 +145,7 @@ To deploy the app on Vercel:
 
    ```
 
-## Deploy using Vercel's CLI or GUI
+### Deploy using Vercel's CLI or GUI
 
 1. **Install Vercel CLI**
 
@@ -157,7 +174,7 @@ To deploy the app on Vercel:
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the [MIT License](./LICENSE.txt). See for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
