@@ -8,7 +8,7 @@
   <h3 align="center">Platinum Hunters GR</h3>
 
   <p align="center">
-    This is a Reactjs app for tracking the Covid 19 cases recoveries and deaths worldwide and per country.
+    This is a platform to help users find **trophy guides** for various games. It offers a variety of features to enhance the gaming experience and allows users to track their progress in achieving trophies.
     <br />
     <br />
     <a href="https://platinum-hunters-gr.vercel.app/" target="_blank">View MVP</a>
