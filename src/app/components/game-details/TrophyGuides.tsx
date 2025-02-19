@@ -1,27 +1,27 @@
-import { GuideProps, Trophy } from "@/types/interfaces";
-import { Trophy as TrophyIcon, BookOpen } from "lucide-react";
-import { motion } from "framer-motion"; // Animation library
+import { GuideProps, Trophy } from '@/types/interfaces';
+import { Trophy as TrophyIcon, BookOpen } from 'lucide-react';
+import { motion } from 'framer-motion'; // Animation library
 
 interface TrophyGuidesProps {
   readonly guides: GuideProps[];
 }
 
 export default function TrophyGuides({ guides }: TrophyGuidesProps) {
-  const trophyColors: Record<Trophy["type"], string> = {
-    Platinum: "text-blue-400", // Μπλε για το Platinum
-    Gold: "text-yellow-400", // Χρυσό για το Gold
-    Silver: "text-gray-400", // Ασημί για το Silver
-    Bronze: "text-orange-500", // Πορτοκαλί για το Bronze
-    Unknown: "text-red-500", // Κόκκινο για άγνωστα
+  const trophyColors: Record<Trophy['type'], string> = {
+    Platinum: 'text-blue-400', // Μπλε για το Platinum
+    Gold: 'text-yellow-400', // Χρυσό για το Gold
+    Silver: 'text-gray-400', // Ασημί για το Silver
+    Bronze: 'text-orange-500', // Πορτοκαλί για το Bronze
+    Unknown: 'text-red-500', // Κόκκινο για άγνωστα
   };
 
   return (
-    <div className="w-full max-w-4xl mt-6">
+    <div className="mt-6 w-full max-w-4xl">
       {guides.length > 0 ? (
-        guides.map((guide) => (
-          <div key={guide.id} className="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-2xl font-bold text-yellow-400 text-center flex items-center justify-center gap-2">
-              <BookOpen className="w-8 h-8 text-yellow-400" />
+        guides.map(guide => (
+          <div key={guide.id} className="mb-6 rounded-lg bg-gray-800 p-6 shadow-md">
+            <h2 className="flex items-center justify-center gap-2 text-center text-2xl font-bold text-yellow-400">
+              <BookOpen className="h-8 w-8 text-yellow-400" />
               <span>Trophy Guides</span>
             </h2>
 
@@ -31,19 +31,19 @@ export default function TrophyGuides({ guides }: TrophyGuidesProps) {
                 <p className="text-gray-400">{step.description}</p>
 
                 {step.trophies.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {step.trophies.map((trophy, i) => (
                       <motion.div
                         key={i}
-                        className="flex items-center bg-gray-700 p-3 rounded-lg shadow-md transition-transform duration-200 ease-in-out hover:scale-105"
+                        className="flex items-center rounded-lg bg-gray-700 p-3 shadow-md transition-transform duration-200 ease-in-out hover:scale-105"
                         initial={{ opacity: 0, y: 10 }} // Fade-in + slide-up
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: i * 0.1 }}
                       >
-                        <TrophyIcon className={`w-10 h-10 mr-3 ${trophyColors[trophy.type]}`} />
+                        <TrophyIcon className={`mr-3 h-10 w-10 ${trophyColors[trophy.type]}`} />
                         <div>
-                          <p className="text-white font-semibold">{trophy.name}</p>
-                          <p className="text-gray-400 text-sm">{trophy.description}</p>
+                          <p className="font-semibold text-white">{trophy.name}</p>
+                          <p className="text-sm text-gray-400">{trophy.description}</p>
                         </div>
                       </motion.div>
                     ))}
@@ -54,7 +54,7 @@ export default function TrophyGuides({ guides }: TrophyGuidesProps) {
           </div>
         ))
       ) : (
-        <p className="text-lg text-gray-400 text-center mt-6">
+        <p className="mt-6 text-center text-lg text-gray-400">
           ❌ Δεν υπάρχουν guides για αυτό το παιχνίδι.
         </p>
       )}

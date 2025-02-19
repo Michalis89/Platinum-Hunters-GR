@@ -1,4 +1,4 @@
-import Badge from "@/app/components/ui/Badge";
+import Badge from '@/app/components/ui/Badge';
 
 interface GuideStatsProps {
   readonly difficulty: string;
@@ -18,10 +18,10 @@ export default function GuideStats({
   hoursColor,
 }: GuideStatsProps) {
   return (
-    <div className="flex justify-center mt-4 gap-4 text-lg">
+    <div className="mt-4 flex justify-center gap-4 text-lg">
       <Badge text={`${difficulty} Difficulty`} color={difficultyColor} />
       <Badge
-        text={`${playthroughs} ${playthroughs === 1 ? "Playthrough" : "Playthroughs"}`}
+        text={`${playthroughs} ${playthroughs === 1 ? 'Playthrough' : 'Playthroughs'}`}
         color={playthroughsColor}
       />
       <Badge text={`${hours} Hours`} color={hoursColor} />

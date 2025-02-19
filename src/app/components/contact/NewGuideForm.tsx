@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Send } from "lucide-react";
-import FormErrorMessage from "../ui/FormErrorMessage";
-import AlertMessage from "../ui/AlertMessage";
+import { useState } from 'react';
+import { Send } from 'lucide-react';
+import FormErrorMessage from '../ui/FormErrorMessage';
+import AlertMessage from '../ui/AlertMessage';
 
 export default function NewGuideForm() {
-  const [game, setGame] = useState("");
-  const [message, setMessage] = useState("");
+  const [game, setGame] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [formErrors, setFormErrors] = useState<{ game?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,7 +19,7 @@ export default function NewGuideForm() {
     setAlert(null);
 
     const errors: { game?: string } = {};
-    if (!game.trim()) errors.game = "Το όνομα του παιχνιδιού είναι υποχρεωτικό.";
+    if (!game.trim()) errors.game = 'Το όνομα του παιχνιδιού είναι υποχρεωτικό.';
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -29,9 +29,9 @@ export default function NewGuideForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/contact/forms/trophy-guide", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/contact/forms/trophy-guide', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           game_name: game,
           additional_comments: message,
@@ -40,13 +40,17 @@ export default function NewGuideForm() {
 
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.error || "Σφάλμα κατά την υποβολή.");
+      if (!response.ok) throw new Error(result.error || 'Σφάλμα κατά την υποβολή.');
 
-      setAlert({ type: "success", message: "✅ Το αίτημά σας καταχωρήθηκε με επιτυχία!" });
-      setGame("");
-      setMessage("");
+      setAlert({ type: 'success', message: '✅ Το αίτημά σας καταχωρήθηκε με επιτυχία!' });
+      setGame('');
+      setMessage('');
     } catch (err) {
-      setAlert({ type: "error", message: "❌ " + err.message });
+      if (err instanceof Error) {
+        setAlert({ type: 'error', message: '❌ ' + err.message });
+      } else {
+        setAlert({ type: 'error', message: '❌ Παρουσιάστηκε άγνωστο σφάλμα' });
+      }
     } finally {
       setLoading(false);
     }
@@ -57,7 +61,7 @@ export default function NewGuideForm() {
       {/* ✅ Εμφάνιση alert όταν υπάρχει API success/error */}
       {alert && <AlertMessage type={alert.type} message={alert.message} />}
       {/* 🏆 Πεδίο Όνομα Παιχνιδιού */}
-      <label htmlFor="game" className="block text-gray-300 text-sm">
+      <label htmlFor="game" className="block text-sm text-gray-300">
         Όνομα Παιχνιδιού <span className="text-red-500">*</span>
       </label>
       <input
@@ -66,19 +70,19 @@ export default function NewGuideForm() {
         name="game"
         placeholder="Γράψτε το όνομα του παιχνιδιού..."
         value={game}
-        onChange={(e) => {
+        onChange={e => {
           setGame(e.target.value);
           if (formErrors.game) {
-            setFormErrors((prev) => ({ ...prev, game: undefined }));
+            setFormErrors(prev => ({ ...prev, game: undefined }));
           }
         }}
-        className={`w-full p-3 bg-gray-800 rounded-lg border ${
-          formErrors.game ? "border-red-500" : "border-gray-700"
+        className={`w-full rounded-lg border bg-gray-800 p-3 ${
+          formErrors.game ? 'border-red-500' : 'border-gray-700'
         } text-white`}
       />
       <FormErrorMessage message={formErrors.game} />
       {/* Πεδίο Επιπλέον Σχόλια */}
-      <label htmlFor="message" className="block text-gray-300 text-sm">
+      <label htmlFor="message" className="block text-sm text-gray-300">
         Επιπλέον Σχόλια
       </label>
       <textarea
@@ -87,20 +91,20 @@ export default function NewGuideForm() {
         placeholder="Προσθέστε περισσότερες λεπτομέρειες αν χρειάζεται..."
         rows={4}
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        className="w-full p-3 bg-gray-800 rounded-lg border border-gray-700 text-white"
+        onChange={e => setMessage(e.target.value)}
+        className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white"
       ></textarea>
       {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold transition flex items-center justify-center space-x-2"
+        className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-600 p-3 text-lg font-semibold transition hover:bg-blue-700"
       >
         {loading ? (
-          "Υποβολή..."
+          'Υποβολή...'
         ) : (
           <>
-            <Send className="w-5 h-5 text-white" />
+            <Send className="h-5 w-5 text-white" />
             <span>Υποβολή Αιτήματος</span>
           </>
         )}

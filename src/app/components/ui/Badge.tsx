@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface BadgeProps {
   readonly text: string;
@@ -8,7 +8,7 @@ interface BadgeProps {
 export default function Badge({ text, color }: BadgeProps) {
   return (
     <span
-      className="px-3 py-1 rounded-lg font-semibold text-white"
+      className="rounded-lg px-3 py-1 font-semibold text-white"
       style={{ backgroundColor: color }}
     >
       {text}

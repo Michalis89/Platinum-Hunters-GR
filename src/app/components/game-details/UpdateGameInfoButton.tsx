@@ -21,10 +21,10 @@ export default function UpdateGameInfoButton({
   return (
     <button
       onClick={handleUpdateInfo}
-      className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
+      className="mt-6 w-full rounded-lg bg-blue-600 py-2 text-white transition hover:bg-blue-700"
       disabled={updating}
     >
-      {updating ? "🔄 Ενημέρωση..." : "🔄 Get Info & Update"}
+      {updating ? '🔄 Ενημέρωση...' : '🔄 Get Info & Update'}
     </button>
   );
 }

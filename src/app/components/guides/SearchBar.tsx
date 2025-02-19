@@ -10,8 +10,8 @@ export default function SearchBar({ search, setSearch }: Readonly<SearchBarProps
         type="text"
         placeholder="🔎 Αναζήτηση παιχνιδιού..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="p-3 w-full border border-gray-600 bg-gray-800 text-white rounded-lg text-lg placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+        onChange={e => setSearch(e.target.value)}
+        className="w-full rounded-lg border border-gray-600 bg-gray-800 p-3 text-lg text-white placeholder-gray-500 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   );

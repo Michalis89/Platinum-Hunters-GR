@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Lightbulb } from "lucide-react";
-import FormErrorMessage from "../ui/FormErrorMessage";
-import AlertMessage from "../ui/AlertMessage"; // ✅ Προσθήκη του AlertMessage
+import { useState } from 'react';
+import { Lightbulb } from 'lucide-react';
+import FormErrorMessage from '../ui/FormErrorMessage';
+import AlertMessage from '../ui/AlertMessage'; // ✅ Προσθήκη του AlertMessage
 
 export default function FeatureRequestForm() {
-  const [featureTitle, setFeatureTitle] = useState("");
-  const [featureDescription, setFeatureDescription] = useState("");
-  const [featureReason, setFeatureReason] = useState("");
-  const [featureExample, setFeatureExample] = useState("");
-  const [priority, setPriority] = useState("medium");
-  const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [featureTitle, setFeatureTitle] = useState('');
+  const [featureDescription, setFeatureDescription] = useState('');
+  const [featureReason, setFeatureReason] = useState('');
+  const [featureExample, setFeatureExample] = useState('');
+  const [priority, setPriority] = useState('medium');
+  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [errors, setErrors] = useState<{
@@ -27,9 +27,9 @@ export default function FeatureRequestForm() {
     setAlert(null);
 
     const newErrors: { title?: string; description?: string; reason?: string } = {};
-    if (!featureTitle.trim()) newErrors.title = "Το πεδίο είναι υποχρεωτικό.";
-    if (!featureDescription.trim()) newErrors.description = "Το πεδίο είναι υποχρεωτικό.";
-    if (!featureReason.trim()) newErrors.reason = "Το πεδίο είναι υποχρεωτικό.";
+    if (!featureTitle.trim()) newErrors.title = 'Το πεδίο είναι υποχρεωτικό.';
+    if (!featureDescription.trim()) newErrors.description = 'Το πεδίο είναι υποχρεωτικό.';
+    if (!featureReason.trim()) newErrors.reason = 'Το πεδίο είναι υποχρεωτικό.';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -37,7 +37,7 @@ export default function FeatureRequestForm() {
     }
 
     if (featureExample && !isValidURL(featureExample)) {
-      setErrors((prev) => ({ ...prev, example: "Το παράδειγμα πρέπει να είναι ένα έγκυρο URL." }));
+      setErrors(prev => ({ ...prev, example: 'Το παράδειγμα πρέπει να είναι ένα έγκυρο URL.' }));
       return;
     }
 
@@ -51,27 +51,30 @@ export default function FeatureRequestForm() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/contact/forms/feature-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/contact/forms/feature-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(featureData),
       });
 
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.error || "Σφάλμα κατά την υποβολή.");
+      if (!response.ok) throw new Error(result.error || 'Σφάλμα κατά την υποβολή.');
 
-      setAlert({ type: "success", message: "✅ Η υποβολή ολοκληρώθηκε επιτυχώς!" });
-      setFeatureTitle("");
-      setFeatureDescription("");
-      setFeatureReason("");
-      setFeatureExample("");
-      setPriority("medium");
+      setAlert({ type: 'success', message: '✅ Η υποβολή ολοκληρώθηκε επιτυχώς!' });
+      setFeatureTitle('');
+      setFeatureDescription('');
+      setFeatureReason('');
+      setFeatureExample('');
+      setPriority('medium');
     } catch (error) {
-      setAlert({
-        type: "error",
-        message: "❌ " + (error.message || "Κάτι πήγε στραβά, δοκιμάστε ξανά."),
-      });
+      let errorMessage = '❌ Κάτι πήγε στραβά, δοκιμάστε ξανά.';
+
+      if (error instanceof Error) {
+        errorMessage = '❌ ' + error.message;
+      }
+
+      setAlert({ type: 'error', message: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -87,11 +90,11 @@ export default function FeatureRequestForm() {
   };
   const getPriorityLabel = (level: string): string => {
     const priorityMap: { [key: string]: string } = {
-      low: "low",
-      medium: "medium",
-      high: "high",
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
     };
-    return priorityMap[level.toLowerCase()] || "medium"; // Default αν κάτι πάει λάθος
+    return priorityMap[level.toLowerCase()] || 'medium'; // Default αν κάτι πάει λάθος
   };
 
   return (
@@ -100,7 +103,7 @@ export default function FeatureRequestForm() {
       {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
       {/* 📝 Τίτλος Feature */}
-      <label htmlFor="featureTitle" className="block text-gray-300 text-sm font-medium">
+      <label htmlFor="featureTitle" className="block text-sm font-medium text-gray-300">
         Τίτλος Feature <span className="text-red-500">*</span>
       </label>
       <input
@@ -109,16 +112,16 @@ export default function FeatureRequestForm() {
         name="featureTitle"
         placeholder="Γράψτε έναν σύντομο τίτλο..."
         value={featureTitle}
-        onChange={(e) => {
+        onChange={e => {
           setFeatureTitle(e.target.value);
-          setErrors((prev) => ({ ...prev, title: undefined })); // ✅ Αφαιρεί το error όταν ο χρήστης πληκτρολογεί
+          setErrors(prev => ({ ...prev, title: undefined })); // ✅ Αφαιρεί το error όταν ο χρήστης πληκτρολογεί
         }}
-        className={`w-full p-3 bg-gray-800 rounded-lg border ${errors.title ? "border-red-500" : "border-gray-700"} text-white`}
+        className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.title ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
       <FormErrorMessage message={errors.title} />
 
       {/* 📝 Περιγραφή Feature */}
-      <label htmlFor="featureDescription" className="block text-gray-300 text-sm font-medium">
+      <label htmlFor="featureDescription" className="block text-sm font-medium text-gray-300">
         Περιγραφή της ιδέας <span className="text-red-500">*</span>
       </label>
       <textarea
@@ -127,16 +130,16 @@ export default function FeatureRequestForm() {
         placeholder="Περιγράψτε το feature..."
         rows={4}
         value={featureDescription}
-        onChange={(e) => {
+        onChange={e => {
           setFeatureDescription(e.target.value);
-          setErrors((prev) => ({ ...prev, description: undefined }));
+          setErrors(prev => ({ ...prev, description: undefined }));
         }}
-        className={`w-full p-3 bg-gray-800 rounded-lg border ${errors.description ? "border-red-500" : "border-gray-700"} text-white`}
+        className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.description ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
       <FormErrorMessage message={errors.description} />
 
       {/* 📝 Σκοπός του Feature */}
-      <label htmlFor="featureReason" className="block text-gray-300 text-sm font-medium">
+      <label htmlFor="featureReason" className="block text-sm font-medium text-gray-300">
         Γιατί είναι χρήσιμο αυτό το feature; <span className="text-red-500">*</span>
       </label>
       <textarea
@@ -145,16 +148,16 @@ export default function FeatureRequestForm() {
         placeholder="Εξηγήστε τη σημασία του feature..."
         rows={3}
         value={featureReason}
-        onChange={(e) => {
+        onChange={e => {
           setFeatureReason(e.target.value);
-          setErrors((prev) => ({ ...prev, reason: undefined }));
+          setErrors(prev => ({ ...prev, reason: undefined }));
         }}
-        className={`w-full p-3 bg-gray-800 rounded-lg border ${errors.reason ? "border-red-500" : "border-gray-700"} text-white`}
+        className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.reason ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
       <FormErrorMessage message={errors.reason} />
 
       {/* 🌍 Παράδειγμα URL */}
-      <label htmlFor="featureExample" className="block text-gray-300 text-sm font-medium">
+      <label htmlFor="featureExample" className="block text-sm font-medium text-gray-300">
         Παράδειγμα από άλλο site (προαιρετικό)
       </label>
       <input
@@ -163,26 +166,26 @@ export default function FeatureRequestForm() {
         name="featureExample"
         placeholder="Εισάγετε ένα URL (προαιρετικό)"
         value={featureExample}
-        onChange={(e) => {
+        onChange={e => {
           const value = e.target.value;
           setFeatureExample(value);
 
           if (value.trim() && !isValidURL(value)) {
-            setErrors((prev) => ({ ...prev, example: "Το URL δεν είναι έγκυρο." }));
+            setErrors(prev => ({ ...prev, example: 'Το URL δεν είναι έγκυρο.' }));
           } else {
-            setErrors((prev) => ({ ...prev, example: undefined }));
+            setErrors(prev => ({ ...prev, example: undefined }));
           }
         }}
-        className={`w-full p-3 bg-gray-800 rounded-lg border ${errors.example ? "border-red-500" : "border-gray-700"} text-white`}
+        className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.example ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
       <FormErrorMessage message={errors.example} />
 
       {/* 🎯 Επιλογή Προτεραιότητας */}
-      <label htmlFor="priority" className="block text-gray-300 text-sm font-medium">
+      <label htmlFor="priority" className="block text-sm font-medium text-gray-300">
         Προτεραιότητα Feature
       </label>
       <div className="flex space-x-4">
-        {["low", "medium", "high"].map((level) => (
+        {['low', 'medium', 'high'].map(level => (
           <label key={level} className="flex items-center space-x-2">
             <input
               type="radio"
@@ -201,13 +204,13 @@ export default function FeatureRequestForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold transition flex items-center justify-center space-x-2"
+        className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-600 p-3 text-lg font-semibold transition hover:bg-blue-700"
       >
         {loading ? (
-          "Υποβολή..."
+          'Υποβολή...'
         ) : (
           <>
-            <Lightbulb className="w-5 h-5 text-white" />
+            <Lightbulb className="h-5 w-5 text-white" />
             <span>Υποβολή Αιτήματος</span>
           </>
         )}
