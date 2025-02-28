@@ -82,7 +82,6 @@ export default function ContactPage() {
         <h1 className="flex items-center justify-center gap-2 text-center text-3xl font-extrabold text-blue-400">
           <Mail size={24} /> Επικοινωνία
         </h1>
-        {/* Δυναμικός τίτλος */}
         <p className="text-center text-gray-400">
           {form.type === 'general_question'
             ? pageTitle

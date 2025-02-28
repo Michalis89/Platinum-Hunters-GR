@@ -12,12 +12,10 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: 'easeOut' }}
       >
-        {/* Τίτλος με γυαλιστερό εφέ */}
         <motion.h1 className="animate-gradient bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 bg-clip-text text-6xl font-extrabold text-transparent drop-shadow-lg">
           Platinum Hunters
         </motion.h1>
 
-        {/* Περιγραφή */}
         <motion.p
           className="mt-4 text-lg text-gray-300"
           initial={{ opacity: 0 }}
@@ -27,7 +25,6 @@ export default function Home() {
           Ανακάλυψε και κατάκτησε το επόμενο Platinum Trophy σου.
         </motion.p>
 
-        {/* Κουμπί έναρξης */}
         <motion.div
           className="relative mt-6 inline-block"
           initial={{ opacity: 0, scale: 0.8 }}

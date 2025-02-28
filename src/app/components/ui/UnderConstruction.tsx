@@ -7,14 +7,14 @@ import { motion } from 'framer-motion';
 
 export default function UnderConstruction() {
   const router = useRouter();
-  const [countdown, setCountdown] = useState(10); // Timer για redirect
+  const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     } else {
-      router.push('/'); // Redirect στο homepage ή σε άλλη σελίδα
+      router.push('/');
     }
   }, [countdown, router]);
 

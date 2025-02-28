@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import dynamic from 'next/dynamic'; // 🚀 Lazy Loading για components
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Guide, ApiGame, GameDetails } from '@/types/interfaces';
 import AlertMessage from '@/app/components/ui/AlertMessage';
@@ -14,7 +14,6 @@ import GamePlatforms from '@/app/components/game-details/GamePlatforms';
 import GameDetailsInfo from '@/app/components/game-details/GameDetailsInfo';
 import GuideStats from '@/app/components/game-details/GuideStats';
 
-// 🚀 Lazy Loading για TrophyStats και TrophyGuides
 const TrophyStats = dynamic(() => import('@/app/components/game-details/TrophyStats'), {
   ssr: false,
 });
@@ -47,7 +46,7 @@ export default function GameDetailsPage() {
   } | null>(null);
 
   useEffect(() => {
-    if (!slug) return; // 🚀 Αν δεν υπάρχει slug, δεν ξεκινάμε το fetch
+    if (!slug) return;
 
     const fetchGameData = async () => {
       try {

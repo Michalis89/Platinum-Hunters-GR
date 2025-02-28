@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-    <img src="assets/logo.png" alt="Logo" width="339" height="149">
+    <img src="assets/platinum-hunters-gr.png" alt="Logo" width="339" height="149">
 
   <h3 align="center">Platinum Hunters GR</h3>
 
@@ -176,6 +176,18 @@ To deploy the app on Vercel:
    ```
 
   <p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- Test Coverage -->
+
+## Test Coverage
+
+To check the test coverage, run:
+
+```sh
+npm test -- --coverage
+```
+
+![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=main)
 
 <!-- API -->
 

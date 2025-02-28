@@ -39,7 +39,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database search error' }, { status: 500 });
     }
 
-    // 📝 Εισαγωγή νέου παιχνιδιού
     const { data: game, error: gameError } = await supabase
       .from('games')
       .insert([
@@ -63,7 +62,6 @@ export async function POST(req: Request) {
 
     console.log(`✅ Αποθηκεύτηκε το παιχνίδι: ${game.title} με ID: ${game.id}`);
 
-    // ✅ **Προσθήκη entry στο `game_details` με NULL τιμές**
     const { error: gameDetailsError } = await supabase.from('game_details').insert({
       game_id: game.id,
       release_year: null,
@@ -83,7 +81,6 @@ export async function POST(req: Request) {
       console.log(`✅ Προστέθηκε αρχικό entry στο game_details για το game_id: ${game.id}`);
     }
 
-    // 🔹 Αποθήκευση του guide με το game_id
     const { data: guide, error: guideError } = await supabase
       .from('guides')
       .insert([

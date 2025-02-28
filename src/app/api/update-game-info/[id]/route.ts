@@ -6,7 +6,6 @@ const RAWG_API_KEY = process.env.RAWG_API_KEY;
 
 async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
   try {
-    // 🔍 Πρώτο API call για να βρούμε το slug
     const searchResponse = await fetch(
       `https://api.rawg.io/api/games?search=${encodeURIComponent(gameTitle)}&key=${RAWG_API_KEY}`,
     );
@@ -26,7 +25,6 @@ async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
     const gameSlug = searchData.results[0].slug;
     console.log(`🔹 Found slug: ${gameSlug}`);
 
-    // 🔄 Δεύτερο API call για να πάρουμε όλες τις λεπτομέρειες με το slug
     const detailsResponse = await fetch(
       `https://api.rawg.io/api/games/${gameSlug}?key=${RAWG_API_KEY}`,
     );
@@ -75,7 +73,6 @@ export async function POST(req: Request, context: any) {
       return NextResponse.json({ error: 'Invalid game ID' }, { status: 400 });
     }
 
-    // 🔍 Παίρνουμε τον τίτλο του παιχνιδιού από τη βάση
     const { data: gameData, error: gameError } = await supabase
       .from('games')
       .select('title')
@@ -86,13 +83,11 @@ export async function POST(req: Request, context: any) {
       console.error('❌ Game not found in DB:', gameError);
       return NextResponse.json({ error: 'Game not found' }, { status: 404 });
     }
-    // 🔄 Παίρνουμε πληροφορίες από RAWG API
     const gameInfo = await fetchGameInfo(gameData.title);
     if (!gameInfo) {
       return NextResponse.json({ error: 'Game info not found' }, { status: 404 });
     }
 
-    // 🔄 Ενημέρωση της βάσης δεδομένων
     const { error } = await supabase.from('game_details').update(gameInfo).eq('game_id', gameId);
 
     if (error) {

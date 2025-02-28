@@ -9,7 +9,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    // 🔍 Εξαγωγή τίτλου από το URL
     const extractTitleFromURL = (url: string) => {
       const regex = /guide\/\d+-(.*?)-trophy-guide/;
       const matches = regex.exec(url);
@@ -18,11 +17,10 @@ export async function POST(req: Request) {
 
     const extractedTitle = extractTitleFromURL(url).trim();
 
-    // 🛑 1️⃣ Ακριβής Έλεγχος στη βάση
     const { data: exactMatch } = await supabase
       .from('games')
       .select('*')
-      .ilike('title', extractedTitle) // Case-insensitive match
+      .ilike('title', extractedTitle)
       .single();
 
     if (exactMatch) {
@@ -35,7 +33,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔄 2️⃣ Δοκιμή Fuzzy Matching (αν δεν βρέθηκε exact match)
     const { data, error } = await supabase.rpc('fuzzy_search', {
       search_title: extractedTitle,
     });
@@ -55,7 +52,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Αν δεν υπάρχει, ξεκινάμε το Scraping
     const scrapedData = await scrapePSNGuide(url);
     if (!scrapedData) {
       console.error('❌ Scraping failed!');

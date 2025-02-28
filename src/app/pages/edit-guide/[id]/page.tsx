@@ -8,14 +8,13 @@ import { motion } from 'framer-motion';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 
 export default function EditGuide() {
-  const { id } = useParams(); // Παίρνουμε το ID από το URL
+  const { id } = useParams();
   const [steps, setSteps] = useState<{ title: string; description: string }[]>([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // 🔹 Φόρτωσε τον οδηγό όταν ανοίξει η σελίδα
   useEffect(() => {
     const fetchGuide = async () => {
       try {
@@ -38,14 +37,12 @@ export default function EditGuide() {
     if (id) fetchGuide();
   }, [id]);
 
-  // 🔹 Χειρισμός αλλαγής στο textarea
   const handleChange = (index: number, newText: string) => {
     setSteps(prevSteps =>
       prevSteps.map((step, i) => (i === index ? { ...step, description: newText } : step)),
     );
   };
 
-  // 🔹 Αποθήκευση των αλλαγών στη βάση
   const handleSave = async () => {
     setSaving(true);
     setMessage('');

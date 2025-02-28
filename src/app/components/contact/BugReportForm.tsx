@@ -9,14 +9,13 @@ import FormErrorMessage from '../ui/FormErrorMessage';
 import AlertMessage from '../ui/AlertMessage';
 
 export default function BugReportForm() {
-  const [form, setForm] = useState({ type: '' }); // Required επιλογή
+  const [form, setForm] = useState({ type: '' });
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [bugDescription, setBugDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
-  // ✅ Διαχείριση Errors ξεχωριστά για κάθε πεδίο
   const [errors, setErrors] = useState<{ type?: string; description?: string }>({});
 
   const requestTypes = [
@@ -34,7 +33,6 @@ export default function BugReportForm() {
     setLoading(true);
     setAlert(null);
 
-    // ✅ Έλεγχος αν όλα τα required πεδία είναι συμπληρωμένα
     const newErrors: { type?: string; description?: string } = {};
     if (!form.type) newErrors.type = 'Ο τύπος προβλήματος είναι υποχρεωτικός.';
     if (!bugDescription.trim()) newErrors.description = 'Η περιγραφή του bug είναι υποχρεωτική.';
@@ -84,7 +82,6 @@ export default function BugReportForm() {
     <form onSubmit={handleSubmit} className="mt-4 space-y-6">
       {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
-      {/* Dropdown για τύπο προβλήματος */}
       <Dropdown
         label="Τύπος Προβλήματος"
         options={requestTypes}
@@ -105,7 +102,6 @@ export default function BugReportForm() {
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="space-y-2"
         >
-          {/* Textarea για περιγραφή του bug */}
           <label htmlFor="bugDescription" className="block text-sm font-medium text-gray-300">
             Περιγραφή του bug <span className="text-red-500">*</span>
           </label>
@@ -123,7 +119,6 @@ export default function BugReportForm() {
           ></textarea>
           <FormErrorMessage message={errors.description} />
 
-          {/* Upload Screenshot */}
           <div className="mt-4">
             <label htmlFor="bugScreenshot" className="mb-2 block text-sm text-gray-400">
               Προσθέστε Screenshot (προαιρετικό)
@@ -151,7 +146,6 @@ export default function BugReportForm() {
               />
             </div>
 
-            {/* Screenshot Preview */}
             {screenshotPreview && (
               <div className="mt-2">
                 <Image
@@ -165,7 +159,6 @@ export default function BugReportForm() {
             )}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}

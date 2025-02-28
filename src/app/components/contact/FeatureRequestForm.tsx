@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Lightbulb } from 'lucide-react';
 import FormErrorMessage from '../ui/FormErrorMessage';
-import AlertMessage from '../ui/AlertMessage'; // ✅ Προσθήκη του AlertMessage
+import AlertMessage from '../ui/AlertMessage';
 
 export default function FeatureRequestForm() {
   const [featureTitle, setFeatureTitle] = useState('');
@@ -94,15 +94,13 @@ export default function FeatureRequestForm() {
       medium: 'medium',
       high: 'high',
     };
-    return priorityMap[level.toLowerCase()] || 'medium'; // Default αν κάτι πάει λάθος
+    return priorityMap[level.toLowerCase()] || 'medium';
   };
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-      {/* ✅ Εμφάνιση alert όταν υπάρχει API success/error */}
       {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
-      {/* 📝 Τίτλος Feature */}
       <label htmlFor="featureTitle" className="block text-sm font-medium text-gray-300">
         Τίτλος Feature <span className="text-red-500">*</span>
       </label>
@@ -114,13 +112,12 @@ export default function FeatureRequestForm() {
         value={featureTitle}
         onChange={e => {
           setFeatureTitle(e.target.value);
-          setErrors(prev => ({ ...prev, title: undefined })); // ✅ Αφαιρεί το error όταν ο χρήστης πληκτρολογεί
+          setErrors(prev => ({ ...prev, title: undefined }));
         }}
         className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.title ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
       <FormErrorMessage message={errors.title} />
 
-      {/* 📝 Περιγραφή Feature */}
       <label htmlFor="featureDescription" className="block text-sm font-medium text-gray-300">
         Περιγραφή της ιδέας <span className="text-red-500">*</span>
       </label>
@@ -138,7 +135,6 @@ export default function FeatureRequestForm() {
       />
       <FormErrorMessage message={errors.description} />
 
-      {/* 📝 Σκοπός του Feature */}
       <label htmlFor="featureReason" className="block text-sm font-medium text-gray-300">
         Γιατί είναι χρήσιμο αυτό το feature; <span className="text-red-500">*</span>
       </label>
@@ -156,7 +152,6 @@ export default function FeatureRequestForm() {
       />
       <FormErrorMessage message={errors.reason} />
 
-      {/* 🌍 Παράδειγμα URL */}
       <label htmlFor="featureExample" className="block text-sm font-medium text-gray-300">
         Παράδειγμα από άλλο site (προαιρετικό)
       </label>
@@ -180,7 +175,6 @@ export default function FeatureRequestForm() {
       />
       <FormErrorMessage message={errors.example} />
 
-      {/* 🎯 Επιλογή Προτεραιότητας */}
       <label htmlFor="priority" className="block text-sm font-medium text-gray-300">
         Προτεραιότητα Feature
       </label>
@@ -200,7 +194,6 @@ export default function FeatureRequestForm() {
         ))}
       </div>
 
-      {/* 🚀 Submit Button */}
       <button
         type="submit"
         disabled={loading}

@@ -39,7 +39,6 @@ export default function SupportForm() {
         ☕ Buy Me a Coffee
       </a>
 
-      {/* 🔹 Βελτιωμένο Box */}
       <div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-5 text-center shadow-md">
         <h2 className="flex items-center justify-center gap-2 text-xl font-bold text-white">
           <Lightbulb className="h-6 w-6 text-yellow-400" />

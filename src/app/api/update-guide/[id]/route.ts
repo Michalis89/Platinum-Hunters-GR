@@ -4,7 +4,7 @@ import supabase from '@/lib/db';
 export async function PUT(
   req: Request,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any, // 👈 Παρακάμπτουμε το TypeScript error
+  context: any,
 ) {
   try {
     if (!context.params?.id) {
@@ -35,11 +35,10 @@ export async function PUT(
       return NextResponse.json({ error: 'Guide not found for this game' }, { status: 404 });
     }
 
-    // 🔄 Εκτέλεση ενημέρωσης
     const { error: updateError } = await supabase
       .from('guides')
       .update({ steps })
-      .eq('game_id', gameId); // ✅ Ενημερώνουμε με βάση το game_id
+      .eq('game_id', gameId);
 
     if (updateError) {
       console.error('❌ Σφάλμα ενημέρωσης οδηγού:', updateError);

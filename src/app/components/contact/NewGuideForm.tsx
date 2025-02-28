@@ -58,9 +58,7 @@ export default function NewGuideForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-      {/* ✅ Εμφάνιση alert όταν υπάρχει API success/error */}
       {alert && <AlertMessage type={alert.type} message={alert.message} />}
-      {/* 🏆 Πεδίο Όνομα Παιχνιδιού */}
       <label htmlFor="game" className="block text-sm text-gray-300">
         Όνομα Παιχνιδιού <span className="text-red-500">*</span>
       </label>
@@ -81,7 +79,6 @@ export default function NewGuideForm() {
         } text-white`}
       />
       <FormErrorMessage message={formErrors.game} />
-      {/* Πεδίο Επιπλέον Σχόλια */}
       <label htmlFor="message" className="block text-sm text-gray-300">
         Επιπλέον Σχόλια
       </label>
@@ -94,7 +91,6 @@ export default function NewGuideForm() {
         onChange={e => setMessage(e.target.value)}
         className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white"
       ></textarea>
-      {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}

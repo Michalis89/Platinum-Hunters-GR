@@ -4,7 +4,7 @@ import supabase from '@/lib/db';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GET(req: Request, context: any) {
   try {
-    const { params } = await context; // ✅ Σωστό await
+    const { params } = await context;
     const id = params.id as string;
 
     if (!id) {

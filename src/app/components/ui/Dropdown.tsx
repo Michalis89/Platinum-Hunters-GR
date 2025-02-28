@@ -13,7 +13,7 @@ interface DropdownProps {
   selectedValue: string;
   onSelect: (value: string) => void;
   isOpen: boolean;
-  zIndex: number; // Add z-index prop
+  zIndex: number;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -27,7 +27,6 @@ const Dropdown: React.FC<DropdownProps> = ({
   const [dropdownOpen, setDropdownOpen] = useState(isOpen);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -72,15 +71,15 @@ const Dropdown: React.FC<DropdownProps> = ({
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
             className="absolute left-0 mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
-            style={{ zIndex: zIndex }} // Apply z-index dynamically
+            style={{ zIndex: zIndex }}
           >
             {options.map(option => (
               <button
                 key={option.value}
                 className="flex w-full cursor-pointer items-center p-3 text-left hover:bg-gray-700"
                 onClick={() => {
-                  onSelect(option.value); // Pass the value to onSelect
-                  setDropdownOpen(false); // Close dropdown after selection
+                  onSelect(option.value);
+                  setDropdownOpen(false);
                 }}
                 type="button"
               >

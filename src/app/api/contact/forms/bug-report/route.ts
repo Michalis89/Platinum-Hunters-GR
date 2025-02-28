@@ -31,18 +31,16 @@ export async function POST(req: Request) {
       fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/bug_reports/${fileName}`;
     }
 
-    // **1. Δημιουργία νέας εγγραφής στον πίνακα submissions**
     const { data: submission, error: submissionError } = await supabase
       .from('submissions')
       .insert([{ type: 'bug_report', status: 'pending' }])
-      .select('id') // Παίρνουμε πίσω το ID της νέας εγγραφής
-      .single(); // Επιστρέφει ένα μόνο αντικείμενο
+      .select('id')
+      .single();
 
     if (submissionError) throw submissionError;
 
-    const submission_id = submission.id; // Παίρνουμε το ID της νέας εγγραφής
+    const submission_id = submission.id;
 
-    // **2. Εισαγωγή του bug report με το σωστό submission_id**
     const { error: dbError } = await supabase
       .from('bug_reports')
       .insert([{ submission_id, bug_type, description, screenshot_url: fileUrl }]);

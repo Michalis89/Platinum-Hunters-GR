@@ -66,8 +66,8 @@ export default function ScraperPage() {
         setMessageState('error', '⚠️ Ο οδηγός υπάρχει ήδη στη βάση!');
       } else if (response.ok) {
         setMessageState('success', '✅ Ο οδηγός αποθηκεύτηκε επιτυχώς!');
-        setUrl(''); // 🔹 Reset του input
-        setData(null); // 🔹 Clear τα προηγούμενα δεδομένα
+        setUrl('');
+        setData(null);
       } else {
         setMessageState('error', '❌ Κάτι πήγε στραβά κατά την αποθήκευση!');
       }

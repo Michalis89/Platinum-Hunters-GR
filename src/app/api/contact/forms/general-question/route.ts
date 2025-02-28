@@ -60,16 +60,13 @@ export async function POST(req: Request) {
       feedbackRating,
     } = requestData;
 
-    // ✅ Validation πριν γίνει οποιαδήποτε κλήση στη βάση
     const validationError = validateRequest(requestData);
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    // ✅ Δημιουργία submission
     const submission_id = await createSubmission();
 
-    // ✅ Προετοιμασία δεδομένων προς εισαγωγή
     const payload = {
       category,
       question: category === 'Other' ? question : null,
@@ -81,7 +78,6 @@ export async function POST(req: Request) {
       feedback_rating: category === 'Feedback' ? feedbackRating : null,
     };
 
-    // ✅ Εισαγωγή στη βάση
     await insertGeneralQuestion(submission_id, payload);
 
     return NextResponse.json(

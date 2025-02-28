@@ -153,7 +153,7 @@ export default function GeneralQuestionForm({
 
     setErrors(prev => ({
       ...prev,
-      feedbackRating: value > 0 ? undefined : ('' as unknown as number), // ✅ Fix τύπου
+      feedbackRating: value > 0 ? undefined : ('' as unknown as number),
     }));
   };
 
@@ -161,7 +161,6 @@ export default function GeneralQuestionForm({
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
-      {/* Dropdown επιλογής */}
       <Dropdown
         label="Κατηγορία Ερώτησης"
         options={questionCategories}
@@ -171,7 +170,6 @@ export default function GeneralQuestionForm({
         zIndex={2}
       />
 
-      {/* Smooth εμφάνιση των πεδίων όταν υπάρχει επιλογή */}
       {formData.category && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -179,7 +177,6 @@ export default function GeneralQuestionForm({
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="space-y-4"
         >
-          {/* Email */}
           <label htmlFor="email" className="block text-sm font-medium text-gray-300">
             Το email σας <span className="text-red-500">*</span>
           </label>
@@ -196,7 +193,6 @@ export default function GeneralQuestionForm({
           />
           <FormErrorMessage message={errors.email} />
 
-          {/* Υπηρεσία (για Support) */}
           {formData.category === 'Support' && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -251,7 +247,6 @@ export default function GeneralQuestionForm({
             </motion.div>
           )}
 
-          {/* Πληροφορίες (για Info) */}
           {formData.category === 'Info' && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -303,7 +298,6 @@ export default function GeneralQuestionForm({
             </motion.div>
           )}
 
-          {/* Feedback */}
           {formData.category === 'Feedback' && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -334,7 +328,6 @@ export default function GeneralQuestionForm({
             </motion.div>
           )}
 
-          {/* Other */}
           {formData.category === 'Other' && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}

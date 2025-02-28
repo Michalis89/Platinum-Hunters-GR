@@ -1,6 +1,6 @@
 import { GuideProps, Trophy } from '@/types/interfaces';
 import { Trophy as TrophyIcon, BookOpen } from 'lucide-react';
-import { motion } from 'framer-motion'; // Animation library
+import { motion } from 'framer-motion';
 
 interface TrophyGuidesProps {
   readonly guides: GuideProps[];
@@ -8,11 +8,11 @@ interface TrophyGuidesProps {
 
 export default function TrophyGuides({ guides }: TrophyGuidesProps) {
   const trophyColors: Record<Trophy['type'], string> = {
-    Platinum: 'text-blue-400', // Μπλε για το Platinum
-    Gold: 'text-yellow-400', // Χρυσό για το Gold
-    Silver: 'text-gray-400', // Ασημί για το Silver
-    Bronze: 'text-orange-500', // Πορτοκαλί για το Bronze
-    Unknown: 'text-red-500', // Κόκκινο για άγνωστα
+    Platinum: 'text-blue-400',
+    Gold: 'text-yellow-400',
+    Silver: 'text-gray-400',
+    Bronze: 'text-orange-500',
+    Unknown: 'text-red-500',
   };
 
   return (
@@ -36,7 +36,7 @@ export default function TrophyGuides({ guides }: TrophyGuidesProps) {
                       <motion.div
                         key={i}
                         className="flex items-center rounded-lg bg-gray-700 p-3 shadow-md transition-transform duration-200 ease-in-out hover:scale-105"
-                        initial={{ opacity: 0, y: 10 }} // Fade-in + slide-up
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: i * 0.1 }}
                       >
