@@ -191,6 +191,7 @@ npm run test:coverage
 
 ## Test Coverage
 
+
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
   <div>
@@ -650,12 +651,14 @@ npm run test:coverage
 
 ## Test Results
 
+
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 16 passed, 16 total</p>
 <p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
-<p><strong>Time:</strong> 41.11 seconds</p>
+<p><strong>Time:</strong> 11.40 seconds</p>
 </div>
+
 
 ## License
 
