@@ -33,9 +33,3 @@ jobs:
 
       - name: Run Build
         run: npm run build
-
-      - name: Upload Coverage to Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: lcov.info
