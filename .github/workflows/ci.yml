@@ -11,6 +11,11 @@ jobs:
     name: Lint, Build & Test
     runs-on: ubuntu-latest
 
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      RAWG_API_KEY: ${{ secrets.RAWG_API_KEY }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
