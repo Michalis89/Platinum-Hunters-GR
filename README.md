@@ -194,17 +194,22 @@ npm run test:coverage
 ## Test Coverage Results
 
 
-<div id="results">
-<table>
-<tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
-<tr>
-<td><strong>All files</strong></td>
-<td><span style="color: red;">14.54%</span></td>
-<td><span style="color: orange;">53.19%</span></td>
-<td><span style="color: red;">26.67%</span></td>
-<td><span style="color: red;">14.54%</span></td>
-<td>-</td>
-</tr>
+<details>
+  <summary><strong>Click to expand Test Coverage Results</strong></summary>
+  
+<details>
+  <summary><strong>Click to expand Test Coverage Results</strong></summary>
+  <div id="results">
+    <table>
+      <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
+      <tr>
+        <td><strong>All files</strong></td>
+        <td><span style="color: red;">14.54%</span></td>
+        <td><span style="color: orange;">53.19%</span></td>
+        <td><span style="color: red;">26.67%</span></td>
+        <td><span style="color: red;">14.54%</span></td>
+        <td>-</td>
+      </tr>
 <tr>
 <td>layout.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
@@ -645,18 +650,17 @@ npm run test:coverage
 <td><span style="color: red;">0.00%</span></td>
 <td>-</td>
 </tr>
-</table>
-</div>
+    </table>
+  </div>
+</details>
+</details>
 
-
-  
-<div id="jest-results">
-<h3>Test Summary</h3>
-<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
-<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
-<p><strong>Time:</strong> 41.11 seconds</p>
-</div>
-
+  <div id="jest-results">
+    <h3>Test Summary</h3>
+    <p><strong>Test Suites:</strong> 16 passed, 16 total</p>
+    <p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
+    <p><strong>Time:</strong> 41.11 seconds</p>
+  </div>
 
 ## License
 
@@ -667,3 +671,17 @@ Distributed under the [MIT License](./LICENSE.txt). See for more information.
 <!-- MARKDOWN LINKS & IMAGES -->
 
 [product-screenshot]: assets/screenshot.png
+
+<div id="jest-results">
+<h3>Test Summary</h3>
+<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
+<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
+<p><strong>Time:</strong> 41.11 seconds</p>
+</div>
+
+<div id="jest-results">
+<h3>Test Summary</h3>
+<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
+<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
+<p><strong>Time:</strong> 41.11 seconds</p>
+</div>

@@ -51,7 +51,22 @@ parser.parseString(xmlData, (err, result) => {
   };
 
   // ** Δημιουργία του HTML Πίνακα για Coverage **
-  let table = `\n<div id="results">\n<table>\n<tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>\n<tr>\n<td><strong>All files</strong></td>\n<td>${colorize(allFilesStmtCoverage)}</td>\n<td>${colorize(allFilesBranchCoverage)}</td>\n<td>${colorize(allFilesFuncsCoverage)}</td>\n<td>${colorize(allFilesLinesCoverage)}</td>\n<td>-</td>\n</tr>`;
+  // ** Δημιουργία collapsible section για Coverage **
+  let table = `
+<details>
+  <summary><strong>Click to expand Test Coverage Results</strong></summary>
+  <div id="results">
+    <table>
+      <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
+      <tr>
+        <td><strong>All files</strong></td>
+        <td>${colorize(allFilesStmtCoverage)}</td>
+        <td>${colorize(allFilesBranchCoverage)}</td>
+        <td>${colorize(allFilesFuncsCoverage)}</td>
+        <td>${colorize(allFilesLinesCoverage)}</td>
+        <td>-</td>
+      </tr>`;
+
 
   // ** Ανά αρχείο **
   const packages = Array.isArray(project.package) ? project.package : [project.package];
@@ -80,7 +95,11 @@ parser.parseString(xmlData, (err, result) => {
     }
   });
 
-  table += `\n</table>\n</div>\n`;
+  table += `
+    </table>
+  </div>
+</details>`;
+
 
   // ** Διαβάζουμε το README.md και το ενημερώνουμε **
   const readmePath = './README.md';
@@ -103,8 +122,8 @@ parser.parseString(xmlData, (err, result) => {
     // ** Αποφυγή αλλοίωσης του README.md **
     const divStart = '<div id="results">';
     const divEnd = '</div>';
-    const jestDivStart = '<div id="jest-results">';
-    const jestDivEnd = '</div>';
+    const jestDivStart = '<details id="jest-results">';
+    const jestDivEnd = '</details>';
 
     // Αντικατάσταση του υπάρχοντος πίνακα coverage
     updatedReadme = updatedReadme.replace(new RegExp(`${divStart}[\\s\\S]*?${divEnd}`, 'g'), table);
