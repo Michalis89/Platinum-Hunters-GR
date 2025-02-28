@@ -1,11 +1,28 @@
 import fs from 'fs';
 import xml2js from 'xml2js';
 
-// Διαβάζουμε το αρχείο clover.xml
+// ** Διαβάζουμε το αρχείο clover.xml **
 const coverageFilePath = './coverage/clover.xml';
 const xmlData = fs.readFileSync(coverageFilePath, 'utf-8');
 
-// Μετατροπή του XML σε JavaScript αντικείμενο
+// ** Διαβάζουμε το Jest results JSON **
+const jestResultsPath = './jest-results.json';
+let jestSummary = '';
+
+if (fs.existsSync(jestResultsPath)) {
+  const jestData = JSON.parse(fs.readFileSync(jestResultsPath, 'utf-8'));
+
+  const totalTests = jestData.numTotalTests;
+  const passedTests = jestData.numPassedTests;
+  const failedTests = jestData.numFailedTests;
+  const testSuitesTotal = jestData.numTotalTestSuites;
+  const testSuitesPassed = jestData.numPassedTestSuites;
+  const timeElapsed = (jestData.testResults.reduce((sum, suite) => sum + suite.endTime - suite.startTime, 0) / 1000).toFixed(2);
+
+  jestSummary = `\n<div id="jest-results">\n<h3>Test Summary</h3>\n<p><strong>Test Suites:</strong> ${testSuitesPassed} passed, ${testSuitesTotal} total</p>\n<p><strong>Tests:</strong> ${passedTests} passed, ${failedTests} failed, ${totalTests} total</p>\n<p><strong>Time:</strong> ${timeElapsed} seconds</p>\n</div>\n`;
+}
+
+// ** Μετατροπή XML σε JSON Object **
 const parser = new xml2js.Parser({ explicitArray: false });
 parser.parseString(xmlData, (err, result) => {
   if (err) {
@@ -13,23 +30,31 @@ parser.parseString(xmlData, (err, result) => {
     return;
   }
 
-  // Παίρνουμε το project αντικείμενο από το XML
   const project = result.coverage.project;
-
-  // Αν το project δεν έχει την ιδιότητα 'package', σημαίνει ότι πρέπει να το βρούμε αλλιώς
-  if (!project || !project.package) {
-    console.error('Δεν βρέθηκε η ιδιότητα "package" στο XML.');
+  const summary = project?.metrics?.$;
+  if (!summary) {
+    console.error('Δεν βρέθηκε το summary.metrics στο XML.');
     return;
   }
 
+  const allFilesStmtCoverage = parseFloat(summary.statements) > 0 ? ((summary.coveredstatements / summary.statements) * 100).toFixed(2) : '0.00';
+  const allFilesBranchCoverage = parseFloat(summary.conditionals) > 0 ? ((summary.coveredconditionals / summary.conditionals) * 100).toFixed(2) : '0.00';
+  const allFilesFuncsCoverage = parseFloat(summary.methods) > 0 ? ((summary.coveredmethods / summary.methods) * 100).toFixed(2) : '0.00';
+  const allFilesLinesCoverage = parseFloat(summary.statements) > 0 ? ((summary.coveredstatements / summary.statements) * 100).toFixed(2) : '0.00';
+
+  // ** Χρώματα στα ποσοστά **
+  const colorize = (value) => {
+    const numValue = parseFloat(value);
+    if (numValue >= 80) return `<span style="color: green;">${value}%</span>`;
+    if (numValue <= 50) return `<span style="color: red;">${value}%</span>`;
+    return `<span style="color: orange;">${value}%</span>`;
+  };
+
+  // ** Δημιουργία του HTML Πίνακα για Coverage **
+  let table = `\n<div id="results">\n<table>\n<tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>\n<tr>\n<td><strong>All files</strong></td>\n<td>${colorize(allFilesStmtCoverage)}</td>\n<td>${colorize(allFilesBranchCoverage)}</td>\n<td>${colorize(allFilesFuncsCoverage)}</td>\n<td>${colorize(allFilesLinesCoverage)}</td>\n<td>-</td>\n</tr>`;
+
+  // ** Ανά αρχείο **
   const packages = Array.isArray(project.package) ? project.package : [project.package];
-
-  // Δημιουργία του πίνακα
-  let table = `<div id="results">\n`;
-  table += `| File                     | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s |\n`;
-  table += `| ------------------------ | ------- | -------- | ------- | ------- | ----------------- |\n`;
-
-  // Επεξεργασία των αρχείων για κάθε package
   packages.forEach(pkg => {
     if (pkg.file) {
       const files = Array.isArray(pkg.file) ? pkg.file : [pkg.file];
@@ -50,26 +75,14 @@ parser.parseString(xmlData, (err, result) => {
         const funcCoverage = methods > 0 ? ((coveredMethods / methods) * 100).toFixed(2) : '0.00';
         const lineCoverage = statements > 0 ? ((coveredStatements / statements) * 100).toFixed(2) : '0.00';
 
-        // Συνάρτηση για να προσθέσουμε padding
-        const pad = (str, length) => str.padEnd(length, ' ');
-
-        // Εισαγωγή χρωμάτων (πράσινο για πάνω από 80%, κόκκινο για κάτω από 50%)
-        const colorize = (value) => {
-          const numValue = parseFloat(value);
-          if (numValue >= 80) return `<span style="color: green;">${value}</span>`;
-          if (numValue <= 50) return `<span style="color: red;">${value}</span>`;
-          return `<span style="color: orange;">${value}</span>`; // Για τιμές μεταξύ 50% και 80%
-        };
-
-        // Προσθήκη των αποτελεσμάτων στον πίνακα με χρώματα
-        table += `| ${pad(fileName, 25)} | ${pad(colorize(stmtCoverage + '%'), 7)} | ${pad(colorize(branchCoverage + '%'), 7)} | ${pad(colorize(funcCoverage + '%'), 7)} | ${pad(colorize(lineCoverage + '%'), 7)} |  |\n`;
+        table += `\n<tr>\n<td>${fileName}</td>\n<td>${colorize(stmtCoverage)}</td>\n<td>${colorize(branchCoverage)}</td>\n<td>${colorize(funcCoverage)}</td>\n<td>${colorize(lineCoverage)}</td>\n<td>-</td>\n</tr>`;
       });
     }
   });
 
-  table += `</div>\n`;
+  table += `\n</table>\n</div>\n`;
 
-  // Διαβάζουμε το README.md
+  // ** Διαβάζουμε το README.md και το ενημερώνουμε **
   const readmePath = './README.md';
   fs.readFile(readmePath, 'utf-8', (err, data) => {
     if (err) {
@@ -77,7 +90,6 @@ parser.parseString(xmlData, (err, result) => {
       return;
     }
 
-    // Βρίσκουμε το σημείο που θέλουμε να προσθέσουμε τον πίνακα (κάτω από το ## Test Coverage Results)
     const sectionHeader = '## Test Coverage Results';
     const insertPosition = data.indexOf(sectionHeader);
 
@@ -86,36 +98,34 @@ parser.parseString(xmlData, (err, result) => {
       return;
     }
 
-    // Αν υπάρχει ήδη το div με id="results", το διαγράφουμε
+    let updatedReadme = data;
+
+    // ** Αποφυγή αλλοίωσης του README.md **
     const divStart = '<div id="results">';
     const divEnd = '</div>';
+    const jestDivStart = '<div id="jest-results">';
+    const jestDivEnd = '</div>';
 
-    if (data.includes(divStart)) {
-      // Διαγράφουμε το παλιό div και το αντικαθιστούμε με το νέο
-      const updatedReadme = data.replace(new RegExp(`${divStart}[\\s\\S]*${divEnd}`, 'g'), table);
+    // Αντικατάσταση του υπάρχοντος πίνακα coverage
+    updatedReadme = updatedReadme.replace(new RegExp(`${divStart}[\\s\\S]*?${divEnd}`, 'g'), table);
+    // Αντικατάσταση του υπάρχοντος πίνακα Jest
+    updatedReadme = updatedReadme.replace(new RegExp(`${jestDivStart}[\\s\\S]*?${jestDivEnd}`, 'g'), jestSummary);
 
-      // Γράφουμε το ενημερωμένο README.md
-      fs.writeFile(readmePath, updatedReadme, 'utf-8', (err) => {
-        if (err) {
-          console.error('Error writing to README.md:', err);
-          return;
-        }
-
-        console.log('Πίνακας test coverage αντικαταστάθηκε με επιτυχία στο README.md!');
-      });
-    } else {
-      // Αν δεν υπάρχει το div, το προσθέτουμε κάτω από την επικεφαλίδα
-      const updatedReadme = data.slice(0, insertPosition + sectionHeader.length) + '\n' + table + data.slice(insertPosition + sectionHeader.length);
-
-      // Γράφουμε το ενημερωμένο README.md
-      fs.writeFile(readmePath, updatedReadme, 'utf-8', (err) => {
-        if (err) {
-          console.error('Error writing to README.md:', err);
-          return;
-        }
-
-        console.log('Πίνακας test coverage προστέθηκε με επιτυχία στο README.md!');
-      });
+    // Αν δεν υπάρχουν, τα προσθέτουμε στο τέλος του coverage section
+    if (!updatedReadme.includes(divStart)) {
+      updatedReadme = updatedReadme.replace(sectionHeader, `${sectionHeader}\n${table}`);
     }
+    if (!updatedReadme.includes(jestDivStart)) {
+      updatedReadme += jestSummary;
+    }
+
+    // ** Γράφουμε το νέο README.md χωρίς extra γραμμές **
+    fs.writeFile(readmePath, updatedReadme.trim() + '\n', 'utf-8', (err) => {
+      if (err) {
+        console.error('Error writing to README.md:', err);
+        return;
+      }
+      console.log('✅ Πίνακας test coverage και Jest summary προστέθηκαν στο README.md χωρίς περιττά κενά!');
+    });
   });
 });

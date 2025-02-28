@@ -193,65 +193,472 @@ npm run test:coverage
 
 ## Test Coverage Results
 
+
 <div id="results">
-| File                     | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s |
-| ------------------------ | ------- | -------- | ------- | ------- | ----------------- |
-| layout.tsx                | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| page.tsx                  | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| Navbar.tsx                | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: orange;">66.67%</span> | <span style="color: green;">100.00%</span> |  |
-| NavbarWrapper.tsx         | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| BugReportForm.tsx         | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| FeatureRequestForm.tsx    | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| GeneralQuestionForm.tsx   | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| NewGuideForm.tsx          | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| SupportForm.tsx           | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| EditGuideButton.tsx       | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| GameDetailsInfo.tsx       | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| GamePlatforms.tsx         | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| GuideStats.tsx            | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| TrophyGuides.tsx          | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| TrophyStats.tsx           | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| UpdateGameInfoButton.tsx  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| GameCard.tsx              | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| GameGrid.tsx              | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| SearchBar.tsx             | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| AlertMessage.tsx          | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| Badge.tsx                 | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| Button.tsx                | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| Card.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| Dropdown.tsx              | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| FormErrorMessage.tsx      | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| Input.tsx                 | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| Skeleton.tsx              | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| UnderConstruction.tsx     | <span style="color: green;">97.10%</span> | <span style="color: green;">80.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">97.10%</span> |  |
-| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| page.tsx                  | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
-| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| db.ts                     | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| index.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| selectors.ts              | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| utils.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| handlers.ts               | <span style="color: green;">92.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: green;">92.00%</span> |  |
-| server.ts                 | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: green;">100.00%</span> |  |
-| forms.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
-| interfaces.ts             | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+<table>
+<tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
+<tr>
+<td><strong>All files</strong></td>
+<td><span style="color: red;">14.54%</span></td>
+<td><span style="color: orange;">53.19%</span></td>
+<td><span style="color: red;">26.67%</span></td>
+<td><span style="color: red;">14.54%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>layout.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Navbar.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: orange;">66.67%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>NavbarWrapper.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>BugReportForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>FeatureRequestForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GeneralQuestionForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>NewGuideForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>SupportForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>EditGuideButton.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GameDetailsInfo.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GamePlatforms.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GuideStats.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>TrophyGuides.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>TrophyStats.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>UpdateGameInfoButton.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GameCard.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GameGrid.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>SearchBar.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>AlertMessage.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Badge.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Button.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Card.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Dropdown.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>FormErrorMessage.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Input.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Skeleton.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>UnderConstruction.tsx</td>
+<td><span style="color: green;">97.10%</span></td>
+<td><span style="color: green;">80.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">97.10%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>db.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>index.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>selectors.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>utils.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>handlers.ts</td>
+<td><span style="color: green;">92.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">92.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>server.ts</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>forms.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>interfaces.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+</table>
 </div>
+
+
+  
+<div id="jest-results">
+<h3>Test Summary</h3>
+<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
+<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
+<p><strong>Time:</strong> 41.11 seconds</p>
+</div>
+
+
+## License
 
 Distributed under the [MIT License](./LICENSE.txt). See for more information.
 
