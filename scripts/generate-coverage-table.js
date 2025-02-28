@@ -1,11 +1,9 @@
 import fs from 'fs';
 import xml2js from 'xml2js';
 
-// ** Διαβάζουμε το αρχείο clover.xml **
 const coverageFilePath = './coverage/clover.xml';
 const xmlData = fs.readFileSync(coverageFilePath, 'utf-8');
 
-// ** Διαβάζουμε το Jest results JSON **
 const jestResultsPath = './jest-results.json';
 let jestSummary = '';
 
@@ -42,7 +40,6 @@ parser.parseString(xmlData, (err, result) => {
   const allFilesFuncsCoverage = parseFloat(summary.methods) > 0 ? ((summary.coveredmethods / summary.methods) * 100).toFixed(2) : '0.00';
   const allFilesLinesCoverage = parseFloat(summary.statements) > 0 ? ((summary.coveredstatements / summary.statements) * 100).toFixed(2) : '0.00';
 
-  // ** Χρώματα στα ποσοστά **
   const colorize = (value) => {
     const numValue = parseFloat(value);
     if (numValue >= 80) return `<span style="color: green;">${value}%</span>`;
@@ -50,12 +47,10 @@ parser.parseString(xmlData, (err, result) => {
     return `<span style="color: orange;">${value}%</span>`;
   };
 
-  // ** Δημιουργία του HTML Πίνακα για Coverage **
-  // ** Δημιουργία collapsible section για Coverage **
   let table = `
-<details>
+<details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
-  <div id="results">
+  <div>
     <table>
       <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
       <tr>
@@ -109,33 +104,36 @@ parser.parseString(xmlData, (err, result) => {
       return;
     }
 
-    const sectionHeader = '## Test Coverage Results';
+    const sectionHeader = '## Test Coverage';
+    const jestResultsHeader = '## Test Results';
     const insertPosition = data.indexOf(sectionHeader);
+    const insertPositionJestResult = data.indexOf(jestResultsHeader);
 
     if (insertPosition === -1) {
       console.error(`Δεν βρέθηκε το section "${sectionHeader}" στο README.md.`);
       return;
     }
 
+    if (insertPositionJestResult === -1) {
+      console.error(`Δεν βρέθηκε το section "${jestResultsHeader}" στο README.md.`);
+      return;
+    }
+
     let updatedReadme = data;
 
-    // ** Αποφυγή αλλοίωσης του README.md **
-    const divStart = '<div id="results">';
-    const divEnd = '</div>';
-    const jestDivStart = '<details id="jest-results">';
-    const jestDivEnd = '</details>';
+    const divStart = '<details id="results">';
+    const divEnd = '</details>';
+    const jestDivStart = '<div id="jest-results">';
+    const jestDivEnd = '</div>';
 
-    // Αντικατάσταση του υπάρχοντος πίνακα coverage
     updatedReadme = updatedReadme.replace(new RegExp(`${divStart}[\\s\\S]*?${divEnd}`, 'g'), table);
-    // Αντικατάσταση του υπάρχοντος πίνακα Jest
     updatedReadme = updatedReadme.replace(new RegExp(`${jestDivStart}[\\s\\S]*?${jestDivEnd}`, 'g'), jestSummary);
 
-    // Αν δεν υπάρχουν, τα προσθέτουμε στο τέλος του coverage section
     if (!updatedReadme.includes(divStart)) {
       updatedReadme = updatedReadme.replace(sectionHeader, `${sectionHeader}\n${table}`);
     }
     if (!updatedReadme.includes(jestDivStart)) {
-      updatedReadme += jestSummary;
+      updatedReadme = updatedReadme.replace(jestResultsHeader, `${jestResultsHeader}\n${jestSummary}`).trim();
     }
 
     // ** Γράφουμε το νέο README.md χωρίς extra γραμμές **

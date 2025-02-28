@@ -177,9 +177,7 @@ To deploy the app on Vercel:
 
   <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- Test Coverage -->
-
-## Test Coverage
+## Testing
 
 To check the test coverage, run:
 
@@ -191,15 +189,11 @@ npm run test:coverage
 
 ![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=develop)
 
-## Test Coverage Results
+## Test Coverage
 
-
-<details>
+<details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
-  
-<details>
-  <summary><strong>Click to expand Test Coverage Results</strong></summary>
-  <div id="results">
+  <div>
     <table>
       <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
       <tr>
@@ -653,14 +647,15 @@ npm run test:coverage
     </table>
   </div>
 </details>
-</details>
 
-  <div id="jest-results">
-    <h3>Test Summary</h3>
-    <p><strong>Test Suites:</strong> 16 passed, 16 total</p>
-    <p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
-    <p><strong>Time:</strong> 41.11 seconds</p>
-  </div>
+## Test Results
+
+<div id="jest-results">
+<h3>Test Summary</h3>
+<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
+<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
+<p><strong>Time:</strong> 41.11 seconds</p>
+</div>
 
 ## License
 
@@ -668,20 +663,4 @@ Distributed under the [MIT License](./LICENSE.txt). See for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- MARKDOWN LINKS & IMAGES -->
-
 [product-screenshot]: assets/screenshot.png
-
-<div id="jest-results">
-<h3>Test Summary</h3>
-<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
-<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
-<p><strong>Time:</strong> 41.11 seconds</p>
-</div>
-
-<div id="jest-results">
-<h3>Test Summary</h3>
-<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
-<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
-<p><strong>Time:</strong> 41.11 seconds</p>
-</div>
