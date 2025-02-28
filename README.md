@@ -184,37 +184,74 @@ To deploy the app on Vercel:
 To check the test coverage, run:
 
 ```sh
-npm test -- --coverage
+
+npm run test:coverage
+
 ```
 
-![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=main)
+![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=develop)
 
-<!-- API -->
+## Test Coverage Results
 
-## API
-
-<div id="api-usage"></div>
-
-Platinum Hunters GR uses the [RAWG API](https://rawg.io/apidocs) to enrich game guides with additional information. This API provides valuable data such as:
-
-- **Release Year**: The release year of the game.
-- **Publishers**: The publishers of the game.
-- **Developers**: The developers behind the game.
-- **Genre**: The genre(s) of the game.
-- **Metacritic Score**: The Metacritic rating for the game.
-- **Rating**: The user rating for the game.
-- **Platforms**: The platforms available for the game (e.g., PC, PS5, Xbox).
-- **ESRB Rating**: The ESRB rating for the game (for age restrictions).
-
-This data is used to provide users with comprehensive and up-to-date information to make their experience on Platinum Hunters GR more informative and engaging.
-
-You can access the [API Documentation here](https://rawg.io/apidocs) for more details on how to integrate additional features.
-
-<!-- LICENSE -->
-
-## License
-
-<div id="license"></div>
+<div id="results">
+| File                     | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s |
+| ------------------------ | ------- | -------- | ------- | ------- | ----------------- |
+| layout.tsx                | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| page.tsx                  | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| route.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| Navbar.tsx                | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: orange;">66.67%</span> | <span style="color: green;">100.00%</span> |  |
+| NavbarWrapper.tsx         | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| BugReportForm.tsx         | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| FeatureRequestForm.tsx    | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| GeneralQuestionForm.tsx   | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| NewGuideForm.tsx          | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| SupportForm.tsx           | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| EditGuideButton.tsx       | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| GameDetailsInfo.tsx       | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| GamePlatforms.tsx         | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| GuideStats.tsx            | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| TrophyGuides.tsx          | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| TrophyStats.tsx           | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| UpdateGameInfoButton.tsx  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| GameCard.tsx              | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| GameGrid.tsx              | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| SearchBar.tsx             | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| AlertMessage.tsx          | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| Badge.tsx                 | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| Button.tsx                | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| Card.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| Dropdown.tsx              | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| FormErrorMessage.tsx      | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| Input.tsx                 | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| Skeleton.tsx              | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| UnderConstruction.tsx     | <span style="color: green;">97.10%</span> | <span style="color: green;">80.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">97.10%</span> |  |
+| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| page.tsx                  | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> |  |
+| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| page.tsx                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| db.ts                     | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| index.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| selectors.ts              | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| utils.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| handlers.ts               | <span style="color: green;">92.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: green;">92.00%</span> |  |
+| server.ts                 | <span style="color: green;">100.00%</span> | <span style="color: green;">100.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: green;">100.00%</span> |  |
+| forms.ts                  | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+| interfaces.ts             | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> | <span style="color: red;">0.00%</span> |  |
+</div>
 
 Distributed under the [MIT License](./LICENSE.txt). See for more information.
 
