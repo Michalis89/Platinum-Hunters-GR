@@ -177,9 +177,7 @@ To deploy the app on Vercel:
 
   <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- Test Coverage -->
-
-## Test Coverage
+## Testing
 
 To check the test coverage, run:
 
@@ -191,20 +189,21 @@ npm run test:coverage
 
 ![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=develop)
 
-## Test Coverage Results
+## Test Coverage
 
-
-<div id="results">
-<table>
-<tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
-<tr>
-<td><strong>All files</strong></td>
-<td><span style="color: red;">14.54%</span></td>
-<td><span style="color: orange;">53.19%</span></td>
-<td><span style="color: red;">26.67%</span></td>
-<td><span style="color: red;">14.54%</span></td>
-<td>-</td>
-</tr>
+<details id="results">
+  <summary><strong>Click to expand Test Coverage Results</strong></summary>
+  <div>
+    <table>
+      <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
+      <tr>
+        <td><strong>All files</strong></td>
+        <td><span style="color: red;">14.54%</span></td>
+        <td><span style="color: orange;">53.19%</span></td>
+        <td><span style="color: red;">26.67%</span></td>
+        <td><span style="color: red;">14.54%</span></td>
+        <td>-</td>
+      </tr>
 <tr>
 <td>layout.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
@@ -645,11 +644,12 @@ npm run test:coverage
 <td><span style="color: red;">0.00%</span></td>
 <td>-</td>
 </tr>
-</table>
-</div>
+    </table>
+  </div>
+</details>
 
+## Test Results
 
-  
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 16 passed, 16 total</p>
@@ -657,13 +657,10 @@ npm run test:coverage
 <p><strong>Time:</strong> 41.11 seconds</p>
 </div>
 
-
 ## License
 
 Distributed under the [MIT License](./LICENSE.txt). See for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- MARKDOWN LINKS & IMAGES -->
 
 [product-screenshot]: assets/screenshot.png
