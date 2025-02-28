@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       RAWG_API_KEY: ${{ secrets.RAWG_API_KEY }}
 
     steps:
@@ -34,8 +34,8 @@ jobs:
       - name: Run Build
         run: npm run build
 
-      - name: Run Tests with Coverage
-        run: npm test -- --coverage --coverageReporters=text-lcov > lcov.info
+      - name: Run Tests
+        run: npm test
 
       - name: Upload Coverage to Coveralls
         uses: coverallsapp/github-action@v2
