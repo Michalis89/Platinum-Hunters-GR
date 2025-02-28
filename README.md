@@ -192,10 +192,6 @@ npm run test:coverage
 ![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=develop)
 
 ## Test Coverage Results
-
-
-<details>
-  <summary><strong>Click to expand Test Coverage Results</strong></summary>
   
 <details>
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
@@ -652,7 +648,6 @@ npm run test:coverage
 </tr>
     </table>
   </div>
-</details>
 </details>
 
   <div id="jest-results">
