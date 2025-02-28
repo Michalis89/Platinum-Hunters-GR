@@ -1,47 +1,47 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Mail, Bug, Lightbulb, HelpCircle, BookOpen, DollarSign } from "lucide-react";
-import Skeleton from "@/app/components/ui/Skeleton";
-import NewGuideForm from "@/app/components/contact/NewGuideForm";
-import BugReportForm from "@/app/components/contact/BugReportForm";
-import FeatureRequestForm from "@/app/components/contact/FeatureRequestForm";
-import GeneralQuestionForm from "@/app/components/contact/GeneralQuestionForm";
-import SupportForm from "@/app/components/contact/SupportForm";
-import Dropdown from "@/app/components/ui/Dropdown";
+import { useState, useEffect } from 'react';
+import { Mail, Bug, Lightbulb, HelpCircle, BookOpen, DollarSign } from 'lucide-react';
+import Skeleton from '@/app/components/ui/Skeleton';
+import NewGuideForm from '@/app/components/contact/NewGuideForm';
+import BugReportForm from '@/app/components/contact/BugReportForm';
+import FeatureRequestForm from '@/app/components/contact/FeatureRequestForm';
+import GeneralQuestionForm from '@/app/components/contact/GeneralQuestionForm';
+import SupportForm from '@/app/components/contact/SupportForm';
+import Dropdown from '@/app/components/ui/Dropdown';
 
 const requestTypes = [
   {
-    value: "new_guide",
-    label: "Νέος οδηγός Trophy",
+    value: 'new_guide',
+    label: 'Νέος οδηγός Trophy',
     icon: <BookOpen size={16} className="mr-2 inline-block align-middle" />,
   },
   {
-    value: "bug_report",
-    label: "Αναφορά Bug",
+    value: 'bug_report',
+    label: 'Αναφορά Bug',
     icon: <Bug size={16} className="mr-2 inline-block align-middle" />,
   },
   {
-    value: "feature_request",
-    label: "Αίτημα νέου feature",
+    value: 'feature_request',
+    label: 'Αίτημα νέου feature',
     icon: <Lightbulb size={16} className="mr-2 inline-block align-middle" />,
   },
   {
-    value: "general_question",
-    label: "Επικοινωνήστε μαζί μας",
+    value: 'general_question',
+    label: 'Επικοινωνήστε μαζί μας',
     icon: <HelpCircle size={16} className="mr-2 inline-block align-middle" />,
   },
   {
-    value: "support",
-    label: "Υποστήριξη / Δωρεά",
+    value: 'support',
+    label: 'Υποστήριξη / Δωρεά',
     icon: <DollarSign size={16} className="mr-2 inline-block align-middle" />,
   },
 ];
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ type: "new_guide" });
+  const [form, setForm] = useState({ type: 'new_guide' });
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const [pageTitle, setPageTitle] = useState("Ρώτησε μας ό,τι θέλεις!");
+  const [pageTitle, setPageTitle] = useState('Ρώτησε μας ό,τι θέλεις!');
 
   useEffect(() => {
     setTimeout(() => setIsPageLoading(false), 1000);
@@ -53,15 +53,15 @@ export default function ContactPage() {
 
   const renderFormComponent = () => {
     switch (form.type) {
-      case "new_guide":
+      case 'new_guide':
         return <NewGuideForm />;
-      case "bug_report":
+      case 'bug_report':
         return <BugReportForm />;
-      case "feature_request":
+      case 'feature_request':
         return <FeatureRequestForm />;
-      case "general_question":
+      case 'general_question':
         return <GeneralQuestionForm onTitleChange={setPageTitle} />;
-      case "support":
+      case 'support':
         return <SupportForm />;
       default:
         return null;
@@ -69,24 +69,23 @@ export default function ContactPage() {
   };
 
   const requestMessages: { [key: string]: string } = {
-    new_guide: "Στείλε αίτημα για νέο Trophy Guide",
-    bug_report: "Αναφορά προβλήματος που εντοπίσατε",
-    feature_request: "Πρότεινε ένα νέο feature για το project",
-    general_question: "Ρώτησε μας ό,τι θέλεις!",
-    support: "Υποστήριξε το project μέσω δωρεάς",
+    new_guide: 'Στείλε αίτημα για νέο Trophy Guide',
+    bug_report: 'Αναφορά προβλήματος που εντοπίσατε',
+    feature_request: 'Πρότεινε ένα νέο feature για το project',
+    general_question: 'Ρώτησε μας ό,τι θέλεις!',
+    support: 'Υποστήριξε το project μέσω δωρεάς',
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
-      <div className="max-w-xl w-full bg-gray-900 p-6 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-extrabold text-blue-400 text-center flex items-center justify-center gap-2">
+    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white">
+      <div className="w-full max-w-xl rounded-lg bg-gray-900 p-6 shadow-lg">
+        <h1 className="flex items-center justify-center gap-2 text-center text-3xl font-extrabold text-blue-400">
           <Mail size={24} /> Επικοινωνία
         </h1>
-        {/* Δυναμικός τίτλος */}
-        <p className="text-gray-400 text-center">
-          {form.type === "general_question"
+        <p className="text-center text-gray-400">
+          {form.type === 'general_question'
             ? pageTitle
-            : requestMessages[form.type] || "Στείλε μας το μήνυμά σου"}
+            : requestMessages[form.type] || 'Στείλε μας το μήνυμά σου'}
         </p>
 
         <div className="mt-6">
@@ -94,7 +93,7 @@ export default function ContactPage() {
             label="Επιλέξτε θέμα επικοινωνίας"
             options={requestTypes}
             selectedValue={form.type}
-            onSelect={(value) => setForm({ type: value })}
+            onSelect={value => setForm({ type: value })}
             isOpen={false}
             zIndex={2}
           />

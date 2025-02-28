@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-    <img src="assets/logo.png" alt="Logo" width="339" height="149">
+    <img src="assets/platinum-hunters-gr.png" alt="Logo" width="339" height="149">
 
   <h3 align="center">Platinum Hunters GR</h3>
 
@@ -177,32 +177,488 @@ To deploy the app on Vercel:
 
   <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- API -->
+<!-- Test Coverage -->
 
-## API
+## Test Coverage
 
-<div id="api-usage"></div>
+To check the test coverage, run:
 
-Platinum Hunters GR uses the [RAWG API](https://rawg.io/apidocs) to enrich game guides with additional information. This API provides valuable data such as:
+```sh
 
-- **Release Year**: The release year of the game.
-- **Publishers**: The publishers of the game.
-- **Developers**: The developers behind the game.
-- **Genre**: The genre(s) of the game.
-- **Metacritic Score**: The Metacritic rating for the game.
-- **Rating**: The user rating for the game.
-- **Platforms**: The platforms available for the game (e.g., PC, PS5, Xbox).
-- **ESRB Rating**: The ESRB rating for the game (for age restrictions).
+npm run test:coverage
 
-This data is used to provide users with comprehensive and up-to-date information to make their experience on Platinum Hunters GR more informative and engaging.
+```
 
-You can access the [API Documentation here](https://rawg.io/apidocs) for more details on how to integrate additional features.
+![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=develop)
 
-<!-- LICENSE -->
+## Test Coverage Results
+
+
+<div id="results">
+<table>
+<tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
+<tr>
+<td><strong>All files</strong></td>
+<td><span style="color: red;">14.54%</span></td>
+<td><span style="color: orange;">53.19%</span></td>
+<td><span style="color: red;">26.67%</span></td>
+<td><span style="color: red;">14.54%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>layout.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Navbar.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: orange;">66.67%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>NavbarWrapper.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>BugReportForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>FeatureRequestForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GeneralQuestionForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>NewGuideForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>SupportForm.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>EditGuideButton.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GameDetailsInfo.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GamePlatforms.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GuideStats.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>TrophyGuides.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>TrophyStats.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>UpdateGameInfoButton.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GameCard.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>GameGrid.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>SearchBar.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>AlertMessage.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Badge.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Button.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Card.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Dropdown.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>FormErrorMessage.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Input.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Skeleton.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>UnderConstruction.tsx</td>
+<td><span style="color: green;">97.10%</span></td>
+<td><span style="color: green;">80.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">97.10%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>db.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>index.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>selectors.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>utils.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>handlers.ts</td>
+<td><span style="color: green;">92.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">92.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>server.ts</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>forms.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>interfaces.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+</table>
+</div>
+
+
+  
+<div id="jest-results">
+<h3>Test Summary</h3>
+<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
+<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
+<p><strong>Time:</strong> 41.11 seconds</p>
+</div>
+
 
 ## License
-
-<div id="license"></div>
 
 Distributed under the [MIT License](./LICENSE.txt). See for more information.
 

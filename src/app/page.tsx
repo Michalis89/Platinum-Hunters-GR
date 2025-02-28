@@ -1,23 +1,21 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Link from "next/link";
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 text-white">
       <motion.div
-        className="text-center max-w-2xl"
+        className="max-w-2xl text-center"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
       >
-        {/* Τίτλος με γυαλιστερό εφέ */}
-        <motion.h1 className="text-6xl font-extrabold drop-shadow-lg text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 animate-gradient">
+        <motion.h1 className="animate-gradient bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 bg-clip-text text-6xl font-extrabold text-transparent drop-shadow-lg">
           Platinum Hunters
         </motion.h1>
 
-        {/* Περιγραφή */}
         <motion.p
           className="mt-4 text-lg text-gray-300"
           initial={{ opacity: 0 }}
@@ -27,29 +25,28 @@ export default function Home() {
           Ανακάλυψε και κατάκτησε το επόμενο Platinum Trophy σου.
         </motion.p>
 
-        {/* Κουμπί έναρξης */}
         <motion.div
-          className="relative inline-block mt-6"
+          className="relative mt-6 inline-block"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{
             opacity: 1,
             scale: 1,
             boxShadow: [
-              "0px 0px 10px rgba(59, 130, 246, 0.8)",
-              "0px 0px 20px rgba(59, 130, 246, 1)",
-              "0px 0px 10px rgba(59, 130, 246, 0.8)",
+              '0px 0px 10px rgba(59, 130, 246, 0.8)',
+              '0px 0px 20px rgba(59, 130, 246, 1)',
+              '0px 0px 10px rgba(59, 130, 246, 0.8)',
             ],
           }}
           transition={{
-            opacity: { duration: 0.8, ease: "easeOut", delay: 1 },
-            scale: { duration: 0.8, ease: "easeOut", delay: 1 },
-            boxShadow: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+            opacity: { duration: 0.8, ease: 'easeOut', delay: 1 },
+            scale: { duration: 0.8, ease: 'easeOut', delay: 1 },
+            boxShadow: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' },
           }}
           whileHover={{ scale: 1.1 }}
         >
           <Link
             href="/pages/guide"
-            className="inline-block px-6 py-3 text-lg font-semibold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg transition"
+            className="inline-block rounded-lg bg-blue-600 px-6 py-3 text-lg font-semibold shadow-lg transition hover:bg-blue-700"
           >
             Start Hunting 🎮
           </Link>

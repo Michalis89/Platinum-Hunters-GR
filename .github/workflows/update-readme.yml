@@ -1,0 +1,41 @@
+name: Update Test Coverage in README
+
+on:
+  pull_request:
+    types: [closed] # Εκτελείται όταν γίνεται merge ένα PR
+    branches:
+      - develop # Άλλαξε το σε main αν θέλεις
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Απαραίτητο για να μπορεί να κάνει commit
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Jest Tests & Generate Coverage Report
+        run: npm run test:coverage
+
+      - name: Generate Jest Results JSON
+        run: npm run test:results
+
+      - name: Update README with Coverage Results
+        run: npm run test:readME
+
+      - name: Commit and Push if README was updated
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || (git commit -m "Update README with latest test coverage" && git push)

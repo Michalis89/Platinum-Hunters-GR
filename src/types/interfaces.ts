@@ -1,7 +1,7 @@
 export interface Trophy {
   name: string;
   description: string;
-  type: "Bronze" | "Silver" | "Gold" | "Platinum" | "Unknown";
+  type: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Unknown';
 }
 
 export interface Step {
@@ -71,7 +71,7 @@ export interface Guide {
 }
 
 export interface AlertProps {
-  readonly type: "success" | "error";
+  readonly type: 'success' | 'error';
   readonly message: string;
   readonly duration?: number;
 }
