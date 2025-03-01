@@ -1,5 +1,7 @@
 import fs from 'fs';
 import xml2js from 'xml2js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const coverageFilePath = './coverage/clover.xml';
 const xmlData = fs.readFileSync(coverageFilePath, 'utf-8');
@@ -70,7 +72,22 @@ parser.parseString(xmlData, (err, result) => {
       const files = Array.isArray(pkg.file) ? pkg.file : [pkg.file];
 
       files.forEach(file => {
-        const fileName = file.$.name;
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const projectRoot = path.resolve(__dirname, "../..").replace(/\\/g, "/");
+
+        // Κανονικοποίηση path
+        let filePath = file.$.path ? path.normalize(file.$.path).replace(/\\/g, "/") : "";
+
+        // Αποφυγή διπλασιασμού του ονόματος αρχείου
+        if (!filePath.endsWith(`/${file.$.name}`)) {
+          filePath = path.join(filePath, file.$.name).replace(/\\/g, "/");
+        }
+
+        // Αφαιρούμε το project root
+        filePath = filePath.replace(projectRoot, "").replace(/^\/?platinum-hunters\//, "");
+
+
         const metrics = file.metrics.$;
 
         const statements = parseInt(metrics.statements, 10);
@@ -85,7 +102,7 @@ parser.parseString(xmlData, (err, result) => {
         const funcCoverage = methods > 0 ? ((coveredMethods / methods) * 100).toFixed(2) : '0.00';
         const lineCoverage = statements > 0 ? ((coveredStatements / statements) * 100).toFixed(2) : '0.00';
 
-        table += `\n<tr>\n<td>${fileName}</td>\n<td>${colorize(stmtCoverage)}</td>\n<td>${colorize(branchCoverage)}</td>\n<td>${colorize(funcCoverage)}</td>\n<td>${colorize(lineCoverage)}</td>\n<td>-</td>\n</tr>`;
+        table += `\n<tr>\n<td>${filePath}</td>\n<td>${colorize(stmtCoverage)}</td>\n<td>${colorize(branchCoverage)}</td>\n<td>${colorize(funcCoverage)}</td>\n<td>${colorize(lineCoverage)}</td>\n<td>-</td>\n</tr>`;
       });
     }
   });
