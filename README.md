@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-    <img src="assets/platinum-hunters-gr.png" alt="Logo" width="339" height="149">
+    <img src="assets/platinum-hunters-gr.png" alt="Logo" width="339" >
 
   <h3 align="center">Platinum Hunters GR</h3>
 
