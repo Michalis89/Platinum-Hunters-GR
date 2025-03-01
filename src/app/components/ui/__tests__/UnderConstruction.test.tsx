@@ -20,12 +20,12 @@ describe('UnderConstruction Component', () => {
     jest.useRealTimers();
   });
 
-  test('renders the under construction message', () => {
+  it('renders the under construction message', () => {
     render(<UnderConstruction />);
     expect(screen.getByText('Under Construction')).toBeInTheDocument();
   });
 
-  test('shows countdown starting from 10', () => {
+  it('shows countdown starting from 10', () => {
     render(<UnderConstruction />);
 
     expect(
@@ -35,7 +35,7 @@ describe('UnderConstruction Component', () => {
     ).toBeGreaterThan(0);
   });
 
-  test('redirects to home when the button is clicked', () => {
+  it('redirects to home when the button is clicked', () => {
     render(<UnderConstruction />);
 
     const button = screen.getByRole('button', { name: 'Επιστροφή στην Αρχική' });

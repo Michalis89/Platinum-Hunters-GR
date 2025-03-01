@@ -95,6 +95,7 @@ const config: Config = {
   // moduleNameMapper: {},
   moduleNameMapper: {
     '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
