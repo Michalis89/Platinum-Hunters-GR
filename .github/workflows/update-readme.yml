@@ -27,6 +27,12 @@ jobs:
       - name: Run Jest Tests & Generate Coverage Report
         run: npm run test:coverage
 
+      - name: Upload to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: lcov.info
+
       - name: Generate Jest Results JSON
         run: npm run test:results
 
