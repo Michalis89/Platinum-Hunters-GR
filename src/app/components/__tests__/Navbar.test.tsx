@@ -34,7 +34,7 @@ describe('Navbar Component', () => {
     process.env = originalEnv;
   });
 
-  test('renders navbar correctly', () => {
+  it('renders navbar correctly', () => {
     render(<Navbar />);
 
     expect(screen.getByText('Platinum Hunters')).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('Navbar Component', () => {
     expect(screen.getByTestId('nav-link-/pages/contact')).toBeInTheDocument();
   });
 
-  test('mobile menu opens and closes correctly', async () => {
+  it('mobile menu opens and closes correctly', async () => {
     render(<Navbar />);
 
     const menuButton = screen.getByRole('button');
@@ -63,7 +63,7 @@ describe('Navbar Component', () => {
     await waitFor(() => expect(screen.queryByTestId('mobile-menu')).not.toBeInTheDocument());
   });
 
-  test('navigates correctly when clicking a menu link', () => {
+  it('navigates correctly when clicking a menu link', () => {
     render(<Navbar />);
 
     const guideLink = screen.getByTestId('nav-link-/pages/guide');
@@ -72,14 +72,14 @@ describe('Navbar Component', () => {
     expect(guideLink).toHaveAttribute('href', '/pages/guide');
   });
 
-  test('hides the scraper link when not in development mode', () => {
+  it('hides the scraper link when not in development mode', () => {
     process.env = { ...originalEnv, NODE_ENV: 'production' };
     render(<Navbar />);
 
     expect(screen.queryByTestId('nav-link-/pages/scraper')).not.toBeInTheDocument();
   });
 
-  test('shows the scraper link only in development mode', () => {
+  it('shows the scraper link only in development mode', () => {
     process.env = { ...originalEnv, NODE_ENV: 'development' };
     render(<Navbar />);
 

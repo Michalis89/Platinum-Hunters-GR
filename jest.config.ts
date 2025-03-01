@@ -35,9 +35,13 @@ const config: Config = {
   coverageDirectory: 'coverage',
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "\\\\node_modules\\\\"
-  // ],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/src/types/',
+    'src/mocks/',
+    'src/app/layout',
+    'src/lib',
+  ],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'v8',
@@ -95,6 +99,7 @@ const config: Config = {
   // moduleNameMapper: {},
   moduleNameMapper: {
     '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

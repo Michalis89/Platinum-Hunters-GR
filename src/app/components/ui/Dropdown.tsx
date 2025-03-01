@@ -35,6 +35,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -50,6 +51,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       <button
         type="button"
         onClick={() => setDropdownOpen(!dropdownOpen)}
+        data-testid="dropdown"
         className="flex w-full items-center justify-center space-x-2 rounded-lg border border-gray-700 bg-gray-800 p-3 text-white"
       >
         {selectedOption ? (
