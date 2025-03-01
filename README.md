@@ -192,6 +192,7 @@ npm run test:coverage
 ## Test Coverage
 
 
+
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
   <div>
@@ -206,7 +207,7 @@ npm run test:coverage
         <td>-</td>
       </tr>
 <tr>
-<td>src/app/layout.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/layout.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -214,7 +215,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/page.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -222,7 +223,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/contact/forms/bug-report/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/contact/forms/bug-report/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -230,7 +231,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/contact/forms/feature-request/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/contact/forms/feature-request/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -238,7 +239,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/contact/forms/general-question/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/contact/forms/general-question/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -246,7 +247,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/contact/forms/trophy-guide/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/contact/forms/trophy-guide/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -254,7 +255,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/game-details/[game_id]/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/game-details/[game_id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -262,7 +263,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/game/[id]/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/game/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -270,7 +271,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/games/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/games/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -278,7 +279,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/guides/[id]/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/guides/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -286,7 +287,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/save-guide/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/save-guide/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -294,7 +295,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/scrape/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/scrape/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -302,7 +303,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/update-game-info/[id]/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/update-game-info/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -310,7 +311,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/api/update-guide/[id]/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/update-guide/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -318,7 +319,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/Navbar.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/Navbar.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: orange;">66.67%</span></td>
@@ -326,7 +327,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/NavbarWrapper.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/NavbarWrapper.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -334,7 +335,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/contact/BugReportForm.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/contact/BugReportForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -342,7 +343,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/contact/FeatureRequestForm.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/contact/FeatureRequestForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -350,7 +351,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/contact/GeneralQuestionForm.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/contact/GeneralQuestionForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -358,7 +359,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/contact/NewGuideForm.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/contact/NewGuideForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -366,7 +367,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/contact/SupportForm.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/contact/SupportForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -374,7 +375,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/game-details/EditGuideButton.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/game-details/EditGuideButton.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -382,7 +383,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/game-details/GameDetailsInfo.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/game-details/GameDetailsInfo.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -390,7 +391,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/game-details/GamePlatforms.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/game-details/GamePlatforms.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -398,7 +399,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/game-details/GuideStats.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/game-details/GuideStats.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -406,7 +407,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/game-details/TrophyGuides.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/game-details/TrophyGuides.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -414,7 +415,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/game-details/TrophyStats.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/game-details/TrophyStats.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -422,7 +423,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/game-details/UpdateGameInfoButton.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/game-details/UpdateGameInfoButton.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -430,7 +431,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/guides/GameCard.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/guides/GameCard.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -438,7 +439,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/guides/GameGrid.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/guides/GameGrid.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -446,7 +447,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/guides/SearchBar.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/guides/SearchBar.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -454,7 +455,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/AlertMessage.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/AlertMessage.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -462,7 +463,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/Badge.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Badge.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -470,7 +471,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/Button.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Button.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -478,7 +479,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/Card.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Card.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -486,7 +487,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/Dropdown.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Dropdown.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -494,7 +495,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/FormErrorMessage.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/FormErrorMessage.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -502,7 +503,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/Input.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Input.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -510,7 +511,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/Skeleton.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Skeleton.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -518,7 +519,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/components/ui/UnderConstruction.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/UnderConstruction.tsx</td>
 <td><span style="color: green;">97.10%</span></td>
 <td><span style="color: green;">80.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -526,7 +527,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/pages/contact/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/pages/contact/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -534,7 +535,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/pages/edit-guide/[id]/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/pages/edit-guide/[id]/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -542,7 +543,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/pages/guide/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/pages/guide/page.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -550,7 +551,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/pages/guide/[slug]/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/pages/guide/[slug]/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -558,7 +559,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/pages/news/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/pages/news/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -566,7 +567,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/pages/reviews/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/pages/reviews/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -574,7 +575,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/app/pages/scraper/page.tsx</td>
+<td>/Platinum-Hunters-GR/src/app/pages/scraper/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -582,7 +583,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/lib/db.ts</td>
+<td>/Platinum-Hunters-GR/src/lib/db.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -590,7 +591,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/lib/scraper/index.ts</td>
+<td>/Platinum-Hunters-GR/src/lib/scraper/index.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -598,7 +599,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/lib/scraper/selectors.ts</td>
+<td>/Platinum-Hunters-GR/src/lib/scraper/selectors.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -606,7 +607,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/lib/scraper/utils.ts</td>
+<td>/Platinum-Hunters-GR/src/lib/scraper/utils.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -614,7 +615,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/mocks/handlers.ts</td>
+<td>/Platinum-Hunters-GR/src/mocks/handlers.ts</td>
 <td><span style="color: green;">92.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -622,7 +623,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/mocks/server.ts</td>
+<td>/Platinum-Hunters-GR/src/mocks/server.ts</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -630,7 +631,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/types/forms.ts</td>
+<td>/Platinum-Hunters-GR/src/types/forms.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -638,7 +639,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>src/types/interfaces.ts</td>
+<td>/Platinum-Hunters-GR/src/types/interfaces.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -652,12 +653,14 @@ npm run test:coverage
 ## Test Results
 
 
+
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 16 passed, 16 total</p>
 <p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
-<p><strong>Time:</strong> 11.40 seconds</p>
+<p><strong>Time:</strong> 11.33 seconds</p>
 </div>
+
 
 
 ## License
