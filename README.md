@@ -205,7 +205,7 @@ npm run test:coverage
         <td>-</td>
       </tr>
 <tr>
-<td>layout.tsx</td>
+<td>src/app/layout.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -213,7 +213,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/page.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -221,7 +221,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/contact/forms/bug-report/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -229,7 +229,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/contact/forms/feature-request/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -237,7 +237,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/contact/forms/general-question/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -245,7 +245,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/contact/forms/trophy-guide/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -253,7 +253,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/game-details/[game_id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -261,7 +261,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/game/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -269,7 +269,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/games/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -277,7 +277,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/guides/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -285,7 +285,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/save-guide/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -293,7 +293,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/scrape/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -301,7 +301,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/update-game-info/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -309,7 +309,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>route.ts</td>
+<td>src/app/api/update-guide/[id]/route.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -317,7 +317,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>Navbar.tsx</td>
+<td>src/app/components/Navbar.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: orange;">66.67%</span></td>
@@ -325,7 +325,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>NavbarWrapper.tsx</td>
+<td>src/app/components/NavbarWrapper.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -333,7 +333,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>BugReportForm.tsx</td>
+<td>src/app/components/contact/BugReportForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -341,7 +341,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>FeatureRequestForm.tsx</td>
+<td>src/app/components/contact/FeatureRequestForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -349,7 +349,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>GeneralQuestionForm.tsx</td>
+<td>src/app/components/contact/GeneralQuestionForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -357,7 +357,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>NewGuideForm.tsx</td>
+<td>src/app/components/contact/NewGuideForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -365,7 +365,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>SupportForm.tsx</td>
+<td>src/app/components/contact/SupportForm.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -373,7 +373,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>EditGuideButton.tsx</td>
+<td>src/app/components/game-details/EditGuideButton.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -381,7 +381,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>GameDetailsInfo.tsx</td>
+<td>src/app/components/game-details/GameDetailsInfo.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -389,7 +389,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>GamePlatforms.tsx</td>
+<td>src/app/components/game-details/GamePlatforms.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -397,7 +397,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>GuideStats.tsx</td>
+<td>src/app/components/game-details/GuideStats.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -405,7 +405,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>TrophyGuides.tsx</td>
+<td>src/app/components/game-details/TrophyGuides.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -413,7 +413,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>TrophyStats.tsx</td>
+<td>src/app/components/game-details/TrophyStats.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -421,7 +421,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>UpdateGameInfoButton.tsx</td>
+<td>src/app/components/game-details/UpdateGameInfoButton.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -429,7 +429,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>GameCard.tsx</td>
+<td>src/app/components/guides/GameCard.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -437,7 +437,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>GameGrid.tsx</td>
+<td>src/app/components/guides/GameGrid.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -445,7 +445,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>SearchBar.tsx</td>
+<td>src/app/components/guides/SearchBar.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -453,7 +453,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>AlertMessage.tsx</td>
+<td>src/app/components/ui/AlertMessage.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -461,7 +461,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>Badge.tsx</td>
+<td>src/app/components/ui/Badge.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -469,7 +469,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>Button.tsx</td>
+<td>src/app/components/ui/Button.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -477,7 +477,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>Card.tsx</td>
+<td>src/app/components/ui/Card.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -485,7 +485,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>Dropdown.tsx</td>
+<td>src/app/components/ui/Dropdown.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -493,7 +493,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>FormErrorMessage.tsx</td>
+<td>src/app/components/ui/FormErrorMessage.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -501,7 +501,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>Input.tsx</td>
+<td>src/app/components/ui/Input.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -509,7 +509,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>Skeleton.tsx</td>
+<td>src/app/components/ui/Skeleton.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -517,7 +517,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>UnderConstruction.tsx</td>
+<td>src/app/components/ui/UnderConstruction.tsx</td>
 <td><span style="color: green;">97.10%</span></td>
 <td><span style="color: green;">80.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -525,7 +525,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/pages/contact/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -533,7 +533,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/pages/edit-guide/[id]/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -541,7 +541,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/pages/guide/page.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -549,7 +549,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/pages/guide/[slug]/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -557,7 +557,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/pages/news/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -565,7 +565,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/pages/reviews/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -573,7 +573,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>page.tsx</td>
+<td>src/app/pages/scraper/page.tsx</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -581,7 +581,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>db.ts</td>
+<td>src/lib/db.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -589,7 +589,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>index.ts</td>
+<td>src/lib/scraper/index.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -597,7 +597,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>selectors.ts</td>
+<td>src/lib/scraper/selectors.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -605,7 +605,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>utils.ts</td>
+<td>src/lib/scraper/utils.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -613,7 +613,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>handlers.ts</td>
+<td>src/mocks/handlers.ts</td>
 <td><span style="color: green;">92.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -621,7 +621,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>server.ts</td>
+<td>src/mocks/server.ts</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -629,7 +629,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>forms.ts</td>
+<td>src/types/forms.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
@@ -637,7 +637,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>interfaces.ts</td>
+<td>src/types/interfaces.ts</td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
 <td><span style="color: red;">0.00%</span></td>
