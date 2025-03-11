@@ -81,11 +81,11 @@ export async function POST(req: Request) {
     await insertGeneralQuestion(submission_id, payload);
 
     return NextResponse.json(
-      { message: '✅ Η ερώτησή σας καταχωρήθηκε επιτυχώς!', submission_id },
+      { message: 'Η ερώτησή σας καταχωρήθηκε επιτυχώς!', submission_id },
       { status: 201 },
     );
   } catch (error) {
-    console.error('❌ API Error:', error);
+    console.error('API Error:', error);
 
     let errorMessage = 'Σφάλμα κατά την υποβολή.';
 
