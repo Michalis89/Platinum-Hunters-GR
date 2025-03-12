@@ -147,7 +147,7 @@ export default function GameDetailsPage() {
           {gameDetails && (
             <div className="mt-6 rounded-lg border border-gray-700 bg-gray-900 p-6 shadow-lg">
               <h2 className="mb-4 flex items-center justify-center text-center text-lg font-bold text-yellow-400">
-                <Info className="mr-2 h-5 w-5 text-blue-400" /> Game Information
+                <Info className="mr-2 h-5 w-5 text-blue-400" /> Πληροφορίες Παιχνιδιού
               </h2>
               <GameDetailsInfo {...gameDetails} />
               <GamePlatforms platforms={gameDetails.platforms} />

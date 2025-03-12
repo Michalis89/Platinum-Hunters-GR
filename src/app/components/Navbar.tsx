@@ -11,10 +11,10 @@ export default function Navbar() {
   const isDev = process.env.NODE_ENV === 'development';
 
   const navLinks = [
-    { href: '/pages/guide', label: 'Guides', icon: <Book size={18} /> },
-    { href: '/pages/reviews', label: 'Reviews', icon: <Star size={18} /> },
-    { href: '/pages/news', label: 'News', icon: <Newspaper size={18} /> },
-    { href: '/pages/contact', label: 'Contact', icon: <Mail size={18} /> },
+    { href: '/pages/guide', label: 'Οδηγοί', icon: <Book size={18} /> },
+    { href: '/pages/reviews', label: 'Κριτικές', icon: <Star size={18} /> },
+    { href: '/pages/news', label: 'Νέα', icon: <Newspaper size={18} /> },
+    { href: '/pages/contact', label: 'Επικοινωνία', icon: <Mail size={18} /> },
     ...(isDev ? [{ href: '/pages/scraper', label: 'Scraper', icon: <Search size={18} /> }] : []),
   ];
 
