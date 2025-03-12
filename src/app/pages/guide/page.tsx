@@ -65,7 +65,7 @@ export default function Guides() {
     <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white">
       <h1 className="mb-6 flex items-center gap-3 text-5xl font-extrabold text-blue-400">
         <BookOpen className="relative top-1 h-12 w-12 text-yellow-400" />
-        <span>Trophy Guides</span>
+        <span>Οδηγοί</span>
       </h1>
 
       <SearchBar search={search} setSearch={setSearch} />

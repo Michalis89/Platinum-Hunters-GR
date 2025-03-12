@@ -10,33 +10,13 @@ export default function SupportForm() {
       </p>
 
       <a
-        href="https://www.paypal.com/donate"
+        href="https://www.paypal.com/paypalme/michailMouzakitis"
         target="_blank"
         rel="noopener noreferrer"
         referrerPolicy="no-referrer"
         className="block w-full rounded-lg bg-blue-600 p-3 text-center text-lg font-semibold transition hover:bg-blue-700"
       >
-        💙 Κάνε μια δωρεά μέσω PayPal
-      </a>
-
-      <a
-        href="https://www.patreon.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        referrerPolicy="no-referrer"
-        className="block w-full rounded-lg bg-red-600 p-3 text-center text-lg font-semibold transition hover:bg-red-700"
-      >
-        🔥 Γίνε υποστηρικτής στο Patreon
-      </a>
-
-      <a
-        href="https://www.buymeacoffee.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        referrerPolicy="no-referrer"
-        className="block w-full rounded-lg bg-orange-500 p-3 text-center text-lg font-semibold transition hover:bg-orange-600"
-      >
-        ☕ Buy Me a Coffee
+        Κάνε μια δωρεά μέσω PayPal
       </a>
 
       <div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-5 text-center shadow-md">

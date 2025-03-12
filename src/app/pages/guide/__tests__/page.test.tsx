@@ -6,7 +6,7 @@ import { rest } from 'msw';
 describe('Guides Page', () => {
   it('renders the heading Trophy Guides', () => {
     render(<Guides />);
-    expect(screen.getByText('Trophy Guides')).toBeInTheDocument();
+    expect(screen.getByText('Οδηγοί')).toBeInTheDocument();
   });
 
   it('renders the search bar', () => {

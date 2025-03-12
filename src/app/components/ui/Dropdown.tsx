@@ -44,7 +44,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <div className="relative">
-      <label htmlFor="dropdown" className="block text-sm font-medium text-gray-300">
+      <label htmlFor="dropdown" className="mb-4 block text-sm font-medium text-gray-300">
         {label}
       </label>
       <button
