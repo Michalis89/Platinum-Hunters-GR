@@ -116,9 +116,9 @@ export default function GameDetailsPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white">
+    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-4 text-white md:p-8">
       {game && (
-        <div className="w-full max-w-3xl rounded-lg bg-gray-900 p-6 shadow-lg">
+        <div className="w-full max-w-3xl rounded-lg bg-gray-900 p-4 shadow-lg md:p-6">
           <div className="mb-4 flex justify-center">
             <Image
               src={game.game_image ?? '/default-image.png'}
@@ -129,34 +129,48 @@ export default function GameDetailsPage() {
             />
           </div>
 
-          <h1 className="text-center text-3xl font-extrabold text-blue-400">{game.title}</h1>
+          <h1 className="text-center text-2xl font-extrabold text-blue-400 md:text-3xl">
+            {game.title}
+          </h1>
 
           {guides.length > 0 && (
-            <GuideStats
-              difficulty={guides[0].difficulty}
-              difficultyColor={guides[0].difficulty_color}
-              playthroughs={guides[0].playthroughs}
-              playthroughsColor={guides[0].playthroughs_color}
-              hours={guides[0].hours}
-              hoursColor={guides[0].hours_color}
-            />
+            <div className="mt-4 flex flex-col justify-center gap-2 md:flex-row md:gap-4">
+              <GuideStats
+                difficulty={guides[0].difficulty}
+                difficultyColor={guides[0].difficulty_color}
+                playthroughs={guides[0].playthroughs}
+                playthroughsColor={guides[0].playthroughs_color}
+                hours={guides[0].hours}
+                hoursColor={guides[0].hours_color}
+              />
+            </div>
           )}
 
           {trophies && <TrophyStats trophies={trophies} />}
 
           {gameDetails && (
-            <div className="mt-6 rounded-lg border border-gray-700 bg-gray-900 p-6 shadow-lg">
-              <h2 className="mb-4 flex items-center justify-center text-center text-lg font-bold text-yellow-400">
-                <Info className="mr-2 h-5 w-5 text-blue-400" /> Πληροφορίες Παιχνιδιού
+            <div className="mt-6 w-full max-w-2xl rounded-lg border border-gray-700 bg-gray-900 p-4 shadow-lg md:p-6">
+              <h2 className="mb-4 flex items-center justify-center text-center text-base font-bold text-yellow-400 md:text-lg">
+                <Info className="mr-2 h-4 w-4 text-blue-400 md:h-5 md:w-5" /> Πληροφορίες Παιχνιδιού
               </h2>
-              <GameDetailsInfo {...gameDetails} />
-              <GamePlatforms platforms={gameDetails.platforms} />
-              <UpdateGameInfoButton
-                handleUpdateInfo={handleUpdateInfo}
-                updating={updating}
-                gameDetails={gameDetails}
-              />
-              {message && messageType && <AlertMessage type={messageType} message={message} />}
+              <div className="flex flex-col gap-2 text-sm md:gap-3 md:text-base">
+                <GameDetailsInfo {...gameDetails} />
+              </div>
+              <div className="mt-4">
+                <GamePlatforms platforms={gameDetails.platforms} />
+              </div>
+              <div className="mt-4 flex justify-center">
+                <UpdateGameInfoButton
+                  handleUpdateInfo={handleUpdateInfo}
+                  updating={updating}
+                  gameDetails={gameDetails}
+                />
+              </div>
+              {message && messageType && (
+                <div className="mt-4">
+                  <AlertMessage type={messageType} message={message} />
+                </div>
+              )}
             </div>
           )}
 

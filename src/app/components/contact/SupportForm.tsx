@@ -4,7 +4,7 @@ import { CheckCircle, Lightbulb } from 'lucide-react';
 
 export default function SupportForm() {
   return (
-    <div className="mt-4 space-y-6">
+    <div className="mt-6 w-full max-w-lg space-y-6">
       <p className="text-center text-gray-300">
         Αν θέλεις να υποστηρίξεις το project, μπορείς να κάνεις δωρεά μέσω:
       </p>
@@ -19,16 +19,19 @@ export default function SupportForm() {
         Κάνε μια δωρεά μέσω PayPal
       </a>
 
-      <div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-5 text-center shadow-md">
-        <h2 className="flex items-center justify-center gap-2 text-xl font-bold text-white">
-          <Lightbulb className="h-6 w-6 text-yellow-400" />
-          Γιατί ζητάμε υποστήριξη;
-        </h2>
-        <p className="text-sm text-gray-300">
+      <div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-5 shadow-md">
+        <div className="flex items-center justify-center gap-1 text-center">
+          <Lightbulb className="h-5 w-5 text-yellow-400 md:h-6 md:w-6" />
+          <h2 className="text-base leading-tight text-white md:text-xl md:font-bold">
+            Γιατί ζητάμε υποστήριξη;
+          </h2>
+        </div>
+
+        <p className="text-center text-sm text-gray-400">
           Κάθε δωρεά συμβάλλει στη διατήρηση του project, καλύπτοντας έξοδα όπως:
         </p>
 
-        <div className="grid grid-cols-1 gap-3 text-sm text-gray-400 md:grid-cols-2">
+        <div className="flex flex-col gap-2 md:grid md:grid-cols-2 md:gap-3">
           {[
             'Κόστος Hosting & Domain',
             'Βάση δεδομένων & Αποθήκευση',
@@ -39,15 +42,15 @@ export default function SupportForm() {
             'Διαχείριση κοινότητας',
             'Διαφημίσεις & Προώθηση',
           ].map((item, index) => (
-            <p key={index} className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-400" />
-              {item}
-            </p>
+            <div key={index} className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-400 md:h-5 md:w-5" />
+              <span className="text-sm text-gray-300 md:text-base">{item}</span>
+            </div>
           ))}
         </div>
       </div>
 
-      <p className="text-center text-sm text-gray-400">
+      <p className="text-center text-xs text-gray-400 md:text-sm">
         Κάθε συνεισφορά βοηθάει στη βελτίωση του project! 🙏
       </p>
     </div>

@@ -27,7 +27,7 @@ export default function Home() {
         </motion.p>
 
         <motion.div
-          className="relative mt-6 inline-block"
+          className="relative mt-6 inline-block overflow-hidden rounded-lg"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{
             opacity: 1,
