@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import VersionBadge from './components/ui/VersionBadge';
 
 export default function Home() {
   return (
@@ -52,6 +53,7 @@ export default function Home() {
           </Link>
         </motion.div>
       </motion.div>
+      <VersionBadge />
     </div>
   );
 }
