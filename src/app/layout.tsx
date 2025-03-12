@@ -122,7 +122,7 @@ const trophyGuideStructuredData = {
   name: 'Complete Trophy Guide for Assassin’s Creed Mirage',
   description: 'Complete guide to achieve all trophies for Assassin’s Creed Mirage.',
   totalTime: 'PT5H',
-  difficulty: 'hard', // Προσθήκη επιπέδου δυσκολίας
+  difficulty: 'hard',
   tool: [
     {
       '@type': 'HowToTool',
