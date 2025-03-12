@@ -1,5 +1,5 @@
-import GameCard from "./GameCard";
-import { Game } from "@/types/interfaces";
+import GameCard from './GameCard';
+import { Game } from '@/types/interfaces';
 
 interface GameGridProps {
   readonly games: readonly Game[];
@@ -7,8 +7,8 @@ interface GameGridProps {
 
 export default function GameGrid({ games }: GameGridProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {games.map((game) => (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+      {games.map(game => (
         <GameCard key={game.id} game={game} />
       ))}
     </div>

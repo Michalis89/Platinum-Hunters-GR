@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Option = {
   value: string;
@@ -13,7 +13,7 @@ interface DropdownProps {
   selectedValue: string;
   onSelect: (value: string) => void;
   isOpen: boolean;
-  zIndex: number; // Add z-index prop
+  zIndex: number;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -27,7 +27,6 @@ const Dropdown: React.FC<DropdownProps> = ({
   const [dropdownOpen, setDropdownOpen] = useState(isOpen);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -35,23 +34,23 @@ const Dropdown: React.FC<DropdownProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  const selectedOption = options.find((option) => option.value === selectedValue);
+  const selectedOption = options.find(option => option.value === selectedValue);
 
   return (
     <div className="relative">
-      <label htmlFor="dropdown" className="block text-gray-300 text-sm font-medium">
+      <label htmlFor="dropdown" className="block text-sm font-medium text-gray-300">
         {label}
       </label>
       <button
         type="button"
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="w-full p-3 bg-gray-800 rounded-lg border border-gray-700 text-white flex items-center justify-center space-x-2"
+        className="flex w-full items-center justify-center space-x-2 rounded-lg border border-gray-700 bg-gray-800 p-3 text-white"
       >
         {selectedOption ? (
           <>
@@ -59,7 +58,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             <span>{selectedOption.label}</span>
           </>
         ) : (
-          "Επιλέξτε"
+          'Επιλέξτε'
         )}
       </button>
 
@@ -71,16 +70,16 @@ const Dropdown: React.FC<DropdownProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
-            style={{ zIndex: zIndex }} // Apply z-index dynamically
+            className="absolute left-0 mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
+            style={{ zIndex: zIndex }}
           >
-            {options.map((option) => (
+            {options.map(option => (
               <button
                 key={option.value}
-                className="p-3 hover:bg-gray-700 cursor-pointer flex items-center w-full text-left"
+                className="flex w-full cursor-pointer items-center p-3 text-left hover:bg-gray-700"
                 onClick={() => {
-                  onSelect(option.value); // Pass the value to onSelect
-                  setDropdownOpen(false); // Close dropdown after selection
+                  onSelect(option.value);
+                  setDropdownOpen(false);
                 }}
                 type="button"
               >

@@ -1,46 +1,53 @@
 interface SkeletonProps {
-  readonly type?: "page" | "grid" | "card";
+  readonly type?: 'page' | 'grid' | 'card';
   readonly count?: number;
 }
 
-export default function Skeleton({ type = "page", count = 6 }: SkeletonProps) {
-  if (type === "page") {
+export default function Skeleton({ type = 'page', count = 6 }: SkeletonProps) {
+  if (type === 'page') {
     return (
-      <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
-        <div className="max-w-3xl w-full bg-gray-900 p-6 rounded-lg shadow-lg animate-pulse">
-          <div className="flex justify-center mb-4">
-            <div className="w-48 h-48 bg-gray-700 rounded-lg"></div>
+      <div
+        className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white"
+        data-testid="skeleton"
+      >
+        <div className="w-full max-w-3xl animate-pulse rounded-lg bg-gray-900 p-6 shadow-lg">
+          <div className="mb-4 flex justify-center">
+            <div className="h-48 w-48 rounded-lg bg-gray-700"></div>
           </div>
-          <div className="h-6 bg-gray-700 w-3/4 mx-auto rounded"></div>
-          <div className="h-4 bg-gray-700 w-1/2 mx-auto rounded mt-2"></div>
+          <div className="mx-auto h-6 w-3/4 rounded bg-gray-700"></div>
+          <div className="mx-auto mt-2 h-4 w-1/2 rounded bg-gray-700"></div>
         </div>
       </div>
     );
   }
 
-  if (type === "grid") {
+  if (type === 'grid') {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3" data-testid="skeleton">
         {Array.from({ length: count }).map((_, index) => (
           <div
             key={index}
-            className="p-4 bg-gray-700 rounded-lg shadow-lg animate-pulse flex flex-col items-center"
+            className="flex animate-pulse flex-col items-center rounded-lg bg-gray-700 p-4 shadow-lg"
+            data-testid="skeleton-item"
           >
-            <div className="w-32 h-40 bg-gray-600 rounded-lg"></div>
-            <div className="w-3/4 h-4 bg-gray-500 rounded mt-4"></div>
-            <div className="w-1/2 h-4 bg-gray-500 rounded mt-2"></div>
+            <div className="h-40 w-32 rounded-lg bg-gray-600"></div>
+            <div className="mt-4 h-4 w-3/4 rounded bg-gray-500"></div>
+            <div className="mt-2 h-4 w-1/2 rounded bg-gray-500"></div>
           </div>
         ))}
       </div>
     );
   }
 
-  if (type === "card") {
+  if (type === 'card') {
     return (
-      <div className="p-4 bg-gray-700 rounded-lg shadow-lg animate-pulse flex flex-col items-center">
-        <div className="w-32 h-40 bg-gray-600 rounded-lg"></div>
-        <div className="w-3/4 h-4 bg-gray-500 rounded mt-4"></div>
-        <div className="w-1/2 h-4 bg-gray-500 rounded mt-2"></div>
+      <div
+        className="flex animate-pulse flex-col items-center rounded-lg bg-gray-700 p-4 shadow-lg"
+        data-testid="skeleton"
+      >
+        <div className="h-40 w-32 rounded-lg bg-gray-600"></div>
+        <div className="mt-4 h-4 w-3/4 rounded bg-gray-500"></div>
+        <div className="mt-2 h-4 w-1/2 rounded bg-gray-500"></div>
       </div>
     );
   }

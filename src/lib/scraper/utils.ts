@@ -4,7 +4,7 @@ import { Page } from 'playwright';
 export async function extractNumericValue(page: Page, selector: string): Promise<string> {
   const element = await page.$(selector);
   if (!element) return 'Άγνωστο';
-  const text = await element.evaluate((el) => el.textContent?.trim() ?? '');
+  const text = await element.evaluate(el => el.textContent?.trim() ?? '');
   const match = /\d+\/?\d*/.exec(text);
   return match ? match[0] : 'Άγνωστο';
 }
@@ -12,7 +12,7 @@ export async function extractNumericValue(page: Page, selector: string): Promise
 export async function extractBackgroundColor(page: Page, selector: string): Promise<string> {
   const element = await page.$(selector);
   if (!element) return '#FFFFFF';
-  const style = await element.evaluate((el) => el.getAttribute('style') ?? '');
+  const style = await element.evaluate(el => el.getAttribute('style') ?? '');
   const match = /background-color:\s*(#[0-9a-fA-F]+)/.exec(style);
   return match ? match[1] : '#FFFFFF';
 }

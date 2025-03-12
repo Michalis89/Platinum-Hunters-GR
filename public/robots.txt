@@ -1,0 +1,30 @@
+# Allow all agents to crawl everything except sensitive routes
+User-agent: *
+Allow: /
+
+# Block internal/admin routes
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /private
+Disallow: /scraper
+Disallow: /search?q=
+Disallow: /api/
+
+# Block crawling of dynamic query strings to avoid duplicate content
+Disallow: /*?*
+
+# Allow indexing of JavaScript, CSS, images, etc.
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.jpg$
+Allow: /*.png$
+Allow: /*.gif$
+
+# Set crawl delay to avoid overloading the server
+Crawl-delay: 5
+
+# Specify host
+Host: https://platinumhunters.gr
+
+# Sitemaps
+Sitemap: https://platinumhunters.gr/sitemap.xml

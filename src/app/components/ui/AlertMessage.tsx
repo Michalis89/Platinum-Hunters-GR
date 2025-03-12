@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, X, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, X, AlertTriangle } from 'lucide-react';
 
 interface AlertProps {
-  readonly type: "success" | "error";
+  readonly type: 'success' | 'error';
   readonly message: string;
   readonly duration?: number;
 }
@@ -26,12 +26,12 @@ export default function AlertMessage({ type, message, duration = 4000 }: Readonl
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
-          className={`fixed top-20 inset-x-0 mx-auto w-auto max-w-[500px] px-6 py-4 rounded-lg shadow-lg flex items-center justify-between gap-3 text-white text-lg z-50 ${
-            type === "success" ? "bg-green-500" : "bg-red-500"
+          className={`fixed inset-x-0 top-20 z-50 mx-auto flex w-auto max-w-[500px] items-center justify-between gap-3 rounded-lg px-6 py-4 text-lg text-white shadow-lg ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
           }`}
         >
           <div className="flex items-center gap-2">
-            {type === "success" ? <CheckCircle size={24} /> : <AlertTriangle size={24} />}
+            {type === 'success' ? <CheckCircle size={24} /> : <AlertTriangle size={24} />}
             <span>{message}</span>
           </div>
           <button onClick={() => setVisible(false)} className="focus:outline-none">

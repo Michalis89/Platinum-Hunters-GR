@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
 interface CardProps {
   readonly children: ReactNode;
@@ -6,7 +6,7 @@ interface CardProps {
 }
 
 export function Card({ children, className }: Readonly<CardProps>) {
-  return <div className={`bg-gray-800 p-4 rounded-lg shadow-md ${className}`}>{children}</div>;
+  return <div className={`rounded-lg bg-gray-800 p-4 shadow-md ${className}`}>{children}</div>;
 }
 
 interface CardContentProps {
