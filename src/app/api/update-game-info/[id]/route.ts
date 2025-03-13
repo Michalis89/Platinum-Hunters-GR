@@ -23,7 +23,6 @@ async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
     }
 
     const gameSlug = searchData.results[0].slug;
-    console.log(`🔹 Found slug: ${gameSlug}`);
 
     const detailsResponse = await fetch(
       `https://api.rawg.io/api/games/${gameSlug}?key=${RAWG_API_KEY}`,
@@ -81,8 +80,9 @@ export async function POST(req: Request, context: any) {
 
     if (gameError ?? !gameData) {
       console.error('❌ Game not found in DB:', gameError);
-      return NextResponse.json({ error: 'Game not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Game info not found' }, { status: 404 });
     }
+
     const gameInfo = await fetchGameInfo(gameData.title);
     if (!gameInfo) {
       return NextResponse.json({ error: 'Game info not found' }, { status: 404 });

@@ -50,6 +50,7 @@ export default function GameDetailsPage() {
 
     const fetchGameData = async () => {
       try {
+        const delay = new Promise(res => setTimeout(res, 300));
         const gameResponse = await fetch('/api/games');
         if (!gameResponse.ok) throw new Error('Failed to fetch games');
 
@@ -71,6 +72,7 @@ export default function GameDetailsPage() {
         setGuides(guideData);
         setGameDetails(detailsData);
         setTrophies(trophiesData);
+        await delay;
       } catch (err) {
         console.error('❌ Σφάλμα στη φόρτωση:', err);
       } finally {
@@ -111,8 +113,12 @@ export default function GameDetailsPage() {
     setUpdating(false);
   };
 
-  if (loading || !game) {
-    return <Skeleton type="page" />;
+  if (loading) {
+    return <Skeleton type="page" data-testid="skeleton" />;
+  }
+
+  if (!game) {
+    return <div>❌ Game not found!</div>;
   }
 
   return (

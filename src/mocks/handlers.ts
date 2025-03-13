@@ -15,6 +15,16 @@ export const handlers = [
           silver: 10,
           bronze: 20,
         },
+        {
+          id: 2,
+          title: 'God of War Ragnarok',
+          platform: 'PS5',
+          game_image: '/images/gow-ragnarok.jpg',
+          platinum: 1,
+          gold: 3,
+          silver: 10,
+          bronze: 20,
+        },
       ]),
     );
   }),

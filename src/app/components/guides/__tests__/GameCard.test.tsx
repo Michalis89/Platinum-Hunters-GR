@@ -38,14 +38,14 @@ describe('GameCard Component', () => {
     steps: [],
   };
 
-  test('renders correctly', () => {
+  it('renders correctly', () => {
     render(<GameCard game={mockGame} />);
     expect(screen.getByText(mockGame.title)).toBeInTheDocument();
     expect(screen.getByText(mockGame.platform)).toBeInTheDocument();
     expect(screen.getByTestId('game-image')).toHaveAttribute('src', mockGame.game_image);
   });
 
-  test('renders correct trophy counts', () => {
+  it('renders correct trophy counts', () => {
     render(<GameCard game={mockGame} />);
     expect(screen.getByText(mockGame.trophies.Platinum)).toBeInTheDocument();
     expect(screen.getByText(mockGame.trophies.Gold)).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('GameCard Component', () => {
     expect(screen.getByText(mockGame.trophies.Bronze)).toBeInTheDocument();
   });
 
-  test('generates correct link URL', () => {
+  it('generates correct link URL', () => {
     render(<GameCard game={mockGame} />);
     const expectedSlug = encodeURIComponent(
       mockGame.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -62,7 +62,7 @@ describe('GameCard Component', () => {
     expect(link).toHaveAttribute('href', `/pages/guide/${expectedSlug}`);
   });
 
-  test('renders total points correctly', () => {
+  it('renders total points correctly', () => {
     render(<GameCard game={mockGame} />);
     expect(screen.getByText(`⭐ Σύνολο Πόντων: ${mockGame.totalPoints}`)).toBeInTheDocument();
   });

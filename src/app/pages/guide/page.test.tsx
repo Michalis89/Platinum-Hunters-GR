@@ -1,5 +1,5 @@
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
-import Guides from '../page';
+import Guides from './page';
 import { server } from '@/mocks/server';
 import { rest } from 'msw';
 

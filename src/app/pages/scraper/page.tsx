@@ -37,14 +37,14 @@ export default function ScraperPage() {
         setMessageState('error', result.message);
         setData(result.existingData);
       } else if (response.ok) {
-        setMessageState('success', '✅ Scraping επιτυχές!');
+        setMessageState('success', 'Scraping επιτυχές!');
         setData(result);
       } else {
-        setMessageState('error', '❌ Σφάλμα κατά το Scraping!');
+        setMessageState('error', 'Σφάλμα κατά το Scraping!');
       }
     } catch (error) {
-      console.error('❌ Σφάλμα:', error);
-      setMessageState('error', '❌ Αποτυχία Scraping! Δοκίμασε ξανά.');
+      console.error('Σφάλμα:', error);
+      setMessageState('error', 'Αποτυχία Scraping! Δοκίμασε ξανά.');
     }
 
     setLoading(false);
@@ -63,17 +63,17 @@ export default function ScraperPage() {
       });
 
       if (response.status === 409) {
-        setMessageState('error', '⚠️ Ο οδηγός υπάρχει ήδη στη βάση!');
+        setMessageState('error', 'Ο οδηγός υπάρχει ήδη στη βάση!');
       } else if (response.ok) {
-        setMessageState('success', '✅ Ο οδηγός αποθηκεύτηκε επιτυχώς!');
+        setMessageState('success', 'Ο οδηγός αποθηκεύτηκε επιτυχώς!');
         setUrl('');
         setData(null);
       } else {
-        setMessageState('error', '❌ Κάτι πήγε στραβά κατά την αποθήκευση!');
+        setMessageState('error', 'Κάτι πήγε στραβά κατά την αποθήκευση!');
       }
     } catch (error) {
-      console.error('❌ Σφάλμα:', error);
-      setMessageState('error', '❌ Αποτυχία αποθήκευσης στη βάση!');
+      console.error('Σφάλμα:', error);
+      setMessageState('error', 'Αποτυχία αποθήκευσης στη βάση!');
     }
 
     setSaving(false);
@@ -124,7 +124,7 @@ export default function ScraperPage() {
             <h3 className="text-xl font-semibold text-white">{data.title}</h3>
             <p className="text-sm text-gray-500">{data.platform}</p>
             <Button onClick={handleSave} disabled={saving} className="mt-4">
-              {saving ? '💾 Αποθήκευση...' : '💾 Αποθήκευση στη βάση'}
+              {saving ? 'Αποθήκευση...' : 'Αποθήκευση στη βάση'}
             </Button>
           </Card>
         )}

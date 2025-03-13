@@ -36,17 +36,17 @@ describe('GameGrid Component', () => {
     },
   ];
 
-  test('renders correctly', () => {
+  it('renders correctly', () => {
     render(<GameGrid games={mockGames} />);
     expect(screen.getAllByTestId('game-card').length).toBeGreaterThan(0);
   });
 
-  test('renders correct number of GameCard components', () => {
+  it('renders correct number of GameCard components', () => {
     render(<GameGrid games={mockGames} />);
     expect(screen.getAllByTestId('game-card')).toHaveLength(mockGames.length);
   });
 
-  test('renders empty grid when no games are provided', () => {
+  it('renders empty grid when no games are provided', () => {
     render(<GameGrid games={[]} />);
     expect(screen.queryByTestId('game-card')).not.toBeInTheDocument();
   });
