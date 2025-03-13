@@ -4,6 +4,7 @@ import './globals.css';
 import NavbarWrapper from './components/NavbarWrapper';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import ScrollToTop from '@/utils/ScrollToTop';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -208,6 +209,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={` ${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NavbarWrapper />
+        <ScrollToTop />
         <main>{children}</main>
         <Analytics />
         <SpeedInsights />
