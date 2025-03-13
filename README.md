@@ -218,6 +218,7 @@ npm run test:coverage
 ## Test Coverage
 
 
+
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
   <div>
@@ -226,7 +227,7 @@ npm run test:coverage
       <tr>
         <td><strong>All files</strong></td>
         <td><span style="color: green;">95.60%</span></td>
-        <td><span style="color: green;">84.92%</span></td>
+        <td><span style="color: green;">85.19%</span></td>
         <td><span style="color: green;">86.17%</span></td>
         <td><span style="color: green;">95.60%</span></td>
         <td>-</td>
@@ -490,7 +491,7 @@ npm run test:coverage
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Dropdown.tsx</td>
 <td><span style="color: green;">96.12%</span></td>
-<td><span style="color: green;">88.89%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td><span style="color: orange;">75.00%</span></td>
 <td><span style="color: green;">96.12%</span></td>
 <td>-</td>
@@ -582,12 +583,14 @@ npm run test:coverage
 ## Test Results
 
 
+
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 42 passed, 42 total</p>
 <p><strong>Tests:</strong> 169 passed, 0 failed, 169 total</p>
-<p><strong>Time:</strong> 32.85 seconds</p>
+<p><strong>Time:</strong> 32.63 seconds</p>
 </div>
+
 
 
 ## License
