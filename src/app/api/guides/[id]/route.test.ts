@@ -1,7 +1,6 @@
 import { GET } from './route';
 import supabase from '@/lib/db';
 
-// Mock Supabase with named mock functions
 jest.mock('@/lib/db', () => {
   const mockEq = jest.fn().mockResolvedValue({ data: [], error: null });
   const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
@@ -9,7 +8,6 @@ jest.mock('@/lib/db', () => {
   return { from: mockFrom };
 });
 
-// Mock NextResponse
 jest.mock('next/server', () => ({
   NextResponse: {
     json: jest.fn((data, options = {}) => {
@@ -36,7 +34,6 @@ describe('GET /api/guides/[id]', () => {
       },
     ];
 
-    // Mock successful Supabase query with named mocks
     const mockEq = jest.fn().mockResolvedValue({
       data: mockGuides,
       error: null,
@@ -61,7 +58,7 @@ describe('GET /api/guides/[id]', () => {
 
   it('should return 400 if no ID is provided', async () => {
     const req = new Request('http://localhost:3000');
-    const context = { params: {} }; // No ID provided
+    const context = { params: {} };
 
     const response = await GET(req, context);
     const json = await response.json();
