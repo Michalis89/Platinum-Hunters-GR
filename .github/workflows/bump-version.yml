@@ -30,21 +30,23 @@ jobs:
         id: branch_name
         run: |
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          echo "Branch name is $BRANCH_NAME"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Determine version bump type
         id: version_bump
         run: |
-          if [[ $BRANCH_NAME =~ ^fix/PH-[0-9]+$ ]]; then
+          if [[ "$BRANCH_NAME" =~ ^fix/PH-[0-9]+$ ]]; then
             echo "BUMP=patch" >> $GITHUB_ENV
-          elif [[ $BRANCH_NAME =~ ^feat/PH-[0-9]+$ ]]; then
+          elif [[ "$BRANCH_NAME" =~ ^feat/PH-[0-9]+$ ]]; then
             echo "BUMP=minor" >> $GITHUB_ENV
-          elif [[ $BRANCH_NAME =~ ^release/PH-[0-9]+$ ]]; then
+          elif [[ "$BRANCH_NAME" =~ ^release/PH-[0-9]+$ ]]; then
             echo "BUMP=major" >> $GITHUB_ENV
           else
             echo "Skipping version bump for branch $BRANCH_NAME"
             exit 0
           fi
+          echo "Version bump type: $BUMP"
 
       - name: Bump version in package.json
         if: env.BUMP != ''
