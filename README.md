@@ -177,6 +177,32 @@ To deploy the app on Vercel:
 
   <p align="right">(<a href="#top">back to top</a>)</p>
 
+## CI/CD Pipeline
+
+We have set up a CI/CD pipeline to ensure code quality and stability before merging any code into the main branch.
+
+### ✅ Status Checks
+
+- **Linting** – Ensures code consistency and follows coding standards.
+- **Testing** – Runs unit and integration tests to verify that all functionality works as expected.
+- **Build** – Builds the project to confirm that there are no compile-time issues.
+
+### ✅ Branch Protection Rules
+
+We have enforced branch protection rules to maintain code quality:
+
+- All feature branches should follow the naming convention:
+  - `feat/PH-<issue_number>` – For new features
+  - `fix/PH-<issue_number>` – For bug fixes
+  - `hotfix/PH-<issue_number>` – For critical fixes on production
+- Merging into `develop` requires:
+
+  - ✅ Successful status checks (Lint, Test, Build)
+  - ✅ Code review approval
+  - ✅ Up-to-date with base branch before merging
+
+  [![CI/CD](https://github.com/Michalis89/Platinum-Hunters-GR/actions/workflows/main.yml/badge.svg)](https://github.com/Michalis89/Platinum-Hunters-GR/actions)
+
 ## Testing
 
 To check the test coverage, run:
@@ -190,10 +216,6 @@ npm run test:coverage
 ![Coverage](https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=develop)
 
 ## Test Coverage
-
-
-
-
 
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
@@ -558,20 +580,12 @@ npm run test:coverage
 
 ## Test Results
 
-
-
-
-
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 42 passed, 42 total</p>
 <p><strong>Tests:</strong> 169 passed, 0 failed, 169 total</p>
 <p><strong>Time:</strong> 32.19 seconds</p>
 </div>
-
-
-
-
 
 ## License
 
