@@ -27,7 +27,7 @@ export default function UnderConstruction() {
         className="max-w-lg rounded-2xl bg-gray-800 p-8 shadow-lg"
       >
         <Hammer className="mx-auto h-16 w-16 animate-bounce text-yellow-400" />
-        <h1 className="mt-4 text-3xl font-extrabold text-yellow-400">Under Construction</h1>
+        <h1 className="mt-4 text-3xl font-extrabold text-yellow-400">Υπό Κατασκευή</h1>
         <p className="mt-2 text-gray-300">
           Αυτή η σελίδα βρίσκεται υπό κατασκευή. Παρακαλώ επιστρέψτε αργότερα!
         </p>

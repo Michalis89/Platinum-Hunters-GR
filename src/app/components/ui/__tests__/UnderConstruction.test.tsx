@@ -22,7 +22,7 @@ describe('UnderConstruction Component', () => {
 
   it('renders the under construction message', () => {
     render(<UnderConstruction />);
-    expect(screen.getByText('Under Construction')).toBeInTheDocument();
+    expect(screen.getByText('Υπό Κατασκευή')).toBeInTheDocument();
   });
 
   it('shows countdown starting from 10', () => {

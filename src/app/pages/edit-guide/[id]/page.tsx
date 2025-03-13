@@ -37,9 +37,9 @@ export default function EditGuide() {
     if (id) fetchGuide();
   }, [id]);
 
-  const handleChange = (index: number, newText: string) => {
+  const handleChange = (index: number, field: 'title' | 'description', newValue: string) => {
     setSteps(prevSteps =>
-      prevSteps.map((step, i) => (i === index ? { ...step, description: newText } : step)),
+      prevSteps.map((step, i) => (i === index ? { ...step, [field]: newValue } : step)),
     );
   };
 
@@ -90,11 +90,16 @@ export default function EditGuide() {
                 key={index}
                 className="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow-lg"
               >
-                <h3 className="text-lg font-bold text-blue-300">{step.title}</h3>
+                <input
+                  type="text"
+                  className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 p-4 text-white focus:ring-2 focus:ring-blue-500"
+                  value={step.title}
+                  onChange={e => handleChange(index, 'title', e.target.value)}
+                />
                 <textarea
-                  className="mt-3 min-h-[150px] w-full resize-none rounded-lg border border-gray-700 bg-gray-800 p-4 text-white focus:ring-2 focus:ring-blue-500"
+                  className="mt-3 min-h-[150px] w-full resize-y rounded-lg border border-gray-700 bg-gray-800 p-4 text-white focus:ring-2 focus:ring-blue-500"
                   value={step.description}
-                  onChange={e => handleChange(index, e.target.value)}
+                  onChange={e => handleChange(index, 'description', e.target.value)}
                 />
               </Card>
             ))}

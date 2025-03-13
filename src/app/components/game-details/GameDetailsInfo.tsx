@@ -25,28 +25,28 @@ export default function GameDetailsInfo({
         {typeof release_year === 'number' && (
           <p className="flex items-center">
             <Calendar className="mr-2 h-4 w-4 text-red-400" />
-            <span className="font-semibold">Release Year:</span>
+            <span className="font-semibold">Έτος Κυκλοφορίας:</span>
             <span className="ml-2 text-white">{release_year}</span>
           </p>
         )}
         {developer && (
           <p className="flex items-center">
             <Building2 className="mr-2 h-4 w-4 text-blue-400" />
-            <span className="font-semibold">Developer:</span>
+            <span className="font-semibold">Προγραμματιστής:</span>
             <span className="ml-2 text-white">{developer}</span>
           </p>
         )}
         {publisher && (
           <p className="flex items-center">
             <BookOpen className="mr-2 h-4 w-4 text-purple-400" />
-            <span className="font-semibold">Publisher:</span>
+            <span className="font-semibold">Εκδότης:</span>
             <span className="ml-2 text-white">{publisher}</span>
           </p>
         )}
         {genre && (
           <p className="flex items-center">
             <Joystick className="mr-2 h-4 w-4 text-yellow-400" />
-            <span className="font-semibold">Genre:</span>
+            <span className="font-semibold">Είδος:</span>
             <span className="ml-2 text-white">{genre}</span>
           </p>
         )}
@@ -56,7 +56,7 @@ export default function GameDetailsInfo({
         {typeof rating === 'number' && (
           <p className="flex items-center">
             <Trophy className="mr-2 h-4 w-4 text-green-400" />
-            <span className="font-semibold">Rating:</span>
+            <span className="font-semibold">Βαθμολογία:</span>
             <span className="ml-2 text-white">{rating}</span>
           </p>
         )}
@@ -70,7 +70,7 @@ export default function GameDetailsInfo({
         {esrb_rating && (
           <p className="flex items-center">
             <ShieldAlert className="mr-2 h-4 w-4 text-red-500" />
-            <span className="font-semibold">ESRB Rating:</span>
+            <span className="font-semibold">ESRB Βαθμολογία:</span>
             <span className="ml-2 text-white">{esrb_rating}</span>
           </p>
         )}

@@ -4,7 +4,7 @@ import SearchBar from '../SearchBar';
 describe('SearchBar Component', () => {
   it('renders correctly', () => {
     render(<SearchBar search="" setSearch={jest.fn()} />);
-    expect(screen.getByPlaceholderText('🔎 Αναζήτηση παιχνιδιού...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('🔎 Αναζήτηση οδηγού...')).toBeInTheDocument();
   });
 
   it('displays the correct search value', () => {
@@ -16,7 +16,7 @@ describe('SearchBar Component', () => {
     const mockSetSearch = jest.fn();
     render(<SearchBar search="" setSearch={mockSetSearch} />);
 
-    const input = screen.getByPlaceholderText('🔎 Αναζήτηση παιχνιδιού...');
+    const input = screen.getByPlaceholderText('🔎 Αναζήτηση οδηγού...');
     fireEvent.change(input, { target: { value: 'God of War' } });
 
     expect(mockSetSearch).toHaveBeenCalledTimes(1);
