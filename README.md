@@ -194,6 +194,7 @@ npm run test:coverage
 
 
 
+
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
   <div>
@@ -201,20 +202,12 @@ npm run test:coverage
       <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
       <tr>
         <td><strong>All files</strong></td>
-        <td><span style="color: red;">14.24%</span></td>
-        <td><span style="color: orange;">51.58%</span></td>
-        <td><span style="color: red;">29.03%</span></td>
-        <td><span style="color: red;">14.24%</span></td>
+        <td><span style="color: green;">95.02%</span></td>
+        <td><span style="color: green;">84.84%</span></td>
+        <td><span style="color: green;">86.17%</span></td>
+        <td><span style="color: green;">95.02%</span></td>
         <td>-</td>
       </tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/app/layout.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/page.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
@@ -225,98 +218,82 @@ npm run test:coverage
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/contact/forms/bug-report/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">90.91%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/contact/forms/feature-request/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/contact/forms/general-question/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">98.98%</span></td>
+<td><span style="color: orange;">74.36%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">98.98%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/contact/forms/trophy-guide/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/game-details/[game_id]/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/game/[id]/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/games/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/guides/[id]/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/save-guide/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/app/api/scrape/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">99.15%</span></td>
+<td><span style="color: orange;">73.68%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">99.15%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/update-game-info/[id]/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/app/api/update-guide/[id]/route.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">89.62%</span></td>
+<td><span style="color: orange;">61.29%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">89.62%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -337,98 +314,98 @@ npm run test:coverage
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/contact/BugReportForm.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">98.90%</span></td>
+<td><span style="color: green;">90.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">98.90%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/contact/FeatureRequestForm.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">89.62%</span></td>
+<td><span style="color: green;">82.76%</span></td>
+<td><span style="color: orange;">71.43%</span></td>
+<td><span style="color: green;">89.62%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/contact/GeneralQuestionForm.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">88.10%</span></td>
+<td><span style="color: orange;">78.95%</span></td>
+<td><span style="color: orange;">56.25%</span></td>
+<td><span style="color: green;">88.10%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/contact/NewGuideForm.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">98.18%</span></td>
+<td><span style="color: green;">85.71%</span></td>
+<td><span style="color: orange;">75.00%</span></td>
+<td><span style="color: green;">98.18%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/contact/SupportForm.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/EditGuideButton.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">90.91%</span></td>
+<td><span style="color: red;">50.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">90.91%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/GameDetailsInfo.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/GamePlatforms.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/GuideStats.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/TrophyGuides.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/TrophyStats.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/UpdateGameInfoButton.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -458,65 +435,65 @@ npm run test:coverage
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/AlertMessage.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: orange;">71.43%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Badge.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Button.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Card.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Dropdown.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">96.12%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: orange;">75.00%</span></td>
+<td><span style="color: green;">96.12%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/FormErrorMessage.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Input.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Skeleton.tsx</td>
+<td><span style="color: orange;">71.43%</span></td>
+<td><span style="color: green;">80.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: orange;">71.43%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -537,18 +514,10 @@ npm run test:coverage
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/pages/contact/page.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/app/pages/edit-guide/[id]/page.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">98.10%</span></td>
+<td><span style="color: green;">80.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">98.10%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -561,102 +530,22 @@ npm run test:coverage
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/pages/guide/[slug]/page.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">83.68%</span></td>
+<td><span style="color: orange;">70.00%</span></td>
+<td><span style="color: orange;">66.67%</span></td>
+<td><span style="color: green;">83.68%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/pages/news/page.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/pages/reviews/page.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/app/pages/scraper/page.tsx</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/lib/db.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/lib/scraper/index.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/lib/scraper/selectors.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/lib/scraper/utils.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/mocks/handlers.ts</td>
-<td><span style="color: green;">92.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: green;">92.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/mocks/server.ts</td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/types/forms.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/types/interfaces.ts</td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td><span style="color: red;">0.00%</span></td>
-<td>-</td>
-</tr>
-<tr>
-<td>/Platinum-Hunters-GR/src/utils/getVersion.ts</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -672,12 +561,14 @@ npm run test:coverage
 
 
 
+
 <div id="jest-results">
 <h3>Test Summary</h3>
-<p><strong>Test Suites:</strong> 16 passed, 16 total</p>
-<p><strong>Tests:</strong> 44 passed, 0 failed, 44 total</p>
-<p><strong>Time:</strong> 11.92 seconds</p>
+<p><strong>Test Suites:</strong> 42 passed, 42 total</p>
+<p><strong>Tests:</strong> 169 passed, 0 failed, 169 total</p>
+<p><strong>Time:</strong> 32.19 seconds</p>
 </div>
+
 
 
 
