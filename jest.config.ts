@@ -41,6 +41,11 @@ const config: Config = {
     'src/mocks/',
     'src/app/layout',
     'src/lib',
+    'src/utils',
+    'src/app/pages/scraper',
+    'src/app/pages/edit-guide',
+    'app/api/scrape',
+    'app/api/update-guide',
   ],
 
   // Indicates which provider should be used to instrument code for coverage

@@ -22,7 +22,7 @@ describe('TrophyGuides Component', () => {
   it('renders guides correctly when guides are provided', () => {
     render(<TrophyGuides guides={mockGuides} />);
 
-    expect(screen.getByText('Trophy Guides')).toBeInTheDocument();
+    expect(screen.getByText('Οδηγός')).toBeInTheDocument();
 
     expect(screen.getByText('Step 1')).toBeInTheDocument();
     expect(screen.getByText('This is the first step')).toBeInTheDocument();

@@ -16,7 +16,6 @@ describe('UnderConstruction Component', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
     jest.useRealTimers();
   });
 

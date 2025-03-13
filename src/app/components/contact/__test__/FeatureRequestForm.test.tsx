@@ -2,10 +2,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FeatureRequestForm from '../FeatureRequestForm';
 
 describe('FeatureRequestForm Component', () => {
-  afterEach(() => {
-    jest.clearAllMocks(); // Καθαρίζει όλα τα mock χωρίς να πετάει errors
-  });
-
   it('renders the form correctly', () => {
     render(<FeatureRequestForm />);
 
@@ -20,7 +16,6 @@ describe('FeatureRequestForm Component', () => {
 
     fireEvent.click(screen.getByText(/Υποβολή Αιτήματος/i));
 
-    // Χρησιμοποιούμε findAllByText γιατί έχουμε πολλαπλά ίδια validation messages
     const errorMessages = await screen.findAllByText(/Το πεδίο είναι υποχρεωτικό/i);
     expect(errorMessages.length).toBeGreaterThanOrEqual(3);
   });
@@ -72,20 +67,6 @@ describe('FeatureRequestForm Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Σφάλμα κατά την υποβολή/i)).toBeInTheDocument();
-    });
-  });
-
-  it.skip('shows error if the example URL is invalid', async () => {
-    render(<FeatureRequestForm />);
-
-    fireEvent.change(screen.getByPlaceholderText(/Εισάγετε ένα URL/i), {
-      target: { value: 'invalid-url' },
-    });
-
-    fireEvent.click(screen.getByText(/Υποβολή Αιτήματος/i));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Το URL δεν είναι έγκυρο/i)).toBeInTheDocument();
     });
   });
 });

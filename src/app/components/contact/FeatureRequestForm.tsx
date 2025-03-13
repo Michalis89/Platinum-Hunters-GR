@@ -61,7 +61,6 @@ export default function FeatureRequestForm() {
 
       setAlert({ type: 'success', message: '✅ Η υποβολή ολοκληρώθηκε επιτυχώς!' });
 
-      // Επαναφορά πεδίων
       setFeatureTitle('');
       setFeatureDescription('');
       setFeatureReason('');

@@ -143,6 +143,7 @@ export default function BugReportForm() {
                     setScreenshotPreview(URL.createObjectURL(e.target.files[0]));
                   }
                 }}
+                data-testid="file-input"
               />
             </div>
 

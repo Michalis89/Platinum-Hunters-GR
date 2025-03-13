@@ -15,25 +15,25 @@ describe('GameDetailsInfo Component', () => {
       />,
     );
 
-    expect(screen.getByText('Release Year:')).toBeInTheDocument();
+    expect(screen.getByText('Έτος Κυκλοφορίας:')).toBeInTheDocument();
     expect(screen.getByText('2022')).toBeInTheDocument();
 
-    expect(screen.getByText('Developer:')).toBeInTheDocument();
+    expect(screen.getByText('Προγραμματιστής:')).toBeInTheDocument();
     expect(screen.getByText('Naughty Dog')).toBeInTheDocument();
 
-    expect(screen.getByText('Publisher:')).toBeInTheDocument();
+    expect(screen.getByText('Εκδότης:')).toBeInTheDocument();
     expect(screen.getByText('Sony Interactive Entertainment')).toBeInTheDocument();
 
-    expect(screen.getByText('Genre:')).toBeInTheDocument();
+    expect(screen.getByText('Είδος:')).toBeInTheDocument();
     expect(screen.getByText('Action-Adventure')).toBeInTheDocument();
 
-    expect(screen.getByText('Rating:')).toBeInTheDocument();
+    expect(screen.getByText('Βαθμολογία:')).toBeInTheDocument();
     expect(screen.getByText('9.5')).toBeInTheDocument();
 
     expect(screen.getByText('Metacritic:')).toBeInTheDocument();
     expect(screen.getByText('92')).toBeInTheDocument();
 
-    expect(screen.getByText('ESRB Rating:')).toBeInTheDocument();
+    expect(screen.getByText('ESRB Βαθμολογία:')).toBeInTheDocument();
     expect(screen.getByText('M (Mature)')).toBeInTheDocument();
   });
 

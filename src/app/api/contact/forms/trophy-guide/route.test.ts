@@ -1,4 +1,3 @@
-// src/app/api/contact/forms/trophy-guide/route.test.ts
 import { POST } from './route';
 import supabase from '@/lib/db';
 
@@ -41,10 +40,6 @@ const mockRequest = (body: TestRequestBody) =>
   });
 
 describe('POST /api/trophy-guide', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should submit a valid trophy guide request', async () => {
     const req = mockRequest({
       game_name: 'Test Game',
@@ -71,7 +66,6 @@ describe('POST /api/trophy-guide', () => {
   });
 
   it('should handle submission insert error', async () => {
-    // Mock submission error
     (supabase.from as jest.Mock).mockImplementationOnce(() => ({
       insert: jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue({
@@ -93,7 +87,6 @@ describe('POST /api/trophy-guide', () => {
   });
 
   it('should handle trophy guide insert error', async () => {
-    // Mock first call (submission)
     (supabase.from as jest.Mock)
       .mockImplementationOnce(() => ({
         insert: jest.fn().mockReturnValue({
@@ -103,7 +96,6 @@ describe('POST /api/trophy-guide', () => {
           }),
         }),
       }))
-      // Mock second call (guide insert)
       .mockImplementationOnce(() => ({
         insert: jest.fn().mockReturnValue({
           error: new Error('Guide insert failed'),
@@ -122,7 +114,6 @@ describe('POST /api/trophy-guide', () => {
   });
 
   it('should handle generic errors', async () => {
-    // Mock a generic error
     jest.spyOn(global, 'Request').mockImplementationOnce((): Request => {
       return {
         json: () => Promise.reject(new Error('Unexpected error')),

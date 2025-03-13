@@ -22,7 +22,6 @@ if (fs.existsSync(jestResultsPath)) {
   jestSummary = `\n<div id="jest-results">\n<h3>Test Summary</h3>\n<p><strong>Test Suites:</strong> ${testSuitesPassed} passed, ${testSuitesTotal} total</p>\n<p><strong>Tests:</strong> ${passedTests} passed, ${failedTests} failed, ${totalTests} total</p>\n<p><strong>Time:</strong> ${timeElapsed} seconds</p>\n</div>\n`;
 }
 
-// ** Μετατροπή XML σε JSON Object **
 const parser = new xml2js.Parser({ explicitArray: false });
 parser.parseString(xmlData, (err, result) => {
   if (err) {
@@ -65,7 +64,6 @@ parser.parseString(xmlData, (err, result) => {
       </tr>`;
 
 
-  // ** Ανά αρχείο **
   const packages = Array.isArray(project.package) ? project.package : [project.package];
   packages.forEach(pkg => {
     if (pkg.file) {
@@ -76,15 +74,12 @@ parser.parseString(xmlData, (err, result) => {
         const __dirname = path.dirname(__filename);
         const projectRoot = path.resolve(__dirname, "../..").replace(/\\/g, "/");
 
-        // Κανονικοποίηση path
         let filePath = file.$.path ? path.normalize(file.$.path).replace(/\\/g, "/") : "";
 
-        // Αποφυγή διπλασιασμού του ονόματος αρχείου
         if (!filePath.endsWith(`/${file.$.name}`)) {
           filePath = path.join(filePath, file.$.name).replace(/\\/g, "/");
         }
 
-        // Αφαιρούμε το project root
         filePath = filePath.replace(projectRoot, "").replace(/^\/?platinum-hunters\//, "");
 
 
@@ -113,7 +108,6 @@ parser.parseString(xmlData, (err, result) => {
 </details>`;
 
 
-  // ** Διαβάζουμε το README.md και το ενημερώνουμε **
   const readmePath = './README.md';
   fs.readFile(readmePath, 'utf-8', (err, data) => {
     if (err) {
@@ -153,7 +147,6 @@ parser.parseString(xmlData, (err, result) => {
       updatedReadme = updatedReadme.replace(jestResultsHeader, `${jestResultsHeader}\n${jestSummary}`).trim();
     }
 
-    // ** Γράφουμε το νέο README.md χωρίς extra γραμμές **
     fs.writeFile(readmePath, updatedReadme.trim() + '\n', 'utf-8', (err) => {
       if (err) {
         console.error('Error writing to README.md:', err);

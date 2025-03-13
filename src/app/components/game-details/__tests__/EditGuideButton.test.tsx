@@ -25,17 +25,6 @@ describe('EditGuideButton Component', () => {
     jest.resetModules();
   });
 
-  it.skip('does not render in production mode', async () => {
-    setNodeEnv('production');
-
-    const { default: EditGuideButton } = await import('../EditGuideButton');
-
-    render(<EditGuideButton gameId={gameId} />);
-
-    expect(screen.queryByText('✏️ Επεξεργασία Guide')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mocked-link')).not.toBeInTheDocument();
-  });
-
   it('renders correctly in development mode', async () => {
     setNodeEnv('development');
 

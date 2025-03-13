@@ -22,6 +22,6 @@ describe('TrophyStats Component', () => {
     render(<TrophyStats trophies={mockTrophies} />);
 
     const trophyIcons = screen.getAllByTestId('trophy-icon');
-    expect(trophyIcons.length).toBe(4); // ✅ Τώρα θα περάσει το test!
+    expect(trophyIcons.length).toBe(4);
   });
 });

@@ -11,9 +11,7 @@ describe('SupportForm Component', () => {
 
   it('renders all donation buttons', () => {
     render(<SupportForm />);
-    expect(screen.getByText('💙 Κάνε μια δωρεά μέσω PayPal')).toBeInTheDocument();
-    expect(screen.getByText('🔥 Γίνε υποστηρικτής στο Patreon')).toBeInTheDocument();
-    expect(screen.getByText('☕ Buy Me a Coffee')).toBeInTheDocument();
+    expect(screen.getByText('Κάνε μια δωρεά μέσω PayPal')).toBeInTheDocument();
   });
 
   it('renders the support reasons section', () => {

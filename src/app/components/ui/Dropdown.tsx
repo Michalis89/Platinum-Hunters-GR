@@ -28,6 +28,10 @@ const Dropdown: React.FC<DropdownProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setDropdownOpen(isOpen);
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
@@ -74,6 +78,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             transition={{ duration: 0.2 }}
             className="absolute left-0 mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
             style={{ zIndex: zIndex }}
+            data-testid="dropdown-options"
           >
             {options.map(option => (
               <button

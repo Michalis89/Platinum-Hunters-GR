@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
 import { GeneralQuestionDBEntry, GeneralQuestionRequest } from '@/types/forms';
 
-const validateRequest = ({
+export const validateRequest = ({
   category,
   question,
   email,
@@ -28,7 +28,7 @@ const validateRequest = ({
   return validations[category]?.() ?? null;
 };
 
-const createSubmission = async () => {
+export const createSubmission = async () => {
   const { data, error } = await supabase
     .from('submissions')
     .insert([{ type: 'general_question', status: 'pending' }])
@@ -39,7 +39,10 @@ const createSubmission = async () => {
   return data.id;
 };
 
-const insertGeneralQuestion = async (submission_id: number, payload: GeneralQuestionDBEntry) => {
+export const insertGeneralQuestion = async (
+  submission_id: number,
+  payload: GeneralQuestionDBEntry,
+) => {
   const { error } = await supabase
     .from('general_questions')
     .insert([{ submission_id, ...payload }]);

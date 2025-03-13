@@ -14,9 +14,9 @@ describe('GuideStats Component', () => {
       />,
     );
 
-    expect(screen.getByText('Hard Difficulty')).toBeInTheDocument();
-    expect(screen.getByText('2 Playthroughs')).toBeInTheDocument();
-    expect(screen.getByText('50 Hours')).toBeInTheDocument();
+    expect(screen.getByText('Hard Δυσκολία')).toBeInTheDocument();
+    expect(screen.getByText('2 Περάσματα')).toBeInTheDocument();
+    expect(screen.getByText('50 Ώρες')).toBeInTheDocument();
   });
 
   it('renders "Playthrough" in singular when playthroughs is 1', () => {
@@ -31,6 +31,6 @@ describe('GuideStats Component', () => {
       />,
     );
 
-    expect(screen.getByText('1 Playthrough')).toBeInTheDocument();
+    expect(screen.getByText('1 Πέρασμα')).toBeInTheDocument();
   });
 });
