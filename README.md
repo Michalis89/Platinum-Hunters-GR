@@ -221,6 +221,7 @@ npm run test:coverage
 
 
 
+
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
   <div>
@@ -228,10 +229,10 @@ npm run test:coverage
       <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
       <tr>
         <td><strong>All files</strong></td>
-        <td><span style="color: green;">95.60%</span></td>
-        <td><span style="color: green;">84.57%</span></td>
+        <td><span style="color: green;">94.44%</span></td>
+        <td><span style="color: green;">83.29%</span></td>
         <td><span style="color: green;">86.17%</span></td>
-        <td><span style="color: green;">95.60%</span></td>
+        <td><span style="color: green;">94.44%</span></td>
         <td>-</td>
       </tr>
 <tr>
@@ -405,7 +406,7 @@ npm run test:coverage
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/GuideStats.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: red;">50.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
@@ -429,7 +430,7 @@ npm run test:coverage
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/UpdateGameInfoButton.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">20.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
@@ -516,10 +517,10 @@ npm run test:coverage
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Skeleton.tsx</td>
+<td><span style="color: red;">42.86%</span></td>
+<td><span style="color: orange;">66.67%</span></td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">42.86%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -588,12 +589,14 @@ npm run test:coverage
 
 
 
+
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 42 passed, 42 total</p>
 <p><strong>Tests:</strong> 169 passed, 0 failed, 169 total</p>
-<p><strong>Time:</strong> 32.74 seconds</p>
+<p><strong>Time:</strong> 32.91 seconds</p>
 </div>
+
 
 
 
