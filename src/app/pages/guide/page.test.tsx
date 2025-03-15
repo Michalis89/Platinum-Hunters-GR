@@ -1,54 +1,199 @@
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+// __tests__/Guides.test.tsx
+import { render, screen, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import Guides from './page';
-import { server } from '@/mocks/server';
-import { rest } from 'msw';
+import { useGetGamesQuery } from '@/store/api/gamesApi';
 
-describe('Guides Page', () => {
-  it('renders the heading Trophy Guides', () => {
-    render(<Guides />);
+import processedGamesReducer, {
+  initialState as processedGamesInitialState,
+} from '@/store/slices/processedGamesSlice';
+import genresReducer, { initialState as genresInitialState } from '@/store/slices/genresSlice';
+import developerReducer, {
+  initialState as developerInitialState,
+} from '@/store/slices/developerSlice';
+import difficultyReducer, {
+  initialState as difficultyInitialState,
+} from '@/store/slices/difficultySlice';
+import platformsReducer, {
+  initialState as platformsInitialState,
+} from '@/store/slices/platformsSlice';
+
+jest.mock('@/store/api/gamesApi', () => ({
+  useGetGamesQuery: jest.fn(),
+}));
+
+jest.mock('@/app/components/guides/SearchBar', () => {
+  const SearchBarMock = ({ search, setSearch }) => (
+    <input data-testid="search-bar" value={search} onChange={e => setSearch(e.target.value)} />
+  );
+  SearchBarMock.displayName = 'SearchBarMock';
+  return SearchBarMock;
+});
+
+jest.mock('@/app/components/ui/AlertMessage', () => {
+  const AlertMessageMock = ({ message }) => <div data-testid="alert">{message}</div>;
+  AlertMessageMock.displayName = 'AlertMessageMock';
+  return AlertMessageMock;
+});
+
+jest.mock('@/app/components/guides/GameGrid', () => {
+  const GameGridMock = ({ games }) => <div data-testid="game-grid">{games.length} games</div>;
+  GameGridMock.displayName = 'GameGridMock';
+  return GameGridMock;
+});
+
+jest.mock('@/app/components/ui/Skeleton', () => {
+  const SkeletonMock = () => <div data-testid="skeleton">Loading...</div>;
+  SkeletonMock.displayName = 'SkeletonMock';
+  return SkeletonMock;
+});
+
+jest.mock('@/app/components/guides/filters/SortFilter', () => {
+  const SortFilterMock = () => <div data-testid="sort-filter" />;
+  SortFilterMock.displayName = 'SortFilterMock';
+  return SortFilterMock;
+});
+
+jest.mock('@/app/components/guides/filters/FiltersPanel', () => {
+  const FiltersPanelMock = () => <div data-testid="filters-panel" />;
+  FiltersPanelMock.displayName = 'FiltersPanelMock';
+  return FiltersPanelMock;
+});
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }) => <div {...props}>{children}</div>,
+  },
+}));
+
+jest.mock('lucide-react', () => ({
+  BookOpen: () => <svg data-testid="book-icon" />,
+  ChevronDown: () => <svg data-testid="chevron-icon" />,
+}));
+
+const createTestStore = () =>
+  configureStore({
+    reducer: {
+      processedGames: processedGamesReducer,
+      genres: genresReducer,
+      developer: developerReducer,
+      difficulty: difficultyReducer,
+      platforms: platformsReducer,
+    },
+    preloadedState: {
+      processedGames: processedGamesInitialState,
+      genres: genresInitialState,
+      developer: developerInitialState,
+      difficulty: difficultyInitialState,
+      platforms: platformsInitialState,
+    },
+  });
+
+describe('Guides Component', () => {
+  const mockGames = {
+    games: [
+      { id: 1, title: 'Game 1', platform: 'PC', genre: 'Action', hours: 20, release_year: 2020 },
+      { id: 2, title: 'Game 2', platform: 'PS5', genre: 'RPG', hours: 40, release_year: 2021 },
+    ],
+  };
+
+  it('renders loading state', () => {
+    (useGetGamesQuery as jest.Mock).mockReturnValue({
+      isLoading: true,
+      data: null,
+      error: null,
+    });
+
+    render(
+      <Provider store={createTestStore()}>
+        <Guides />
+      </Provider>,
+    );
+
+    expect(screen.getByTestId('skeleton')).toBeInTheDocument();
     expect(screen.getByText('Οδηγοί')).toBeInTheDocument();
   });
 
-  it('renders the search bar', () => {
-    render(<Guides />);
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-  });
-
-  it('shows skeleton while loading', async () => {
-    render(<Guides />);
-    expect(screen.getByTestId('skeleton')).toBeInTheDocument();
-    await waitFor(() => expect(screen.queryByTestId('skeleton')).not.toBeInTheDocument());
-  });
-
-  it('shows alert message on error', async () => {
-    server.use(
-      rest.get('/api/games', (req, res, ctx) => {
-        return res(ctx.status(500), ctx.json({ message: 'Internal Server Error' }));
-      }),
-    );
-
-    render(<Guides />);
-
-    await waitFor(() =>
-      expect(screen.getByText('Σφάλμα κατά τη φόρτωση των παιχνιδιών.')).toBeInTheDocument(),
-    );
-  });
-
-  it('shows game grid when data is loaded', async () => {
-    render(<Guides />);
-    await waitFor(() => expect(screen.getByText('Elden Ring')).toBeInTheDocument());
-  });
-
-  it('shows no results message when search has no matches', async () => {
-    render(<Guides />);
-    await waitFor(() => expect(screen.getByText('Elden Ring')).toBeInTheDocument());
-
-    const searchInput = screen.getByRole('textbox');
-
-    await act(async () => {
-      fireEvent.change(searchInput, { target: { value: 'NonExistingGame' } });
+  it('renders games when data is loaded', async () => {
+    (useGetGamesQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockGames,
+      error: null,
     });
 
-    await waitFor(() => expect(screen.getByText('Δεν βρέθηκαν παιχνίδια.')).toBeInTheDocument());
+    render(
+      <Provider store={createTestStore()}>
+        <Guides />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('game-grid')).toBeInTheDocument();
+      expect(screen.getByText('2 games')).toBeInTheDocument();
+    });
+  });
+
+  it('shows error message when API fails', async () => {
+    (useGetGamesQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: null,
+      error: { status: 500, data: 'Server error' },
+    });
+
+    render(
+      <Provider store={createTestStore()}>
+        <Guides />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alert')).toBeInTheDocument();
+    });
+  });
+
+  it('shows no games message when filtered results are empty', async () => {
+    (useGetGamesQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: { games: [] },
+      error: null,
+    });
+
+    render(
+      <Provider store={createTestStore()}>
+        <Guides />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Δεν βρέθηκαν παιχνίδια.')).toBeInTheDocument();
+    });
+  });
+
+  it('toggles filters panel', async () => {
+    (useGetGamesQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockGames,
+      error: null,
+    });
+
+    const { rerender } = render(
+      <Provider store={createTestStore()}>
+        <Guides />
+      </Provider>,
+    );
+
+    const filterButton = screen.getByText('Φίλτρα');
+    filterButton.click();
+
+    rerender(
+      <Provider store={createTestStore()}>
+        <Guides />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('filters-panel')).toBeInTheDocument();
+    });
   });
 });

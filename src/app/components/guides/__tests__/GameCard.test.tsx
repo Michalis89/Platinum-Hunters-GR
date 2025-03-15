@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import GameCard from '../GameCard';
-import { Game } from '@/types/interfaces';
+import { ProcessedGame } from '@/types/interfaces'; // Import the correct interface
 
 jest.mock('next/image', () => {
   const MockImage = (props: { alt: string }) => <div data-testid="game-image" {...props} />;
@@ -22,20 +22,21 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }));
 
+jest.mock('lucide-react', () => ({
+  Trophy: () => <span data-testid="trophy-icon" />,
+}));
+
 describe('GameCard Component', () => {
-  const mockGame: Game = {
+  const mockGame: ProcessedGame = {
     id: 1,
     title: 'Elden Ring',
     platform: 'PlayStation 5',
     game_image: 'https://example.com/elden-ring.jpg',
-    trophies: {
-      Platinum: '1',
-      Gold: '4',
-      Silver: '14',
-      Bronze: '35',
-    },
+    platinum: 1,
+    gold: 4,
+    silver: 14,
+    bronze: 35,
     totalPoints: 1230,
-    steps: [],
   };
 
   it('renders correctly', () => {
@@ -47,10 +48,10 @@ describe('GameCard Component', () => {
 
   it('renders correct trophy counts', () => {
     render(<GameCard game={mockGame} />);
-    expect(screen.getByText(mockGame.trophies.Platinum)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.trophies.Gold)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.trophies.Silver)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.trophies.Bronze)).toBeInTheDocument();
+    expect(screen.getByText(mockGame.platinum)).toBeInTheDocument();
+    expect(screen.getByText(mockGame.gold)).toBeInTheDocument();
+    expect(screen.getByText(mockGame.silver)).toBeInTheDocument();
+    expect(screen.getByText(mockGame.bronze)).toBeInTheDocument();
   });
 
   it('generates correct link URL', () => {

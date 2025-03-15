@@ -62,11 +62,10 @@ async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function POST(req: Request, context: any) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { params } = await context;
-    const gameId = parseInt(params.id as string);
+    const { id } = await params;
+    const gameId = parseInt(id);
 
     if (isNaN(gameId)) {
       return NextResponse.json({ error: 'Invalid game ID' }, { status: 400 });

@@ -7,11 +7,11 @@ export async function PUT(
   context: any,
 ) {
   try {
-    if (!context.params?.id) {
+    if (!(await context.params)?.id) {
       return NextResponse.json({ error: 'Missing game ID' }, { status: 400 });
     }
 
-    const gameId = Number(context.params.id);
+    const gameId = Number((await context.params).id);
     const { steps } = await req.json();
 
     if (!steps || !Array.isArray(steps)) {

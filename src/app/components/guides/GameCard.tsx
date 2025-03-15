@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Game } from '@/types/interfaces';
+import { ProcessedGame } from '@/types/interfaces';
+import { Trophy } from 'lucide-react';
 
 interface GameCardProps {
-  readonly game: Game;
+  readonly game: ProcessedGame;
 }
 
 export default function GameCard({ game }: GameCardProps) {
@@ -35,16 +36,20 @@ export default function GameCard({ game }: GameCardProps) {
 
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-300">
         <span className="flex items-center gap-1">
-          🏆 <span className="text-yellow-400">{game.trophies.Platinum}</span>
+          <Trophy className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-400">{game.platinum}</span>
         </span>
         <span className="flex items-center gap-1">
-          🥇 <span className="text-orange-400">{game.trophies.Gold}</span>
+          <Trophy className="h-5 w-5 text-yellow-400" />
+          <span className="text-yellow-400">{game.gold}</span>
         </span>
         <span className="flex items-center gap-1">
-          🥈 <span className="text-blue-300">{game.trophies.Silver}</span>
+          <Trophy className="h-5 w-5 text-gray-400" />
+          <span className="text-gray-400">{game.silver}</span>
         </span>
         <span className="flex items-center gap-1">
-          🥉 <span className="text-green-400">{game.trophies.Bronze}</span>
+          <Trophy className="h-5 w-5 text-orange-500" />
+          <span className="text-orange-500">{game.bronze}</span>
         </span>
       </div>
 

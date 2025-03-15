@@ -95,3 +95,57 @@ export interface GuideProps {
 export interface TrophyGuidesProps {
   guides: GuideProps[];
 }
+
+export interface CombinedGame {
+  id: number;
+  title: string;
+  platform: string;
+  game_image: string;
+  platinum: number;
+  gold: number;
+  silver: number;
+  bronze: number;
+  release_year?: number;
+  developer?: string;
+  publisher?: string;
+  genre?: string;
+  slug?: string;
+  metacritic?: number;
+  rating?: number;
+  platforms?: string[];
+  esrb_rating?: string;
+  difficulty?: string;
+  playthroughs?: number;
+  totalPoints?: number;
+  hours?: number;
+  steps?: {
+    title: string;
+    trophies: {
+      name: string;
+      type: string;
+      description: string;
+    }[];
+    description: string;
+  }[];
+}
+
+export interface Platform {
+  value: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+export interface Genre {
+  value: string;
+  label: string;
+}
+export interface ProcessedGame extends Omit<CombinedGame, 'difficulty'> {
+  difficulty: number;
+}
+
+export interface GamesResponse {
+  games: ProcessedGame[];
+  genres: string[];
+  developer: string[];
+  platforms: string[];
+  difficulty: number[];
+}

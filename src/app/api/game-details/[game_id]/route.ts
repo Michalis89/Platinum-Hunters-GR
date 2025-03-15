@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(req: Request, context: any) {
+export async function GET(req: Request, props: { params: Promise<{ game_id: string }> }) {
+  const params = await props.params;
   try {
-    const { params } = await context;
-    const gameId = params.game_id as string;
+    const gameId = params.game_id;
 
     if (!gameId) {
       return NextResponse.json({ error: 'Λάθος ID παιχνιδιού' }, { status: 400 });
     }
-
-    console.log('📥 Ανάκτηση λεπτομερειών για game_id:', gameId);
 
     const { data, error } = await supabase
       .from('game_details')

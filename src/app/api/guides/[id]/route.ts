@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(req: Request, context: any) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const { params } = await context;
-    const id = params.id as string;
+    const id = params.id;
 
     if (!id) {
       return NextResponse.json({ error: 'Λάθος ID οδηγού' }, { status: 400 });
     }
-
-    console.log('📥 Ανάκτηση οδηγού για game_id:', id);
 
     const { data: guides, error } = await supabase.from('guides').select('*').eq('game_id', id);
 

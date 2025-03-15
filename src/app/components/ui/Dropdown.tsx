@@ -4,16 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 type Option = {
   value: string;
   label: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
 };
 
 interface DropdownProps {
-  label: string;
+  label?: string;
   options: Option[];
   selectedValue: string;
   onSelect: (value: string) => void;
   isOpen: boolean;
   zIndex: number;
+  className?: string;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -23,6 +24,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   onSelect,
   isOpen,
   zIndex,
+  className,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(isOpen);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -31,32 +33,25 @@ const Dropdown: React.FC<DropdownProps> = ({
     setDropdownOpen(isOpen);
   }, [isOpen]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   const selectedOption = options.find(option => option.value === selectedValue);
 
   return (
-    <div className="relative">
-      <label htmlFor="dropdown" className="mb-4 block text-sm font-medium text-gray-300">
-        {label}
-      </label>
+    <div className={`relative ${className}`}>
+      {label && (
+        <label htmlFor="dropdown" className="mb-4 block text-sm font-medium text-gray-300">
+          {label}
+        </label>
+      )}
       <button
         type="button"
-        onClick={() => setDropdownOpen(!dropdownOpen)}
+        onClick={e => {
+          e.stopPropagation();
+          setDropdownOpen(prev => !prev);
+        }}
         data-testid="dropdown"
-        className="flex w-full items-center justify-center space-x-2 rounded-lg border border-gray-700 bg-gray-800 p-3 text-white"
+        className={`flex w-full items-center justify-between space-x-2 rounded-lg border ${
+          dropdownOpen ? 'border-blue-400' : 'border-gray-700'
+        } bg-gray-800 p-3 text-white transition-all duration-300 hover:bg-gray-700`}
       >
         {selectedOption ? (
           <>
@@ -66,8 +61,18 @@ const Dropdown: React.FC<DropdownProps> = ({
         ) : (
           'Επιλέξτε'
         )}
+        <motion.svg
+          className={`h-5 w-5 text-gray-400 transition-transform ${
+            dropdownOpen ? 'rotate-180' : ''
+          }`}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+        </motion.svg>
       </button>
-
       <AnimatePresence>
         {dropdownOpen && (
           <motion.div
@@ -76,21 +81,27 @@ const Dropdown: React.FC<DropdownProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
-            style={{ zIndex: zIndex }}
+            className="absolute left-0 mt-1 w-full overflow-y-auto rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
+            style={{
+              zIndex: zIndex,
+              maxHeight: '300px',
+            }}
             data-testid="dropdown-options"
           >
             {options.map(option => (
               <button
                 key={option.value}
-                className="flex w-full cursor-pointer items-center p-3 text-left hover:bg-gray-700"
+                className={`flex w-full cursor-pointer items-center p-3 text-left ${
+                  option.value === selectedValue ? 'bg-gray-700' : 'hover:bg-gray-700'
+                }`}
                 onClick={() => {
                   onSelect(option.value);
                   setDropdownOpen(false);
                 }}
                 type="button"
               >
-                {option.icon} <span className="ml-2">{option.label}</span>
+                {option.icon}
+                <span className="ml-2">{option.label}</span>
               </button>
             ))}
           </motion.div>
