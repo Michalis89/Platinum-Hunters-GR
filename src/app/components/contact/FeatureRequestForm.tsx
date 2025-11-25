@@ -10,7 +10,6 @@ export default function FeatureRequestForm() {
   const [featureDescription, setFeatureDescription] = useState('');
   const [featureReason, setFeatureReason] = useState('');
   const [featureExample, setFeatureExample] = useState('');
-  const [priority, setPriority] = useState('medium');
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +45,6 @@ export default function FeatureRequestForm() {
       description: featureDescription,
       reason: featureReason,
       example_url: featureExample || null,
-      priority: getPriorityLabel(priority).toLowerCase(),
     };
 
     setLoading(true);
@@ -62,19 +60,18 @@ export default function FeatureRequestForm() {
       if (!response.ok) throw new Error(result.error || 'Σφάλμα κατά την υποβολή.');
 
       setAlert({ type: 'success', message: '✅ Η υποβολή ολοκληρώθηκε επιτυχώς!' });
+
       setFeatureTitle('');
       setFeatureDescription('');
       setFeatureReason('');
       setFeatureExample('');
-      setPriority('medium');
+      setErrors({});
     } catch (error) {
-      let errorMessage = '❌ Κάτι πήγε στραβά, δοκιμάστε ξανά.';
-
-      if (error instanceof Error) {
-        errorMessage = '❌ ' + error.message;
-      }
-
-      setAlert({ type: 'error', message: errorMessage });
+      setAlert({
+        type: 'error',
+        message:
+          error instanceof Error ? `❌ ${error.message}` : '❌ Κάτι πήγε στραβά, δοκιμάστε ξανά.',
+      });
     } finally {
       setLoading(false);
     }
@@ -87,14 +84,6 @@ export default function FeatureRequestForm() {
     } catch {
       return false;
     }
-  };
-  const getPriorityLabel = (level: string): string => {
-    const priorityMap: { [key: string]: string } = {
-      low: 'low',
-      medium: 'medium',
-      high: 'high',
-    };
-    return priorityMap[level.toLowerCase()] || 'medium';
   };
 
   return (
@@ -116,7 +105,7 @@ export default function FeatureRequestForm() {
         }}
         className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.title ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
-      <FormErrorMessage message={errors.title} />
+      <FormErrorMessage message={errors.title} aria-live="assertive" />
 
       <label htmlFor="featureDescription" className="block text-sm font-medium text-gray-300">
         Περιγραφή της ιδέας <span className="text-red-500">*</span>
@@ -133,7 +122,7 @@ export default function FeatureRequestForm() {
         }}
         className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.description ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
-      <FormErrorMessage message={errors.description} />
+      <FormErrorMessage message={errors.description} aria-live="assertive" />
 
       <label htmlFor="featureReason" className="block text-sm font-medium text-gray-300">
         Γιατί είναι χρήσιμο αυτό το feature; <span className="text-red-500">*</span>
@@ -150,7 +139,7 @@ export default function FeatureRequestForm() {
         }}
         className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.reason ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
-      <FormErrorMessage message={errors.reason} />
+      <FormErrorMessage message={errors.reason} aria-live="assertive" />
 
       <label htmlFor="featureExample" className="block text-sm font-medium text-gray-300">
         Παράδειγμα από άλλο site (προαιρετικό)
@@ -173,26 +162,7 @@ export default function FeatureRequestForm() {
         }}
         className={`w-full rounded-lg border bg-gray-800 p-3 ${errors.example ? 'border-red-500' : 'border-gray-700'} text-white`}
       />
-      <FormErrorMessage message={errors.example} />
-
-      <label htmlFor="priority" className="block text-sm font-medium text-gray-300">
-        Προτεραιότητα Feature
-      </label>
-      <div className="flex space-x-4">
-        {['low', 'medium', 'high'].map(level => (
-          <label key={level} className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="priority"
-              value={level}
-              checked={priority === level}
-              onChange={() => setPriority(level)}
-              className="form-radio text-blue-500"
-            />
-            <span className="text-gray-300">{getPriorityLabel(level)}</span>
-          </label>
-        ))}
-      </div>
+      <FormErrorMessage message={errors.example} aria-live="assertive" />
 
       <button
         type="submit"

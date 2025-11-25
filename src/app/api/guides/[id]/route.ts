@@ -1,29 +1,56 @@
 import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(req: Request, context: any) {
+interface GuideStep {
+  step_order?: number;
+  order?: number;
+  title: string;
+  description: string;
+  trophies?: unknown[];
+}
+
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const { params } = await context;
-    const id = params.id as string;
+    const id = params.id;
 
     if (!id) {
       return NextResponse.json({ error: 'Λάθος ID οδηγού' }, { status: 400 });
     }
 
-    console.log('📥 Ανάκτηση οδηγού για game_id:', id);
-
-    const { data: guides, error } = await supabase.from('guides').select('*').eq('game_id', id);
+    const { data: guides, error } = await supabase
+      .from('guides')
+      .select(
+        `
+        *,
+        guide_steps (*)
+      `,
+      )
+      .eq('game_id', id);
 
     if (error) {
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
     }
 
     if (!guides || guides.length === 0) {
       return NextResponse.json({ error: 'Guide not found' }, { status: 404 });
     }
 
-    return NextResponse.json(guides);
+    // Transform guide_steps array to steps array with proper structure
+    const transformedGuides = guides.map(guide => ({
+      ...guide,
+      steps: (guide.guide_steps || [])
+        .sort((a: GuideStep, b: GuideStep) => (a.step_order || a.order || 0) - (b.step_order || b.order || 0))
+        .map((step: GuideStep) => ({
+          title: step.title,
+          description: step.description,
+          trophies: step.trophies || [],
+        })),
+      guide_steps: undefined, // Remove the nested guide_steps property
+    }));
+
+    return NextResponse.json(transformedGuides);
   } catch (error) {
     console.error('❌ Σφάλμα διακομιστή:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -11,7 +11,7 @@ import AlertMessage from '../AlertMessage';
 describe('AlertMessage Component', () => {
   jest.useFakeTimers();
 
-  test('renders success alert with message', () => {
+  it('renders success alert with message', () => {
     render(<AlertMessage type="success" message="Success message" />);
 
     const alertElement = screen.getByText('Success message');
@@ -19,7 +19,7 @@ describe('AlertMessage Component', () => {
     expect(alertElement.closest('.bg-green-500')).toBeTruthy();
   });
 
-  test('renders error alert with message', () => {
+  it('renders error alert with message', () => {
     render(<AlertMessage type="error" message="Error message" />);
 
     const alertElement = screen.getByText('Error message');
@@ -27,7 +27,7 @@ describe('AlertMessage Component', () => {
     expect(alertElement.closest('.bg-red-500')).toBeTruthy();
   });
 
-  test('closes alert when close button is clicked', async () => {
+  it('closes alert when close button is clicked', async () => {
     render(<AlertMessage type="error" message="Error message" />);
 
     const closeButton = screen.getByRole('button');
@@ -38,7 +38,7 @@ describe('AlertMessage Component', () => {
     });
   });
 
-  test('auto-hides alert after duration', async () => {
+  it('auto-hides alert after duration', async () => {
     render(<AlertMessage type="success" message="Auto-hide message" duration={3000} />);
 
     expect(screen.getByText('Auto-hide message')).toBeInTheDocument();

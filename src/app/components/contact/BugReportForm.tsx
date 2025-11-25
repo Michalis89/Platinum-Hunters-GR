@@ -143,6 +143,7 @@ export default function BugReportForm() {
                     setScreenshotPreview(URL.createObjectURL(e.target.files[0]));
                   }
                 }}
+                data-testid="file-input"
               />
             </div>
 
@@ -154,6 +155,8 @@ export default function BugReportForm() {
                   width={128}
                   height={128}
                   className="rounded-lg object-cover"
+                  sizes="128px"
+                  style={{ width: 'auto', height: 'auto' }}
                 />
               </div>
             )}
