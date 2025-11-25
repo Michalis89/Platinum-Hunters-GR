@@ -11,11 +11,14 @@ import {
   Cpu,
   Target,
   LandPlot,
+  Gamepad,
 } from 'lucide-react';
 import { JSX } from 'react';
 
 export const getIcon = (input: string): JSX.Element => {
   switch (input.toLowerCase()) {
+    case 'gamepad':
+      return <Gamepad className="h-5 w-5 text-gray-400" />;
     case 'action':
       return <Sword className="h-5 w-5 text-red-400" />;
     case 'adventure':

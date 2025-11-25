@@ -1,11 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setGenres, setSelectedGenre } from '@/store/slices/genresSlice';
 import { RootState } from '@/store/store';
 import { useGetGamesQuery } from '@/store/api/gamesApi';
 import { getIcon } from '@/utils/icons/getIcon';
-import Dropdown from '../../ui/Dropdown';
+import Dropdown from '../ui/Dropdown';
 
 export default function GenreFilter() {
   const dispatch = useDispatch();
@@ -15,14 +16,16 @@ export default function GenreFilter() {
   const genres = useSelector((state: RootState) => state.genres.genres);
   const selectedGenre = useSelector((state: RootState) => state.genres.selectedGenre);
 
-  if (data?.genres && genres.length === 0) {
-    const formattedGenres = data.genres.map(genre => ({
-      value: genre,
-      label: `${genre}`,
-    }));
+  useEffect(() => {
+    if (data?.genres && genres.length === 0) {
+      const formattedGenres = data.genres.map(genre => ({
+        value: genre,
+        label: `${genre}`,
+      }));
 
-    dispatch(setGenres(formattedGenres));
-  }
+      dispatch(setGenres(formattedGenres));
+    }
+  }, [data, genres.length, dispatch]);
 
   const options = [
     {

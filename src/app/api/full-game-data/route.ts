@@ -3,7 +3,7 @@ import supabase from '@/lib/db';
 
 export async function GET() {
   try {
-    const { data, error } = await supabase.from('combined_games').select('*');
+    const { data, error } = await supabase.from('full_game_data').select('*');
 
     if (error) throw new Error(error.message);
     return NextResponse.json(data);

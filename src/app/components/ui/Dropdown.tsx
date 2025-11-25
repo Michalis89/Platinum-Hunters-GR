@@ -33,10 +33,26 @@ const Dropdown: React.FC<DropdownProps> = ({
     setDropdownOpen(isOpen);
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
   const selectedOption = options.find(option => option.value === selectedValue);
 
   return (
-    <div className={`relative ${className}`}>
+    <div ref={dropdownRef} className={`relative ${className}`}>
       {label && (
         <label htmlFor="dropdown" className="mb-4 block text-sm font-medium text-gray-300">
           {label}
@@ -76,7 +92,6 @@ const Dropdown: React.FC<DropdownProps> = ({
       <AnimatePresence>
         {dropdownOpen && (
           <motion.div
-            ref={dropdownRef}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

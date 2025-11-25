@@ -1,4 +1,3 @@
-// src/app/api/combined-games/route.test.ts
 import { GET } from './route';
 import supabase from '@/lib/db';
 
@@ -37,7 +36,7 @@ describe('GET /api/games', () => {
 
     expect(response.status).toBe(200);
     expect(json).toEqual(mockGames); // Fixed from .equal to .toEqual
-    expect(supabase.from).toHaveBeenCalledWith('combined_games');
+    expect(supabase.from).toHaveBeenCalledWith('full_game_data');
     expect(supabase.from().select).toHaveBeenCalledWith('*');
   });
 

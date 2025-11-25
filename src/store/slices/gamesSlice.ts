@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CombinedGame } from '@/types/interfaces';
+import { FullGameData } from '@/types/interfaces';
 
 interface GamesState {
-  games: CombinedGame[];
+  games: FullGameData[];
 }
 
 export const initialState: GamesState = {
@@ -13,7 +13,7 @@ const gamesSlice = createSlice({
   name: 'games',
   initialState,
   reducers: {
-    setGames(state, action: PayloadAction<CombinedGame[]>) {
+    setGames(state, action: PayloadAction<FullGameData[]>) {
       state.games = action.payload;
     },
   },

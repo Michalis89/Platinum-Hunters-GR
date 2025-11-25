@@ -155,6 +155,8 @@ export default function BugReportForm() {
                   width={128}
                   height={128}
                   className="rounded-lg object-cover"
+                  sizes="128px"
+                  style={{ width: 'auto', height: 'auto' }}
                 />
               </div>
             )}

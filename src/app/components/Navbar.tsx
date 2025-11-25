@@ -11,7 +11,7 @@ export default function Navbar() {
   const isDev = process.env.NODE_ENV === 'development';
 
   const navLinks = [
-    { href: '/pages/guide', label: 'Οδηγοί', icon: <Book size={18} /> },
+    { href: '/pages/guides', label: 'Οδηγοί', icon: <Book size={18} /> },
     { href: '/pages/reviews', label: 'Κριτικές', icon: <Star size={18} /> },
     { href: '/pages/news', label: 'Νέα', icon: <Newspaper size={18} /> },
     { href: '/pages/contact', label: 'Επικοινωνία', icon: <Mail size={18} /> },

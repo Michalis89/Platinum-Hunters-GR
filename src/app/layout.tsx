@@ -35,7 +35,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <StructuredData data={trophyGuideStructuredData} />
         <StructuredData data={contactFormStructuredData} />
       </head>
-      <body className={` ${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        suppressHydrationWarning
+        className={` ${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <Providers>
           <NavbarWrapper />
           <ScrollToTop />

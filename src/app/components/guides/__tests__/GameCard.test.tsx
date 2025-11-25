@@ -60,7 +60,7 @@ describe('GameCard Component', () => {
       mockGame.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     );
     const link = screen.getByTestId('game-link');
-    expect(link).toHaveAttribute('href', `/pages/guide/${expectedSlug}`);
+    expect(link).toHaveAttribute('href', `/pages/guides/${expectedSlug}`);
   });
 
   it('renders total points correctly', () => {

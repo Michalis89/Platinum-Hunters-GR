@@ -127,11 +127,13 @@ export default function GameDetailsPage() {
         <div className="w-full max-w-3xl rounded-lg bg-gray-900 p-4 shadow-lg md:p-6">
           <div className="mb-4 flex justify-center">
             <Image
-              src={game.game_image ?? '/default-image.png'}
+              src={game.cover_image ?? '/og-image.png'}
               alt={game.title}
               width={200}
               height={200}
               className="rounded-lg object-contain shadow-md"
+              sizes="200px"
+              style={{ width: 'auto', height: 'auto' }}
             />
           </div>
 
@@ -139,18 +141,39 @@ export default function GameDetailsPage() {
             {game.title}
           </h1>
 
-          {guides.length > 0 && (
-            <div className="mt-4 flex flex-col justify-center gap-2 md:flex-row md:gap-4">
-              <GuideStats
-                difficulty={guides[0].difficulty}
-                difficultyColor={guides[0].difficulty_color}
-                playthroughs={guides[0].playthroughs}
-                playthroughsColor={guides[0].playthroughs_color}
-                hours={guides[0].hours}
-                hoursColor={guides[0].hours_color}
-              />
-            </div>
-          )}
+          {guides.length > 0 &&
+            guides[0].difficulty_rating &&
+            guides[0].estimated_hours &&
+            guides[0].estimated_playthroughs && (
+              <div className="mt-4 flex flex-col justify-center gap-2 md:flex-row md:gap-4">
+                <GuideStats
+                  difficulty={guides[0].difficulty_rating?.toString() || 'N/A'}
+                  difficultyColor={
+                    (guides[0].difficulty_rating || 0) <= 3
+                      ? 'green'
+                      : (guides[0].difficulty_rating || 0) <= 7
+                        ? 'yellow'
+                        : 'red'
+                  }
+                  playthroughs={guides[0].estimated_playthroughs || 0}
+                  playthroughsColor={
+                    (guides[0].estimated_playthroughs || 0) === 1
+                      ? 'green'
+                      : (guides[0].estimated_playthroughs || 0) === 2
+                        ? 'yellow'
+                        : 'red'
+                  }
+                  hours={guides[0].estimated_hours || 0}
+                  hoursColor={
+                    (guides[0].estimated_hours || 0) <= 10
+                      ? 'green'
+                      : (guides[0].estimated_hours || 0) <= 30
+                        ? 'yellow'
+                        : 'red'
+                  }
+                />
+              </div>
+            )}
 
           {trophies && <TrophyStats trophies={trophies} />}
 

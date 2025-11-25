@@ -6,7 +6,12 @@ export const metadata: Metadata = {
     'Complete trophy guides and strategies to achieve platinum trophies in your favorite games. Join the Platinum Hunters GR community!',
   metadataBase: new URL('https://platinum-hunters.gr'),
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
   openGraph: {

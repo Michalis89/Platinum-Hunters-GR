@@ -1,11 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useGetGamesQuery } from '@/store/api/gamesApi';
 import { RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import Dropdown from '../../ui/Dropdown';
 import { setDeveloper, setSelectedDeveloper } from '@/store/slices/developerSlice';
 import { getIcon } from '@/utils/icons/getIcon';
+import Dropdown from '../ui/Dropdown';
 
 export default function DeveloperFilter() {
   const dispatch = useDispatch();
@@ -15,14 +16,16 @@ export default function DeveloperFilter() {
   const developer = useSelector((state: RootState) => state.developer.developer);
   const selectedDeveloper = useSelector((state: RootState) => state.developer.selectedDeveloper);
 
-  if (data?.developer && developer.length === 0) {
-    const formattedDevelopers = data.developer.map(developer => ({
-      value: developer,
-      label: `${developer}`,
-    }));
+  useEffect(() => {
+    if (data?.developers && developer.length === 0) {
+      const formattedDevelopers = data.developers.map(developer => ({
+        value: developer,
+        label: `${developer}`,
+      }));
 
-    dispatch(setDeveloper(formattedDevelopers));
-  }
+      dispatch(setDeveloper(formattedDevelopers));
+    }
+  }, [data, developer.length, dispatch]);
 
   const options = [
     {
@@ -30,7 +33,7 @@ export default function DeveloperFilter() {
       label: 'Όλοι οι Προγραμματιστές',
       icon: getIcon('developer'),
     },
-    ...(data?.developer.map(developer => ({
+    ...(data?.developers.map(developer => ({
       value: developer,
       label: `${developer}`,
       icon: getIcon('developer'),

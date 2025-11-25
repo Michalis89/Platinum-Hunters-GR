@@ -1,6 +1,6 @@
 'use client';
 
-import Dropdown from '../../ui/Dropdown';
+import Dropdown from '../ui/Dropdown';
 import {
   CaseSensitive,
   Target,

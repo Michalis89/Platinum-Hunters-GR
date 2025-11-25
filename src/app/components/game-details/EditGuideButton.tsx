@@ -1,10 +1,46 @@
 import Link from 'next/link';
+import { useState } from 'react';
 
 interface EditGuideButtonProps {
   readonly gameId: number;
 }
 
 export default function EditGuideButton({ gameId }: EditGuideButtonProps) {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  // Handle delete
+  const handleDelete = async () => {
+    if (!confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτό το παιχνίδι;')) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`/api/delete-game/${gameId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage('✅ Το παιχνίδι διαγράφηκε επιτυχώς!');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      } else {
+        setMessage(result.error || '❌ Σφάλμα κατά τη διαγραφή!');
+      }
+    } catch (error) {
+      console.error('❌ Σφάλμα:', error);
+      setMessage('❌ Σφάλμα κατά τη διαγραφή!');
+    }
+
+    setLoading(false);
+  };
+
   if (process.env.NODE_ENV === 'production') {
     return null;
   }
@@ -17,6 +53,18 @@ export default function EditGuideButton({ gameId }: EditGuideButtonProps) {
       >
         ✏️ Επεξεργασία Guide
       </Link>
+
+      {/* Delete Game Button */}
+      <button
+        onClick={handleDelete}
+        disabled={loading}
+        className="ml-4 rounded-lg bg-red-600 px-4 py-3 text-lg text-white transition hover:bg-red-700"
+      >
+        {loading ? '🗑️ Διαγραφή...' : '🗑️ Διαγραφή Παιχνιδιού'}
+      </button>
+
+      {/* Feedback Message */}
+      {message && <p className="mt-2 text-gray-300">{message}</p>}
     </div>
   );
 }

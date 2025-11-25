@@ -11,20 +11,33 @@ export async function GET(req: Request, props: { params: Promise<{ game_id: stri
     }
 
     const { data, error } = await supabase
-      .from('game_details')
-      .select('*')
-      .eq('game_id', gameId)
+      .from('full_game_data')
+      .select('release_year, developer, publisher, genres, slug, metacritic_score, rating, platforms')
+      .eq('id', gameId)
       .single();
 
     if (error) {
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
     }
 
     if (!data) {
       return NextResponse.json({ error: 'Game details not found' }, { status: 404 });
     }
 
-    return NextResponse.json(data);
+    // Transform to match GameDetails interface
+    const gameDetails = {
+      release_year: data.release_year,
+      developer: data.developer,
+      publisher: data.publisher,
+      genre: data.genres?.[0] || null, // Take first genre for compatibility
+      slug: data.slug,
+      metacritic: data.metacritic_score,
+      rating: data.rating,
+      platforms: data.platforms,
+    };
+
+    return NextResponse.json(gameDetails);
   } catch (error) {
     console.error('❌ Σφάλμα διακομιστή:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

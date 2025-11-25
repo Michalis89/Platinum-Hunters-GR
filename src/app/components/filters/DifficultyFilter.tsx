@@ -3,7 +3,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { setSelectedDifficulty } from '@/store/slices/difficultySlice';
-import SingleSlider from '../../ui/SingleSlider';
+import SingleSlider from '../ui/SingleSlider';
 
 export default function DifficultyFilter() {
   const dispatch = useDispatch();

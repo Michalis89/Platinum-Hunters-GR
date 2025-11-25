@@ -1,13 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import SearchBar from '@/app/components/guides/SearchBar';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import GameGrid from '@/app/components/guides/GameGrid';
 import { BookOpen, ChevronDown } from 'lucide-react';
 import Skeleton from '@/app/components/ui/Skeleton';
-import SortFilter from '@/app/components/guides/filters/SortFilter';
-import FiltersPanel from '@/app/components/guides/filters/FiltersPanel';
 import { motion } from 'framer-motion';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
@@ -18,6 +15,9 @@ import { resetGenre } from '@/store/slices/genresSlice';
 import { resetDeveloper } from '@/store/slices/developerSlice';
 import { resetDifficulty } from '@/store/slices/difficultySlice';
 import { resetPlatform } from '@/store/slices/platformsSlice';
+import { SearchBar } from '@/app/components/ui/SearchBar';
+import SortFilter from '@/app/components/filters/SortFilter';
+import FiltersPanel from '@/app/components/filters/FiltersPanel';
 
 export default function Guides() {
   const dispatch = useDispatch();
@@ -44,21 +44,34 @@ export default function Guides() {
     }
   }, [games, dispatch]);
 
+  // Helper function to check if search matches whole words or start of title
+  const matchesSearch = (title: string, searchTerm: string) => {
+    if (!searchTerm) return true;
+    const lowerTitle = title.toLowerCase();
+    const lowerSearch = searchTerm.toLowerCase();
+
+    // Check if it starts with the search term
+    if (lowerTitle.startsWith(lowerSearch)) return true;
+
+    // Check if any word starts with the search term
+    const words = lowerTitle.split(/\s+/);
+    return words.some(word => word.startsWith(lowerSearch));
+  };
+
   const filteredGames = games?.games
 
     ?.filter(
       game =>
-        game.title.toLowerCase().includes(search.toLowerCase()) &&
-        (!platformFilter || game.platform === platformFilter) &&
+        matchesSearch(game.title, search) &&
+        (!platformFilter || game.platforms?.includes(platformFilter)) &&
         (!developerFilter || game.developer === developerFilter) &&
-        (!genreFilter || game.genre?.includes(genreFilter)) &&
+        (!genreFilter || game.genres?.includes(genreFilter)) &&
         (difficultyFilter === null ||
           difficultyFilter === 0 ||
-          (difficultyFilter !== 0 && (game.difficulty ?? 0) === difficultyFilter)) &&
-        (game.hours ?? 0) >= hourRange[0] &&
-        (game.hours ?? 0) <= hourRange[1] &&
-        (game.release_year ?? 0) >= yearRange[0] &&
-        (game.release_year ?? 0) <= yearRange[1],
+          (difficultyFilter !== 0 && (game.average_difficulty ?? 0) === difficultyFilter)) &&
+        (game.average_hours ?? 0) >= hourRange[0] &&
+        (game.average_hours ?? 0) <= hourRange[1] &&
+        (!game.release_year || (game.release_year >= yearRange[0] && game.release_year <= yearRange[1])),
     )
     ?.sort((a, b) => {
       if (sortBy === 'title') {
@@ -69,14 +82,14 @@ export default function Guides() {
 
       if (sortBy === 'difficulty') {
         return sortOrder === 'asc'
-          ? (a.difficulty ?? 0) - (b.difficulty ?? 0)
-          : (b.difficulty ?? 0) - (a.difficulty ?? 0);
+          ? (a.average_difficulty ?? 0) - (b.average_difficulty ?? 0)
+          : (b.average_difficulty ?? 0) - (a.average_difficulty ?? 0);
       }
 
       if (sortBy === 'hours') {
         return sortOrder === 'asc'
-          ? (a.hours ?? 0) - (b.hours ?? 0)
-          : (b.hours ?? 0) - (a.hours ?? 0);
+          ? (a.average_hours ?? 0) - (b.average_hours ?? 0)
+          : (b.average_hours ?? 0) - (a.average_hours ?? 0);
       }
 
       if (sortBy === 'rating') {
@@ -120,7 +133,7 @@ export default function Guides() {
         <span>Οδηγοί</span>
       </h1>
 
-      <SearchBar search={search} setSearch={setSearch} />
+      <SearchBar value={search} onChange={setSearch} placeholder="Αναζήτηση οδηγού..." />
 
       {error && <AlertMessage type="error" message={parseError(error)} />}
 
@@ -153,6 +166,7 @@ export default function Guides() {
           yearRange={yearRange}
           setYearRange={setYearRange}
           onResetFilters={handleResetFilters}
+          onClose={() => setIsOpen(false)}
         />
       </motion.div>
 
