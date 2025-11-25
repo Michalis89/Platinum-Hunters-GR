@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import xml2js from 'xml2js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const coverageFilePath = './coverage/clover.xml';
 const xmlData = fs.readFileSync(coverageFilePath, 'utf-8');
@@ -36,13 +36,13 @@ parser.parseString(xmlData, (err, result) => {
     return;
   }
 
-  const allFilesStmtCoverage = parseFloat(summary.statements) > 0 ? ((summary.coveredstatements / summary.statements) * 100).toFixed(2) : '0.00';
-  const allFilesBranchCoverage = parseFloat(summary.conditionals) > 0 ? ((summary.coveredconditionals / summary.conditionals) * 100).toFixed(2) : '0.00';
-  const allFilesFuncsCoverage = parseFloat(summary.methods) > 0 ? ((summary.coveredmethods / summary.methods) * 100).toFixed(2) : '0.00';
-  const allFilesLinesCoverage = parseFloat(summary.statements) > 0 ? ((summary.coveredstatements / summary.statements) * 100).toFixed(2) : '0.00';
+  const allFilesStmtCoverage = Number.parseFloat(summary.statements) > 0 ? ((summary.coveredstatements / summary.statements) * 100).toFixed(2) : '0.00';
+  const allFilesBranchCoverage = Number.parseFloat(summary.conditionals) > 0 ? ((summary.coveredconditionals / summary.conditionals) * 100).toFixed(2) : '0.00';
+  const allFilesFuncsCoverage = Number.parseFloat(summary.methods) > 0 ? ((summary.coveredmethods / summary.methods) * 100).toFixed(2) : '0.00';
+  const allFilesLinesCoverage = Number.parseFloat(summary.statements) > 0 ? ((summary.coveredstatements / summary.statements) * 100).toFixed(2) : '0.00';
 
   const colorize = (value) => {
-    const numValue = parseFloat(value);
+    const numValue = Number.parseFloat(value);
     if (numValue >= 80) return `<span style="color: green;">${value}%</span>`;
     if (numValue <= 50) return `<span style="color: red;">${value}%</span>`;
     return `<span style="color: orange;">${value}%</span>`;
@@ -72,12 +72,12 @@ parser.parseString(xmlData, (err, result) => {
       files.forEach(file => {
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
-        const projectRoot = path.resolve(__dirname, "../..").replace(/\\/g, "/");
+        const projectRoot = path.resolve(__dirname, "../..").replaceAll('\\', '/');
 
-        let filePath = file.$.path ? path.normalize(file.$.path).replace(/\\/g, "/") : "";
+        let filePath = file.$.path ? path.normalize(file.$.path).replaceAll('\\', '/') : "";
 
         if (!filePath.endsWith(`/${file.$.name}`)) {
-          filePath = path.join(filePath, file.$.name).replace(/\\/g, "/");
+          filePath = path.join(filePath, file.$.name).replaceAll('\\', '/');
         }
 
         filePath = filePath.replace(projectRoot, "").replace(/^\/?platinum-hunters\//, "");
@@ -85,12 +85,12 @@ parser.parseString(xmlData, (err, result) => {
 
         const metrics = file.metrics.$;
 
-        const statements = parseInt(metrics.statements, 10);
-        const coveredStatements = parseInt(metrics.coveredstatements, 10);
-        const conditionals = parseInt(metrics.conditionals, 10);
-        const coveredConditionals = parseInt(metrics.coveredconditionals, 10);
-        const methods = parseInt(metrics.methods, 10);
-        const coveredMethods = parseInt(metrics.coveredmethods, 10);
+        const statements = Number.parseInt(metrics.statements, 10);
+        const coveredStatements = Number.parseInt(metrics.coveredstatements, 10);
+        const conditionals = Number.parseInt(metrics.conditionals, 10);
+        const coveredConditionals = Number.parseInt(metrics.coveredconditionals, 10);
+        const methods = Number.parseInt(metrics.methods, 10);
+        const coveredMethods = Number.parseInt(metrics.coveredmethods, 10);
 
         const stmtCoverage = statements > 0 ? ((coveredStatements / statements) * 100).toFixed(2) : '0.00';
         const branchCoverage = conditionals > 0 ? ((coveredConditionals / conditionals) * 100).toFixed(2) : '0.00';

@@ -23,8 +23,18 @@ jest.mock('next/server', () => ({
 
 describe('GET /api/game-details/[game_id]', () => {
   it('should return game details for a valid game_id', async () => {
-    const mockGameDetails = {
-      game_id: '1',
+    const mockDatabaseData = {
+      release_year: 2023,
+      developer: 'Test Developer',
+      publisher: 'Test Publisher',
+      genres: ['Action'],
+      slug: 'test-game',
+      metacritic_score: 85,
+      rating: 4.5,
+      platforms: ['PC', 'PS5'],
+    };
+
+    const mockExpectedResponse = {
       release_year: 2023,
       developer: 'Test Developer',
       publisher: 'Test Publisher',
@@ -33,11 +43,10 @@ describe('GET /api/game-details/[game_id]', () => {
       metacritic: 85,
       rating: 4.5,
       platforms: ['PC', 'PS5'],
-      esrb_rating: 'Mature',
     };
 
     const mockSingle = jest.fn().mockResolvedValue({
-      data: mockGameDetails,
+      data: mockDatabaseData,
       error: null,
     });
     const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
@@ -47,22 +56,24 @@ describe('GET /api/game-details/[game_id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { game_id: '1' } };
+    const context = { params: Promise.resolve({ game_id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual(mockGameDetails);
-    expect(supabase.from).toHaveBeenCalledWith('game_details');
-    expect(mockSelect).toHaveBeenCalledWith('*');
-    expect(mockEq).toHaveBeenCalledWith('game_id', '1');
+    expect(json).toEqual(mockExpectedResponse);
+    expect(supabase.from).toHaveBeenCalledWith('full_game_data');
+    expect(mockSelect).toHaveBeenCalledWith(
+      'release_year, developer, publisher, genres, slug, metacritic_score, rating, platforms',
+    );
+    expect(mockEq).toHaveBeenCalledWith('id', '1');
     expect(mockSingle).toHaveBeenCalled();
   });
 
   it('should return 400 if no game_id is provided', async () => {
     const req = new Request('http://localhost:3000');
-    const context = { params: {} };
+    const context = { params: Promise.resolve({}) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -83,7 +94,7 @@ describe('GET /api/game-details/[game_id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { game_id: '1' } };
+    const context = { params: Promise.resolve({ game_id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -104,7 +115,7 @@ describe('GET /api/game-details/[game_id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { game_id: '1' } };
+    const context = { params: Promise.resolve({ game_id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -122,7 +133,7 @@ describe('GET /api/game-details/[game_id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { game_id: '1' } };
+    const context = { params: Promise.resolve({ game_id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();

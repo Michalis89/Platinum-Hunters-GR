@@ -23,13 +23,11 @@ jest.mock('@/store/api/gamesApi', () => ({
   useGetGamesQuery: jest.fn(),
 }));
 
-jest.mock('@/app/components/guides/SearchBar', () => {
-  const SearchBarMock = ({ search, setSearch }) => (
-    <input data-testid="search-bar" value={search} onChange={e => setSearch(e.target.value)} />
-  );
-  SearchBarMock.displayName = 'SearchBarMock';
-  return SearchBarMock;
-});
+jest.mock('@/app/components/ui/SearchBar', () => ({
+  SearchBar: ({ value, onChange }) => (
+    <input data-testid="search-bar" value={value} onChange={e => onChange(e.target.value)} />
+  ),
+}));
 
 jest.mock('@/app/components/ui/AlertMessage', () => {
   const AlertMessageMock = ({ message }) => <div data-testid="alert">{message}</div>;
@@ -49,16 +47,64 @@ jest.mock('@/app/components/ui/Skeleton', () => {
   return SkeletonMock;
 });
 
-jest.mock('@/app/components/guides/filters/SortFilter', () => {
+jest.mock('@/app/components/filters/SortFilter', () => {
   const SortFilterMock = () => <div data-testid="sort-filter" />;
   SortFilterMock.displayName = 'SortFilterMock';
   return SortFilterMock;
 });
 
-jest.mock('@/app/components/guides/filters/FiltersPanel', () => {
+jest.mock('@/app/components/filters/FiltersPanel', () => {
   const FiltersPanelMock = () => <div data-testid="filters-panel" />;
   FiltersPanelMock.displayName = 'FiltersPanelMock';
   return FiltersPanelMock;
+});
+
+jest.mock('@/app/components/ui/Dropdown', () => {
+  const DropdownMock = () => <div data-testid="dropdown" />;
+  DropdownMock.displayName = 'DropdownMock';
+  return DropdownMock;
+});
+
+jest.mock('@/app/components/filters/PlatformFilter', () => {
+  const PlatformFilterMock = () => <div data-testid="platform-filter" />;
+  PlatformFilterMock.displayName = 'PlatformFilterMock';
+  return PlatformFilterMock;
+});
+
+jest.mock('@/app/components/filters/GenreFilter', () => {
+  const GenreFilterMock = () => <div data-testid="genre-filter" />;
+  GenreFilterMock.displayName = 'GenreFilterMock';
+  return GenreFilterMock;
+});
+
+jest.mock('@/app/components/filters/DifficultyFilter', () => {
+  const DifficultyFilterMock = () => <div data-testid="difficulty-filter" />;
+  DifficultyFilterMock.displayName = 'DifficultyFilterMock';
+  return DifficultyFilterMock;
+});
+
+jest.mock('@/app/components/filters/DeveloperFilter', () => {
+  const DeveloperFilterMock = () => <div data-testid="developer-filter" />;
+  DeveloperFilterMock.displayName = 'DeveloperFilterMock';
+  return DeveloperFilterMock;
+});
+
+jest.mock('@/app/components/filters/HourFilter', () => {
+  const HourFilterMock = () => <div data-testid="hour-filter" />;
+  HourFilterMock.displayName = 'HourFilterMock';
+  return HourFilterMock;
+});
+
+jest.mock('@/app/components/filters/YearFilter', () => {
+  const YearFilterMock = () => <div data-testid="year-filter" />;
+  YearFilterMock.displayName = 'YearFilterMock';
+  return YearFilterMock;
+});
+
+jest.mock('@/app/components/filters/ResetFilters', () => {
+  const ResetFiltersMock = () => <div data-testid="reset-filters" />;
+  ResetFiltersMock.displayName = 'ResetFiltersMock';
+  return ResetFiltersMock;
 });
 
 jest.mock('framer-motion', () => ({

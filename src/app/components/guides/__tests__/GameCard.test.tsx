@@ -3,7 +3,7 @@ import GameCard from '../GameCard';
 import { ProcessedGame } from '@/types/interfaces'; // Import the correct interface
 
 jest.mock('next/image', () => {
-  const MockImage = (props: { alt: string }) => <div data-testid="game-image" {...props} />;
+  const MockImage = (props: { alt: string; src: string }) => <div data-testid="game-image" {...props} />;
   MockImage.displayName = 'NextImageMock';
   return MockImage;
 });
@@ -30,28 +30,29 @@ describe('GameCard Component', () => {
   const mockGame: ProcessedGame = {
     id: 1,
     title: 'Elden Ring',
-    platform: 'PlayStation 5',
-    game_image: 'https://example.com/elden-ring.jpg',
-    platinum: 1,
-    gold: 4,
-    silver: 14,
-    bronze: 35,
+    platforms: ['PlayStation 5'],
+    cover_image: 'https://example.com/elden-ring.jpg',
+    background_image: 'https://example.com/elden-ring-bg.jpg',
+    trophy_platinum: 1,
+    trophy_gold: 4,
+    trophy_silver: 14,
+    trophy_bronze: 35,
     totalPoints: 1230,
   };
 
   it('renders correctly', () => {
     render(<GameCard game={mockGame} />);
     expect(screen.getByText(mockGame.title)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.platform)).toBeInTheDocument();
-    expect(screen.getByTestId('game-image')).toHaveAttribute('src', mockGame.game_image);
+    expect(screen.getByText('PlayStation 5')).toBeInTheDocument();
+    expect(screen.getByTestId('game-image')).toHaveAttribute('src', mockGame.cover_image);
   });
 
   it('renders correct trophy counts', () => {
     render(<GameCard game={mockGame} />);
-    expect(screen.getByText(mockGame.platinum)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.gold)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.silver)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.bronze)).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_platinum.toString())).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_gold.toString())).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_silver.toString())).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_bronze.toString())).toBeInTheDocument();
   });
 
   it('generates correct link URL', () => {

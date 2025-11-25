@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import EditGuideButton from '../EditGuideButton';
 
 jest.mock('next/link', () => {
   const MockNextLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
@@ -13,22 +14,14 @@ jest.mock('next/link', () => {
 
 describe('EditGuideButton Component', () => {
   const gameId = 123;
+  const originalEnv = process.env.NODE_ENV;
 
-  const setNodeEnv = (env: 'development' | 'production') => {
-    Object.defineProperty(process.env, 'NODE_ENV', {
-      value: env,
-      configurable: true,
-    });
-  };
-
-  beforeEach(() => {
-    jest.resetModules();
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv;
   });
 
-  it('renders correctly in development mode', async () => {
-    setNodeEnv('development');
-
-    const { default: EditGuideButton } = await import('../EditGuideButton');
+  it('renders correctly in development mode', () => {
+    process.env.NODE_ENV = 'development';
 
     render(<EditGuideButton gameId={gameId} />);
 
@@ -36,5 +29,13 @@ describe('EditGuideButton Component', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', `/pages/edit-guide/${gameId}`);
     expect(screen.getByText('✏️ Επεξεργασία Guide')).toBeInTheDocument();
+  });
+
+  it('does not render in production mode', () => {
+    process.env.NODE_ENV = 'production';
+
+    const { container } = render(<EditGuideButton gameId={gameId} />);
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

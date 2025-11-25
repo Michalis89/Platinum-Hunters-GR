@@ -22,7 +22,7 @@ jest.mock('next/server', () => ({
 
 describe('GET /api/guides/[id]', () => {
   it('should return guides for a valid game_id', async () => {
-    const mockGuides = [
+    const mockDatabaseGuides = [
       {
         game_id: '1',
         difficulty: 'Easy',
@@ -31,11 +31,39 @@ describe('GET /api/guides/[id]', () => {
         playthroughs_color: 'blue',
         hours: 10,
         hours_color: 'yellow',
+        guide_steps: [
+          {
+            step_order: 1,
+            title: 'Step 1',
+            description: 'Description 1',
+            trophies: [],
+          },
+        ],
+      },
+    ];
+
+    const mockExpectedResponse = [
+      {
+        game_id: '1',
+        difficulty: 'Easy',
+        difficulty_color: 'green',
+        playthroughs: 1,
+        playthroughs_color: 'blue',
+        hours: 10,
+        hours_color: 'yellow',
+        guide_steps: undefined,
+        steps: [
+          {
+            title: 'Step 1',
+            description: 'Description 1',
+            trophies: [],
+          },
+        ],
       },
     ];
 
     const mockEq = jest.fn().mockResolvedValue({
-      data: mockGuides,
+      data: mockDatabaseGuides,
       error: null,
     });
     const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
@@ -44,21 +72,24 @@ describe('GET /api/guides/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual(mockGuides);
+    expect(json).toEqual(mockExpectedResponse);
     expect(supabase.from).toHaveBeenCalledWith('guides');
-    expect(mockSelect).toHaveBeenCalledWith('*');
+    expect(mockSelect).toHaveBeenCalledWith(`
+        *,
+        guide_steps (*)
+      `);
     expect(mockEq).toHaveBeenCalledWith('game_id', '1');
   });
 
   it('should return 400 if no ID is provided', async () => {
     const req = new Request('http://localhost:3000');
-    const context = { params: {} };
+    const context = { params: Promise.resolve({}) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -78,7 +109,7 @@ describe('GET /api/guides/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -98,7 +129,7 @@ describe('GET /api/guides/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -115,7 +146,7 @@ describe('GET /api/guides/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();

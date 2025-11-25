@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
 
+interface GuideStep {
+  step_order?: number;
+  order?: number;
+  title: string;
+  description: string;
+  trophies?: unknown[];
+}
+
 export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
@@ -33,8 +41,8 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
     const transformedGuides = guides.map(guide => ({
       ...guide,
       steps: (guide.guide_steps || [])
-        .sort((a: any, b: any) => (a.step_order || a.order || 0) - (b.step_order || b.order || 0))
-        .map((step: any) => ({
+        .sort((a: GuideStep, b: GuideStep) => (a.step_order || a.order || 0) - (b.step_order || b.order || 0))
+        .map((step: GuideStep) => ({
           title: step.title,
           description: step.description,
           trophies: step.trophies || [],

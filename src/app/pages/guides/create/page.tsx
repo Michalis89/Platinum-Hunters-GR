@@ -23,13 +23,6 @@ interface GameDetailsInfoProps {
   readonly esrb_rating?: string | null;
 }
 
-interface TrophyData {
-  trophyId: number;
-  trophyType: string;
-  trophyName: string;
-  trophyDetail: string;
-}
-
 export default function GuideCreatePage() {
   const [search, setSearch] = useState<string>('');
   const [gameDetails, setGameDetails] = useState<GameDetailsInfoProps | null>(null);

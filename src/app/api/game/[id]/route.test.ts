@@ -31,11 +31,18 @@ describe('GET /api/games/[id]', () => {
   });
 
   it('should return game data for a valid game_id', async () => {
-    const mockGame = {
+    const mockDatabaseGame = {
       id: '1',
       title: 'Test Game',
       platform: 'PC',
       game_image: '/test-image.png',
+      trophy_platinum: 1,
+      trophy_gold: 2,
+      trophy_silver: 3,
+      trophy_bronze: 4,
+    };
+
+    const mockExpectedResponse = {
       platinum: 1,
       gold: 2,
       silver: 3,
@@ -43,7 +50,7 @@ describe('GET /api/games/[id]', () => {
     };
 
     const mockSingle = jest.fn().mockResolvedValue({
-      data: mockGame,
+      data: mockDatabaseGame,
       error: null,
     });
     const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
@@ -53,13 +60,13 @@ describe('GET /api/games/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual(mockGame);
+    expect(json).toEqual(mockExpectedResponse);
     expect(supabase.from).toHaveBeenCalledWith('games');
     expect(mockSelect).toHaveBeenCalledWith('*');
     expect(mockEq).toHaveBeenCalledWith('id', '1');
@@ -68,7 +75,7 @@ describe('GET /api/games/[id]', () => {
 
   it('should return 400 if no game_id is provided', async () => {
     const req = new Request('http://localhost:3000');
-    const context = { params: {} };
+    const context = { params: Promise.resolve({}) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -79,7 +86,7 @@ describe('GET /api/games/[id]', () => {
 
   it('should return 400 if game_id is undefined', async () => {
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: undefined } };
+    const context = { params: Promise.resolve({ id: undefined }) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -100,7 +107,7 @@ describe('GET /api/games/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -121,7 +128,7 @@ describe('GET /api/games/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();
@@ -139,7 +146,7 @@ describe('GET /api/games/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000');
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await GET(req, context);
     const json = await response.json();

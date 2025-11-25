@@ -17,18 +17,15 @@ global.fetch = jest.fn();
 const mockGame = {
   id: 1,
   title: 'Test Game',
-  game_image: '/test-image.png',
+  cover_image: '/test-image.png',
 };
 
 const mockGuides = [
   {
     id: 1,
-    difficulty: 'Easy',
-    difficulty_color: 'green',
-    playthroughs: 1,
-    playthroughs_color: 'blue',
-    hours: 10,
-    hours_color: 'yellow',
+    difficulty_rating: 5,
+    estimated_playthroughs: 1,
+    estimated_hours: 10,
   },
 ];
 
@@ -91,7 +88,7 @@ describe('GameDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(mockGame.title)).toBeInTheDocument();
-      expect(screen.getByAltText(mockGame.title)).toHaveAttribute('src', mockGame.game_image);
+      expect(screen.getByAltText(mockGame.title)).toHaveAttribute('src', mockGame.cover_image);
     });
   });
 
@@ -101,7 +98,7 @@ describe('GameDetailsPage', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Easy Δυσκολία')).toBeInTheDocument();
+      expect(screen.getByText('5 Δυσκολία')).toBeInTheDocument();
       expect(screen.getByText('1 Πέρασμα')).toBeInTheDocument();
       expect(screen.getByText('10 Ώρες')).toBeInTheDocument();
     });
