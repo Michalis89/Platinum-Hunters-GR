@@ -222,6 +222,7 @@ npm run test:coverage
 
 
 
+
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
   <div>
@@ -229,10 +230,10 @@ npm run test:coverage
       <tr><th>File</th><th>% Stmts</th><th>% Branch</th><th>% Funcs</th><th>% Lines</th><th>Uncovered Line #s</th></tr>
       <tr>
         <td><strong>All files</strong></td>
-        <td><span style="color: green;">94.44%</span></td>
-        <td><span style="color: green;">83.29%</span></td>
-        <td><span style="color: green;">86.17%</span></td>
-        <td><span style="color: green;">94.44%</span></td>
+        <td><span style="color: orange;">66.41%</span></td>
+        <td><span style="color: orange;">74.32%</span></td>
+        <td><span style="color: orange;">57.43%</span></td>
+        <td><span style="color: orange;">66.41%</span></td>
         <td>-</td>
       </tr>
 <tr>
@@ -276,7 +277,15 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>/Platinum-Hunters-GR/src/app/api/game-details/[game_id]/route.ts</td>
+<td>/Platinum-Hunters-GR/src/app/api/delete-game/[id]/route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/api/full-game-data/route.ts</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -284,9 +293,17 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
+<td>/Platinum-Hunters-GR/src/app/api/game-details/[game_id]/route.ts</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">88.89%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
 <td>/Platinum-Hunters-GR/src/app/api/game/[id]/route.ts</td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: orange;">66.67%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
@@ -302,7 +319,7 @@ npm run test:coverage
 <tr>
 <td>/Platinum-Hunters-GR/src/app/api/guides/[id]/route.ts</td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">81.82%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
@@ -316,11 +333,19 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
+<td>/Platinum-Hunters-GR/src/app/api/trophies/route.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
 <td>/Platinum-Hunters-GR/src/app/api/update-game-info/[id]/route.ts</td>
-<td><span style="color: green;">89.62%</span></td>
-<td><span style="color: orange;">61.29%</span></td>
+<td><span style="color: orange;">75.00%</span></td>
+<td><span style="color: orange;">56.41%</span></td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">89.62%</span></td>
+<td><span style="color: orange;">75.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -341,10 +366,10 @@ npm run test:coverage
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/contact/BugReportForm.tsx</td>
-<td><span style="color: green;">98.90%</span></td>
+<td><span style="color: green;">98.91%</span></td>
 <td><span style="color: green;">90.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">98.90%</span></td>
+<td><span style="color: green;">98.91%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -380,11 +405,83 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/DeveloperFilter.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/DifficultyFilter.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/FiltersPanel.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/GenreFilter.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/HourFilter.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/PlatformFilter.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/ResetFilters.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/SortFilter.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/filters/YearFilter.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/EditGuideButton.tsx</td>
-<td><span style="color: green;">90.91%</span></td>
+<td><span style="color: orange;">55.71%</span></td>
+<td><span style="color: red;">33.33%</span></td>
 <td><span style="color: red;">50.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">90.91%</span></td>
+<td><span style="color: orange;">55.71%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -430,7 +527,7 @@ npm run test:coverage
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/game-details/UpdateGameInfoButton.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: red;">20.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
@@ -438,7 +535,7 @@ npm run test:coverage
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/guides/GameCard.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">25.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
@@ -452,11 +549,27 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>/Platinum-Hunters-GR/src/app/components/guides/SearchBar.tsx</td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td>/Platinum-Hunters-GR/src/app/components/layout/GridList.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/layout/PageWrapper.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/layout/SidebarLayout.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -485,18 +598,26 @@ npm run test:coverage
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Card.tsx</td>
+<td><span style="color: orange;">78.38%</span></td>
 <td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">33.33%</span></td>
+<td><span style="color: orange;">78.38%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Checkbox.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Dropdown.tsx</td>
-<td><span style="color: green;">96.12%</span></td>
-<td><span style="color: green;">88.89%</span></td>
+<td><span style="color: green;">96.90%</span></td>
+<td><span style="color: green;">100.00%</span></td>
 <td><span style="color: orange;">75.00%</span></td>
-<td><span style="color: green;">96.12%</span></td>
+<td><span style="color: green;">96.90%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -508,7 +629,63 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/GuideStepsEditor.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
 <td>/Platinum-Hunters-GR/src/app/components/ui/Input.tsx</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: red;">50.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Modal.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/MultiSlider.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/SearchBar.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Select.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/SingleSlider.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Skeleton.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -516,11 +693,27 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>/Platinum-Hunters-GR/src/app/components/ui/Skeleton.tsx</td>
-<td><span style="color: red;">42.86%</span></td>
-<td><span style="color: orange;">66.67%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: red;">42.86%</span></td>
+<td>/Platinum-Hunters-GR/src/app/components/ui/TagsInput.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/Textarea.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/components/ui/TrophySidebar.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -548,19 +741,27 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>/Platinum-Hunters-GR/src/app/pages/guide/page.tsx</td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
-<td><span style="color: green;">100.00%</span></td>
+<td>/Platinum-Hunters-GR/src/app/pages/guides/page.tsx</td>
+<td><span style="color: orange;">74.74%</span></td>
+<td><span style="color: orange;">70.00%</span></td>
+<td><span style="color: orange;">57.14%</span></td>
+<td><span style="color: orange;">74.74%</span></td>
 <td>-</td>
 </tr>
 <tr>
-<td>/Platinum-Hunters-GR/src/app/pages/guide/[slug]/page.tsx</td>
-<td><span style="color: green;">83.68%</span></td>
-<td><span style="color: orange;">70.00%</span></td>
-<td><span style="color: orange;">66.67%</span></td>
-<td><span style="color: green;">83.68%</span></td>
+<td>/Platinum-Hunters-GR/src/app/pages/guides/[slug]/page.tsx</td>
+<td><span style="color: green;">82.03%</span></td>
+<td><span style="color: orange;">52.94%</span></td>
+<td><span style="color: green;">83.33%</span></td>
+<td><span style="color: green;">82.03%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/pages/guides/create/page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -579,6 +780,86 @@ npm run test:coverage
 <td><span style="color: green;">100.00%</span></td>
 <td>-</td>
 </tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/app/pages/ui-kit/page.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/Providers.tsx</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/store.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/api/gamesApi.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/slices/developerSlice.ts</td>
+<td><span style="color: green;">80.65%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">80.65%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/slices/difficultySlice.ts</td>
+<td><span style="color: green;">80.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">80.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/slices/gamesSlice.ts</td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/slices/genresSlice.ts</td>
+<td><span style="color: green;">80.65%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">80.65%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/slices/platformsSlice.ts</td>
+<td><span style="color: green;">80.65%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: red;">0.00%</span></td>
+<td><span style="color: green;">80.65%</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td>/Platinum-Hunters-GR/src/store/slices/processedGamesSlice.ts</td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">100.00%</span></td>
+<td>-</td>
+</tr>
     </table>
   </div>
 </details>
@@ -590,12 +871,14 @@ npm run test:coverage
 
 
 
+
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 42 passed, 42 total</p>
-<p><strong>Tests:</strong> 169 passed, 0 failed, 169 total</p>
-<p><strong>Time:</strong> 32.91 seconds</p>
+<p><strong>Tests:</strong> 170 passed, 0 failed, 170 total</p>
+<p><strong>Time:</strong> 30.76 seconds</p>
 </div>
+
 
 
 
