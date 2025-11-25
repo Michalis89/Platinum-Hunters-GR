@@ -18,17 +18,20 @@ jest.mock('next/server', () => ({
   },
 }));
 
+let supabaseMock: { from: jest.Mock };
+
 beforeEach(() => {
   jest.clearAllMocks();
   globalThis.fetch = jest.fn();
 
   const mockFrom = jest.fn();
-  (getSupabaseServer as jest.Mock).mockReturnValue({ from: mockFrom });
+  supabaseMock = { from: mockFrom };
+  (getSupabaseServer as jest.Mock).mockReturnValue(supabaseMock);
 });
 
 describe('POST /api/update-game-info/[id]', () => {
   it('should update game info successfully', async () => {
-    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
+    const mockFrom = supabaseMock.from;
 
     // Mock game query
     mockFrom.mockReturnValueOnce({
@@ -140,7 +143,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 404 if game is not found in the database', async () => {
-    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
+    const mockFrom = supabaseMock.from;
 
     mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
@@ -162,7 +165,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 404 if RAWG API returns no data', async () => {
-    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
+    const mockFrom = supabaseMock.from;
 
     mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
@@ -189,7 +192,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should handle RAWG API error', async () => {
-    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
+    const mockFrom = supabaseMock.from;
 
     mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
@@ -216,7 +219,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 500 if database update fails', async () => {
-    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
+    const mockFrom = supabaseMock.from;
 
     // Mock game query
     mockFrom.mockReturnValueOnce({
