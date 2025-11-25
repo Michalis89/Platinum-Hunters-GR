@@ -1,5 +1,3 @@
-import { metadata as siteMetadata } from '@/utils/seo/metadata/metadata';
-
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import NavbarWrapper from './components/NavbarWrapper';
@@ -14,6 +12,7 @@ import {
   contactFormStructuredData,
 } from '@/utils/seo/metadata/structuredData';
 import Providers from '@/store/Providers';
+export { metadata } from '@/utils/seo/metadata/metadata';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -24,8 +23,6 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-
-export const metadata = siteMetadata;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

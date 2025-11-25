@@ -129,6 +129,7 @@ export interface GameDetails {
   developer?: string | null;
   publisher?: string | null;
   genre?: string | null;
+  genres?: string[] | null;
   slug?: string | null;
   metacritic?: number | null;
   rating?: number | null;

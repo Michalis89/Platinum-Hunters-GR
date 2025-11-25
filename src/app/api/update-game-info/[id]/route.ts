@@ -46,13 +46,13 @@ async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
     } = await detailsResponse.json();
 
     return {
-      release_year: game.released ? parseInt(game.released.split('-')[0]) : null,
+      release_year: game.released ? Number.parseInt(game.released.split('-')[0]) : null,
       developer: game.developers?.[0]?.name ?? null,
       publisher: game.publishers?.[0]?.name ?? null,
       genre: game.genres?.[0]?.name ?? null, // Take first genre for compatibility
       genres: game.genres?.map(g => g.name) ?? null, // Store all genres as array
       slug: game.slug,
-      metacritic_score: game.metacritic ?? null,
+      metacritic: game.metacritic ?? null,
       rating: game.rating ?? null,
       platforms: game.platforms?.map(p => p.platform.name) ?? null,
       esrb_rating: game.esrb_rating?.name ?? null,
@@ -66,9 +66,9 @@ async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const gameId = parseInt(id);
+    const gameId = Number.parseInt(id);
 
-    if (isNaN(gameId)) {
+    if (Number.isNaN(gameId)) {
       return NextResponse.json({ error: 'Invalid game ID' }, { status: 400 });
     }
 
@@ -103,7 +103,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         // Not found, create new
         const { data: newDev, error: insertError } = await supabaseServer
           .from('developers')
-          .insert({ name: gameInfo.developer, slug: gameInfo.developer.toLowerCase().replace(/\s+/g, '-') })
+          .insert({
+            name: gameInfo.developer,
+            slug: gameInfo.developer.toLowerCase().replaceAll(/\s+/g, '-'),
+          })
           .select('id')
           .single();
 
@@ -132,7 +135,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         // Not found, create new
         const { data: newPub, error: insertError } = await supabaseServer
           .from('publishers')
-          .insert({ name: gameInfo.publisher, slug: gameInfo.publisher.toLowerCase().replace(/\s+/g, '-') })
+          .insert({
+            name: gameInfo.publisher,
+            slug: gameInfo.publisher.toLowerCase().replaceAll(/\s+/g, '-'),
+          })
           .select('id')
           .single();
 
@@ -153,14 +159,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         release_year: gameInfo.release_year,
         developer_id: developerId,
         publisher_id: publisherId,
-        metacritic_score: gameInfo.metacritic_score,
+        metacritic_score: gameInfo.metacritic,
         rating: gameInfo.rating,
       })
       .eq('id', gameId);
 
     if (updateError) {
       console.error('❌ Database update error:', updateError);
-      return NextResponse.json({ error: 'Database update error', details: updateError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Database update error', details: updateError.message },
+        { status: 500 },
+      );
     }
 
     // Handle genres (many-to-many)
@@ -183,7 +192,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         } else {
           const { data: newGenre } = await supabaseServer
             .from('genres')
-            .insert({ name: genreName, slug: genreName.toLowerCase().replace(/\s+/g, '-') })
+            .insert({ name: genreName, slug: genreName.toLowerCase().replaceAll(/\s+/g, '-') })
             .select('id')
             .single();
           genreId = newGenre?.id;
@@ -214,7 +223,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           platformId = platformData.id;
         } else {
           // Create short_name from name (e.g., "PlayStation 4" -> "PS4")
-          const shortName = platformName.replace(/PlayStation/i, 'PS').replace(/\s+/g, '');
+          const shortName = platformName.replace(/PlayStation/i, 'PS').replaceAll(/\s+/g, '');
           const { data: newPlatform } = await supabaseServer
             .from('platforms')
             .insert({ name: platformName, short_name: shortName })
@@ -224,7 +233,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         }
 
         if (platformId) {
-          await supabaseServer.from('game_platforms').insert({ game_id: gameId, platform_id: platformId });
+          await supabaseServer
+            .from('game_platforms')
+            .insert({ game_id: gameId, platform_id: platformId });
         }
       }
     }
