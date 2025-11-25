@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import supabaseServer from '@/lib/supabase-server';
+import getSupabaseServer from '@/lib/supabase-server';
 import { GameDetails } from '@/types/interfaces';
 
 const RAWG_API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY;
@@ -65,6 +65,7 @@ async function fetchGameInfo(gameTitle: string): Promise<GameDetails | null> {
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const supabase = getSupabaseServer();
     const { id } = await params;
     const gameId = Number.parseInt(id);
 
@@ -72,7 +73,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Invalid game ID' }, { status: 400 });
     }
 
-    const { data: gameData, error: gameError } = await supabaseServer
+    const { data: gameData, error: gameError } = await supabase
       .from('games')
       .select('title')
       .eq('id', gameId)
@@ -91,7 +92,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Get or create developer
     let developerId = null;
     if (gameInfo.developer) {
-      const { data: devData, error: devError } = await supabaseServer
+      const { data: devData, error: devError } = await supabase
         .from('developers')
         .select('id')
         .eq('name', gameInfo.developer)
@@ -101,7 +102,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         developerId = devData.id;
       } else if (devError?.code === 'PGRST116') {
         // Not found, create new
-        const { data: newDev, error: insertError } = await supabaseServer
+        const { data: newDev, error: insertError } = await supabase
           .from('developers')
           .insert({
             name: gameInfo.developer,
@@ -123,7 +124,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Get or create publisher
     let publisherId = null;
     if (gameInfo.publisher) {
-      const { data: pubData, error: pubError } = await supabaseServer
+      const { data: pubData, error: pubError } = await supabase
         .from('publishers')
         .select('id')
         .eq('name', gameInfo.publisher)
@@ -133,7 +134,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         publisherId = pubData.id;
       } else if (pubError?.code === 'PGRST116') {
         // Not found, create new
-        const { data: newPub, error: insertError } = await supabaseServer
+        const { data: newPub, error: insertError } = await supabase
           .from('publishers')
           .insert({
             name: gameInfo.publisher,
@@ -153,7 +154,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     // Update game with basic info
-    const { error: updateError } = await supabaseServer
+    const { error: updateError } = await supabase
       .from('games')
       .update({
         release_year: gameInfo.release_year,
@@ -175,13 +176,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Handle genres (many-to-many)
     if (gameInfo.genres && gameInfo.genres.length > 0) {
       // Delete existing genre associations
-      await supabaseServer.from('game_genres').delete().eq('game_id', gameId);
+      await supabase.from('game_genres').delete().eq('game_id', gameId);
 
       // Add new genres
       for (const genreName of gameInfo.genres) {
         // Get or create genre
         let genreId = null;
-        const { data: genreData } = await supabaseServer
+        const { data: genreData } = await supabase
           .from('genres')
           .select('id')
           .eq('name', genreName)
@@ -190,7 +191,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         if (genreData) {
           genreId = genreData.id;
         } else {
-          const { data: newGenre } = await supabaseServer
+          const { data: newGenre } = await supabase
             .from('genres')
             .insert({ name: genreName, slug: genreName.toLowerCase().replaceAll(/\s+/g, '-') })
             .select('id')
@@ -199,7 +200,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         }
 
         if (genreId) {
-          await supabaseServer.from('game_genres').insert({ game_id: gameId, genre_id: genreId });
+          await supabase.from('game_genres').insert({ game_id: gameId, genre_id: genreId });
         }
       }
     }
@@ -207,13 +208,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Handle platforms (many-to-many)
     if (gameInfo.platforms && gameInfo.platforms.length > 0) {
       // Delete existing platform associations
-      await supabaseServer.from('game_platforms').delete().eq('game_id', gameId);
+      await supabase.from('game_platforms').delete().eq('game_id', gameId);
 
       // Add new platforms
       for (const platformName of gameInfo.platforms) {
         // Get or create platform
         let platformId = null;
-        const { data: platformData } = await supabaseServer
+        const { data: platformData } = await supabase
           .from('platforms')
           .select('id')
           .ilike('name', platformName)
@@ -224,7 +225,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         } else {
           // Create short_name from name (e.g., "PlayStation 4" -> "PS4")
           const shortName = platformName.replace(/PlayStation/i, 'PS').replaceAll(/\s+/g, '');
-          const { data: newPlatform } = await supabaseServer
+          const { data: newPlatform } = await supabase
             .from('platforms')
             .insert({ name: platformName, short_name: shortName })
             .select('id')
@@ -233,7 +234,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         }
 
         if (platformId) {
-          await supabaseServer
+          await supabase
             .from('game_platforms')
             .insert({ game_id: gameId, platform_id: platformId });
         }

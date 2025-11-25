@@ -1,11 +1,9 @@
 import { POST } from './route';
-import supabaseServer from '@/lib/supabase-server';
+import getSupabaseServer from '@/lib/supabase-server';
 
 jest.mock('@/lib/supabase-server', () => ({
   __esModule: true,
-  default: {
-    from: jest.fn(),
-  },
+  default: jest.fn(),
 }));
 
 jest.mock('next/server', () => ({
@@ -23,11 +21,14 @@ jest.mock('next/server', () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   globalThis.fetch = jest.fn();
+
+  const mockFrom = jest.fn();
+  (getSupabaseServer as jest.Mock).mockReturnValue({ from: mockFrom });
 });
 
 describe('POST /api/update-game-info/[id]', () => {
   it('should update game info successfully', async () => {
-    const mockFrom = supabaseServer.from as jest.Mock;
+    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
 
     // Mock game query
     mockFrom.mockReturnValueOnce({
@@ -139,7 +140,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 404 if game is not found in the database', async () => {
-    const mockFrom = supabaseServer.from as jest.Mock;
+    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
 
     mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
@@ -161,7 +162,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 404 if RAWG API returns no data', async () => {
-    const mockFrom = supabaseServer.from as jest.Mock;
+    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
 
     mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
@@ -188,7 +189,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should handle RAWG API error', async () => {
-    const mockFrom = supabaseServer.from as jest.Mock;
+    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
 
     mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
@@ -215,7 +216,7 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 500 if database update fails', async () => {
-    const mockFrom = supabaseServer.from as jest.Mock;
+    const mockFrom = (getSupabaseServer as jest.Mock).mock.results.at(-1)?.value.from as jest.Mock;
 
     // Mock game query
     mockFrom.mockReturnValueOnce({
