@@ -23,8 +23,8 @@ describe("Home Page", () => {
 
   it("renders the Start Hunting button with correct link", () => {
     render(<Home />);
-    const startButton = screen.getByRole("link", { name: /Start Hunting 🎮/i });
+    const startButton = screen.getByRole("link", { name: /Ξεκίνα το κυνήγι/i });
     expect(startButton).toBeInTheDocument();
-    expect(startButton).toHaveAttribute("href", "/pages/guide");
+    expect(startButton).toHaveAttribute("href", "/pages/guides");
   });
 });

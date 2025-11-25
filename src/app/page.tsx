@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import VersionBadge from './components/ui/VersionBadge';
+import { Gamepad2 } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -46,10 +47,10 @@ export default function Home() {
           whileHover={{ scale: 1.1 }}
         >
           <Link
-            href="/pages/guide"
-            className="inline-block rounded-lg bg-blue-600 px-6 py-3 text-lg font-semibold shadow-lg transition hover:bg-blue-700"
+            href="/pages/guides"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-lg font-semibold shadow-lg transition hover:bg-blue-700"
           >
-            Start Hunting 🎮
+            Ξεκίνα το κυνήγι <Gamepad2 />
           </Link>
         </motion.div>
       </motion.div>

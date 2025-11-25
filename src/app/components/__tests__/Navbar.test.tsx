@@ -38,7 +38,7 @@ describe('Navbar Component', () => {
     render(<Navbar />);
 
     expect(screen.getByText('Platinum Hunters')).toBeInTheDocument();
-    expect(screen.getByTestId('nav-link-/pages/guide')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-link-/pages/guides')).toBeInTheDocument();
     expect(screen.getByTestId('nav-link-/pages/reviews')).toBeInTheDocument();
     expect(screen.getByTestId('nav-link-/pages/news')).toBeInTheDocument();
     expect(screen.getByTestId('nav-link-/pages/contact')).toBeInTheDocument();
@@ -66,10 +66,10 @@ describe('Navbar Component', () => {
   it('navigates correctly when clicking a menu link', () => {
     render(<Navbar />);
 
-    const guideLink = screen.getByTestId('nav-link-/pages/guide');
+    const guideLink = screen.getByTestId('nav-link-/pages/guides');
     fireEvent.click(guideLink);
 
-    expect(guideLink).toHaveAttribute('href', '/pages/guide');
+    expect(guideLink).toHaveAttribute('href', '/pages/guides');
   });
 
   it('hides the scraper link when not in development mode', () => {

@@ -1,13 +1,9 @@
 import { POST } from './route';
-import supabase from '@/lib/db';
+import getSupabaseServer from '@/lib/supabase-server';
 
-jest.mock('@/lib/db', () => ({
-  from: jest.fn(() => ({
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    single: jest.fn(),
-    update: jest.fn().mockReturnThis(),
-  })),
+jest.mock('@/lib/supabase-server', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock('next/server', () => ({
@@ -22,13 +18,23 @@ jest.mock('next/server', () => ({
   },
 }));
 
+let supabaseMock: { from: jest.Mock };
+
 beforeEach(() => {
-  global.fetch = jest.fn();
+  jest.clearAllMocks();
+  globalThis.fetch = jest.fn();
+
+  const mockFrom = jest.fn();
+  supabaseMock = { from: mockFrom };
+  (getSupabaseServer as jest.Mock).mockReturnValue(supabaseMock);
 });
 
 describe('POST /api/update-game-info/[id]', () => {
   it('should update game info successfully', async () => {
-    (supabase.from as jest.Mock).mockReturnValueOnce({
+    const mockFrom = supabaseMock.from;
+
+    // Mock game query
+    mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({
@@ -37,6 +43,7 @@ describe('POST /api/update-game-info/[id]', () => {
       }),
     });
 
+    // Mock RAWG API calls
     (fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
@@ -57,13 +64,76 @@ describe('POST /api/update-game-info/[id]', () => {
         }),
       });
 
-    (supabase.from as jest.Mock).mockReturnValueOnce({
+    // Mock developer query (existing developer)
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: { id: 1 },
+        error: null,
+      }),
+    });
+
+    // Mock publisher query (existing publisher)
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: { id: 1 },
+        error: null,
+      }),
+    });
+
+    // Mock game update
+    mockFrom.mockReturnValueOnce({
       update: jest.fn().mockReturnThis(),
       eq: jest.fn().mockResolvedValue({ error: null, data: {} }),
     });
 
+    // Mock game_genres delete
+    mockFrom.mockReturnValueOnce({
+      delete: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockResolvedValue({ error: null }),
+    });
+
+    // Mock genre query (existing genre)
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: { id: 1 },
+        error: null,
+      }),
+    });
+
+    // Mock game_genres insert
+    mockFrom.mockReturnValueOnce({
+      insert: jest.fn().mockResolvedValue({ error: null }),
+    });
+
+    // Mock game_platforms delete
+    mockFrom.mockReturnValueOnce({
+      delete: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockResolvedValue({ error: null }),
+    });
+
+    // Mock platform query (existing platform)
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      ilike: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: { id: 1 },
+        error: null,
+      }),
+    });
+
+    // Mock game_platforms insert
+    mockFrom.mockReturnValueOnce({
+      insert: jest.fn().mockResolvedValue({ error: null }),
+    });
+
     const req = new Request('http://localhost:3000', { method: 'POST' });
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await POST(req, context);
     const json = await response.json();
@@ -73,7 +143,9 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 404 if game is not found in the database', async () => {
-    (supabase.from as jest.Mock).mockReturnValueOnce({
+    const mockFrom = supabaseMock.from;
+
+    mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({
@@ -83,7 +155,7 @@ describe('POST /api/update-game-info/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000', { method: 'POST' });
-    const context = { params: { id: '999' } };
+    const context = { params: Promise.resolve({ id: '999' }) };
 
     const response = await POST(req, context);
     const json = await response.json();
@@ -93,7 +165,9 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 404 if RAWG API returns no data', async () => {
-    (supabase.from as jest.Mock).mockReturnValueOnce({
+    const mockFrom = supabaseMock.from;
+
+    mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({
@@ -108,7 +182,7 @@ describe('POST /api/update-game-info/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000', { method: 'POST' });
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await POST(req, context);
     const json = await response.json();
@@ -118,7 +192,9 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should handle RAWG API error', async () => {
-    (supabase.from as jest.Mock).mockReturnValueOnce({
+    const mockFrom = supabaseMock.from;
+
+    mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({
@@ -133,7 +209,7 @@ describe('POST /api/update-game-info/[id]', () => {
     });
 
     const req = new Request('http://localhost:3000', { method: 'POST' });
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await POST(req, context);
     const json = await response.json();
@@ -143,7 +219,10 @@ describe('POST /api/update-game-info/[id]', () => {
   });
 
   it('should return 500 if database update fails', async () => {
-    (supabase.from as jest.Mock).mockReturnValueOnce({
+    const mockFrom = supabaseMock.from;
+
+    // Mock game query
+    mockFrom.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({
@@ -152,6 +231,7 @@ describe('POST /api/update-game-info/[id]', () => {
       }),
     });
 
+    // Mock RAWG API calls
     (fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
@@ -172,13 +252,37 @@ describe('POST /api/update-game-info/[id]', () => {
         }),
       });
 
-    (supabase.from as jest.Mock).mockReturnValueOnce({
+    // Mock developer query (existing developer)
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: { id: 1 },
+        error: null,
+      }),
+    });
+
+    // Mock publisher query (existing publisher)
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: { id: 1 },
+        error: null,
+      }),
+    });
+
+    // Mock game update with error
+    mockFrom.mockReturnValueOnce({
       update: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockResolvedValue({ error: { message: 'Database update error' }, data: null }),
+      eq: jest.fn().mockResolvedValue({
+        error: { message: 'Database update error' },
+        data: null,
+      }),
     });
 
     const req = new Request('http://localhost:3000', { method: 'POST' });
-    const context = { params: { id: '1' } };
+    const context = { params: Promise.resolve({ id: '1' }) };
 
     const response = await POST(req, context);
     const json = await response.json();

@@ -1,8 +1,8 @@
 import GameCard from './GameCard';
-import { Game } from '@/types/interfaces';
+import { ProcessedGame } from '@/types/interfaces';
 
 interface GameGridProps {
-  readonly games: readonly Game[];
+  readonly games: readonly ProcessedGame[];
 }
 
 export default function GameGrid({ games }: GameGridProps) {

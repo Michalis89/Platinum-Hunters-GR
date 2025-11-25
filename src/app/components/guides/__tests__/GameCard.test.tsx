@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import GameCard from '../GameCard';
-import { Game } from '@/types/interfaces';
+import { ProcessedGame } from '@/types/interfaces'; // Import the correct interface
 
 jest.mock('next/image', () => {
-  const MockImage = (props: { alt: string }) => <div data-testid="game-image" {...props} />;
+  const MockImage = (props: { alt: string; src: string }) => <div data-testid="game-image" {...props} />;
   MockImage.displayName = 'NextImageMock';
   return MockImage;
 });
@@ -22,35 +22,37 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }));
 
+jest.mock('lucide-react', () => ({
+  Trophy: () => <span data-testid="trophy-icon" />,
+}));
+
 describe('GameCard Component', () => {
-  const mockGame: Game = {
+  const mockGame: ProcessedGame = {
     id: 1,
     title: 'Elden Ring',
-    platform: 'PlayStation 5',
-    game_image: 'https://example.com/elden-ring.jpg',
-    trophies: {
-      Platinum: '1',
-      Gold: '4',
-      Silver: '14',
-      Bronze: '35',
-    },
+    platforms: ['PlayStation 5'],
+    cover_image: 'https://example.com/elden-ring.jpg',
+    background_image: 'https://example.com/elden-ring-bg.jpg',
+    trophy_platinum: 1,
+    trophy_gold: 4,
+    trophy_silver: 14,
+    trophy_bronze: 35,
     totalPoints: 1230,
-    steps: [],
   };
 
   it('renders correctly', () => {
     render(<GameCard game={mockGame} />);
     expect(screen.getByText(mockGame.title)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.platform)).toBeInTheDocument();
-    expect(screen.getByTestId('game-image')).toHaveAttribute('src', mockGame.game_image);
+    expect(screen.getByText('PlayStation 5')).toBeInTheDocument();
+    expect(screen.getByTestId('game-image')).toHaveAttribute('src', mockGame.cover_image);
   });
 
   it('renders correct trophy counts', () => {
     render(<GameCard game={mockGame} />);
-    expect(screen.getByText(mockGame.trophies.Platinum)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.trophies.Gold)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.trophies.Silver)).toBeInTheDocument();
-    expect(screen.getByText(mockGame.trophies.Bronze)).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_platinum.toString())).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_gold.toString())).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_silver.toString())).toBeInTheDocument();
+    expect(screen.getByText(mockGame.trophy_bronze.toString())).toBeInTheDocument();
   });
 
   it('generates correct link URL', () => {
@@ -59,7 +61,7 @@ describe('GameCard Component', () => {
       mockGame.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     );
     const link = screen.getByTestId('game-link');
-    expect(link).toHaveAttribute('href', `/pages/guide/${expectedSlug}`);
+    expect(link).toHaveAttribute('href', `/pages/guides/${expectedSlug}`);
   });
 
   it('renders total points correctly', () => {

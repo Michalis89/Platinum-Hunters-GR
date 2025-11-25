@@ -56,7 +56,7 @@ export default function GameDetailsPage() {
 
         const gamesData: ApiGame[] = await gameResponse.json();
         const matchedGame = gamesData.find(
-          game => encodeURIComponent(game.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')) === slug,
+          game => encodeURIComponent(game.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')) === slug,
         );
 
         if (!matchedGame) throw new Error('Game not found');
@@ -121,17 +121,37 @@ export default function GameDetailsPage() {
     return <div>❌ Game not found!</div>;
   }
 
+  const getDifficultyColor = (rating: number): string => {
+    if (rating <= 3) return 'green';
+    if (rating <= 7) return 'yellow';
+    return 'red';
+  };
+
+  const getPlaythroughsColor = (count: number): string => {
+    if (count === 1) return 'green';
+    if (count === 2) return 'yellow';
+    return 'red';
+  };
+
+  const getHoursColor = (hours: number): string => {
+    if (hours <= 10) return 'green';
+    if (hours <= 30) return 'yellow';
+    return 'red';
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-4 text-white md:p-8">
       {game && (
         <div className="w-full max-w-3xl rounded-lg bg-gray-900 p-4 shadow-lg md:p-6">
           <div className="mb-4 flex justify-center">
             <Image
-              src={game.game_image ?? '/default-image.png'}
+              src={game.cover_image ?? '/og-image.png'}
               alt={game.title}
               width={200}
               height={200}
               className="rounded-lg object-contain shadow-md"
+              sizes="200px"
+              style={{ width: 'auto', height: 'auto' }}
             />
           </div>
 
@@ -139,18 +159,21 @@ export default function GameDetailsPage() {
             {game.title}
           </h1>
 
-          {guides.length > 0 && (
-            <div className="mt-4 flex flex-col justify-center gap-2 md:flex-row md:gap-4">
-              <GuideStats
-                difficulty={guides[0].difficulty}
-                difficultyColor={guides[0].difficulty_color}
-                playthroughs={guides[0].playthroughs}
-                playthroughsColor={guides[0].playthroughs_color}
-                hours={guides[0].hours}
-                hoursColor={guides[0].hours_color}
-              />
-            </div>
-          )}
+          {guides.length > 0 &&
+            guides[0].difficulty_rating &&
+            guides[0].estimated_hours &&
+            guides[0].estimated_playthroughs && (
+              <div className="mt-4 flex flex-col justify-center gap-2 md:flex-row md:gap-4">
+                <GuideStats
+                  difficulty={guides[0].difficulty_rating?.toString() || 'N/A'}
+                  difficultyColor={getDifficultyColor(guides[0].difficulty_rating || 0)}
+                  playthroughs={guides[0].estimated_playthroughs || 0}
+                  playthroughsColor={getPlaythroughsColor(guides[0].estimated_playthroughs || 0)}
+                  hours={guides[0].estimated_hours || 0}
+                  hoursColor={getHoursColor(guides[0].estimated_hours || 0)}
+                />
+              </div>
+            )}
 
           {trophies && <TrophyStats trophies={trophies} />}
 
@@ -184,7 +207,11 @@ export default function GameDetailsPage() {
         </div>
       )}
 
-      <TrophyGuides guides={guides} />
+      <TrophyGuides
+        guides={guides
+          .filter(g => g.steps !== undefined)
+          .map(g => ({ id: g.id, steps: g.steps! }))}
+      />
     </div>
   );
 }

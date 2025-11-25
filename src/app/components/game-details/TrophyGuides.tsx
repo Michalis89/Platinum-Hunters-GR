@@ -24,29 +24,35 @@ export default function TrophyGuides({ guides }: TrophyGuidesProps) {
               <span>Οδηγός</span>
             </h2>
 
-            {guide.steps.map((step, index) => (
-              <div key={index} className="mt-6">
-                <h3 className="mb-1 text-xl font-semibold text-blue-300">{step.title}</h3>
-                <p className="whitespace-pre-wrap text-gray-400">{step.description}</p>
+            {guide.steps && guide.steps.length > 0 ? (
+              guide.steps.map((step, index) => (
+                <div key={index} className="mt-6">
+                  <h3 className="mb-1 text-xl font-semibold text-blue-300">{step.title}</h3>
+                  <p className="whitespace-pre-wrap text-gray-400">{step.description}</p>
 
-                {step.trophies.length > 0 && (
-                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {step.trophies.map((trophy, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center rounded-lg bg-gray-700 p-3 shadow-md"
-                      >
-                        <TrophyIcon className={`mr-3 h-10 w-10 ${trophyColors[trophy.type]}`} />
-                        <div>
-                          <p className="font-semibold text-white">{trophy.name}</p>
-                          <p className="text-sm text-gray-400">{trophy.description}</p>
+                  {step.trophies && step.trophies.length > 0 && (
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {step.trophies.map((trophy, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center rounded-lg bg-gray-700 p-3 shadow-md"
+                        >
+                          <TrophyIcon className={`mr-3 h-10 w-10 ${trophyColors[trophy.type]}`} />
+                          <div>
+                            <p className="font-semibold text-white">{trophy.name}</p>
+                            <p className="text-sm text-gray-400">{trophy.description}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="mt-4 text-center text-gray-400">
+                Δεν υπάρχουν βήματα για αυτόν τον οδηγό.
+              </p>
+            )}
           </div>
         ))
       ) : (

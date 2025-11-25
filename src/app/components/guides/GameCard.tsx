@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Game } from '@/types/interfaces';
+import { ProcessedGame } from '@/types/interfaces';
+import { Trophy } from 'lucide-react';
 
 interface GameCardProps {
-  readonly game: Game;
+  readonly game: ProcessedGame;
 }
 
 export default function GameCard({ game }: GameCardProps) {
@@ -12,18 +13,20 @@ export default function GameCard({ game }: GameCardProps) {
   return (
     <Link
       key={game.id}
-      href={`/pages/guide/${gameSlug}`}
+      href={`/pages/guides/${gameSlug}`}
       className="group relative flex transform flex-col items-center overflow-hidden rounded-xl border border-gray-700/50 bg-gray-900/90 p-6 shadow-xl backdrop-blur-lg transition duration-300 hover:scale-105 hover:bg-gray-800/90"
     >
       <div className="absolute inset-0 bg-blue-500 opacity-0 transition-opacity duration-500 group-hover:opacity-20"></div>
 
       <div className="relative flex h-36 w-36 items-center justify-center">
         <Image
-          src={game.game_image}
+          src={game.cover_image || game.background_image || '/og-image.png'}
           alt={game.title}
           width={144}
           height={144}
           className="rounded-lg object-contain shadow-md"
+          sizes="144px"
+          style={{ width: 'auto', height: 'auto' }}
         />
       </div>
 
@@ -31,20 +34,24 @@ export default function GameCard({ game }: GameCardProps) {
         {game.title}
       </h2>
 
-      <p className="text-sm text-gray-400">{game.platform}</p>
+      <p className="text-sm text-gray-400">{game.platforms?.join(', ') || 'N/A'}</p>
 
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-300">
         <span className="flex items-center gap-1">
-          🏆 <span className="text-yellow-400">{game.trophies.Platinum}</span>
+          <Trophy className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-400">{game.trophy_platinum}</span>
         </span>
         <span className="flex items-center gap-1">
-          🥇 <span className="text-orange-400">{game.trophies.Gold}</span>
+          <Trophy className="h-5 w-5 text-yellow-400" />
+          <span className="text-yellow-400">{game.trophy_gold}</span>
         </span>
         <span className="flex items-center gap-1">
-          🥈 <span className="text-blue-300">{game.trophies.Silver}</span>
+          <Trophy className="h-5 w-5 text-gray-400" />
+          <span className="text-gray-400">{game.trophy_silver}</span>
         </span>
         <span className="flex items-center gap-1">
-          🥉 <span className="text-green-400">{game.trophies.Bronze}</span>
+          <Trophy className="h-5 w-5 text-orange-500" />
+          <span className="text-orange-500">{game.trophy_bronze}</span>
         </span>
       </div>
 

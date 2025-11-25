@@ -1,0 +1,86 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Platinum Hunters GR - Trophy Guides & Game Completion',
+  description:
+    'Complete trophy guides and strategies to achieve platinum trophies in your favorite games. Join the Platinum Hunters GR community!',
+  metadataBase: new URL('https://platinum-hunters.gr'),
+  icons: {
+    icon: [
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+  openGraph: {
+    title: 'Platinum Hunters',
+    description: 'Ο καλύτερος οδηγός για Platinum trophies!',
+    url: 'https://platinum-hunters.gr',
+    siteName: 'Platinum Hunters',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Platinum Hunters Logo',
+      },
+    ],
+    type: 'website',
+    locale: 'el_GR',
+    determiner: 'the',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Platinum Hunters',
+    description: 'Ο καλύτερος οδηγός για Platinum trophies!',
+    images: ['/og-image.png'],
+    creator: '@platinumhunters',
+  },
+  keywords: [
+    'platinum trophies',
+    'game guides',
+    'trophy hunting',
+    'game reviews',
+    'gaming news',
+    'backlog management',
+    'PS5 trophies',
+    'PS4 trophies',
+    'gaming community',
+    '100% game completion',
+    'platinum trophies gr',
+    'οδηγός trophy',
+    'παιχνίδια platinum',
+    'οδηγοί trophy',
+    'gaming guides',
+    'παιχνίδια PS5',
+    'παιχνίδια PS4',
+    'επίτευξη platinum',
+    'κατάκτηση trophies',
+    '100% ολοκλήρωση παιχνιδιού',
+    'κοινότητα gaming',
+    'κριτικές παιχνιδιών',
+    'νέα gaming',
+    'διαχείριση backlog',
+    'gaming tips',
+  ],
+  authors: [{ name: 'Platinum Hunters GR', url: 'https://platinumhunters.gr' }],
+  robots: {
+    index: true,
+    follow: true,
+    nocache: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      noarchive: true,
+    },
+  },
+  alternates: {
+    canonical: 'https://platinumhunters.gr',
+    languages: {
+      el: 'https://platinumhunters.gr',
+      en: 'https://platinumhunters.gr/',
+    },
+  },
+};
