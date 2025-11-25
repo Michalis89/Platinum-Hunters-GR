@@ -1,6 +1,8 @@
+import { join } from 'node:path';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: join(process.cwd()),
   images: {
     remotePatterns: [
       {
