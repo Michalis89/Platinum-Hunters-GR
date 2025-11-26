@@ -35,14 +35,42 @@ export async function PUT(
       return NextResponse.json({ error: 'Guide not found for this game' }, { status: 404 });
     }
 
-    const { error: updateError } = await supabase
-      .from('guides')
-      .update({ steps })
-      .eq('game_id', gameId);
+    const guideId = existingGuide.id;
 
-    if (updateError) {
-      console.error('❌ Σφάλμα ενημέρωσης οδηγού:', updateError);
-      return NextResponse.json({ error: 'Failed to update guide' }, { status: 500 });
+    // Delete existing guide_steps
+    const { error: deleteError } = await supabase
+      .from('guide_steps')
+      .delete()
+      .eq('guide_id', guideId);
+
+    if (deleteError) {
+      console.error('❌ Σφάλμα διαγραφής παλιών steps:', deleteError);
+      return NextResponse.json({ error: 'Failed to delete old steps' }, { status: 500 });
+    }
+
+    // Insert new guide_steps
+    const newSteps = steps.map((step: { title: string; description: string }, index: number) => ({
+      guide_id: guideId,
+      step_number: index + 1,
+      title: step.title,
+      description: step.description,
+    }));
+
+    console.log('📝 Attempting to insert steps:', JSON.stringify(newSteps, null, 2));
+
+    const { error: insertError } = await supabase.from('guide_steps').insert(newSteps);
+
+    if (insertError) {
+      console.error('❌ Σφάλμα εισαγωγής νέων steps:', insertError);
+      console.error('❌ Insert error details:', JSON.stringify(insertError, null, 2));
+      return NextResponse.json(
+        {
+          error: 'Failed to insert new steps',
+          details: insertError.message,
+          code: insertError.code,
+        },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ message: '✅ Ο οδηγός ενημερώθηκε επιτυχώς!' });
