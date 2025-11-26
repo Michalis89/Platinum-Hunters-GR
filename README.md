@@ -217,14 +217,6 @@ npm run test:coverage
 
 ## Test Coverage
 
-
-
-
-
-
-
-
-
 <details id="results">
   <summary><strong>Click to expand Test Coverage Results</strong></summary>
   <div>
@@ -375,7 +367,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>/Platinum-Hunters-GR/src/app/components/NavbarWrapper.tsx</td>
+<td>src/app/components/NavbarWrapper.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -564,6 +556,7 @@ npm run test:coverage
 <td><span style="color: red;">25.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
+<td><span style="color: green;">98.91%</span></td>
 <td>-</td>
 </tr>
 <tr>
@@ -751,7 +744,7 @@ npm run test:coverage
 <td>-</td>
 </tr>
 <tr>
-<td>/Platinum-Hunters-GR/src/app/components/ui/VersionBadge.tsx</td>
+<td>src/app/components/ui/VersionBadge.tsx</td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
 <td><span style="color: green;">100.00%</span></td>
@@ -892,28 +885,12 @@ npm run test:coverage
 
 ## Test Results
 
-
-
-
-
-
-
-
-
 <div id="jest-results">
 <h3>Test Summary</h3>
 <p><strong>Test Suites:</strong> 38 passed, 42 total</p>
 <p><strong>Tests:</strong> 149 passed, 0 failed, 170 total</p>
 <p><strong>Time:</strong> 25.35 seconds</p>
 </div>
-
-
-
-
-
-
-
-
 
 ## License
 

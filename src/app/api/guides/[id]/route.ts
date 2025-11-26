@@ -30,7 +30,10 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
 
     if (error) {
       console.error('Database error:', error);
-      return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Database error', details: error.message },
+        { status: 500 },
+      );
     }
 
     if (!guides || guides.length === 0) {
