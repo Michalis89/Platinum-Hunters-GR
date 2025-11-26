@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import GameGrid from '@/app/components/guides/GameGrid';
 import { BookOpen, ChevronDown } from 'lucide-react';
@@ -26,12 +26,33 @@ export default function Guides() {
   const [sortBy, setSortBy] = useState<string>('title');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  const [hourRange, setHourRange] = useState<[number, number]>([0, 200]);
-  const [yearRange, setYearRange] = useState<[number, number]>([2000, 2025]);
+  const [hourRange, setHourRange] = useState<[number, number]>([0, 1000]);
+  const [yearRange, setYearRange] = useState<[number, number]>([1990, 2025]);
 
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: games, error, isLoading } = useGetGamesQuery();
+
+  // Calculate dynamic min/max values from games data
+  const { minYear, maxYear, minHour, maxHour } = useMemo(() => {
+    if (!games?.games || games.games.length === 0) {
+      return { minYear: 1990, maxYear: new Date().getFullYear(), minHour: 0, maxHour: 200 };
+    }
+
+    const years = games.games
+      .map(game => game.release_year)
+      .filter((year): year is number => year !== null && year !== undefined);
+    const hours = games.games
+      .map(game => game.average_hours)
+      .filter((hour): hour is number => hour !== null && hour !== undefined);
+
+    return {
+      minYear: years.length > 0 ? Math.min(...years) : 1990,
+      maxYear: years.length > 0 ? Math.max(...years) : new Date().getFullYear(),
+      minHour: hours.length > 0 ? Math.floor(Math.min(...hours)) : 0,
+      maxHour: hours.length > 0 ? Math.ceil(Math.max(...hours)) : 200,
+    };
+  }, [games]);
 
   const platformFilter = useSelector((state: RootState) => state.platforms.selectedPlatform);
   const genreFilter = useSelector((state: RootState) => state.genres.selectedGenre);
@@ -43,6 +64,16 @@ export default function Guides() {
       dispatch(setProcessedGames(games.games));
     }
   }, [games, dispatch]);
+
+  // Initialize ranges when data first loads
+  useEffect(() => {
+    if (games && hourRange[0] === 0 && hourRange[1] === 1000) {
+      setHourRange([minHour, maxHour]);
+    }
+    if (games && yearRange[0] === 1990 && yearRange[1] === 2025) {
+      setYearRange([minYear, maxYear]);
+    }
+  }, [games, minHour, maxHour, minYear, maxYear, hourRange, yearRange]);
 
   // Helper function to check if search matches whole words or start of title
   const matchesSearch = (title: string, searchTerm: string) => {
@@ -71,7 +102,11 @@ export default function Guides() {
           (difficultyFilter !== 0 && (game.average_difficulty ?? 0) === difficultyFilter)) &&
         (game.average_hours ?? 0) >= hourRange[0] &&
         (game.average_hours ?? 0) <= hourRange[1] &&
-        (!game.release_year || (game.release_year >= yearRange[0] && game.release_year <= yearRange[1])),
+        (yearRange[0] === minYear && yearRange[1] === maxYear
+          ? true // If filter is at max range, include all games
+          : game.release_year &&
+            game.release_year >= yearRange[0] &&
+            game.release_year <= yearRange[1]),
     )
     ?.sort((a, b) => {
       if (sortBy === 'title') {
@@ -104,12 +139,18 @@ export default function Guides() {
           : (b.totalPoints ?? 0) - (a.totalPoints ?? 0);
       }
 
+      if (sortBy === 'releaseYear') {
+        return sortOrder === 'asc'
+          ? (a.release_year ?? 0) - (b.release_year ?? 0)
+          : (b.release_year ?? 0) - (a.release_year ?? 0);
+      }
+
       return 0;
     });
 
   const handleResetFilters = () => {
-    setYearRange([2000, 2025]);
-    setHourRange([0, 1000]);
+    setYearRange([minYear, maxYear]);
+    setHourRange([minHour, maxHour]);
     setSortBy('title');
     setSortOrder('asc');
     dispatch(resetPlatform());
@@ -165,6 +206,10 @@ export default function Guides() {
           setHourRange={setHourRange}
           yearRange={yearRange}
           setYearRange={setYearRange}
+          minHour={minHour}
+          maxHour={maxHour}
+          minYear={minYear}
+          maxYear={maxYear}
           onResetFilters={handleResetFilters}
           onClose={() => setIsOpen(false)}
         />

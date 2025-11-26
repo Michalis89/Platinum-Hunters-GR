@@ -7,6 +7,7 @@ import {
   Hourglass,
   Star,
   Trophy,
+  Calendar,
   ArrowUpNarrowWide,
   ArrowDownNarrowWide,
 } from 'lucide-react';
@@ -25,6 +26,7 @@ const options = [
   { value: 'hours', label: 'Ώρες', icon: <Hourglass /> },
   { value: 'rating', label: 'Βαθμολογία', icon: <Star /> },
   { value: 'totalPoints', label: 'Πόντοι', icon: <Trophy /> },
+  { value: 'releaseYear', label: 'Έτος Κυκλοφορίας', icon: <Calendar /> },
 ];
 
 export default function SortFilter({ sortBy, sortOrder, onSortChange, onOrderChange }: Props) {
@@ -47,8 +49,11 @@ export default function SortFilter({ sortBy, sortOrder, onSortChange, onOrderCha
         className={`flex h-12 items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold text-white transition-all duration-300 ${
           sortOrder === 'asc' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-red-500 hover:bg-red-600'
         }`}
+        aria-label={`Αλλαγή σειράς ταξινόμησης. Τρέχουσα: ${sortOrder === 'asc' ? 'Αύξουσα' : 'Φθίνουσα'}`}
       >
-        {sortOrder === 'asc' ? <ArrowUpNarrowWide /> : <ArrowDownNarrowWide />}
+        <span aria-hidden="true">
+          {sortOrder === 'asc' ? <ArrowUpNarrowWide /> : <ArrowDownNarrowWide />}
+        </span>
         {sortOrder === 'asc' ? 'Αύξουσα' : 'Φθίνουσα'}
       </button>
     </div>

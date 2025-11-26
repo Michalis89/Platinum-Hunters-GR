@@ -5,18 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setPlatforms, setSelectedPlatform } from '@/store/slices/platformsSlice';
 import { RootState } from '@/store/store';
 import { useGetGamesQuery } from '@/store/api/gamesApi';
-import { Gamepad2, Monitor } from 'lucide-react';
+import { Gamepad2 } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
-
-const getPlatformIcon = (platform: string): React.ReactNode => {
-  if (platform === 'PS5' || platform === 'PS4' || platform === 'PS3') {
-    return <Gamepad2 className="h-5 w-5 text-blue-400" />;
-  }
-  if (platform === 'PC') {
-    return <Monitor className="h-5 w-5 text-green-400" />;
-  }
-  return <Gamepad2 className="h-5 w-5 text-gray-400" />;
-};
 
 export default function PlatformFilter() {
   const dispatch = useDispatch();
@@ -28,10 +18,27 @@ export default function PlatformFilter() {
 
   useEffect(() => {
     if (data?.platforms && platforms.length === 0) {
-      const formattedPlatforms = data.platforms.map(platform => ({
-        value: platform,
-        label: platform,
-      }));
+      const platformOrder = ['PS5', 'PS4', 'PS3', 'PS2', 'PS1', 'PS Vita'];
+
+      const formattedPlatforms = data.platforms
+        .filter(platform => platform.startsWith('PS'))
+        .sort((a, b) => {
+          const indexA = platformOrder.indexOf(a);
+          const indexB = platformOrder.indexOf(b);
+
+          // If both are in the order array, sort by index
+          if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+          // If only A is in the order array, A comes first
+          if (indexA !== -1) return -1;
+          // If only B is in the order array, B comes first
+          if (indexB !== -1) return 1;
+          // If neither is in the order array, sort alphabetically
+          return a.localeCompare(b);
+        })
+        .map(platform => ({
+          value: platform,
+          label: platform,
+        }));
 
       dispatch(setPlatforms(formattedPlatforms));
     }
@@ -46,7 +53,6 @@ export default function PlatformFilter() {
     ...platforms.map(platform => ({
       value: platform.value,
       label: platform.label,
-      icon: getPlatformIcon(platform.value),
     })),
   ];
 

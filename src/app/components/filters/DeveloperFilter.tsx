@@ -36,7 +36,6 @@ export default function DeveloperFilter() {
     ...(data?.developers.map(developer => ({
       value: developer,
       label: `${developer}`,
-      icon: getIcon('developer'),
     })) ?? []),
   ];
 
