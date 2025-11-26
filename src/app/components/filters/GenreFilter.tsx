@@ -36,7 +36,6 @@ export default function GenreFilter() {
     ...(data?.genres.map(genre => ({
       value: genre,
       label: `${genre}`,
-      icon: getIcon(genre),
     })) ?? []),
   ];
 

@@ -16,12 +16,12 @@ export default function SingleSlider({
   icon,
 }: SingleSliderProps) {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <fieldset className="flex flex-col items-center gap-2 border-0 p-0">
       {label && (
-        <span className="flex items-center gap-2 text-gray-300">
-          {icon}
+        <legend className="flex items-center gap-2 text-sm font-medium text-gray-300">
+          <span aria-hidden="true">{icon}</span>
           {label}: {value}
-        </span>
+        </legend>
       )}
 
       <input
@@ -31,7 +31,12 @@ export default function SingleSlider({
         value={value}
         onChange={e => onChange(Number(e.target.value))}
         className="w-full bg-blue-500"
+        aria-label={label ? `${label}: ${value}` : `Τιμή: ${value}`}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        aria-valuetext={`${value}`}
       />
-    </div>
+    </fieldset>
   );
 }
