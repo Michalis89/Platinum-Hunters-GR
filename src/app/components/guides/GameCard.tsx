@@ -8,12 +8,10 @@ interface GameCardProps {
 }
 
 export default function GameCard({ game }: GameCardProps) {
-  const gameSlug = encodeURIComponent(game.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
-
   return (
     <Link
       key={game.id}
-      href={`/pages/guides/${gameSlug}`}
+      href={`/pages/guides/${game.slug}`}
       className="group relative flex transform flex-col items-center overflow-hidden rounded-xl border border-gray-700/50 bg-gray-900/90 p-6 shadow-xl backdrop-blur-lg transition duration-300 hover:scale-105 hover:bg-gray-800/90"
     >
       <div className="absolute inset-0 bg-blue-500 opacity-0 transition-opacity duration-500 group-hover:opacity-20"></div>

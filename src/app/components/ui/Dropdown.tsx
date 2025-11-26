@@ -40,12 +40,20 @@ const Dropdown: React.FC<DropdownProps> = ({
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && dropdownOpen) {
+        setDropdownOpen(false);
+      }
+    };
+
     if (dropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [dropdownOpen]);
 
@@ -68,10 +76,13 @@ const Dropdown: React.FC<DropdownProps> = ({
         className={`flex w-full items-center justify-between space-x-2 rounded-lg border ${
           dropdownOpen ? 'border-blue-400' : 'border-gray-700'
         } bg-gray-800 p-3 text-white transition-all duration-300 hover:bg-gray-700`}
+        aria-haspopup="listbox"
+        aria-expanded={dropdownOpen}
+        aria-label={label || 'Επιλογή φίλτρου'}
       >
         {selectedOption ? (
           <>
-            {selectedOption.icon}
+            <span aria-hidden="true">{selectedOption.icon}</span>
             <span>{selectedOption.label}</span>
           </>
         ) : (
@@ -85,13 +96,14 @@ const Dropdown: React.FC<DropdownProps> = ({
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
         </motion.svg>
       </button>
       <AnimatePresence>
         {dropdownOpen && (
-          <motion.div
+          <motion.ul
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -102,10 +114,14 @@ const Dropdown: React.FC<DropdownProps> = ({
               maxHeight: '300px',
             }}
             data-testid="dropdown-options"
+            role="listbox"
+            aria-label={label || 'Επιλογές φίλτρου'}
           >
             {options.map(option => (
-              <button
+              <li
                 key={option.value}
+                role="option"
+                aria-selected={option.value === selectedValue}
                 className={`flex w-full cursor-pointer items-center p-3 text-left ${
                   option.value === selectedValue ? 'bg-gray-700' : 'hover:bg-gray-700'
                 }`}
@@ -113,13 +129,20 @@ const Dropdown: React.FC<DropdownProps> = ({
                   onSelect(option.value);
                   setDropdownOpen(false);
                 }}
-                type="button"
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelect(option.value);
+                    setDropdownOpen(false);
+                  }
+                }}
+                tabIndex={0}
               >
-                {option.icon}
+                <span aria-hidden="true">{option.icon}</span>
                 <span className="ml-2">{option.label}</span>
-              </button>
+              </li>
             ))}
-          </motion.div>
+          </motion.ul>
         )}
       </AnimatePresence>
     </div>
