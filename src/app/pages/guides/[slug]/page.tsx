@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { GameDetails } from '@/types/interfaces';
+import { GameDetails, Guide, ProcessedGame } from '@/types/interfaces';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import { Info } from 'lucide-react';
 import Skeleton from '@/app/components/ui/Skeleton';
@@ -14,8 +14,6 @@ import EditGameInfoModal from '@/app/components/game-details/EditGameInfoModal';
 import GamePlatforms from '@/app/components/game-details/GamePlatforms';
 import GameDetailsInfo from '@/app/components/game-details/GameDetailsInfo';
 import GuideStats from '@/app/components/game-details/GuideStats';
-import { useGame } from '@/hooks/useGame';
-import { useGuides, useGameDetails, useTrophies } from '@/hooks/useGameData';
 
 const TrophyStats = dynamic(() => import('@/app/components/game-details/TrophyStats'), {
   ssr: false,
@@ -34,16 +32,56 @@ export default function GameDetailsPage() {
     }
   }, [params]);
 
-  // Use SWR hooks for data fetching with automatic caching
-  const { game, isLoading: gameLoading, isError: gameError } = useGame(slug);
-  const { guides } = useGuides(game?.id || null);
-  const { gameDetails, mutate: mutateGameDetails } = useGameDetails(game?.id || null);
-  const { trophies } = useTrophies(game?.id || null);
-
+  const [game, setGame] = useState<ProcessedGame | null>(null);
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
+  const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [trophies, setTrophies] = useState<{
+    platinum: number;
+    gold: number;
+    silver: number;
+    bronze: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!slug) return;
+
+    const fetchGameData = async () => {
+      try {
+        const delay = new Promise(res => setTimeout(res, 300));
+        const gameResponse = await fetch('/api/games');
+        if (!gameResponse.ok) throw new Error('Failed to fetch games');
+
+        const gamesData: ProcessedGame[] = await gameResponse.json();
+        const matchedGame = gamesData.find(game => game.slug === slug);
+
+        if (!matchedGame) throw new Error('Game not found');
+
+        setGame(matchedGame);
+
+        const [guideData, detailsData, trophiesData] = await Promise.all([
+          fetch(`/api/guides/${matchedGame.id}`).then(res => res.json()),
+          fetch(`/api/game-details/${matchedGame.id}`).then(res => res.json()),
+          fetch(`/api/game/${matchedGame.id}`).then(res => res.json()),
+        ]);
+
+        setGuides(guideData);
+        setGameDetails(detailsData);
+        setTrophies(trophiesData);
+        await delay;
+      } catch (err) {
+        console.error('❌ Σφάλμα στη φόρτωση:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGameData();
+  }, [slug]);
 
   const handleUpdateInfo = async () => {
     if (!game) return;
@@ -57,8 +95,11 @@ export default function GameDetailsPage() {
 
       if (response.ok) {
         setMessage('✅ Πληροφορίες ενημερώθηκαν!');
-        // Revalidate the game details cache
-        mutateGameDetails({ ...gameDetails, ...result.updatedData }, false);
+        setGameDetails({
+          ...gameDetails,
+          ...result.updatedData,
+        });
+
         setMessageType('success');
       } else {
         setMessage('❌ Σφάλμα κατά την ενημέρωση!');
@@ -73,11 +114,11 @@ export default function GameDetailsPage() {
     setUpdating(false);
   };
 
-  if (gameLoading) {
+  if (loading) {
     return <Skeleton type="page" data-testid="skeleton" />;
   }
 
-  if (gameError || !game) {
+  if (!game) {
     return <div>❌ Game not found!</div>;
   }
 
@@ -148,22 +189,22 @@ export default function GameDetailsPage() {
               <div className="mt-4">
                 <GamePlatforms platforms={gameDetails.platforms} />
               </div>
-              <div className="mt-4 flex flex-col items-center gap-3 md:flex-row md:justify-center">
-                <UpdateGameInfoButton
-                  handleUpdateInfo={handleUpdateInfo}
-                  updating={updating}
-                  gameDetails={gameDetails}
-                />
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-4 flex flex-col items-center gap-3 md:flex-row md:justify-center">
+                  <UpdateGameInfoButton
+                    handleUpdateInfo={handleUpdateInfo}
+                    updating={updating}
+                    gameDetails={gameDetails}
+                  />
 
-                {process.env.NODE_ENV === 'development' && (
                   <button
                     onClick={() => setIsModalOpen(true)}
                     className="w-full rounded-lg bg-green-600 py-2 text-white transition hover:bg-green-700 md:w-auto md:px-4"
                   >
                     ✏️ Επεξεργασία Πληροφοριών
                   </button>
-                )}
-              </div>
+                </div>
+              )}
               {message && messageType && (
                 <div className="mt-4">
                   <AlertMessage type={messageType} message={message} />
@@ -177,9 +218,7 @@ export default function GameDetailsPage() {
       )}
 
       <TrophyGuides
-        guides={guides
-          .filter(g => g.steps !== undefined)
-          .map(g => ({ id: g.id, steps: g.steps! }))}
+        guides={guides.filter(g => g.steps !== undefined).map(g => ({ id: g.id, steps: g.steps! }))}
       />
 
       {game && (
@@ -189,7 +228,8 @@ export default function GameDetailsPage() {
           gameId={game.id}
           gameDetails={gameDetails}
           onSuccess={updatedData => {
-            mutateGameDetails({ ...gameDetails, ...updatedData }, false);
+            setGameDetails({ ...gameDetails, ...updatedData });
+
             setMessage('✅ Πληροφορίες ενημερώθηκαν επιτυχώς!');
             setMessageType('success');
           }}
