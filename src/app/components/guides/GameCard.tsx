@@ -1,13 +1,41 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useDispatch, useSelector } from 'react-redux';
+import { Trophy, ListPlus, Check } from 'lucide-react';
 import { ProcessedGame } from '@/types/interfaces';
-import { Trophy } from 'lucide-react';
+import { addToBacklog, selectIsInBacklog } from '@/store/slices/backlogSlice';
+import type { AppDispatch } from '@/store/store';
+import { selectIsAuthenticated } from '@/store/slices/authSlice';
+import { useState } from 'react';
 
 interface GameCardProps {
   readonly game: ProcessedGame;
 }
 
 export default function GameCard({ game }: GameCardProps) {
+  const dispatch = useDispatch<AppDispatch>();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isInBacklog = useSelector(selectIsInBacklog(game.id));
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAddToBacklog = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated || isInBacklog || isAdding) return;
+
+    setIsAdding(true);
+    try {
+      await dispatch(addToBacklog({ game_id: game.id, priority: 0 })).unwrap();
+    } catch (error) {
+      console.error('Error adding to backlog:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <Link
       key={game.id}
@@ -15,6 +43,32 @@ export default function GameCard({ game }: GameCardProps) {
       className="group relative flex transform flex-col items-center overflow-hidden rounded-xl border border-gray-700/50 bg-gray-900/90 p-6 shadow-xl backdrop-blur-lg transition duration-300 hover:scale-105 hover:bg-gray-800/90"
     >
       <div className="absolute inset-0 bg-blue-500 opacity-0 transition-opacity duration-500 group-hover:opacity-20"></div>
+
+      {/* Add to Backlog Button */}
+      {isAuthenticated && (
+        <button
+          onClick={handleAddToBacklog}
+          disabled={isInBacklog || isAdding}
+          className={`absolute right-2 top-2 z-10 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-sm transition ${
+            isInBacklog
+              ? 'bg-green-600/90 text-white cursor-default'
+              : 'bg-blue-600/90 text-white hover:bg-blue-500'
+          } disabled:opacity-50`}
+          title={isInBacklog ? 'Στο Backlog' : 'Προσθήκη στο Backlog'}
+        >
+          {isInBacklog ? (
+            <>
+              <Check size={14} />
+              <span className="hidden sm:inline">Στο Backlog</span>
+            </>
+          ) : (
+            <>
+              <ListPlus size={14} />
+              <span className="hidden sm:inline">{isAdding ? 'Προσθήκη...' : 'Backlog'}</span>
+            </>
+          )}
+        </button>
+      )}
 
       <div className="relative flex h-36 w-36 items-center justify-center">
         <Image

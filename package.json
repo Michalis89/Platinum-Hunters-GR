@@ -11,8 +11,6 @@
     "lint": "next lint",
     "test": "jest --coverage",
     "test:coverage": "npm test -- --coverage --coverageReporters=text-lcov > lcov.info",
-    "test:results": "jest --json --outputFile=jest-results.json",
-    "test:readME": "node scripts/generate-coverage-table.js",
     "sitemap": "next-sitemap",
     "cypress:open": "concurrently \"npm run build && npm run start\" \"cypress open\" "
   },
