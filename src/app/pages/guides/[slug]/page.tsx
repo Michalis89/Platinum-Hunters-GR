@@ -141,100 +141,167 @@ export default function GameDetailsPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-4 text-white md:p-8">
-      {game && (
-        <div className="w-full max-w-3xl rounded-lg bg-gray-900 p-4 shadow-lg md:p-6">
-          <div className="mb-4 flex justify-center">
-            <Image
-              src={game.cover_image ?? '/og-image.png'}
-              alt={game.title}
-              width={200}
-              height={200}
-              className="rounded-lg object-contain shadow-md"
-              sizes="200px"
-              style={{ width: 'auto', height: 'auto' }}
-            />
-          </div>
-
-          <h1 className="text-center text-2xl font-extrabold text-blue-400 md:text-3xl">
-            {game.title}
-          </h1>
-
-          {guides.length > 0 &&
-            guides[0].difficulty_rating &&
-            guides[0].estimated_hours &&
-            guides[0].estimated_playthroughs && (
-              <div className="mt-4 flex flex-col justify-center gap-2 md:flex-row md:gap-4">
-                <GuideStats
-                  difficulty={guides[0].difficulty_rating?.toString() || 'N/A'}
-                  difficultyColor={getDifficultyColor(guides[0].difficulty_rating || 0)}
-                  playthroughs={guides[0].estimated_playthroughs || 0}
-                  playthroughsColor={getPlaythroughsColor(guides[0].estimated_playthroughs || 0)}
-                  hours={guides[0].estimated_hours || 0}
-                  hoursColor={getHoursColor(guides[0].estimated_hours || 0)}
+    <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,_#1e293b,_#020617)] px-4 py-16 text-slate-100">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        {game && (
+          <>
+            {/* HERO SECTION */}
+            <section className="flex flex-col gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl backdrop-blur-md sm:flex-row sm:items-center">
+              {/* Cover */}
+              <div className="flex justify-center sm:block sm:w-48">
+                <Image
+                  src={game.cover_image ?? '/og-image.png'}
+                  alt={game.title}
+                  width={250}
+                  height={250}
+                  className="rounded-xl object-cover shadow-lg ring-2 ring-slate-800/80"
                 />
               </div>
+
+              {/* Title + Stats */}
+              <div className="flex flex-1 flex-col items-center gap-4 text-center sm:items-start sm:text-left">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+                    Platinum Hunters • Trophy Guide
+                  </p>
+                  <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-50 md:text-4xl">
+                    {game.title}
+                  </h1>
+                </div>
+
+                {/* Difficulty / Playthroughs / Hours */}
+                {guides.length > 0 &&
+                  guides[0].difficulty_rating &&
+                  guides[0].estimated_hours &&
+                  guides[0].estimated_playthroughs && (
+                    <div className="w-full">
+                      <GuideStats
+                        difficulty={guides[0].difficulty_rating?.toString() || 'N/A'}
+                        difficultyColor={getDifficultyColor(guides[0].difficulty_rating || 0)}
+                        playthroughs={guides[0].estimated_playthroughs || 0}
+                        playthroughsColor={getPlaythroughsColor(
+                          guides[0].estimated_playthroughs || 0,
+                        )}
+                        hours={guides[0].estimated_hours || 0}
+                        hoursColor={getHoursColor(guides[0].estimated_hours || 0)}
+                      />
+                    </div>
+                  )}
+
+                {/* Quick meta row (έτος, dev, rating) */}
+                {gameDetails && (
+                  <div className="mt-1 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-300 sm:justify-start">
+                    <span className="rounded-full bg-slate-800/80 px-3 py-1">
+                      Έτος κυκλοφορίας:{' '}
+                      <span className="font-semibold">{gameDetails.release_year}</span>
+                    </span>
+                    <span className="rounded-full bg-slate-800/80 px-3 py-1">
+                      Developer: <span className="font-semibold">{gameDetails.developer}</span>
+                    </span>
+                    <span className="rounded-full bg-slate-800/80 px-3 py-1">
+                      Βαθμολογία:{' '}
+                      <span className="font-semibold text-emerald-400">
+                        {gameDetails.rating?.toFixed(2)}
+                      </span>
+                    </span>
+                  </div>
+                )}
+
+                {/* CTA – edit guide */}
+                <div className="mt-2 flex w-full justify-center sm:justify-start">
+                  <EditGuideButton gameId={game.id} />
+                </div>
+              </div>
+            </section>
+
+            {/* INFO + TROPHIES SECTION */}
+            {(gameDetails || trophies) && (
+              <section className="grid gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl backdrop-blur-md md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+                {/* Game info */}
+                {gameDetails && (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <Info className="h-5 w-5 text-blue-400" />
+                      <h2 className="text-lg font-semibold text-yellow-400">
+                        Πληροφορίες Παιχνιδιού
+                      </h2>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-4 text-sm md:text-base">
+                      <GameDetailsInfo {...gameDetails} />
+                      <div className="mt-4 border-t border-slate-800 pt-4">
+                        <GamePlatforms platforms={gameDetails.platforms} />
+                      </div>
+                    </div>
+
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="flex flex-wrap items-center gap-3">
+                        <UpdateGameInfoButton
+                          handleUpdateInfo={handleUpdateInfo}
+                          updating={updating}
+                          gameDetails={gameDetails}
+                        />
+
+                        <button
+                          onClick={() => setIsModalOpen(true)}
+                          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-emerald-700"
+                        >
+                          ✏️ Επεξεργασία Πληροφοριών
+                        </button>
+                      </div>
+                    )}
+
+                    {message && messageType && (
+                      <div className="mt-2">
+                        <AlertMessage type={messageType} message={message} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Trophy Stats */}
+                {trophies && (
+                  <div className="flex flex-col gap-4 rounded-xl border border-slate-800/80 bg-slate-950/40 p-4">
+                    <h3 className="text-base font-semibold text-slate-100">Συνολικά Trophies</h3>
+                    <TrophyStats trophies={trophies} />
+                  </div>
+                )}
+              </section>
             )}
+          </>
+        )}
 
-          {trophies && <TrophyStats trophies={trophies} />}
+        {/* GUIDES SECTION */}
+        <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl backdrop-blur-md">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-100">Οδηγός</h2>
+            <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              Trophy Walkthrough
+            </span>
+          </div>
 
-          {gameDetails && (
-            <div className="mt-6 w-full max-w-2xl rounded-lg border border-gray-700 bg-gray-900 p-4 shadow-lg md:p-6">
-              <h2 className="mb-4 flex items-center justify-center text-center text-base font-bold text-yellow-400 md:text-lg">
-                <Info className="mr-2 h-4 w-4 text-blue-400 md:h-5 md:w-5" /> Πληροφορίες Παιχνιδιού
-              </h2>
-              <div className="flex flex-col gap-2 text-sm md:gap-3 md:text-base">
-                <GameDetailsInfo {...gameDetails} />
-              </div>
-              <div className="mt-4">
-                <GamePlatforms platforms={gameDetails.platforms} />
-              </div>
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-4 flex flex-col items-center gap-3 md:flex-row md:justify-center">
-                  <UpdateGameInfoButton
-                    handleUpdateInfo={handleUpdateInfo}
-                    updating={updating}
-                    gameDetails={gameDetails}
-                  />
+          <TrophyGuides
+            guides={guides
+              .filter(g => g.steps !== undefined)
+              .map(g => ({ id: g.id, steps: g.steps! }))}
+          />
+        </section>
 
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="w-full rounded-lg bg-green-600 py-2 text-white transition hover:bg-green-700 md:w-auto md:px-4"
-                  >
-                    ✏️ Επεξεργασία Πληροφοριών
-                  </button>
-                </div>
-              )}
-              {message && messageType && (
-                <div className="mt-4">
-                  <AlertMessage type={messageType} message={message} />
-                </div>
-              )}
-            </div>
-          )}
-
-          <EditGuideButton gameId={game.id} />
-        </div>
-      )}
-
-      <TrophyGuides
-        guides={guides.filter(g => g.steps !== undefined).map(g => ({ id: g.id, steps: g.steps! }))}
-      />
-
-      {game && (
-        <EditGameInfoModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          gameId={game.id}
-          gameDetails={gameDetails}
-          onSuccess={updatedData => {
-            setGameDetails({ ...gameDetails, ...updatedData });
-
-            setMessage('✅ Πληροφορίες ενημερώθηκαν επιτυχώς!');
-            setMessageType('success');
-          }}
-        />
-      )}
+        {/* Modal */}
+        {game && (
+          <EditGameInfoModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            gameId={game.id}
+            gameDetails={gameDetails}
+            onSuccess={updatedData => {
+              setGameDetails(prev => ({ ...prev, ...updatedData }));
+              setMessage('✅ Πληροφορίες ενημερώθηκαν επιτυχώς!');
+              setMessageType('success');
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

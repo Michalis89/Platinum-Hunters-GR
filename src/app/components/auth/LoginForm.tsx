@@ -82,6 +82,7 @@ export default function LoginForm() {
       // Call API route with identifier (email or username)
       const response = await fetch('/api/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           identifier: formData.identifier,
@@ -114,7 +115,8 @@ export default function LoginForm() {
       }, 1000);
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error instanceof Error ? error.message : '❌ Σφάλμα σύνδεσης. Ελέγξτε τα στοιχεία σας.';
+      const errorMessage =
+        error instanceof Error ? error.message : '❌ Σφάλμα σύνδεσης. Ελέγξτε τα στοιχεία σας.';
       setAlert({
         type: 'error',
         message: errorMessage,
@@ -125,14 +127,21 @@ export default function LoginForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <LogIn className="h-6 w-6" />
-          Σύνδεση
+    <Card className="border border-slate-800/60 bg-slate-900/70 shadow-xl shadow-blue-900/30 backdrop-blur-xl">
+      <CardHeader className="border-slate-800/70">
+        <CardTitle className="flex items-center justify-between text-xl text-white">
+          <span className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 via-sky-400 to-emerald-400 text-slate-950 shadow-lg shadow-blue-500/30">
+              <LogIn className="h-5 w-5" />
+            </div>
+            Σύνδεση
+          </span>
+          <span className="rounded-full bg-slate-800/80 px-3 py-1 text-xs text-slate-300">
+            Safe session
+          </span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-5">
         <form onSubmit={handleSubmit} className="space-y-4">
           {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
@@ -144,7 +153,7 @@ export default function LoginForm() {
               name="identifier"
               value={formData.identifier}
               onChange={handleChange}
-              placeholder="example@email.com ή username"
+              placeholder="player@hunters.gg ή username"
               error={!!errors.identifier}
               disabled={loading}
               required
@@ -165,11 +174,12 @@ export default function LoginForm() {
                 error={!!errors.password}
                 disabled={loading}
                 required
+                className="pr-11"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-gray-400 hover:text-white"
+                className="absolute right-3 top-9 text-slate-400 transition hover:text-white"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -179,20 +189,23 @@ export default function LoginForm() {
           </div>
 
           {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center gap-2 text-slate-300">
               <input
                 type="checkbox"
                 name="remember"
                 checked={formData.remember}
                 onChange={handleChange}
-                className="rounded border-gray-700 bg-gray-800 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                className="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-2 focus:ring-blue-500"
                 disabled={loading}
               />
               Να με θυμάσαι
             </label>
 
-            <Link href="/auth/forgot-password" className="text-sm text-blue-500 hover:text-blue-400">
+            <Link
+              href="/pages/auth/forgot-password"
+              className="text-emerald-400 transition hover:text-emerald-300"
+            >
               Ξέχασες τον κωδικό;
             </Link>
           </div>
@@ -201,7 +214,7 @@ export default function LoginForm() {
           <Button
             type="submit"
             variant="primary"
-            className="w-full"
+            className="flex w-full items-center justify-center gap-2 bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400 text-slate-950 shadow-lg shadow-blue-500/30 transition hover:shadow-blue-400/40"
             disabled={loading}
           >
             {loading ? (
@@ -215,9 +228,12 @@ export default function LoginForm() {
           </Button>
 
           {/* Register Link */}
-          <div className="mt-4 text-center text-sm text-gray-400">
+          <div className="pt-1 text-center text-sm text-slate-400">
             Δεν έχεις λογαριασμό;{' '}
-            <Link href="/auth/register" className="text-blue-500 hover:text-blue-400">
+            <Link
+              href="/pages/auth/register"
+              className="font-medium text-emerald-300 transition hover:text-emerald-200"
+            >
               Κάνε εγγραφή
             </Link>
           </div>

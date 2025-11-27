@@ -77,7 +77,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white">
+    <div className="flex min-h-screen flex-col items-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-24 text-center text-slate-100">
       <div className="w-full max-w-xl rounded-lg bg-gray-900 p-6 shadow-lg">
         <h1 className="flex items-center justify-center gap-2 text-center text-3xl font-extrabold text-blue-400">
           <Mail size={24} /> Επικοινωνία

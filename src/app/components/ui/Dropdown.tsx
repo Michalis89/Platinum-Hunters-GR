@@ -73,23 +73,25 @@ const Dropdown: React.FC<DropdownProps> = ({
           setDropdownOpen(prev => !prev);
         }}
         data-testid="dropdown"
-        className={`flex w-full items-center justify-between space-x-2 rounded-lg border ${
-          dropdownOpen ? 'border-blue-400' : 'border-gray-700'
-        } bg-gray-800 p-3 text-white transition-all duration-300 hover:bg-gray-700`}
+        className={`flex w-full items-center justify-between rounded-xl border ${
+          dropdownOpen ? 'border-sky-400/70 shadow-sky-400/30' : 'border-slate-800/70 shadow-slate-950/40'
+        } bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 shadow-inner transition-all duration-200 hover:border-sky-300/70 hover:bg-slate-900/80`}
         aria-haspopup="listbox"
         aria-expanded={dropdownOpen}
         aria-label={label || 'Επιλογή φίλτρου'}
       >
-        {selectedOption ? (
-          <>
-            <span aria-hidden="true">{selectedOption.icon}</span>
-            <span>{selectedOption.label}</span>
-          </>
-        ) : (
-          'Επιλέξτε'
-        )}
+        <span className="flex items-center gap-2 text-left leading-tight">
+          {selectedOption ? (
+            <>
+              {selectedOption.icon && <span aria-hidden="true">{selectedOption.icon}</span>}
+              <span className="whitespace-normal">{selectedOption.label}</span>
+            </>
+          ) : (
+            <span className="text-slate-400">Επιλέξτε</span>
+          )}
+        </span>
         <motion.svg
-          className={`h-5 w-5 text-gray-400 transition-transform ${
+          className={`h-4 w-4 text-slate-400 transition-transform ${
             dropdownOpen ? 'rotate-180' : ''
           }`}
           xmlns="http://www.w3.org/2000/svg"
@@ -108,10 +110,10 @@ const Dropdown: React.FC<DropdownProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 mt-1 w-full overflow-y-auto rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
+            className="absolute left-0 mt-1 w-full overflow-y-auto rounded-xl border border-slate-800/80 bg-slate-950/95 shadow-xl shadow-slate-950/60 backdrop-blur"
             style={{
-              zIndex: zIndex,
-              maxHeight: '300px',
+              zIndex: zIndex ?? 50,
+              maxHeight: '320px',
             }}
             data-testid="dropdown-options"
             role="listbox"
@@ -122,9 +124,11 @@ const Dropdown: React.FC<DropdownProps> = ({
                 key={option.value}
                 role="option"
                 aria-selected={option.value === selectedValue}
-                className={`flex w-full cursor-pointer items-center p-3 text-left ${
-                  option.value === selectedValue ? 'bg-gray-700' : 'hover:bg-gray-700'
-                }`}
+            className={`flex w-full cursor-pointer items-center px-3 py-2 text-sm text-slate-100 transition ${
+              option.value === selectedValue
+                ? 'bg-slate-800/80 text-sky-200'
+                : 'hover:bg-slate-800/70'
+            }`}
                 onClick={() => {
                   onSelect(option.value);
                   setDropdownOpen(false);
@@ -138,8 +142,8 @@ const Dropdown: React.FC<DropdownProps> = ({
                 }}
                 tabIndex={0}
               >
-                <span aria-hidden="true">{option.icon}</span>
-                <span className="ml-2">{option.label}</span>
+                {option.icon && <span aria-hidden="true">{option.icon}</span>}
+                <span className="ml-2 truncate">{option.label}</span>
               </li>
             ))}
           </motion.ul>

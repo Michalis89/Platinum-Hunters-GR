@@ -40,19 +40,22 @@ export default function GameCard({ game }: GameCardProps) {
     <Link
       key={game.id}
       href={`/pages/guides/${game.slug}`}
-      className="group relative flex transform flex-col items-center overflow-hidden rounded-xl border border-gray-700/50 bg-gray-900/90 p-6 shadow-xl backdrop-blur-lg transition duration-300 hover:scale-105 hover:bg-gray-800/90"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70 shadow-xl shadow-blue-900/30 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-sky-400/60 hover:shadow-sky-500/30"
     >
-      <div className="absolute inset-0 bg-blue-500 opacity-0 transition-opacity duration-500 group-hover:opacity-20"></div>
+      {/* Ambient overlay */}
+      <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-500/30 via-blue-500/20 to-emerald-400/30" />
+      </div>
 
       {/* Add to Backlog Button */}
       {isAuthenticated && (
         <button
           onClick={handleAddToBacklog}
           disabled={isInBacklog || isAdding}
-          className={`absolute right-2 top-2 z-10 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-sm transition ${
+          className={`absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-sm transition ${
             isInBacklog
-              ? 'bg-green-600/90 text-white cursor-default'
-              : 'bg-blue-600/90 text-white hover:bg-blue-500'
+              ? 'cursor-default bg-emerald-500/90 text-slate-950'
+              : 'bg-sky-500/90 text-slate-950 hover:bg-emerald-400/90'
           } disabled:opacity-50`}
           title={isInBacklog ? 'Στο Backlog' : 'Προσθήκη στο Backlog'}
         >
@@ -70,46 +73,95 @@ export default function GameCard({ game }: GameCardProps) {
         </button>
       )}
 
-      <div className="relative flex h-36 w-36 items-center justify-center">
+      {/* Media */}
+      <div className="relative h-44 w-full overflow-hidden">
         <Image
           src={game.cover_image || game.background_image || '/og-image.png'}
           alt={game.title}
-          width={144}
-          height={144}
-          className="rounded-lg object-contain shadow-md"
-          sizes="144px"
-          style={{ width: 'auto', height: 'auto' }}
+          fill
+          className="object-cover"
+          sizes="(min-width: 1024px) 300px, 100vw"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+        <div className="absolute bottom-4 left-4 flex flex-col gap-1">
+          <p className="text-sm text-slate-300">
+            {game.platforms?.slice(0, 2).join(' • ') || 'N/A'}
+          </p>
+          <div className="flex flex-wrap gap-2 text-xs font-medium">
+            {game.average_difficulty !== null && game.average_difficulty !== undefined && (
+              <span className="rounded-full bg-slate-900/80 px-3 py-1 text-emerald-300">
+                Δυσκολία: {game.average_difficulty}
+              </span>
+            )}
+            {game.average_hours !== null && game.average_hours !== undefined && (
+              <span className="rounded-full bg-slate-900/80 px-3 py-1 text-sky-300">
+                Ώρες: {game.average_hours}
+              </span>
+            )}
+            {game.release_year && (
+              <span className="rounded-full bg-slate-900/80 px-3 py-1 text-slate-200">
+                Έτος: {game.release_year}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
-      <h2 className="mt-4 text-center text-xl font-bold text-white transition-colors group-hover:text-blue-400">
-        {game.title}
-      </h2>
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <h2 className="text-center text-lg font-semibold text-white transition-colors group-hover:text-emerald-300">
+          {game.title}
+        </h2>
 
-      <p className="text-sm text-gray-400">{game.platforms?.join(', ') || 'N/A'}</p>
+        <div className="flex flex-wrap gap-2 text-xs text-slate-300">
+          {game.genres?.slice(0, 3).map(genre => (
+            <span
+              key={genre}
+              className="rounded-full border border-slate-800/60 bg-slate-950/70 px-3 py-1"
+            >
+              {genre}
+            </span>
+          ))}
+          {game.genres && game.genres.length > 3 && (
+            <span className="rounded-full border border-slate-800/60 bg-slate-950/70 px-2 py-1">
+              +{game.genres.length - 3}
+            </span>
+          )}
+        </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-300">
-        <span className="flex items-center gap-1">
-          <Trophy className="h-5 w-5 text-blue-400" />
-          <span className="text-blue-400">{game.trophy_platinum}</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <Trophy className="h-5 w-5 text-yellow-400" />
-          <span className="text-yellow-400">{game.trophy_gold}</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <Trophy className="h-5 w-5 text-gray-400" />
-          <span className="text-gray-400">{game.trophy_silver}</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <Trophy className="h-5 w-5 text-orange-500" />
-          <span className="text-orange-500">{game.trophy_bronze}</span>
-        </span>
+        <div className="flex flex-col items-center gap-3 text-sm text-slate-200">
+          {/* Platinum centered */}
+          <span className="flex items-center gap-2 rounded-full bg-slate-950/70 px-4 py-1.5 shadow-md">
+            <Trophy className="h-4 w-4 text-blue-300" />
+            {game.trophy_platinum}
+          </span>
+
+          {/* Row of 3 trophies */}
+          <div className="flex items-center justify-center gap-4">
+            <span className="flex items-center gap-1 rounded-full bg-slate-950/60 px-3 py-1 shadow">
+              <Trophy className="h-4 w-4 text-yellow-300" />
+              {game.trophy_gold}
+            </span>
+
+            <span className="flex items-center gap-1 rounded-full bg-slate-950/60 px-3 py-1 shadow">
+              <Trophy className="h-4 w-4 text-slate-200" />
+              {game.trophy_silver}
+            </span>
+
+            <span className="flex items-center gap-1 rounded-full bg-slate-950/60 px-3 py-1 shadow">
+              <Trophy className="h-4 w-4 text-orange-300" />
+              {game.trophy_bronze}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-auto flex items-center justify-between text-sm font-semibold text-amber-300">
+          <span>⭐ Σύνολο Πόντων: {game.totalPoints}</span>
+          <span className="text-emerald-300 transition group-hover:text-emerald-200">
+            Δες guide →
+          </span>
+        </div>
       </div>
-
-      <p className="mt-4 flex items-center gap-2 text-lg font-semibold text-yellow-300">
-        ⭐ Σύνολο Πόντων: {game.totalPoints}
-      </p>
     </Link>
   );
 }

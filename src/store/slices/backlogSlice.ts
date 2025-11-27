@@ -62,7 +62,9 @@ const initialState: BacklogState = {
  * Thunk: Fetch backlog
  */
 export const fetchBacklog = createAsyncThunk('backlog/fetch', async () => {
-  const response = await fetch('/api/backlog');
+  const response = await fetch('/api/backlog', {
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     const error = await response.json();
@@ -81,6 +83,7 @@ export const addToBacklog = createAsyncThunk(
   async ({ game_id, priority = 0, notes = null }: { game_id: number; priority?: number; notes?: string | null }) => {
     const response = await fetch('/api/backlog', {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ game_id, priority, notes }),
     });
@@ -121,6 +124,7 @@ export const updateBacklogItem = createAsyncThunk(
   }) => {
     const response = await fetch(`/api/backlog/${id}`, {
       method: 'PATCH',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         status,
@@ -149,6 +153,7 @@ export const updateBacklogItem = createAsyncThunk(
 export const removeFromBacklog = createAsyncThunk('backlog/remove', async (id: number) => {
   const response = await fetch(`/api/backlog/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 
   if (!response.ok) {

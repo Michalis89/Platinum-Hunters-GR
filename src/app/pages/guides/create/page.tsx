@@ -34,7 +34,9 @@ export default function GuideCreatePage() {
 
     try {
       const rawgRes = await fetch(
-        `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(search)}&page_size=1`,
+        `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(
+          search,
+        )}&page_size=1`,
       );
       const data = await rawgRes.json();
       const game = data.results?.[0];
@@ -55,6 +57,7 @@ export default function GuideCreatePage() {
         esrb_rating: game.esrb_rating?.name ?? null,
       });
 
+      // TODO: real NP communication id
       const npCommunicationId = 'NPWR00867_00';
 
       const res = await fetch(`/api/trophies?npCommunicationId=${npCommunicationId}`, {
@@ -71,83 +74,108 @@ export default function GuideCreatePage() {
 
   return (
     <PageWrapper>
-      <div className="flex flex-col-reverse gap-8 md:flex-row">
-        <div className="flex-1">
-          <h1 className="mb-6 text-2xl font-bold text-white">Δημιουργία Guide</h1>
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-10">
+        <div className="mx-auto flex w-full max-w-6xl flex-col-reverse gap-10 md:flex-row">
+          {/* LEFT PANEL – MAIN CONTENT */}
+          <div className="flex-1">
+            <h1 className="mb-8 bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-3xl font-extrabold text-transparent">
+              Δημιουργία Trophy Guide
+            </h1>
 
-          <form className="space-y-8">
-            {/* General Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Γενικές Πληροφορίες</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Input label="Τίτλος Guide" placeholder="Platinum Walkthrough για το God of War" />
-                <div className="flex items-center gap-4">
-                  <SearchBar
-                    value={search}
-                    onChange={setSearch}
-                    placeholder="Αναζήτηση παιχνιδιού..."
+            <form className="space-y-10">
+              {/* GENERAL INFO */}
+              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-slate-100">
+                    🎮 Γενικές Πληροφορίες
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  <Input
+                    label="Τίτλος Guide"
+                    placeholder="Platinum Walkthrough για το Elden Ring"
                   />
-                  <Button type="button" onClick={handleSearch}>
-                    Αναζήτηση
-                  </Button>
-                </div>
-                {gameDetails && <GameDetailsInfo {...gameDetails} />}
-                <Select label="Πλατφόρμα" options={['PS3', 'PS4', 'PS5', 'PC', 'XBOX']} />
-              </CardContent>
-            </Card>
 
-            {/* Platinum Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Platinum Στατιστικά</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Input label="Βαθμός Δυσκολίας (1-10)" type="number" min={1} max={10} />
-                <Input
-                  label="Πόσα Playthroughts θέλει για την πλατίνα"
-                  type="number"
-                  min={1}
-                  max={10}
-                />
-                <Input label="Ώρες για Platinum" type="number" />
-              </CardContent>
-            </Card>
+                  <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                    <SearchBar
+                      value={search}
+                      onChange={setSearch}
+                      placeholder="Αναζήτηση παιχνιδιού..."
+                    />
+                    <Button type="button" onClick={handleSearch} className="whitespace-nowrap">
+                      🔍 Αναζήτηση
+                    </Button>
+                  </div>
 
-            {/* Guide Content */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Περιεχόμενο</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea label="Εισαγωγή" />
-                <GuideStepsEditor />
-              </CardContent>
-            </Card>
+                  {gameDetails && (
+                    <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+                      <GameDetailsInfo {...gameDetails} />
+                    </div>
+                  )}
 
-            {/* Tags & Submit */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Tags & Υποβολή</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <TagsInput />
-                <div className="space-x-4">
-                  <Button variant="secondary">Αποθήκευση ως Draft</Button>
-                  <Button variant="primary" type="submit">
-                    Υποβολή Guide
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </form>
+                  <Select label="Πλατφόρμα" options={['PS3', 'PS4', 'PS5', 'PC', 'XBOX']} />
+                </CardContent>
+              </Card>
+
+              {/* PLATINUM STATS */}
+              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-slate-100">
+                    🏆 Platinum Στατιστικά
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  <Input label="Βαθμός Δυσκολίας (1-10)" type="number" min={1} max={10} />
+                  <Input label="Αριθμός Playthroughs" type="number" min={1} max={10} />
+                  <Input label="Συνολικές Ώρες" type="number" />
+                </CardContent>
+              </Card>
+
+              {/* GUIDE CONTENT */}
+              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-slate-100">
+                    ✏️ Περιεχόμενο Guide
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  <Textarea label="Εισαγωγή" placeholder="Ξεκινήστε με μια σύντομη περιγραφή..." />
+                  <GuideStepsEditor />
+                </CardContent>
+              </Card>
+
+              {/* TAGS & SUBMIT */}
+              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-slate-100">
+                    🏷️ Tags & Υποβολή
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                  <TagsInput />
+
+                  <div className="flex flex-wrap gap-4">
+                    <Button variant="secondary">💾 Αποθήκευση ως Draft</Button>
+                    <Button variant="primary" type="submit">
+                      🚀 Υποβολή Guide
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </form>
+          </div>
+
+          {/* RIGHT PANEL – TROPHY SIDEBAR */}
+          <TrophySidebar
+            trophies={trophies}
+            iconSize={32}
+            classNameIcon="shrink-0 w-8 h-8 flex items-center justify-center"
+          />
         </div>
-        <TrophySidebar
-          trophies={trophies}
-          iconSize={32}
-          classNameIcon="shrink-0 w-8 h-8 flex items-center justify-center"
-        />
       </div>
     </PageWrapper>
   );

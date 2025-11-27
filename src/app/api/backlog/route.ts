@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { UserGameWithGame, UserGameInsert } from '@/types/database';
 
 /**
  * GET - Fetch user's backlog with game details
@@ -81,38 +82,22 @@ export async function GET() {
     }
 
     // Transform data to flatten game object
-    const transformedGames = userGames.map(item => ({
-      // @ts-expect-error - Supabase typed as never here, safe runtime
+    const transformedGames = (userGames as UserGameWithGame[]).map(item => ({
       id: item.id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       user_id: item.user_id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       game_id: item.game_id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       status: item.status,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       priority: item.priority,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       actual_hours_casual: item.actual_hours_casual,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       actual_hours_platinum: item.actual_hours_platinum,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       notes: item.notes,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       personal_rating: item.personal_rating,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       would_recommend: item.would_recommend,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       added_at: item.added_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       started_at: item.started_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       completed_at: item.completed_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       platinumed_at: item.platinumed_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       dropped_at: item.dropped_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
       game: Array.isArray(item.games) ? item.games[0] : item.games,
     }));
 
@@ -163,16 +148,17 @@ export async function POST(request: Request) {
     }
 
     // Insert into user_games
+    const insertData: UserGameInsert = {
+      user_id: userId,
+      game_id,
+      status,
+      priority,
+      notes,
+    };
+
     const { data: newItem, error: insertError } = await supabase
       .from('user_games')
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      .insert({
-        user_id: userId,
-        game_id,
-        status,
-        priority,
-        notes,
-      })
+      .insert(insertData as never)
       .select(
         `
         id,
@@ -229,39 +215,24 @@ export async function POST(request: Request) {
     }
 
     // Transform data
+    const typedNewItem = newItem as UserGameWithGame;
     const transformedItem = {
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      id: newItem.id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      user_id: newItem.user_id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      game_id: newItem.game_id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      status: newItem.status,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      priority: newItem.priority,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      actual_hours_casual: newItem.actual_hours_casual,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      actual_hours_platinum: newItem.actual_hours_platinum,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      notes: newItem.notes,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      personal_rating: newItem.personal_rating,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      would_recommend: newItem.would_recommend,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      added_at: newItem.added_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      started_at: newItem.started_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      completed_at: newItem.completed_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      platinumed_at: newItem.platinumed_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      dropped_at: newItem.dropped_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      game: Array.isArray(newItem.games) ? newItem.games[0] : newItem.games,
+      id: typedNewItem.id,
+      user_id: typedNewItem.user_id,
+      game_id: typedNewItem.game_id,
+      status: typedNewItem.status,
+      priority: typedNewItem.priority,
+      actual_hours_casual: typedNewItem.actual_hours_casual,
+      actual_hours_platinum: typedNewItem.actual_hours_platinum,
+      notes: typedNewItem.notes,
+      personal_rating: typedNewItem.personal_rating,
+      would_recommend: typedNewItem.would_recommend,
+      added_at: typedNewItem.added_at,
+      started_at: typedNewItem.started_at,
+      completed_at: typedNewItem.completed_at,
+      platinumed_at: typedNewItem.platinumed_at,
+      dropped_at: typedNewItem.dropped_at,
+      game: Array.isArray(typedNewItem.games) ? typedNewItem.games[0] : typedNewItem.games,
     };
 
     return NextResponse.json(transformedItem, { status: 201 });

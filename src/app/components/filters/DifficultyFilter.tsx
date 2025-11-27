@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { setSelectedDifficulty } from '@/store/slices/difficultySlice';
 import SingleSlider from '../ui/SingleSlider';
+import { Flame } from 'lucide-react';
 
 export default function DifficultyFilter() {
   const dispatch = useDispatch();
@@ -21,7 +22,7 @@ export default function DifficultyFilter() {
       value={difficulty ?? 0}
       onChange={handleSelect}
       label="Δυσκολία"
-      icon={<span>🔥</span>}
+      icon={<Flame className="h-4 w-4 text-sky-300" />}
     />
   );
 }

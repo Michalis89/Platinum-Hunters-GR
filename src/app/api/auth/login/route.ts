@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { validateEmail, validatePassword } from '@/utils/validation/auth';
+import type { User } from '@/types/user';
 
 export async function POST(req: Request) {
   try {
@@ -54,24 +55,22 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Λάθος username ή κωδικός' }, { status: 401 });
       }
 
+      const typedUserData = userData as Pick<User, 'email' | 'account_status'>;
+
       // Check if account is deleted, suspended, or banned
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      if (userData.account_status === 'deleted') {
+      if (typedUserData.account_status === 'deleted') {
         return NextResponse.json({ error: 'Ο λογαριασμός έχει διαγραφεί' }, { status: 403 });
       }
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      if (userData.account_status === 'suspended') {
+      if (typedUserData.account_status === 'suspended') {
         return NextResponse.json(
           { error: 'Ο λογαριασμός σας έχει ανασταλεί. Επικοινωνήστε με τη διαχείριση.' },
           { status: 403 },
         );
       }
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      if (userData.account_status === 'banned') {
+      if (typedUserData.account_status === 'banned') {
         return NextResponse.json({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, { status: 403 });
       }
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      email = userData.email;
+      email = typedUserData.email;
     } else {
       // Validate email format
       const emailValidation = validateEmail(identifier);
@@ -122,22 +121,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Σφάλμα φόρτωσης προφίλ' }, { status: 500 });
     }
 
+    const typedUserProfile = userProfile as User;
+
     // Check if account is suspended or banned
-    // @ts-expect-error - Supabase typed as never here, safe runtime
-    if (userProfile.account_status === 'suspended') {
+    if (typedUserProfile.account_status === 'suspended') {
       return NextResponse.json(
         { error: 'Ο λογαριασμός σας έχει ανασταλεί. Επικοινωνήστε με τη διαχείριση.' },
         { status: 403 },
       );
     }
-    // @ts-expect-error - Supabase typed as never here, safe runtime
-    if (userProfile.account_status === 'banned') {
+    if (typedUserProfile.account_status === 'banned') {
       return NextResponse.json({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, { status: 403 });
     }
 
     // UPDATE LAST LOGIN
-    // @ts-expect-error - Supabase typed as never here, safe runtime
-    await supabase.rpc('update_user_last_login', { user_id: authData.user.id });
+    await supabase.rpc('update_user_last_login', { user_id: authData.user.id } as never);
     // SET SESSION COOKIES
     if (authData.session) {
       const { cookies } = await import('next/headers');

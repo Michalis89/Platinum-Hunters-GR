@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { cookies } from 'next/headers';
+import type { User } from '@/types/user';
 
 export async function GET() {
   try {
@@ -39,9 +40,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Σφάλμα φόρτωσης προφίλ' }, { status: 500 });
     }
 
+    const typedUserProfile = userProfile as User;
+
     // Check if account is deleted, suspended, or banned
-    // @ts-expect-error - Supabase typed as never here, safe runtime
-    if (userProfile.account_status === 'deleted') {
+    if (typedUserProfile.account_status === 'deleted') {
       // Sign out the user and clear cookies
       await supabase.auth.signOut();
 
@@ -52,8 +54,8 @@ export async function GET() {
 
       return NextResponse.json({ user: null, session: null });
     }
-    // @ts-expect-error - Supabase typed as never here, safe runtime
-    if (userProfile.account_status === 'suspended' || userProfile.account_status === 'banned') {
+
+    if (typedUserProfile.account_status === 'suspended' || typedUserProfile.account_status === 'banned') {
       // Sign out suspended/banned users
       await supabase.auth.signOut();
 
@@ -65,8 +67,7 @@ export async function GET() {
       return NextResponse.json(
         {
           error:
-            // @ts-expect-error - Supabase typed as never here, safe runtime
-            userProfile.account_status === 'suspended'
+            typedUserProfile.account_status === 'suspended'
               ? 'Ο λογαριασμός σας έχει ανασταλεί'
               : 'Ο λογαριασμός σας έχει αποκλειστεί',
           user: null,
@@ -77,7 +78,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      user: userProfile,
+      user: typedUserProfile,
       session,
     });
   } catch (error) {

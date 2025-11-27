@@ -1,4 +1,5 @@
 'use client';
+import { CalendarDays } from 'lucide-react';
 interface Props {
   readonly value: [number, number];
   readonly onChange: (value: [number, number]) => void;
@@ -8,9 +9,10 @@ interface Props {
 
 export default function YearFilter({ value, onChange, min, max }: Props) {
   return (
-    <fieldset className="flex flex-col items-center gap-2 border-0 p-0">
-      <legend className="text-sm font-medium">
-        📅 Χρονολογία: {value[0]} - {value[1]}
+    <fieldset className="flex flex-col items-start gap-2 border-0 p-0">
+      <legend className="flex items-center gap-2 text-sm font-medium text-slate-200">
+        <CalendarDays className="h-4 w-4 text-sky-300" />
+        Χρονολογία: <span className="text-sky-300">{value[0]}</span> - <span className="text-sky-300">{value[1]}</span>
       </legend>
       <input
         type="range"
@@ -18,7 +20,7 @@ export default function YearFilter({ value, onChange, min, max }: Props) {
         max={max}
         value={value[0]}
         onChange={e => onChange([Number(e.target.value), value[1]])}
-        className="w-full bg-blue-500"
+        className="w-full accent-sky-400"
         aria-label={`Ελάχιστο έτος κυκλοφορίας: ${value[0]}`}
         aria-valuemin={min}
         aria-valuemax={max}
@@ -31,7 +33,7 @@ export default function YearFilter({ value, onChange, min, max }: Props) {
         max={max}
         value={value[1]}
         onChange={e => onChange([value[0], Number(e.target.value)])}
-        className="w-full bg-blue-500"
+        className="w-full accent-sky-400"
         aria-label={`Μέγιστο έτος κυκλοφορίας: ${value[1]}`}
         aria-valuemin={min}
         aria-valuemax={max}
