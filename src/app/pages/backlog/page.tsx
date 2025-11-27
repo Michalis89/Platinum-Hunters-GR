@@ -42,7 +42,9 @@ export default function BacklogPage() {
   const error = useSelector(selectBacklogError);
   const stats = useSelector(selectBacklogStats);
   const statusCounts = useSelector(selectStatusCounts);
-  const isAuthLoading = useSelector((state: { auth: { isLoading: boolean } }) => state.auth.isLoading);
+  const isAuthLoading = useSelector(
+    (state: { auth: { isLoading: boolean } }) => state.auth.isLoading,
+  );
 
   const [activeTab, setActiveTab] = useState<StatusTab>('all');
   const [search, setSearch] = useState('');
@@ -118,7 +120,7 @@ export default function BacklogPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
         <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-blue-500 mx-auto" />
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-blue-500" />
           <p className="text-slate-400">Φόρτωση...</p>
         </div>
       </div>
@@ -138,14 +140,12 @@ export default function BacklogPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-4">
+          <div className="mb-4 flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-500 via-sky-400 to-emerald-400 shadow-lg shadow-blue-500/40">
               <ListChecks className="h-6 w-6 text-slate-950" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold tracking-tight">
-                Το Backlog μου
-              </h1>
+              <h1 className="text-4xl font-bold tracking-tight">Το Backlog μου</h1>
               <p className="text-slate-400">
                 {user?.username ? `${user.username} • ` : ''}
                 {stats.totalGames} παιχνίδια • ~{Math.round(stats.totalHours)} ώρες
@@ -185,7 +185,7 @@ export default function BacklogPage() {
             transition={{ delay: 0.15 }}
             className="mb-6"
           >
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex justify-center justify-items-center gap-4 overflow-x-auto pb-2">
               <button
                 onClick={() => setActiveTab('all')}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition ${
@@ -207,7 +207,7 @@ export default function BacklogPage() {
                     : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                Να Παίξω
+                Backlog
                 <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
                   {statusCounts.to_play || 0}
                 </span>
@@ -246,7 +246,7 @@ export default function BacklogPage() {
                     : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                🏆 Πλατίνα
+                Πλατίνα
                 <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
                   {statusCounts.platinumed || 0}
                 </span>
@@ -259,7 +259,7 @@ export default function BacklogPage() {
                     : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                Εγκαταλελειμμένο
+                Παρατημένο
                 <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
                   {statusCounts.dropped || 0}
                 </span>
@@ -381,12 +381,8 @@ export default function BacklogPage() {
             className="flex flex-col items-center justify-center rounded-2xl bg-slate-900/30 py-16 text-center"
           >
             <Search className="mb-4 h-12 w-12 text-slate-600" />
-            <h3 className="mb-2 text-xl font-semibold text-slate-300">
-              Δεν βρέθηκαν αποτελέσματα
-            </h3>
-            <p className="text-slate-400">
-              Δοκίμασε άλλο όρο αναζήτησης ή φίλτρα
-            </p>
+            <h3 className="mb-2 text-xl font-semibold text-slate-300">Δεν βρέθηκαν αποτελέσματα</h3>
+            <p className="text-slate-400">Δοκίμασε άλλο όρο αναζήτησης ή φίλτρα</p>
           </motion.div>
         )}
       </div>

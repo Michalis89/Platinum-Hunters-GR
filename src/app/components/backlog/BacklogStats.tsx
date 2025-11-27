@@ -59,20 +59,21 @@ export default function BacklogStats({ stats }: BacklogStatsProps) {
       </div>
 
       {/* Total Trophies */}
-      <div className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 p-6 backdrop-blur-sm transition-all hover:border-yellow-500/50 hover:shadow-lg hover:shadow-yellow-500/10">
+      <div className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 p-6 backdrop-blur-sm transition-all hover:border-blue-300/50 hover:shadow-lg hover:shadow-blue-300/10">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/10">
-            <Trophy className="h-5 w-5 text-yellow-400" />
+            <Trophy className="h-5 w-5 text-blue-300" />
           </div>
-          <TrendingUp className="h-4 w-4 text-slate-600 transition-colors group-hover:text-yellow-500" />
+          <TrendingUp className="h-4 w-4 text-slate-600 transition-colors group-hover:text-blue-300" />
         </div>
         <div className="mb-1 text-3xl font-bold text-slate-100">{stats.totalTrophies.total}</div>
         <div className="text-sm text-slate-400">Συνολικά Trophies</div>
         <div className="mt-3 flex items-center gap-2 text-xs">
           <span className="flex items-center gap-1">
-            <span className="font-semibold text-yellow-400">{stats.totalTrophies.platinum}</span>
-            <Trophy size={12} className="text-yellow-400" />
+            <span className="font-semibold text-blue-300">{stats.totalTrophies.platinum}</span>
+            <Trophy size={12} className="text-blue-300" />
           </span>
+
           <span className="flex items-center gap-1">
             <span className="font-semibold text-yellow-600">{stats.totalTrophies.gold}</span>
             <Trophy size={12} className="text-yellow-600" />

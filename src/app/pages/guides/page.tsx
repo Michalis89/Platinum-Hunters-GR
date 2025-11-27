@@ -201,8 +201,8 @@ export default function Guides() {
                 Οδηγοί
               </h1>
               <p className="max-w-2xl text-lg text-slate-300">
-                Ανακάλυψε walkthroughs, trophies και tips σε εμπειρία σχεδιασμένη σαν σύγχρονη web
-                app. Φίλτραρε, ταξινόμησε και βρες τον επόμενο στόχο για πλατίνα.
+                Για trophy hunters που θέλουν καθαρή, γρήγορη και αξιόπιστη πληροφόρηση. Βρες τον
+                επόμενο στόχο σου και ξεκίνα το κυνήγι για πλατίνα.
               </p>
               {error && <AlertMessage type="error" message={parseError(error)} />}
             </div>
@@ -232,13 +232,15 @@ export default function Guides() {
                   </p>
                 </div>
               </div>
-              <Link
-                href="/pages/guides/create"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-blue-500/30 transition hover:shadow-blue-400/40"
-              >
-                <Plus className="h-4 w-4" />
-                Δημιουργία νέου guide
-              </Link>
+              {process.env.NODE_ENV !== 'production' && (
+                <Link
+                  href="/pages/guides/create"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-blue-500/30 transition hover:shadow-blue-400/40"
+                >
+                  <Plus className="h-4 w-4" />
+                  Δημιουργία νέου guide
+                </Link>
+              )}
             </div>
           </div>
         </div>

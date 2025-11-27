@@ -111,12 +111,11 @@ export default function ProfilePage() {
 
               {/* Edit button */}
               <Button
-                variant="primary"
                 onClick={() => router.push('/pages/profile/edit')}
-                className="flex items-center gap-2 self-stretch md:self-auto"
+                className="flex items-center gap-2 rounded-2xl bg-gradient-to-b from-slate-50 to-slate-200 px-5 py-2.5 font-semibold text-slate-900 shadow-[0_6px_20px_rgba(255,255,255,0.18),0_0_18px_rgba(90,150,255,0.35)] transition-all duration-300 hover:from-white hover:to-slate-100 hover:shadow-[0_8px_26px_rgba(255,255,255,0.24),0_0_22px_rgba(120,180,255,0.50)] active:scale-[0.97]"
               >
-                <Edit className="h-4 w-4" />
-                Επεξεργασία Προφίλ
+                <Edit className="h-4 w-4 text-slate-800" />
+                <span className="text-slate-800">Επεξεργασία Προφίλ</span>
               </Button>
             </CardContent>
           </Card>
@@ -126,8 +125,8 @@ export default function ProfilePage() {
             <CardContent className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-6">
               {/* Πλατίνες */}
               <div className="flex items-center gap-3 rounded-xl border border-slate-800/70 bg-slate-950/40 px-4 py-3">
-                <div className="rounded-full bg-yellow-500/15 p-3">
-                  <Trophy className="h-5 w-5 text-yellow-400" />
+                <div className="rounded-full bg-blue-300/15 p-3">
+                  <Trophy className="h-5 w-5 text-blue-300" />
                 </div>
                 <div>
                   <p className="text-lg font-bold text-slate-50">{statusCounts.platinumed || 0}</p>
@@ -175,7 +174,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-lg font-bold text-slate-50">{statusCounts.Dropped || 0}</p>
-                  <p className="text-xs text-slate-400">Εγκαταλείφθηκαν</p>
+                  <p className="text-xs text-slate-400">Παρατημένα</p>
                 </div>
               </div>
 
