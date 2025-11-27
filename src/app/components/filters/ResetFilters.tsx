@@ -7,9 +7,9 @@ export default function ResetFilters({ onReset }: Props) {
   return (
     <button
       onClick={onReset}
-      className="w-full rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition-all duration-300 hover:bg-red-600"
+      className="w-full rounded-xl border border-red-500/50 bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/40 transition hover:bg-red-600"
     >
-      ❌ Reset Φίλτρων
+      Reset
     </button>
   );
 }

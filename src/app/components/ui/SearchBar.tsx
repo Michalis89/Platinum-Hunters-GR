@@ -26,7 +26,7 @@ export function SearchBar({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-gray-600 bg-gray-800 p-3 pl-10 text-lg text-white placeholder-gray-500 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full rounded-lg border border-gray-600 bg-gray-800 p-3 pl-10 text-lg text-white placeholder-gray-500 transition placeholder:opacity-80 focus:placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 [&::-webkit-search-cancel-button]:cursor-pointer"
         aria-label={placeholder}
         {...props}
       />
