@@ -364,7 +364,7 @@ export default function EditProfilePage() {
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-b from-white to-slate-200 px-6 py-2.5 font-semibold text-slate-900 shadow-[0_4px_12px_rgba(255,255,255,0.15),0_0_12px_rgba(59,130,246,0.3)] transition-all duration-300 hover:from-white hover:to-slate-100 hover:shadow-[0_6px_16px_rgba(255,255,255,0.25),0_0_18px_rgba(59,130,246,0.45)] active:scale-[0.97]"
               >
                 <Save className="h-4 w-4 text-slate-800" />
-                {saving ? 'Αποθήκευση...' : 'Αποθήκευση'}
+                <span className="text-slate-800">{saving ? 'Αποθήκευση...' : 'Αποθήκευση'}</span>
               </Button>
               {/* Secondary Button */}
               <Button

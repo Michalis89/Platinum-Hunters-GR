@@ -27,7 +27,7 @@ import EditBacklogItemModal from './EditBacklogItemModal';
 import HoursInputModal from './HoursInputModal';
 
 interface BacklogItemProps {
-  item: UserBacklogWithGame;
+  readonly item: UserBacklogWithGame;
 }
 
 // Priority badge mapping
@@ -40,12 +40,33 @@ const PRIORITY_CONFIG = {
 
 // Status badge mapping
 const STATUS_CONFIG = {
-  to_play: { label: 'Να Παίξω', color: 'text-blue-400 bg-blue-950 border-blue-800' },
-  playing: { label: 'Παίζω', color: 'text-green-400 bg-green-950 border-green-800' },
-  completed: { label: 'Ολοκληρώθηκε', color: 'text-purple-400 bg-purple-950 border-purple-800' },
-  platinumed: { label: 'Πλατίνα 🏆', color: 'text-yellow-400 bg-yellow-950 border-yellow-800' },
-  dropped: { label: 'Εγκαταλείφθηκε', color: 'text-red-400 bg-red-950 border-red-800' },
-};
+  to_play: {
+    label: 'Backlog',
+    color: 'text-blue-300 bg-blue-950/40 border-blue-700 shadow-[0_0_6px_rgba(59,130,246,0.25)]',
+  },
+
+  playing: {
+    label: 'Παίζω',
+    color: 'text-green-300 bg-green-950/40 border-green-700 shadow-[0_0_6px_rgba(34,197,94,0.25)]',
+  },
+
+  completed: {
+    label: 'Ολοκληρώθηκε',
+    color:
+      'text-purple-300 bg-purple-950/40 border-purple-700 shadow-[0_0_6px_rgba(168,85,247,0.25)]',
+  },
+
+  platinumed: {
+    label: 'Πλατίνα',
+    color:
+      'text-slate-200 bg-slate-900/40 border-slate-600 shadow-[0_0_8px_rgba(180,200,255,0.35)]',
+  },
+
+  dropped: {
+    label: 'Παρατημένο',
+    color: 'text-red-300 bg-red-950/40 border-red-700 shadow-[0_0_6px_rgba(220,38,38,0.25)]',
+  },
+} as const;
 
 export default function BacklogItem({ item }: BacklogItemProps) {
   const dispatch = useDispatch<AppDispatch>();
@@ -56,7 +77,8 @@ export default function BacklogItem({ item }: BacklogItemProps) {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const game = item.game;
-  const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] || PRIORITY_CONFIG[0];
+  const priorityConfig =
+    PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] || PRIORITY_CONFIG[0];
   const statusConfig = STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG];
 
   const handleDelete = async () => {
@@ -71,7 +93,9 @@ export default function BacklogItem({ item }: BacklogItemProps) {
     }
   };
 
-  const handleStatusChange = async (newStatus: 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped') => {
+  const handleStatusChange = async (
+    newStatus: 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped',
+  ) => {
     setIsUpdatingStatus(true);
     try {
       await dispatch(updateBacklogItem({ id: item.id, status: newStatus })).unwrap();
@@ -98,7 +122,10 @@ export default function BacklogItem({ item }: BacklogItemProps) {
         className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm transition-all hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
       >
         {/* Cover Image */}
-        <Link href={`/pages/guides/${game.slug}`} className="relative block aspect-video overflow-hidden">
+        <Link
+          href={`/pages/guides/${game.slug}`}
+          className="relative block aspect-video overflow-hidden"
+        >
           {game.cover_image ? (
             <Image
               src={game.cover_image}
@@ -244,10 +271,12 @@ export default function BacklogItem({ item }: BacklogItemProps) {
                 <button
                   onClick={() => handleStatusChange('platinumed')}
                   disabled={isUpdatingStatus}
-                  className="flex-1 rounded-lg bg-yellow-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-yellow-500 disabled:opacity-50"
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-b from-slate-100 to-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-[0_0_12px_rgba(180,200,255,0.35)] transition-all duration-300 hover:shadow-[0_0_16px_rgba(190,210,255,0.55)] active:scale-[0.97] disabled:opacity-50"
                 >
-                  🏆 Πλατίνα!
+                  <Trophy className="h-4 w-4 text-blue-500" />
+                  Πλατίνα!
                 </button>
+
                 <button
                   onClick={() => handleStatusChange('dropped')}
                   disabled={isUpdatingStatus}
@@ -324,9 +353,7 @@ export default function BacklogItem({ item }: BacklogItemProps) {
             >
               <div className="max-w-xs space-y-4 p-6 text-center">
                 <Trash2 className="mx-auto h-12 w-12 text-red-400" />
-                <h4 className="text-lg font-semibold text-slate-100">
-                  Αφαίρεση από το Backlog;
-                </h4>
+                <h4 className="text-lg font-semibold text-slate-100">Αφαίρεση από το Backlog;</h4>
                 <p className="text-sm text-slate-400">
                   Θέλεις σίγουρα να αφαιρέσεις το <strong>{game.title}</strong> από το backlog σου;
                 </p>
@@ -354,19 +381,11 @@ export default function BacklogItem({ item }: BacklogItemProps) {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <EditBacklogItemModal
-          item={item}
-          onClose={() => setShowEditModal(false)}
-        />
+        <EditBacklogItemModal item={item} onClose={() => setShowEditModal(false)} />
       )}
 
       {/* Hours Input Modal */}
-      {showHoursModal && (
-        <HoursInputModal
-          item={item}
-          onClose={() => setShowHoursModal(false)}
-        />
-      )}
+      {showHoursModal && <HoursInputModal item={item} onClose={() => setShowHoursModal(false)} />}
     </>
   );
 }
