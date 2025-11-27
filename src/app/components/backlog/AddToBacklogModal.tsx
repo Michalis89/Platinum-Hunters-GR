@@ -5,7 +5,7 @@
  * PH-31: User Backlog System
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Plus, Trophy, Clock, Signal, Check } from 'lucide-react';
@@ -80,7 +80,7 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
         disabled={isInBacklog}
         className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition ${
           isInBacklog
-            ? 'border-slate-800 bg-slate-900/30 opacity-50 cursor-not-allowed'
+            ? 'cursor-not-allowed border-slate-800 bg-slate-900/30 opacity-50'
             : selectedGame?.id === game.id
               ? 'border-blue-500 bg-blue-950/50'
               : 'border-slate-800 bg-slate-900/50 hover:border-slate-700 hover:bg-slate-800/50'
@@ -104,7 +104,7 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
         </div>
 
         {/* Info */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <h4 className="line-clamp-1 font-medium text-slate-200">{game.title}</h4>
           <div className="mt-1 flex items-center gap-3 text-xs text-slate-400">
             {game.average_hours && (

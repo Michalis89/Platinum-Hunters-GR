@@ -3,18 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  User,
-  Mail,
-  Calendar,
-  MapPin,
-  Trophy,
-  Star,
-  Clock,
-  Edit,
-  Gamepad2,
-  ListChecks,
-} from 'lucide-react';
+import { User, Mail, Calendar, MapPin, Trophy, Star, Clock, Edit, Gamepad2 } from 'lucide-react';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';

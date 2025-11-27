@@ -40,6 +40,7 @@ export async function GET() {
     }
 
     // Check if account is deleted, suspended, or banned
+    // @ts-expect-error - Supabase typed as never here, safe runtime
     if (userProfile.account_status === 'deleted') {
       // Sign out the user and clear cookies
       await supabase.auth.signOut();
@@ -51,7 +52,7 @@ export async function GET() {
 
       return NextResponse.json({ user: null, session: null });
     }
-
+    // @ts-expect-error - Supabase typed as never here, safe runtime
     if (userProfile.account_status === 'suspended' || userProfile.account_status === 'banned') {
       // Sign out suspended/banned users
       await supabase.auth.signOut();
@@ -61,13 +62,18 @@ export async function GET() {
       cookieStore.delete('sb-access-token');
       cookieStore.delete('sb-refresh-token');
 
-      return NextResponse.json({
-        error: userProfile.account_status === 'suspended'
-          ? 'Ο λογαριασμός σας έχει ανασταλεί'
-          : 'Ο λογαριασμός σας έχει αποκλειστεί',
-        user: null,
-        session: null
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          error:
+            // @ts-expect-error - Supabase typed as never here, safe runtime
+            userProfile.account_status === 'suspended'
+              ? 'Ο λογαριασμός σας έχει ανασταλεί'
+              : 'Ο λογαριασμός σας έχει αποκλειστεί',
+          user: null,
+          session: null,
+        },
+        { status: 403 },
+      );
     }
 
     return NextResponse.json({

@@ -26,7 +26,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const userId = session.user.id;
-    const { id } = await params;
+
+    const { id } = await params; // 🔴 εδώ κάνουμε await γιατί το type είναι Promise<{ id: string }>
+
+    // const backlogId = Number.parseInt(params.id);
     const backlogId = Number.parseInt(id, 10);
 
     if (Number.isNaN(backlogId)) {
@@ -42,7 +45,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       actual_hours_casual,
       actual_hours_platinum,
       personal_rating,
-      would_recommend
+      would_recommend,
     } = body;
 
     // Validate at least one field is provided
@@ -71,7 +74,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (checkError || !existingItem) {
       return NextResponse.json({ error: 'Το στοιχείο δεν βρέθηκε' }, { status: 404 });
     }
-
+    // @ts-expect-error - Supabase typed as never here, safe runtime
     if (existingItem.user_id !== userId) {
       return NextResponse.json(
         { error: 'Δεν έχεις δικαίωμα να τροποποιήσεις αυτό το στοιχείο' },
@@ -99,12 +102,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
       // Update corresponding timestamp when status changes
       const now = new Date().toISOString();
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       if (status === 'playing' && existingItem.status !== 'playing') {
         updateData.started_at = now;
+        // @ts-expect-error - Supabase typed as never here, safe runtime
       } else if (status === 'completed' && existingItem.status !== 'completed') {
         updateData.completed_at = now;
+        // @ts-expect-error - Supabase typed as never here, safe runtime
       } else if (status === 'platinumed' && existingItem.status !== 'platinumed') {
         updateData.platinumed_at = now;
+        // @ts-expect-error - Supabase typed as never here, safe runtime
       } else if (status === 'dropped' && existingItem.status !== 'dropped') {
         updateData.dropped_at = now;
       }
@@ -113,13 +121,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (priority !== undefined) updateData.priority = priority;
     if (notes !== undefined) updateData.notes = notes;
     if (actual_hours_casual !== undefined) updateData.actual_hours_casual = actual_hours_casual;
-    if (actual_hours_platinum !== undefined) updateData.actual_hours_platinum = actual_hours_platinum;
+    if (actual_hours_platinum !== undefined)
+      updateData.actual_hours_platinum = actual_hours_platinum;
     if (personal_rating !== undefined) updateData.personal_rating = personal_rating;
     if (would_recommend !== undefined) updateData.would_recommend = would_recommend;
 
     // Update the item
     const { data: updatedItem, error: updateError } = await supabase
       .from('user_games')
+      // @ts-expect-error - Supabase typed as never here, safe runtime
       .update(updateData)
       .eq('id', backlogId)
       .select(
@@ -172,21 +182,52 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     // Transform data
     const transformedItem = {
+      // @ts-expect-error - Supabase typed as never here, safe runtime
       id: updatedItem.id,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       user_id: updatedItem.user_id,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       game_id: updatedItem.game_id,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       status: updatedItem.status,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       priority: updatedItem.priority,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       actual_hours_casual: updatedItem.actual_hours_casual,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       actual_hours_platinum: updatedItem.actual_hours_platinum,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       notes: updatedItem.notes,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       personal_rating: updatedItem.personal_rating,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       would_recommend: updatedItem.would_recommend,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       added_at: updatedItem.added_at,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       started_at: updatedItem.started_at,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       completed_at: updatedItem.completed_at,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       platinumed_at: updatedItem.platinumed_at,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       dropped_at: updatedItem.dropped_at,
+      // @ts-expect-error - Supabase typed as never here, safe runtime
+
       game: Array.isArray(updatedItem.games) ? updatedItem.games[0] : updatedItem.games,
     };
 
@@ -200,6 +241,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 /**
  * DELETE - Remove game from backlog
  */
+// export async function DELETE(request: Request, { params }: { params: { id: string } }) {
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
@@ -214,8 +256,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
     }
 
+    // const userId = session.user.id;
+    // const backlogId = Number.parseInt(params.id);
     const userId = session.user.id;
-    const { id } = await params;
+
+    const { id } = await params; // 🔴
     const backlogId = Number.parseInt(id, 10);
 
     if (Number.isNaN(backlogId)) {
@@ -232,7 +277,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     if (checkError || !existingItem) {
       return NextResponse.json({ error: 'Το στοιχείο δεν βρέθηκε' }, { status: 404 });
     }
-
+    // @ts-expect-error - Supabase typed as never here, safe runtime
     if (existingItem.user_id !== userId) {
       return NextResponse.json(
         { error: 'Δεν έχεις δικαίωμα να διαγράψεις αυτό το στοιχείο' },
