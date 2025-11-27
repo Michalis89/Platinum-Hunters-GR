@@ -193,12 +193,25 @@ export interface UserBacklog {
   id: number;
   user_id: string;
   game_id: number;
+  status: 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
   priority: number;
-  notes?: string;
+  notes?: string | null;
+  actual_hours_casual?: number | null;
+  actual_hours_platinum?: number | null;
+  personal_rating?: number | null;
+  would_recommend?: boolean | null;
   added_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+  platinumed_at?: string | null;
+  dropped_at?: string | null;
 
   // From view join
   game?: FullGameData;
+}
+
+export interface UserBacklogWithGame extends Omit<UserBacklog, 'game'> {
+  game: FullGameData; // Required game data
 }
 
 export interface UserCompletedGame {
