@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { UserGameWithGame, UserGameUpdate, UserGameRow } from '@/types/database';
 
 /**
  * PATCH - Update priority and/or notes for backlog item
@@ -74,8 +75,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (checkError || !existingItem) {
       return NextResponse.json({ error: 'Το στοιχείο δεν βρέθηκε' }, { status: 404 });
     }
-    // @ts-expect-error - Supabase typed as never here, safe runtime
-    if (existingItem.user_id !== userId) {
+
+    const typedExistingItem = existingItem as Pick<UserGameRow, 'id' | 'user_id' | 'status'>;
+
+    if (typedExistingItem.user_id !== userId) {
       return NextResponse.json(
         { error: 'Δεν έχεις δικαίωμα να τροποποιήσεις αυτό το στοιχείο' },
         { status: 403 },
@@ -83,14 +86,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     // Build update object with all supported fields
-    const updateData: {
-      status?: string;
-      priority?: number;
-      notes?: string | null;
-      actual_hours_casual?: number | null;
-      actual_hours_platinum?: number | null;
-      personal_rating?: number | null;
-      would_recommend?: boolean | null;
+    const updateData: UserGameUpdate & {
       started_at?: string;
       completed_at?: string;
       platinumed_at?: string;
@@ -102,18 +98,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
       // Update corresponding timestamp when status changes
       const now = new Date().toISOString();
-      // @ts-expect-error - Supabase typed as never here, safe runtime
 
-      if (status === 'playing' && existingItem.status !== 'playing') {
+      if (status === 'playing' && typedExistingItem.status !== 'playing') {
         updateData.started_at = now;
-        // @ts-expect-error - Supabase typed as never here, safe runtime
-      } else if (status === 'completed' && existingItem.status !== 'completed') {
+      } else if (status === 'completed' && typedExistingItem.status !== 'completed') {
         updateData.completed_at = now;
-        // @ts-expect-error - Supabase typed as never here, safe runtime
-      } else if (status === 'platinumed' && existingItem.status !== 'platinumed') {
+      } else if (status === 'platinumed' && typedExistingItem.status !== 'platinumed') {
         updateData.platinumed_at = now;
-        // @ts-expect-error - Supabase typed as never here, safe runtime
-      } else if (status === 'dropped' && existingItem.status !== 'dropped') {
+      } else if (status === 'dropped' && typedExistingItem.status !== 'dropped') {
         updateData.dropped_at = now;
       }
     }
@@ -129,8 +121,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // Update the item
     const { data: updatedItem, error: updateError } = await supabase
       .from('user_games')
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      .update(updateData)
+      .update(updateData as never)
       .eq('id', backlogId)
       .select(
         `
@@ -181,54 +172,24 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     // Transform data
+    const typedUpdatedItem = updatedItem as UserGameWithGame;
     const transformedItem = {
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-      id: updatedItem.id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      user_id: updatedItem.user_id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      game_id: updatedItem.game_id,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      status: updatedItem.status,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      priority: updatedItem.priority,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      actual_hours_casual: updatedItem.actual_hours_casual,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      actual_hours_platinum: updatedItem.actual_hours_platinum,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      notes: updatedItem.notes,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      personal_rating: updatedItem.personal_rating,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      would_recommend: updatedItem.would_recommend,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      added_at: updatedItem.added_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      started_at: updatedItem.started_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      completed_at: updatedItem.completed_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      platinumed_at: updatedItem.platinumed_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      dropped_at: updatedItem.dropped_at,
-      // @ts-expect-error - Supabase typed as never here, safe runtime
-
-      game: Array.isArray(updatedItem.games) ? updatedItem.games[0] : updatedItem.games,
+      id: typedUpdatedItem.id,
+      user_id: typedUpdatedItem.user_id,
+      game_id: typedUpdatedItem.game_id,
+      status: typedUpdatedItem.status,
+      priority: typedUpdatedItem.priority,
+      actual_hours_casual: typedUpdatedItem.actual_hours_casual,
+      actual_hours_platinum: typedUpdatedItem.actual_hours_platinum,
+      notes: typedUpdatedItem.notes,
+      personal_rating: typedUpdatedItem.personal_rating,
+      would_recommend: typedUpdatedItem.would_recommend,
+      added_at: typedUpdatedItem.added_at,
+      started_at: typedUpdatedItem.started_at,
+      completed_at: typedUpdatedItem.completed_at,
+      platinumed_at: typedUpdatedItem.platinumed_at,
+      dropped_at: typedUpdatedItem.dropped_at,
+      game: Array.isArray(typedUpdatedItem.games) ? typedUpdatedItem.games[0] : typedUpdatedItem.games,
     };
 
     return NextResponse.json(transformedItem);
@@ -277,8 +238,10 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     if (checkError || !existingItem) {
       return NextResponse.json({ error: 'Το στοιχείο δεν βρέθηκε' }, { status: 404 });
     }
-    // @ts-expect-error - Supabase typed as never here, safe runtime
-    if (existingItem.user_id !== userId) {
+
+    const typedExistingItem = existingItem as Pick<UserGameRow, 'id' | 'user_id'>;
+
+    if (typedExistingItem.user_id !== userId) {
       return NextResponse.json(
         { error: 'Δεν έχεις δικαίωμα να διαγράψεις αυτό το στοιχείο' },
         { status: 403 },

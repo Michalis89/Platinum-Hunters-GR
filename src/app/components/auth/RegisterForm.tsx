@@ -30,10 +30,21 @@ import type { AppDispatch } from '@/store/store';
 
 const COUNTRIES = ['GR', 'US', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'Other'];
 const PLATFORMS = ['PS5', 'PS4', 'PS3', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC'];
-const GENRES = ['Action', 'RPG', 'Adventure', 'Shooter', 'Sports', 'Racing', 'Fighting', 'Puzzle', 'Horror', 'Platform'];
+const GENRES = [
+  'Action',
+  'RPG',
+  'Adventure',
+  'Shooter',
+  'Sports',
+  'Racing',
+  'Fighting',
+  'Puzzle',
+  'Horror',
+  'Platform',
+];
 
 interface RegisterFormProps {
-  onSuccess?: () => void;
+  readonly onSuccess?: () => void;
 }
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
@@ -64,7 +75,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   const passwordStrength = formData.password ? getPasswordStrength(formData.password) : null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
@@ -108,7 +121,10 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const passwordVal = validatePassword(formData.password || '');
     if (!passwordVal.isValid) newErrors.password = passwordVal.error!;
 
-    const passwordConfirmVal = validatePasswordConfirm(formData.password || '', formData.password_confirm || '');
+    const passwordConfirmVal = validatePasswordConfirm(
+      formData.password || '',
+      formData.password_confirm || '',
+    );
     if (!passwordConfirmVal.isValid) newErrors.password_confirm = passwordConfirmVal.error!;
 
     if (!formData.agree_to_terms) {
@@ -201,7 +217,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       setAlert({
         type: 'success',
-        message: '✅ Επιτυχής εγγραφή! Έλεγξε το email σου για να επιβεβαιώσεις το λογαριασμό σου. Ανακατεύθυνση...'
+        message:
+          '✅ Επιτυχής εγγραφή! Έλεγξε το email σου για να επιβεβαιώσεις το λογαριασμό σου. Ανακατεύθυνση...',
       });
 
       // Fetch session to update Redux state
@@ -217,7 +234,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       }, 1500);
     } catch (error) {
       console.error('Registration error:', error);
-      const errorMessage = error instanceof Error ? error.message : '❌ Σφάλμα εγγραφής. Δοκιμάστε ξανά.';
+      const errorMessage =
+        error instanceof Error ? error.message : '❌ Σφάλμα εγγραφής. Δοκιμάστε ξανά.';
       setAlert({
         type: 'error',
         message: errorMessage,
@@ -231,16 +249,23 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const progress = (currentStep / 3) * 100;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <UserPlus className="h-6 w-6" />
-          Εγγραφή - Βήμα {currentStep} από 3
+    <Card className="border border-slate-800/60 bg-slate-900/70 shadow-xl shadow-emerald-900/30 backdrop-blur-xl">
+      <CardHeader className="border-slate-800/70">
+        <CardTitle className="flex items-center justify-between text-white">
+          <span className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 via-sky-400 to-blue-500 text-slate-950 shadow-lg shadow-emerald-400/30">
+              <UserPlus className="h-5 w-5" />
+            </div>
+            Εγγραφή - Βήμα {currentStep} από 3
+          </span>
+          <span className="rounded-full bg-slate-800/80 px-3 py-1 text-xs text-slate-300">
+            Profile setup
+          </span>
         </CardTitle>
         {/* Progress Bar */}
-        <div className="mt-4 h-2 w-full rounded-full bg-gray-700">
+        <div className="mt-4 h-2 w-full rounded-full bg-slate-800">
           <motion.div
-            className="h-full rounded-full bg-blue-600"
+            className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-sky-400 to-blue-500"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
@@ -248,7 +273,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="space-y-5">
         {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
         <AnimatePresence mode="wait">
@@ -321,7 +346,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                           }}
                         />
                       </div>
-                      <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+                      <span style={{ color: passwordStrength.color }}>
+                        {passwordStrength.label}
+                      </span>
                     </div>
                     {passwordStrength.errors.length > 0 && (
                       <ul className="mt-1 text-xs text-gray-400">
@@ -352,7 +379,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                     className="absolute right-3 top-9 text-gray-400 hover:text-white"
                   >
-                    {showPasswordConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPasswordConfirm ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
                 <FormErrorMessage message={errors.password_confirm} />
@@ -365,15 +396,21 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     name="agree_to_terms"
                     checked={formData.agree_to_terms}
                     onChange={handleChange}
-                    className="mt-1 rounded border-gray-700 bg-gray-800 text-blue-600"
+                    className="mt-1 rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-2 focus:ring-blue-500"
                   />
                   <span>
                     Αποδέχομαι τους{' '}
-                    <Link href="/terms" className="text-blue-500 hover:text-blue-400">
+                    <Link
+                      href="/terms"
+                      className="text-emerald-300 transition hover:text-emerald-200"
+                    >
                       όρους χρήσης
                     </Link>{' '}
                     και την{' '}
-                    <Link href="/privacy" className="text-blue-500 hover:text-blue-400">
+                    <Link
+                      href="/privacy"
+                      className="text-emerald-300 transition hover:text-emerald-200"
+                    >
                       πολιτική απορρήτου
                     </Link>
                   </span>
@@ -494,7 +531,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             }));
                           }
                         }}
-                        className="rounded border-gray-700 bg-gray-800 text-blue-600"
+                        className="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
                       {genre}
                     </label>
@@ -519,7 +556,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             variant="primary"
             onClick={handleNext}
             disabled={loading}
-            className="flex-1"
+            className="flex flex-1 items-center justify-center gap-2 bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400 text-slate-950 shadow-lg shadow-emerald-400/30 transition hover:shadow-emerald-300/40"
           >
             {loading ? (
               'Εγγραφή...'
@@ -538,9 +575,12 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
 
         {/* Login Link */}
-        <div className="mt-4 text-center text-sm text-gray-400">
+        <div className="mt-4 text-center text-sm text-slate-400">
           Έχεις ήδη λογαριασμό;{' '}
-          <Link href="/auth/login" className="text-blue-500 hover:text-blue-400">
+          <Link
+            href="/auth/login"
+            className="font-medium text-emerald-300 transition hover:text-emerald-200"
+          >
             Σύνδεση
           </Link>
         </div>

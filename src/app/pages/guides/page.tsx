@@ -168,7 +168,7 @@ export default function Guides() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white">
+    <div className="flex min-h-screen flex-col items-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-24 text-center text-slate-100">
       <h1 className="mb-6 flex items-center gap-3 text-5xl font-extrabold text-blue-400">
         <BookOpen className="relative top-1 h-12 w-12 text-yellow-400" />
         <span>Οδηγοί</span>
