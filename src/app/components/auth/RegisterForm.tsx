@@ -401,14 +401,14 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   <span>
                     Αποδέχομαι τους{' '}
                     <Link
-                      href="/terms"
+                      href="/pages/terms"
                       className="text-emerald-300 transition hover:text-emerald-200"
                     >
                       όρους χρήσης
                     </Link>{' '}
                     και την{' '}
                     <Link
-                      href="/privacy"
+                      href="/pages/privacy"
                       className="text-emerald-300 transition hover:text-emerald-200"
                     >
                       πολιτική απορρήτου
