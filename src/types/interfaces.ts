@@ -12,6 +12,8 @@ export interface Step {
   title: string;
   description: string;
   trophies: Trophy[];
+  content_rich?: unknown;
+  content_html?: string;
 }
 
 export interface Guide {
@@ -26,6 +28,8 @@ export interface Guide {
   status: 'draft' | 'published' | 'archived';
   is_verified: boolean;
   steps?: Step[];
+  content_rich?: unknown;
+  content_html?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -171,10 +175,11 @@ export interface Genre {
 // PROCESSED DATA FOR UI
 // =====================================================
 
-export interface ProcessedGame extends FullGameData {
+export interface ProcessedGame extends FullGameData, ScrapedGameData {
   // Computed fields
   totalPoints: number;
   difficultyNumber: number; // For sorting/filtering
+  playthroughs: string; //IS THIS CORRECT?
 }
 
 export interface GamesResponse {

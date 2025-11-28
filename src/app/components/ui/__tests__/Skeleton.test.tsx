@@ -14,6 +14,36 @@ describe('Skeleton Component', () => {
     expect(skeletonElements.length).toBe(6);
   });
 
+  it('renders the backlog skeleton', () => {
+    render(<Skeleton type="backlog" />);
+    const skeletonElement = screen.getByTestId('skeleton');
+    expect(skeletonElement).toBeInTheDocument();
+  });
+
+  it('renders the profile skeleton', () => {
+    render(<Skeleton type="profile" />);
+    const skeletonElement = screen.getByTestId('skeleton');
+    expect(skeletonElement).toBeInTheDocument();
+  });
+
+  it('renders the profile edit skeleton', () => {
+    render(<Skeleton type="profile-edit" />);
+    const skeletonElement = screen.getByTestId('skeleton');
+    expect(skeletonElement).toBeInTheDocument();
+  });
+
+  it('renders the guides list skeleton', () => {
+    render(<Skeleton type="guides-list" />);
+    const skeletonElement = screen.getByTestId('skeleton');
+    expect(skeletonElement).toBeInTheDocument();
+  });
+
+  it('renders the guide detail skeleton', () => {
+    render(<Skeleton type="guide-detail" />);
+    const skeletonElement = screen.getByTestId('skeleton');
+    expect(skeletonElement).toBeInTheDocument();
+  });
+
   it('renders the grid skeleton with a custom count', () => {
     render(<Skeleton type="grid" count={3} />);
     const skeletonElements = screen.getAllByTestId('skeleton-item');

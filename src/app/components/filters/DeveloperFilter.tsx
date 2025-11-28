@@ -30,7 +30,7 @@ export default function DeveloperFilter() {
   const options = [
     {
       value: '',
-      label: 'Όλοι οι Προγραμματιστές',
+      label: 'Developers',
       icon: getIcon('developer'),
     },
     ...(data?.developers.map(developer => ({

@@ -47,7 +47,7 @@ export default function PlatformFilter() {
   const options = [
     {
       value: '',
-      label: 'Όλες οι Κονσόλες',
+      label: 'Κονσόλες',
       icon: <Gamepad2 className="h-5 w-5 text-red-400" />,
     },
     ...platforms.map(platform => ({

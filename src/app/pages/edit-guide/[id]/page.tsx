@@ -1,30 +1,66 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
 import { motion } from 'framer-motion';
-import AlertMessage from '@/app/components/ui/AlertMessage';
+import { PageWrapper } from '@/app/components/layout/PageWrapper';
+import { Button } from '@/app/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
+import { Input } from '@/app/components/ui/Input';
+import Feedback from '@/app/components/ui/Feedback';
+import { GuideStepsEditor } from '@/app/components/ui/GuideStepsEditor';
+import RichTextEditor from '@/app/components/ui/RichTextEditor';
 
 export default function EditGuide() {
   const { id } = useParams();
   const router = useRouter();
-  const [steps, setSteps] = useState<{ title: string; description: string }[]>([]);
+
+  const [stepsHtml, setStepsHtml] = useState<string[]>([]);
+  const [stepTitles, setStepTitles] = useState<string[]>([]);
   const [gameSlug, setGameSlug] = useState<string>('');
+  const [guideTitle, setGuideTitle] = useState<string>('');
+  const [difficultyRating, setDifficultyRating] = useState<number | ''>('');
+  const [playthroughs, setPlaythroughs] = useState<number | ''>('');
+  const [hours, setHours] = useState<number | ''>('');
+  const [introHtml, setIntroHtml] = useState<string>('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
+
+  const guideContentRich = useMemo(
+    () =>
+      introHtml
+        ? {
+            type: 'doc',
+            content: [{ type: 'paragraph', text: stripHtml(introHtml) }],
+          }
+        : null,
+    [introHtml],
+  );
 
   useEffect(() => {
     const fetchGuide = async () => {
       try {
         const response = await fetch(`/api/guides/${id}`);
         const data = await response.json();
-        if (response.ok && data) {
-          setSteps(data[0]?.steps ?? []);
-          setGameSlug(data[0]?.games?.slug ?? '');
+        if (response.ok && data && data[0]) {
+          const firstGuide = data[0];
+          setGuideTitle(firstGuide?.title ?? '');
+          setDifficultyRating(firstGuide?.difficulty_rating ?? '');
+          setPlaythroughs(firstGuide?.estimated_playthroughs ?? '');
+          setHours(firstGuide?.estimated_hours ?? '');
+          setIntroHtml(firstGuide?.content_html ?? firstGuide?.description ?? '');
+          const stepsArr = (firstGuide?.steps || []).map(
+            (s: { content_html?: string; description?: string }) =>
+              s.content_html || s.description || '',
+          );
+          const titlesArr = (firstGuide?.steps || []).map((s: { title?: string }) => s.title || '');
+          setStepsHtml(stepsArr.length ? stepsArr : ['']);
+          setStepTitles(titlesArr.length ? titlesArr : ['']);
+          setGameSlug(firstGuide?.games?.slug ?? '');
         } else {
           setMessage('❌ Σφάλμα φόρτωσης οδηγού!');
           setMessageType('error');
@@ -40,31 +76,38 @@ export default function EditGuide() {
     if (id) fetchGuide();
   }, [id]);
 
-  const handleChange = (index: number, field: 'title' | 'description', newValue: string) => {
-    setSteps(prevSteps =>
-      prevSteps.map((step, i) => (i === index ? { ...step, [field]: newValue } : step)),
-    );
-  };
-
-  const handleAddStep = () => {
-    setSteps(prevSteps => [...prevSteps, { title: '', description: '' }]);
-  };
-
-  const handleRemoveStep = (index: number) => {
-    if (steps.length === 1) {
-      setMessage('⚠️ Πρέπει να υπάρχει τουλάχιστον ένα βήμα!');
-      setMessageType('error');
-      return;
-    }
-    setSteps(prevSteps => prevSteps.filter((_, i) => i !== index));
-  };
+  useEffect(() => {
+    setStepTitles(prev => {
+      if (stepsHtml.length > prev.length) {
+        return [...prev, ...Array(stepsHtml.length - prev.length).fill('')];
+      }
+      if (stepsHtml.length < prev.length) {
+        return prev.slice(0, stepsHtml.length);
+      }
+      return prev;
+    });
+  }, [stepsHtml]);
 
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
 
-    // Filter out empty steps (both title and description empty)
-    const filteredSteps = steps.filter(step => step.title.trim() !== '' || step.description.trim() !== '');
+    const filteredSteps = stepsHtml
+      .map((html, idx) => {
+        const plain = stripHtml(html);
+        return {
+          title: stepTitles[idx] || `Βήμα ${idx + 1}`,
+          description: plain,
+          content_rich: plain
+            ? {
+                type: 'doc',
+                content: [{ type: 'paragraph', text: plain }],
+              }
+            : null,
+          content_html: html || null,
+        };
+      })
+      .filter(step => step.title.trim() !== '' || step.description.trim() !== '');
 
     if (filteredSteps.length === 0) {
       setMessage('⚠️ Πρέπει να υπάρχει τουλάχιστον ένα βήμα με περιεχόμενο!');
@@ -77,7 +120,16 @@ export default function EditGuide() {
       const response = await fetch(`/api/update-guide/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ steps: filteredSteps }),
+        body: JSON.stringify({
+          title: guideTitle,
+          difficulty_rating: difficultyRating || null,
+          estimated_hours: hours || null,
+          estimated_playthroughs: playthroughs || null,
+          content_html: introHtml || null,
+          description: stripHtml(introHtml) || null,
+          content_rich: guideContentRich,
+          steps: filteredSteps,
+        }),
       });
 
       const result = await response.json();
@@ -85,7 +137,6 @@ export default function EditGuide() {
         setMessage('✅ Ο οδηγός ενημερώθηκε επιτυχώς!');
         setMessageType('success');
 
-        // Redirect to guide page after 1.5 seconds
         setTimeout(() => {
           if (gameSlug) {
             router.push(`/pages/guides/${gameSlug}`);
@@ -105,63 +156,139 @@ export default function EditGuide() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-6 text-white">
-      <motion.div
-        className="w-full max-w-3xl"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: 'easeOut' }}
-      >
-        <h2 className="text-center text-3xl font-bold text-blue-400">✍️ Επεξεργασία Οδηγού</h2>
-
-        {loading ? (
-          <p className="text-center text-gray-400">🔄 Φόρτωση...</p>
-        ) : (
-          <div className="mt-6 space-y-4">
-            {steps.map((step, index) => (
-              <Card
-                key={index}
-                className="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow-lg"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-gray-400">Βήμα {index + 1}</span>
-                  <button
-                    onClick={() => handleRemoveStep(index)}
-                    className="rounded-lg bg-red-600 px-3 py-1 text-sm text-white transition hover:bg-red-700"
-                    disabled={steps.length === 1}
-                  >
-                    🗑️ Διαγραφή
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Τίτλος βήματος..."
-                  className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 p-4 text-white focus:ring-2 focus:ring-blue-500"
-                  value={step.title}
-                  onChange={e => handleChange(index, 'title', e.target.value)}
-                />
-                <textarea
-                  placeholder="Περιγραφή βήματος..."
-                  className="mt-3 min-h-[150px] w-full resize-y rounded-lg border border-gray-700 bg-gray-800 p-4 text-white focus:ring-2 focus:ring-blue-500"
-                  value={step.description}
-                  onChange={e => handleChange(index, 'description', e.target.value)}
-                />
-              </Card>
-            ))}
+    <PageWrapper>
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-10">
+        <motion.div
+          className="mx-auto w-full max-w-5xl space-y-8"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-3xl font-bold text-slate-50">✍️ Επεξεργασία Οδηγού</h2>
+            {message && messageType && (
+              <Feedback
+                layout="toast"
+                tone={messageType === 'success' ? 'solid' : 'soft'}
+                variant={messageType}
+                title={messageType === 'success' ? 'Επιτυχία' : 'Σφάλμα'}
+                description={message}
+                dismissible
+                onDismiss={() => {
+                  setMessage('');
+                  setMessageType(null);
+                }}
+              />
+            )}
           </div>
-        )}
 
-        <div className="mt-6 flex flex-col items-center gap-3 md:flex-row md:justify-center">
-          <Button onClick={handleAddStep} disabled={loading}>
-            ➕ Προσθήκη Βήματος
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? '💾 Αποθήκευση...' : '💾 Αποθήκευση'}
-          </Button>
-        </div>
+          {loading ? (
+            <div className="text-center text-slate-400">🔄 Φόρτωση...</div>
+          ) : (
+            <div className="space-y-8">
+              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg text-slate-100">Γενικές Πληροφορίες</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+                  <Input
+                    label="Τίτλος Guide"
+                    value={guideTitle}
+                    onChange={e => setGuideTitle(e.target.value)}
+                  />
+                  <Input
+                    label="Δυσκολία (1-10)"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={difficultyRating}
+                    onChange={e => setDifficultyRating(e.target.value ? Number(e.target.value) : '')}
+                  />
+                  <Input
+                    label="Playthroughs"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={playthroughs}
+                    onChange={e => setPlaythroughs(e.target.value ? Number(e.target.value) : '')}
+                  />
+                  <Input
+                    label="Ώρες"
+                    type="number"
+                    value={hours}
+                    onChange={e => setHours(e.target.value ? Number(e.target.value) : '')}
+                  />
+                </CardContent>
+              </Card>
 
-        {message && messageType && <AlertMessage type={messageType} message={message} />}
-      </motion.div>
-    </div>
+              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg text-slate-100">Εισαγωγή</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RichTextEditor
+                    value={introHtml}
+                    onChange={setIntroHtml}
+                    placeholder="Ενημέρωση εισαγωγής guide..."
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg text-slate-100">Βήματα</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <GuideStepsEditor value={stepsHtml} onChange={setStepsHtml} placeholderPrefix="Βήμα" />
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-slate-200">Τίτλοι βημάτων</h4>
+                    {stepTitles.map((title, idx) => (
+                      <Input
+                        key={idx}
+                        label={`Βήμα ${idx + 1}`}
+                        value={title}
+                        onChange={e => {
+                          const updated = [...stepTitles];
+                          updated[idx] = e.target.value;
+                          setStepTitles(updated);
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => {
+                        setStepsHtml(prev => [...prev, '']);
+                        setStepTitles(prev => [...prev, '']);
+                      }}
+                      className="bg-gradient-to-r from-emerald-500 via-sky-500 to-blue-600 text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40"
+                    >
+                      + Προσθήκη Βήματος
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="bg-gradient-to-r from-emerald-500 via-sky-500 to-blue-600 text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40"
+                >
+                  {saving ? '💾 Αποθήκευση...' : '💾 Αποθήκευση'}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => router.back()}
+                  className="border-slate-700 bg-slate-900/60 text-slate-200 transition hover:border-sky-500/70 hover:text-white"
+                >
+                  ⬅️ Επιστροφή
+                </Button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </PageWrapper>
   );
 }

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { GameDetails, Guide, ProcessedGame } from '@/types/interfaces';
-import AlertMessage from '@/app/components/ui/AlertMessage';
+import Feedback from '@/app/components/ui/Feedback';
 import { Info } from 'lucide-react';
 import Skeleton from '@/app/components/ui/Skeleton';
 import EditGuideButton from '@/app/components/game-details/EditGuideButton';
@@ -14,6 +14,7 @@ import EditGameInfoModal from '@/app/components/game-details/EditGameInfoModal';
 import GamePlatforms from '@/app/components/game-details/GamePlatforms';
 import GameDetailsInfo from '@/app/components/game-details/GameDetailsInfo';
 import GuideStats from '@/app/components/game-details/GuideStats';
+import type { ReactNode } from 'react';
 
 const TrophyStats = dynamic(() => import('@/app/components/game-details/TrophyStats'), {
   ssr: false,
@@ -114,8 +115,25 @@ export default function GameDetailsPage() {
     setUpdating(false);
   };
 
+  useEffect(() => {
+    if (!message || !messageType) return;
+    const timeout = setTimeout(
+      () => {
+        setMessage(null);
+        setMessageType(null);
+      },
+      messageType === 'success' ? 3200 : 4200,
+    );
+    return () => clearTimeout(timeout);
+  }, [message, messageType]);
+
+  const dismissMessage = () => {
+    setMessage(null);
+    setMessageType(null);
+  };
+
   if (loading) {
-    return <Skeleton type="page" data-testid="skeleton" />;
+    return <Skeleton type="guide-detail" data-testid="skeleton" />;
   }
 
   if (!game) {
@@ -139,6 +157,12 @@ export default function GameDetailsPage() {
     if (hours <= 30) return 'yellow';
     return 'red';
   };
+
+  const primaryGuide = guides[0];
+  const introText = primaryGuide
+    ? stripHtml(primaryGuide.content_html || primaryGuide.description || '')
+    : '';
+  const hasIntro = Boolean(introText);
 
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,_#1e293b,_#020617)] px-4 py-16 text-slate-100">
@@ -214,6 +238,20 @@ export default function GameDetailsPage() {
               </div>
             </section>
 
+            {message && messageType && (
+              <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow">
+                <Feedback
+                  layout="inline"
+                  tone={messageType === 'success' ? 'solid' : 'soft'}
+                  variant={messageType}
+                  title={messageType === 'success' ? 'Ενημέρωση ολοκληρώθηκε' : 'Σφάλμα ενημέρωσης'}
+                  description={message}
+                  dismissible
+                  onDismiss={dismissMessage}
+                />
+              </div>
+            )}
+
             {/* INFO + TROPHIES SECTION */}
             {(gameDetails || trophies) && (
               <section className="grid gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl backdrop-blur-md md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -253,7 +291,17 @@ export default function GameDetailsPage() {
 
                     {message && messageType && (
                       <div className="mt-2">
-                        <AlertMessage type={messageType} message={message} />
+                        <Feedback
+                          layout="inline"
+                          tone={messageType === 'success' ? 'solid' : 'soft'}
+                          variant={messageType}
+                          title={
+                            messageType === 'success'
+                              ? 'Ενημέρωση ολοκληρώθηκε'
+                              : 'Σφάλμα ενημέρωσης'
+                          }
+                          description={message}
+                        />
                       </div>
                     )}
                   </div>
@@ -272,19 +320,37 @@ export default function GameDetailsPage() {
         )}
 
         {/* GUIDES SECTION */}
-        <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl backdrop-blur-md">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-100">Οδηγός</h2>
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
+        <section className="mt-4 space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl shadow-blue-900/20 backdrop-blur-md">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-50">Οδηγός</h2>
+              <p className="text-sm text-slate-400">Κύριο περιεχόμενο & βήματα</p>
+            </div>
+            <span className="rounded-full border border-slate-800 bg-slate-900/60 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-400">
               Trophy Walkthrough
             </span>
           </div>
 
-          <TrophyGuides
-            guides={guides
-              .filter(g => g.steps !== undefined)
-              .map(g => ({ id: g.id, steps: g.steps! }))}
-          />
+          <div className="space-y-4 rounded-2xl border border-slate-800/70 bg-slate-950/60 p-5 shadow-inner shadow-slate-900/40">
+            {guides.length > 0 && hasIntro && (
+              <div className="overflow-hidden rounded-xl border border-slate-800/70 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-950/80 p-4 shadow-inner shadow-slate-900/30">
+                <h3 className="text-base font-semibold text-slate-100">Εισαγωγή</h3>
+                <div className="prose prose-invert max-w-none prose-p:my-3 text-slate-200">
+                  {renderGuideContent(
+                    primaryGuide?.content_rich,
+                    primaryGuide?.content_html,
+                    primaryGuide?.description,
+                  )}
+                </div>
+              </div>
+            )}
+
+            <TrophyGuides
+              guides={guides
+                .filter(g => g.steps !== undefined)
+                .map(g => ({ id: g.id, steps: g.steps! }))}
+            />
+          </div>
         </section>
 
         {/* Modal */}
@@ -296,7 +362,7 @@ export default function GameDetailsPage() {
             gameDetails={gameDetails}
             onSuccess={updatedData => {
               setGameDetails(prev => ({ ...prev, ...updatedData }));
-              setMessage('✅ Πληροφορίες ενημερώθηκαν επιτυχώς!');
+              setMessage('Οι Πληροφορίες ενημερώθηκαν επιτυχώς!');
               setMessageType('success');
             }}
           />
@@ -304,4 +370,36 @@ export default function GameDetailsPage() {
       </div>
     </div>
   );
+}
+
+function renderGuideContent(
+  contentRich: unknown,
+  contentHtml: string | null | undefined,
+  fallbackDescription: string | undefined,
+): ReactNode {
+  if (contentHtml) {
+    return <div dangerouslySetInnerHTML={{ __html: contentHtml }} />;
+  }
+
+  if (Array.isArray((contentRich as { content?: unknown[] })?.content)) {
+    const blocks = (contentRich as { content: Array<{ type?: string; text?: string }> }).content;
+    if (blocks.length === 0 && fallbackDescription) {
+      return <p className="whitespace-pre-wrap">{fallbackDescription}</p>;
+    }
+    return blocks.map((block, idx) => (
+      <p key={idx} className="leading-7 text-slate-200">
+        {block?.text ?? ''}
+      </p>
+    ));
+  }
+
+  if (fallbackDescription) {
+    return <p className="whitespace-pre-wrap">{fallbackDescription}</p>;
+  }
+
+  return <p className="text-slate-500">Δεν έχει προστεθεί περιεχόμενο ακόμη.</p>;
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>?/gm, '').trim();
 }

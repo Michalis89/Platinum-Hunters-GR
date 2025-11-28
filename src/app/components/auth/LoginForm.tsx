@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Input } from '@/app/components/ui/Input';
 import { Button } from '@/app/components/ui/Button';
 import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
-import AlertMessage from '@/app/components/ui/AlertMessage';
+import Feedback from '@/app/components/ui/Feedback';
 import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/Card';
 import { validateEmail, validatePassword } from '@/utils/validation/auth';
 import { fetchSession } from '@/store/slices/authSlice';
@@ -143,7 +143,15 @@ export default function LoginForm() {
       </CardHeader>
       <CardContent className="space-y-5">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {alert && <AlertMessage type={alert.type} message={alert.message} />}
+          {alert && (
+            <Feedback
+              layout="inline"
+              tone={alert.type === 'success' ? 'solid' : 'soft'}
+              variant={alert.type}
+              title={alert.type === 'success' ? 'Επιτυχής σύνδεση' : 'Σφάλμα σύνδεσης'}
+              description={alert.message}
+            />
+          )}
 
           {/* Email or Username */}
           <div>

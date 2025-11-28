@@ -29,7 +29,8 @@ export default function Guides() {
     null,
   );
 
-  const [hourRange, setHourRange] = useState<[number, number]>([0, 1000]);
+  const [hourRange, setHourRange] = useState<[number, number]>([1, 1000]);
+  const [runRange, setRunRange] = useState<[number, number]>([1, 10]);
   const [yearRange, setYearRange] = useState<[number, number]>([1990, 2025]);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -37,9 +38,16 @@ export default function Guides() {
   const { data: games, error, isLoading } = useGetGamesQuery();
 
   // Calculate dynamic min/max values from games data
-  const { minYear, maxYear, minHour, maxHour } = useMemo(() => {
+  const { minYear, maxYear, minHour, maxHour, minRun, maxRun } = useMemo(() => {
     if (!games?.games || games.games.length === 0) {
-      return { minYear: 1990, maxYear: new Date().getFullYear(), minHour: 0, maxHour: 200 };
+      return {
+        minYear: 1990,
+        maxYear: new Date().getFullYear(),
+        minHour: 0,
+        maxHour: 200,
+        minRun: 1,
+        maxRun: 10,
+      };
     }
 
     const years = games.games
@@ -48,12 +56,17 @@ export default function Guides() {
     const hours = games.games
       .map(game => game.average_hours)
       .filter((hour): hour is number => hour !== null && hour !== undefined);
+    const runs = games.games
+      .map(game => Number.parseInt(game.playthroughs, 10)) // TODO: fix this field with the correct playthrough count
+      .filter((run): run is number => !Number.isNaN(run));
 
     return {
       minYear: years.length > 0 ? Math.min(...years) : 1990,
       maxYear: years.length > 0 ? Math.max(...years) : new Date().getFullYear(),
       minHour: hours.length > 0 ? Math.floor(Math.min(...hours)) : 0,
       maxHour: hours.length > 0 ? Math.ceil(Math.max(...hours)) : 200,
+      minRun: runs.length > 0 ? Math.floor(Math.min(...runs)) : 1,
+      maxRun: runs.length > 0 ? Math.ceil(Math.max(...runs)) : 10,
     };
   }, [games]);
 
@@ -73,10 +86,13 @@ export default function Guides() {
     if (games && hourRange[0] === 0 && hourRange[1] === 1000) {
       setHourRange([minHour, maxHour]);
     }
+    if (games && runRange[0] === 0 && runRange[1] === 10) {
+      setRunRange([minRun, maxRun]);
+    }
     if (games && yearRange[0] === 1990 && yearRange[1] === 2025) {
       setYearRange([minYear, maxYear]);
     }
-  }, [games, minHour, maxHour, minYear, maxYear, hourRange, yearRange]);
+  }, [games, minHour, maxHour, minYear, maxYear, hourRange, yearRange, runRange, minRun, maxRun]);
 
   // Helper function to check if search matches whole words or start of title
   const matchesSearch = (title: string, searchTerm: string) => {
@@ -163,6 +179,7 @@ export default function Guides() {
   const handleResetFilters = () => {
     setYearRange([minYear, maxYear]);
     setHourRange([minHour, maxHour]);
+    setRunRange([minHour, maxHour]);
     setSortBy('title');
     setSortOrder('asc');
     setDifficultyCategory(null);
@@ -173,12 +190,13 @@ export default function Guides() {
   };
 
   const content = () => {
-    if (isLoading) {
-      return <Skeleton type="grid" />;
-    }
     if (filteredGames && filteredGames.length > 0) return <GameGrid games={filteredGames || []} />;
     return <p className="mt-6 text-center text-lg text-gray-400">Δεν βρέθηκαν παιχνίδια.</p>;
   };
+
+  if (isLoading) {
+    return <Skeleton type="guides-list" />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-16 text-slate-100">
@@ -252,12 +270,16 @@ export default function Guides() {
             <div className="sticky top-6">
               <FiltersPanel
                 isOpen
+                runRange={runRange}
                 hourRange={hourRange}
+                setRunRange={setRunRange}
                 setHourRange={setHourRange}
                 yearRange={yearRange}
                 setYearRange={setYearRange}
                 minHour={minHour}
                 maxHour={maxHour}
+                minRun={minRun}
+                maxRun={maxRun}
                 minYear={minYear}
                 maxYear={maxYear}
                 onResetFilters={handleResetFilters}
@@ -325,10 +347,14 @@ export default function Guides() {
                 <div className="pt-2">
                   <FiltersPanel
                     isOpen={isOpen}
+                    runRange={runRange}
                     hourRange={hourRange}
+                    setRunRange={setRunRange}
                     setHourRange={setHourRange}
                     yearRange={yearRange}
                     setYearRange={setYearRange}
+                    minRun={minRun}
+                    maxRun={maxRun}
                     minHour={minHour}
                     maxHour={maxHour}
                     minYear={minYear}

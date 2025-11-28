@@ -10,6 +10,7 @@ import { Input } from '@/app/components/ui/Input';
 import { Select } from '@/app/components/ui/Select';
 import { Textarea } from '@/app/components/ui/Textarea';
 import { Button } from '@/app/components/ui/Button';
+import Skeleton from '@/app/components/ui/Skeleton';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import {
   fetchSession,
@@ -83,12 +84,7 @@ export default function EditProfilePage() {
   if (loading) {
     return (
       <PageWrapper>
-        <div className="flex min-h-[60vh] items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-          <div className="text-center">
-            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-blue-500" />
-            <p className="text-sm text-slate-400">Φόρτωση...</p>
-          </div>
-        </div>
+        <Skeleton type="profile-edit" />
       </PageWrapper>
     );
   }

@@ -99,7 +99,7 @@ describe.skip('GameDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('5 Δυσκολία')).toBeInTheDocument();
-      expect(screen.getByText('1 Πέρασμα')).toBeInTheDocument();
+      expect(screen.getByText('1 Run')).toBeInTheDocument();
       expect(screen.getByText('10 Ώρες')).toBeInTheDocument();
     });
   });

@@ -5,12 +5,25 @@ interface ScrapedStep {
   title: string;
   description: string;
   trophies?: unknown[];
+  content_rich?: unknown;
+  content_html?: string | null;
 }
 
 export async function POST(req: Request) {
   try {
-    const { title, platform, gameImage, trophies, difficulty, hours, playthroughs, steps } =
-      await req.json();
+    const {
+      title,
+      platform,
+      gameImage,
+      trophies,
+      difficulty,
+      hours,
+      playthroughs,
+      steps,
+      content_rich: guideContentRich,
+      content_html: guideContentHtml,
+      description,
+    } = await req.json();
 
     // Create slug from title
     const slug = title
@@ -95,10 +108,13 @@ export async function POST(req: Request) {
         {
           game_id: game.id,
           title: `${title} Trophy Guide`,
+          description: description ?? null,
           difficulty_rating: difficultyRating,
           estimated_hours: estimatedHours,
           estimated_playthroughs: estimatedPlaythroughs,
           status: 'published',
+          content_rich: guideContentRich ?? null,
+          content_html: guideContentHtml ?? null,
         },
       ])
       .select('*')
@@ -118,6 +134,8 @@ export async function POST(req: Request) {
         step_number: index + 1,
         title: step.title,
         description: step.description,
+        content_rich: step.content_rich ?? null,
+        content_html: step.content_html ?? null,
       }));
 
       const { error: stepsError } = await supabase.from('guide_steps').insert(guideSteps);

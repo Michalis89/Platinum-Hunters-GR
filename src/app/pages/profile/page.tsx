@@ -7,6 +7,7 @@ import { User, Mail, Calendar, MapPin, Trophy, Star, Clock, Edit, Gamepad2 } fro
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
+import Skeleton from '@/app/components/ui/Skeleton';
 import {
   fetchSession,
   selectUser,
@@ -44,12 +45,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <PageWrapper>
-        <div className="flex min-h-[60vh] items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-          <div className="text-center">
-            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-blue-500" />
-            <p className="text-sm text-slate-400">Φόρτωση προφίλ...</p>
-          </div>
-        </div>
+        <Skeleton type="profile" />
       </PageWrapper>
     );
   }

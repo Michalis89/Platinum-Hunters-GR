@@ -115,16 +115,9 @@ export default function BacklogPage() {
     setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
   };
 
-  // Show loading while auth initializes
+  // Show skeleton while auth initializes
   if (isAuthLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-blue-500" />
-          <p className="text-slate-400">Φόρτωση...</p>
-        </div>
-      </div>
-    );
+    return <Skeleton type="backlog" />;
   }
 
   if (!isAuthenticated) {
@@ -317,11 +310,7 @@ export default function BacklogPage() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-64 rounded-xl" />
-            ))}
-          </div>
+          <Skeleton type="backlog" />
         )}
 
         {/* Empty State */}

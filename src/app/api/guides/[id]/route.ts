@@ -5,6 +5,8 @@ interface GuideStep {
   step_number: number;
   title: string;
   description: string;
+  content_rich?: unknown;
+  content_html?: string | null;
   trophies?: unknown[];
 }
 
@@ -48,6 +50,8 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         .map((step: GuideStep) => ({
           title: step.title,
           description: step.description,
+          content_rich: step.content_rich ?? null,
+          content_html: step.content_html ?? null,
           trophies: step.trophies || [],
         })),
       guide_steps: undefined, // Remove the nested guide_steps property
