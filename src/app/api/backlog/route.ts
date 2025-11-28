@@ -42,7 +42,9 @@ export async function GET() {
         actual_hours_platinum,
         notes,
         personal_rating,
+        personal_difficulty,
         would_recommend,
+        is_favorite,
         added_at,
         started_at,
         completed_at,
@@ -92,7 +94,9 @@ export async function GET() {
       actual_hours_platinum: item.actual_hours_platinum,
       notes: item.notes,
       personal_rating: item.personal_rating,
+      personal_difficulty: item.personal_difficulty,
       would_recommend: item.would_recommend,
+      is_favorite: item.is_favorite,
       added_at: item.added_at,
       started_at: item.started_at,
       completed_at: item.completed_at,
@@ -129,7 +133,16 @@ export async function POST(request: Request) {
 
     // Parse request body
     const body = await request.json();
-    const { game_id, priority = 0, notes = null, status = 'to_play' } = body;
+    const {
+      game_id,
+      priority = 0,
+      notes = null,
+      status = 'to_play',
+      personal_rating = null,
+      personal_difficulty = null,
+      would_recommend = null,
+      is_favorite = false,
+    } = body;
 
     // Validate game_id
     if (!game_id || typeof game_id !== 'number') {
@@ -154,6 +167,10 @@ export async function POST(request: Request) {
       status,
       priority,
       notes,
+      personal_rating,
+      personal_difficulty,
+      would_recommend,
+      is_favorite,
     };
 
     const { data: newItem, error: insertError } = await supabase
@@ -170,7 +187,9 @@ export async function POST(request: Request) {
         actual_hours_platinum,
         notes,
         personal_rating,
+        personal_difficulty,
         would_recommend,
+        is_favorite,
         added_at,
         started_at,
         completed_at,
@@ -226,7 +245,9 @@ export async function POST(request: Request) {
       actual_hours_platinum: typedNewItem.actual_hours_platinum,
       notes: typedNewItem.notes,
       personal_rating: typedNewItem.personal_rating,
+      personal_difficulty: typedNewItem.personal_difficulty,
       would_recommend: typedNewItem.would_recommend,
+      is_favorite: typedNewItem.is_favorite,
       added_at: typedNewItem.added_at,
       started_at: typedNewItem.started_at,
       completed_at: typedNewItem.completed_at,

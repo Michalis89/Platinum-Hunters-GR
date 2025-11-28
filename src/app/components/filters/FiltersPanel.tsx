@@ -15,9 +15,9 @@ import RunsFilter from './RunsFilter';
 
 interface FiltersPanelProps {
   readonly hourRange: [number, number];
-  readonly runRange: [number, number];
+  readonly runValue: number;
   readonly setHourRange: (value: [number, number]) => void;
-  readonly setRunRange: (value: [number, number]) => void;
+  readonly setRunValue: (value: number) => void;
   readonly yearRange: [number, number];
   readonly setYearRange: (value: [number, number]) => void;
   readonly minHour: number;
@@ -37,9 +37,9 @@ interface FiltersPanelProps {
 
 export default function FiltersPanel({
   hourRange,
-  runRange,
+  runValue,
   setHourRange,
-  setRunRange,
+  setRunValue,
   yearRange,
   setYearRange,
   minHour,
@@ -114,7 +114,7 @@ export default function FiltersPanel({
           {/* Sliders */}
           <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-800/70 bg-slate-950/60 p-3">
             <DifficultyFilter />
-            <RunsFilter value={runRange} onChange={setRunRange} min={minRun} max={maxRun} />
+            <RunsFilter value={runValue} onChange={setRunValue} min={minRun} max={maxRun} />
             <HourFilter value={hourRange} onChange={setHourRange} min={minHour} max={maxHour} />
             <YearFilter value={yearRange} onChange={setYearRange} min={minYear} max={maxYear} />
           </div>

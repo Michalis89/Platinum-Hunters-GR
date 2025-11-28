@@ -46,7 +46,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       actual_hours_casual,
       actual_hours_platinum,
       personal_rating,
+      personal_difficulty,
       would_recommend,
+      is_favorite,
     } = body;
 
     // Validate at least one field is provided
@@ -57,7 +59,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       actual_hours_casual === undefined &&
       actual_hours_platinum === undefined &&
       personal_rating === undefined &&
-      would_recommend === undefined
+      personal_difficulty === undefined &&
+      would_recommend === undefined &&
+      is_favorite === undefined
     ) {
       return NextResponse.json(
         { error: 'Πρέπει να παρέχεται τουλάχιστον ένα πεδίο για ενημέρωση' },
@@ -116,7 +120,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (actual_hours_platinum !== undefined)
       updateData.actual_hours_platinum = actual_hours_platinum;
     if (personal_rating !== undefined) updateData.personal_rating = personal_rating;
+    if (personal_difficulty !== undefined) updateData.personal_difficulty = personal_difficulty;
     if (would_recommend !== undefined) updateData.would_recommend = would_recommend;
+    if (is_favorite !== undefined) updateData.is_favorite = is_favorite;
 
     // Update the item
     const { data: updatedItem, error: updateError } = await supabase
@@ -134,7 +140,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         actual_hours_platinum,
         notes,
         personal_rating,
+        personal_difficulty,
         would_recommend,
+        is_favorite,
         added_at,
         started_at,
         completed_at,
@@ -183,7 +191,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       actual_hours_platinum: typedUpdatedItem.actual_hours_platinum,
       notes: typedUpdatedItem.notes,
       personal_rating: typedUpdatedItem.personal_rating,
+      personal_difficulty: typedUpdatedItem.personal_difficulty,
       would_recommend: typedUpdatedItem.would_recommend,
+      is_favorite: typedUpdatedItem.is_favorite,
       added_at: typedUpdatedItem.added_at,
       started_at: typedUpdatedItem.started_at,
       completed_at: typedUpdatedItem.completed_at,

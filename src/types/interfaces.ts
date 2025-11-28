@@ -70,6 +70,9 @@ export interface Game {
   total_reviews: number;
   average_difficulty?: number;
   average_hours?: number;
+  // Aggregated from guides (computed in API)
+  average_playthroughs?: number | null;
+  max_playthroughs?: number | null;
 
   // Timestamps
   created_at: string;
@@ -201,9 +204,11 @@ export interface UserBacklog {
   status: 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
   priority: number;
   notes?: string | null;
+  personal_difficulty?: number | null;
   actual_hours_casual?: number | null;
   actual_hours_platinum?: number | null;
   personal_rating?: number | null;
+  is_favorite?: boolean | null;
   would_recommend?: boolean | null;
   added_at: string;
   started_at?: string | null;

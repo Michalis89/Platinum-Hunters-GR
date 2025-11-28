@@ -26,7 +26,9 @@ export interface UserGameRow {
   actual_hours_platinum: number | null;
   notes: string | null;
   personal_rating: number | null;
+  personal_difficulty: number | null;
   would_recommend: boolean | null;
+  is_favorite: boolean | null;
   added_at: string;
   started_at: string | null;
   completed_at: string | null;
@@ -46,7 +48,9 @@ export interface UserGameInsert {
   actual_hours_platinum?: number | null;
   notes?: string | null;
   personal_rating?: number | null;
+  personal_difficulty?: number | null;
   would_recommend?: boolean | null;
+  is_favorite?: boolean | null;
   started_at?: string | null;
   completed_at?: string | null;
   platinumed_at?: string | null;
@@ -63,7 +67,9 @@ export interface UserGameUpdate {
   actual_hours_platinum?: number | null;
   notes?: string | null;
   personal_rating?: number | null;
+  personal_difficulty?: number | null;
   would_recommend?: boolean | null;
+  is_favorite?: boolean | null;
   started_at?: string | null;
   completed_at?: string | null;
   platinumed_at?: string | null;

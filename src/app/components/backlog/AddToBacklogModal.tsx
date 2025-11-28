@@ -5,15 +5,22 @@
  * PH-31: User Backlog System
  */
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Plus, Trophy, Clock, Signal, Check } from 'lucide-react';
 import Image from 'next/image';
 import type { AppDispatch } from '@/store/store';
-import { addToBacklog, selectIsInBacklog } from '@/store/slices/backlogSlice';
+import {
+  addToBacklog,
+  fetchBacklog,
+  selectBacklogItems,
+  selectBacklogLoading,
+  selectIsInBacklog,
+} from '@/store/slices/backlogSlice';
 import { useGetGamesQuery } from '@/store/api/gamesApi';
 import type { ProcessedGame } from '@/types/interfaces';
+import { selectIsAuthenticated } from '@/store/slices/authSlice';
 
 interface AddToBacklogModalProps {
   onClose: () => void;
@@ -29,6 +36,10 @@ const PRIORITY_OPTIONS = [
 export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
   const dispatch = useDispatch<AppDispatch>();
   const { data: gamesData, isLoading: gamesLoading } = useGetGamesQuery();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const backlogLoading = useSelector(selectBacklogLoading);
+  const backlogItems = useSelector(selectBacklogItems);
+  const hasRequestedBacklog = useRef(false);
 
   const [search, setSearch] = useState('');
   const [selectedGame, setSelectedGame] = useState<ProcessedGame | null>(null);
@@ -36,6 +47,19 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
   const [notes, setNotes] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      hasRequestedBacklog.current = false;
+      return;
+    }
+    if (backlogItems.length > 0) return;
+    if (hasRequestedBacklog.current) return;
+    if (backlogLoading) return;
+
+    hasRequestedBacklog.current = true;
+    dispatch(fetchBacklog());
+  }, [dispatch, isAuthenticated, backlogItems.length, backlogLoading]);
 
   // Filter games based on search
   const filteredGames = useMemo(() => {
@@ -76,14 +100,16 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
 
     return (
       <button
-        onClick={() => !isInBacklog && setSelectedGame(game)}
-        disabled={isInBacklog}
+        onClick={() => !isInBacklog && !backlogLoading && setSelectedGame(game)}
+        disabled={isInBacklog || backlogLoading}
         className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition ${
-          isInBacklog
-            ? 'cursor-not-allowed border-slate-800 bg-slate-900/30 opacity-50'
-            : selectedGame?.id === game.id
-              ? 'border-blue-500 bg-blue-950/50'
-              : 'border-slate-800 bg-slate-900/50 hover:border-slate-700 hover:bg-slate-800/50'
+          backlogLoading
+            ? 'cursor-wait border-slate-800 bg-slate-900/30 opacity-70'
+            : isInBacklog
+              ? 'cursor-not-allowed border-slate-800 bg-slate-900/30 opacity-50'
+              : selectedGame?.id === game.id
+                ? 'border-blue-500 bg-blue-950/50'
+                : 'border-slate-800 bg-slate-900/50 hover:border-slate-700 hover:bg-slate-800/50'
         }`}
       >
         {/* Cover */}
@@ -134,6 +160,9 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
             <Check size={14} />
             Στο Backlog
           </div>
+        )}
+        {!isInBacklog && backlogLoading && (
+          <div className="text-xs text-slate-400">Έλεγχος backlog...</div>
         )}
       </button>
     );

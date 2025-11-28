@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { BookOpen, ChevronDown, Plus } from 'lucide-react';
@@ -8,8 +8,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import GameGrid from '@/app/components/guides/GameGrid';
 import Skeleton from '@/app/components/ui/Skeleton';
-import { RootState } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/store';
 import { useGetGamesQuery } from '@/store/api/gamesApi';
+import {
+  fetchBacklog,
+  selectBacklogError,
+  selectBacklogItems,
+  selectBacklogLoading,
+} from '@/store/slices/backlogSlice';
+import { ProcessedGame } from '@/types/interfaces';
 import { parseError } from '@/utils/error/parseError';
 import { setProcessedGames } from '@/store/slices/processedGamesSlice';
 import { resetGenre } from '@/store/slices/genresSlice';
@@ -18,9 +25,11 @@ import { resetDifficulty } from '@/store/slices/difficultySlice';
 import { resetPlatform } from '@/store/slices/platformsSlice';
 import { SearchBar } from '@/app/components/ui/SearchBar';
 import FiltersPanel from '@/app/components/filters/FiltersPanel';
+import { selectIsAuthenticated } from '@/store/slices/authSlice';
+import Feedback from '@/app/components/ui/Feedback';
 
 export default function Guides() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<string>('title');
@@ -30,12 +39,26 @@ export default function Guides() {
   );
 
   const [hourRange, setHourRange] = useState<[number, number]>([1, 1000]);
-  const [runRange, setRunRange] = useState<[number, number]>([1, 10]);
+  const [runValue, setRunValue] = useState<number>(0);
   const [yearRange, setYearRange] = useState<[number, number]>([1990, 2025]);
+  const [hasInitializedRanges, setHasInitializedRanges] = useState(false);
+  const [showBacklogErrorOverlay, setShowBacklogErrorOverlay] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: games, error, isLoading } = useGetGamesQuery();
+
+  const getRunValue = (game: ProcessedGame): number | null => {
+    if (typeof game.average_playthroughs === 'number') return game.average_playthroughs;
+    if (typeof game.max_playthroughs === 'number') return game.max_playthroughs;
+
+    const estimatedPlaythroughs = (game as { estimated_playthroughs?: number | null })
+      .estimated_playthroughs;
+    if (typeof estimatedPlaythroughs === 'number') return estimatedPlaythroughs;
+
+    const parsed = Number.parseInt((game as { playthroughs?: string }).playthroughs ?? '', 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  };
 
   // Calculate dynamic min/max values from games data
   const { minYear, maxYear, minHour, maxHour, minRun, maxRun } = useMemo(() => {
@@ -45,7 +68,7 @@ export default function Guides() {
         maxYear: new Date().getFullYear(),
         minHour: 0,
         maxHour: 200,
-        minRun: 1,
+        minRun: 0,
         maxRun: 10,
       };
     }
@@ -57,16 +80,17 @@ export default function Guides() {
       .map(game => game.average_hours)
       .filter((hour): hour is number => hour !== null && hour !== undefined);
     const runs = games.games
-      .map(game => Number.parseInt(game.playthroughs, 10)) // TODO: fix this field with the correct playthrough count
-      .filter((run): run is number => !Number.isNaN(run));
+      .map(game => getRunValue(game))
+      .filter((run): run is number => run !== null && !Number.isNaN(run));
+    const maxRunValue = runs.length > 0 ? Math.max(...runs.map(run => Math.ceil(run))) : 10;
 
     return {
       minYear: years.length > 0 ? Math.min(...years) : 1990,
       maxYear: years.length > 0 ? Math.max(...years) : new Date().getFullYear(),
       minHour: hours.length > 0 ? Math.floor(Math.min(...hours)) : 0,
       maxHour: hours.length > 0 ? Math.ceil(Math.max(...hours)) : 200,
-      minRun: runs.length > 0 ? Math.floor(Math.min(...runs)) : 1,
-      maxRun: runs.length > 0 ? Math.ceil(Math.max(...runs)) : 10,
+      minRun: 0,
+      maxRun: Math.max(1, maxRunValue),
     };
   }, [games]);
 
@@ -74,6 +98,11 @@ export default function Guides() {
   const genreFilter = useSelector((state: RootState) => state.genres.selectedGenre);
   const developerFilter = useSelector((state: RootState) => state.developer.selectedDeveloper);
   const difficultyFilter = useSelector((state: RootState) => state.difficulty.selectedDifficulty);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const backlogItems = useSelector(selectBacklogItems);
+  const backlogError = useSelector(selectBacklogError);
+  const backlogLoading = useSelector(selectBacklogLoading);
+  const hasRequestedBacklog = useRef(false);
 
   useEffect(() => {
     if (games) {
@@ -81,18 +110,46 @@ export default function Guides() {
     }
   }, [games, dispatch]);
 
-  // Initialize ranges when data first loads
+  // Fetch backlog once after auth so chips render with correct status
   useEffect(() => {
-    if (games && hourRange[0] === 0 && hourRange[1] === 1000) {
-      setHourRange([minHour, maxHour]);
+    if (!isAuthenticated) {
+      hasRequestedBacklog.current = false;
+      setShowBacklogErrorOverlay(false);
+      return;
     }
-    if (games && runRange[0] === 0 && runRange[1] === 10) {
-      setRunRange([minRun, maxRun]);
+    if (backlogItems.length > 0) return;
+    if (hasRequestedBacklog.current) return;
+    if (backlogLoading) return;
+
+    hasRequestedBacklog.current = true;
+    dispatch(fetchBacklog());
+  }, [dispatch, isAuthenticated, backlogItems.length, backlogLoading]);
+
+  useEffect(() => {
+    if (backlogError) {
+      setShowBacklogErrorOverlay(true);
+    } else {
+      setShowBacklogErrorOverlay(false);
     }
-    if (games && yearRange[0] === 1990 && yearRange[1] === 2025) {
-      setYearRange([minYear, maxYear]);
-    }
-  }, [games, minHour, maxHour, minYear, maxYear, hourRange, yearRange, runRange, minRun, maxRun]);
+  }, [backlogError]);
+
+  useEffect(() => {
+    if (!games || hasInitializedRanges) return;
+
+    setHourRange([minHour, maxHour]);
+    setRunValue(0);
+    setYearRange([minYear, maxYear]);
+    setHasInitializedRanges(true);
+  }, [games, hasInitializedRanges, minHour, maxHour, minRun, maxRun, minYear, maxYear]);
+
+  useEffect(() => {
+    setRunValue(prev => {
+      if (!Number.isFinite(prev)) return maxRun;
+      if (prev > maxRun) return maxRun;
+      if (prev < minRun) return minRun; // allows 0 as reset
+      return prev;
+    });
+  }, [minRun, maxRun]);
 
   // Helper function to check if search matches whole words or start of title
   const matchesSearch = (title: string, searchTerm: string) => {
@@ -110,8 +167,22 @@ export default function Guides() {
 
   const filteredGames = games?.games
 
-    ?.filter(
-      game =>
+    ?.filter(game => {
+      const runStat = getRunValue(game);
+      const normalizedRun = runStat === null ? null : Math.round(runStat);
+      const matchesRuns =
+        !hasInitializedRanges || runValue === 0
+          ? true
+          : normalizedRun !== null && normalizedRun === runValue;
+
+      const matchesYearRange =
+        yearRange[0] === minYear && yearRange[1] === maxYear
+          ? true
+          : typeof game.release_year === 'number' &&
+            game.release_year >= yearRange[0] &&
+            game.release_year <= yearRange[1];
+
+      return (
         matchesSearch(game.title, search) &&
         (!platformFilter || game.platforms?.includes(platformFilter)) &&
         (!developerFilter || game.developer === developerFilter) &&
@@ -128,14 +199,12 @@ export default function Guides() {
             return (game.average_difficulty ?? 0) > 3 && (game.average_difficulty ?? 0) < 7;
           return true;
         })() &&
+        matchesRuns &&
         (game.average_hours ?? 0) >= hourRange[0] &&
         (game.average_hours ?? 0) <= hourRange[1] &&
-        (yearRange[0] === minYear && yearRange[1] === maxYear
-          ? true // If filter is at max range, include all games
-          : game.release_year &&
-            game.release_year >= yearRange[0] &&
-            game.release_year <= yearRange[1]),
-    )
+        matchesYearRange
+      );
+    })
     ?.sort((a, b) => {
       if (sortBy === 'title') {
         return sortOrder === 'asc'
@@ -179,7 +248,7 @@ export default function Guides() {
   const handleResetFilters = () => {
     setYearRange([minYear, maxYear]);
     setHourRange([minHour, maxHour]);
-    setRunRange([minHour, maxHour]);
+    setRunValue(0);
     setSortBy('title');
     setSortOrder('asc');
     setDifficultyCategory(null);
@@ -200,6 +269,24 @@ export default function Guides() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-16 text-slate-100">
+      {showBacklogErrorOverlay && backlogError && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm">
+          <div className="w-full max-w-xl px-4">
+            <Feedback
+              variant="error"
+              tone="solid"
+              layout="inline"
+              title="Αδυναμία φόρτωσης backlog"
+              description="To παιχνίδι δεν προσθεθηκε στο backlog."
+              actionLabel={backlogLoading ? 'Προσπάθεια...' : 'Δοκίμασε ξανά'}
+              onAction={() => dispatch(fetchBacklog())}
+              dismissible
+              onDismiss={() => setShowBacklogErrorOverlay(false)}
+              className="shadow-2xl shadow-red-500/20"
+            />
+          </div>
+        </div>
+      )}
       <div className="relative mx-auto flex max-w-7xl flex-col gap-10">
         {/* Ambient glows */}
         <div className="pointer-events-none absolute inset-0 opacity-60">
@@ -270,9 +357,9 @@ export default function Guides() {
             <div className="sticky top-6">
               <FiltersPanel
                 isOpen
-                runRange={runRange}
+                runValue={runValue}
                 hourRange={hourRange}
-                setRunRange={setRunRange}
+                setRunValue={setRunValue}
                 setHourRange={setHourRange}
                 yearRange={yearRange}
                 setYearRange={setYearRange}
@@ -347,9 +434,9 @@ export default function Guides() {
                 <div className="pt-2">
                   <FiltersPanel
                     isOpen={isOpen}
-                    runRange={runRange}
+                    runValue={runValue}
                     hourRange={hourRange}
-                    setRunRange={setRunRange}
+                    setRunValue={setRunValue}
                     setHourRange={setHourRange}
                     yearRange={yearRange}
                     setYearRange={setYearRange}
@@ -371,7 +458,7 @@ export default function Guides() {
             </div>
 
             <motion.div
-              key={`${sortOrder}-${sortBy}-${hourRange}-${yearRange}-${platformFilter}-${genreFilter}-${developerFilter}-${difficultyFilter}-${difficultyCategory}`}
+              key={`${sortOrder}-${sortBy}-${hourRange}-${runValue}-${yearRange}-${platformFilter}-${genreFilter}-${developerFilter}-${difficultyFilter}-${difficultyCategory}`}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}

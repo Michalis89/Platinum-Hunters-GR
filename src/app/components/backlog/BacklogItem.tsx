@@ -19,6 +19,8 @@ import {
   ExternalLink,
   Calendar,
   Signal,
+  Star,
+  Gauge,
 } from 'lucide-react';
 import type { UserBacklogWithGame } from '@/types/interfaces';
 import type { AppDispatch } from '@/store/store';
@@ -209,15 +211,41 @@ export default function BacklogItem({ item }: BacklogItemProps) {
             )}
           </div>
 
-          {/* Actual Hours Display */}
-          {(item.actual_hours_casual || item.actual_hours_platinum) && (
-            <div className="mb-3 rounded-lg border border-blue-800 bg-blue-950/30 px-3 py-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-blue-300">Οι δικές σου ώρες:</span>
-                <div className="flex items-center gap-2 font-medium text-blue-400">
-                  {item.actual_hours_casual && <span>🎮 {item.actual_hours_casual}h</span>}
-                  {item.actual_hours_platinum && <span>🏆 {item.actual_hours_platinum}h</span>}
-                </div>
+          {/* Personal Stats Display */}
+          {(item.actual_hours_casual ||
+            item.actual_hours_platinum ||
+            item.personal_rating ||
+            item.personal_difficulty) && (
+            <div className="mb-3 rounded-xl border border-slate-800/80 bg-gradient-to-r from-slate-900 via-slate-900/80 to-slate-900/60 px-4 py-3 shadow-inner shadow-slate-950/40">
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-slate-200">
+                <span className="text-slate-300">Τα δικά σου δεδομένα</span>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                {item.actual_hours_casual && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-1 text-blue-200 ring-1 ring-blue-500/40">
+                    <Clock className="h-3.5 w-3.5" />
+                    {item.actual_hours_casual}h
+                  </span>
+                )}
+                {item.actual_hours_platinum && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-amber-100 ring-1 ring-amber-400/40">
+                    <Trophy className="h-3.5 w-3.5" />
+                    {item.actual_hours_platinum}h
+                  </span>
+                )}
+                {item.personal_rating && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-100 ring-1 ring-emerald-400/40 shadow-[0_0_0_1px_rgba(16,185,129,0.15)]">
+                    <Star className="h-3.5 w-3.5" />
+                    Rating: {item.personal_rating}/5
+                  </span>
+                )}
+                {item.personal_difficulty && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-1 text-amber-100 ring-1 ring-amber-400/40 shadow-[0_0_0_1px_rgba(251,191,36,0.15)]">
+                    <Gauge className="h-3.5 w-3.5" />
+                    Δυσκολία: {item.personal_difficulty}/10
+                  </span>
+                )}
               </div>
             </div>
           )}
