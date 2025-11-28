@@ -44,8 +44,9 @@ export async function GET(req: Request, props: { params: Promise<{ game_id: stri
       if (genreError) {
         console.error('❌ Genre fetch error:', genreError);
       } else if (genreRows) {
-        genresList = genreRows
-          .map((row: { genres?: { name?: string } | null }) => row.genres?.name)
+        const normalizedRows = (genreRows as Array<{ genres?: { name?: string } | null }>) ?? [];
+        genresList = normalizedRows
+          .map(row => row.genres?.name)
           .filter((g): g is string => Boolean(g));
       }
     }

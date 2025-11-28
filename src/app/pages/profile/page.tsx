@@ -32,7 +32,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchBacklog());
+      dispatch(fetchBacklog({}));
     }
   }, [isAuthenticated, dispatch]);
 

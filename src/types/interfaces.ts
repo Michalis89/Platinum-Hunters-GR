@@ -191,6 +191,18 @@ export interface GamesResponse {
   developers: string[];
   platforms: string[];
   difficulties: number[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    meta?: {
+      developersCount?: number;
+      genresCount?: number;
+      maxHours?: number | null;
+      minYearMeta?: number | null;
+      maxYearMeta?: number | null;
+    };
+  };
 }
 
 // =====================================================

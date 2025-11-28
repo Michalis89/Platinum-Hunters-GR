@@ -47,7 +47,7 @@ export default function ResetPasswordForm() {
 
     const validation = validatePassword(password);
     if (!validation.isValid) {
-      setError(validation.error);
+      setError(validation.error || 'Μη έγκυρος κωδικός.');
       return;
     }
     if (password !== confirmPassword) {

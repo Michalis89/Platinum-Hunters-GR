@@ -41,6 +41,11 @@ interface BacklogState {
   isLoading: boolean;
   error: string | null;
   stats: BacklogStats;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
 }
 
 /**
@@ -72,24 +77,42 @@ const initialState: BacklogState = {
     difficultyAverage: 0,
     recentlyAdded: [],
   },
+  pagination: {
+    page: 1,
+    limit: 50,
+    total: 0,
+  },
 };
 
 /**
  * Thunk: Fetch backlog
  */
-export const fetchBacklog = createAsyncThunk('backlog/fetch', async () => {
-  const response = await fetch('/api/backlog', {
-    credentials: 'include',
-  });
+export const fetchBacklog = createAsyncThunk(
+  'backlog/fetch',
+  async ({ page = 1, limit = 50 }: { page?: number; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('page', page.toString());
+    qs.set('limit', limit.toString());
+    const response = await fetch(`/api/backlog?${qs.toString()}`, {
+      credentials: 'include',
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Σφάλμα φόρτωσης backlog');
-  }
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const message = error.error || 'Σφάλμα φόρτωσης backlog';
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('UNAUTHORIZED');
+      }
+      throw new Error(message);
+    }
 
-  const data = await response.json();
-  return data as UserBacklogWithGame[];
-});
+    const data = await response.json();
+    return data as {
+      data: UserBacklogWithGame[];
+      pagination?: { page: number; limit: number; total: number };
+    };
+  },
+);
 
 /**
  * Thunk: Add to backlog
@@ -304,10 +327,26 @@ const backlogSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(fetchBacklog.fulfilled, (state, action: PayloadAction<UserBacklogWithGame[]>) => {
+      .addCase(
+        fetchBacklog.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            data: UserBacklogWithGame[];
+            pagination?: { page: number; limit: number; total: number };
+          }>,
+        ) => {
         state.isLoading = false;
-        state.items = action.payload;
-        state.stats = calculateStats(action.payload);
+          state.items =
+            action.payload.pagination?.page && action.payload.pagination.page > 1
+              ? [...state.items, ...action.payload.data]
+              : action.payload.data;
+          state.stats = calculateStats(state.items);
+          state.pagination = {
+            page: action.payload.pagination?.page ?? 1,
+            limit: action.payload.pagination?.limit ?? state.pagination.limit,
+            total: action.payload.pagination?.total ?? action.payload.data.length,
+          };
       })
       .addCase(fetchBacklog.rejected, (state, action) => {
         state.isLoading = false;

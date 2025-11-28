@@ -9,11 +9,22 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import type { UserGameWithGame, UserGameInsert } from '@/types/database';
 
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 200;
+
 /**
  * GET - Fetch user's backlog with game details
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
+    const limitParam = Number.parseInt(searchParams.get('limit') || '', 10);
+    const limit = Number.isFinite(limitParam)
+      ? Math.min(Math.max(limitParam, 1), MAX_PAGE_SIZE)
+      : DEFAULT_PAGE_SIZE;
+    const offset = (Math.max(page, 1) - 1) * limit;
+
     const supabase = await createRouteHandlerClient();
 
     // Get current session
@@ -29,7 +40,7 @@ export async function GET() {
     const userId = session.user.id;
 
     // Fetch user games with game details (JOIN)
-    const { data: userGames, error: gamesError } = await supabase
+    const { data: userGames, error: gamesError, count: totalCount } = await supabase
       .from('user_games')
       .select(
         `
@@ -65,18 +76,20 @@ export async function GET() {
           release_date,
           release_year,
           metacritic_score,
-          rating,
-          total_guides,
-          average_difficulty,
-          average_hours,
-          created_at,
-          updated_at
+        rating,
+        total_guides,
+        average_difficulty,
+        average_hours,
+        created_at,
+        updated_at
         )
       `,
+        { count: 'exact' },
       )
       .eq('user_id', userId)
       .order('priority', { ascending: false })
-      .order('added_at', { ascending: false });
+      .order('added_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (gamesError) {
       console.error('User games fetch error:', gamesError);
@@ -105,7 +118,14 @@ export async function GET() {
       game: Array.isArray(item.games) ? item.games[0] : item.games,
     }));
 
-    return NextResponse.json(transformedGames);
+    return NextResponse.json({
+      data: transformedGames,
+      pagination: {
+        page: Math.max(page, 1),
+        limit,
+        total: totalCount ?? transformedGames.length,
+      },
+    });
   } catch (error) {
     console.error('Backlog error:', error);
     return NextResponse.json({ error: 'Σφάλμα φόρτωσης backlog' }, { status: 500 });

@@ -58,7 +58,20 @@ export default function GameDetailsPage() {
         if (!gameResponse.ok) throw new Error('Failed to fetch games');
 
         const gamesData: ProcessedGame[] = await gameResponse.json();
-        const matchedGame = gamesData.find(game => game.slug === slug);
+
+        // Match slug even if URL contains diacritics (e.g., röki -> roki)
+        const normalizeSlug = (value: string | null | undefined) =>
+          (value ?? '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
+        const requestedSlug = normalizeSlug(decodeURIComponent(slug));
+
+        const matchedGame =
+          gamesData.find(game => normalizeSlug(game.slug) === requestedSlug) ??
+          gamesData.find(game => normalizeSlug(game.title) === requestedSlug);
 
         if (!matchedGame) throw new Error('Game not found');
 

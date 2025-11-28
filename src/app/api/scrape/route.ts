@@ -33,23 +33,27 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data, error } = await supabase.rpc('fuzzy_search', {
-      search_title: extractedTitle,
-    });
+    try {
+      const { data, error } = await supabase.rpc('fuzzy_search', {
+        search_title: extractedTitle,
+      });
 
-    if (error) {
-      console.error('❌ Fuzzy Match Error:', error);
-      return NextResponse.json({ error: 'Database error during fuzzy search' }, { status: 500 });
-    }
+      if (error) {
+        throw error;
+      }
 
-    if (data.length > 0 && data[0].similarity > 0.8) {
-      return NextResponse.json(
-        {
-          message: `⚠️ Ο οδηγός "${data[0].title}" υπάρχει ήδη στη βάση (πιθανό match)!`,
-          existingData: data[0],
-        },
-        { status: 409 },
-      );
+      if (data.length > 0 && data[0].similarity > 0.8) {
+        return NextResponse.json(
+          {
+            message: `⚠️ Ο οδηγός "${data[0].title}" υπάρχει ήδη στη βάση (πιθανό match)!`,
+            existingData: data[0],
+          },
+          { status: 409 },
+        );
+      }
+    } catch (fuzzyError) {
+      console.error('❌ Fuzzy Match Error:', fuzzyError);
+      // Continue without blocking scrape; just skip fuzzy match if RPC fails
     }
 
     const scrapedData = await scrapePSNGuide(url);

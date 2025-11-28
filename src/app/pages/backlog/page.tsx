@@ -5,7 +5,9 @@
  * PH-31: User Backlog System
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -18,18 +20,23 @@ import {
   selectBacklogStats,
   selectStatusCounts,
   clearBacklogError,
+  updateBacklogItem,
 } from '@/store/slices/backlogSlice';
-import { selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
+import { fetchSession, selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import Skeleton from '@/app/components/ui/Skeleton';
 import { SearchBar } from '@/app/components/ui/SearchBar';
 import BacklogStats from '@/app/components/backlog/BacklogStats';
 import BacklogItem from '@/app/components/backlog/BacklogItem';
+import BacklogListRow from '@/app/components/backlog/BacklogListRow';
+import { UserBacklogWithGame } from '@/types/interfaces';
 import AddToBacklogModal from '@/app/components/backlog/AddToBacklogModal';
+import { setUser } from '@/store/slices/authSlice';
 
 type SortOption = 'priority' | 'added' | 'title' | 'hours' | 'difficulty';
 type StatusTab = 'all' | 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
+type BacklogViewMode = 'grid' | 'list' | 'compact' | 'timeline';
 
 export default function BacklogPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -45,12 +52,20 @@ export default function BacklogPage() {
   const isAuthLoading = useSelector(
     (state: { auth: { isLoading: boolean } }) => state.auth.isLoading,
   );
+  const hasCheckedSession = useRef(false);
 
   const [activeTab, setActiveTab] = useState<StatusTab>('all');
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('priority');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [viewMode, setViewMode] = useState<BacklogViewMode>(() => {
+    if (typeof window === 'undefined') return 'grid';
+    const stored = window.localStorage.getItem('backlogViewMode');
+    return stored === 'list' || stored === 'compact' || stored === 'timeline'
+      ? (stored as BacklogViewMode)
+      : 'grid';
+  });
 
   // Check authentication - wait for auth to initialize before redirecting
   useEffect(() => {
@@ -59,12 +74,28 @@ export default function BacklogPage() {
     }
   }, [isAuthenticated, isAuthLoading, router]);
 
+  // Refresh session once on mount to keep auth state in sync across reloads
+  useEffect(() => {
+    if (hasCheckedSession.current) return;
+    hasCheckedSession.current = true;
+    dispatch(fetchSession());
+  }, [dispatch]);
+
   // Fetch backlog on mount
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchBacklog());
+      dispatch(fetchBacklog({}));
     }
   }, [isAuthenticated, dispatch]);
+
+  // If unauthorized error occurs, force logout so UI/state realigns
+  useEffect(() => {
+    if (!error) return;
+    if (error === 'UNAUTHORIZED') {
+      dispatch(setUser(null));
+      router.push('/pages/auth/login');
+    }
+  }, [error, dispatch, router]);
 
   // Clear error on unmount
   useEffect(() => {
@@ -72,6 +103,12 @@ export default function BacklogPage() {
       dispatch(clearBacklogError());
     };
   }, [dispatch]);
+
+  // Persist view mode (Grid/List)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('backlogViewMode', viewMode);
+  }, [viewMode]);
 
   // Filter and sort items
   const filteredAndSortedItems = backlogItems
@@ -110,6 +147,41 @@ export default function BacklogPage() {
 
       return sortOrder === 'desc' ? comparison : -comparison;
     });
+
+  const timelineGroups = useMemo(() => {
+    const groups = new Map<string, UserBacklogWithGame[]>();
+    filteredAndSortedItems.forEach(item => {
+      const releaseYear =
+        typeof item.game?.release_year === 'number'
+          ? item.game.release_year
+          : item.added_at
+            ? new Date(item.added_at).getFullYear()
+            : null;
+      const key = releaseYear ? releaseYear.toString() : 'Unknown';
+      const list = groups.get(key) ?? [];
+      list.push(item);
+      groups.set(key, list);
+    });
+
+    const sorted = Array.from(groups.entries()).sort((a, b) => {
+      if (a[0] === 'Unknown') return 1;
+      if (b[0] === 'Unknown') return -1;
+      return Number(b[0]) - Number(a[0]);
+    });
+
+    return sorted.map(([year, items]) => ({ year, items }));
+  }, [filteredAndSortedItems]);
+
+  const handleStatusChangeInline = async (
+    id: number,
+    newStatus: 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped',
+  ) => {
+    try {
+      await dispatch(updateBacklogItem({ id, status: newStatus })).unwrap();
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
 
   const toggleSortOrder = () => {
     setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
@@ -297,6 +369,49 @@ export default function BacklogPage() {
             >
               {sortOrder === 'desc' ? <SortDesc size={18} /> : <SortAsc size={18} />}
             </button>
+
+            <div className="flex items-center gap-2 rounded-lg border border-slate-800/70 bg-slate-900/60 px-2 py-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                  viewMode === 'grid'
+                    ? 'bg-emerald-500/20 text-emerald-100'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Grid
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                  viewMode === 'list'
+                    ? 'bg-emerald-500/20 text-emerald-100'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                List
+              </button>
+              <button
+                onClick={() => setViewMode('compact')}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                  viewMode === 'compact'
+                    ? 'bg-emerald-500/20 text-emerald-100'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Compact
+              </button>
+              <button
+                onClick={() => setViewMode('timeline')}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                  viewMode === 'timeline'
+                    ? 'bg-emerald-500/20 text-emerald-100'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Timeline
+              </button>
+            </div>
           </div>
 
           <button
@@ -309,9 +424,7 @@ export default function BacklogPage() {
         </motion.div>
 
         {/* Loading State */}
-        {isLoading && (
-          <Skeleton type="backlog" />
-        )}
+        {isLoading && <Skeleton type="backlog" />}
 
         {/* Empty State */}
         {!isLoading && backlogItems.length === 0 && (
@@ -341,24 +454,87 @@ export default function BacklogPage() {
           </motion.div>
         )}
 
-        {/* Backlog Grid */}
+        {/* Backlog Grid/List */}
         {!isLoading && filteredAndSortedItems.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-          >
-            {filteredAndSortedItems.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * index }}
-              >
-                <BacklogItem item={item} />
-              </motion.div>
-            ))}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+            {viewMode === 'grid' ? (
+              <div className="max-h-[80vh] min-h-[60vh] overflow-y-auto pr-1">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredAndSortedItems.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.05 * index }}
+                    >
+                      <BacklogItem item={item} />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            ) : viewMode === 'timeline' ? (
+              <div className="space-y-4 overflow-x-auto pb-2">
+                <div className="flex min-w-full gap-4">
+                  {timelineGroups.map(group => (
+                    <div
+                      key={group.year}
+                      className="min-w-[240px] rounded-xl border border-slate-800/70 bg-slate-900/60 p-3 shadow-inner shadow-slate-900/30"
+                    >
+                      <div className="flex items-center justify-between text-sm text-slate-200">
+                        <span className="text-base font-semibold text-emerald-200">
+                          {group.year}
+                        </span>
+                        <span className="rounded-full bg-slate-800/70 px-2 py-0.5 text-xs text-slate-300">
+                          {group.items.length}
+                        </span>
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {group.items.map(item => (
+                          <Link
+                            key={item.id}
+                            href={`/pages/guides/${item.game.slug}`}
+                            className="group flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-950/60 p-2 text-xs text-slate-200 transition hover:border-emerald-400/60"
+                          >
+                            <div className="relative h-12 w-12 overflow-hidden rounded-md bg-slate-800">
+                              <Image
+                                src={
+                                  item.game.cover_image ||
+                                  item.game.background_image ||
+                                  '/og-image.png'
+                                }
+                                alt={item.game.title}
+                                fill
+                                className="object-cover"
+                                sizes="48px"
+                              />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate text-[13px] font-semibold group-hover:text-emerald-200">
+                                {item.game.title}
+                              </p>
+                              <p className="truncate text-[11px] text-slate-400">
+                                {item.game.platforms?.slice(0, 2).join(' • ') || 'N/A'}
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="max-h-[80vh] min-h-[60vh] space-y-2 overflow-y-auto pr-1">
+                {filteredAndSortedItems.map(item => (
+                  <BacklogListRow
+                    key={item.id}
+                    item={item}
+                    compact={viewMode === 'compact'}
+                    onStatusChange={status => handleStatusChangeInline(item.id, status)}
+                  />
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 

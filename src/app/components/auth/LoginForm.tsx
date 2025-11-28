@@ -62,7 +62,10 @@ export default function LoginForm() {
     setResetAlert(null);
     const emailValidation = validateEmail(resetEmail);
     if (!emailValidation.isValid) {
-      setResetAlert({ type: 'error', message: emailValidation.error });
+      setResetAlert({
+        type: 'error',
+        message: emailValidation.error || 'Μη έγκυρο email. Δοκίμασε ξανά.',
+      });
       return;
     }
 

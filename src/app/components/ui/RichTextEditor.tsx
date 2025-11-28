@@ -25,9 +25,6 @@ export default function RichTextEditor({
 
   useEffect(() => {
     setMounted(true);
-    if (editorRef.current && !value) {
-      editorRef.current.innerHTML = '';
-    }
   }, []);
 
   useEffect(() => {

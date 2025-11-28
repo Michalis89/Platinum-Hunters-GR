@@ -58,7 +58,7 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
     if (backlogLoading) return;
 
     hasRequestedBacklog.current = true;
-    dispatch(fetchBacklog());
+    dispatch(fetchBacklog({}));
   }, [dispatch, isAuthenticated, backlogItems.length, backlogLoading]);
 
   // Filter games based on search

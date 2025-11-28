@@ -8,7 +8,8 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchSession } from '@/store/slices/authSlice';
+import { fetchSession, setUser } from '@/store/slices/authSlice';
+import { supabase } from '@/lib/supabase-client';
 import type { AppDispatch } from '@/store/store';
 
 export default function AuthInit() {
@@ -17,6 +18,21 @@ export default function AuthInit() {
   // Fetch session on mount
   useEffect(() => {
     dispatch(fetchSession());
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session || event === 'SIGNED_OUT') {
+        dispatch(setUser(null));
+        return;
+      }
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        dispatch(fetchSession());
+      }
+    });
+
+    return () => {
+      subscription?.subscription?.unsubscribe();
+    };
   }, [dispatch]);
 
   // This component doesn't render anything
