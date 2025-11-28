@@ -335,7 +335,7 @@ export default function GameDetailsPage() {
             {guides.length > 0 && hasIntro && (
               <div className="overflow-hidden rounded-xl border border-slate-800/70 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-950/80 p-4 shadow-inner shadow-slate-900/30">
                 <h3 className="text-base font-semibold text-slate-100">Εισαγωγή</h3>
-                <div className="prose prose-invert max-w-none prose-p:my-3 text-slate-200">
+                <div className="prose prose-invert prose-p:my-3 max-w-none text-slate-200">
                   {renderGuideContent(
                     primaryGuide?.content_rich,
                     primaryGuide?.content_html,
@@ -401,5 +401,5 @@ function renderGuideContent(
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>?/gm, '').trim();
+  return html.replaceAll(/<[^>]*>?/gm, '').trim();
 }
