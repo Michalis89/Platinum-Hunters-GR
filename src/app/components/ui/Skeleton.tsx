@@ -16,36 +16,29 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
   if (type === 'guides-list') {
     return (
       <div
-        className={`min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-16 text-slate-100 ${className}`}
+        className={`min-h-screen bg-[var(--hb-bg)] px-4 py-16 text-[var(--hb-text)] ${className}`}
         data-testid="skeleton"
       >
-        <div className="relative mx-auto flex max-w-7xl flex-col gap-10 animate-pulse">
-          {/* Ambient glows */}
-          <div className="pointer-events-none absolute inset-0 opacity-60">
-            <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-blue-600/15 blur-3xl" />
-            <div className="absolute right-0 top-32 h-52 w-52 rounded-full bg-emerald-400/15 blur-3xl" />
-            <div className="absolute bottom-10 left-1/2 h-24 w-48 -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
-          </div>
-
+        <div className="relative mx-auto flex max-w-7xl animate-pulse flex-col gap-10">
           {/* Hero */}
-          <div className="relative overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-900/60 px-6 py-8 shadow-2xl shadow-blue-900/40 backdrop-blur-xl md:px-10">
+          <div className="relative overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-8 shadow-[0_12px_30px_rgba(3,7,18,0.45)] backdrop-blur-xl md:px-10">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-800" />
-                  <div className="h-10 w-36 rounded bg-slate-800/80" />
+                  <div className="h-12 w-12 rounded-2xl border border-[var(--hb-border)] bg-white/5" />
+                  <div className="h-10 w-36 rounded bg-white/10" />
                 </div>
-                <div className="h-4 w-80 max-w-full rounded bg-slate-800/70" />
-                <div className="h-4 w-64 max-w-full rounded bg-slate-800/60" />
+                <div className="h-4 w-80 max-w-full rounded bg-white/10" />
+                <div className="h-4 w-64 max-w-full rounded bg-white/10" />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {Array.from({ length: 3 }).map((_, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-inner shadow-slate-950/30"
+                    className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 shadow-inner shadow-black/20"
                   >
-                    <div className="h-3 w-14 rounded bg-slate-800/60" />
-                    <div className="mt-2 h-6 w-12 rounded bg-slate-800/80" />
+                    <div className="h-3 w-14 rounded bg-white/10" />
+                    <div className="mt-2 h-6 w-12 rounded bg-white/10" />
                   </div>
                 ))}
               </div>
@@ -56,30 +49,30 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
           <div className="relative grid gap-4 lg:grid-cols-[320px,1fr]">
             {/* Filters sidebar */}
             <div className="hidden lg:block">
-              <div className="sticky top-6 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-4 shadow-lg shadow-slate-900/40 backdrop-blur-xl">
-                <div className="h-5 w-32 rounded bg-slate-800/70" />
+              <div className="sticky top-6 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-lg shadow-black/30 backdrop-blur-xl">
+                <div className="h-5 w-32 rounded bg-[var(--hb-card)]" />
                 <div className="mt-4 space-y-3">
-                  <div className="h-10 w-full rounded-lg bg-slate-800/60" />
-                  <div className="h-10 w-full rounded-lg bg-slate-800/60" />
-                  <div className="h-10 w-full rounded-lg bg-slate-800/60" />
-                  <div className="h-10 w-full rounded-lg bg-slate-800/60" />
+                  <div className="h-10 w-full rounded-lg bg-[var(--hb-card)]" />
+                  <div className="h-10 w-full rounded-lg bg-[var(--hb-card)]" />
+                  <div className="h-10 w-full rounded-lg bg-[var(--hb-card)]" />
+                  <div className="h-10 w-full rounded-lg bg-[var(--hb-card)]" />
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
               {/* Mobile filters + controls */}
-              <div className="rounded-2xl border border-slate-800/60 bg-slate-900/60 p-4 shadow-lg shadow-slate-900/40 backdrop-blur-xl">
+              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-lg shadow-black/30 backdrop-blur-xl">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="h-11 w-full rounded-lg bg-slate-800/60 md:max-w-sm" />
+                  <div className="h-11 w-full rounded-lg bg-white/5 md:max-w-sm" />
                   <div className="flex flex-wrap items-center gap-2 md:justify-end">
                     {Array.from({ length: 3 }).map((_, idx) => (
                       <div
                         key={idx}
-                        className="h-11 w-36 rounded-xl border border-slate-800/70 bg-slate-950/70"
+                        className="h-11 w-36 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)]"
                       />
                     ))}
-                    <div className="h-11 w-28 rounded-xl border border-slate-800/70 bg-slate-950/70 lg:hidden" />
+                    <div className="h-11 w-28 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] lg:hidden" />
                   </div>
                 </div>
               </div>
@@ -89,15 +82,15 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
                 {Array.from({ length: 9 }).map((_, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-lg shadow-slate-900/40 backdrop-blur-sm"
+                    className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-lg shadow-black/30 backdrop-blur-sm"
                     data-testid="skeleton-item"
                   >
-                    <div className="h-4 w-5/6 rounded bg-slate-800/80" />
-                    <div className="mt-3 h-4 w-2/3 rounded bg-slate-800/70" />
-                    <div className="mt-3 h-4 w-1/2 rounded bg-slate-800/60" />
+                    <div className="h-4 w-5/6 rounded bg-white/10" />
+                    <div className="mt-3 h-4 w-2/3 rounded bg-white/10" />
+                    <div className="mt-3 h-4 w-1/2 rounded bg-white/10" />
                     <div className="mt-4 flex gap-2">
-                      <div className="h-6 w-16 rounded-full bg-slate-800/60" />
-                      <div className="h-6 w-16 rounded-full bg-slate-800/50" />
+                      <div className="h-6 w-16 rounded-full bg-white/10" />
+                      <div className="h-6 w-16 rounded-full bg-white/10" />
                     </div>
                   </div>
                 ))}
@@ -112,17 +105,17 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
   if (type === 'backlog') {
     return (
       <div
-        className={`min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-24 text-slate-100 ${className}`}
+        className={`min-h-screen bg-[var(--hb-bg)] px-4 py-24 text-[var(--hb-text)] ${className}`}
         data-testid="skeleton"
       >
-        <div className="mx-auto max-w-7xl space-y-8 animate-pulse">
+        <div className="mx-auto max-w-7xl animate-pulse space-y-8">
           {/* Header */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-slate-800/80" />
+              <div className="h-12 w-12 rounded-2xl border border-[var(--hb-border)] bg-white/5" />
               <div className="space-y-2">
-                <div className="h-6 w-40 rounded bg-slate-800/80" />
-                <div className="h-4 w-56 rounded bg-slate-800/60" />
+                <div className="h-6 w-40 rounded bg-white/10" />
+                <div className="h-4 w-56 rounded bg-white/10" />
               </div>
             </div>
           </div>
@@ -132,7 +125,7 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
-                className="h-24 rounded-xl border border-slate-800/70 bg-slate-900/60"
+                className="h-24 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)]"
                 data-testid="skeleton-item"
               />
             ))}
@@ -141,18 +134,21 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
           {/* Tabs */}
           <div className="flex flex-wrap gap-3">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-10 w-28 rounded-lg border border-slate-800 bg-slate-900/60" />
+              <div
+                key={index}
+                className="h-10 w-28 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)]"
+              />
             ))}
           </div>
 
           {/* Search / sort / add */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-1 gap-3">
-              <div className="h-11 flex-1 rounded-lg bg-slate-900/60" />
-              <div className="h-11 w-44 rounded-lg bg-slate-900/60" />
-              <div className="h-11 w-11 rounded-lg bg-slate-900/60" />
+              <div className="h-11 flex-1 rounded-lg bg-white/5" />
+              <div className="h-11 w-44 rounded-lg bg-white/5" />
+              <div className="h-11 w-11 rounded-lg bg-white/5" />
             </div>
-            <div className="h-11 w-52 rounded-lg bg-blue-900/40" />
+            <div className="bg-[var(--hb-primary-strong)]/25 h-11 w-52 rounded-lg" />
           </div>
 
           {/* Grid */}
@@ -160,18 +156,18 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="rounded-xl border border-slate-800/70 bg-slate-900/60 p-4"
+                className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4"
                 data-testid="skeleton-item"
               >
-                <div className="h-5 w-3/4 rounded bg-slate-800/80" />
+                <div className="h-5 w-3/4 rounded bg-white/10" />
                 <div className="mt-3 space-y-2">
-                  <div className="h-4 w-full rounded bg-slate-800/70" />
-                  <div className="h-4 w-5/6 rounded bg-slate-800/60" />
-                  <div className="h-4 w-2/3 rounded bg-slate-800/50" />
+                  <div className="h-4 w-full rounded bg-white/10" />
+                  <div className="h-4 w-5/6 rounded bg-white/10" />
+                  <div className="h-4 w-2/3 rounded bg-white/10" />
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <div className="h-6 w-16 rounded-full bg-slate-800/60" />
-                  <div className="h-6 w-20 rounded-full bg-slate-800/50" />
+                  <div className="h-6 w-16 rounded-full bg-white/10" />
+                  <div className="h-6 w-20 rounded-full bg-white/10" />
                 </div>
               </div>
             ))}
@@ -184,66 +180,120 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
   if (type === 'profile') {
     return (
       <div
-        className={`min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-10 ${className}`}
+        className={`min-h-screen bg-[var(--hb-bg)] py-10 text-[var(--hb-text)] ${className}`}
         data-testid="skeleton"
       >
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 animate-pulse">
-          {/* Header card */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl backdrop-blur">
-            <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex w-full max-w-6xl animate-pulse flex-col gap-8 px-4">
+          {/* Header card with categories */}
+          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_12px_30px_rgba(3,7,18,0.45)] backdrop-blur">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-20 w-20 rounded-full bg-slate-800 md:h-24 md:w-24" />
+                <div className="h-20 w-20 rounded-full border border-[var(--hb-border)] bg-white/5 md:h-24 md:w-24" />
                 <div className="space-y-2">
-                  <div className="h-3 w-40 rounded bg-slate-800/80" />
-                  <div className="h-6 w-56 rounded bg-slate-800/70" />
-                  <div className="h-4 w-32 rounded bg-slate-800/60" />
+                  <div className="h-3 w-32 rounded bg-white/10" />
+                  <div className="h-7 w-48 rounded bg-white/10" />
+                  <div className="h-4 w-28 rounded bg-white/10" />
                   <div className="flex gap-2">
-                    <div className="h-6 w-20 rounded-full bg-slate-800/70" />
-                    <div className="h-6 w-28 rounded-full bg-slate-800/60" />
+                    <div className="h-6 w-20 rounded-full bg-white/10" />
+                    <div className="h-6 w-24 rounded-full bg-white/10" />
                   </div>
                 </div>
               </div>
-              <div className="h-11 w-44 rounded-xl bg-slate-200/50" />
+              <div className="bg-[var(--hb-primary-strong)]/30 h-10 w-10 rounded-full" />
             </div>
-          </div>
-
-          {/* Stats grid */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 backdrop-blur">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-              {Array.from({ length: 6 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="h-20 rounded-xl border border-slate-800/70 bg-slate-950/50"
-                  data-testid="skeleton-item"
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Two columns */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 backdrop-blur">
-              <div className="mb-4 h-5 w-32 rounded bg-slate-800/80" />
-              <div className="space-y-3">
-                <div className="h-4 w-64 rounded bg-slate-800/70" />
-                <div className="h-4 w-56 rounded bg-slate-800/70" />
-                <div className="h-4 w-48 rounded bg-slate-800/70" />
-                <div className="h-4 w-40 rounded bg-slate-800/70" />
-                <div className="h-16 rounded bg-slate-800/60" />
+            <div className="mt-4 space-y-2 border-t border-[var(--hb-border)] pt-4">
+              <div className="h-3 w-40 rounded bg-white/10" />
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="h-7 w-28 rounded-full border border-[var(--hb-border)] bg-white/5"
+                  />
+                ))}
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 backdrop-blur">
-              <div className="mb-4 h-5 w-40 rounded bg-slate-800/80" />
+          </div>
+
+          {/* Personal info full row */}
+          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur">
+            <div className="mb-4 h-5 w-44 rounded bg-white/10" />
+            <div className="grid gap-4 text-sm lg:grid-cols-2">
               <div className="space-y-3">
-                <div className="h-4 w-64 rounded bg-slate-800/70" />
-                <div className="h-4 w-56 rounded bg-slate-800/70" />
-                <div className="h-4 w-52 rounded bg-slate-800/70" />
-                <div className="h-10 w-full rounded bg-slate-800/60" />
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-5 rounded-full bg-white/10" />
+                  <div className="h-4 w-40 rounded bg-white/10" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-5 rounded-full bg-white/10" />
+                  <div className="h-4 w-28 rounded bg-white/10" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-5 rounded-full bg-white/10" />
+                  <div className="h-4 w-32 rounded bg-white/10" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-5 rounded-full bg-white/10" />
+                  <div className="h-4 w-28 rounded bg-white/10" />
+                </div>
+                <div className="h-16 rounded bg-white/5" />
+              </div>
+            </div>
+          </div>
+
+          {/* Favorites + category panel */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur lg:col-span-2">
+              <div className="mb-4 space-y-3">
+                <div className="h-5 w-32 rounded bg-white/10" />
                 <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: 6 }).map((_, chip) => (
+                  {Array.from({ length: 4 }).map((_, idx) => (
                     <div
-                      key={chip}
-                      className="h-6 w-20 rounded-full bg-slate-800/60"
+                      key={idx}
+                      className="h-7 w-28 rounded-full border border-[var(--hb-border)] bg-white/5"
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3"
+                  >
+                    <div className="h-10 w-10 rounded bg-white/5" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-40 rounded bg-white/10" />
+                      <div className="h-3 w-28 rounded bg-white/10" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur">
+              <div className="mb-3 h-5 w-28 rounded bg-white/10" />
+              <div className="space-y-2">
+                <div className="h-4 w-44 rounded bg-white/10" />
+                <div className="h-4 w-36 rounded bg-white/10" />
+              </div>
+              <div className="mt-3 space-y-2">
+                <div className="h-9 w-full rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)]" />
+                <div className="h-9 w-full rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)]" />
+              </div>
+              <div className="mt-4 space-y-3 border-t border-[var(--hb-border)] pt-4">
+                <div className="h-3 w-32 rounded bg-white/10" />
+                <div className="space-y-2">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div key={idx} className="h-4 w-36 rounded bg-white/10" />
+                  ))}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {Array.from({ length: 6 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="h-14 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)]"
                     />
                   ))}
                 </div>
@@ -252,21 +302,43 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
           </div>
 
           {/* Account info */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 backdrop-blur">
-            <div className="mb-4 h-5 w-44 rounded bg-slate-800/80" />
+          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur">
+            <div className="mb-4 h-5 w-44 rounded bg-white/10" />
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="h-4 w-32 rounded bg-slate-800/70" />
-                <div className="h-4 w-24 rounded bg-slate-800/60" />
+                <div className="h-4 w-32 rounded bg-white/10" />
+                <div className="h-4 w-24 rounded bg-white/10" />
               </div>
               <div className="flex items-center justify-between">
-                <div className="h-4 w-40 rounded bg-slate-800/70" />
-                <div className="h-4 w-28 rounded bg-slate-800/60" />
+                <div className="h-4 w-40 rounded bg-white/10" />
+                <div className="h-4 w-28 rounded bg-white/10" />
               </div>
               <div className="flex items-center justify-between">
-                <div className="h-4 w-48 rounded bg-slate-800/70" />
-                <div className="h-4 w-20 rounded bg-slate-800/60" />
+                <div className="h-4 w-48 rounded bg-white/10" />
+                <div className="h-4 w-20 rounded bg-white/10" />
               </div>
+            </div>
+          </div>
+
+          {/* Activity feed */}
+          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[0_12px_30px_rgba(3,7,18,0.45)]">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="h-5 w-32 rounded bg-white/10" />
+              <div className="h-3 w-12 rounded bg-white/10" />
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-start gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3"
+                >
+                  <div className="h-8 w-8 rounded-full bg-white/5" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-40 rounded bg-white/10" />
+                    <div className="h-3 w-24 rounded bg-white/10" />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -276,53 +348,64 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
 
   if (type === 'profile-edit') {
     return (
-      <div
-        className={`min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-10 ${className}`}
-        data-testid="skeleton"
-      >
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 animate-pulse">
+      <div className={`min-h-screen bg-[var(--hb-bg)] py-10 ${className}`} data-testid="skeleton">
+        <div className="mx-auto flex w-full max-w-4xl animate-pulse flex-col gap-6 px-4">
+          {/* Header */}
           <div className="space-y-2">
-            <div className="h-3 w-52 rounded bg-slate-800/70" />
-            <div className="h-7 w-72 rounded bg-slate-800/80" />
+            <div className="h-3 w-44 rounded bg-white/10" />
+            <div className="h-7 w-64 rounded bg-white/10" />
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 backdrop-blur">
-            <div className="mb-4 h-5 w-40 rounded bg-slate-800/80" />
+          {/* Personal info */}
+          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur">
+            <div className="mb-4 h-5 w-40 rounded bg-white/10" />
             <div className="space-y-3">
-              <div className="h-11 w-full rounded-lg bg-slate-800/60" />
-              <div className="h-11 w-full rounded-lg bg-slate-800/60" />
-              <div className="h-11 w-full rounded-lg bg-slate-800/60" />
-              <div className="h-24 w-full rounded-lg bg-slate-800/50" />
-              <div className="h-4 w-32 rounded bg-slate-800/60" />
+              <div className="h-11 w-full rounded-lg bg-white/5" />
+              <div className="h-11 w-full rounded-lg bg-white/5" />
+              <div className="h-11 w-full rounded-lg bg-white/5" />
+              <div className="h-20 w-full rounded-lg bg-white/5" />
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 backdrop-blur">
-            <div className="mb-4 h-5 w-44 rounded bg-slate-800/80" />
-            <div className="grid gap-3 md:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, idx) => (
-                <div key={idx} className="h-11 w-full rounded-lg bg-slate-800/60" />
+          {/* Categories chips */}
+          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur">
+            <div className="mb-3 h-5 w-40 rounded bg-white/10" />
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div key={idx} className="h-8 w-24 rounded-full bg-white/5" />
               ))}
             </div>
-            <div className="mt-4 space-y-3">
-              <div className="h-11 w-full rounded-lg bg-slate-800/60" />
-              <div className="space-y-2">
-                <div className="h-4 w-32 rounded bg-slate-800/60" />
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-                  {Array.from({ length: 8 }).map((_, idx) => (
-                    <div key={idx} className="h-8 rounded-lg bg-slate-800/60" />
+          </div>
+
+          {/* Three section cards placeholder */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur"
+              >
+                <div className="mb-3 h-5 w-36 rounded bg-white/10" />
+                <div className="space-y-2">
+                  <div className="h-4 w-3/4 rounded bg-white/10" />
+                  <div className="h-4 w-2/3 rounded bg-white/10" />
+                  <div className="h-4 w-1/2 rounded bg-white/10" />
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {Array.from({ length: 8 }).map((__, chip) => (
+                    <div key={chip} className="h-7 w-20 rounded-full bg-white/5" />
                   ))}
                 </div>
               </div>
-              <div className="h-11 w-full rounded-lg bg-slate-800/60" />
-            </div>
+            ))}
           </div>
 
+          {/* Save buttons */}
           <div className="flex justify-end gap-3">
-            <div className="h-11 w-32 rounded-xl bg-slate-200/40" />
-            <div className="h-11 w-32 rounded-xl bg-slate-800/60" />
+            <div className="h-11 w-32 rounded-xl bg-white/15" />
+            <div className="h-11 w-32 rounded-xl bg-white/5" />
           </div>
 
+          {/* Danger zone */}
           <div className="rounded-2xl border-2 border-red-900/60 bg-red-950/25 p-6 backdrop-blur">
             <div className="mb-3 h-5 w-32 rounded bg-red-900/60" />
             <div className="space-y-2">
@@ -339,95 +422,95 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
   if (type === 'guide-detail') {
     return (
       <div
-        className={`min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,_#1e293b,_#020617)] px-4 py-16 text-slate-100 ${className}`}
+        className={`min-h-screen bg-[var(--hb-bg)] px-4 py-16 text-[var(--hb-text)] ${className}`}
         data-testid="skeleton"
       >
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
           {/* Hero */}
-          <div className="flex animate-pulse flex-col gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl backdrop-blur-sm sm:flex-row sm:items-center">
+          <div className="flex animate-pulse flex-col gap-6 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl shadow-black/30 backdrop-blur-sm sm:flex-row sm:items-center">
             <div className="flex justify-center sm:block sm:w-48">
-              <div className="h-48 w-40 rounded-xl bg-slate-800 sm:h-56 sm:w-44" />
+              <div className="h-48 w-40 rounded-xl bg-[var(--hb-card)] sm:h-56 sm:w-44" />
             </div>
             <div className="flex flex-1 flex-col gap-4">
-              <div className="h-6 w-40 rounded bg-slate-800/80" />
-              <div className="h-8 w-3/4 rounded bg-slate-800/80" />
+              <div className="h-6 w-40 rounded bg-[var(--hb-card)]" />
+              <div className="h-8 w-3/4 rounded bg-[var(--hb-card)]" />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="h-10 rounded-xl bg-slate-800/70" />
-                <div className="h-10 rounded-xl bg-slate-800/70" />
-                <div className="h-10 rounded-xl bg-slate-800/70" />
+                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
               </div>
               <div className="flex flex-wrap gap-3">
-                <div className="h-6 w-28 rounded-full bg-slate-800/80" />
-                <div className="h-6 w-32 rounded-full bg-slate-800/80" />
-                <div className="h-6 w-24 rounded-full bg-slate-800/80" />
+                <div className="h-6 w-28 rounded-full bg-[var(--hb-card)]" />
+                <div className="h-6 w-32 rounded-full bg-[var(--hb-card)]" />
+                <div className="h-6 w-24 rounded-full bg-[var(--hb-card)]" />
               </div>
             </div>
           </div>
 
           {/* Info + trophies */}
-          <div className="grid animate-pulse gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl backdrop-blur-sm md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="grid animate-pulse gap-6 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-xl shadow-black/30 backdrop-blur-sm md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded-full bg-slate-800/80" />
-                <div className="h-5 w-36 rounded bg-slate-800/80" />
+                <div className="h-5 w-5 rounded-full bg-[var(--hb-card)]" />
+                <div className="h-5 w-36 rounded bg-[var(--hb-card)]" />
               </div>
-              <div className="space-y-3 rounded-xl border border-slate-800/80 bg-slate-950/40 p-4">
-                <div className="h-4 w-3/4 rounded bg-slate-800" />
-                <div className="h-4 w-2/3 rounded bg-slate-800/90" />
-                <div className="h-4 w-5/6 rounded bg-slate-800/70" />
-                <div className="h-4 w-1/2 rounded bg-slate-800/70" />
-                <div className="h-4 w-4/6 rounded bg-slate-800/80" />
+              <div className="space-y-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
+                <div className="h-4 w-3/4 rounded bg-[var(--hb-panel)]" />
+                <div className="h-4 w-2/3 rounded bg-[var(--hb-panel)]" />
+                <div className="h-4 w-5/6 rounded bg-[var(--hb-panel)]" />
+                <div className="h-4 w-1/2 rounded bg-[var(--hb-panel)]" />
+                <div className="h-4 w-4/6 rounded bg-[var(--hb-panel)]" />
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <div className="h-6 w-20 rounded-full bg-slate-800/80" />
-                  <div className="h-6 w-24 rounded-full bg-slate-800/70" />
-                  <div className="h-6 w-16 rounded-full bg-slate-800/60" />
+                  <div className="h-6 w-20 rounded-full bg-[var(--hb-panel)]" />
+                  <div className="h-6 w-24 rounded-full bg-[var(--hb-panel)]" />
+                  <div className="h-6 w-16 rounded-full bg-[var(--hb-panel)]" />
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 rounded-xl border border-slate-800/80 bg-slate-950/40 p-4">
-              <div className="h-5 w-32 rounded bg-slate-800/80" />
+            <div className="flex flex-col gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
+              <div className="h-5 w-32 rounded bg-[var(--hb-panel)]" />
               <div className="space-y-3 pt-1">
-                <div className="h-4 w-full rounded bg-slate-800" />
-                <div className="h-4 w-5/6 rounded bg-slate-800/90" />
-                <div className="h-4 w-4/6 rounded bg-slate-800/80" />
-                <div className="h-4 w-3/4 rounded bg-slate-800/70" />
+                <div className="h-4 w-full rounded bg-[var(--hb-panel)]" />
+                <div className="h-4 w-5/6 rounded bg-[var(--hb-panel)]" />
+                <div className="h-4 w-4/6 rounded bg-[var(--hb-panel)]" />
+                <div className="h-4 w-3/4 rounded bg-[var(--hb-panel)]" />
               </div>
             </div>
           </div>
 
           {/* Guides */}
-          <div className="space-y-4 animate-pulse rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl backdrop-blur-sm">
+          <div className="animate-pulse space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-xl shadow-black/30 backdrop-blur-sm">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <div className="h-5 w-24 rounded bg-slate-800/80" />
-                <div className="h-3 w-40 rounded bg-slate-800/60" />
+                <div className="h-5 w-24 rounded bg-[var(--hb-card)]" />
+                <div className="h-3 w-40 rounded bg-[var(--hb-card)]" />
               </div>
-              <div className="h-4 w-28 rounded bg-slate-800/60" />
+              <div className="h-4 w-28 rounded bg-[var(--hb-card)]" />
             </div>
 
-            <div className="space-y-3 rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 shadow-inner shadow-slate-900/40">
-              <div className="h-4 w-20 rounded bg-slate-800/80" />
+            <div className="space-y-3 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 shadow-inner shadow-black/20">
+              <div className="h-4 w-20 rounded bg-[var(--hb-panel)]" />
               <div className="space-y-2">
-                <div className="h-3 w-full rounded bg-slate-800/70" />
-                <div className="h-3 w-5/6 rounded bg-slate-800/60" />
-                <div className="h-3 w-2/3 rounded bg-slate-800/50" />
+                <div className="h-3 w-full rounded bg-[var(--hb-panel)]" />
+                <div className="h-3 w-5/6 rounded bg-[var(--hb-panel)]" />
+                <div className="h-3 w-2/3 rounded bg-[var(--hb-panel)]" />
               </div>
             </div>
 
-            <div className="space-y-4 rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 shadow-inner shadow-slate-900/40">
+            <div className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 shadow-inner shadow-black/20">
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-950/50 p-4 shadow"
+                  className="flex flex-col gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow"
                   data-testid="skeleton-item"
                 >
-                  <div className="h-4 w-2/3 rounded bg-slate-800/80" />
+                  <div className="h-4 w-2/3 rounded bg-[var(--hb-card)]" />
                   <div className="space-y-2">
-                    <div className="h-3 w-full rounded bg-slate-800/70" />
-                    <div className="h-3 w-5/6 rounded bg-slate-800/70" />
-                    <div className="h-3 w-3/4 rounded bg-slate-800/60" />
-                    <div className="h-3 w-2/3 rounded bg-slate-800/50" />
+                    <div className="h-3 w-full rounded bg-[var(--hb-card)]" />
+                    <div className="h-3 w-5/6 rounded bg-[var(--hb-card)]" />
+                    <div className="h-3 w-3/4 rounded bg-[var(--hb-card)]" />
+                    <div className="h-3 w-2/3 rounded bg-[var(--hb-card)]" />
                   </div>
                 </div>
               ))}

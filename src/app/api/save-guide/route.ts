@@ -1,5 +1,22 @@
 import { NextResponse } from 'next/server';
-import supabase from '@/lib/db';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+
+async function insertActivity(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+  payload: Record<string, unknown>,
+) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('activity_log') as any).insert({
+      user_id: userId,
+      type: 'guide_created',
+      payload,
+    });
+  } catch (err) {
+    console.warn('⚠️ Activity insert (guide_created) failed:', err);
+  }
+}
 
 interface ScrapedStep {
   title: string;
@@ -11,10 +28,25 @@ interface ScrapedStep {
 
 export async function POST(req: Request) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = (await createRouteHandlerClient()) as any;
+
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
+    }
+
     const {
       title,
       platform,
       gameImage,
+      release_year,
+      rating,
+      metacritic,
       trophies,
       difficulty,
       hours,
@@ -23,6 +55,7 @@ export async function POST(req: Request) {
       content_rich: guideContentRich,
       content_html: guideContentHtml,
       description,
+      background_image,
     } = await req.json();
 
     // Create slug from title
@@ -56,10 +89,14 @@ export async function POST(req: Request) {
           title,
           slug,
           cover_image: gameImage,
+          background_image: background_image ?? gameImage,
           trophy_platinum: parseInt(trophies?.Platinum) || 0,
           trophy_gold: parseInt(trophies?.Gold) || 0,
           trophy_silver: parseInt(trophies?.Silver) || 0,
           trophy_bronze: parseInt(trophies?.Bronze) || 0,
+          release_year: release_year ?? null,
+          rating: rating ?? null,
+          metacritic_score: metacritic ?? null,
         },
       ])
       .select('*')
@@ -146,6 +183,24 @@ export async function POST(req: Request) {
         console.log(`✅ Αποθηκεύτηκαν ${steps.length} steps`);
       }
     }
+
+    // Activity log for guide_created
+    const profile = await supabase
+      .from('users')
+      .select('username, display_name, avatar_url')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    await insertActivity(supabase, session.user.id, {
+      guideId: guide.id,
+      guideTitle: guide.title,
+      gameId: game.id,
+      gameTitle: game.title,
+      gameSlug: game.slug,
+      username: profile.data?.username,
+      display_name: profile.data?.display_name,
+      avatar_url: profile.data?.avatar_url,
+    });
 
     return NextResponse.json({
       message: '✅ Ο οδηγός αποθηκεύτηκε!',

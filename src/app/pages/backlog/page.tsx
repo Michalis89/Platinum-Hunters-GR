@@ -5,13 +5,13 @@
  * PH-31: User Backlog System
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ListChecks, Plus, Search, SortAsc, SortDesc } from 'lucide-react';
+import { ListChecks, Plus, Search, SortAsc, SortDesc, Loader2 } from 'lucide-react';
 import {
   fetchBacklog,
   selectBacklogItems,
@@ -22,7 +22,7 @@ import {
   clearBacklogError,
   updateBacklogItem,
 } from '@/store/slices/backlogSlice';
-import { fetchSession, selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
+import { selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import Skeleton from '@/app/components/ui/Skeleton';
@@ -33,14 +33,34 @@ import BacklogListRow from '@/app/components/backlog/BacklogListRow';
 import { UserBacklogWithGame } from '@/types/interfaces';
 import AddToBacklogModal from '@/app/components/backlog/AddToBacklogModal';
 import { setUser } from '@/store/slices/authSlice';
+import CategoryLibrary, { isMediaCategory } from '@/app/components/backlog/CategoryLibrary';
 
 type SortOption = 'priority' | 'added' | 'title' | 'hours' | 'difficulty';
 type StatusTab = 'all' | 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
 type BacklogViewMode = 'grid' | 'list' | 'compact' | 'timeline';
 
+function BacklogFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
+      <Loader2 className="h-8 w-8 animate-spin text-[var(--hb-primary)]" />
+    </div>
+  );
+}
+
 export default function BacklogPage() {
+  return (
+    <Suspense fallback={<BacklogFallback />}>
+      <BacklogPageContent />
+    </Suspense>
+  );
+}
+
+function BacklogPageContent() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get('category');
+  const mediaCategory = isMediaCategory(categoryParam) ? categoryParam : null;
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
@@ -78,15 +98,16 @@ export default function BacklogPage() {
   useEffect(() => {
     if (hasCheckedSession.current) return;
     hasCheckedSession.current = true;
-    dispatch(fetchSession());
   }, [dispatch]);
 
   // Fetch backlog on mount
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchBacklog({}));
+      if (!mediaCategory) {
+        dispatch(fetchBacklog({}));
+      }
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, mediaCategory]);
 
   // If unauthorized error occurs, force logout so UI/state realigns
   useEffect(() => {
@@ -196,8 +217,12 @@ export default function BacklogPage() {
     return null; // Will redirect
   }
 
+  if (mediaCategory) {
+    return <CategoryLibrary category={mediaCategory} username={user?.username} />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-24 text-slate-100">
+    <div className="min-h-screen bg-[var(--hb-bg)] px-4 py-24 text-[var(--hb-text)]">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <motion.div
@@ -206,12 +231,12 @@ export default function BacklogPage() {
           className="mb-8"
         >
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-500 via-sky-400 to-emerald-400 shadow-lg shadow-blue-500/40">
-              <ListChecks className="h-6 w-6 text-slate-950" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-lg shadow-[rgba(229,9,20,0.35)]">
+              <ListChecks className="h-6 w-6 text-[var(--hb-bg)]" />
             </div>
             <div>
               <h1 className="text-4xl font-bold tracking-tight">Το Backlog μου</h1>
-              <p className="text-slate-400">
+              <p className="text-[var(--hb-muted)]">
                 {user?.username ? `${user.username} • ` : ''}
                 {stats.totalGames} παιχνίδια • ~{Math.round(stats.totalHours)} ώρες
               </p>
@@ -255,12 +280,12 @@ export default function BacklogPage() {
                 onClick={() => setActiveTab('all')}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition ${
                   activeTab === 'all'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/40'
-                    : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)]'
+                    : 'hover:border-[var(--hb-primary-strong)]/60 border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)]'
                 }`}
               >
                 Όλα
-                <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
+                <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs">
                   {backlogItems.length}
                 </span>
               </button>
@@ -268,12 +293,12 @@ export default function BacklogPage() {
                 onClick={() => setActiveTab('to_play')}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition ${
                   activeTab === 'to_play'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/40'
-                    : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)]'
+                    : 'hover:border-[var(--hb-primary-strong)]/60 border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)]'
                 }`}
               >
                 Backlog
-                <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
+                <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs">
                   {statusCounts.to_play || 0}
                 </span>
               </button>
@@ -281,12 +306,12 @@ export default function BacklogPage() {
                 onClick={() => setActiveTab('playing')}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition ${
                   activeTab === 'playing'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/40'
-                    : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)]'
+                    : 'hover:border-[var(--hb-primary-strong)]/60 border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)]'
                 }`}
               >
                 Παίζω
-                <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
+                <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs">
                   {statusCounts.playing || 0}
                 </span>
               </button>
@@ -294,12 +319,12 @@ export default function BacklogPage() {
                 onClick={() => setActiveTab('completed')}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition ${
                   activeTab === 'completed'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/40'
-                    : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)]'
+                    : 'hover:border-[var(--hb-primary-strong)]/60 border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)]'
                 }`}
               >
                 Ολοκληρώθηκε
-                <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
+                <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs">
                   {statusCounts.completed || 0}
                 </span>
               </button>
@@ -307,12 +332,12 @@ export default function BacklogPage() {
                 onClick={() => setActiveTab('platinumed')}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition ${
                   activeTab === 'platinumed'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/40'
-                    : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)]'
+                    : 'hover:border-[var(--hb-primary-strong)]/60 border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)]'
                 }`}
               >
                 Πλατίνα
-                <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
+                <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs">
                   {statusCounts.platinumed || 0}
                 </span>
               </button>
@@ -320,12 +345,12 @@ export default function BacklogPage() {
                 onClick={() => setActiveTab('dropped')}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition ${
                   activeTab === 'dropped'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/40'
-                    : 'border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)]'
+                    : 'hover:border-[var(--hb-primary-strong)]/60 border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)]'
                 }`}
               >
                 Παρατημένο
-                <span className="rounded-full bg-slate-900/50 px-2 py-0.5 text-xs">
+                <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs">
                   {statusCounts.dropped || 0}
                 </span>
               </button>
@@ -353,7 +378,7 @@ export default function BacklogPage() {
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as SortOption)}
-              className="rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800 focus:border-blue-500 focus:outline-none"
+              className="hover:border-[var(--hb-primary-strong)]/60 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none"
             >
               <option value="priority">Προτεραιότητα</option>
               <option value="added">Ημερομηνία Προσθήκης</option>
@@ -364,19 +389,19 @@ export default function BacklogPage() {
 
             <button
               onClick={toggleSortOrder}
-              className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
+              className="hover:border-[var(--hb-primary-strong)]/60 flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-sm text-[var(--hb-text)] transition"
               title={sortOrder === 'desc' ? 'Φθίνουσα' : 'Αύξουσα'}
             >
               {sortOrder === 'desc' ? <SortDesc size={18} /> : <SortAsc size={18} />}
             </button>
 
-            <div className="flex items-center gap-2 rounded-lg border border-slate-800/70 bg-slate-900/60 px-2 py-1">
+            <div className="flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-2 py-1">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
                   viewMode === 'grid'
-                    ? 'bg-emerald-500/20 text-emerald-100'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[var(--hb-primary-strong)]/15 text-[var(--hb-headline)]'
+                    : 'text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                 }`}
               >
                 Grid
@@ -385,8 +410,8 @@ export default function BacklogPage() {
                 onClick={() => setViewMode('list')}
                 className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
                   viewMode === 'list'
-                    ? 'bg-emerald-500/20 text-emerald-100'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[var(--hb-primary-strong)]/15 text-[var(--hb-headline)]'
+                    : 'text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                 }`}
               >
                 List
@@ -395,8 +420,8 @@ export default function BacklogPage() {
                 onClick={() => setViewMode('compact')}
                 className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
                   viewMode === 'compact'
-                    ? 'bg-emerald-500/20 text-emerald-100'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[var(--hb-primary-strong)]/15 text-[var(--hb-headline)]'
+                    : 'text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                 }`}
               >
                 Compact
@@ -405,8 +430,8 @@ export default function BacklogPage() {
                 onClick={() => setViewMode('timeline')}
                 className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
                   viewMode === 'timeline'
-                    ? 'bg-emerald-500/20 text-emerald-100'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[var(--hb-primary-strong)]/15 text-[var(--hb-headline)]'
+                    : 'text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                 }`}
               >
                 Timeline
@@ -416,7 +441,7 @@ export default function BacklogPage() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2 font-medium text-white shadow-md shadow-blue-500/40 transition hover:bg-blue-500"
+            className="flex items-center justify-center gap-2 rounded-lg bg-[var(--hb-primary-strong)] px-6 py-2 font-medium text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)] transition hover:brightness-110"
           >
             <Plus size={18} />
             Προσθήκη Παιχνιδιού
@@ -432,21 +457,21 @@ export default function BacklogPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-700 bg-slate-900/30 py-20 text-center"
+            className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[var(--hb-border)] bg-[var(--hb-panel)] py-20 text-center"
           >
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-800">
-              <ListChecks className="h-10 w-10 text-slate-600" />
+            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--hb-card)]">
+              <ListChecks className="h-10 w-10 text-[var(--hb-muted)]" />
             </div>
-            <h3 className="mb-2 text-2xl font-semibold text-slate-300">
+            <h3 className="mb-2 text-2xl font-semibold text-[var(--hb-headline)]">
               Το backlog σου είναι άδειο
             </h3>
-            <p className="mb-6 max-w-md text-slate-400">
+            <p className="mb-6 max-w-md text-[var(--hb-muted)]">
               Πρόσθεσε παιχνίδια που θέλεις να παίξεις και οργάνωσε το backlog σου με
               προτεραιότητες!
             </p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white shadow-md shadow-blue-500/40 transition hover:bg-blue-500"
+              className="flex items-center gap-2 rounded-lg bg-[var(--hb-primary-strong)] px-6 py-3 font-medium text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)] transition hover:brightness-110"
             >
               <Plus size={20} />
               Πρόσθεσε το πρώτο σου παιχνίδι
@@ -458,7 +483,7 @@ export default function BacklogPage() {
         {!isLoading && filteredAndSortedItems.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
             {viewMode === 'grid' ? (
-              <div className="max-h-[80vh] min-h-[60vh] overflow-y-auto pr-1">
+              <div className="max-h-[90vh] min-h-[70vh] overflow-y-auto pr-1">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {filteredAndSortedItems.map((item, index) => (
                     <motion.div
@@ -478,13 +503,13 @@ export default function BacklogPage() {
                   {timelineGroups.map(group => (
                     <div
                       key={group.year}
-                      className="min-w-[240px] rounded-xl border border-slate-800/70 bg-slate-900/60 p-3 shadow-inner shadow-slate-900/30"
+                      className="min-w-[240px] rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 shadow-inner shadow-black/30"
                     >
-                      <div className="flex items-center justify-between text-sm text-slate-200">
-                        <span className="text-base font-semibold text-emerald-200">
+                      <div className="flex items-center justify-between text-sm text-[var(--hb-text)]">
+                        <span className="text-base font-semibold text-[var(--hb-headline)]">
                           {group.year}
                         </span>
-                        <span className="rounded-full bg-slate-800/70 px-2 py-0.5 text-xs text-slate-300">
+                        <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs text-[var(--hb-muted)]">
                           {group.items.length}
                         </span>
                       </div>
@@ -493,9 +518,9 @@ export default function BacklogPage() {
                           <Link
                             key={item.id}
                             href={`/pages/guides/${item.game.slug}`}
-                            className="group flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-950/60 p-2 text-xs text-slate-200 transition hover:border-emerald-400/60"
+                            className="hover:border-[var(--hb-primary-strong)]/60 group flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] p-2 text-xs text-[var(--hb-text)] transition"
                           >
-                            <div className="relative h-12 w-12 overflow-hidden rounded-md bg-slate-800">
+                            <div className="relative h-12 w-12 overflow-hidden rounded-md bg-[var(--hb-panel)]">
                               <Image
                                 src={
                                   item.game.cover_image ||
@@ -509,10 +534,10 @@ export default function BacklogPage() {
                               />
                             </div>
                             <div className="min-w-0">
-                              <p className="truncate text-[13px] font-semibold group-hover:text-emerald-200">
+                              <p className="truncate text-[13px] font-semibold group-hover:text-[var(--hb-headline)]">
                                 {item.game.title}
                               </p>
-                              <p className="truncate text-[11px] text-slate-400">
+                              <p className="truncate text-[11px] text-[var(--hb-muted)]">
                                 {item.game.platforms?.slice(0, 2).join(' • ') || 'N/A'}
                               </p>
                             </div>
@@ -543,11 +568,13 @@ export default function BacklogPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center rounded-2xl bg-slate-900/30 py-16 text-center"
+            className="flex flex-col items-center justify-center rounded-2xl bg-[var(--hb-panel)] py-16 text-center"
           >
-            <Search className="mb-4 h-12 w-12 text-slate-600" />
-            <h3 className="mb-2 text-xl font-semibold text-slate-300">Δεν βρέθηκαν αποτελέσματα</h3>
-            <p className="text-slate-400">Δοκίμασε άλλο όρο αναζήτησης ή φίλτρα</p>
+            <Search className="mb-4 h-12 w-12 text-[var(--hb-muted)]" />
+            <h3 className="mb-2 text-xl font-semibold text-[var(--hb-headline)]">
+              Δεν βρέθηκαν αποτελέσματα
+            </h3>
+            <p className="text-[var(--hb-muted)]">Δοκίμασε άλλο όρο αναζήτησης ή φίλτρα</p>
           </motion.div>
         )}
       </div>

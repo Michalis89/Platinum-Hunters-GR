@@ -22,7 +22,7 @@ export default function DifficultyFilter() {
       value={difficulty ?? 0}
       onChange={handleSelect}
       label="Δυσκολία"
-      icon={<Flame className="h-4 w-4 text-sky-300" />}
+      icon={<Flame className="h-4 w-4 text-[var(--hb-primary-strong)]" />}
     />
   );
 }

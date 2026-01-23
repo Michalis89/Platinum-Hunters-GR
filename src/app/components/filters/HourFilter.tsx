@@ -10,9 +10,11 @@ interface Props {
 export default function HourFilter({ value, onChange, min, max }: Props) {
   return (
     <fieldset className="flex flex-col items-start gap-2 border-0 p-0">
-      <legend className="flex items-center gap-2 text-sm font-medium text-slate-200">
-        <Hourglass className="h-4 w-4 text-sky-300" />
-        Ώρες: <span className="text-sky-300">{value[0]}</span> - <span className="text-sky-300">{value[1]}</span>
+      <legend className="flex items-center gap-2 text-sm font-medium text-[var(--hb-text)]">
+        <Hourglass className="h-4 w-4 text-[var(--hb-primary-strong)]" />
+        Ώρες:{' '}
+        <span className="text-[var(--hb-primary-strong)]">{value[0]}</span> -{' '}
+        <span className="text-[var(--hb-primary-strong)]">{value[1]}</span>
       </legend>
       <input
         type="range"
@@ -20,7 +22,7 @@ export default function HourFilter({ value, onChange, min, max }: Props) {
         max={max}
         value={value[0]}
         onChange={e => onChange([Number(e.target.value), value[1]])}
-        className="w-full accent-sky-400"
+        className="w-full accent-[var(--hb-primary-strong)]"
         aria-label={`Ελάχιστες ώρες: ${value[0]}`}
         aria-valuemin={min}
         aria-valuemax={max}
@@ -33,7 +35,7 @@ export default function HourFilter({ value, onChange, min, max }: Props) {
         max={max}
         value={value[1]}
         onChange={e => onChange([value[0], Number(e.target.value)])}
-        className="w-full accent-sky-400"
+        className="w-full accent-[var(--hb-primary-strong)]"
         aria-label={`Μέγιστες ώρες: ${value[1]}`}
         aria-valuemin={min}
         aria-valuemax={max}

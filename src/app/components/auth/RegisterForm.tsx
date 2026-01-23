@@ -7,7 +7,6 @@ import { Eye, EyeOff, UserPlus, ArrowRight, ArrowLeft, Check } from 'lucide-reac
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Input } from '@/app/components/ui/Input';
-import { Button } from '@/app/components/ui/Button';
 import { Select } from '@/app/components/ui/Select';
 import { Textarea } from '@/app/components/ui/Textarea';
 import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
@@ -27,6 +26,7 @@ import {
 import type { RegisterData } from '@/types/auth';
 import { fetchSession } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
+import Button from '../ui/Button';
 
 const COUNTRIES = ['GR', 'US', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'Other'];
 const PLATFORMS = ['PS5', 'PS4', 'PS3', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC'];
@@ -53,6 +53,10 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const inputClasses =
+    'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
+  const selectClasses =
+    'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] hover:border-[var(--hb-primary-strong)]/70 focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
 
   const [formData, setFormData] = useState<Partial<RegisterData>>({
     email: '',
@@ -249,23 +253,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const progress = (currentStep / 3) * 100;
 
   return (
-    <Card className="border border-slate-800/60 bg-slate-900/70 shadow-xl shadow-emerald-900/30 backdrop-blur-xl">
-      <CardHeader className="border-slate-800/70">
-        <CardTitle className="flex items-center justify-between text-white">
+    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_22px_70px_rgba(0,0,0,0.65)] backdrop-blur">
+      <CardHeader className="border-[var(--hb-border)]">
+        <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
           <span className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 via-sky-400 to-blue-500 text-slate-950 shadow-lg shadow-emerald-400/30">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[0_10px_35px_rgba(229,9,20,0.35)]">
               <UserPlus className="h-5 w-5" />
             </div>
             Εγγραφή - Βήμα {currentStep} από 3
           </span>
-          <span className="rounded-full bg-slate-800/80 px-3 py-1 text-xs text-slate-300">
-            Profile setup
-          </span>
         </CardTitle>
         {/* Progress Bar */}
-        <div className="mt-4 h-2 w-full rounded-full bg-slate-800">
+        <div className="mt-4 h-2 w-full rounded-full bg-white/5">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-sky-400 to-blue-500"
+            className="h-full rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
@@ -295,6 +296,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="example@email.com"
                   error={!!errors.email}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.email} />
@@ -309,6 +311,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="gamer123"
                   error={!!errors.username}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.username} />
@@ -324,12 +327,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     onChange={handleChange}
                     placeholder="••••••••"
                     error={!!errors.password}
+                    className={inputClasses}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-9 text-gray-400 hover:text-white"
+                    className="absolute right-3 top-9 text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -372,12 +376,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     onChange={handleChange}
                     placeholder="••••••••"
                     error={!!errors.password_confirm}
+                    className={inputClasses}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                    className="absolute right-3 top-9 text-gray-400 hover:text-white"
+                    className="absolute right-3 top-9 text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
                   >
                     {showPasswordConfirm ? (
                       <EyeOff className="h-5 w-5" />
@@ -390,26 +395,26 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               </div>
 
               <div>
-                <label className="flex items-start gap-2 text-sm text-gray-300">
+                <label className="flex items-start gap-2 text-sm text-[var(--hb-headline)]">
                   <input
                     type="checkbox"
                     name="agree_to_terms"
                     checked={formData.agree_to_terms}
                     onChange={handleChange}
-                    className="mt-1 rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-2 focus:ring-blue-500"
+                    className="mt-1 rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-primary-strong)] focus:ring-2 focus:ring-[var(--hb-primary-strong)]"
                   />
                   <span>
                     Αποδέχομαι τους{' '}
                     <Link
                       href="/pages/terms"
-                      className="text-emerald-300 transition hover:text-emerald-200"
+                      className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
                     >
                       όρους χρήσης
                     </Link>{' '}
                     και την{' '}
                     <Link
                       href="/pages/privacy"
-                      className="text-emerald-300 transition hover:text-emerald-200"
+                      className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
                     >
                       πολιτική απορρήτου
                     </Link>
@@ -438,6 +443,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="Γιάννης Παπαδόπουλος"
                   error={!!errors.full_name}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.full_name} />
@@ -451,6 +457,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   value={formData.date_of_birth}
                   onChange={handleChange}
                   error={!!errors.date_of_birth}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.date_of_birth} />
@@ -462,6 +469,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   options={COUNTRIES}
                   value={formData.country}
                   onChange={handleSelectChange('country')}
+                  className={selectClasses}
                 />
                 <FormErrorMessage message={errors.country} />
               </div>
@@ -474,8 +482,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="Πες μας λίγα λόγια για σένα..."
                   rows={3}
+                  className={`${inputClasses} min-h-[120px]`}
                 />
-                <div className="mt-1 text-xs text-gray-400">{formData.bio?.length || 0} / 500</div>
+                <div className="mt-1 text-xs text-[var(--hb-muted)]">
+                  {formData.bio?.length || 0} / 500
+                </div>
                 <FormErrorMessage message={errors.bio} />
               </div>
             </motion.div>
@@ -499,20 +510,22 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="YourPSNID"
                   error={!!errors.psn_id}
+                  className={inputClasses}
                 />
                 <FormErrorMessage message={errors.psn_id} />
               </div>
 
               <div>
                 <Select
-                  label="Αγαπημένη Πλατφόρμα (προαιρετικό)"
+                  label="Αγαπημένη Κονσόλα (προαιρετικό)"
                   options={['', ...PLATFORMS]}
                   value={formData.favorite_platform}
                   onChange={handleSelectChange('favorite_platform')}
+                  className={selectClasses}
                 />
               </div>
 
-              <div className="text-sm text-gray-300">
+              <div className="text-sm text-[var(--hb-headline)]">
                 <p className="mb-2">Αγαπημένα Genres (προαιρετικό):</p>
                 <div className="grid grid-cols-2 gap-2">
                   {GENRES.map(genre => (
@@ -531,7 +544,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             }));
                           }
                         }}
-                        className="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-primary-strong)] focus:ring-1 focus:ring-[var(--hb-primary-strong)]"
                       />
                       {genre}
                     </label>
@@ -545,7 +558,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         {/* Navigation Buttons */}
         <div className="mt-6 flex gap-4">
           {currentStep > 1 && (
-            <Button type="button" variant="secondary" onClick={handleBack} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleBack}
+              disabled={loading}
+              className="hover:border-[var(--hb-primary-strong)]/60 border-[var(--hb-border)] text-[var(--hb-headline)]"
+            >
               <ArrowLeft className="h-5 w-5" />
               Πίσω
             </Button>
@@ -556,7 +575,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             variant="primary"
             onClick={handleNext}
             disabled={loading}
-            className="flex flex-1 items-center justify-center gap-2 bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400 text-slate-950 shadow-lg shadow-emerald-400/30 transition hover:shadow-emerald-300/40"
+            className="flex flex-1 items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[0_14px_40px_rgba(229,9,20,0.35)] transition hover:shadow-[0_14px_48px_rgba(229,9,20,0.5)]"
           >
             {loading ? (
               'Εγγραφή...'
@@ -575,11 +594,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
 
         {/* Login Link */}
-        <div className="mt-4 text-center text-sm text-slate-400">
+        <div className="mt-4 text-center text-sm text-[var(--hb-muted)]">
           Έχεις ήδη λογαριασμό;{' '}
           <Link
-            href="/auth/login"
-            className="font-medium text-emerald-300 transition hover:text-emerald-200"
+            href="/pages/auth/login"
+            className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
           >
             Σύνδεση
           </Link>

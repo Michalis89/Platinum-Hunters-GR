@@ -25,7 +25,7 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         `
         *,
         guide_steps (*),
-        games!inner(slug, title)
+        games!inner(slug, title, cover_image, background_image)
       `,
       )
       .eq('game_id', id);

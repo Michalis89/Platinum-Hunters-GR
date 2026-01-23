@@ -17,6 +17,31 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'i.psnprofiles.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'media.rawg.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 's4.anilist.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.myanimelist.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'books.google.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'jolfksxuhyktpwncniks.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
 };

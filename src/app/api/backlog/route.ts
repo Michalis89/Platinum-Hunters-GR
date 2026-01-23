@@ -7,7 +7,25 @@
 
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import type { UserGameWithGame, UserGameInsert } from '@/types/database';
+import type { UserGameWithGame, UserGameInsert, Database } from '@/types/database';
+
+async function insertActivity(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+  type: 'backlog_added' | 'backlog_status',
+  payload: Record<string, unknown>,
+) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('activity_log') as any).insert({
+      user_id: userId,
+      type,
+      payload,
+    });
+  } catch (err) {
+    console.warn('⚠️ Activity insert failed:', err);
+  }
+}
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
@@ -172,7 +190,7 @@ export async function POST(request: Request) {
     // Check if game exists
     const { data: gameExists, error: gameCheckError } = await supabase
       .from('games')
-      .select('id')
+      .select('id, title, slug')
       .eq('id', game_id)
       .single();
 
@@ -275,6 +293,23 @@ export async function POST(request: Request) {
       dropped_at: typedNewItem.dropped_at,
       game: Array.isArray(typedNewItem.games) ? typedNewItem.games[0] : typedNewItem.games,
     };
+
+    // Log activity (backlog_added)
+    const { data: profileData } = await supabase
+      .from('users')
+      .select('username, display_name, avatar_url')
+      .eq('id', userId)
+      .maybeSingle();
+
+    await insertActivity(supabase, userId, 'backlog_added', {
+      gameId: transformedItem.game?.id,
+      gameTitle: (transformedItem.game as Database['public']['Tables']['games']['Row'])?.title,
+      gameSlug: (transformedItem.game as Database['public']['Tables']['games']['Row'])?.slug,
+      status: transformedItem.status,
+      username: (profileData as { username?: string } | null)?.username,
+      display_name: (profileData as { display_name?: string } | null)?.display_name,
+      avatar_url: (profileData as { avatar_url?: string } | null)?.avatar_url,
+    });
 
     return NextResponse.json(transformedItem, { status: 201 });
   } catch (error) {

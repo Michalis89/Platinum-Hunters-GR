@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { GameDetails, Guide, ProcessedGame } from '@/types/interfaces';
 import Feedback from '@/app/components/ui/Feedback';
-import { Info } from 'lucide-react';
+import { Info, Trophy as TrophyIcon } from 'lucide-react';
 import Skeleton from '@/app/components/ui/Skeleton';
 import EditGuideButton from '@/app/components/game-details/EditGuideButton';
 import UpdateGameInfoButton from '@/app/components/game-details/UpdateGameInfoButton';
@@ -22,6 +22,20 @@ const TrophyStats = dynamic(() => import('@/app/components/game-details/TrophySt
 const TrophyGuides = dynamic(() => import('@/app/components/game-details/TrophyGuides'), {
   ssr: false,
 });
+
+type TrophyListEntry = {
+  name: string;
+  description: string | null;
+  type: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+  icon_url: string | null;
+};
+
+const TROPHY_COLOR_MAP: Record<'Bronze' | 'Silver' | 'Gold' | 'Platinum', string> = {
+  Bronze: 'text-orange-400',
+  Silver: 'text-[var(--hb-text)]',
+  Gold: 'text-yellow-300',
+  Platinum: 'text-blue-300',
+};
 
 export default function GameDetailsPage() {
   const params = useParams();
@@ -47,6 +61,7 @@ export default function GameDetailsPage() {
     silver: number;
     bronze: number;
   } | null>(null);
+  const [trophyList, setTrophyList] = useState<TrophyListEntry[] | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -65,7 +80,7 @@ export default function GameDetailsPage() {
             .toString()
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
+            .replaceAll(/[\u0300-\u036f]/g, '');
 
         const requestedSlug = normalizeSlug(decodeURIComponent(slug));
 
@@ -80,12 +95,34 @@ export default function GameDetailsPage() {
         const [guideData, detailsData, trophiesData] = await Promise.all([
           fetch(`/api/guides/${matchedGame.id}`).then(res => res.json()),
           fetch(`/api/game-details/${matchedGame.id}`).then(res => res.json()),
-          fetch(`/api/game/${matchedGame.id}`).then(res => res.json()),
+          fetch(`/api/games/${matchedGame.id}/trophies`).then(async res => {
+            if (!res.ok) {
+              console.warn('Trophies request failed', res.status, await res.text());
+              return null;
+            }
+            return res.json();
+          }),
         ]);
 
         setGuides(guideData);
         setGameDetails(detailsData);
-        setTrophies(trophiesData);
+        const trophyCounts =
+          trophiesData?.counts ??
+          (trophiesData &&
+          typeof trophiesData === 'object' &&
+          'platinum' in trophiesData &&
+          'gold' in trophiesData &&
+          'silver' in trophiesData &&
+          'bronze' in trophiesData
+            ? trophiesData
+            : null);
+        const trophyEntries =
+          trophiesData && Array.isArray((trophiesData as { trophies?: unknown[] }).trophies)
+            ? (trophiesData as { trophies: TrophyListEntry[] }).trophies
+            : null;
+
+        setTrophies(trophyCounts ?? null);
+        setTrophyList(trophyEntries);
         await delay;
       } catch (err) {
         console.error('❌ Σφάλμα στη φόρτωση:', err);
@@ -178,12 +215,12 @@ export default function GameDetailsPage() {
   const hasIntro = Boolean(introText);
 
   return (
-    <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,_#1e293b,_#020617)] px-4 py-16 text-slate-100">
+    <div className="min-h-screen bg-[var(--hb-bg)] px-4 py-16 text-[var(--hb-text)]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         {game && (
           <>
             {/* HERO SECTION */}
-            <section className="flex flex-col gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl backdrop-blur-md sm:flex-row sm:items-center">
+            <section className="flex flex-col gap-6 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl shadow-black/30 backdrop-blur-md sm:flex-row sm:items-center">
               {/* Cover */}
               <div className="flex justify-center sm:block sm:w-48">
                 <Image
@@ -191,17 +228,17 @@ export default function GameDetailsPage() {
                   alt={game.title}
                   width={250}
                   height={250}
-                  className="rounded-xl object-cover shadow-lg ring-2 ring-slate-800/80"
+                  className="rounded-xl object-cover shadow-lg ring-2 ring-[var(--hb-border)]"
                 />
               </div>
 
               {/* Title + Stats */}
               <div className="flex flex-1 flex-col items-center gap-4 text-center sm:items-start sm:text-left">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+                  <p className="text-xs uppercase tracking-[0.25em] text-[var(--hb-muted)]">
                     Platinum Hunters • Trophy Guide
                   </p>
-                  <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-50 md:text-4xl">
+                  <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[var(--hb-headline)] md:text-4xl">
                     {game.title}
                   </h1>
                 </div>
@@ -227,17 +264,22 @@ export default function GameDetailsPage() {
 
                 {/* Quick meta row (έτος, dev, rating) */}
                 {gameDetails && (
-                  <div className="mt-1 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-300 sm:justify-start">
-                    <span className="rounded-full bg-slate-800/80 px-3 py-1">
+                  <div className="mt-1 flex flex-wrap items-center justify-center gap-3 text-xs text-[var(--hb-muted)] sm:justify-start">
+                    <span className="rounded-full bg-[var(--hb-card)] px-3 py-1">
                       Έτος κυκλοφορίας:{' '}
-                      <span className="font-semibold">{gameDetails.release_year}</span>
+                      <span className="font-semibold text-[var(--hb-headline)]">
+                        {gameDetails.release_year}
+                      </span>
                     </span>
-                    <span className="rounded-full bg-slate-800/80 px-3 py-1">
-                      Developer: <span className="font-semibold">{gameDetails.developer}</span>
+                    <span className="rounded-full bg-[var(--hb-card)] px-3 py-1">
+                      Developer:{' '}
+                      <span className="font-semibold text-[var(--hb-headline)]">
+                        {gameDetails.developer}
+                      </span>
                     </span>
-                    <span className="rounded-full bg-slate-800/80 px-3 py-1">
+                    <span className="rounded-full bg-[var(--hb-card)] px-3 py-1">
                       Βαθμολογία:{' '}
-                      <span className="font-semibold text-emerald-400">
+                      <span className="font-semibold text-[var(--hb-primary-strong)]">
                         {gameDetails.rating?.toFixed(2)}
                       </span>
                     </span>
@@ -252,7 +294,7 @@ export default function GameDetailsPage() {
             </section>
 
             {message && messageType && (
-              <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow">
+              <div className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow">
                 <Feedback
                   layout="inline"
                   tone={messageType === 'success' ? 'solid' : 'soft'}
@@ -267,7 +309,7 @@ export default function GameDetailsPage() {
 
             {/* INFO + TROPHIES SECTION */}
             {(gameDetails || trophies) && (
-              <section className="grid gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl backdrop-blur-md md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+              <section className="grid gap-6 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-xl shadow-black/30 backdrop-blur-md md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
                 {/* Game info */}
                 {gameDetails && (
                   <div className="flex flex-col gap-4">
@@ -278,9 +320,9 @@ export default function GameDetailsPage() {
                       </h2>
                     </div>
 
-                    <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-4 text-sm md:text-base">
+                    <div className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 text-sm md:text-base">
                       <GameDetailsInfo {...gameDetails} />
-                      <div className="mt-4 border-t border-slate-800 pt-4">
+                      <div className="mt-4 border-t border-[var(--hb-border)] pt-4">
                         <GamePlatforms platforms={gameDetails.platforms} />
                       </div>
                     </div>
@@ -322,9 +364,36 @@ export default function GameDetailsPage() {
 
                 {/* Trophy Stats */}
                 {trophies && (
-                  <div className="flex flex-col gap-4 rounded-xl border border-slate-800/80 bg-slate-950/40 p-4">
-                    <h3 className="text-base font-semibold text-slate-100">Συνολικά Trophies</h3>
+                  <div className="flex flex-col gap-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
+                    <h3 className="text-base font-semibold text-[var(--hb-headline)]">
+                      Συνολικά Trophies
+                    </h3>
                     <TrophyStats trophies={trophies} />
+
+                    {trophyList && trophyList.length > 0 && (
+                      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {trophyList.map((trophy, index) => (
+                          <div
+                            key={`${trophy.name}-${index}`}
+                            className="flex items-start gap-3 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3"
+                          >
+                            <TrophyIcon
+                              className={`mt-0.5 h-5 w-5 ${TROPHY_COLOR_MAP[trophy.type]}`}
+                            />
+                            <div className="space-y-1">
+                              <p className="font-semibold leading-tight text-white">
+                                {trophy.name}
+                              </p>
+                              {trophy.description && (
+                              <p className="text-sm text-[var(--hb-muted)]">
+                                {trophy.description}
+                              </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </section>
@@ -333,22 +402,22 @@ export default function GameDetailsPage() {
         )}
 
         {/* GUIDES SECTION */}
-        <section className="mt-4 space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl shadow-blue-900/20 backdrop-blur-md">
+        <section className="mt-4 space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-xl shadow-black/30 backdrop-blur-md">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-slate-50">Οδηγός</h2>
-              <p className="text-sm text-slate-400">Κύριο περιεχόμενο & βήματα</p>
+              <h2 className="text-xl font-semibold text-[var(--hb-headline)]">Οδηγός</h2>
+              <p className="text-sm text-[var(--hb-muted)]">Κύριο περιεχόμενο & βήματα</p>
             </div>
-            <span className="rounded-full border border-slate-800 bg-slate-900/60 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-400">
+            <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
               Trophy Walkthrough
             </span>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-800/70 bg-slate-950/60 p-5 shadow-inner shadow-slate-900/40">
+          <div className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-5 shadow-inner shadow-black/20">
             {guides.length > 0 && hasIntro && (
-              <div className="overflow-hidden rounded-xl border border-slate-800/70 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-950/80 p-4 shadow-inner shadow-slate-900/30">
-                <h3 className="text-base font-semibold text-slate-100">Εισαγωγή</h3>
-                <div className="prose prose-invert prose-p:my-3 max-w-none text-slate-200">
+              <div className="overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-inner shadow-black/20">
+                <h3 className="text-base font-semibold text-[var(--hb-headline)]">Εισαγωγή</h3>
+                <div className="prose prose-invert prose-p:my-3 max-w-none text-[var(--hb-text)]">
                   {renderGuideContent(
                     primaryGuide?.content_rich,
                     primaryGuide?.content_html,
@@ -400,7 +469,7 @@ function renderGuideContent(
       return <p className="whitespace-pre-wrap">{fallbackDescription}</p>;
     }
     return blocks.map((block, idx) => (
-      <p key={idx} className="leading-7 text-slate-200">
+      <p key={idx} className="leading-7 text-[var(--hb-text)]">
         {block?.text ?? ''}
       </p>
     ));
@@ -410,7 +479,7 @@ function renderGuideContent(
     return <p className="whitespace-pre-wrap">{fallbackDescription}</p>;
   }
 
-  return <p className="text-slate-500">Δεν έχει προστεθεί περιεχόμενο ακόμη.</p>;
+  return <p className="text-[var(--hb-muted)]">Δεν έχει προστεθεί περιεχόμενο ακόμη.</p>;
 }
 
 function stripHtml(html: string): string {

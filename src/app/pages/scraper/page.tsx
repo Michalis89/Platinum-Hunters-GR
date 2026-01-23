@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { ScrapedGameData } from '@/types/interfaces';
-import Image from 'next/image';
 import AlertMessage from '../../components/ui/AlertMessage';
+import Button from '@/app/components/ui/Button';
+import Image from 'next/image';
 
 export default function ScraperPage() {
   const [url, setUrl] = useState('');
@@ -84,6 +84,16 @@ export default function ScraperPage() {
     setMessage(msg);
   };
 
+  const isValidHttpUrl = (maybeUrl?: string | null) => {
+    if (!maybeUrl) return false;
+    try {
+      const parsed = new URL(maybeUrl);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 p-6 text-white">
       {message && messageType && <AlertMessage type={messageType} message={message} />}
@@ -110,14 +120,15 @@ export default function ScraperPage() {
         </div>
         {data && (
           <Card className="mt-6 rounded-lg bg-gray-900 p-6">
-            {data.gameImage && (
+            {isValidHttpUrl(data.gameImage) && (
               <div className="relative mt-4 h-60 w-full">
                 <Image
                   src={data.gameImage}
                   alt={data.title}
-                  layout="fill"
-                  objectFit="contain"
+                  fill
+                  style={{ objectFit: 'contain' }}
                   className="rounded-lg"
+                  unoptimized
                 />
               </div>
             )}

@@ -15,6 +15,9 @@ export interface PrivacySettings {
   show_email: boolean;
   show_stats: boolean;
   show_psn_id: boolean;
+  show_age?: boolean;
+  show_social_links?: boolean;
+  show_location?: boolean;
 }
 
 /**
@@ -36,6 +39,11 @@ export interface SocialLinks {
   twitch?: string;
   youtube?: string;
   discord?: string;
+  instagram?: string;
+  reddit?: string;
+  website?: string;
+  portfolio?: string;
+  location_city?: string;
 }
 
 /**
@@ -67,6 +75,7 @@ export interface User {
   favorite_platform: string | null;
   favorite_genres: string[] | null;
   gaming_since: number | null;
+  categories: string[] | null;
 
   // Settings (JSONB)
   privacy_settings: PrivacySettings;
@@ -126,6 +135,7 @@ export interface UserProfileUpdate {
   favorite_platform?: string | null;
   favorite_genres?: string[] | null;
   gaming_since?: number | null;
+  categories?: string[] | null;
   privacy_settings?: Partial<PrivacySettings>;
   notification_settings?: Partial<NotificationSettings>;
   social_links?: Partial<SocialLinks>;

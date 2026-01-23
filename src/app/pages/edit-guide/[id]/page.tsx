@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
-import { Button } from '@/app/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
 import Feedback from '@/app/components/ui/Feedback';
 import { GuideStepsEditor } from '@/app/components/ui/GuideStepsEditor';
 import RichTextEditor from '@/app/components/ui/RichTextEditor';
+import Button from '@/app/components/ui/Button';
 
 export default function EditGuide() {
   const { id } = useParams();
@@ -23,6 +23,7 @@ export default function EditGuide() {
   const [playthroughs, setPlaythroughs] = useState<number | ''>('');
   const [hours, setHours] = useState<number | ''>('');
   const [introHtml, setIntroHtml] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,13 @@ export default function EditGuide() {
           setStepsHtml(stepsArr.length ? stepsArr : ['']);
           setStepTitles(titlesArr.length ? titlesArr : ['']);
           setGameSlug(firstGuide?.games?.slug ?? '');
+          setImageUrl(
+            firstGuide?.games?.cover_image ||
+              firstGuide?.games?.background_image ||
+              firstGuide?.cover_image ||
+              firstGuide?.background_image ||
+              '',
+          );
         } else {
           setMessage('❌ Σφάλμα φόρτωσης οδηγού!');
           setMessageType('error');
@@ -128,6 +136,8 @@ export default function EditGuide() {
           content_html: introHtml || null,
           description: stripHtml(introHtml) || null,
           content_rich: guideContentRich,
+          cover_image: imageUrl || null,
+          background_image: imageUrl || null,
           steps: filteredSteps,
         }),
       });
@@ -202,7 +212,9 @@ export default function EditGuide() {
                     min={1}
                     max={10}
                     value={difficultyRating}
-                    onChange={e => setDifficultyRating(e.target.value ? Number(e.target.value) : '')}
+                    onChange={e =>
+                      setDifficultyRating(e.target.value ? Number(e.target.value) : '')
+                    }
                   />
                   <Input
                     label="Playthroughs"
@@ -217,6 +229,12 @@ export default function EditGuide() {
                     type="number"
                     value={hours}
                     onChange={e => setHours(e.target.value ? Number(e.target.value) : '')}
+                  />
+                  <Input
+                    label="Εικόνα (URL)"
+                    placeholder="https://..."
+                    value={imageUrl}
+                    onChange={e => setImageUrl(e.target.value)}
                   />
                 </CardContent>
               </Card>
@@ -239,7 +257,11 @@ export default function EditGuide() {
                   <CardTitle className="text-lg text-slate-100">Βήματα</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <GuideStepsEditor value={stepsHtml} onChange={setStepsHtml} placeholderPrefix="Βήμα" />
+                  <GuideStepsEditor
+                    value={stepsHtml}
+                    onChange={setStepsHtml}
+                    placeholderPrefix="Βήμα"
+                  />
                   <div className="space-y-3">
                     <h4 className="text-sm font-semibold text-slate-200">Τίτλοι βημάτων</h4>
                     {stepTitles.map((title, idx) => (
@@ -270,18 +292,10 @@ export default function EditGuide() {
               </Card>
 
               <div className="flex flex-wrap gap-3">
-                <Button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="bg-gradient-to-r from-emerald-500 via-sky-500 to-blue-600 text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40"
-                >
+                <Button variant="primary" onClick={handleSave} disabled={saving}>
                   {saving ? '💾 Αποθήκευση...' : '💾 Αποθήκευση'}
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => router.back()}
-                  className="border-slate-700 bg-slate-900/60 text-slate-200 transition hover:border-sky-500/70 hover:text-white"
-                >
+                <Button variant="outline" onClick={() => router.back()}>
                   ⬅️ Επιστροφή
                 </Button>
               </div>

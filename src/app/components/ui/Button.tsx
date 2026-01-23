@@ -1,44 +1,95 @@
-import { ReactNode } from 'react';
+import React from 'react';
+import Link, { type LinkProps } from 'next/link';
 
-// Define possible button variants
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning';
+type Variant = 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
 
-interface ButtonProps {
-  readonly children: ReactNode;
-  readonly onClick?: () => void;
-  readonly disabled?: boolean;
-  readonly className?: string;
-  readonly variant?: ButtonVariant;
-  readonly type?: 'button' | 'submit' | 'reset';
-}
-
-const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700',
-  secondary: 'bg-gray-600 text-white hover:bg-gray-700',
-  tertiary: 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
-  success: 'bg-green-600 text-white hover:bg-green-700',
-  warning: 'bg-yellow-500 text-black hover:bg-yellow-600',
+type BaseProps = {
+  children: React.ReactNode;
+  variant?: Variant;
+  icon?: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  title?: string;
+  ariaLabel?: string;
 };
 
-export function Button({
-  children,
-  onClick,
-  disabled,
-  className = '',
-  variant = 'primary',
-  type = 'button',
-}: Readonly<ButtonProps>) {
+type LinkButtonProps = BaseProps & {
+  href: LinkProps['href'];
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+  type?: never;
+};
+
+type NativeButtonProps = BaseProps & {
+  onClick?: React.ButtonHTMLAttributes<HTMLButtonElement>['onClick'];
+  type?: React.ButtonHTMLAttributes<HTMLButtonElement>['type'];
+  form?: string;
+  href?: never;
+};
+
+type ButtonProps = LinkButtonProps | NativeButtonProps;
+
+const variantClasses: Record<Variant, string> = {
+  primary: 'bg-[var(--hb-primary-strong)] text-slate-950 hover:brightness-110',
+  secondary:
+    'border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]',
+  tertiary: 'bg-[var(--hb-panel)] text-[var(--hb-text)] hover:text-[var(--hb-headline)]',
+  outline:
+    'border border-[var(--hb-border)] text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]',
+  ghost: 'text-[var(--hb-text)] hover:text-[var(--hb-headline)]',
+  danger: 'bg-red-600 text-white hover:bg-red-500',
+  success: 'bg-emerald-500 text-slate-950 hover:bg-emerald-400',
+  warning: 'bg-amber-400 text-slate-950 hover:bg-amber-300',
+};
+
+const baseClass =
+  'inline-flex flex-row items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition';
+
+const isLinkButtonProps = (props: ButtonProps): props is LinkButtonProps =>
+  'href' in props && props.href !== undefined;
+
+const Button = (props: ButtonProps) => {
+  const { children, variant = 'outline', icon, className, disabled, title, ariaLabel } = props;
+  const disabledClass = disabled ? 'opacity-60 cursor-not-allowed pointer-events-none' : '';
+  const classes = [baseClass, variantClasses[variant], disabledClass, className]
+    .filter(Boolean)
+    .join(' ');
+  const accessibleLabel =
+    ariaLabel || (typeof children === 'string' ? children : title) || undefined;
+
+  if (isLinkButtonProps(props)) {
+    return (
+      <Link
+        href={props.href}
+        className={classes}
+        aria-disabled={disabled}
+        tabIndex={disabled ? -1 : undefined}
+        title={title}
+        aria-label={accessibleLabel}
+        onClick={props.onClick}
+      >
+        {icon}
+        <span>{children}</span>
+      </Link>
+    );
+  }
+
   return (
     <button
-      type={type}
-      onClick={onClick}
+      type={props.type ?? 'button'}
+      onClick={props.onClick}
+      form={props.form}
+      className={classes}
       disabled={disabled}
-      className={`rounded px-4 py-2 font-bold transition ${
-        disabled ? 'cursor-not-allowed opacity-50' : ''
-      } ${variantClasses[variant]} ${className}`}
+      title={title}
+      aria-label={accessibleLabel}
     >
-      {children}
+      {icon}
+      <span className="inline-flex flex-row items-center justify-center gap-2">{children}</span>
     </button>
   );
-}
+};
+
+export type ButtonVariant = Variant;
+export type { ButtonProps };
+export { Button };
+export default Button;

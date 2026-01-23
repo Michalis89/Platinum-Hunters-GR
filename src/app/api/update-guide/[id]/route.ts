@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
-import supabase from '@/lib/db';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 type IncomingStep = {
   title?: string;
@@ -10,27 +11,52 @@ type IncomingStep = {
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
 
-export async function PUT(
-  req: Request,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any,
+async function insertActivity(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+  payload: Record<string, unknown>,
 ) {
   try {
+    await (supabase.from('activity_log') as any).insert({
+      user_id: userId,
+      type: 'guide_created', // reuse type with action=updated to satisfy current constraint
+      payload: { action: 'updated', ...payload },
+    });
+  } catch (err) {
+    console.warn('⚠️ Activity insert (guide update) failed:', err);
+  }
+}
+
+export async function PUT(req: Request, context: any) {
+  try {
+    const supabase = (await createRouteHandlerClient()) as any;
+
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
+    }
+
     if (!(await context.params)?.id) {
       return NextResponse.json({ error: 'Missing game ID' }, { status: 400 });
     }
 
     const gameId = Number((await context.params).id);
-  const {
-    steps,
-    content_rich: guideContentRich,
-    content_html: guideContentHtml,
-    description,
-    title,
-    difficulty_rating,
-    estimated_hours,
-    estimated_playthroughs,
-  } = await req.json();
+    const {
+      steps,
+      content_rich: guideContentRich,
+      content_html: guideContentHtml,
+      description,
+      title,
+      difficulty_rating,
+      estimated_hours,
+      estimated_playthroughs,
+      cover_image,
+      background_image,
+    } = await req.json();
 
     if (!steps || !Array.isArray(steps)) {
       return NextResponse.json({ error: 'Invalid steps data' }, { status: 400 });
@@ -38,7 +64,7 @@ export async function PUT(
 
     const { data: existingGuide, error: fetchError } = await supabase
       .from('guides')
-      .select('*')
+      .select('*, games (id, title, slug, cover_image, background_image)')
       .eq('game_id', gameId)
       .maybeSingle();
 
@@ -53,28 +79,49 @@ export async function PUT(
       return NextResponse.json({ error: 'Guide not found for this game' }, { status: 404 });
     }
 
-  const guideId = existingGuide.id;
+    const guideId = existingGuide.id;
+    const gameData = Array.isArray((existingGuide as any).games)
+      ? (existingGuide as any).games[0]
+      : (existingGuide as any).games;
 
-  // Update guide-level content if provided
-  const guideUpdatePayload: Record<string, unknown> = {};
-  if (guideContentRich !== undefined) guideUpdatePayload.content_rich = guideContentRich;
-  if (guideContentHtml !== undefined) guideUpdatePayload.content_html = guideContentHtml;
-  if (description !== undefined) guideUpdatePayload.description = description;
-  if (title !== undefined) guideUpdatePayload.title = title;
-  if (difficulty_rating !== undefined) guideUpdatePayload.difficulty_rating = difficulty_rating;
-  if (estimated_hours !== undefined) guideUpdatePayload.estimated_hours = estimated_hours;
-  if (estimated_playthroughs !== undefined)
-    guideUpdatePayload.estimated_playthroughs = estimated_playthroughs;
+    // Update guide-level content if provided
+    const guideUpdatePayload: Record<string, unknown> = {};
+    if (guideContentRich !== undefined) guideUpdatePayload.content_rich = guideContentRich;
+    if (guideContentHtml !== undefined) guideUpdatePayload.content_html = guideContentHtml;
+    if (description !== undefined) guideUpdatePayload.description = description;
+    if (title !== undefined) guideUpdatePayload.title = title;
+    if (difficulty_rating !== undefined) guideUpdatePayload.difficulty_rating = difficulty_rating;
+    if (estimated_hours !== undefined) guideUpdatePayload.estimated_hours = estimated_hours;
+    if (estimated_playthroughs !== undefined)
+      guideUpdatePayload.estimated_playthroughs = estimated_playthroughs;
 
-  if (Object.keys(guideUpdatePayload).length > 0) {
-    const { error: guideUpdateError } = await supabase
-      .from('guides')
-      .update(guideUpdatePayload)
+    if (Object.keys(guideUpdatePayload).length > 0) {
+      const { error: guideUpdateError } = await supabase
+        .from('guides')
+        .update(guideUpdatePayload)
         .eq('id', guideId);
 
       if (guideUpdateError) {
         console.error('❌ Σφάλμα ενημέρωσης guide:', guideUpdateError);
         return NextResponse.json({ error: 'Failed to update guide content' }, { status: 500 });
+      }
+    }
+
+    // Update game images if provided
+    if (cover_image !== undefined || background_image !== undefined) {
+      const gameUpdate: Record<string, unknown> = {};
+      if (cover_image !== undefined) gameUpdate.cover_image = cover_image;
+      if (background_image !== undefined) gameUpdate.background_image = background_image;
+
+      if (Object.keys(gameUpdate).length > 0) {
+        const { error: gameUpdateError } = await supabase
+          .from('games')
+          .update(gameUpdate)
+          .eq('id', gameId);
+
+        if (gameUpdateError) {
+          console.error('❌ Σφάλμα ενημέρωσης εικόνας παιχνιδιού:', gameUpdateError);
+        }
       }
     }
 
@@ -115,6 +162,23 @@ export async function PUT(
         { status: 500 },
       );
     }
+
+    // Activity log: guide updated
+    const profile = await supabase
+      .from('users')
+      .select('username, display_name, avatar_url')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    await insertActivity(supabase, session.user.id, {
+      guideId,
+      gameId,
+      gameTitle: (gameData as { title?: string })?.title ?? undefined,
+      gameSlug: (gameData as { slug?: string })?.slug ?? undefined,
+      username: profile.data?.username,
+      display_name: profile.data?.display_name,
+      avatar_url: profile.data?.avatar_url,
+    });
 
     return NextResponse.json({ message: '✅ Ο οδηγός ενημερώθηκε επιτυχώς!' });
   } catch (error) {

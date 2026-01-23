@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
 
-export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ slug: string }> },
+) {
   try {
     const { slug } = await params;
 
@@ -9,7 +12,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
     }
 
-    // Fetch only the game with the specified slug
     const { data: game, error } = await supabase
       .from('games')
       .select('*')

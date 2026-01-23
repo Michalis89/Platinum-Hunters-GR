@@ -7,7 +7,25 @@
 
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import type { UserGameWithGame, UserGameUpdate, UserGameRow } from '@/types/database';
+import type { UserGameWithGame, UserGameUpdate, UserGameRow, Database } from '@/types/database';
+
+async function insertActivity(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+  type: 'backlog_status',
+  payload: Record<string, unknown>,
+) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('activity_log') as any).insert({
+      user_id: userId,
+      type,
+      payload,
+    });
+  } catch (err) {
+    console.warn('⚠️ Activity insert failed:', err);
+  }
+}
 
 /**
  * PATCH - Update priority and/or notes for backlog item
@@ -27,10 +45,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const userId = session.user.id;
-
-    const { id } = await params; // 🔴 εδώ κάνουμε await γιατί το type είναι Promise<{ id: string }>
-
-    // const backlogId = Number.parseInt(params.id);
+    const { id } = await params;
     const backlogId = Number.parseInt(id, 10);
 
     if (Number.isNaN(backlogId)) {
@@ -72,7 +87,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // Check if item exists and belongs to user
     const { data: existingItem, error: checkError } = await supabase
       .from('user_games')
-      .select('id, user_id, status')
+      .select('id, user_id, status, is_favorite')
       .eq('id', backlogId)
       .single();
 
@@ -80,7 +95,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: 'Το στοιχείο δεν βρέθηκε' }, { status: 404 });
     }
 
-    const typedExistingItem = existingItem as Pick<UserGameRow, 'id' | 'user_id' | 'status'>;
+    const typedExistingItem = existingItem as Pick<UserGameRow, 'id' | 'user_id' | 'status' | 'is_favorite'>;
 
     if (typedExistingItem.user_id !== userId) {
       return NextResponse.json(
@@ -202,6 +217,50 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       game: Array.isArray(typedUpdatedItem.games) ? typedUpdatedItem.games[0] : typedUpdatedItem.games,
     };
 
+    // Log activity if status changed
+    const gameData = transformedItem.game as Database['public']['Tables']['games']['Row'];
+
+    if (
+      status !== undefined &&
+      status !== typedExistingItem.status
+    ) {
+      const { data: profileData } = await supabase
+        .from('users')
+        .select('username, display_name, avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
+
+      await insertActivity(supabase, userId, 'backlog_status', {
+        gameId: gameData?.id,
+        gameTitle: gameData?.title,
+        gameSlug: gameData?.slug,
+        status,
+        previousStatus: typedExistingItem.status,
+        username: (profileData as { username?: string } | null)?.username,
+        display_name: (profileData as { display_name?: string } | null)?.display_name,
+        avatar_url: (profileData as { avatar_url?: string } | null)?.avatar_url,
+      });
+    }
+
+    // Log favorite toggle
+    if (is_favorite !== undefined && is_favorite !== typedExistingItem.is_favorite) {
+      const { data: profileData } = await supabase
+        .from('users')
+        .select('username, display_name, avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
+
+      await insertActivity(supabase, userId, 'backlog_status', {
+        gameId: gameData?.id,
+        gameTitle: gameData?.title,
+        gameSlug: gameData?.slug,
+        favoriteAction: is_favorite ? 'added' : 'removed',
+        username: (profileData as { username?: string } | null)?.username,
+        display_name: (profileData as { display_name?: string } | null)?.display_name,
+        avatar_url: (profileData as { avatar_url?: string } | null)?.avatar_url,
+      });
+    }
+
     return NextResponse.json(transformedItem);
   } catch (error) {
     console.error('Backlog update error:', error);
@@ -212,7 +271,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 /**
  * DELETE - Remove game from backlog
  */
-// export async function DELETE(request: Request, { params }: { params: { id: string } }) {
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
@@ -227,11 +285,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
     }
 
-    // const userId = session.user.id;
-    // const backlogId = Number.parseInt(params.id);
     const userId = session.user.id;
-
-    const { id } = await params; // 🔴
+    const { id } = await params;
     const backlogId = Number.parseInt(id, 10);
 
     if (Number.isNaN(backlogId)) {

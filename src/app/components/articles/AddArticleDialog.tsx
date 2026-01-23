@@ -1,0 +1,449 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Save, Eye, Loader2, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
+import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
+import RichTextEditor from '../ui/RichTextEditor';
+import Button from '../ui/Button';
+import type { ArticleCategory, ArticleTopic, ArticleStatus } from '@/types/database';
+
+interface AddArticleDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+type ContentType = 'article';
+
+interface CategoryConfig {
+  label: string;
+  topics: { value: ArticleTopic; label: string }[];
+}
+
+const CONTENT_TYPES: { value: ContentType; label: string }[] = [
+  { value: 'article', label: 'Άρθρο' },
+];
+
+const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
+  gaming: {
+    label: 'Gaming',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'reviews', label: 'Reviews' },
+      { value: 'guides', label: 'Οδηγοί' },
+    ],
+  },
+  anime: {
+    label: 'Anime',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'reviews', label: 'Reviews' },
+    ],
+  },
+  manga: {
+    label: 'Manga',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'reviews', label: 'Reviews' },
+    ],
+  },
+  books: {
+    label: 'Βιβλία',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'reviews', label: 'Reviews' },
+    ],
+  },
+  movies: {
+    label: 'Movies',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'reviews', label: 'Reviews' },
+    ],
+  },
+  tv: {
+    label: 'TV Series',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'reviews', label: 'Reviews' },
+    ],
+  },
+  coding: {
+    label: 'Coding',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'tutorials', label: 'Tutorials' },
+      { value: 'weird-cases', label: 'Weird Cases' },
+    ],
+  },
+  pet: {
+    label: 'Pet',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'care', label: 'Οδηγοί φροντίδας' },
+      { value: 'experiences', label: 'Εμπειρίες' },
+      { value: 'health', label: 'Υγεία' },
+    ],
+  },
+  vape: {
+    label: 'Vape',
+    topics: [
+      { value: 'articles', label: 'Άρθρα' },
+      { value: 'devices', label: 'Ατμοποιητές/Συσκευές' },
+      { value: 'liquids', label: 'Υγρά' },
+      { value: 'experiences', label: 'Εμπειρίες' },
+      { value: 'reviews', label: 'Κριτικές' },
+    ],
+  },
+};
+
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+};
+
+const stripEmptyParagraphs = (html: string) => {
+  return html.replace(/<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '');
+};
+
+export default function AddArticleDialog({
+  isOpen,
+  onClose,
+  onSuccess,
+}: Readonly<AddArticleDialogProps>) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // Form state
+  const [contentType, setContentType] = useState<ContentType>('article');
+  const [category, setCategory] = useState<ArticleCategory | ''>('');
+  const [topic, setTopic] = useState<ArticleTopic>('articles');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [coverImage, setCoverImage] = useState('');
+  const [contentHtml, setContentHtml] = useState('');
+  const [tags, setTags] = useState('');
+  const [isCoverPreviewValid, setIsCoverPreviewValid] = useState(true);
+
+  // UI state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Handle dialog open/close
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (isOpen && dialog && !dialog.open) {
+      dialog.showModal();
+    } else if (!isOpen && dialog?.open) {
+      dialog.close();
+    }
+  }, [isOpen]);
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setContentType('article');
+      setCategory('');
+      setTopic('articles');
+      setTitle('');
+      setDescription('');
+      setCoverImage('');
+      setContentHtml('');
+      setTags('');
+      setError(null);
+      setIsCoverPreviewValid(true);
+    }
+  }, [isOpen]);
+
+  // Update topic when category changes
+  useEffect(() => {
+    if (category) {
+      setTopic('articles');
+    }
+  }, [category]);
+
+  useEffect(() => {
+    setIsCoverPreviewValid(true);
+  }, [coverImage]);
+
+  const handleSubmit = async (saveStatus: ArticleStatus) => {
+    if (!category) {
+      setError('Παρακαλώ επιλέξτε κατηγορία');
+      return;
+    }
+    if (!title.trim()) {
+      setError('Παρακαλώ εισάγετε τίτλο');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const slug = generateSlug(title);
+      const tagsArray = tags
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean);
+      const cleanedContentHtml = stripEmptyParagraphs(contentHtml || '').trim();
+
+      const response = await fetch('/api/articles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          slug,
+          description: description.trim() || null,
+          category,
+          topic,
+          tags: tagsArray,
+          cover_image: coverImage.trim() || null,
+          content_html: cleanedContentHtml || null,
+          status: saveStatus,
+          published_at: saveStatus === 'published' ? new Date().toISOString() : null,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Αποτυχία αποθήκευσης');
+      }
+
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const availableTopics = category ? CATEGORIES[category].topics : [];
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          {/* Dialog Container - Centered */}
+          <dialog
+            ref={dialogRef}
+            className="fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-surface)] p-0 shadow-2xl backdrop:bg-transparent"
+            onClose={onClose}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="flex h-full max-h-[90vh] flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-[var(--hb-border)] px-6 py-4">
+                <h2 className="text-xl font-semibold text-[var(--hb-headline)]">Νέο Άρθρο</h2>
+                <button
+                  onClick={onClose}
+                  className="rounded-lg p-2 text-[var(--hb-muted)] transition hover:bg-white/5 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {/* Error message */}
+                  {error && (
+                    <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* Type & Category Row */}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    {/* Content Type */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-[var(--hb-headline)]">Τύπος</label>
+                      <select
+                        value={contentType}
+                        onChange={e => setContentType(e.target.value as ContentType)}
+                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
+                      >
+                        {CONTENT_TYPES.map(type => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Category */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-[var(--hb-headline)]">
+                        Κατηγορία *
+                      </label>
+                      <select
+                        value={category}
+                        onChange={e => setCategory(e.target.value as ArticleCategory)}
+                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
+                      >
+                        <option value="">-- Επιλέξτε --</option>
+                        {(Object.keys(CATEGORIES) as ArticleCategory[]).map(cat => (
+                          <option key={cat} value={cat}>
+                            {CATEGORIES[cat].label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Topic */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-[var(--hb-headline)]">
+                        Υποκατηγορία
+                      </label>
+                      <select
+                        value={topic}
+                        onChange={e => setTopic(e.target.value as ArticleTopic)}
+                        disabled={!category}
+                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2 disabled:opacity-50"
+                      >
+                        {availableTopics.map(t => (
+                          <option key={t.value} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <Input
+                    label="Τίτλος *"
+                    placeholder="Εισάγετε τον τίτλο του άρθρου"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                  />
+
+                  {/* Description */}
+                  <Textarea
+                    label="Περιγραφή"
+                    placeholder="Σύντομη περιγραφή του άρθρου (εμφανίζεται στις κάρτες)"
+                    rows={3}
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                  />
+
+                  {/* Cover Image */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-[var(--hb-headline)]">
+                      Εικόνα εξωφύλλου
+                    </label>
+                    <div className="flex gap-3">
+                      <Input
+                        placeholder="URL εικόνας"
+                        value={coverImage}
+                        onChange={e => setCoverImage(e.target.value)}
+                        className="flex-1"
+                      />
+                      {coverImage && isCoverPreviewValid && (
+                        <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[var(--hb-border)]">
+                          <Image
+                            src={coverImage}
+                            alt="Preview"
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                            onError={() => setIsCoverPreviewValid(false)}
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                      {(!coverImage || !isCoverPreviewValid) && (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)]">
+                          <ImageIcon size={20} className="text-[var(--hb-muted)]" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <RichTextEditor
+                    label="Περιεχόμενο"
+                    value={contentHtml}
+                    onChange={setContentHtml}
+                    placeholder="Γράψτε το περιεχόμενο του άρθρου..."
+                  />
+
+                  {/* Tags */}
+                  <Input
+                    label="Tags"
+                    placeholder="Χωρισμένα με κόμμα (π.χ. ps5, rpg, exclusive)"
+                    value={tags}
+                    onChange={e => setTags(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between border-t border-[var(--hb-border)] px-6 py-4">
+                <button
+                  onClick={onClose}
+                  className="rounded-lg px-4 py-2 text-sm text-[var(--hb-muted)] transition hover:text-white"
+                >
+                  Ακύρωση
+                </button>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    icon={
+                      isSubmitting ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Save size={16} />
+                      )
+                    }
+                    onClick={() => handleSubmit('draft')}
+                    disabled={isSubmitting}
+                  >
+                    Αποθήκευση ως Draft
+                  </Button>
+                  <Button
+                    variant="primary"
+                    icon={
+                      isSubmitting ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Eye size={16} />
+                      )
+                    }
+                    onClick={() => handleSubmit('published')}
+                    disabled={isSubmitting}
+                  >
+                    Δημοσίευση
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </dialog>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}

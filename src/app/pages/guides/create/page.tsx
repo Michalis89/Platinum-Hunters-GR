@@ -1,8 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
-import { Button } from '@/app/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
 import { Select } from '@/app/components/ui/Select';
@@ -13,6 +12,7 @@ import GameDetailsInfo from '@/app/components/game-details/GameDetailsInfo';
 import { GuideStepsEditor } from '@/app/components/ui/GuideStepsEditor';
 import { Trophy, TrophySidebar } from '@/app/components/ui/TrophySidebar';
 import RichTextEditor from '@/app/components/ui/RichTextEditor';
+import Button from '@/app/components/ui/Button';
 
 interface GameDetailsInfoProps {
   readonly release_year?: number | null;
@@ -27,6 +27,7 @@ interface GameDetailsInfoProps {
 export default function GuideCreatePage() {
   const [search, setSearch] = useState<string>('');
   const [gameDetails, setGameDetails] = useState<GameDetailsInfoProps | null>(null);
+  const [gameImage, setGameImage] = useState<string>('');
   const [trophies, setTrophies] = useState<Trophy[]>([]);
   const [title, setTitle] = useState('');
   const [platform, setPlatform] = useState('PS5');
@@ -35,6 +36,7 @@ export default function GuideCreatePage() {
   const [hours, setHours] = useState<number | ''>('');
   const [introHtml, setIntroHtml] = useState('');
   const [steps, setSteps] = useState<string[]>(['']);
+  const [stepTitles, setStepTitles] = useState<string[]>(['']);
   const [submitting, setSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const RAWG_API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY!;
@@ -60,6 +62,16 @@ export default function GuideCreatePage() {
         }
       : null;
 
+  // Keep titles array in sync with steps array length
+  useEffect(() => {
+    setStepTitles(prev => {
+      if (steps.length > prev.length)
+        return [...prev, ...Array(steps.length - prev.length).fill('')];
+      if (steps.length < prev.length) return prev.slice(0, steps.length);
+      return prev;
+    });
+  }, [steps]);
+
   const handleSearch = async () => {
     if (!search.trim()) return;
 
@@ -75,6 +87,7 @@ export default function GuideCreatePage() {
       if (!game) {
         setGameDetails(null);
         setTrophies([]);
+        setGameImage('');
         return;
       }
 
@@ -87,6 +100,7 @@ export default function GuideCreatePage() {
         metacritic: game.metacritic ?? null,
         esrb_rating: game.esrb_rating?.name ?? null,
       });
+      setGameImage(game.background_image || '');
 
       // TODO: real NP communication id
       const npCommunicationId = 'NPWR00867_00';
@@ -112,7 +126,11 @@ export default function GuideCreatePage() {
       const payload = {
         title,
         platform,
-        gameImage: null,
+        gameImage: gameImage || null,
+        release_year: gameDetails?.release_year ?? null,
+        rating: gameDetails?.rating ?? null,
+        metacritic: gameDetails?.metacritic ?? null,
+        background_image: gameImage || null,
         trophies: {},
         difficulty: difficultyRating || null,
         hours: hours || null,
@@ -123,7 +141,7 @@ export default function GuideCreatePage() {
         steps: steps.map((html, idx) => {
           const plain = stripHtml(html);
           return {
-          title: `Βήμα ${idx + 1}`,
+            title: stepTitles[idx] || `Βήμα ${idx + 1}`,
             description: plain,
             content_rich: stepRich(plain),
             content_html: html || null,
@@ -159,12 +177,12 @@ export default function GuideCreatePage() {
 
   return (
     <PageWrapper>
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-10">
+      <div className="min-h-screen bg-[var(--hb-bg)] py-10 text-[var(--hb-text)]">
         <div className="mx-auto flex w-full max-w-6xl flex-col-reverse gap-10 md:flex-row">
           {/* LEFT PANEL – MAIN CONTENT */}
           <div className="flex-1">
             <div className="mb-6 flex items-center justify-between">
-              <h1 className="bg-gradient-to-r from-blue-300 to-emerald-400 bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
+              <h1 className="text-3xl font-extrabold text-[var(--hb-headline)] md:text-4xl">
                 Δημιουργία Trophy Guide
               </h1>
               {alert && (
@@ -182,9 +200,9 @@ export default function GuideCreatePage() {
 
             <form className="space-y-10" onSubmit={handleSubmit}>
               {/* GENERAL INFO */}
-              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-slate-100">
+                  <CardTitle className="text-lg font-semibold text-[var(--hb-headline)]">
                     🎮 Γενικές Πληροφορίες
                   </CardTitle>
                 </CardHeader>
@@ -196,6 +214,13 @@ export default function GuideCreatePage() {
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     required
+                  />
+
+                  <Input
+                    label="Εικόνα (URL)"
+                    placeholder="https://..."
+                    value={gameImage}
+                    onChange={e => setGameImage(e.target.value)}
                   />
 
                   <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -210,7 +235,7 @@ export default function GuideCreatePage() {
                   </div>
 
                   {gameDetails && (
-                    <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+                    <div className="rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
                       <GameDetailsInfo {...gameDetails} />
                     </div>
                   )}
@@ -225,9 +250,9 @@ export default function GuideCreatePage() {
               </Card>
 
               {/* PLATINUM STATS */}
-              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-slate-100">
+                  <CardTitle className="text-lg font-semibold text-[var(--hb-headline)]">
                     🏆 Platinum Στατιστικά
                   </CardTitle>
                 </CardHeader>
@@ -239,7 +264,9 @@ export default function GuideCreatePage() {
                     min={1}
                     max={10}
                     value={difficultyRating}
-                    onChange={e => setDifficultyRating(e.target.value ? Number(e.target.value) : '')}
+                    onChange={e =>
+                      setDifficultyRating(e.target.value ? Number(e.target.value) : '')
+                    }
                   />
                   <Input
                     label="Αριθμός Playthroughs"
@@ -259,14 +286,14 @@ export default function GuideCreatePage() {
               </Card>
 
               {/* GUIDE CONTENT */}
-              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-slate-100">
-                  ✏️ Περιεχόμενο Guide
-                </CardTitle>
-              </CardHeader>
+              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-[var(--hb-headline)]">
+                    ✏️ Περιεχόμενο Guide
+                  </CardTitle>
+                </CardHeader>
 
-              <CardContent className="space-y-6">
+                <CardContent className="space-y-6">
                   <RichTextEditor
                     label="Εισαγωγή"
                     placeholder="Ξεκινήστε με μια σύντομη περιγραφή..."
@@ -274,13 +301,40 @@ export default function GuideCreatePage() {
                     onChange={setIntroHtml}
                   />
                   <GuideStepsEditor value={steps} onChange={setSteps} />
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-[var(--hb-text)]">Τίτλοι βημάτων</h4>
+                    {stepTitles.map((title, idx) => (
+                      <Input
+                        key={idx}
+                        label={`Βήμα ${idx + 1}`}
+                        value={title}
+                        onChange={e => {
+                          const updated = [...stepTitles];
+                          updated[idx] = e.target.value;
+                          setStepTitles(updated);
+                        }}
+                      />
+                    ))}
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setSteps(prev => [...prev, '']);
+                          setStepTitles(prev => [...prev, '']);
+                        }}
+                        className="bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-lg shadow-black/30 transition hover:brightness-110"
+                      >
+                        + Προσθήκη Βήματος
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* TAGS & SUBMIT */}
-              <Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
+              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-slate-100">
+                  <CardTitle className="text-lg font-semibold text-[var(--hb-headline)]">
                     🏷️ Tags & Υποβολή
                   </CardTitle>
                 </CardHeader>
@@ -293,7 +347,7 @@ export default function GuideCreatePage() {
                       variant="secondary"
                       type="button"
                       disabled={submitting}
-                      className="border-slate-700 bg-slate-900/60 text-slate-200 transition hover:border-sky-500/70 hover:text-white"
+                      className="border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]"
                     >
                       💾 Αποθήκευση ως Draft
                     </Button>
@@ -301,7 +355,7 @@ export default function GuideCreatePage() {
                       variant="primary"
                       type="submit"
                       disabled={submitting}
-                      className="bg-gradient-to-r from-emerald-500 via-sky-500 to-blue-600 text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40"
+                      className="bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-lg shadow-black/30 transition hover:brightness-110"
                     >
                       {submitting ? 'Αποθήκευση...' : '🚀 Υποβολή Guide'}
                     </Button>

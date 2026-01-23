@@ -399,45 +399,47 @@ export default function Guides() {
     if (filteredGames && filteredGames.length > 0) {
       if (viewMode === 'timeline') {
         return (
-          <div className="min-h-[60vh]">
-            <div className="w-full overflow-x-auto pb-2">
-              <div className="flex w-fit gap-4 pr-2">
-                {timelineGroups.map(group => (
-                  <div
-                    key={group.year}
-                    className="min-w-[240px] rounded-xl border border-slate-800/70 bg-slate-900/60 p-3 shadow-inner shadow-slate-900/30"
-                  >
-                    <div className="flex items-center justify-between text-sm text-slate-200">
-                      <span className="text-base font-semibold text-emerald-200">{group.year}</span>
-                      <span className="rounded-full bg-slate-800/70 px-2 py-0.5 text-xs text-slate-300">
-                        {group.items.length}
-                      </span>
-                    </div>
-                    <div className="mt-3 space-y-2">
-                      {group.items.map(game => (
-                        <Link
-                          key={game.id}
-                          href={`/pages/guides/${game.slug}`}
-                          className="group flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-950/60 p-2 text-xs text-slate-200 transition hover:border-emerald-400/60"
-                        >
-                          <div className="relative h-12 w-12 overflow-hidden rounded-md bg-slate-800">
-                            <Image
-                              src={game.cover_image || game.background_image || '/og-image.png'}
-                              alt={game.title}
-                              fill
-                              className="object-cover"
-                              sizes="48px"
-                            />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="truncate text-[13px] font-semibold group-hover:text-emerald-200">
-                              {game.title}
-                            </p>
-                            <p className="truncate text-[11px] text-slate-400">
-                              {game.platforms?.slice(0, 2).join(' • ') || 'N/A'}
-                            </p>
-                          </div>
-                        </Link>
+            <div className="min-h-[60vh]">
+              <div className="w-full overflow-x-auto pb-2">
+                <div className="flex w-fit gap-4 pr-2">
+                  {timelineGroups.map(group => (
+                    <div
+                      key={group.year}
+                      className="min-w-[240px] rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 shadow-inner shadow-black/20"
+                    >
+                      <div className="flex items-center justify-between text-sm text-[var(--hb-text)]">
+                        <span className="text-base font-semibold text-[var(--hb-primary-strong)]">
+                          {group.year}
+                        </span>
+                        <span className="rounded-full bg-[var(--hb-card)] px-2 py-0.5 text-xs text-[var(--hb-muted)]">
+                          {group.items.length}
+                        </span>
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {group.items.map(game => (
+                          <Link
+                            key={game.id}
+                            href={`/pages/guides/${game.slug}`}
+                            className="group flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] p-2 text-xs text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/60"
+                          >
+                            <div className="relative h-12 w-12 overflow-hidden rounded-md bg-[var(--hb-panel)]">
+                              <Image
+                                src={game.cover_image || game.background_image || '/og-image.png'}
+                                alt={game.title}
+                                fill
+                                className="object-cover"
+                                sizes="48px"
+                              />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate text-[13px] font-semibold group-hover:text-[var(--hb-primary-strong)]">
+                                {game.title}
+                              </p>
+                              <p className="truncate text-[11px] text-[var(--hb-muted)]">
+                                {game.platforms?.slice(0, 2).join(' • ') || 'N/A'}
+                              </p>
+                            </div>
+                          </Link>
                       ))}
                     </div>
                   </div>
@@ -471,9 +473,9 @@ export default function Guides() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-16 text-slate-100">
+    <div className="min-h-screen bg-[var(--hb-bg)] px-4 py-16 text-[var(--hb-text)]">
       {showBacklogErrorOverlay && backlogError && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="w-full max-w-xl px-4">
             <Feedback
               variant="error"
@@ -496,22 +498,22 @@ export default function Guides() {
       <div className="relative mx-auto flex max-w-7xl flex-col gap-10">
         {/* Ambient glows */}
         <div className="pointer-events-none absolute inset-0 opacity-60">
-          <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-blue-600/20 blur-3xl" />
-          <div className="absolute right-0 top-32 h-52 w-52 rounded-full bg-emerald-400/20 blur-3xl" />
-          <div className="absolute bottom-10 left-1/2 h-24 w-48 -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-[var(--hb-primary-strong)]/15 blur-3xl" />
+          <div className="absolute right-0 top-32 h-52 w-52 rounded-full bg-[var(--hb-accent)]/15 blur-3xl" />
+          <div className="absolute bottom-10 left-1/2 h-24 w-48 -translate-x-1/2 rounded-full bg-[var(--hb-primary)]/10 blur-3xl" />
         </div>
 
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-900/60 px-6 py-8 shadow-2xl shadow-blue-900/40 backdrop-blur-xl md:px-10">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-8 shadow-2xl shadow-black/40 backdrop-blur-xl md:px-10">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-3">
-              <h1 className="flex items-center gap-3 text-4xl font-bold tracking-tight text-white md:text-5xl">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 via-sky-400 to-emerald-300 text-slate-950 shadow-lg shadow-blue-500/30">
+              <h1 className="flex items-center gap-3 text-4xl font-bold tracking-tight text-[var(--hb-headline)] md:text-5xl">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)] shadow-lg shadow-black/40">
                   <BookOpen className="h-6 w-6" />
                 </span>
                 Οδηγοί
               </h1>
-              <p className="max-w-2xl text-lg text-slate-300">
+              <p className="max-w-2xl text-lg text-[var(--hb-muted)]">
                 Για trophy hunters που θέλουν καθαρή, γρήγορη και αξιόπιστη πληροφόρηση. Βρες τον
                 επόμενο στόχο σου και ξεκίνα το κυνήγι για πλατίνα.
               </p>
@@ -520,24 +522,24 @@ export default function Guides() {
 
             <div className="flex flex-col gap-3 md:items-end">
               <div className="flex flex-wrap gap-3 text-sm">
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 shadow-inner shadow-slate-950/30">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Guides</p>
-                  <p className="text-center text-2xl font-semibold text-white">
+                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-3 shadow-inner shadow-black/20">
+                  <p className="text-xs uppercase tracking-wide text-[var(--hb-muted)]">Guides</p>
+                  <p className="text-center text-2xl font-semibold text-[var(--hb-headline)]">
                     {(games?.pagination?.total ?? combinedGames.length) || '–'}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 shadow-inner shadow-slate-950/30">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Developer</p>
-                  <p className="text-center text-2xl font-semibold text-sky-300">
+                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-3 shadow-inner shadow-black/20">
+                  <p className="text-xs uppercase tracking-wide text-[var(--hb-muted)]">Developer</p>
+                  <p className="text-center text-2xl font-semibold text-[var(--hb-primary-strong)]">
                     {games?.pagination?.meta?.developersCount ??
                       (combinedGames.length > 0
                         ? new Set(combinedGames.flatMap(g => g.developer || [])).size || '–'
                         : '–')}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 shadow-inner shadow-slate-950/30">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Genres</p>
-                  <p className="text-center text-2xl font-semibold text-sky-300">
+                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-3 shadow-inner shadow-black/20">
+                  <p className="text-xs uppercase tracking-wide text-[var(--hb-muted)]">Genres</p>
+                  <p className="text-center text-2xl font-semibold text-[var(--hb-primary-strong)]">
                     {games?.pagination?.meta?.genresCount ??
                       (combinedGames.length > 0
                         ? new Set(combinedGames.flatMap(g => g.genres || [])).size || '–'
@@ -548,7 +550,7 @@ export default function Guides() {
               {process.env.NODE_ENV !== 'production' && (
                 <Link
                   href="/pages/guides/create"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-blue-500/30 transition hover:shadow-blue-400/40"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--hb-primary-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--hb-bg)] shadow-lg shadow-black/30 transition hover:brightness-110"
                 >
                   <Plus className="h-4 w-4" />
                   Δημιουργία νέου guide
@@ -604,7 +606,7 @@ export default function Guides() {
 
           <div className="space-y-4">
             {/* Mobile filters + controls */}
-            <div className="flex flex-col gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-4 shadow-lg shadow-slate-900/40 backdrop-blur-xl">
+            <div className="flex flex-col gap-3 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-lg shadow-black/30 backdrop-blur-xl">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex-1">
                   <SearchBar
@@ -617,13 +619,13 @@ export default function Guides() {
                   />
                 </div>
                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  <div className="flex items-center gap-2 rounded-xl border border-slate-800/70 bg-slate-950/70 px-2 py-1">
+                  <div className="flex items-center gap-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-2 py-1">
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
                         viewMode === 'grid'
-                          ? 'bg-emerald-500/20 text-emerald-100'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)]'
+                          : 'text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                       }`}
                     >
                       Grid
@@ -632,8 +634,8 @@ export default function Guides() {
                       onClick={() => setViewMode('list')}
                       className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
                         viewMode === 'list'
-                          ? 'bg-emerald-500/20 text-emerald-100'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)]'
+                          : 'text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                       }`}
                     >
                       List
@@ -642,8 +644,8 @@ export default function Guides() {
                       onClick={() => setViewMode('compact')}
                       className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
                         viewMode === 'compact'
-                          ? 'bg-emerald-500/20 text-emerald-100'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)]'
+                          : 'text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                       }`}
                     >
                       Compact
@@ -664,19 +666,19 @@ export default function Guides() {
                       }}
                       className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
                         difficultyCategory === option.value
-                          ? 'border-sky-400/70 bg-sky-500/10 text-sky-100 shadow-[0_0_0_1px_rgba(56,189,248,0.35)]'
-                          : 'border-slate-800/70 bg-slate-950/70 text-slate-100 hover:border-sky-400/60 hover:text-white'
+                          ? 'border-[var(--hb-primary-strong)]/70 bg-[var(--hb-primary-strong)]/10 text-[var(--hb-primary-strong)] shadow-[0_0_0_1px_rgba(229,9,20,0.35)]'
+                          : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]/60 hover:text-[var(--hb-headline)]'
                       }`}
                     >
                       <span className="flex flex-col items-start leading-tight">
                         <span>{option.label}</span>
-                        <span className="text-[11px] text-slate-400">{option.desc}</span>
+                        <span className="text-[11px] text-[var(--hb-muted)]">{option.desc}</span>
                       </span>
                     </button>
                   ))}
                   <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="flex items-center gap-2 rounded-xl border border-slate-800/70 bg-slate-950/70 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-white lg:hidden"
+                    className="flex items-center gap-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)] lg:hidden"
                   >
                     Φίλτρα
                     <ChevronDown
@@ -759,7 +761,7 @@ export default function Guides() {
                     setPage(p => p + 1);
                   }}
                   disabled={isFetching}
-                  className="rounded-xl border border-slate-800/70 bg-slate-900/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-emerald-400/60 hover:text-white disabled:opacity-50"
+                  className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/60 hover:text-[var(--hb-headline)] disabled:opacity-50"
                 >
                   {isFetching ? 'Φόρτωση...' : 'Φόρτωσε περισσότερα'}
                 </button>

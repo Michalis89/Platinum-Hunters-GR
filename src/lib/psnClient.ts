@@ -1,4 +1,4 @@
-import { Trophy } from '@/app/components/ui/TrophySidebar';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   exchangeNpssoForAccessCode,
   exchangeAccessCodeForAuthTokens,
@@ -14,7 +14,6 @@ export async function getAccessToken(): Promise<string> {
   }
   const accessCode = await exchangeNpssoForAccessCode(npsso);
   const { accessToken } = await exchangeAccessCodeForAuthTokens(accessCode);
-  console.log('Access Token:', accessToken);
 
   return accessToken;
 }
@@ -25,13 +24,25 @@ export interface PsnGameResult {
   platform: 'PS3' | 'PS4' | 'PS5';
 }
 
+export type PsnTrophy = {
+  trophyId: number;
+  trophyType: string;
+  trophyName: string;
+  trophyDetail: string;
+  trophyIconUrl?: string | null;
+};
+
 export async function searchPsnGame(title: string): Promise<PsnGameResult | null> {
   const token = await getAccessToken();
 
-  const result = await makeUniversalSearch({ accessToken: token }, title, 'SocialAllAccounts');
+  const searchTypes: Array<Parameters<typeof makeUniversalSearch>[2]> = ['SocialAllAccounts'];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const game = result.domainResponses.find(r => r.domain === 'Games')?.results?.[0] as any;
+  let game: any = null;
+  for (const type of searchTypes) {
+    const result = await makeUniversalSearch({ accessToken: token }, title, type);
+    game = result.domainResponses.find(r => r.domain === 'Games')?.results?.[0] as any;
+    if (game?.id) break;
+  }
 
   if (!game?.id) return null;
 
@@ -45,7 +56,7 @@ export async function searchPsnGame(title: string): Promise<PsnGameResult | null
 export async function fetchTrophiesFromPsn(
   npCommunicationId: string,
   platform: 'PS3' | 'PS4' | 'PS5',
-): Promise<Trophy[]> {
+): Promise<PsnTrophy[]> {
   const token = await getAccessToken();
 
   const response = await getTitleTrophies(
@@ -54,7 +65,11 @@ export async function fetchTrophiesFromPsn(
     'all',
     platform === 'PS3' || platform === 'PS4' ? { npServiceName: 'trophy' } : undefined,
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+  if (!response || !Array.isArray((response as any).trophies)) {
+    throw new Error('PSN did not return a trophies array');
+  }
+
   return response.trophies.map((t: any) => ({
     trophyId: t.trophyId,
     trophyType: t.trophyType.toLowerCase(),

@@ -70,7 +70,7 @@ export default function PrivacyPage() {
                 <li>
                   <span className="font-semibold">Πληροφορίες προφίλ (προαιρετικές):</span> display
                   name, ονοματεπώνυμο, χώρα, bio, gaming IDs (PSN ID, Xbox Gamertag, Steam ID,
-                  Nintendo ID), αγαπημένα genres, αγαπημένη πλατφόρμα, έτος έναρξης gaming.
+                  Nintendo ID), αγαπημένα genres, αγαπημένη Κονσόλα, έτος έναρξης gaming.
                 </li>
                 <li>
                   <span className="font-semibold">Δεδομένα χρήσης:</span> ρυθμίσεις προφίλ, backlog

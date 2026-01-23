@@ -10,9 +10,9 @@ interface Props {
 export default function RunsFilter({ value, onChange, min, max }: Props) {
   return (
     <fieldset className="flex flex-col items-start gap-2 border-0 p-0">
-      <legend className="flex items-center gap-2 text-sm font-medium text-slate-200">
-        <Hourglass className="h-4 w-4 text-sky-300" />
-        Runs: <span className="text-sky-300">{value}</span>
+      <legend className="flex items-center gap-2 text-sm font-medium text-[var(--hb-text)]">
+        <Hourglass className="h-4 w-4 text-[var(--hb-primary-strong)]" />
+        Runs: <span className="text-[var(--hb-primary-strong)]">{value}</span>
       </legend>
       <input
         type="range"
@@ -21,7 +21,7 @@ export default function RunsFilter({ value, onChange, min, max }: Props) {
         step={1}
         value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="w-full accent-sky-400"
+        className="w-full accent-[var(--hb-primary-strong)]"
         aria-label={`Μέγιστα runs: ${value}`}
         aria-valuemin={min}
         aria-valuemax={max}
