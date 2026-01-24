@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 
 type IncomingStep = {
   title?: string;
@@ -40,6 +42,16 @@ export async function PUT(req: Request, context: any) {
       return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
     }
 
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!userData || !['admin', 'author'].includes(userData.role as string)) {
+      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+    }
+
     if (!(await context.params)?.id) {
       return NextResponse.json({ error: 'Missing game ID' }, { status: 400 });
     }
@@ -57,6 +69,35 @@ export async function PUT(req: Request, context: any) {
       cover_image,
       background_image,
     } = await req.json();
+    if (title !== undefined) {
+      const titleValidation = validatePlainText(title, 'Ο τίτλος');
+      if (!titleValidation.isValid) {
+        return NextResponse.json({ error: titleValidation.error }, { status: 400 });
+      }
+    }
+    if (description !== undefined) {
+      const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+      if (!descriptionValidation.isValid) {
+        return NextResponse.json({ error: descriptionValidation.error }, { status: 400 });
+      }
+    }
+    if (steps && Array.isArray(steps)) {
+      const stepTitles = steps.map((step: IncomingStep) => step.title ?? '').filter(Boolean);
+      const stepDescriptions = steps
+        .map((step: IncomingStep) => step.description ?? '')
+        .filter(Boolean);
+      const stepTitleValidation = validatePlainTextArray(stepTitles, 'Οι τίτλοι βημάτων');
+      if (!stepTitleValidation.isValid) {
+        return NextResponse.json({ error: stepTitleValidation.error }, { status: 400 });
+      }
+      const stepDescriptionValidation = validatePlainTextArray(
+        stepDescriptions,
+        'Οι περιγραφές βημάτων',
+      );
+      if (!stepDescriptionValidation.isValid) {
+        return NextResponse.json({ error: stepDescriptionValidation.error }, { status: 400 });
+      }
+    }
 
     if (!steps || !Array.isArray(steps)) {
       return NextResponse.json({ error: 'Invalid steps data' }, { status: 400 });
@@ -87,7 +128,9 @@ export async function PUT(req: Request, context: any) {
     // Update guide-level content if provided
     const guideUpdatePayload: Record<string, unknown> = {};
     if (guideContentRich !== undefined) guideUpdatePayload.content_rich = guideContentRich;
-    if (guideContentHtml !== undefined) guideUpdatePayload.content_html = guideContentHtml;
+    if (guideContentHtml !== undefined) {
+      guideUpdatePayload.content_html = sanitizeHtmlContent(guideContentHtml).trim() || null;
+    }
     if (description !== undefined) guideUpdatePayload.description = description;
     if (title !== undefined) guideUpdatePayload.title = title;
     if (difficulty_rating !== undefined) guideUpdatePayload.difficulty_rating = difficulty_rating;
@@ -137,14 +180,17 @@ export async function PUT(req: Request, context: any) {
     }
 
     // Insert new guide_steps
-    const newSteps = steps.map((step: IncomingStep, index: number) => ({
-      guide_id: guideId,
-      step_number: index + 1,
-      title: (step.title ?? `Βήμα ${index + 1}`).toString(),
-      description: step.description ?? (step.content_html ? stripHtml(step.content_html) : ''),
-      content_rich: step.content_rich ?? null,
-      content_html: step.content_html ?? null,
-    }));
+    const newSteps = steps.map((step: IncomingStep, index: number) => {
+      const sanitizedStepHtml = sanitizeHtmlContent(step.content_html).trim() || null;
+      return {
+        guide_id: guideId,
+        step_number: index + 1,
+        title: (step.title ?? `Βήμα ${index + 1}`).toString(),
+        description: step.description ?? (sanitizedStepHtml ? stripHtml(sanitizedStepHtml) : ''),
+        content_rich: step.content_rich ?? null,
+        content_html: sanitizedStepHtml,
+      };
+    });
 
     console.log('📝 Attempting to insert steps:', JSON.stringify(newSteps, null, 2));
 

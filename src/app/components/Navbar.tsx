@@ -74,7 +74,6 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <Sparkles size={18} />,
     category: 'anime',
     children: [
-      { href: '/pages/news?category=anime', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=anime',
         label: 'Anime Library',
@@ -89,7 +88,6 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <BookOpen size={18} />,
     category: 'manga',
     children: [
-      { href: '/pages/news?category=manga', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=manga',
         label: 'Manga Library',
@@ -104,7 +102,6 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <BookOpen size={18} />,
     category: 'books',
     children: [
-      { href: '/pages/news?category=books', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=books',
         label: 'Books Library',
@@ -119,7 +116,6 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <Film size={18} />,
     category: 'movies',
     children: [
-      { href: '/pages/news?category=movies', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=movies',
         label: 'Movies Library',
@@ -134,7 +130,6 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <Tv size={18} />,
     category: 'tv',
     children: [
-      { href: '/pages/news?category=tv', label: 'Άρθρα', icon: <FileText size={16} /> },
       { href: '/pages/backlog?category=tv', label: 'TV Library', icon: <ListChecks size={16} /> },
       { href: '/pages/reviews?category=tv', label: 'Reviews', icon: <Star size={16} /> },
     ],

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 
 async function insertActivity(
   supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
@@ -40,6 +42,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
     }
 
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!userData || !['admin', 'author'].includes(userData.role as string)) {
+      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+    }
+
     const {
       title,
       platform,
@@ -57,6 +69,32 @@ export async function POST(req: Request) {
       description,
       background_image,
     } = await req.json();
+    const titleValidation = validatePlainText(title, 'Ο τίτλος');
+    if (!titleValidation.isValid) {
+      return NextResponse.json({ error: titleValidation.error }, { status: 400 });
+    }
+    const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+    if (!descriptionValidation.isValid) {
+      return NextResponse.json({ error: descriptionValidation.error }, { status: 400 });
+    }
+    if (steps && Array.isArray(steps)) {
+      const stepTitles = steps.map((step: ScrapedStep) => step.title).filter(Boolean);
+      const stepDescriptions = steps
+        .map((step: ScrapedStep) => step.description)
+        .filter(Boolean);
+      const stepTitleValidation = validatePlainTextArray(stepTitles, 'Οι τίτλοι βημάτων');
+      if (!stepTitleValidation.isValid) {
+        return NextResponse.json({ error: stepTitleValidation.error }, { status: 400 });
+      }
+      const stepDescriptionValidation = validatePlainTextArray(
+        stepDescriptions,
+        'Οι περιγραφές βημάτων',
+      );
+      if (!stepDescriptionValidation.isValid) {
+        return NextResponse.json({ error: stepDescriptionValidation.error }, { status: 400 });
+      }
+    }
+    const sanitizedGuideContentHtml = sanitizeHtmlContent(guideContentHtml).trim() || null;
 
     // Create slug from title
     const slug = title
@@ -151,7 +189,7 @@ export async function POST(req: Request) {
           estimated_playthroughs: estimatedPlaythroughs,
           status: 'published',
           content_rich: guideContentRich ?? null,
-          content_html: guideContentHtml ?? null,
+          content_html: sanitizedGuideContentHtml,
         },
       ])
       .select('*')
@@ -172,7 +210,7 @@ export async function POST(req: Request) {
         title: step.title,
         description: step.description,
         content_rich: step.content_rich ?? null,
-        content_html: step.content_html ?? null,
+        content_html: sanitizeHtmlContent(step.content_html).trim() || null,
       }));
 
       const { error: stepsError } = await supabase.from('guide_steps').insert(guideSteps);

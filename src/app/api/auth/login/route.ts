@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     // DETERMINE IF IDENTIFIER IS EMAIL OR USERNAME
     // =====================================================
 
-    const supabase = await createRouteHandlerClient();
+    const supabase = await createRouteHandlerClient(undefined, { ignoreCookies: true });
     let email = identifier;
 
     // If identifier doesn't contain @, treat it as username
@@ -110,7 +110,10 @@ export async function POST(req: Request) {
     // FETCH USER PROFILE
     // =====================================================
 
-    const { data: userProfile, error: profileError } = await supabase
+    const authedSupabase = await createRouteHandlerClient(authData.session?.access_token, {
+      ignoreCookies: true,
+    });
+    const { data: userProfile, error: profileError } = await authedSupabase
       .from('users')
       .select('*')
       .eq('id', authData.user.id)
@@ -135,7 +138,7 @@ export async function POST(req: Request) {
     }
 
     // UPDATE LAST LOGIN
-    await supabase.rpc('update_user_last_login', { user_id: authData.user.id } as never);
+    await authedSupabase.rpc('update_user_last_login', { user_id: authData.user.id } as never);
     // SET SESSION COOKIES
     if (authData.session) {
       const { cookies } = await import('next/headers');

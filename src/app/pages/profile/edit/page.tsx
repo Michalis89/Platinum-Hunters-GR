@@ -150,9 +150,9 @@ const CODING_FOCUS = [
   'Embedded',
   'Other',
 ];
-const PET_TYPES = ['Dog', 'Cat', 'Bird', 'Fish', 'Reptile', 'Other'];
-const VAPE_DEVICES = ['Pod', 'Mod', 'Disposable', 'MTL', 'DTL', 'Other'];
-const VAPE_FLAVORS = ['Tobacco', 'Dessert', 'Fruits', 'Menthol', 'Drinks', 'Other'];
+const PET_TYPES = ['Σκύλος', 'Γάτα', 'Πτηνά', 'Ψάρια', 'Ερπετά', 'Άλλα'];
+const VAPE_DEVICES = ['Pod', 'Mod', 'Disposable', 'MTL', 'DTL', 'Άλλα'];
+const VAPE_FLAVORS = ['Tobacco', 'Dessert', 'Fruits', 'Menthol', 'Drinks', 'Άλλα'];
 const BOOK_GENRES = [
   'Fantasy',
   'Sci-Fi',
@@ -2098,7 +2098,9 @@ export default function EditProfilePage() {
                   <div>
                     <label className="mb-2 block text-xs text-[var(--hb-text)]">
                       Πληκτρολόγησε{' '}
-                      <code className="rounded bg-[var(--hb-card)] px-2 py-1 text-red-300">ΔΙΑΓΡΑΦΗ</code>{' '}
+                      <code className="rounded bg-[var(--hb-card)] px-2 py-1 text-red-300">
+                        ΔΙΑΓΡΑΦΗ
+                      </code>{' '}
                       για να επιβεβαιώσεις:
                     </label>
                     <Input

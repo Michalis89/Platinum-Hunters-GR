@@ -1,321 +1,83 @@
-'use client';
+import type { Metadata } from 'next';
+import NewsPageClient from '@/app/pages/news/NewsPageClient';
+import { buildMetadata } from '@/utils/seo/metadata/helpers';
+import {
+  CATEGORY_LABELS,
+  CATEGORY_SUBTITLES,
+  TOPIC_LABELS,
+} from '@/app/pages/news/constants';
+import type { ArticleCategory } from '@/types/database';
+import StructuredData from '@/utils/seo/StructuredData';
+import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
+import { SITE_URL } from '@/config/site';
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { FileText, Clock, Eye, Heart, Calendar, User, Tag, Loader2 } from 'lucide-react';
-import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
-
-interface ArticleWithAuthor extends ArticleRow {
-  users?: {
-    username: string;
-    display_name: string | null;
-    avatar_url: string | null;
-  } | null;
-}
-
-const CATEGORY_LABELS: Record<ArticleCategory, string> = {
-  gaming: 'Gaming',
-  anime: 'Anime',
-  manga: 'Manga',
-  books: 'Βιβλία',
-  movies: 'Movies',
-  tv: 'TV Series',
-  coding: 'Coding',
-  pet: 'Pet',
-  vape: 'Vape',
+type NewsPageProps = {
+  searchParams: Promise<{ category?: string; topic?: string }>;
 };
 
-const TOPIC_LABELS: Record<ArticleTopic, string> = {
-  articles: 'Άρθρα',
-  reviews: 'Reviews',
-  tutorials: 'Tutorials',
-  guides: 'Οδηγοί',
-  'weird-cases': 'Weird Cases',
-  care: 'Φροντίδα',
-  experiences: 'Εμπειρίες',
-  health: 'Υγεία',
-  devices: 'Συσκευές',
-  liquids: 'Υγρά',
-};
+export async function generateMetadata({ searchParams }: NewsPageProps): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const rawCategory = resolvedSearchParams.category;
+  const category =
+    rawCategory && CATEGORY_LABELS[rawCategory as ArticleCategory]
+      ? (rawCategory as ArticleCategory)
+      : undefined;
+  const rawTopic = resolvedSearchParams.topic as keyof typeof TOPIC_LABELS | undefined;
+  const topic = rawTopic === 'articles' ? undefined : rawTopic;
+  const categoryLabel = category ? CATEGORY_LABELS[category] : undefined;
+  const topicLabel = topic ? TOPIC_LABELS[topic] : undefined;
+  const heading = topicLabel ?? 'Άρθρα';
 
-function normalizeSlug(value: string) {
-  const trimmed = value.replace(/^-+/, '').replace(/-+$/, '');
-  return trimmed || value;
+  const title = categoryLabel
+    ? `${heading} για ${categoryLabel} | Χομπίστας`
+    : `${heading} | Χομπίστας`;
+
+  const description =
+    category && categoryLabel
+      ? CATEGORY_SUBTITLES[category] ??
+        'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Χομπίστα.'
+      : 'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Χομπίστα.';
+
+  const params = new URLSearchParams();
+  if (category) params.set('category', category);
+  if (topic) params.set('topic', topic);
+
+  // Canonical strategy: treat category/topic query pages as first-class and keep their querystring.
+  const path = params.toString() ? `/pages/news?${params.toString()}` : '/pages/news';
+
+  return buildMetadata({
+    title,
+    description,
+    path,
+  });
 }
 
-function ArticleCard({ article }: { article: ArticleWithAuthor }) {
-  const normalizedSlug = normalizeSlug(article.slug);
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-lg transition hover:border-[var(--hb-primary-strong)]/50 hover:shadow-xl"
-    >
-      {/* Cover Image */}
-      <Link href={`/pages/news/${normalizedSlug}`} className="block">
-        <div className="relative aspect-video overflow-hidden bg-[var(--hb-surface)]">
-          {article.cover_image ? (
-            <Image
-              src={article.cover_image}
-              alt={article.title}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition duration-300 group-hover:scale-105"
-              unoptimized
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--hb-primary-strong)] to-[var(--hb-accent)]">
-              <FileText size={48} className="text-white/50" />
-            </div>
-          )}
-          {/* Category Badge */}
-          <div className="absolute left-3 top-3">
-            <span className="rounded-full bg-[var(--hb-primary-strong)] px-3 py-1 text-xs font-semibold text-white shadow-lg">
-              {CATEGORY_LABELS[article.category]}
-            </span>
-          </div>
-          {/* Topic Badge */}
-          <div className="absolute right-3 top-3">
-            <span className="rounded-full bg-[var(--hb-panel)]/90 px-3 py-1 text-xs font-medium text-[var(--hb-text)] backdrop-blur-sm">
-              {TOPIC_LABELS[article.topic]}
-            </span>
-          </div>
-        </div>
-      </Link>
+export default async function NewsPage({ searchParams }: NewsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const rawCategory = resolvedSearchParams.category;
+  const category =
+    rawCategory && CATEGORY_LABELS[rawCategory as ArticleCategory]
+      ? (rawCategory as ArticleCategory)
+      : undefined;
+  const rawTopic = resolvedSearchParams.topic as keyof typeof TOPIC_LABELS | undefined;
+  const topic = rawTopic === 'articles' ? undefined : rawTopic;
+  const categoryLabel = category ? CATEGORY_LABELS[category] : undefined;
+  const topicLabel = topic ? TOPIC_LABELS[topic] : undefined;
+  const heading = topicLabel ?? 'Άρθρα';
+  const breadcrumb = [
+    { name: 'Αρχική', url: `${SITE_URL}/` },
+    { name: 'Άρθρα', url: `${SITE_URL}/pages/news` },
+  ];
 
-      {/* Content */}
-      <div className="p-4">
-        <Link href={`/pages/news/${normalizedSlug}`}>
-          <h2 className="mb-2 line-clamp-2 text-lg font-semibold text-[var(--hb-headline)] transition group-hover:text-[var(--hb-primary-strong)]">
-            {article.title}
-          </h2>
-        </Link>
-
-        {article.description && (
-          <p className="mb-3 line-clamp-2 text-sm text-[var(--hb-muted)]">
-            {article.description}
-          </p>
-        )}
-
-        {/* Tags */}
-        {article.tags && article.tags.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-1">
-            {article.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 rounded-md bg-[var(--hb-surface)] px-2 py-0.5 text-xs text-[var(--hb-muted)]"
-              >
-                <Tag size={10} />
-                {tag}
-              </span>
-            ))}
-            {article.tags.length > 3 && (
-              <span className="text-xs text-[var(--hb-muted)]">+{article.tags.length - 3}</span>
-            )}
-          </div>
-        )}
-
-        {/* Meta */}
-        <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--hb-muted)]">
-          {/* Author */}
-          {article.users && (
-            <div className="flex items-center gap-1">
-              <User size={12} />
-              <span>{article.users.display_name || article.users.username}</span>
-            </div>
-          )}
-
-          {/* Date */}
-          {article.published_at && (
-            <div className="flex items-center gap-1">
-              <Calendar size={12} />
-              <span>{new Date(article.published_at).toLocaleDateString('el-GR')}</span>
-            </div>
-          )}
-
-          {/* Reading time */}
-          {article.reading_time_minutes && (
-            <div className="flex items-center gap-1">
-              <Clock size={12} />
-              <span>{article.reading_time_minutes} λεπτά</span>
-            </div>
-          )}
-
-          {/* Stats */}
-          <div className="ml-auto flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <Eye size={12} />
-              <span>{article.views}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Heart size={12} />
-              <span>{article.likes}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.article>
-  );
-}
-
-function NewsFallback() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-      <Loader2 className="h-8 w-8 animate-spin text-[var(--hb-primary)]" />
-    </div>
-  );
-}
-
-export default function NewsPage() {
-  return (
-    <Suspense fallback={<NewsFallback />}>
-      <NewsPageContent />
-    </Suspense>
-  );
-}
-
-function NewsPageContent() {
-  const searchParams = useSearchParams();
-  const category = searchParams.get('category') as ArticleCategory | null;
-  const topic = searchParams.get('topic') as ArticleTopic | null;
-  const normalizedTopic = topic === 'articles' ? null : topic;
-
-  const [articles, setArticles] = useState<ArticleWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
-
-  useEffect(() => {
-    const fetchArticles = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const params = new URLSearchParams();
-        if (category) params.set('category', category);
-        if (normalizedTopic) params.set('topic', normalizedTopic);
-        params.set('status', 'published');
-        params.set('limit', '20');
-
-        const response = await fetch(`/api/articles?${params.toString()}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch articles');
-        }
-
-        const data = await response.json();
-        setArticles(data.articles || []);
-        setTotal(data.total || 0);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, [category, normalizedTopic]);
-
-  const categoryLabel = category ? CATEGORY_LABELS[category] : null;
-  const topicLabel = normalizedTopic ? TOPIC_LABELS[normalizedTopic] : null;
-
-  const pageTitle = categoryLabel
-    ? topicLabel
-      ? `${topicLabel} - ${categoryLabel}`
-      : categoryLabel
-    : 'Άρθρα';
+  if (categoryLabel) {
+    const label = topicLabel ? `${heading} • ${categoryLabel}` : categoryLabel;
+    breadcrumb.push({ name: label, url: `${SITE_URL}/pages/news?category=${category}` });
+  }
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] px-4 py-16 text-[var(--hb-text)]">
-      {/* Ambient glows */}
-      <div className="pointer-events-none absolute inset-0 opacity-80 blur-[90px]">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)]" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-7xl">
-        {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative mb-10 overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-8 shadow-2xl backdrop-blur-xl md:px-10"
-        >
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-[var(--hb-headline)] md:text-4xl">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] to-[var(--hb-accent)] text-white shadow-lg">
-                  <FileText className="h-6 w-6" />
-                </span>
-                {pageTitle}
-              </h1>
-              <p className="text-[var(--hb-muted)]">
-                {total > 0 ? `${total} άρθρα` : 'Εξερεύνησε τα άρθρα μας'}
-              </p>
-            </div>
-
-            {/* Category filter pills */}
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/pages/news"
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                  !category
-                    ? 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)] ring-1 ring-[var(--hb-primary-strong)]/50'
-                    : 'border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-headline)]'
-                }`}
-              >
-                Όλα
-              </Link>
-              {(Object.keys(CATEGORY_LABELS) as ArticleCategory[]).map((cat) => (
-                <Link
-                  key={cat}
-                  href={`/pages/news?category=${cat}`}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    category === cat
-                      ? 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)] ring-1 ring-[var(--hb-primary-strong)]/50'
-                      : 'border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-headline)]'
-                  }`}
-                >
-                  {CATEGORY_LABELS[cat]}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-[var(--hb-primary-strong)]" />
-          </div>
-        ) : error ? (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-12 text-center">
-            <p className="text-red-400">{error}</p>
-          </div>
-        ) : articles.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-20 text-center">
-            <FileText className="mx-auto mb-4 h-16 w-16 text-[var(--hb-muted)]" />
-            <h2 className="mb-2 text-xl font-semibold text-[var(--hb-headline)]">Δεν υπάρχουν άρθρα</h2>
-            <p className="text-[var(--hb-muted)]">
-              {category
-                ? `Δεν βρέθηκαν άρθρα στην κατηγορία "${categoryLabel}"`
-                : 'Δεν υπάρχουν ακόμα δημοσιευμένα άρθρα'}
-            </p>
-          </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </motion.div>
-        )}
-      </div>
-    </div>
+    <>
+      <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
+      <NewsPageClient />
+    </>
   );
 }

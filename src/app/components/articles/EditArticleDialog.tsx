@@ -9,6 +9,8 @@ import { Textarea } from '../ui/Textarea';
 import RichTextEditor from '../ui/RichTextEditor';
 import Button from '../ui/Button';
 import type { ArticleCategory, ArticleTopic, ArticleStatus, ArticleRow } from '@/types/database';
+import { validatePlainText } from '@/utils/validation/text';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 interface EditArticleDialogProps {
   isOpen: boolean;
@@ -129,6 +131,7 @@ export default function EditArticleDialog({
   const [status, setStatus] = useState<ArticleStatus>(article.status);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [isCoverPreviewValid, setIsCoverPreviewValid] = useState(true);
 
   useEffect(() => {
@@ -152,6 +155,7 @@ export default function EditArticleDialog({
     setTags((article.tags ?? []).join(', '));
     setStatus(article.status);
     setError(null);
+    setWarning(null);
     setIsCoverPreviewValid(true);
   }, [article, isOpen]);
 
@@ -166,9 +170,27 @@ export default function EditArticleDialog({
     setIsCoverPreviewValid(true);
   }, [coverImage]);
 
+  const titleValidation = validatePlainText(title, 'Ο τίτλος');
+  const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+  const tagsValidation = validatePlainText(tags, 'Τα tags');
+  const hasPlainTextError =
+    !titleValidation.isValid || !descriptionValidation.isValid || !tagsValidation.isValid;
+
   const handleSubmit = async () => {
     if (!title.trim()) {
       setError('Παρακαλώ εισάγετε τίτλο');
+      return;
+    }
+    if (!titleValidation.isValid) {
+      setError(titleValidation.error || 'Ο τίτλος δεν πρέπει να περιέχει HTML.');
+      return;
+    }
+    if (!descriptionValidation.isValid) {
+      setError(descriptionValidation.error || 'Η περιγραφή δεν πρέπει να περιέχει HTML.');
+      return;
+    }
+    if (!tagsValidation.isValid) {
+      setError(tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.');
       return;
     }
 
@@ -181,6 +203,12 @@ export default function EditArticleDialog({
         .map(tag => tag.trim())
         .filter(Boolean);
       const cleanedContentHtml = stripEmptyParagraphs(contentHtml || '').trim();
+      const sanitizedContentHtml = sanitizeHtmlContent(cleanedContentHtml).trim();
+      if (sanitizedContentHtml !== cleanedContentHtml) {
+        setWarning('Unsupported formatting was removed for security.');
+      } else {
+        setWarning(null);
+      }
 
       const response = await fetch(`/api/articles/${article.id}`, {
         method: 'PUT',
@@ -193,7 +221,7 @@ export default function EditArticleDialog({
           topic,
           tags: tagsArray,
           cover_image: coverImage.trim() || null,
-          content_html: cleanedContentHtml || null,
+          content_html: sanitizedContentHtml || null,
           status,
         }),
       });
@@ -258,6 +286,11 @@ export default function EditArticleDialog({
                       {error}
                     </div>
                   )}
+                  {warning && (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                      {warning}
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-1">
@@ -317,7 +350,13 @@ export default function EditArticleDialog({
                     placeholder="Εισάγετε τον τίτλο του άρθρου"
                     value={title}
                     onChange={event => setTitle(event.target.value)}
+                    error={!titleValidation.isValid}
                   />
+                  {!titleValidation.isValid && (
+                    <p className="text-xs text-red-400">
+                      Ο τίτλος δεν πρέπει να περιέχει HTML.
+                    </p>
+                  )}
 
                   <Textarea
                     label="Περιγραφή"
@@ -325,7 +364,13 @@ export default function EditArticleDialog({
                     rows={3}
                     value={description}
                     onChange={event => setDescription(event.target.value)}
+                    className={!descriptionValidation.isValid ? 'border-red-500' : undefined}
                   />
+                  {!descriptionValidation.isValid && (
+                    <p className="text-xs text-red-400">
+                      Η περιγραφή δεν πρέπει να περιέχει HTML.
+                    </p>
+                  )}
 
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-[var(--hb-headline)]">
@@ -370,7 +415,13 @@ export default function EditArticleDialog({
                     placeholder="Χωρισμένα με κόμμα"
                     value={tags}
                     onChange={event => setTags(event.target.value)}
+                    error={!tagsValidation.isValid}
                   />
+                  {!tagsValidation.isValid && (
+                    <p className="text-xs text-red-400">
+                      {tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.'}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -391,7 +442,7 @@ export default function EditArticleDialog({
                     )
                   }
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || hasPlainTextError}
                 >
                   Αποθήκευση
                 </Button>

@@ -7,7 +7,15 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import type { Database } from '@/types/database';
 
-export async function createRouteHandlerClient(accessTokenOverride?: string) {
+type RouteHandlerOptions = {
+  ignoreCookies?: boolean;
+};
+
+export async function createRouteHandlerClient(
+  accessTokenOverride?: string,
+  options: RouteHandlerOptions = {},
+) {
+  const { ignoreCookies = false } = options;
   const cookieStore = await cookies();
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,8 +26,13 @@ export async function createRouteHandlerClient(accessTokenOverride?: string) {
   }
 
   // Get auth tokens from cookies (unless an override is provided)
-  const accessToken = accessTokenOverride || cookieStore.get('sb-access-token')?.value;
-  const refreshToken = accessTokenOverride ? undefined : cookieStore.get('sb-refresh-token')?.value;
+  const accessToken =
+    accessTokenOverride ??
+    (ignoreCookies ? undefined : cookieStore.get('sb-access-token')?.value);
+  const refreshToken =
+    accessTokenOverride !== undefined || ignoreCookies
+      ? undefined
+      : cookieStore.get('sb-refresh-token')?.value;
 
   const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {

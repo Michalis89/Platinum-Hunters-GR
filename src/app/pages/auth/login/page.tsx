@@ -1,10 +1,15 @@
+import { Suspense } from 'react';
 import LoginForm from '@/app/components/auth/LoginForm';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
+import { Footer } from '@/app/components/layout/Footer';
+import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
-export const metadata = {
-  title: 'Σύνδεση | Hobistas',
-  description: 'Συνδεθείτε στο Hobistas — το hub για όλα τα χόμπι σας.',
-};
+export const metadata = buildMetadata({
+  title: 'Σύνδεση | Χομπίστας',
+  description: 'Συνδέσου στο Χομπίστας για να οργανώσεις όλα τα χόμπι σου.',
+  path: '/pages/auth/login',
+  noindex: true,
+});
 
 export default function LoginPage() {
   return (
@@ -20,7 +25,7 @@ export default function LoginPage() {
             <div className="space-y-6">
               <div className="space-y-4">
                 <h1 className="bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-4xl font-black leading-tight text-transparent md:text-5xl">
-                  Μπες ξανά στο Hobistas
+                  Μπες ξανά στο Χομπίστας
                 </h1>
                 <p className="max-w-xl text-lg text-[var(--hb-muted)]">
                   Όλα τα χόμπι σου σε ένα ενιαίο περιβάλλον. <br />
@@ -32,7 +37,7 @@ export default function LoginPage() {
               <div className="grid gap-3 text-sm text-[var(--hb-headline)] md:grid-cols-2">
                 <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[0_15px_40px_rgba(0,0,0,0.35)]">
                   <div>
-                    <p className="font-semibold">Το Hobistas δεν είναι πλατφόρμα. Είναι χώρος.</p>
+                    <p className="font-semibold">Ο Χομπίστας δεν είναι πλατφόρμα. Είναι χώρος.</p>
                     <p className="text-[var(--hb-muted)]">
                       Για όσους ζουν τα χόμπι τους και θέλουν να τα κρατούν οργανωμένα, καθαρά και
                       χωρίς θόρυβο.
@@ -54,12 +59,16 @@ export default function LoginPage() {
             <div className="relative">
               <div className="bg-[var(--hb-primary-strong)]/30 absolute -right-6 bottom-6 h-16 w-16 rounded-full blur-2xl" />
               <div className="relative">
-                <LoginForm />
+                <Suspense fallback={<div className="h-[420px]" />}>
+                  <LoginForm />
+                </Suspense>
               </div>
             </div>
           </div>
         </div>
       </PageWrapper>
+
+      <Footer />
     </div>
   );
 }

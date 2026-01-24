@@ -1,6 +1,7 @@
 import { GuideProps, Trophy } from '@/types/interfaces';
 import { Trophy as TrophyIcon, BookOpen } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 interface TrophyGuidesProps {
   readonly guides: GuideProps[];
@@ -78,8 +79,9 @@ function renderStepContent(
   contentHtml: string | null | undefined,
   fallbackDescription: string | undefined,
 ): ReactNode {
-  if (contentHtml) {
-    return <div dangerouslySetInnerHTML={{ __html: contentHtml }} />;
+  const sanitizedHtml = sanitizeHtmlContent(contentHtml).trim();
+  if (sanitizedHtml) {
+    return <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
   }
 
   if (Array.isArray((contentRich as { content?: unknown[] })?.content)) {

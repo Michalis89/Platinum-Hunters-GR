@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { Eye, EyeOff, LogIn, AlertCircle, Mail } from 'lucide-react';
 import Link from 'next/link';
@@ -19,7 +19,12 @@ const RETURN_URL_KEY = 'platinum-hunters-return-url';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
+
+  // Get redirect URL from query param (priority) or sessionStorage (fallback)
+  const redirectParam = searchParams.get('redirect');
+
   const inputClasses =
     'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
 
@@ -170,16 +175,20 @@ export default function LoginForm() {
       // Fetch session to update Redux state
       await dispatch(fetchSession());
 
-      // Get return URL (saved before session expiry logout) or default to home
+      // Get return URL: query param (priority) > sessionStorage (fallback) > home
       let redirectUrl = '/';
-      try {
-        const savedUrl = sessionStorage.getItem(RETURN_URL_KEY);
-        if (savedUrl) {
-          redirectUrl = savedUrl;
-          sessionStorage.removeItem(RETURN_URL_KEY); // Clean up
+      if (redirectParam) {
+        redirectUrl = decodeURIComponent(redirectParam);
+      } else {
+        try {
+          const savedUrl = sessionStorage.getItem(RETURN_URL_KEY);
+          if (savedUrl) {
+            redirectUrl = savedUrl;
+            sessionStorage.removeItem(RETURN_URL_KEY); // Clean up
+          }
+        } catch {
+          // ignore storage errors
         }
-      } catch {
-        // ignore storage errors
       }
 
       // Redirect after short delay
@@ -208,7 +217,7 @@ export default function LoginForm() {
               <LogIn className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
-              <span className="font-semibold">Σύνδεση στο Hobistas</span>
+              <span className="font-semibold">Σύνδεση στον Χομπίστα</span>
             </span>
           </span>
         </CardTitle>
@@ -307,7 +316,7 @@ export default function LoginForm() {
           <div className="pt-1 text-center text-sm text-[var(--hb-muted)]">
             Δεν έχεις λογαριασμό;{' '}
             <Link
-              href="/pages/auth/register"
+              href={redirectParam ? `/pages/auth/register?redirect=${encodeURIComponent(redirectParam)}` : '/pages/auth/register'}
               className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
             >
               Δημιούργησε έναν

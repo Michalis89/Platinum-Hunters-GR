@@ -9,6 +9,8 @@ import { Textarea } from '../ui/Textarea';
 import RichTextEditor from '../ui/RichTextEditor';
 import Button from '../ui/Button';
 import type { ArticleCategory, ArticleTopic, ArticleStatus } from '@/types/database';
+import { validatePlainText } from '@/utils/validation/text';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 interface AddArticleDialogProps {
   isOpen: boolean;
@@ -137,6 +139,7 @@ export default function AddArticleDialog({
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   // Handle dialog open/close
   useEffect(() => {
@@ -160,6 +163,7 @@ export default function AddArticleDialog({
       setContentHtml('');
       setTags('');
       setError(null);
+      setWarning(null);
       setIsCoverPreviewValid(true);
     }
   }, [isOpen]);
@@ -175,6 +179,12 @@ export default function AddArticleDialog({
     setIsCoverPreviewValid(true);
   }, [coverImage]);
 
+  const titleValidation = validatePlainText(title, 'Ο τίτλος');
+  const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+  const tagsValidation = validatePlainText(tags, 'Τα tags');
+  const hasPlainTextError =
+    !titleValidation.isValid || !descriptionValidation.isValid || !tagsValidation.isValid;
+
   const handleSubmit = async (saveStatus: ArticleStatus) => {
     if (!category) {
       setError('Παρακαλώ επιλέξτε κατηγορία');
@@ -182,6 +192,18 @@ export default function AddArticleDialog({
     }
     if (!title.trim()) {
       setError('Παρακαλώ εισάγετε τίτλο');
+      return;
+    }
+    if (!titleValidation.isValid) {
+      setError(titleValidation.error || 'Ο τίτλος δεν πρέπει να περιέχει HTML.');
+      return;
+    }
+    if (!descriptionValidation.isValid) {
+      setError(descriptionValidation.error || 'Η περιγραφή δεν πρέπει να περιέχει HTML.');
+      return;
+    }
+    if (!tagsValidation.isValid) {
+      setError(tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.');
       return;
     }
 
@@ -195,6 +217,12 @@ export default function AddArticleDialog({
         .map(t => t.trim())
         .filter(Boolean);
       const cleanedContentHtml = stripEmptyParagraphs(contentHtml || '').trim();
+      const sanitizedContentHtml = sanitizeHtmlContent(cleanedContentHtml).trim();
+      if (sanitizedContentHtml !== cleanedContentHtml) {
+        setWarning('Unsupported formatting was removed for security.');
+      } else {
+        setWarning(null);
+      }
 
       const response = await fetch('/api/articles', {
         method: 'POST',
@@ -207,7 +235,7 @@ export default function AddArticleDialog({
           topic,
           tags: tagsArray,
           cover_image: coverImage.trim() || null,
-          content_html: cleanedContentHtml || null,
+          content_html: sanitizedContentHtml || null,
           status: saveStatus,
           published_at: saveStatus === 'published' ? new Date().toISOString() : null,
         }),
@@ -275,6 +303,11 @@ export default function AddArticleDialog({
                       {error}
                     </div>
                   )}
+                  {warning && (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                      {warning}
+                    </div>
+                  )}
 
                   {/* Type & Category Row */}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -339,7 +372,13 @@ export default function AddArticleDialog({
                     placeholder="Εισάγετε τον τίτλο του άρθρου"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
+                    error={!titleValidation.isValid}
                   />
+                  {!titleValidation.isValid && (
+                    <p className="text-xs text-red-400">
+                      Ο τίτλος δεν πρέπει να περιέχει HTML.
+                    </p>
+                  )}
 
                   {/* Description */}
                   <Textarea
@@ -348,7 +387,13 @@ export default function AddArticleDialog({
                     rows={3}
                     value={description}
                     onChange={e => setDescription(e.target.value)}
+                    className={!descriptionValidation.isValid ? 'border-red-500' : undefined}
                   />
+                  {!descriptionValidation.isValid && (
+                    <p className="text-xs text-red-400">
+                      Η περιγραφή δεν πρέπει να περιέχει HTML.
+                    </p>
+                  )}
 
                   {/* Cover Image */}
                   <div className="space-y-1">
@@ -397,7 +442,13 @@ export default function AddArticleDialog({
                     placeholder="Χωρισμένα με κόμμα (π.χ. ps5, rpg, exclusive)"
                     value={tags}
                     onChange={e => setTags(e.target.value)}
+                    error={!tagsValidation.isValid}
                   />
+                  {!tagsValidation.isValid && (
+                    <p className="text-xs text-red-400">
+                      {tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.'}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -420,7 +471,7 @@ export default function AddArticleDialog({
                       )
                     }
                     onClick={() => handleSubmit('draft')}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || hasPlainTextError}
                   >
                     Αποθήκευση ως Draft
                   </Button>
@@ -434,7 +485,7 @@ export default function AddArticleDialog({
                       )
                     }
                     onClick={() => handleSubmit('published')}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || hasPlainTextError}
                   >
                     Δημοσίευση
                   </Button>

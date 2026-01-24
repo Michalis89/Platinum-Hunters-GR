@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { Eye, EyeOff, UserPlus, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,7 +49,12 @@ interface RegisterFormProps {
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
+
+  // Get redirect URL from query param
+  const redirectParam = searchParams.get('redirect');
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -233,7 +238,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push('/pages/guides');
+          // Use redirect param if present, otherwise default to hobbies
+          const redirectUrl = redirectParam ? decodeURIComponent(redirectParam) : '/pages/hobbies';
+          router.push(redirectUrl);
         }
       }, 1500);
     } catch (error) {
@@ -597,7 +604,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         <div className="mt-4 text-center text-sm text-[var(--hb-muted)]">
           Έχεις ήδη λογαριασμό;{' '}
           <Link
-            href="/pages/auth/login"
+            href={redirectParam ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}` : '/pages/auth/login'}
             className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
           >
             Σύνδεση

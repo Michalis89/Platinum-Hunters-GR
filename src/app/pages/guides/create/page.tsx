@@ -13,6 +13,8 @@ import { GuideStepsEditor } from '@/app/components/ui/GuideStepsEditor';
 import { Trophy, TrophySidebar } from '@/app/components/ui/TrophySidebar';
 import RichTextEditor from '@/app/components/ui/RichTextEditor';
 import Button from '@/app/components/ui/Button';
+import { validatePlainText } from '@/utils/validation/text';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 interface GameDetailsInfoProps {
   readonly release_year?: number | null;
@@ -39,6 +41,7 @@ export default function GuideCreatePage() {
   const [stepTitles, setStepTitles] = useState<string[]>(['']);
   const [submitting, setSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const RAWG_API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY!;
 
   const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
@@ -117,12 +120,37 @@ export default function GuideCreatePage() {
     }
   };
 
+  const titleValidation = validatePlainText(title, 'Ο τίτλος');
+  const hasTitleHtml = !titleValidation.isValid;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAlert(null);
+    setWarning(null);
+    if (!titleValidation.isValid) {
+      setAlert({
+        type: 'error',
+        message: titleValidation.error || 'Ο τίτλος δεν πρέπει να περιέχει HTML.',
+      });
+      return;
+    }
     setSubmitting(true);
 
     try {
+      const cleanedIntroHtml = introHtml.trim();
+      const sanitizedIntroHtml = sanitizeHtmlContent(cleanedIntroHtml).trim();
+      const sanitizedStepsHtml = steps.map((html) =>
+        sanitizeHtmlContent((html || '').trim()).trim(),
+      );
+      const hasSanitizedChanges =
+        sanitizedIntroHtml !== cleanedIntroHtml ||
+        sanitizedStepsHtml.some((html, idx) => html !== (steps[idx] || '').trim());
+
+      if (hasSanitizedChanges) {
+        setWarning('Unsupported formatting was removed for security.');
+      }
+
+      const introPlain = stripHtml(sanitizedIntroHtml);
       const payload = {
         title,
         platform,
@@ -135,10 +163,15 @@ export default function GuideCreatePage() {
         difficulty: difficultyRating || null,
         hours: hours || null,
         playthroughs: playthroughs || null,
-        content_rich: guideContentRich,
-        content_html: introHtml || null,
-        description: stripHtml(introHtml) || null,
-        steps: steps.map((html, idx) => {
+        content_rich: introPlain
+          ? {
+              type: 'doc',
+              content: [{ type: 'paragraph', text: introPlain }],
+            }
+          : null,
+        content_html: sanitizedIntroHtml || null,
+        description: introPlain || null,
+        steps: sanitizedStepsHtml.map((html, idx) => {
           const plain = stripHtml(html);
           return {
             title: stepTitles[idx] || `Βήμα ${idx + 1}`,
@@ -185,6 +218,17 @@ export default function GuideCreatePage() {
               <h1 className="text-3xl font-extrabold text-[var(--hb-headline)] md:text-4xl">
                 Δημιουργία Trophy Guide
               </h1>
+              {warning && (
+                <Feedback
+                  layout="toast"
+                  tone="soft"
+                  variant="warning"
+                  title="Ασφάλεια μορφοποίησης"
+                  description={warning}
+                  dismissible
+                  onDismiss={() => setWarning(null)}
+                />
+              )}
               {alert && (
                 <Feedback
                   layout="toast"
@@ -214,7 +258,13 @@ export default function GuideCreatePage() {
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     required
+                    error={hasTitleHtml}
                   />
+                  {hasTitleHtml && (
+                    <p className="text-xs text-red-400">
+                      Ο τίτλος δεν πρέπει να περιέχει HTML.
+                    </p>
+                  )}
 
                   <Input
                     label="Εικόνα (URL)"
@@ -346,7 +396,7 @@ export default function GuideCreatePage() {
                     <Button
                       variant="secondary"
                       type="button"
-                      disabled={submitting}
+                      disabled={submitting || hasTitleHtml}
                       className="border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]"
                     >
                       💾 Αποθήκευση ως Draft
@@ -354,7 +404,7 @@ export default function GuideCreatePage() {
                     <Button
                       variant="primary"
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || hasTitleHtml}
                       className="bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-lg shadow-black/30 transition hover:brightness-110"
                     >
                       {submitting ? 'Αποθήκευση...' : '🚀 Υποβολή Guide'}

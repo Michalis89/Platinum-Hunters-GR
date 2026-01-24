@@ -1,40 +1,55 @@
-// app/pages/terms/page.tsx  (ή app/terms/page.tsx)
-
 import Link from 'next/link';
+import { buildMetadata } from '@/utils/seo/metadata/helpers';
+import StructuredData from '@/utils/seo/StructuredData';
+import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
+import { SITE_CONTACT_EMAIL, SITE_NAME, SITE_URL } from '@/config/site';
+
+export const metadata = buildMetadata({
+  title: 'Όροι Χρήσης | Χομπίστας',
+  description: 'Διάβασε τους όρους χρήσης της υπηρεσίας Χομπίστας.',
+  path: '/pages/terms',
+});
 
 export default function TermsPage() {
+  const breadcrumb = [
+    { name: 'Αρχική', url: `${SITE_URL}/` },
+    { name: 'Όροι Χρήσης', url: `${SITE_URL}/pages/terms` },
+  ];
+
   return (
-    <main className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,_#1e293b,_#020617)] px-4 py-16 text-slate-100">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-        {/* Header / Hero */}
-        <section className="rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 shadow-2xl backdrop-blur-xl md:p-8">
-          <div className="mb-4">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-              Platinum Hunters • Νομικές Πληροφορίες
+    <>
+      <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
+      <main className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,_#1e293b,_#020617)] px-4 py-16 text-slate-100">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+          {/* Header / Hero */}
+          <section className="rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 shadow-2xl backdrop-blur-xl md:p-8">
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+                {SITE_NAME} • Νομικές Πληροφορίες
+              </p>
+              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-50 md:text-4xl">
+                Όροι Χρήσης
+              </h1>
+            </div>
+
+            <p className="text-sm leading-relaxed text-slate-300 md:text-base">
+              Οι παρακάτω Όροι Χρήσης διέπουν την πρόσβαση και χρήση της υπηρεσίας{' '}
+              <span className="font-semibold text-sky-400">{SITE_NAME}</span> (η «Υπηρεσία») μέσω
+              της ιστοσελίδας{' '}
+              <a
+                href={SITE_URL}
+                className="font-medium text-sky-400 underline-offset-2 hover:underline"
+              >
+                {SITE_URL.replace('https://', '')}
+              </a>
+              . Με τη δημιουργία λογαριασμού ή/και τη χρήση της Υπηρεσίας, δηλώνεις ότι έχεις
+              διαβάσει, κατανοήσει και αποδέχεσαι τους παρόντες Όρους.
             </p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-50 md:text-4xl">
-              Όροι Χρήσης
-            </h1>
-          </div>
 
-          <p className="text-sm leading-relaxed text-slate-300 md:text-base">
-            Οι παρακάτω Όροι Χρήσης διέπουν την πρόσβαση και χρήση της υπηρεσίας{' '}
-            <span className="font-semibold text-sky-400">Platinum Hunters</span> (η «Υπηρεσία») μέσω
-            της ιστοσελίδας{' '}
-            <a
-              href="https://www.platinumhunters.gr/"
-              className="font-medium text-sky-400 underline-offset-2 hover:underline"
-            >
-              www.platinumhunters.gr
-            </a>
-            . Με τη δημιουργία λογαριασμού ή/και τη χρήση της Υπηρεσίας, δηλώνεις ότι έχεις
-            διαβάσει, κατανοήσει και αποδέχεσαι τους παρόντες Όρους.
-          </p>
-
-          <p className="mt-3 text-xs text-slate-500">
-            Τελευταία ενημέρωση: {new Date().getFullYear()}
-          </p>
-        </section>
+            <p className="mt-3 text-xs text-slate-500">
+              Τελευταία ενημέρωση: {new Date().getFullYear()}
+            </p>
+          </section>
 
         {/* Content Card */}
         <section className="rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 text-sm leading-relaxed text-slate-200 shadow-xl backdrop-blur-md md:p-8 md:text-base">
@@ -45,11 +60,10 @@ export default function TermsPage() {
                 1. Ταυτότητα της Υπηρεσίας
               </h2>
               <p>
-                Το <span className="font-semibold text-sky-400">Platinum Hunters</span> είναι μία
-                διαδικτυακή πλατφόρμα για καταγραφή backlog, trophy guides, walkthroughs και
-                σχετικού περιεχομένου γύρω από videogames. Η Υπηρεσία παρέχεται σε ερασιτεχνική /
-                προσωπική βάση και δεν αποτελεί επίσημο προϊόν της Sony Interactive Entertainment ή
-                οποιασδήποτε άλλης εταιρείας.
+                Ο <span className="font-semibold text-sky-400">{SITE_NAME}</span> είναι μία
+                διαδικτυακή πλατφόρμα για καταγραφή backlog, guides, reviews και σχετικού
+                περιεχομένου γύρω από hobbies. Η Υπηρεσία παρέχεται σε ερασιτεχνική / προσωπική
+                βάση και δεν αποτελεί επίσημο προϊόν οποιασδήποτε εταιρείας.
               </p>
               <p className="mt-2 text-xs text-slate-400">
                 Η χρήση οποιωνδήποτε ονομάτων, λογοτύπων, σημάτων ή όρων όπως “PlayStation”, “PS5”,
@@ -158,15 +172,13 @@ export default function TermsPage() {
               <p>
                 Όλο το περιεχόμενο της Υπηρεσίας (interface, design, λογότυπα της πλατφόρμας,
                 κείμενα, στοιχεία UI κ.λπ.), εξαιρουμένου του Περιεχομένου Χρήστη και σημάτων
-                τρίτων, ανήκει στον δημιουργό του{' '}
-                <span className="font-semibold">Platinum Hunters</span> και προστατεύεται από τη
-                σχετική νομοθεσία.
+                τρίτων, ανήκει στον δημιουργό του <span className="font-semibold">{SITE_NAME}</span>{' '}
+                και προστατεύεται από τη σχετική νομοθεσία.
               </p>
               <p className="mt-2">
-                Τα σήματα «PlayStation», «PS5», «PS4», τα λογότυπα, τα ονόματα παιχνιδιών και οι
-                σχετικές εικόνες ανήκουν στους αντίστοιχους νόμιμους κατόχους τους και
-                χρησιμοποιούνται μόνο περιγραφικά. Η Υπηρεσία δεν συνδέεται, δεν υποστηρίζεται και
-                δεν ανήκει στη Sony Interactive Entertainment ή σε άλλη εταιρεία.
+                Τα σήματα τρίτων, τα λογότυπα και τα ονόματα προϊόντων ανήκουν στους αντίστοιχους
+                νόμιμους κατόχους τους και χρησιμοποιούνται μόνο περιγραφικά. Η Υπηρεσία δεν
+                συνδέεται, δεν υποστηρίζεται και δεν ανήκει σε καμία εταιρεία.
               </p>
             </section>
 
@@ -261,10 +273,7 @@ export default function TermsPage() {
                 Για οποιαδήποτε απορία σχετικά με τους παρόντες Όρους Χρήσης ή την Υπηρεσία, μπορείς
                 να επικοινωνήσεις μαζί μας στο:
               </p>
-              <p className="mt-1 font-medium text-sky-400">
-                {/* Βάλε εδώ το email επικοινωνίας σου */}
-                contact@platinumhunters.gr
-              </p>
+              <p className="mt-1 font-medium text-sky-400">{SITE_CONTACT_EMAIL}</p>
             </section>
 
             <p className="pt-4 text-xs text-slate-500">
@@ -273,7 +282,8 @@ export default function TermsPage() {
             </p>
           </div>
         </section>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

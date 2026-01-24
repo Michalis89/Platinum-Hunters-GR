@@ -91,12 +91,31 @@ export type ArticleStatus = 'draft' | 'published' | 'archived';
 /**
  * Article category type
  */
-export type ArticleCategory = 'gaming' | 'anime' | 'manga' | 'books' | 'movies' | 'tv' | 'coding' | 'pet' | 'vape';
+export type ArticleCategory =
+  | 'gaming'
+  | 'anime'
+  | 'manga'
+  | 'books'
+  | 'movies'
+  | 'tv'
+  | 'coding'
+  | 'pet'
+  | 'vape';
 
 /**
  * Article topic type
  */
-export type ArticleTopic = 'articles' | 'reviews' | 'tutorials' | 'guides' | 'weird-cases' | 'care' | 'experiences' | 'health' | 'devices' | 'liquids';
+export type ArticleTopic =
+  | 'articles'
+  | 'reviews'
+  | 'tutorials'
+  | 'guides'
+  | 'weird-cases'
+  | 'care'
+  | 'experiences'
+  | 'health'
+  | 'devices'
+  | 'liquids';
 
 /**
  * Article Row Type

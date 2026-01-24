@@ -10,6 +10,8 @@ import Feedback from '@/app/components/ui/Feedback';
 import { GuideStepsEditor } from '@/app/components/ui/GuideStepsEditor';
 import RichTextEditor from '@/app/components/ui/RichTextEditor';
 import Button from '@/app/components/ui/Button';
+import { validatePlainText } from '@/utils/validation/text';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 export default function EditGuide() {
   const { id } = useParams();
@@ -28,6 +30,7 @@ export default function EditGuide() {
   const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [warning, setWarning] = useState<string | null>(null);
 
   const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
 
@@ -96,11 +99,34 @@ export default function EditGuide() {
     });
   }, [stepsHtml]);
 
+  const titleValidation = validatePlainText(guideTitle, 'Ο τίτλος');
+  const hasTitleHtml = !titleValidation.isValid;
+
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
+    setWarning(null);
+    if (!titleValidation.isValid) {
+      setMessage(titleValidation.error || 'Ο τίτλος δεν πρέπει να περιέχει HTML.');
+      setMessageType('error');
+      setSaving(false);
+      return;
+    }
 
-    const filteredSteps = stepsHtml
+    const cleanedIntroHtml = introHtml.trim();
+    const sanitizedIntroHtml = sanitizeHtmlContent(cleanedIntroHtml).trim();
+    const sanitizedStepsHtml = stepsHtml.map((html) =>
+      sanitizeHtmlContent((html || '').trim()).trim(),
+    );
+    const hasSanitizedChanges =
+      sanitizedIntroHtml !== cleanedIntroHtml ||
+      sanitizedStepsHtml.some((html, idx) => html !== (stepsHtml[idx] || '').trim());
+
+    if (hasSanitizedChanges) {
+      setWarning('Unsupported formatting was removed for security.');
+    }
+
+    const filteredSteps = sanitizedStepsHtml
       .map((html, idx) => {
         const plain = stripHtml(html);
         return {
@@ -125,6 +151,7 @@ export default function EditGuide() {
     }
 
     try {
+      const introPlain = stripHtml(sanitizedIntroHtml);
       const response = await fetch(`/api/update-guide/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -133,9 +160,14 @@ export default function EditGuide() {
           difficulty_rating: difficultyRating || null,
           estimated_hours: hours || null,
           estimated_playthroughs: playthroughs || null,
-          content_html: introHtml || null,
-          description: stripHtml(introHtml) || null,
-          content_rich: guideContentRich,
+          content_html: sanitizedIntroHtml || null,
+          description: introPlain || null,
+          content_rich: introPlain
+            ? {
+                type: 'doc',
+                content: [{ type: 'paragraph', text: introPlain }],
+              }
+            : null,
           cover_image: imageUrl || null,
           background_image: imageUrl || null,
           steps: filteredSteps,
@@ -190,6 +222,17 @@ export default function EditGuide() {
                 }}
               />
             )}
+            {warning && (
+              <Feedback
+                layout="toast"
+                tone="soft"
+                variant="warning"
+                title="Ασφάλεια μορφοποίησης"
+                description={warning}
+                dismissible
+                onDismiss={() => setWarning(null)}
+              />
+            )}
           </div>
 
           {loading ? (
@@ -205,7 +248,13 @@ export default function EditGuide() {
                     label="Τίτλος Guide"
                     value={guideTitle}
                     onChange={e => setGuideTitle(e.target.value)}
+                    error={hasTitleHtml}
                   />
+                  {hasTitleHtml && (
+                    <p className="text-xs text-red-400">
+                      {titleValidation.error || 'Ο τίτλος δεν πρέπει να περιέχει HTML.'}
+                    </p>
+                  )}
                   <Input
                     label="Δυσκολία (1-10)"
                     type="number"
@@ -292,7 +341,11 @@ export default function EditGuide() {
               </Card>
 
               <div className="flex flex-wrap gap-3">
-                <Button variant="primary" onClick={handleSave} disabled={saving}>
+                <Button
+                  variant="primary"
+                  onClick={handleSave}
+                  disabled={saving || hasTitleHtml}
+                >
                   {saving ? '💾 Αποθήκευση...' : '💾 Αποθήκευση'}
                 </Button>
                 <Button variant="outline" onClick={() => router.back()}>

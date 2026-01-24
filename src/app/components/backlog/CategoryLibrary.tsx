@@ -980,7 +980,7 @@ export default function CategoryLibrary({
           </div>
         )}
 
-        <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 backdrop-blur">
+        <section className="max-h-[70vh] overflow-y-auto rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 backdrop-blur">
           <div className="hidden gap-4 px-3 pb-2 text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)] md:grid md:grid-cols-[72px,1.6fr,0.8fr,0.8fr,0.6fr,0.4fr]">
             <span>Cover</span>
             <span>Title</span>

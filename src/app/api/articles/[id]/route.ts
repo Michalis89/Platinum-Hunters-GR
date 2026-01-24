@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 
 async function insertActivity(
   supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
@@ -135,6 +137,39 @@ export async function PUT(
       status,
       is_featured,
     } = body;
+    if (title !== undefined) {
+      const titleValidation = validatePlainText(title, 'Ο τίτλος');
+      if (!titleValidation.isValid) {
+        return NextResponse.json({ error: titleValidation.error }, { status: 400 });
+      }
+    }
+    if (description !== undefined) {
+      const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+      if (!descriptionValidation.isValid) {
+        return NextResponse.json({ error: descriptionValidation.error }, { status: 400 });
+      }
+    }
+    if (meta_title !== undefined) {
+      const metaTitleValidation = validatePlainText(meta_title, 'Ο meta τίτλος');
+      if (!metaTitleValidation.isValid) {
+        return NextResponse.json({ error: metaTitleValidation.error }, { status: 400 });
+      }
+    }
+    if (meta_description !== undefined) {
+      const metaDescriptionValidation = validatePlainText(
+        meta_description,
+        'Το meta description',
+      );
+      if (!metaDescriptionValidation.isValid) {
+        return NextResponse.json({ error: metaDescriptionValidation.error }, { status: 400 });
+      }
+    }
+    if (tags !== undefined) {
+      const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
+      if (!tagsValidation.isValid) {
+        return NextResponse.json({ error: tagsValidation.error }, { status: 400 });
+      }
+    }
 
     // Build update object (only include provided fields)
     const updateData: Record<string, unknown> = {};
@@ -146,7 +181,9 @@ export async function PUT(
     if (tags !== undefined) updateData.tags = tags;
     if (cover_image !== undefined) updateData.cover_image = cover_image;
     if (content_rich !== undefined) updateData.content_rich = content_rich;
-    if (content_html !== undefined) updateData.content_html = content_html;
+    if (content_html !== undefined) {
+      updateData.content_html = sanitizeHtmlContent(content_html).trim() || null;
+    }
     if (meta_title !== undefined) updateData.meta_title = meta_title;
     if (meta_description !== undefined) updateData.meta_description = meta_description;
     if (is_featured !== undefined) updateData.is_featured = is_featured;

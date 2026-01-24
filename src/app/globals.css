@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Hobistas theme tokens (Netflix-style black/red) */
+  /* Χομπίστας theme tokens (Netflix-style black/red) */
   --hb-bg: #0b0b0f;
   --hb-surface: rgba(13, 13, 18, 1);
   --hb-panel: rgba(16, 16, 22, 0.92);

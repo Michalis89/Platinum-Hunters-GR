@@ -1,26 +1,20 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
+import { ArrowLeft, Calendar, Clock, Eye, Heart, User } from 'lucide-react';
+import type { ArticleRow } from '@/types/database';
+import ActionRow from '@/app/components/article/ActionRow.client';
+import Button from '@/app/components/ui/Button';
+import ReadingProgress from '@/app/components/article/ReadingProgress.client';
+import { buildMetadata } from '@/utils/seo/metadata/helpers';
+import StructuredData from '@/utils/seo/StructuredData';
 import {
-  ArrowLeft,
-  Calendar,
-  Clock,
-  Eye,
-  Heart,
-  User,
-  Tag,
-  Loader2,
-  Share2,
-  Pencil,
-} from 'lucide-react';
-import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
-import { selectUser } from '@/store/slices/authSlice';
-import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
+  getArticleStructuredData,
+  getBreadcrumbStructuredData,
+} from '@/utils/seo/metadata/structuredData';
+import { SITE_URL } from '@/config/site';
+import { CATEGORY_LABELS, TOPIC_LABELS } from '@/app/pages/news/constants';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -30,311 +24,270 @@ interface ArticleWithAuthor extends ArticleRow {
   } | null;
 }
 
-interface CategoryConfig {
-  label: string;
-  color: string;
+
+async function getArticle(slug: string): Promise<ArticleWithAuthor | null> {
+  const headersList = await headers();
+  const protocol = headersList.get('x-forwarded-proto') ?? 'http';
+  const host = headersList.get('host');
+  const baseUrl = host ? `${protocol}://${host}` : '';
+
+  const response = await fetch(`${baseUrl}/api/articles/${slug}`, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = (await response.json()) as { article?: ArticleWithAuthor };
+  return data.article ?? null;
 }
 
-const CATEGORY_CONFIG: Record<ArticleCategory, CategoryConfig> = {
-  gaming: { label: 'Gaming', color: 'from-blue-500 to-cyan-400' },
-  anime: { label: 'Anime', color: 'from-pink-500 to-rose-400' },
-  manga: { label: 'Manga', color: 'from-orange-500 to-amber-400' },
-  books: { label: 'Βιβλία', color: 'from-emerald-500 to-green-400' },
-  movies: { label: 'Movies', color: 'from-purple-500 to-violet-400' },
-  tv: { label: 'TV Series', color: 'from-indigo-500 to-blue-400' },
-  coding: { label: 'Coding', color: 'from-cyan-500 to-teal-400' },
-  pet: { label: 'Pet', color: 'from-amber-500 to-yellow-400' },
-  vape: { label: 'Vape', color: 'from-slate-400 to-slate-300' },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const article = await getArticle(slug);
+  const path = `/pages/news/${slug}`;
 
-const TOPIC_LABELS: Record<ArticleTopic, string> = {
-  articles: 'Άρθρα',
-  reviews: 'Reviews',
-  tutorials: 'Tutorials',
-  guides: 'Οδηγοί',
-  'weird-cases': 'Weird Cases',
-  care: 'Φροντίδα',
-  experiences: 'Εμπειρίες',
-  health: 'Υγεία',
-  devices: 'Συσκευές',
-  liquids: 'Υγρά',
-};
+  if (!article) {
+    return buildMetadata({
+      title: 'Άρθρο | Χομπίστας',
+      description: 'Το άρθρο που ζήτησες δεν είναι διαθέσιμο αυτή τη στιγμή.',
+      path,
+    });
+  }
 
-export default function ArticlePage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const currentUser = useSelector(selectUser);
+  const authorName = article.users?.display_name || article.users?.username || 'Χομπίστας';
+  const coverImage = article.cover_image ?? undefined;
+  const metaTitle = article.meta_title || article.title;
+  const metaDescription =
+    article.meta_description ||
+    article.description ||
+    'Διάβασε το άρθρο και ανακάλυψε ιδέες, εμπειρίες και πρακτικά guides στον Χομπίστα.';
 
-  const [article, setArticle] = useState<ArticleWithAuthor | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  return buildMetadata({
+    title: `${metaTitle} | Χομπίστας`,
+    description: metaDescription,
+    path: `/pages/news/${article.slug}`,
+    openGraphType: 'article',
+    publishedTime: article.published_at ?? undefined,
+    authors: [authorName],
+    images: coverImage ? [{ url: coverImage, alt: article.title }] : undefined,
+  });
+}
 
-  useEffect(() => {
-    const fetchArticle = async () => {
-      if (!slug) return;
+export default async function ArticlePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const headersList = await headers();
+  const { slug } = await params;
+  const article = await getArticle(slug);
 
-      setLoading(true);
-      setError(null);
+  if (!article) {
+    notFound();
+  }
 
-      try {
-        const response = await fetch(`/api/articles/${slug}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Το άρθρο δεν βρέθηκε');
-          }
-          throw new Error('Failed to fetch article');
-        }
+  const publishedDate = article.published_at
+    ? new Date(article.published_at).toLocaleDateString('el-GR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
 
-        const data = await response.json();
-        setArticle(data.article);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
+  const readTime = article.reading_time_minutes
+    ? `${article.reading_time_minutes} λεπτά`
+    : null;
+
+  const referer = headersList.get('referer');
+  const host = headersList.get('host');
+  const protocol = headersList.get('x-forwarded-proto') ?? 'http';
+  const baseUrl = host ? `${protocol}://${host}` : '';
+  const fallbackHref = `/pages/news?category=${article.category}`;
+  let backHref = fallbackHref;
+
+  if (referer && baseUrl && referer.startsWith(baseUrl)) {
+    try {
+      const url = new URL(referer);
+      const path = `${url.pathname}${url.search}`;
+      if (path.startsWith('/pages/news')) {
+        backHref = path;
       }
-    };
-
-    fetchArticle();
-  }, [slug]);
-
-  const handleShare = async () => {
-    if (navigator.share && article) {
-      try {
-        await navigator.share({
-          title: article.title,
-          text: article.description || '',
-          url: window.location.href,
-        });
-      } catch {
-        // User cancelled or share failed
-      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
+    } catch {
+      backHref = fallbackHref;
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--hb-primary-strong)]" />
-      </div>
-    );
   }
 
-  if (error || !article) {
-    return (
-      <div className="min-h-screen bg-[var(--hb-bg)] px-4 py-16">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-12 text-center">
-            <p className="mb-4 text-red-400">{error || 'Το άρθρο δεν βρέθηκε'}</p>
-            <Link
-              href="/pages/news"
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--hb-card)] px-4 py-2 text-sm text-[var(--hb-headline)] transition hover:bg-[var(--hb-surface)]"
-            >
-              <ArrowLeft size={16} />
-              Πίσω στα άρθρα
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const categoryConfig = CATEGORY_CONFIG[article.category];
-  const canEdit =
-    !!currentUser &&
-    (currentUser.role === 'admin' || (article.author_id && currentUser.id === article.author_id));
+  const articleUrl = `${SITE_URL}/pages/news/${article.slug}`;
+  const sanitizedContentHtml = sanitizeHtmlContent(article.content_html).trim();
+  const breadcrumbItems = [
+    { name: 'Αρχική', url: `${SITE_URL}/` },
+    { name: 'Άρθρα', url: `${SITE_URL}/pages/news` },
+    {
+      name: CATEGORY_LABELS[article.category] ?? article.category,
+      url: `${SITE_URL}/pages/news?category=${article.category}`,
+    },
+    { name: article.title, url: articleUrl },
+  ];
 
   return (
     <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      {/* Ambient glows */}
-      <div className="pointer-events-none absolute inset-0 opacity-80 blur-[90px]">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)]" />
-      </div>
+      <StructuredData
+        data={getArticleStructuredData({
+          title: article.title,
+          description: article.description,
+          url: articleUrl,
+          image: article.cover_image,
+          publishedAt: article.published_at,
+          updatedAt: article.updated_at,
+          authorName: article.users?.display_name || article.users?.username || null,
+        })}
+      />
+      <StructuredData data={getBreadcrumbStructuredData(breadcrumbItems)} />
+      <ReadingProgress />
 
-      {/* Hero with cover image */}
-      <div className="relative z-10">
+      {/* Hero */}
+      <div className="relative h-[40vh] min-h-[280px] w-full overflow-hidden">
         {article.cover_image ? (
-          <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-            <Image
-              src={article.cover_image}
-              alt={article.title}
-              fill
-              sizes="100vw"
-              className="object-cover"
-              priority
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] via-[var(--hb-bg)]/50 to-transparent" />
-          </div>
+          <Image
+            src={article.cover_image}
+            alt={article.title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+            unoptimized
+          />
         ) : (
-          <div className={`relative h-[30vh] min-h-[200px] bg-gradient-to-br ${categoryConfig.color}`}>
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] via-[var(--hb-bg)]/50 to-transparent" />
-          </div>
+          <div className="h-full w-full bg-[var(--hb-panel)]" />
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] via-[var(--hb-bg)]/60 to-transparent" />
 
-        {/* Back button */}
         <div className="absolute left-4 top-4 z-10">
-          <Link
-            href={`/pages/news?category=${article.category}`}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--hb-panel)]/80 px-3 py-2 text-sm text-[var(--hb-headline)] backdrop-blur-sm transition hover:bg-[var(--hb-card)]"
+          <Button
+            href={backHref}
+            variant="secondary"
+            icon={<ArrowLeft size={16} />}
+            className="border-[var(--hb-border)] bg-[var(--hb-panel)]/80 text-[var(--hb-headline)] backdrop-blur-sm"
           >
-            <ArrowLeft size={16} />
             Πίσω
-          </Link>
+          </Button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 mx-auto max-w-4xl px-4 pb-16">
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="-mt-20 rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl backdrop-blur-xl md:p-10"
-        >
-          {/* Badges */}
-          <div className="mb-4 flex flex-wrap gap-2">
-            <span className={`rounded-full bg-gradient-to-r ${categoryConfig.color} px-4 py-1 text-sm font-semibold text-white`}>
-              {categoryConfig.label}
-            </span>
-            <span className="rounded-full bg-[var(--hb-surface)] px-4 py-1 text-sm font-medium text-[var(--hb-muted)]">
-              {TOPIC_LABELS[article.topic]}
-            </span>
-          </div>
+      {/* Masthead + Body */}
+      <div className="relative mx-auto -mt-16 max-w-5xl px-4 pb-16 md:-mt-20">
+        <article className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl backdrop-blur-xl md:p-10">
+          <header className="mx-auto max-w-[760px]">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
+              <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)]/80 px-3 py-1">
+                {CATEGORY_LABELS[article.category]}
+              </span>
+              <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)]/80 px-3 py-1">
+                {TOPIC_LABELS[article.topic]}
+              </span>
+            </div>
 
-          {/* Title */}
-          <h1 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            {article.title}
-          </h1>
+            <h1 className="mt-4 text-[28px] font-bold leading-[1.15] tracking-tight text-[var(--hb-headline)] md:text-[38px]">
+              {article.title}
+            </h1>
 
-          {/* Meta */}
-          <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-[var(--hb-muted)]">
-            {article.users && (
-              <div className="flex items-center gap-2">
-                {article.users.avatar_url ? (
-                  <div className="relative h-6 w-6 overflow-hidden rounded-full">
-                    <Image
-                      src={article.users.avatar_url}
-                      alt={article.users.username}
-                      fill
-                      sizes="24px"
-                      className="object-cover"
-                      unoptimized
-                    />
+            {article.description && (
+              <p className="mt-4 text-base leading-relaxed text-[var(--hb-muted)] md:text-lg">
+                {article.description}
+              </p>
+            )}
+
+            <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--hb-muted)] md:text-sm">
+                {article.users && (
+                  <div className="flex items-center gap-2">
+                    {article.users.avatar_url ? (
+                      <div className="relative h-6 w-6 overflow-hidden rounded-full">
+                        <Image
+                          src={article.users.avatar_url}
+                          alt={article.users.username}
+                          fill
+                          sizes="24px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                    ) : (
+                      <User size={14} />
+                    )}
+                    <span>{article.users.display_name || article.users.username}</span>
                   </div>
-                ) : (
-                  <User size={16} />
                 )}
-                <span>{article.users.display_name || article.users.username}</span>
-              </div>
-            )}
 
-            {article.published_at && (
-              <div className="flex items-center gap-1">
-                <Calendar size={14} />
-                <span>{new Date(article.published_at).toLocaleDateString('el-GR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}</span>
-              </div>
-            )}
+                {publishedDate && (
+                  <div className="flex items-center gap-1">
+                    <Calendar size={14} />
+                    <span>{publishedDate}</span>
+                  </div>
+                )}
 
-            {article.reading_time_minutes && (
-              <div className="flex items-center gap-1">
-                <Clock size={14} />
-                <span>{article.reading_time_minutes} λεπτά ανάγνωση</span>
-              </div>
-            )}
+                {readTime && (
+                  <div className="flex items-center gap-1">
+                    <Clock size={14} />
+                    <span>{readTime}</span>
+                  </div>
+                )}
 
-            <div className="flex items-center gap-1">
-              <Eye size={14} />
-              <span>{article.views} προβολές</span>
+                <div className="flex items-center gap-1 md:ml-auto">
+                  <Eye size={14} />
+                  <span>{article.views} προβολές</span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <Heart size={14} />
+                  <span>{article.likes} likes</span>
+                </div>
+              </div>
+              <ActionRow article={article} />
             </div>
 
-            <div className="flex items-center gap-1">
-              <Heart size={14} />
-              <span>{article.likes} likes</span>
-            </div>
-
-            <button
-              onClick={handleShare}
-              className="ml-auto flex items-center gap-1 rounded-lg bg-[var(--hb-card)]/50 px-3 py-1 transition hover:bg-[var(--hb-surface)]"
-            >
-              <Share2 size={14} />
-              <span>Κοινοποίηση</span>
-            </button>
-            {canEdit && (
-              <button
-                onClick={() => setIsEditOpen(true)}
-                className="flex items-center gap-1 rounded-lg bg-[var(--hb-card)]/50 px-3 py-1 transition hover:bg-[var(--hb-surface)]"
-              >
-                <Pencil size={14} />
-                <span>Επεξεργασία</span>
-              </button>
-            )}
-          </div>
-
-          {/* Description */}
-          {article.description && (
-            <p className="mb-8 text-lg leading-relaxed text-[var(--hb-text)]">
-              {article.description}
-            </p>
-          )}
-
-          {/* Content */}
-          {article.content_html && (
-            <div
-              className="article-content prose prose-invert max-w-none
-                prose-headings:text-[var(--hb-headline)] prose-headings:font-bold
-                prose-h1:text-2xl prose-h1:mt-8 prose-h1:mb-4
-                prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3
-                prose-h3:text-lg prose-h3:mt-5 prose-h3:mb-2
-                prose-p:text-[var(--hb-text)] prose-p:leading-relaxed prose-p:mb-4
-                prose-a:text-[var(--hb-primary)] prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-[var(--hb-accent)]
-                prose-strong:text-[var(--hb-headline)] prose-strong:font-semibold
-                prose-em:italic
-                prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-4
-                prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-4
-                prose-li:mb-1 prose-li:text-[var(--hb-text)]
-                prose-blockquote:border-l-4 prose-blockquote:border-[var(--hb-primary)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--hb-muted)] prose-blockquote:my-6
-                prose-code:bg-[var(--hb-surface)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[var(--hb-primary)] prose-code:text-sm prose-code:font-mono
-                prose-pre:bg-[var(--hb-surface)] prose-pre:rounded-xl prose-pre:p-4 prose-pre:my-6 prose-pre:overflow-x-auto
-                prose-img:rounded-xl prose-img:my-6 prose-img:max-w-full prose-img:h-auto
-                prose-hr:border-[var(--hb-border)] prose-hr:my-8"
-              dangerouslySetInnerHTML={{ __html: article.content_html }}
-            />
-          )}
-
-          {/* Tags */}
-          {article.tags && article.tags.length > 0 && (
-            <div className="mt-10 border-t border-[var(--hb-border)] pt-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <Tag size={16} className="text-[var(--hb-muted)]" />
-                {article.tags.map((tag) => (
-                  <Link
+            {article.tags && article.tags.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {article.tags.map(tag => (
+                  <span
                     key={tag}
-                    href={`/pages/news?category=${article.category}`}
-                    className="rounded-full bg-[var(--hb-card)]/70 px-3 py-1 text-sm text-[var(--hb-muted)] transition hover:bg-[var(--hb-surface)] hover:text-[var(--hb-headline)]"
+                    className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)]/80 px-3 py-1 text-[11px] text-[var(--hb-text)] backdrop-blur-sm"
                   >
                     {tag}
-                  </Link>
+                  </span>
                 ))}
               </div>
-            </div>
+            )}
+          </header>
+
+          {sanitizedContentHtml && (
+            <section
+              className="article-content mx-auto max-w-[760px] pt-8 text-[17px] leading-[1.8] text-[var(--hb-text)]
+                [&_h1]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[var(--hb-headline)]
+                [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-[var(--hb-headline)]
+                [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-[var(--hb-headline)]
+                [&_p]:mb-3
+                [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-6
+                [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-6
+                [&_li]:mb-1
+                [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--hb-primary)] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[var(--hb-muted)]
+                [&_code]:rounded [&_code]:bg-[var(--hb-panel)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-[var(--hb-primary)]
+                [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-[var(--hb-panel)] [&_pre]:p-4
+                [&_pre_code]:bg-transparent [&_pre_code]:p-0
+                [&_hr]:my-6 [&_hr]:border-[var(--hb-border)]
+                [&_a]:text-[var(--hb-primary)] [&_a]:underline [&_a]:underline-offset-2
+                [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg"
+              dangerouslySetInnerHTML={{ __html: sanitizedContentHtml }}
+            />
           )}
-        </motion.article>
+        </article>
       </div>
-      {article && (
-        <EditArticleDialog
-          isOpen={isEditOpen}
-          article={article}
-          onClose={() => setIsEditOpen(false)}
-          onSuccess={updated => setArticle(updated)}
-        />
-      )}
     </div>
   );
 }

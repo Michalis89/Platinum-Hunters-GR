@@ -7,11 +7,7 @@ import StructuredData from '@/utils/seo/StructuredData';
 import AuthInit from './components/AuthInit';
 import AppShell from './components/AppShell';
 
-import {
-  websiteStructuredData,
-  trophyGuideStructuredData,
-  contactFormStructuredData,
-} from '@/utils/seo/metadata/structuredData';
+import { organizationStructuredData, websiteStructuredData } from '@/utils/seo/metadata/structuredData';
 import Providers from '@/store/Providers';
 import HeartbeatPing from './components/HeartbeatPing';
 export { metadata } from '@/utils/seo/metadata/metadata';
@@ -30,9 +26,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="el">
       <head>
+        <StructuredData data={organizationStructuredData} />
         <StructuredData data={websiteStructuredData} />
-        <StructuredData data={trophyGuideStructuredData} />
-        <StructuredData data={contactFormStructuredData} />
       </head>
       <body
         suppressHydrationWarning

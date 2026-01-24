@@ -1,0 +1,108 @@
+import {
+  Layers,
+  ListTodo,
+  BarChart3,
+  Star,
+  StickyNote,
+  Trophy,
+  Gamepad2,
+  Film,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+
+type Feature = {
+  title: string;
+  description: string;
+  icon: ReactNode;
+};
+
+const features: Feature[] = [
+  {
+    title: 'Multi-hobby Backlog',
+    description:
+      'Games, anime, manga, ταινίες, σειρές, βιβλία — μία λίστα για όλα. Κοινή δομή, διαφορετικά metadata ανά κατηγορία.',
+    icon: <Layers className="h-6 w-6" />,
+  },
+  {
+    title: 'Progress Tracking',
+    description:
+      'Παρακολούθησε την πρόοδό σου: ώρες, επεισόδια, κεφάλαια, σελίδες. Quick update με ένα click.',
+    icon: <ListTodo className="h-6 w-6" />,
+  },
+  {
+    title: 'Στατιστικά & Insights',
+    description:
+      'Δες πόσο χρόνο αφιέρωσες, τι ολοκλήρωσες, ποια είναι τα αγαπημένα σου genres και platforms.',
+    icon: <BarChart3 className="h-6 w-6" />,
+  },
+  {
+    title: 'Reviews & Βαθμολογίες',
+    description:
+      'Κράτα τις εντυπώσεις σου. Βαθμολόγησε, γράψε σύντομο review, θυμήσου γιατί σου άρεσε.',
+    icon: <Star className="h-6 w-6" />,
+  },
+  {
+    title: 'Σημειώσεις & Notes',
+    description:
+      'Quick notes, tips, reminders για κάθε entry. Ποτέ μην ξεχάσεις πού σταμάτησες ή τι ήθελες να δοκιμάσεις.',
+    icon: <StickyNote className="h-6 w-6" />,
+  },
+  {
+    title: 'Trophy Guides',
+    description:
+      'Οδηγοί για platinum trophies και achievements. Difficulty, εκτιμώμενες ώρες, missables, tips.',
+    icon: <Trophy className="h-6 w-6" />,
+  },
+  {
+    title: 'Gaming Focus',
+    description:
+      'Ειδική υποστήριξη για gamers: platforms, trophy stats, completion rate, backlog prioritization.',
+    icon: <Gamepad2 className="h-6 w-6" />,
+  },
+  {
+    title: 'Πολυμέσα',
+    description:
+      'Ταινίες, σειρές, ντοκιμαντέρ. Tracking για binge-watching, watchlist, και rewatch notes.',
+    icon: <Film className="h-6 w-6" />,
+  },
+];
+
+export function AboutFeatures() {
+  return (
+    <section className="px-4 py-20 md:px-6 md:py-28">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-12 text-center md:mb-16">
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+            Δυνατότητες
+          </p>
+          <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
+            Όλα όσα χρειάζεσαι, τίποτα παραπάνω
+          </h2>
+          <p className="mx-auto max-w-2xl text-[var(--hb-muted)]">
+            Σχεδιασμένο για hobbyists που θέλουν να οργανώνουν χωρίς περιττή
+            πολυπλοκότητα.
+          </p>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="group relative rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--hb-primary-strong)]/50 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
+            >
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10 text-[var(--hb-primary-strong)] transition-colors group-hover:bg-[var(--hb-primary-strong)]/20">
+                {feature.icon}
+              </div>
+              <h3 className="mb-2 text-base font-semibold text-[var(--hb-headline)]">
+                {feature.title}
+              </h3>
+              <p className="text-sm leading-relaxed text-[var(--hb-muted)]">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

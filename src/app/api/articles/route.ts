@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 
 async function insertActivity(
   supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
@@ -120,6 +122,27 @@ export async function POST(req: Request) {
       is_featured = false,
       published_at,
     } = body;
+    const titleValidation = validatePlainText(title, 'Ο τίτλος');
+    if (!titleValidation.isValid) {
+      return NextResponse.json({ error: titleValidation.error }, { status: 400 });
+    }
+    const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+    if (!descriptionValidation.isValid) {
+      return NextResponse.json({ error: descriptionValidation.error }, { status: 400 });
+    }
+    const metaTitleValidation = validatePlainText(meta_title, 'Ο meta τίτλος');
+    if (!metaTitleValidation.isValid) {
+      return NextResponse.json({ error: metaTitleValidation.error }, { status: 400 });
+    }
+    const metaDescriptionValidation = validatePlainText(meta_description, 'Το meta description');
+    if (!metaDescriptionValidation.isValid) {
+      return NextResponse.json({ error: metaDescriptionValidation.error }, { status: 400 });
+    }
+    const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
+    if (!tagsValidation.isValid) {
+      return NextResponse.json({ error: tagsValidation.error }, { status: 400 });
+    }
+    const sanitizedContentHtml = sanitizeHtmlContent(content_html).trim() || null;
 
     // Validate required fields
     if (!title || !slug || !category) {
@@ -157,7 +180,7 @@ export async function POST(req: Request) {
         tags,
         cover_image,
         content_rich,
-        content_html,
+        content_html: sanitizedContentHtml,
         meta_title,
         meta_description,
         author_id: session.user.id,

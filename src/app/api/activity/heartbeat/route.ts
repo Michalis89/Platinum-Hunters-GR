@@ -9,19 +9,36 @@ export async function POST(req: Request) {
 
     const supabase = await createRouteHandlerClient(accessToken);
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+    let userId: string | null = null;
 
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
+    if (accessToken) {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser(accessToken);
+
+      if (userError || !user) {
+        return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
+      }
+
+      userId = user.id;
+    } else {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
+      }
+
+      userId = session.user.id;
     }
 
     const { error: updateError } = await supabase
       .from('users')
       .update({ last_login: new Date().toISOString() } as never) // Cast to satisfy Supabase's generated types
-      .eq('id', session.user.id);
+      .eq('id', userId);
 
     if (updateError) {
       console.error('❌ Heartbeat update error:', updateError);

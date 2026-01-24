@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { BookOpen, ChevronDown, Plus } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useSearchParams } from 'next/navigation';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import GameGrid from '@/app/components/guides/GameGrid';
 import GameListRow from '@/app/components/guides/GameListRow';
@@ -32,11 +33,13 @@ import Feedback from '@/app/components/ui/Feedback';
 
 type GuidesViewMode = 'grid' | 'list' | 'compact' | 'timeline';
 
-export default function Guides() {
+function GuidesClient() {
   const dispatch = useDispatch<AppDispatch>();
+  const searchParams = useSearchParams();
+  const searchParam = searchParams.get('search')?.trim() ?? '';
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(searchParam);
+  const [search, setSearch] = useState(searchParam);
   const [sortBy, setSortBy] = useState<string>('title');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [difficultyCategory, setDifficultyCategory] = useState<'easy' | 'medium' | 'hard' | null>(
@@ -86,6 +89,13 @@ export default function Guides() {
     setCombinedGames([]);
     setHasMore(true);
   }, [hasInitializedRanges, search, platformFilter, genreFilter, developerFilter, yearRange]);
+
+  // Sync search param to input when visiting /pages/guides?search=...
+  useEffect(() => {
+    if (searchParam === searchInput) return;
+    setSearchInput(searchParam);
+    setSearch(searchParam);
+  }, [searchParam, searchInput]);
 
   // When store-based filters change from defaults, mark filters as active
   useEffect(() => {
@@ -771,5 +781,13 @@ export default function Guides() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GuidesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[var(--hb-bg)]" />}>
+      <GuidesClient />
+    </Suspense>
   );
 }

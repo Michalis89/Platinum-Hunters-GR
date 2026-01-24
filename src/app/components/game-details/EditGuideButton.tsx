@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectUser } from '@/store/slices/authSlice';
 
 interface EditGuideButtonProps {
   readonly gameId: number;
@@ -8,6 +10,8 @@ interface EditGuideButtonProps {
 export default function EditGuideButton({ gameId }: EditGuideButtonProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const user = useSelector(selectUser);
+  const canEdit = user?.role === 'admin' || user?.role === 'author';
 
   // Handle delete
   const handleDelete = async () => {
@@ -41,7 +45,7 @@ export default function EditGuideButton({ gameId }: EditGuideButtonProps) {
     setLoading(false);
   };
 
-  if (process.env.NODE_ENV === 'production') {
+  if (!canEdit) {
     return null;
   }
 

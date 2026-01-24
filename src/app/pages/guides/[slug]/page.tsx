@@ -15,6 +15,7 @@ import GamePlatforms from '@/app/components/game-details/GamePlatforms';
 import GameDetailsInfo from '@/app/components/game-details/GameDetailsInfo';
 import GuideStats from '@/app/components/game-details/GuideStats';
 import type { ReactNode } from 'react';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 const TrophyStats = dynamic(() => import('@/app/components/game-details/TrophyStats'), {
   ssr: false,
@@ -236,7 +237,7 @@ export default function GameDetailsPage() {
               <div className="flex flex-1 flex-col items-center gap-4 text-center sm:items-start sm:text-left">
                 <div>
                   <p className="text-xs uppercase tracking-[0.25em] text-[var(--hb-muted)]">
-                    Platinum Hunters • Trophy Guide
+                    Χομπίστας • Οδηγός
                   </p>
                   <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[var(--hb-headline)] md:text-4xl">
                     {game.title}
@@ -454,14 +455,15 @@ export default function GameDetailsPage() {
   );
 }
 
-function renderGuideContent(
-  contentRich: unknown,
-  contentHtml: string | null | undefined,
-  fallbackDescription: string | undefined,
-): ReactNode {
-  if (contentHtml) {
-    return <div dangerouslySetInnerHTML={{ __html: contentHtml }} />;
-  }
+  function renderGuideContent(
+    contentRich: unknown,
+    contentHtml: string | null | undefined,
+    fallbackDescription: string | undefined,
+  ): ReactNode {
+    const sanitizedHtml = sanitizeHtmlContent(contentHtml).trim();
+    if (sanitizedHtml) {
+      return <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
+    }
 
   if (Array.isArray((contentRich as { content?: unknown[] })?.content)) {
     const blocks = (contentRich as { content: Array<{ type?: string; text?: string }> }).content;
