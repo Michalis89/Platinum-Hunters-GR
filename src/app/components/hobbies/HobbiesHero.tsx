@@ -1,5 +1,5 @@
 import { Layers } from 'lucide-react';
-import PageHero from '@/app/components/layout/PageHero';
+import PageHero from '@/app/components/shared/PageHero';
 
 export function HobbiesHero() {
   return (

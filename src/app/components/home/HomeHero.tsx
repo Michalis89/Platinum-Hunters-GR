@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import PageHero from '@/app/components/layout/PageHero';
+import PageHero from '@/app/components/shared/PageHero';
 
 export function HomeHero() {
   return (
