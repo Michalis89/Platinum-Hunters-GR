@@ -56,7 +56,7 @@ const features: Feature[] = [
 export function HomeFeatures() {
   return (
     <section className="px-4 py-16 md:px-6 md:py-24">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-10 text-center md:mb-14">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
             Δυνατότητες

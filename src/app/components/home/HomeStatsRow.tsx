@@ -50,7 +50,7 @@ export function HomeStatsRow({
 
   return (
     <section className="px-4 md:px-6">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {stats.map((stat) => (
             <div

@@ -26,7 +26,7 @@ export function HobbiesCategorySection({ section }: HobbiesCategorySectionProps)
 
   return (
     <section className="px-4 py-10 md:px-6 md:py-14">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center gap-3">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 ${colorClass}`}

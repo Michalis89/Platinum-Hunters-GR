@@ -198,7 +198,7 @@ export default function GuideCreatePage() {
   return (
     <PageWrapper>
       <div className="min-h-screen bg-[var(--hb-bg)] py-10 text-[var(--hb-text)]">
-        <div className="mx-auto flex w-full max-w-6xl flex-col-reverse gap-10 md:flex-row">
+        <div className="mx-auto flex w-full max-w-7xl flex-col-reverse gap-10 md:flex-row">
           {/* LEFT PANEL – MAIN CONTENT */}
           <div className="flex-1">
             <div className="mb-6 flex items-center justify-between">

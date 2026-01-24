@@ -183,7 +183,7 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
         className={`min-h-screen bg-[var(--hb-bg)] py-10 text-[var(--hb-text)] ${className}`}
         data-testid="skeleton"
       >
-        <div className="mx-auto flex w-full max-w-6xl animate-pulse flex-col gap-8 px-4">
+        <div className="mx-auto flex w-full max-w-7xl animate-pulse flex-col gap-8 px-4">
           {/* Header card with categories */}
           <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_12px_30px_rgba(3,7,18,0.45)] backdrop-blur">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -425,7 +425,7 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
         className={`min-h-screen bg-[var(--hb-bg)] px-4 py-16 text-[var(--hb-text)] ${className}`}
         data-testid="skeleton"
       >
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
           {/* Hero */}
           <div className="flex animate-pulse flex-col gap-6 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl shadow-black/30 backdrop-blur-sm sm:flex-row sm:items-center">
             <div className="flex justify-center sm:block sm:w-48">

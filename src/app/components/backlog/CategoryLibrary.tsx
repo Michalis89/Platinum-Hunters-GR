@@ -661,7 +661,7 @@ export default function CategoryLibrary({
 
   return (
     <div className="min-h-screen bg-[var(--hb-bg)] px-4 py-20 text-[var(--hb-text)]">
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-8">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
         <div className="absolute inset-0 -z-10 opacity-30 blur-[120px]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,var(--hb-primary-strong),transparent_50%)]" />
           <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_20%,var(--hb-accent),transparent_55%)]" />

@@ -9,7 +9,7 @@ type HomeRecentActivityProps = {
 export function HomeRecentActivity({ scope = 'global' }: HomeRecentActivityProps) {
   return (
     <section className="px-4 py-8 md:px-6">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
             {scope === 'me' ? 'Η δραστηριότητά μου' : 'Πρόσφατη δραστηριότητα'}

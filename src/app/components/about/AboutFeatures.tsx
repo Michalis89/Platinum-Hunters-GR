@@ -70,7 +70,7 @@ const features: Feature[] = [
 export function AboutFeatures() {
   return (
     <section className="px-4 py-20 md:px-6 md:py-28">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center md:mb-16">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
             Δυνατότητες

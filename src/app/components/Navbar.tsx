@@ -263,7 +263,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--hb-border)] bg-[var(--hb-surface)] backdrop-blur-xl">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-[0_10px_35px_rgba(229,9,20,0.35)]">
@@ -478,7 +478,7 @@ export default function Navbar() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
             >
-              <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4">
+              <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4">
                 <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3">
                   <div className="mb-2 flex items-center justify-between text-sm font-semibold text-[var(--hb-headline)]">
                     <div className="flex items-center gap-2">

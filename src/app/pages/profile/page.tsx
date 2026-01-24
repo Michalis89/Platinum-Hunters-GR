@@ -479,7 +479,7 @@ export default function ProfilePage() {
   return (
     <PageWrapper>
       <div className="min-h-screen bg-[var(--hb-bg)] py-10 text-[var(--hb-text)]">
-        <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 px-4">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4">
           {/* HEADER CARD */}
           <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_16px_50px_rgba(3,7,18,0.6)] backdrop-blur">
             <CardContent className="flex flex-col gap-6 p-6">

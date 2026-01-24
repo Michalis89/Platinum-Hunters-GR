@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
  * Sizes:
  * - 'sm': max-w-4xl (896px) - Legal pages, narrow content
  * - 'md': max-w-5xl (1024px) - Article/guide detail pages
- * - 'lg': max-w-6xl (1152px) - Default for most content pages
+ * - 'lg': max-w-7xl (1152px) - Default for most content pages
  * - 'xl': max-w-7xl (1280px) - Listings, grids, catalogs
  */
 
@@ -23,7 +23,7 @@ interface PageContainerProps {
 const sizeClasses: Record<ContainerSize, string> = {
   sm: 'max-w-4xl',
   md: 'max-w-5xl',
-  lg: 'max-w-6xl',
+  lg: 'max-w-7xl',
   xl: 'max-w-7xl',
 };
 

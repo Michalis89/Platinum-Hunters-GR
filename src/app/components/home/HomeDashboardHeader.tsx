@@ -26,7 +26,7 @@ export function HomeDashboardHeader({
 
   return (
     <section className="px-4 py-8 md:px-6 md:py-12">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="mb-1 text-sm text-[var(--hb-muted)]">{greeting}</p>
