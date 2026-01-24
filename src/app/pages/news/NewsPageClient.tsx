@@ -9,6 +9,7 @@ import { FileText, Clock, Eye, Heart, Calendar, User, Tag, Loader2 } from 'lucid
 import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
 import { PageContainer, PageHeader } from '@/app/components/layout';
 import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/pages/news/constants';
+import { normalizeSlug } from '@/utils/slugify';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -16,11 +17,6 @@ interface ArticleWithAuthor extends ArticleRow {
     display_name: string | null;
     avatar_url: string | null;
   } | null;
-}
-
-function normalizeSlug(value: string) {
-  const trimmed = value.replace(/^-+/, '').replace(/-+$/, '');
-  return trimmed || value;
 }
 
 function ArticleCard({ article }: { article: ArticleWithAuthor }) {

@@ -13,6 +13,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
+import { normalizeSlug } from '@/utils/slugify';
 
 type ActivityType =
   | 'backlog_added'
@@ -246,11 +247,6 @@ function slugifyTitle(title: string) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '');
-}
-
-function normalizeSlug(value: string) {
-  const trimmed = value.replace(/^-+/, '').replace(/-+$/, '');
-  return trimmed || value;
 }
 
 function FeedText({ item }: { item: ActivityItem }) {

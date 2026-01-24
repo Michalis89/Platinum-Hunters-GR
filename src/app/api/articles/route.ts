@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
+import { normalizeSlug } from '@/utils/slugify';
 
 async function insertActivity(
   supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
@@ -19,11 +20,6 @@ async function insertActivity(
   } catch (err) {
     console.warn(`Activity insert (${type}) failed:`, err);
   }
-}
-
-function normalizeSlug(value: string) {
-  const trimmed = value.replace(/^-+/, '').replace(/-+$/, '');
-  return trimmed || value;
 }
 
 // GET - Fetch articles with filtering
