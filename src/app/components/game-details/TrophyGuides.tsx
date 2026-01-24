@@ -2,6 +2,7 @@ import { GuideProps, Trophy } from '@/types/interfaces';
 import { Trophy as TrophyIcon, BookOpen } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import EmptyState from '@/app/components/ui/EmptyState';
 
 interface TrophyGuidesProps {
   readonly guides: GuideProps[];
@@ -59,16 +60,16 @@ export default function TrophyGuides({ guides }: TrophyGuidesProps) {
                 </div>
               ))
             ) : (
-              <p className="mt-4 text-center text-gray-400">
-                Δεν υπάρχουν βήματα για αυτόν τον οδηγό.
-              </p>
+              <div className="mt-4">
+                <EmptyState title="Δεν υπάρχουν βήματα για αυτόν τον οδηγό." size="sm" />
+              </div>
             )}
           </div>
         ))
       ) : (
-        <p className="mt-6 text-center text-lg text-gray-400">
-          ❌ Δεν υπάρχουν guides για αυτό το παιχνίδι.
-        </p>
+        <div className="mt-6">
+          <EmptyState title="❌ Δεν υπάρχουν guides για αυτό το παιχνίδι." size="sm" />
+        </div>
       )}
     </div>
   );

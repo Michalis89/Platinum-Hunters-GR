@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Eye, Loader2, ImageIcon } from 'lucide-react';
+import { X, Save, Eye, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import RichTextEditor from '../ui/RichTextEditor';
 import Button from '../ui/Button';
+import ErrorState from '../ui/ErrorState';
+import LoadingSpinner from '../ui/LoadingSpinner';
 import type { ArticleCategory, ArticleTopic, ArticleStatus } from '@/types/database';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
@@ -299,9 +301,7 @@ export default function AddArticleDialog({
                 <div className="space-y-6">
                   {/* Error message */}
                   {error && (
-                    <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                      {error}
-                    </div>
+                    <ErrorState error={error} />
                   )}
                   {warning && (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
@@ -465,7 +465,7 @@ export default function AddArticleDialog({
                     variant="outline"
                     icon={
                       isSubmitting ? (
-                        <Loader2 size={16} className="animate-spin" />
+                        <LoadingSpinner size="sm" inline />
                       ) : (
                         <Save size={16} />
                       )
@@ -479,7 +479,7 @@ export default function AddArticleDialog({
                     variant="primary"
                     icon={
                       isSubmitting ? (
-                        <Loader2 size={16} className="animate-spin" />
+                        <LoadingSpinner size="sm" inline />
                       ) : (
                         <Eye size={16} />
                       )

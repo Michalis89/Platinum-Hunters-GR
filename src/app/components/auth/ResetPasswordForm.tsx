@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
 import { Button } from '@/app/components/ui/Button';
+import ErrorState from '@/app/components/ui/ErrorState';
 import Feedback from '@/app/components/ui/Feedback';
 import { validatePassword } from '@/utils/validation/auth';
 import { supabase } from '@/lib/supabase-client';
@@ -99,10 +100,7 @@ export default function ResetPasswordForm() {
             </p>
 
             {error && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-100">
-                <AlertCircle className="mt-0.5 h-4 w-4" />
-                <span>{error}</span>
-              </div>
+              <ErrorState error={error} />
             )}
 
             {success && (

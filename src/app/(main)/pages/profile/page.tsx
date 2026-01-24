@@ -42,6 +42,7 @@ import type { UserBacklogWithGame } from '@/types/interfaces';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/app/components/ui/Button';
+import EmptyState from '@/app/components/ui/EmptyState';
 
 type FavoriteItem = {
   id: string;
@@ -604,9 +605,7 @@ export default function ProfilePage() {
                           );
                         })}
                         {socialPlatforms.every(p => !(socialLinks[p.key] as string)) && (
-                          <p className="text-sm text-[var(--hb-muted)]">
-                            Δεν υπάρχουν social links.
-                          </p>
+                          <EmptyState title="Δεν υπάρχουν social links." size="sm" />
                         )}
                       </div>
                     ) : (
@@ -681,11 +680,14 @@ export default function ProfilePage() {
                   {favCategory !== 'gaming' &&
                     !mediaFavoritesLoading[favCategory] &&
                     favoritesForCategory(favCategory).length === 0 && (
-                      <p className="text-[var(--hb-muted)]">
-                        {articleOnlyCategories.has(favCategory)
-                          ? 'Δεν υπάρχουν favorites ακόμα. Αυτή η κατηγορία έχει μόνο άρθρα.'
-                          : 'Δεν υπάρχουν favorites ακόμα.'}
-                      </p>
+                      <EmptyState
+                        title={
+                          articleOnlyCategories.has(favCategory)
+                            ? 'Δεν υπάρχουν favorites ακόμα. Αυτή η κατηγορία έχει μόνο άρθρα.'
+                            : 'Δεν υπάρχουν favorites ακόμα.'
+                        }
+                        size="sm"
+                      />
                     )}
                   {favoritesForCategory(favCategory).map((fav, idx) => (
                     <div
@@ -897,9 +899,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.tv && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες TV Series ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες TV Series ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}
@@ -980,9 +983,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.movies && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες Movies ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Movies ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}
@@ -1065,9 +1069,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.anime && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες Anime ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Anime ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}
@@ -1123,9 +1128,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.books && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες Books ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Books ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}
@@ -1181,9 +1187,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.manga && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες Manga ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Manga ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}
@@ -1253,9 +1260,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.coding && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες Coding ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Coding ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}
@@ -1294,9 +1302,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.pet && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες Pet ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Pet ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}
@@ -1349,9 +1358,10 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!categoryNotes.vape && (
-                        <p className="text-xs text-[var(--hb-muted)]">
-                          Δεν υπάρχουν αποθηκευμένες πληροφορίες Vape ακόμα.
-                        </p>
+                        <EmptyState
+                          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Vape ακόμα."
+                          size="sm"
+                        />
                       )}
                     </div>
                   )}

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { User2, MapPin, Gamepad2 } from 'lucide-react';
+import EmptyState from '@/app/components/ui/EmptyState';
 
 export type TeamMember = {
   id: string;
@@ -44,9 +45,11 @@ export function AboutPeople({ team }: AboutPeopleProps) {
         </div>
 
         {team.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-8 text-center text-[var(--hb-muted)]">
-            Δεν βρέθηκαν μέλη ομάδας. Τα admins και authors θα εμφανιστούν εδώ.
-          </div>
+          <EmptyState
+            title="Δεν βρέθηκαν μέλη ομάδας."
+            description="Τα admins και authors θα εμφανιστούν εδώ."
+            size="sm"
+          />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">
             {team.map((member) => (

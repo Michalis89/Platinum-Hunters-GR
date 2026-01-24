@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Loader2, ImageIcon } from 'lucide-react';
+import { X, Save, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import RichTextEditor from '../ui/RichTextEditor';
 import Button from '../ui/Button';
+import ErrorState from '../ui/ErrorState';
+import LoadingSpinner from '../ui/LoadingSpinner';
 import type { ArticleCategory, ArticleTopic, ArticleStatus, ArticleRow } from '@/types/database';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
@@ -282,9 +284,7 @@ export default function EditArticleDialog({
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
                   {error && (
-                    <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                      {error}
-                    </div>
+                    <ErrorState error={error} />
                   )}
                   {warning && (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
@@ -436,7 +436,7 @@ export default function EditArticleDialog({
                   variant="primary"
                   icon={
                     isSubmitting ? (
-                      <Loader2 size={16} className="animate-spin" />
+                      <LoadingSpinner size="sm" inline />
                     ) : (
                       <Save size={16} />
                     )

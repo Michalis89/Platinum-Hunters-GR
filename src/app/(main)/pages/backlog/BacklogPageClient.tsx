@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ListChecks, Plus, Search, SortAsc, SortDesc, Loader2 } from 'lucide-react';
+import { ListChecks, Plus, Search, SortAsc, SortDesc } from 'lucide-react';
 import {
   fetchBacklog,
   selectBacklogItems,
@@ -25,6 +25,8 @@ import {
 import { selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import AlertMessage from '@/app/components/ui/AlertMessage';
+import EmptyState from '@/app/components/ui/EmptyState';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Skeleton from '@/app/components/ui/Skeleton';
 import { SearchBar } from '@/app/components/ui/SearchBar';
 import BacklogStats from '@/app/components/backlog/BacklogStats';
@@ -43,7 +45,7 @@ type BacklogViewMode = 'grid' | 'list' | 'compact' | 'timeline';
 function BacklogFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-      <Loader2 className="h-8 w-8 animate-spin text-[var(--hb-primary)]" />
+      <LoadingSpinner size="lg" />
     </div>
   );
 }
@@ -464,25 +466,22 @@ function BacklogPageContent() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[var(--hb-border)] bg-[var(--hb-panel)] py-20 text-center"
+            className="mt-6"
           >
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--hb-card)]">
-              <ListChecks className="h-10 w-10 text-[var(--hb-muted)]" />
-            </div>
-            <h3 className="mb-2 text-2xl font-semibold text-[var(--hb-headline)]">
-              Το backlog σου είναι άδειο
-            </h3>
-            <p className="mb-6 max-w-md text-[var(--hb-muted)]">
-              Πρόσθεσε παιχνίδια που θέλεις να παίξεις και οργάνωσε το backlog σου με
-              προτεραιότητες!
-            </p>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 rounded-lg bg-[var(--hb-primary-strong)] px-6 py-3 font-medium text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)] transition hover:brightness-110"
-            >
-              <Plus size={20} />
-              Πρόσθεσε το πρώτο σου παιχνίδι
-            </button>
+            <EmptyState
+              icon={<ListChecks className="h-10 w-10 text-[var(--hb-muted)]" />}
+              title="Το backlog σου είναι άδειο"
+              description="Πρόσθεσε παιχνίδια που θέλεις να παίξεις και οργάνωσε το backlog σου με προτεραιότητες!"
+              action={
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-2 rounded-lg bg-[var(--hb-primary-strong)] px-6 py-3 font-medium text-[var(--hb-bg)] shadow-md shadow-[rgba(229,9,20,0.35)] transition hover:brightness-110"
+                >
+                  <Plus size={20} />
+                  Πρόσθεσε το πρώτο σου παιχνίδι
+                </button>
+              }
+            />
           </motion.div>
         )}
 
@@ -575,13 +574,14 @@ function BacklogPageContent() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center rounded-2xl bg-[var(--hb-panel)] py-16 text-center"
+            className="mt-6"
           >
-            <Search className="mb-4 h-12 w-12 text-[var(--hb-muted)]" />
-            <h3 className="mb-2 text-xl font-semibold text-[var(--hb-headline)]">
-              Δεν βρέθηκαν αποτελέσματα
-            </h3>
-            <p className="text-[var(--hb-muted)]">Δοκίμασε άλλο όρο αναζήτησης ή φίλτρα</p>
+            <EmptyState
+              icon={<Search className="h-12 w-12 text-[var(--hb-muted)]" />}
+              title="Δεν βρέθηκαν αποτελέσματα"
+              description="Δοκίμασε άλλο όρο αναζήτησης ή φίλτρα"
+              size="sm"
+            />
           </motion.div>
         )}
       </div>

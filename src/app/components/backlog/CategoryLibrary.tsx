@@ -5,6 +5,9 @@ import Image from 'next/image';
 import { Film, BookOpen, Sparkles, Tv } from 'lucide-react';
 import { SearchBar } from '@/app/components/ui/SearchBar';
 import Button from '@/app/components/ui/Button';
+import EmptyState from '@/app/components/ui/EmptyState';
+import ErrorState from '@/app/components/ui/ErrorState';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 export type MediaCategory = 'anime' | 'manga' | 'books' | 'movies' | 'tv';
 
@@ -756,9 +759,11 @@ export default function CategoryLibrary({
                   </div>
                 )}
                 {!createLoading && createResults.length === 0 && (
-                  <div className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-4 text-center text-xs text-[var(--hb-muted)] md:col-span-2">
-                    Δεν βρέθηκαν αποτελέσματα.
-                  </div>
+                  <EmptyState
+                    title="Δεν βρέθηκαν αποτελέσματα."
+                    size="sm"
+                    className="md:col-span-2"
+                  />
                 )}
               </div>
               <div className="mt-4">
@@ -829,9 +834,11 @@ export default function CategoryLibrary({
                   </div>
                 )}
                 {!suggestionsLoading && suggestions.length === 0 && (
-                  <div className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-4 text-center text-xs text-[var(--hb-muted)] md:col-span-2">
-                    Δεν υπάρχουν προτάσεις ακόμα.
-                  </div>
+                  <EmptyState
+                    title="Δεν υπάρχουν προτάσεις ακόμα."
+                    size="sm"
+                    className="md:col-span-2"
+                  />
                 )}
               </div>
             </div>
@@ -974,11 +981,7 @@ export default function CategoryLibrary({
           </div>
         </section>
 
-        {libraryError && (
-          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-3 text-sm text-[var(--hb-text)]">
-            {libraryError}
-          </div>
-        )}
+        {libraryError && <ErrorState error={libraryError} />}
 
         <section className="max-h-[70vh] overflow-y-auto rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 backdrop-blur">
           <div className="hidden gap-4 px-3 pb-2 text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)] md:grid md:grid-cols-[72px,1.6fr,0.8fr,0.8fr,0.6fr,0.4fr]">
@@ -992,8 +995,8 @@ export default function CategoryLibrary({
 
           <div className="mt-2 space-y-3">
             {libraryLoading && (
-              <div className="rounded-2xl border border-dashed border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-6 text-center text-sm text-[var(--hb-muted)]">
-                Φόρτωση βιβλιοθήκης...
+              <div className="rounded-2xl border border-dashed border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-6">
+                <LoadingSpinner label="Φόρτωση βιβλιοθήκης..." />
               </div>
             )}
             {!libraryLoading &&
@@ -1072,9 +1075,7 @@ export default function CategoryLibrary({
                 );
               })}
             {!libraryLoading && entries.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-6 text-center text-sm text-[var(--hb-muted)]">
-                Δεν υπάρχουν καταχωρήσεις ακόμη.
-              </div>
+              <EmptyState title="Δεν υπάρχουν καταχωρήσεις ακόμη." />
             )}
           </div>
         </section>

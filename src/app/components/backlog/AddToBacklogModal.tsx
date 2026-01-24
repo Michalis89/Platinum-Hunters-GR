@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Plus, Trophy, Clock, Signal, Check } from 'lucide-react';
 import Image from 'next/image';
+import EmptyState from '@/app/components/ui/EmptyState';
 import type { AppDispatch } from '@/store/store';
 import {
   addToBacklog,
@@ -224,9 +225,10 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
                 )}
 
                 {!gamesLoading && filteredGames.length === 0 && (
-                  <div className="text-center text-sm text-slate-400">
-                    {search ? 'Δεν βρέθηκαν παιχνίδια' : 'Δεν υπάρχουν διαθέσιμα παιχνίδια'}
-                  </div>
+                  <EmptyState
+                    title={search ? 'Δεν βρέθηκαν παιχνίδια' : 'Δεν υπάρχουν διαθέσιμα παιχνίδια'}
+                    size="sm"
+                  />
                 )}
 
                 {filteredGames.map(game => (

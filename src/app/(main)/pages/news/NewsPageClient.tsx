@@ -5,9 +5,12 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { FileText, Clock, Eye, Heart, Calendar, User, Tag, Loader2 } from 'lucide-react';
+import { FileText, Clock, Eye, Heart, Calendar, User, Tag } from 'lucide-react';
 import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
 import { PageContainer, PageHeader } from '@/app/components/layout';
+import EmptyState from '@/app/components/ui/EmptyState';
+import ErrorState from '@/app/components/ui/ErrorState';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
 
@@ -135,7 +138,7 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
 function NewsFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-      <Loader2 className="h-8 w-8 animate-spin text-[var(--hb-primary)]" />
+      <LoadingSpinner size="lg" />
     </div>
   );
 }
@@ -205,6 +208,9 @@ function NewsPageContent() {
   const subtitle = category
     ? CATEGORY_SUBTITLES[category] ?? 'Άρθρα και ιστορίες από όλα τα χόμπι, σε καθαρή ροή.'
     : 'Άρθρα και ιστορίες από όλα τα χόμπι, σε καθαρή ροή.';
+  const emptyDescription = category
+    ? `Δεν βρέθηκαν άρθρα στην κατηγορία "${categoryLabel}"`
+    : 'Δεν υπάρχουν ακόμα δημοσιευμένα άρθρα';
 
   return (
     <PageContainer size="xl" className="py-12">
@@ -275,24 +281,16 @@ function NewsPageContent() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-[var(--hb-primary-strong)]" />
+            <LoadingSpinner size="lg" />
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-12 text-center">
-            <p className="text-red-400">{error}</p>
-          </div>
+          <ErrorState error={error} />
         ) : articles.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-20 text-center">
-            <FileText className="mx-auto mb-4 h-16 w-16 text-[var(--hb-muted)]" />
-            <h2 className="mb-2 text-xl font-semibold text-[var(--hb-headline)]">
-              Δεν υπάρχουν άρθρα
-            </h2>
-            <p className="text-[var(--hb-muted)]">
-              {category
-                ? `Δεν βρέθηκαν άρθρα στην κατηγορία "${categoryLabel}"`
-                : 'Δεν υπάρχουν ακόμα δημοσιευμένα άρθρα'}
-            </p>
-          </div>
+          <EmptyState
+            icon={<FileText className="h-16 w-16 text-[var(--hb-muted)]" />}
+            title="Δεν υπάρχουν άρθρα"
+            description={emptyDescription}
+          />
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 24 }}

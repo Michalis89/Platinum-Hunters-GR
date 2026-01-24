@@ -30,6 +30,7 @@ import { SearchBar } from '@/app/components/ui/SearchBar';
 import FiltersPanel from '@/app/components/filters/FiltersPanel';
 import { selectIsAuthenticated } from '@/store/slices/authSlice';
 import Feedback from '@/app/components/ui/Feedback';
+import EmptyState from '@/app/components/ui/EmptyState';
 
 type GuidesViewMode = 'grid' | 'list' | 'compact' | 'timeline';
 
@@ -475,7 +476,11 @@ function GuidesClient() {
       );
     }
     if (isFetching || isLoading) return <Skeleton type="guides-list" />;
-    return <p className="mt-6 text-center text-lg text-gray-400">Δεν βρέθηκαν παιχνίδια.</p>;
+    return (
+      <div className="mt-6">
+        <EmptyState title="Δεν βρέθηκαν παιχνίδια." size="sm" />
+      </div>
+    );
   };
 
   if (isLoading) {

@@ -14,6 +14,9 @@ import {
   Trash2,
 } from 'lucide-react';
 import { normalizeSlug } from '@/utils/slugify';
+import EmptyState from '@/app/components/ui/EmptyState';
+import ErrorState from '@/app/components/ui/ErrorState';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 type ActivityType =
   | 'backlog_added'
@@ -211,12 +214,12 @@ export function ActivityFeed({
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-[var(--hb-muted)]">Φόρτωση...</p>}
+      {isLoading && <LoadingSpinner size="sm" label="Φόρτωση..." />}
       {error && (
-        <p className="text-sm text-red-300">Σφάλμα φόρτωσης activity. Προσπάθησε ξανά αργότερα.</p>
+        <ErrorState error="Σφάλμα φόρτωσης activity. Προσπάθησε ξανά αργότερα." />
       )}
       {!isLoading && !error && activities.length === 0 && (
-        <p className="text-sm text-[var(--hb-muted)]">Καμία πρόσφατη ενέργεια.</p>
+        <EmptyState title="Καμία πρόσφατη ενέργεια." />
       )}
 
       <div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: `${height ?? 360}px` }}>
