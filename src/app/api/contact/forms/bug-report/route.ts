@@ -1,5 +1,49 @@
 import { NextResponse } from 'next/server';
+import { type SupabaseClient } from '@supabase/supabase-js';
 import supabase from '@/lib/db';
+import type { Database } from '@/lib/supabase/database.types';
+
+type ExtendedDatabase = Database & {
+  __InternalSupabase: Database['__InternalSupabase'];
+  public: {
+    Tables: Database['public']['Tables'] & {
+      submissions: {
+        Row: { id: number };
+        Insert: { type: string; status: string };
+        Update: { type?: string; status?: string };
+        Relationships: [];
+      };
+      bug_reports: {
+        Row: {
+          id: number;
+          submission_id: number;
+          bug_type: string;
+          description: string;
+          screenshot_url: string | null;
+        };
+        Insert: {
+          submission_id: number;
+          bug_type: string;
+          description: string;
+          screenshot_url?: string | null;
+        };
+        Update: {
+          submission_id?: number;
+          bug_type?: string;
+          description?: string;
+          screenshot_url?: string | null;
+        };
+        Relationships: [];
+      };
+    };
+    Views: Database['public']['Views'];
+    Functions: Database['public']['Functions'];
+    Enums: Database['public']['Enums'];
+    CompositeTypes: Database['public']['CompositeTypes'];
+  };
+};
+
+const typedSupabase = supabase as unknown as SupabaseClient<ExtendedDatabase>;
 
 export async function POST(req: Request) {
   try {
@@ -31,9 +75,9 @@ export async function POST(req: Request) {
       fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/bug_reports/${fileName}`;
     }
 
-    const { data: submission, error: submissionError } = await supabase
+    const { data: submission, error: submissionError } = await typedSupabase
       .from('submissions')
-      .insert([{ type: 'bug_report', status: 'pending' }])
+      .insert({ type: 'bug_report', status: 'pending' })
       .select('id')
       .single();
 
@@ -41,9 +85,12 @@ export async function POST(req: Request) {
 
     const submission_id = submission.id;
 
-    const { error: dbError } = await supabase
-      .from('bug_reports')
-      .insert([{ submission_id, bug_type, description, screenshot_url: fileUrl }]);
+    const { error: dbError } = await typedSupabase.from('bug_reports').insert({
+      submission_id,
+      bug_type,
+      description,
+      screenshot_url: fileUrl,
+    });
 
     if (dbError) throw dbError;
 

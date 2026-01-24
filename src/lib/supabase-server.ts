@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/supabase/database.types';
 
-let supabaseServer: SupabaseClient | null = null;
+let supabaseServer: SupabaseClient<Database> | null = null;
 
 const createSupabaseServer = () => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,7 +11,7 @@ const createSupabaseServer = () => {
     throw new Error('Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
 
-  return createClient(url, key, {
+  return createClient<Database>(url, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

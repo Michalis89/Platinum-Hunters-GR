@@ -1,8 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
+import type { Database } from '@/lib/supabase/database.types';
+import { insertActivity } from '@/lib/services/activityService';
 
 type IncomingStep = {
   title?: string;
@@ -13,25 +14,18 @@ type IncomingStep = {
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
 
-async function insertActivity(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  payload: Record<string, unknown>,
-) {
-  try {
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type: 'guide_created', // reuse type with action=updated to satisfy current constraint
-      payload: { action: 'updated', ...payload },
-    });
-  } catch (err) {
-    console.warn('⚠️ Activity insert (guide update) failed:', err);
-  }
-}
+type GuideRow = Database['public']['Tables']['guides']['Row'];
+type GameRow = Database['public']['Tables']['games']['Row'];
+type GuideWithGame = GuideRow & {
+  games:
+    | Pick<GameRow, 'id' | 'title' | 'slug' | 'cover_image' | 'background_image'>
+    | Array<Pick<GameRow, 'id' | 'title' | 'slug' | 'cover_image' | 'background_image'>>
+    | null;
+};
 
-export async function PUT(req: Request, context: any) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const supabase = (await createRouteHandlerClient()) as any;
+    const supabase = await createRouteHandlerClient();
 
     const {
       data: { session },
@@ -52,11 +46,15 @@ export async function PUT(req: Request, context: any) {
       return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
     }
 
-    if (!(await context.params)?.id) {
+    const { id } = await params;
+    if (!id) {
       return NextResponse.json({ error: 'Missing game ID' }, { status: 400 });
     }
 
-    const gameId = Number((await context.params).id);
+    const gameId = Number.parseInt(id, 10);
+    if (Number.isNaN(gameId)) {
+      return NextResponse.json({ error: 'Invalid game ID' }, { status: 400 });
+    }
     const {
       steps,
       content_rich: guideContentRich,
@@ -114,17 +112,16 @@ export async function PUT(req: Request, context: any) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
-    if (!existingGuide) {
+    const typedGuide = existingGuide as GuideWithGame | null;
+    if (!typedGuide) {
       return NextResponse.json({ error: 'Guide not found for this game' }, { status: 404 });
     }
 
-    const guideId = existingGuide.id;
-    const gameData = Array.isArray((existingGuide as any).games)
-      ? (existingGuide as any).games[0]
-      : (existingGuide as any).games;
+    const guideId = typedGuide.id;
+    const gameData = Array.isArray(typedGuide.games) ? typedGuide.games[0] : typedGuide.games;
 
     // Update guide-level content if provided
-    const guideUpdatePayload: Record<string, unknown> = {};
+    const guideUpdatePayload: Database['public']['Tables']['guides']['Update'] = {};
     if (guideContentRich !== undefined) guideUpdatePayload.content_rich = guideContentRich;
     if (guideContentHtml !== undefined) {
       guideUpdatePayload.content_html = sanitizeHtmlContent(guideContentHtml).trim() || null;
@@ -150,7 +147,7 @@ export async function PUT(req: Request, context: any) {
 
     // Update game images if provided
     if (cover_image !== undefined || background_image !== undefined) {
-      const gameUpdate: Record<string, unknown> = {};
+      const gameUpdate: Database['public']['Tables']['games']['Update'] = {};
       if (cover_image !== undefined) gameUpdate.cover_image = cover_image;
       if (background_image !== undefined) gameUpdate.background_image = background_image;
 
@@ -178,14 +175,16 @@ export async function PUT(req: Request, context: any) {
     }
 
     // Insert new guide_steps
-    const newSteps = steps.map((step: IncomingStep, index: number) => {
+    const newSteps: Database['public']['Tables']['guide_steps']['Insert'][] = steps.map(
+      (step: IncomingStep, index: number) => {
       const sanitizedStepHtml = sanitizeHtmlContent(step.content_html).trim() || null;
       return {
         guide_id: guideId,
         step_number: index + 1,
         title: (step.title ?? `Βήμα ${index + 1}`).toString(),
         description: step.description ?? (sanitizedStepHtml ? stripHtml(sanitizedStepHtml) : ''),
-        content_rich: step.content_rich ?? null,
+        content_rich:
+          (step.content_rich ?? null) as Database['public']['Tables']['guide_steps']['Insert']['content_rich'],
         content_html: sanitizedStepHtml,
       };
     });
@@ -212,11 +211,12 @@ export async function PUT(req: Request, context: any) {
       .eq('id', session.user.id)
       .maybeSingle();
 
-    await insertActivity(supabase, session.user.id, {
+    await insertActivity(supabase, session.user.id, 'guide_created', {
+      action: 'updated',
       guideId,
       gameId,
-      gameTitle: (gameData as { title?: string })?.title ?? undefined,
-      gameSlug: (gameData as { slug?: string })?.slug ?? undefined,
+      gameTitle: gameData?.title ?? undefined,
+      gameSlug: gameData?.slug ?? undefined,
       username: profile.data?.username,
       display_name: profile.data?.display_name,
       avatar_url: profile.data?.avatar_url,

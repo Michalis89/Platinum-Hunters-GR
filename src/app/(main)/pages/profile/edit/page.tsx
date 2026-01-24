@@ -588,7 +588,7 @@ export default function EditProfilePage() {
         ...socialLinks,
         location_city: locationCity,
         category_notes: category_notes || EMPTY_CATEGORY_NOTES,
-      };
+      } as User['social_links'];
 
       await dispatch(
         updateUserProfile({

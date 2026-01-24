@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { Database } from '@/lib/supabase/database.types';
+import { insertActivity } from '@/lib/services/activityService';
 
 type Category = 'movies' | 'tv';
 
@@ -72,24 +74,6 @@ const fetchDetails = async (category: Category, tmdbId: number) => {
   };
 };
 
-const insertActivity = async (
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  type: 'media_added',
-  payload: Record<string, unknown>,
-) => {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type,
-      payload,
-    });
-  } catch (err) {
-    console.warn('⚠️ Activity insert failed:', err);
-  }
-};
-
 export async function POST(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
@@ -126,16 +110,10 @@ export async function POST(req: Request) {
         .eq('id', body.mediaId)
         .maybeSingle();
 
-      const typedMediaRow = mediaRow as
-        | {
-            title?: string | null;
-            original_title?: string | null;
-            title_english?: string | null;
-            title_romaji?: string | null;
-            title_native?: string | null;
-            category?: string | null;
-          }
-        | null;
+      const typedMediaRow = mediaRow as Pick<
+        Database['public']['Tables']['media_items']['Row'],
+        'title' | 'original_title' | 'title_english' | 'title_romaji' | 'title_native' | 'category'
+      > | null;
       const mediaTitle =
         typedMediaRow?.title ||
         typedMediaRow?.original_title ||

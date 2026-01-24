@@ -1,13 +1,17 @@
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import type { UserGameWithGame, UserGameInsert, Database } from '@/types/database';
+import type { Database } from '@/lib/supabase/database.types';
 import { insertActivity } from '@/lib/services/activityService';
+import { getUserGamesWithDetails } from '@/lib/supabase/queries';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithPagination } from '@/lib/api/response';
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
+
+type UserGameRow = Database['public']['Tables']['user_games']['Row'];
+type GameRow = Database['public']['Tables']['games']['Row'];
+type UserGameWithGame = UserGameRow & { games: GameRow | GameRow[] | null };
 
 export async function GET(request: Request) {
   try {
@@ -29,63 +33,14 @@ export async function GET(request: Request) {
       data: userGames,
       error: gamesError,
       count: totalCount,
-    } = await supabase
-      .from('user_games')
-      .select(
-        `
-        id,
-        user_id,
-        game_id,
-        status,
-        priority,
-        actual_hours_casual,
-        actual_hours_platinum,
-        notes,
-        personal_rating,
-        personal_difficulty,
-        would_recommend,
-        is_favorite,
-        added_at,
-        started_at,
-        completed_at,
-        platinumed_at,
-        dropped_at,
-        games (
-          id,
-          title,
-          slug,
-          description,
-          cover_image,
-          background_image,
-          trophy_platinum,
-          trophy_gold,
-          trophy_silver,
-          trophy_bronze,
-          trophy_total,
-          release_date,
-          release_year,
-          metacritic_score,
-        rating,
-        total_guides,
-        average_difficulty,
-        average_hours,
-        created_at,
-        updated_at
-        )
-      `,
-        { count: 'exact' },
-      )
-      .eq('user_id', userId)
-      .order('priority', { ascending: false })
-      .order('added_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    } = await getUserGamesWithDetails(supabase, { userId, limit, offset });
 
     if (gamesError) {
       console.error('User games fetch error:', gamesError);
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    const transformedGames = (userGames as UserGameWithGame[]).map(item => ({
+    const transformedGames = (userGames ?? []).map((item: UserGameWithGame) => ({
       id: item.id,
       user_id: item.user_id,
       game_id: item.game_id,
@@ -144,7 +99,7 @@ export async function POST(request: Request) {
 
     // Validate game_id
     if (!game_id || typeof game_id !== 'number') {
-      return NextResponse.json({ error: 'Μη έγκυρο game_id' }, { status: 400 });
+      return fail({ error: 'Μη έγκυρο game_id' }, 400);
     }
 
     // Check if game exists
@@ -155,11 +110,11 @@ export async function POST(request: Request) {
       .single();
 
     if (gameCheckError || !gameExists) {
-      return NextResponse.json({ error: 'Το παιχνίδι δεν βρέθηκε' }, { status: 404 });
+      return fail({ error: 'Το παιχνίδι δεν βρέθηκε' }, 404);
     }
 
     // Insert into user_games
-    const insertData: UserGameInsert = {
+    const insertData: Database['public']['Tables']['user_games']['Insert'] = {
       user_id: userId,
       game_id,
       status,
@@ -173,7 +128,7 @@ export async function POST(request: Request) {
 
     const { data: newItem, error: insertError } = await supabase
       .from('user_games')
-      .insert(insertData as never)
+      .insert(insertData)
       .select(
         `
         id,
@@ -222,16 +177,16 @@ export async function POST(request: Request) {
     if (insertError) {
       // Check for duplicate (UNIQUE constraint violation)
       if (insertError.code === '23505') {
-        return NextResponse.json(
-          { error: 'Το παιχνίδι υπάρχει ήδη στη συλλογή σου' },
-          { status: 409 },
-        );
+        return fail({ error: 'Το παιχνίδι υπάρχει ήδη στη συλλογή σου', code: 'CONFLICT' }, 409);
       }
       console.error('User games insert error:', insertError);
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    const typedNewItem = newItem as UserGameWithGame;
+    if (!newItem) {
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+    const typedNewItem = newItem;
     const transformedItem = {
       id: typedNewItem.id,
       user_id: typedNewItem.user_id,
@@ -265,8 +220,8 @@ export async function POST(request: Request) {
       'backlog_added',
       {
         gameId: transformedItem.game?.id,
-        gameTitle: (transformedItem.game as Database['public']['Tables']['games']['Row'])?.title,
-        gameSlug: (transformedItem.game as Database['public']['Tables']['games']['Row'])?.slug,
+        gameTitle: transformedItem.game?.title,
+        gameSlug: transformedItem.game?.slug,
         status: transformedItem.status,
         username: (profileData as { username?: string } | null)?.username,
         display_name: (profileData as { display_name?: string } | null)?.display_name,

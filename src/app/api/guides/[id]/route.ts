@@ -14,9 +14,10 @@ interface GuideStep {
 export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const id = params.id;
+    const idParam = params.id;
+    const id = Number.parseInt(idParam, 10);
 
-    if (!id) {
+    if (!idParam || Number.isNaN(id)) {
       return fail({ error: 'Λάθος ID οδηγού' }, 400);
     }
 

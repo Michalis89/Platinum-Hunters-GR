@@ -6,7 +6,7 @@
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { validateEmail, validatePassword } from '@/utils/validation/auth';
-import type { User } from '@/types/user';
+import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 
@@ -14,10 +14,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { identifier, password } = body; // Accept email OR username
-
-    // =====================================================
-    // VALIDATION
-    // =====================================================
 
     if (!identifier || identifier.trim() === '') {
       return fail({ error: 'Το email ή το username είναι υποχρεωτικό' }, 400);
@@ -27,10 +23,6 @@ export async function POST(req: Request) {
     if (!passwordValidation.isValid) {
       return fail({ error: passwordValidation.error || 'Μη έγκυρος κωδικός' }, 400);
     }
-
-    // =====================================================
-    // DETERMINE IF IDENTIFIER IS EMAIL OR USERNAME
-    // =====================================================
 
     const supabase = await createRouteHandlerClient(undefined, { ignoreCookies: true });
     let email = identifier;
@@ -53,7 +45,10 @@ export async function POST(req: Request) {
         return fail({ error: 'Λάθος username ή κωδικός' }, 401);
       }
 
-      const typedUserData = userData as Pick<User, 'email' | 'account_status'>;
+      const typedUserData = userData as Pick<
+        Database['public']['Tables']['users']['Row'],
+        'email' | 'account_status'
+      >;
 
       // Check if account is deleted, suspended, or banned
       if (typedUserData.account_status === 'deleted') {
@@ -104,10 +99,6 @@ export async function POST(req: Request) {
       return fail({ error: 'Αποτυχία σύνδεσης' }, 500);
     }
 
-    // =====================================================
-    // FETCH USER PROFILE
-    // =====================================================
-
     const authedSupabase = await createRouteHandlerClient(authData.session?.access_token, {
       ignoreCookies: true,
     });
@@ -122,16 +113,14 @@ export async function POST(req: Request) {
       return fail({ error: 'Σφάλμα φόρτωσης προφίλ' }, 500);
     }
 
-    const typedUserProfile = userProfile as User;
-
     // Check if account is suspended or banned
-    if (typedUserProfile.account_status === 'suspended') {
+    if (userProfile.account_status === 'suspended') {
       return fail(
         { error: 'Ο λογαριασμός σας έχει ανασταλεί. Επικοινωνήστε με τη διαχείριση.' },
         403,
       );
     }
-    if (typedUserProfile.account_status === 'banned') {
+    if (userProfile.account_status === 'banned') {
       return fail({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, 403);
     }
 

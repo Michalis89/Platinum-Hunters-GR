@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { FullGameData, GamesResponse, ProcessedGame } from '@/types/interfaces';
+import { FullGameData, GamesResponse, ProcessedGame, Step, TrophiesRecord } from '@/types/interfaces';
 
 type GetGamesArgs = {
   page?: number;
@@ -12,6 +11,26 @@ type GetGamesArgs = {
   minYear?: number;
   maxYear?: number;
 } | void;
+
+type LegacyGameExtras = {
+  playthroughs?: string;
+  difficulty?: string;
+  difficultyColor?: string;
+  playthroughsColor?: string;
+  hours?: string;
+  hoursColor?: string;
+  gameImage?: string;
+  platform?: string;
+  trophies?: Record<string, unknown>;
+  steps?: unknown[];
+};
+
+const defaultTrophies: TrophiesRecord = {
+  Platinum: '',
+  Gold: '',
+  Silver: '',
+  Bronze: '',
+};
 
 export const gamesApi = createApi({
   reducerPath: 'gamesApi',
@@ -43,31 +62,38 @@ export const gamesApi = createApi({
       transformResponse: (response: { data: FullGameData[]; pagination?: unknown }) => {
         const payload = response?.data ?? [];
         // Transform games to include computed fields
-        const games: ProcessedGame[] = payload.map(game => ({
-          ...game,
-          // Legacy scraped fields with safe fallbacks
-          playthroughs: (game as any).playthroughs ?? '',
-          difficulty: (game as any).difficulty ?? '',
-          difficultyColor: (game as any).difficultyColor ?? '',
-          playthroughsColor: (game as any).playthroughsColor ?? '',
-          hours: (game as any).hours ?? '',
-          hoursColor: (game as any).hoursColor ?? '',
-          gameImage:
-            (game as any).gameImage ?? game.cover_image ?? game.background_image ?? '/og-image.png',
-          platform:
-            (game as any).platform ??
-            (Array.isArray(game.platforms) && game.platforms.length > 0 ? game.platforms[0] : ''),
-          trophies: (game as any).trophies ?? ({} as any),
-          steps: Array.isArray((game as any).steps) ? (game as any).steps : [],
-          // Compute total points from trophy counts
-          totalPoints:
-            (game.trophy_platinum || 0) * 300 +
-            (game.trophy_gold || 0) * 90 +
-            (game.trophy_silver || 0) * 30 +
-            (game.trophy_bronze || 0) * 15,
-          // Convert difficulty to number for filtering
-          difficultyNumber: game.average_difficulty || 0,
-        }));
+        const games: ProcessedGame[] = payload.map(game => {
+          const legacyGame = game as FullGameData & LegacyGameExtras;
+
+          const steps = Array.isArray(legacyGame.steps) ? (legacyGame.steps as Step[]) : [];
+          const trophies = (legacyGame.trophies ?? defaultTrophies) as TrophiesRecord;
+
+          return {
+            ...game,
+            // Legacy scraped fields with safe fallbacks
+            playthroughs: legacyGame.playthroughs ?? '',
+            difficulty: legacyGame.difficulty ?? '',
+            difficultyColor: legacyGame.difficultyColor ?? '',
+            playthroughsColor: legacyGame.playthroughsColor ?? '',
+            hours: legacyGame.hours ?? '',
+            hoursColor: legacyGame.hoursColor ?? '',
+            gameImage:
+              legacyGame.gameImage ?? game.cover_image ?? game.background_image ?? '/og-image.png',
+            platform:
+              legacyGame.platform ??
+              (Array.isArray(game.platforms) && game.platforms.length > 0 ? game.platforms[0] : ''),
+            trophies,
+            steps,
+            // Compute total points from trophy counts
+            totalPoints:
+              (game.trophy_platinum || 0) * 300 +
+              (game.trophy_gold || 0) * 90 +
+              (game.trophy_silver || 0) * 30 +
+              (game.trophy_bronze || 0) * 15,
+            // Convert difficulty to number for filtering
+            difficultyNumber: game.average_difficulty || 0,
+          };
+        });
 
         // Extract unique values for filters
         const uniquePlatforms = Array.from(

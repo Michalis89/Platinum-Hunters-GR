@@ -1,4 +1,5 @@
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { Database } from '@/lib/supabase/database.types';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 import { insertActivity } from '@/lib/services/activityService';
@@ -16,8 +17,7 @@ interface ScrapedStep {
 
 export async function POST(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase = (await createRouteHandlerClient()) as any;
+    const supabase = await createRouteHandlerClient();
 
     const session = await requireAuth(supabase);
 
@@ -180,14 +180,17 @@ export async function POST(req: Request) {
 
     // Insert guide steps
     if (steps && Array.isArray(steps) && steps.length > 0) {
-      const guideSteps = steps.map((step: ScrapedStep, index: number) => ({
+      const guideSteps: Database['public']['Tables']['guide_steps']['Insert'][] = steps.map(
+        (step: ScrapedStep, index: number) => ({
         guide_id: guide.id,
         step_number: index + 1,
         title: step.title,
         description: step.description,
-        content_rich: step.content_rich ?? null,
+        content_rich:
+          (step.content_rich ?? null) as Database['public']['Tables']['guide_steps']['Insert']['content_rich'],
         content_html: sanitizeHtmlContent(step.content_html).trim() || null,
-      }));
+      }),
+      );
 
       const { error: stepsError } = await supabase.from('guide_steps').insert(guideSteps);
 

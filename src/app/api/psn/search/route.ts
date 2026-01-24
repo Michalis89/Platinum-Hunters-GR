@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { makeUniversalSearch } from 'psn-api';
+import type { UniversalSearchDomains } from 'psn-api';
 import { getAccessToken, searchPsnGame } from '@/lib/psnClient';
 
 export async function GET(request: Request) {
@@ -15,21 +15,31 @@ export async function GET(request: Request) {
   try {
     if (debug === '1' || debug === 'true') {
       const accessToken = await getAccessToken();
-      const attempts = ['GameContent', 'SocialAllAccounts', 'SocialFriends'];
-      const results: Array<{ domain: string; games: any[] }> = [];
+      const attempts = ['GameContent', 'SocialAllAccounts', 'SocialFriends'] as const;
+      const results: Array<{ domain: string; games: Array<{ id?: string; name?: string; platform?: string }> }> =
+        [];
 
       for (const type of attempts) {
         try {
-          const raw = await makeUniversalSearch({ accessToken }, title, type as any);
+          const raw = await makeUniversalSearch(
+            { accessToken },
+            title,
+            type as unknown as UniversalSearchDomains,
+          );
+          const domainResponses = (raw as { domainResponses?: Array<{ domain?: string; results?: unknown[] }> })
+            .domainResponses;
           const games =
-            raw.domainResponses
-              ?.find((r: any) => r.domain === 'Games')
+            domainResponses
+              ?.find(r => r.domain === 'Games')
               ?.results?.slice(0, 10)
-              ?.map((g: any) => ({
-                id: g.id,
-                name: g.name,
-                platform: g.platform,
-              })) ?? [];
+              ?.map(game => {
+                const typedGame = game as { id?: string; name?: string; platform?: string };
+                return {
+                  id: typedGame.id,
+                  name: typedGame.name,
+                  platform: typedGame.platform,
+                };
+              }) ?? [];
           results.push({
             domain: type,
             games,

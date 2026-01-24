@@ -14,6 +14,9 @@ type TrophyRecord = {
   psn_trophy_id: string | null;
 };
 
+type TrophyType = TrophyRecord['type'];
+type PsnPlatform = 'PS5' | 'PS4' | 'PS3';
+
 const TROPHY_TYPE_MAP: Record<string, TrophyRecord['type']> = {
   platinum: 'Platinum',
   gold: 'Gold',
@@ -22,6 +25,12 @@ const TROPHY_TYPE_MAP: Record<string, TrophyRecord['type']> = {
 };
 
 const CACHE_TTL_HOURS = 24;
+
+const isTrophyType = (value: string): value is TrophyType =>
+  value === 'Platinum' || value === 'Gold' || value === 'Silver' || value === 'Bronze';
+
+const isPsnPlatform = (value: string): value is PsnPlatform =>
+  value.startsWith('PS5') || value.startsWith('PS4') || value.startsWith('PS3');
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -80,7 +89,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           cachedTrophies.map(t => ({
             name: t.name,
             description: t.description,
-            type: t.type,
+            type: isTrophyType(t.type) ? t.type : 'Bronze',
             icon_url: t.icon_url,
             is_hidden: t.is_hidden ?? null,
             rarity_percentage: t.rarity_percentage ?? null,
@@ -91,10 +100,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     }
 
     const platform =
-      platformsData?.platforms?.find((p: string) => p.startsWith('PS5')) ||
-      platformsData?.platforms?.find((p: string) => p.startsWith('PS4')) ||
-      platformsData?.platforms?.find((p: string) => p.startsWith('PS3')) ||
-      'PS5';
+      (platformsData?.platforms?.find(
+        (p: string): p is PsnPlatform => isPsnPlatform(p) && p.startsWith('PS5'),
+      ) ??
+        platformsData?.platforms?.find(
+          (p: string): p is PsnPlatform => isPsnPlatform(p) && p.startsWith('PS4'),
+        ) ??
+        platformsData?.platforms?.find(
+          (p: string): p is PsnPlatform => isPsnPlatform(p) && p.startsWith('PS3'),
+        ) ??
+        'PS5') as PsnPlatform;
 
     let psnTrophies;
     try {

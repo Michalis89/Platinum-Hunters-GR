@@ -1,37 +1,13 @@
 import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import supabase from '@/lib/db';
-import { GeneralQuestionDBEntry, GeneralQuestionRequest } from '@/types/forms';
-
-const validateRequest = ({
-  category,
-  question,
-  email,
-  serviceDescription,
-  infoType,
-  infoDetails,
-  feedbackRating,
-}: GeneralQuestionRequest) => {
-  if (!email) return 'Το email είναι υποχρεωτικό.';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Το email δεν είναι έγκυρο.';
-
-  const validations = {
-    Support: () =>
-      !serviceDescription?.trim() ? 'Η περιγραφή της υπηρεσίας είναι υποχρεωτική.' : null,
-    Info: () =>
-      !infoType?.trim() || !infoDetails?.trim()
-        ? 'Το θέμα και η περιγραφή πληροφοριών είναι υποχρεωτικά.'
-        : null,
-    Feedback: () => (!feedbackRating ? 'Η βαθμολογία Feedback είναι υποχρεωτική.' : null),
-    Other: () => (!question?.trim() ? 'Η ερώτηση είναι υποχρεωτική.' : null),
-  };
-
-  return validations[category]?.() ?? null;
-};
+import { GeneralQuestionDBEntry } from '@/types/forms';
+import { generalQuestionSchema } from '@/lib/validation/forms';
 
 const createSubmission = async () => {
   const { data, error } = await supabase
     .from('submissions')
-    .insert([{ type: 'general_question', status: 'pending' }])
+    .insert({ type: 'general_question', status: 'pending' })
     .select('id')
     .single();
 
@@ -42,40 +18,34 @@ const createSubmission = async () => {
 const insertGeneralQuestion = async (submission_id: number, payload: GeneralQuestionDBEntry) => {
   const { error } = await supabase
     .from('general_questions')
-    .insert([{ submission_id, ...payload }]);
+    .insert({ submission_id, ...payload });
   if (error) throw error;
 };
 
 export async function POST(req: Request) {
   try {
     const requestData = await req.json();
-    const {
-      category,
-      question,
-      email,
-      serviceName,
-      serviceDescription,
-      infoType,
-      infoDetails,
-      feedbackRating,
-    } = requestData;
-
-    const validationError = validateRequest(requestData);
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 });
-    }
+    const parsedData = generalQuestionSchema.parse(requestData);
 
     const submission_id = await createSubmission();
 
-    const payload = {
-      category,
-      question: category === 'Other' ? question : null,
-      email,
-      service_name: category === 'Support' ? serviceName : null,
-      service_description: category === 'Support' ? serviceDescription : null,
-      info_type: category === 'Info' ? infoType : null,
-      info_details: category === 'Info' ? infoDetails : null,
-      feedback_rating: category === 'Feedback' ? feedbackRating : null,
+    const normalizeText = (value?: string | null) => {
+      if (!value) return undefined;
+      const trimmed = value.trim();
+      return trimmed ? trimmed : undefined;
+    };
+
+    const payload: GeneralQuestionDBEntry = {
+      category: parsedData.category,
+      question: parsedData.category === 'Other' ? normalizeText(parsedData.question) : undefined,
+      email: parsedData.email.trim(),
+      service_name:
+        parsedData.category === 'Support' ? normalizeText(parsedData.serviceName) : undefined,
+      service_description:
+        parsedData.category === 'Support' ? normalizeText(parsedData.serviceDescription) : undefined,
+      info_type: parsedData.category === 'Info' ? normalizeText(parsedData.infoType) : undefined,
+      info_details: parsedData.category === 'Info' ? normalizeText(parsedData.infoDetails) : undefined,
+      feedback_rating: parsedData.category === 'Feedback' ? parsedData.feedbackRating ?? null : null,
     };
 
     await insertGeneralQuestion(submission_id, payload);
@@ -84,7 +54,13 @@ export async function POST(req: Request) {
       { message: 'Η ερώτησή σας καταχωρήθηκε επιτυχώς!', submission_id },
       { status: 201 },
     );
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      const errorMessage =
+        error.issues.map(issue => issue.message).join(' ') || 'Μη έγκυρο αίτημα';
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
+    }
+
     console.error('API Error:', error);
 
     let errorMessage = 'Σφάλμα κατά την υποβολή.';

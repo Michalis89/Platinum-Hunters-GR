@@ -4,9 +4,10 @@ import supabase from '@/lib/db';
 export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const gameId = params.id;
+    const gameIdParam = params.id;
+    const gameId = Number.parseInt(gameIdParam, 10);
 
-    if (!gameId) {
+    if (!gameIdParam || Number.isNaN(gameId)) {
       return NextResponse.json({ error: 'Λάθος ID παιχνιδιού' }, { status: 400 });
     }
 

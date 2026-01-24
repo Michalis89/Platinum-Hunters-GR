@@ -5,7 +5,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
-import type { Database } from '@/types/database';
+import type { Database } from '@/lib/supabase/database.types';
 
 type RouteHandlerOptions = {
   ignoreCookies?: boolean;

@@ -17,10 +17,10 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: comments, error, count } = await (supabase.from('article_comments') as any)
+    const { data: comments, error, count } = await supabase
+      .from('article_comments')
       .select('*, users!user_id(username, display_name, avatar_url)', { count: 'exact' })
-      .eq('article_id', parseInt(id))
+      .eq('article_id', Number.parseInt(id, 10))
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -59,10 +59,10 @@ export async function POST(
     }
 
     // Get article info for activity log
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: article, error: articleError } = await (supabase.from('articles') as any)
+    const { data: article, error: articleError } = await supabase
+      .from('articles')
       .select('id, title, slug')
-      .eq('id', parseInt(id))
+      .eq('id', Number.parseInt(id, 10))
       .single();
 
     if (articleError || !article) {
@@ -70,17 +70,17 @@ export async function POST(
     }
 
     // Get user info for activity log
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: userData } = await (supabase.from('users') as any)
+    const { data: userData } = await supabase
+      .from('users')
       .select('username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
 
     // Insert comment
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: comment, error: insertError } = await (supabase.from('article_comments') as any)
+    const { data: comment, error: insertError } = await supabase
+      .from('article_comments')
       .insert({
-        article_id: parseInt(id),
+        article_id: Number.parseInt(id, 10),
         user_id: session.user.id,
         content: content.trim(),
       })
@@ -128,10 +128,10 @@ export async function DELETE(req: Request) {
     const session = await requireAuth(supabase);
 
     // Get the comment to check ownership
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: comment, error: fetchError } = await (supabase.from('article_comments') as any)
+    const { data: comment, error: fetchError } = await supabase
+      .from('article_comments')
       .select('*')
-      .eq('id', parseInt(commentId))
+      .eq('id', Number.parseInt(commentId, 10))
       .single();
 
     if (fetchError || !comment) {
@@ -139,8 +139,8 @@ export async function DELETE(req: Request) {
     }
 
     // Check permission (owner or admin)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: userData } = await (supabase.from('users') as any)
+    const { data: userData } = await supabase
+      .from('users')
       .select('role')
       .eq('id', session.user.id)
       .single();
@@ -153,10 +153,10 @@ export async function DELETE(req: Request) {
     }
 
     // Delete comment
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: deleteError } = await (supabase.from('article_comments') as any)
+    const { error: deleteError } = await supabase
+      .from('article_comments')
       .delete()
-      .eq('id', parseInt(commentId));
+      .eq('id', Number.parseInt(commentId, 10));
 
     if (deleteError) {
       console.error('Error deleting comment:', deleteError);

@@ -1,12 +1,6 @@
-/**
- * Session API Route
- * GET /api/auth/session
- * PH-30: User Authentication System
- */
-
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { cookies } from 'next/headers';
-import type { User } from '@/types/user';
+import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 
@@ -41,7 +35,7 @@ export async function GET() {
       return fail({ error: 'Σφάλμα φόρτωσης προφίλ' }, 500);
     }
 
-    const typedUserProfile = userProfile as User;
+    const typedUserProfile = userProfile as Database['public']['Tables']['users']['Row'];
 
     // Check if account is deleted, suspended, or banned
     if (typedUserProfile.account_status === 'deleted') {
@@ -56,7 +50,10 @@ export async function GET() {
       return ok({ user: null, session: null });
     }
 
-    if (typedUserProfile.account_status === 'suspended' || typedUserProfile.account_status === 'banned') {
+    if (
+      typedUserProfile.account_status === 'suspended' ||
+      typedUserProfile.account_status === 'banned'
+    ) {
       // Sign out suspended/banned users
       await supabase.auth.signOut();
 

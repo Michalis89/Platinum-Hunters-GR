@@ -1,10 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
-import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
+import type { Database } from '@/lib/supabase/database.types';
 
 const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 500;
+type FullGameDataRow = Database['public']['Views']['full_game_data']['Row'];
+type GuideRow = Database['public']['Tables']['guides']['Row'];
+
+type FilterQuery<T> = {
+  ilike: (column: string, value: string) => T;
+  contains: (column: string, value: string | readonly string[] | Record<string, unknown>) => T;
+  or: (filters: string) => T;
+};
 
 export async function GET(request: Request) {
   try {
@@ -23,7 +30,7 @@ export async function GET(request: Request) {
     const minYear = searchParams.get('minYear');
     const maxYear = searchParams.get('maxYear');
 
-    const applyFilters = (query: PostgrestFilterBuilder<any, any, any, any>) => {
+    const applyFilters = <T>(query: T & FilterQuery<T>) => {
       if (search) query.ilike('title', `%${search}%`);
       if (developer) query.ilike('developer', `%${developer}%`);
       if (minYear || maxYear) {
@@ -98,20 +105,20 @@ export async function GET(request: Request) {
     if (minYearError) throw new Error(minYearError.message);
     if (maxYearError) throw new Error(maxYearError.message);
 
+    const metaRows = (metaData ?? []) as Array<{
+      developer?: string | null;
+      genres?: string[] | null;
+    }>;
     const developersCount = new Set(
-      (metaData ?? [])
-        .map((item: { developer?: string | null }) => item.developer)
-        .filter((dev: string | null | undefined): dev is string => Boolean(dev)),
+      metaRows.map(item => item.developer).filter((dev): dev is string => Boolean(dev)),
     ).size;
     const genresCount = new Set(
-      (metaData ?? [])
-        .flatMap((item: { genres?: string[] | null }) => item.genres || [])
-        .filter((genre: string | null | undefined): genre is string => Boolean(genre)),
+      metaRows.flatMap(item => item.genres || []).filter((genre): genre is string => Boolean(genre)),
     ).size;
 
     const playthroughStats = new Map<number, { total: number; count: number; max: number }>();
 
-    (guidesData ?? []).forEach(guide => {
+    (guidesData ?? []).forEach((guide: Pick<GuideRow, 'game_id' | 'estimated_playthroughs'>) => {
       const rawRuns = guide.estimated_playthroughs;
       if (rawRuns === null || rawRuns === undefined) return;
 
@@ -127,8 +134,13 @@ export async function GET(request: Request) {
     });
 
     const dataWithRuns =
-      gamesData?.map((game: any) => {
-        const stats = playthroughStats.get(game.id);
+      ((gamesData ?? []) as FullGameDataRow[]).map(game => {
+        if (game.id === null || game.id === undefined) {
+          return game;
+        }
+
+        const gameId = game.id;
+        const stats = playthroughStats.get(gameId);
         const average_playthroughs =
           stats && stats.count > 0 ? Number((stats.total / stats.count).toFixed(2)) : null;
         const max_playthroughs = stats && stats.count > 0 ? stats.max : null;
@@ -138,7 +150,7 @@ export async function GET(request: Request) {
           average_playthroughs,
           max_playthroughs,
         };
-      }) ?? [];
+      });
 
     return NextResponse.json({
       data: dataWithRuns,
@@ -149,18 +161,24 @@ export async function GET(request: Request) {
         meta: {
           developersCount,
           genresCount,
-          maxHours:
-            hoursData && hoursData.length > 0 && typeof hoursData[0].average_hours === 'number'
-              ? hoursData[0].average_hours
-              : null,
-          minYearMeta:
-            minYearData && minYearData.length > 0 && typeof minYearData[0].release_year === 'number'
-              ? minYearData[0].release_year
-              : null,
-          maxYearMeta:
-            maxYearData && maxYearData.length > 0 && typeof maxYearData[0].release_year === 'number'
-              ? maxYearData[0].release_year
-              : null,
+          maxHours: (() => {
+            const rows = (hoursData ?? []) as Array<{ average_hours?: number | null }>;
+            return rows.length > 0 && typeof rows[0].average_hours === 'number'
+              ? rows[0].average_hours
+              : null;
+          })(),
+          minYearMeta: (() => {
+            const rows = (minYearData ?? []) as Array<{ release_year?: number | null }>;
+            return rows.length > 0 && typeof rows[0].release_year === 'number'
+              ? rows[0].release_year
+              : null;
+          })(),
+          maxYearMeta: (() => {
+            const rows = (maxYearData ?? []) as Array<{ release_year?: number | null }>;
+            return rows.length > 0 && typeof rows[0].release_year === 'number'
+              ? rows[0].release_year
+              : null;
+          })(),
         },
       },
     });

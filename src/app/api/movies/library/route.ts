@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { Database } from '@/lib/supabase/database.types';
+import { insertActivity } from '@/lib/services/activityService';
 
 type Category = 'movies' | 'tv';
 
 type LibraryRow = {
   id: number;
-  status: 'planned' | 'current' | 'completed' | 'dropped';
+  status: string;
   is_favorite: boolean | null;
   priority: number | null;
   score: number | null;
@@ -13,7 +15,7 @@ type LibraryRow = {
   notes: string | null;
   media_items: {
     id: number;
-    category: Category;
+    category: string;
     title: string | null;
     original_title: string | null;
     title_english: string | null;
@@ -27,26 +29,8 @@ type LibraryRow = {
     cover_image_large: string | null;
     cover_image_medium: string | null;
     banner_image: string | null;
-    genres: string[] | null;
+    genres: Database['public']['Tables']['media_items']['Row']['genres'];
   } | null;
-};
-
-const insertActivity = async (
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  type: 'media_status' | 'media_favorite',
-  payload: Record<string, unknown>,
-) => {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type,
-      payload,
-    });
-  } catch (err) {
-    console.warn('⚠️ Activity insert failed:', err);
-  }
 };
 
 const mapLibraryEntry = (row: LibraryRow) => {
@@ -80,7 +64,7 @@ const mapLibraryEntry = (row: LibraryRow) => {
     title,
     subtitle,
     year,
-    tags: media.genres ?? [],
+    tags: Array.isArray(media.genres) ? media.genres.map(String) : [],
     cover: media.cover_image_large || media.cover_image_medium || '/og-image.png',
     totalRuntime: media.runtime ?? undefined,
     totalEpisodes: media.number_of_episodes ?? undefined,
@@ -97,8 +81,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unsupported category' }, { status: 400 });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase = (await createRouteHandlerClient()) as any;
+    const supabase = await createRouteHandlerClient();
     const {
       data: { session },
       error: sessionError,
@@ -137,8 +120,7 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase = (await createRouteHandlerClient()) as any;
+    const supabase = await createRouteHandlerClient();
     const {
       data: { session },
       error: sessionError,
@@ -162,7 +144,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Missing mediaId' }, { status: 400 });
     }
 
-    const updateData: Record<string, unknown> = {};
+    const updateData: Database['public']['Tables']['user_media_entries']['Update'] = {};
     if (body.status !== undefined) updateData.status = body.status;
     if (body.is_favorite !== undefined) updateData.is_favorite = body.is_favorite;
     if (body.priority !== undefined) updateData.priority = body.priority;
@@ -205,16 +187,10 @@ export async function PATCH(req: Request) {
       .eq('id', body.mediaId)
       .maybeSingle();
 
-    const typedMediaRow = mediaRow as
-      | {
-          title?: string | null;
-          original_title?: string | null;
-          title_english?: string | null;
-          title_romaji?: string | null;
-          title_native?: string | null;
-          category?: string | null;
-        }
-      | null;
+    const typedMediaRow = mediaRow as Pick<
+      Database['public']['Tables']['media_items']['Row'],
+      'title' | 'original_title' | 'title_english' | 'title_romaji' | 'title_native' | 'category'
+    > | null;
     const mediaTitle =
       typedMediaRow?.title ||
       typedMediaRow?.original_title ||
@@ -255,8 +231,7 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase = (await createRouteHandlerClient()) as any;
+    const supabase = await createRouteHandlerClient();
     const {
       data: { session },
       error: sessionError,

@@ -14,20 +14,23 @@ export async function POST(req: Request) {
 
     const { data: submissionData, error: submissionError } = await supabase
       .from('submissions')
-      .insert([{ type: 'trophy_guide' }])
-      .select();
+      .insert({ type: 'trophy_guide', status: 'pending' })
+      .select('id')
+      .single();
 
     if (submissionError) throw submissionError;
 
-    const submissionId = submissionData[0].id;
+    if (!submissionData) {
+      throw new Error('Missing submission data');
+    }
 
-    const { error: guideError } = await supabase.from('trophy_guides').insert([
-      {
-        submission_id: submissionId,
-        game_name: body.game_name,
-        additional_comments: body.additional_comments || '',
-      },
-    ]);
+    const submissionId = submissionData.id;
+
+    const { error: guideError } = await supabase.from('trophy_guides').insert({
+      submission_id: submissionId,
+      game_name: body.game_name,
+      additional_comments: body.additional_comments || '',
+    });
 
     if (guideError) throw guideError;
 

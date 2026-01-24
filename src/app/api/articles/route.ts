@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 import { normalizeSlug } from '@/utils/slugify';
 import { insertActivity } from '@/lib/services/activityService';
+import { getArticlesWithFilters } from '@/lib/supabase/queries';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
@@ -22,28 +22,15 @@ export async function GET(req: Request) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (supabase.from('articles') as any)
-      .select('*, users!author_id(username, display_name, avatar_url)', { count: 'exact' })
-      .eq('status', status)
-      .order('published_at', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (category) {
-      query = query.eq('category', category);
-    }
-    if (topic) {
-      query = query.eq('topic', topic);
-    }
-    if (authorId) {
-      query = query.eq('author_id', authorId);
-    }
-    if (featured === 'true') {
-      query = query.eq('is_featured', true);
-    }
-
-    const { data: articles, error, count } = await query;
+    const { data: articles, error, count } = await getArticlesWithFilters(supabase, {
+      category,
+      topic,
+      status,
+      authorId,
+      featured: featured === 'true',
+      limit,
+      offset,
+    });
 
     if (error) {
       console.error('Error fetching articles:', error);
@@ -68,8 +55,8 @@ export async function POST(req: Request) {
     const session = await requireAuth(supabase);
 
     // Check if user has permission (admin or author)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: userData } = await (supabase.from('users') as any)
+    const { data: userData } = await supabase
+      .from('users')
       .select('role, username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
@@ -97,39 +84,36 @@ export async function POST(req: Request) {
     } = body;
     const titleValidation = validatePlainText(title, 'Ο τίτλος');
     if (!titleValidation.isValid) {
-      return NextResponse.json({ error: titleValidation.error }, { status: 400 });
+      return fail({ error: titleValidation.error || 'Μη έγκυρος τίτλος' }, 400);
     }
     const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
     if (!descriptionValidation.isValid) {
-      return NextResponse.json({ error: descriptionValidation.error }, { status: 400 });
+      return fail({ error: descriptionValidation.error || 'Μη έγκυρη περιγραφή' }, 400);
     }
     const metaTitleValidation = validatePlainText(meta_title, 'Ο meta τίτλος');
     if (!metaTitleValidation.isValid) {
-      return NextResponse.json({ error: metaTitleValidation.error }, { status: 400 });
+      return fail({ error: metaTitleValidation.error || 'Μη έγκυρος meta τίτλος' }, 400);
     }
     const metaDescriptionValidation = validatePlainText(meta_description, 'Το meta description');
     if (!metaDescriptionValidation.isValid) {
-      return NextResponse.json({ error: metaDescriptionValidation.error }, { status: 400 });
+      return fail({ error: metaDescriptionValidation.error || 'Μη έγκυρο meta description' }, 400);
     }
     const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
     if (!tagsValidation.isValid) {
-      return NextResponse.json({ error: tagsValidation.error }, { status: 400 });
+      return fail({ error: tagsValidation.error || 'Μη έγκυρα tags' }, 400);
     }
     const sanitizedContentHtml = sanitizeHtmlContent(content_html).trim() || null;
 
     // Validate required fields
     if (!title || !slug || !category) {
-      return NextResponse.json(
-        { error: 'Title, slug, and category are required' },
-        { status: 400 },
-      );
+      return fail({ error: 'Ο τίτλος, το slug και η κατηγορία είναι υποχρεωτικά' }, 400);
     }
 
     const normalizedSlug = normalizeSlug(slug);
 
     // Check if slug already exists
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existingArticle } = await (supabase.from('articles') as any)
+    const { data: existingArticle } = await supabase
+      .from('articles')
       .select('id')
       .eq('slug', normalizedSlug)
       .maybeSingle();
@@ -139,8 +123,8 @@ export async function POST(req: Request) {
     }
 
     // Insert article
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: article, error: insertError } = await (supabase.from('articles') as any)
+    const { data: article, error: insertError } = await supabase
+      .from('articles')
       .insert({
         title,
         slug: normalizedSlug,

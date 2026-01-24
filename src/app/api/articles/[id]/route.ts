@@ -3,6 +3,7 @@ import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 import { normalizeSlug } from '@/utils/slugify';
 import { insertActivity } from '@/lib/services/activityService';
+import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
@@ -19,12 +20,12 @@ export async function GET(
     // Try to fetch by ID first, then by slug
     const isNumeric = /^\d+$/.test(id);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (supabase.from('articles') as any)
+    let query = supabase
+      .from('articles')
       .select('*, users!author_id(username, display_name, avatar_url)');
 
     if (isNumeric) {
-      query = query.eq('id', parseInt(id));
+      query = query.eq('id', Number.parseInt(id, 10));
     } else {
       const normalized = normalizeSlug(id);
       const slugCandidates = Array.from(
@@ -43,11 +44,11 @@ export async function GET(
     const { data: { session } } = await supabase.auth.getSession();
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase.from('article_views') as any).insert({
+      const viewPayload: Database['public']['Tables']['article_views']['Insert'] = {
         article_id: article.id,
         user_id: session?.user?.id || null,
-      });
+      };
+      await supabase.from('article_views').insert(viewPayload);
     } catch {
       // Views tracking is optional, don't fail if it errors
     }
@@ -71,10 +72,10 @@ export async function PUT(
     const session = await requireAuth(supabase);
 
     // Get existing article
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existingArticle, error: fetchError } = await (supabase.from('articles') as any)
+    const { data: existingArticle, error: fetchError } = await supabase
+      .from('articles')
       .select('*')
-      .eq('id', parseInt(id))
+      .eq('id', Number.parseInt(id, 10))
       .single();
 
     if (fetchError || !existingArticle) {
@@ -82,8 +83,8 @@ export async function PUT(
     }
 
     // Check permission (author or admin)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: userData } = await (supabase.from('users') as any)
+    const { data: userData } = await supabase
+      .from('users')
       .select('role, username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
@@ -146,7 +147,7 @@ export async function PUT(
     }
 
     // Build update object (only include provided fields)
-    const updateData: Record<string, unknown> = {};
+    const updateData: Database['public']['Tables']['articles']['Update'] = {};
     if (title !== undefined) updateData.title = title;
     if (slug !== undefined) updateData.slug = normalizeSlug(slug);
     if (description !== undefined) updateData.description = description;
@@ -170,10 +171,10 @@ export async function PUT(
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: article, error: updateError } = await (supabase.from('articles') as any)
+    const { data: article, error: updateError } = await supabase
+      .from('articles')
       .update(updateData)
-      .eq('id', parseInt(id))
+      .eq('id', Number.parseInt(id, 10))
       .select('*')
       .single();
 
@@ -215,10 +216,10 @@ export async function DELETE(
     const session = await requireAuth(supabase);
 
     // Get existing article
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existingArticle, error: fetchError } = await (supabase.from('articles') as any)
+    const { data: existingArticle, error: fetchError } = await supabase
+      .from('articles')
       .select('*')
-      .eq('id', parseInt(id))
+      .eq('id', Number.parseInt(id, 10))
       .single();
 
     if (fetchError || !existingArticle) {
@@ -226,8 +227,8 @@ export async function DELETE(
     }
 
     // Check permission (author or admin)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: userData } = await (supabase.from('users') as any)
+    const { data: userData } = await supabase
+      .from('users')
       .select('role, username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
@@ -240,10 +241,10 @@ export async function DELETE(
     }
 
     // Delete article (cascade will handle likes, comments, views)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: deleteError } = await (supabase.from('articles') as any)
+    const { error: deleteError } = await supabase
+      .from('articles')
       .delete()
-      .eq('id', parseInt(id));
+      .eq('id', Number.parseInt(id, 10));
 
     if (deleteError) {
       console.error('Error deleting article:', deleteError);

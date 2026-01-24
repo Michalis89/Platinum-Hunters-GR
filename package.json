@@ -44,7 +44,8 @@
     "react-redux": "^9.2.0",
     "sanitize-html": "^2.12.1",
     "swr": "^2.3.6",
-    "xml2js": "^0.6.2"
+    "xml2js": "^0.6.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -70,6 +71,7 @@
     "postcss": "^8",
     "prettier": "^3.5.1",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "supabase": "^2.72.8",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",

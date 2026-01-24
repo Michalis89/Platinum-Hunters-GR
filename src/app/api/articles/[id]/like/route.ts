@@ -22,18 +22,18 @@ export async function GET(
     }
 
     // Check if user has liked
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: like } = await (supabase.from('article_likes') as any)
+    const { data: like } = await supabase
+      .from('article_likes')
       .select('id')
-      .eq('article_id', parseInt(id))
+      .eq('article_id', Number.parseInt(id, 10))
       .eq('user_id', session.user.id)
       .maybeSingle();
 
     // Get total likes count
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (supabase.from('article_likes') as any)
+    const { count } = await supabase
+      .from('article_likes')
       .select('*', { count: 'exact', head: true })
-      .eq('article_id', parseInt(id));
+      .eq('article_id', Number.parseInt(id, 10));
 
     return ok({
       liked: !!like,
@@ -57,10 +57,10 @@ export async function POST(
     const session = await requireAuth(supabase);
 
     // Get article info for activity log
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: article, error: articleError } = await (supabase.from('articles') as any)
+    const { data: article, error: articleError } = await supabase
+      .from('articles')
       .select('id, title, slug')
-      .eq('id', parseInt(id))
+      .eq('id', Number.parseInt(id, 10))
       .single();
 
     if (articleError || !article) {
@@ -68,10 +68,10 @@ export async function POST(
     }
 
     // Check if already liked
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existingLike } = await (supabase.from('article_likes') as any)
+    const { data: existingLike } = await supabase
+      .from('article_likes')
       .select('id')
-      .eq('article_id', parseInt(id))
+      .eq('article_id', Number.parseInt(id, 10))
       .eq('user_id', session.user.id)
       .maybeSingle();
 
@@ -80,17 +80,17 @@ export async function POST(
     }
 
     // Get user info for activity log
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: userData } = await (supabase.from('users') as any)
+    const { data: userData } = await supabase
+      .from('users')
       .select('username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
 
     // Insert like
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: insertError } = await (supabase.from('article_likes') as any)
+    const { error: insertError } = await supabase
+      .from('article_likes')
       .insert({
-        article_id: parseInt(id),
+        article_id: Number.parseInt(id, 10),
         user_id: session.user.id,
       });
 
@@ -110,10 +110,10 @@ export async function POST(
     });
 
     // Get updated count
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (supabase.from('article_likes') as any)
+    const { count } = await supabase
+      .from('article_likes')
       .select('*', { count: 'exact', head: true })
-      .eq('article_id', parseInt(id));
+      .eq('article_id', Number.parseInt(id, 10));
 
     return ok({
       message: 'Το άρθρο έγινε like',
@@ -141,10 +141,10 @@ export async function DELETE(
     const session = await requireAuth(supabase);
 
     // Delete like
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: deleteError } = await (supabase.from('article_likes') as any)
+    const { error: deleteError } = await supabase
+      .from('article_likes')
       .delete()
-      .eq('article_id', parseInt(id))
+      .eq('article_id', Number.parseInt(id, 10))
       .eq('user_id', session.user.id);
 
     if (deleteError) {
@@ -153,10 +153,10 @@ export async function DELETE(
     }
 
     // Get updated count
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (supabase.from('article_likes') as any)
+    const { count } = await supabase
+      .from('article_likes')
       .select('*', { count: 'exact', head: true })
-      .eq('article_id', parseInt(id));
+      .eq('article_id', Number.parseInt(id, 10));
 
     return ok({
       message: 'Το like αφαιρέθηκε',
