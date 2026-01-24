@@ -19,6 +19,7 @@ interface EditArticleDialogProps {
   article: ArticleRow;
   onClose: () => void;
   onSuccess?: (article: ArticleRow) => void;
+  onDelete?: () => void;
 }
 
 interface CategoryConfig {
@@ -119,6 +120,7 @@ export default function EditArticleDialog({
   article,
   onClose,
   onSuccess,
+  onDelete,
 }: Readonly<EditArticleDialogProps>) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const initialCategoryRef = useRef<ArticleCategory>(article.category);
@@ -134,6 +136,7 @@ export default function EditArticleDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isCoverPreviewValid, setIsCoverPreviewValid] = useState(true);
 
   useEffect(() => {
@@ -241,6 +244,38 @@ export default function EditArticleDialog({
       setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Θες να διαγράψεις οριστικά αυτό το άρθρο; Η ενέργεια δεν αναστρέφεται.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/articles/${article.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || 'Αποτυχία διαγραφής άρθρου');
+      }
+
+      onDelete?.();
+      onClose();
+    } catch (deleteError) {
+      console.error('Error deleting article:', deleteError);
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : 'Κάτι πήγε στραβά κατά τη διαγραφή. Δοκίμασε ξανά.',
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -427,12 +462,25 @@ export default function EditArticleDialog({
               </div>
 
               <div className="flex items-center justify-between border-t border-[var(--hb-border)] px-6 py-4">
-                <button
-                  onClick={onClose}
-                  className="rounded-lg px-4 py-2 text-sm text-[var(--hb-muted)] transition hover:text-white"
-                >
-                  Ακύρωση
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={onClose}
+                    className="rounded-lg px-4 py-2 text-sm text-[var(--hb-muted)] transition hover:text-white"
+                  >
+                    Ακύρωση
+                  </button>
+                  <Button
+                    variant="danger"
+                    onClick={handleDelete}
+                    disabled={isSubmitting || isDeleting}
+                  >
+                    {isDeleting ? (
+                      <LoadingSpinner size="sm" inline />
+                    ) : (
+                      'Διαγραφή άρθρου'
+                    )}
+                  </Button>
+                </div>
                 <Button
                   variant="primary"
                   icon={

@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { Heart, Pencil, Share2 } from 'lucide-react';
+import { Heart, Pencil, Share2, Trash2 } from 'lucide-react';
 import type { ArticleRow } from '@/types/database';
 import { selectUser } from '@/store/slices/authSlice';
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 type ActionRowProps = {
   article: ArticleRow;
@@ -26,9 +27,11 @@ export default function ActionRow({ article }: ActionRowProps) {
     count: article.likes || 0,
   });
   const [likeLoading, setLikeLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const canEdit =
     !!currentUser && (currentUser.role === 'admin' || currentUser.role === 'author');
+  const fallbackHref = `/pages/news?category=${article.category}`;
 
   useEffect(() => {
     let active = true;
@@ -96,6 +99,35 @@ export default function ActionRow({ article }: ActionRowProps) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm('Θέλεις να διαγράψεις οριστικά το άρθρο; Η ενέργεια δεν αναστρέφεται.')) {
+      return;
+    }
+
+    setIsDeleteLoading(true);
+    try {
+      const response = await fetch(`/api/articles/${article.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || 'Αποτυχία διαγραφής άρθρου');
+      }
+
+      router.push(fallbackHref);
+    } catch (deleteError) {
+      console.error('Error deleting article:', deleteError);
+      window.alert(
+        deleteError instanceof Error
+          ? deleteError.message
+          : 'Κάτι πήγε στραβά κατά τη διαγραφή. Δοκίμασε ξανά.',
+      );
+    } finally {
+      setIsDeleteLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="flex min-h-[36px] items-center gap-2">
@@ -131,6 +163,22 @@ export default function ActionRow({ article }: ActionRowProps) {
             <Pencil size={14} />
           </button>
         )}
+        {canEdit && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            aria-label="Διαγραφή"
+            title="Διαγραφή άρθρου"
+            className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-red-400 transition hover:text-red-500 disabled:text-red-400/40"
+            disabled={isDeleteLoading}
+          >
+            {isDeleteLoading ? (
+              <LoadingSpinner size="sm" inline className="text-red-400" />
+            ) : (
+              <Trash2 size={14} />
+            )}
+          </button>
+        )}
       </div>
       {canEdit && (
         <EditArticleDialog
@@ -140,6 +188,10 @@ export default function ActionRow({ article }: ActionRowProps) {
           onSuccess={() => {
             setIsEditOpen(false);
             router.refresh();
+          }}
+          onDelete={() => {
+            setIsEditOpen(false);
+            router.push(fallbackHref);
           }}
         />
       )}
