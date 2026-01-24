@@ -7,6 +7,7 @@
 export { Footer } from './Footer';
 export { GridList } from './GridList';
 export { PageContainer } from './PageContainer';
+export { PageHeader } from './PageHeader';
 export { PageShell } from './PageShell';
 export { PageWrapper } from './PageWrapper';
 export { SidebarLayout } from './SidebarLayout';

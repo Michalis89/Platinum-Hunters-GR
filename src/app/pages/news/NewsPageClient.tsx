@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FileText, Clock, Eye, Heart, Calendar, User, Tag, Loader2 } from 'lucide-react';
 import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
-import { PageContainer } from '@/app/components/layout';
+import { PageContainer, PageHeader } from '@/app/components/layout';
 import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/pages/news/constants';
 
 interface ArticleWithAuthor extends ArticleRow {
@@ -219,63 +219,61 @@ function NewsPageContent() {
           transition={{ duration: 0.8 }}
           className="relative mb-10 overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-8 shadow-2xl backdrop-blur-xl md:px-10"
         >
-          <div className="grid gap-6 lg:grid-cols-[1.2fr,1fr] lg:items-center">
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">
-                Αίθουσα Τύπου
-              </p>
-              <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] to-[var(--hb-accent)] text-white shadow-lg">
-                  <FileText className="h-6 w-6" />
-                </span>
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-[var(--hb-headline)] md:text-4xl">
-                    {pageTitle}
-                  </h1>
-                  <div className="mt-1 flex items-center gap-2 text-sm text-[var(--hb-muted)]">
-                    <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-surface)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-                      {metaLine}
-                    </span>
-                  </div>
+          <PageHeader
+            eyebrow="Αίθουσα Τύπου"
+            title={pageTitle}
+            description={subtitle}
+            meta={
+              <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-surface)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--hb-muted)]">
+                {metaLine}
+              </span>
+            }
+            align="left"
+            contentClassName="items-start"
+            titleClassName="text-3xl font-bold md:text-4xl"
+            descriptionClassName="max-w-xl text-sm text-[var(--hb-muted)]"
+            eyebrowClassName="text-[var(--hb-muted)]"
+            icon={
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] to-[var(--hb-accent)] text-white shadow-lg">
+                <FileText className="h-6 w-6" />
+              </span>
+            }
+            aside={
+              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40 p-3 shadow-[0_12px_28px_rgba(0,0,0,0.25)]">
+                <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
+                  <span>Κατηγορίες</span>
+                  <span className="text-[10px]">
+                    {categoryLabel ? `Φίλτρο: ${categoryLabel}` : 'Όλες'}
+                  </span>
                 </div>
-              </div>
-              <p className="max-w-xl text-sm text-[var(--hb-muted)]">{subtitle}</p>
-            </div>
-
-            <div className="bg-[var(--hb-card)]/40 rounded-2xl border border-[var(--hb-border)] p-3 shadow-[0_12px_28px_rgba(0,0,0,0.25)]">
-              <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-                <span>Κατηγορίες</span>
-                <span className="text-[10px]">
-                  {categoryLabel ? `Φίλτρο: ${categoryLabel}` : 'Όλες'}
-                </span>
-              </div>
-              <div className="flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <Link
-                  href="/pages/news"
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    !category
-                      ? 'bg-[var(--hb-primary-strong)]/20 ring-[var(--hb-primary-strong)]/50 text-[var(--hb-primary-strong)] ring-1'
-                      : 'hover:border-[var(--hb-primary-strong)]/50 border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
-                  }`}
-                >
-                  Όλα
-                </Link>
-                {(Object.keys(CATEGORY_LABELS) as ArticleCategory[]).map((cat) => (
+                <div className="flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <Link
-                    key={cat}
-                    href={`/pages/news?category=${cat}`}
+                    href="/pages/news"
                     className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                      category === cat
+                      !category
                         ? 'bg-[var(--hb-primary-strong)]/20 ring-[var(--hb-primary-strong)]/50 text-[var(--hb-primary-strong)] ring-1'
                         : 'hover:border-[var(--hb-primary-strong)]/50 border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
                     }`}
                   >
-                    {CATEGORY_LABELS[cat] ?? cat}
+                    Όλα
                   </Link>
-                ))}
+                  {(Object.keys(CATEGORY_LABELS) as ArticleCategory[]).map((cat) => (
+                    <Link
+                      key={cat}
+                      href={`/pages/news?category=${cat}`}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                        category === cat
+                          ? 'bg-[var(--hb-primary-strong)]/20 ring-[var(--hb-primary-strong)]/50 text-[var(--hb-primary-strong)] ring-1'
+                          : 'hover:border-[var(--hb-primary-strong)]/50 border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
+                      }`}
+                    >
+                      {CATEGORY_LABELS[cat] ?? cat}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
+            }
+          />
         </motion.div>
 
         {/* Content */}

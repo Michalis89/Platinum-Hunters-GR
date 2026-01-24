@@ -34,6 +34,7 @@ import { UserBacklogWithGame } from '@/types/interfaces';
 import AddToBacklogModal from '@/app/components/backlog/AddToBacklogModal';
 import { setUser } from '@/store/slices/authSlice';
 import CategoryLibrary, { isMediaCategory } from '@/app/components/backlog/CategoryLibrary';
+import { PageHeader } from '@/app/components/layout';
 
 type SortOption = 'priority' | 'added' | 'title' | 'hours' | 'difficulty';
 type StatusTab = 'all' | 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
@@ -230,18 +231,24 @@ function BacklogPageContent() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-lg shadow-[rgba(229,9,20,0.35)]">
-              <ListChecks className="h-6 w-6 text-[var(--hb-bg)]" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight">Backlog Παιχνιδιών</h1>
-              <p className="text-[var(--hb-muted)]">
+          <PageHeader
+            align="left"
+            icon={
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-lg shadow-[rgba(229,9,20,0.35)]">
+                <ListChecks className="h-6 w-6 text-[var(--hb-bg)]" />
+              </div>
+            }
+            title="Backlog Παιχνιδιών"
+            meta={
+              <>
                 {user?.username ? `${user.username} • ` : ''}
                 {stats.totalGames} παιχνίδια • ~{Math.round(stats.totalHours)} ώρες
-              </p>
-            </div>
-          </div>
+              </>
+            }
+            contentClassName="items-start"
+            titleClassName="text-4xl font-bold tracking-tight md:text-4xl"
+            metaClassName="text-[var(--hb-muted)]"
+          />
         </motion.div>
 
         {/* Error Alert */}

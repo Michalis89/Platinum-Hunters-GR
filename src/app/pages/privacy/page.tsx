@@ -3,7 +3,7 @@ import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
 import { SITE_CONTACT_EMAIL, SITE_NAME, SITE_URL } from '@/config/site';
-import { PageContainer } from '@/app/components/layout';
+import { PageContainer, PageHeader } from '@/app/components/layout';
 
 export const metadata = buildMetadata({
   title: 'Πολιτική Απορρήτου | Χομπίστας',
@@ -24,33 +24,33 @@ export default function PrivacyPage() {
         <div className="flex flex-col gap-6">
           {/* Header / Hero */}
           <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl backdrop-blur-xl md:p-8">
-            <div className="mb-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-[var(--hb-muted)]">
-                {SITE_NAME} • Προστασία Δεδομένων
-              </p>
-              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[var(--hb-headline)] md:text-4xl">
-                Πολιτική Απορρήτου
-              </h1>
-            </div>
-
-            <p className="text-sm leading-relaxed text-[var(--hb-text)] md:text-base">
-              Η παρούσα Πολιτική Απορρήτου εξηγεί πώς ο{' '}
-              <span className="font-semibold text-[var(--hb-primary-strong)]">{SITE_NAME}</span>{' '}
-              συλλέγει, αποθηκεύει και επεξεργάζεται τα προσωπικά σου δεδομένα όταν χρησιμοποιείς
-              την ιστοσελίδα{' '}
-              <a
-                href={SITE_URL}
-                className="font-medium text-[var(--hb-primary-strong)] underline-offset-2 hover:underline"
-              >
-                {SITE_URL.replace('https://', '')}
-              </a>{' '}
-              και τις συναφείς υπηρεσίες. Η επεξεργασία γίνεται σύμφωνα με τον Γενικό Κανονισμό
-              Προστασίας Δεδομένων (GDPR) και την ελληνική νομοθεσία.
-            </p>
-
-            <p className="mt-3 text-xs text-[var(--hb-muted)] opacity-70">
-              Τελευταία ενημέρωση: {new Date().getFullYear()}
-            </p>
+            <PageHeader
+              eyebrow={`${SITE_NAME} • Προστασία Δεδομένων`}
+              title="Πολιτική Απορρήτου"
+              description={
+                <>
+                  Η παρούσα Πολιτική Απορρήτου εξηγεί πώς ο{' '}
+                  <span className="font-semibold text-[var(--hb-primary-strong)]">{SITE_NAME}</span>{' '}
+                  συλλέγει, αποθηκεύει και επεξεργάζεται τα προσωπικά σου δεδομένα όταν χρησιμοποιείς
+                  την ιστοσελίδα{' '}
+                  <a
+                    href={SITE_URL}
+                    className="font-medium text-[var(--hb-primary-strong)] underline-offset-2 hover:underline"
+                  >
+                    {SITE_URL.replace('https://', '')}
+                  </a>{' '}
+                  και τις συναφείς υπηρεσίες. Η επεξεργασία γίνεται σύμφωνα με τον Γενικό Κανονισμό
+                  Προστασίας Δεδομένων (GDPR) και την ελληνική νομοθεσία.
+                </>
+              }
+              meta={`Τελευταία ενημέρωση: ${new Date().getFullYear()}`}
+              align="left"
+              contentClassName="items-start"
+              titleClassName="mt-2 text-3xl font-extrabold tracking-tight md:text-4xl"
+              eyebrowClassName="tracking-[0.25em] text-[var(--hb-muted)]"
+              descriptionClassName="text-sm leading-relaxed text-[var(--hb-text)] md:text-base"
+              metaClassName="text-xs text-[var(--hb-muted)] opacity-70"
+            />
           </section>
 
           {/* Content */}
