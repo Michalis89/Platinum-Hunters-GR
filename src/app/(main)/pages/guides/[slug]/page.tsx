@@ -73,7 +73,8 @@ export default function GameDetailsPage() {
         const gameResponse = await fetch('/api/games');
         if (!gameResponse.ok) throw new Error('Failed to fetch games');
 
-        const gamesData: ProcessedGame[] = await gameResponse.json();
+        const gamesPayload = await gameResponse.json();
+        const gamesData: ProcessedGame[] = gamesPayload?.data ?? [];
 
         // Match slug even if URL contains diacritics (e.g., röki -> roki)
         const normalizeSlug = (value: string | null | undefined) =>
@@ -105,21 +106,23 @@ export default function GameDetailsPage() {
           }),
         ]);
 
-        setGuides(guideData);
+        const guidePayload = guideData?.data ?? guideData;
+        setGuides(guidePayload);
         setGameDetails(detailsData);
+        const trophiesPayload = trophiesData?.data ?? trophiesData;
         const trophyCounts =
-          trophiesData?.counts ??
-          (trophiesData &&
-          typeof trophiesData === 'object' &&
-          'platinum' in trophiesData &&
-          'gold' in trophiesData &&
-          'silver' in trophiesData &&
-          'bronze' in trophiesData
-            ? trophiesData
+          trophiesPayload?.counts ??
+          (trophiesPayload &&
+          typeof trophiesPayload === 'object' &&
+          'platinum' in trophiesPayload &&
+          'gold' in trophiesPayload &&
+          'silver' in trophiesPayload &&
+          'bronze' in trophiesPayload
+            ? trophiesPayload
             : null);
         const trophyEntries =
-          trophiesData && Array.isArray((trophiesData as { trophies?: unknown[] }).trophies)
-            ? (trophiesData as { trophies: TrophyListEntry[] }).trophies
+          trophiesPayload && Array.isArray((trophiesPayload as { trophies?: unknown[] }).trophies)
+            ? (trophiesPayload as { trophies: TrophyListEntry[] }).trophies
             : null;
 
         setTrophies(trophyCounts ?? null);

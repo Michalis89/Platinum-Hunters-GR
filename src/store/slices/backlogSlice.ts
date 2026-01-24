@@ -157,7 +157,7 @@ export const addToBacklog = createAsyncThunk(
     }
 
     const data = await response.json();
-    return data as UserBacklogWithGame;
+    return (data?.data ?? data) as UserBacklogWithGame;
   },
 );
 
@@ -212,7 +212,7 @@ export const updateBacklogItem = createAsyncThunk(
     }
 
     const data = await response.json();
-    return data as UserBacklogWithGame;
+    return (data?.data ?? data) as UserBacklogWithGame;
   },
 );
 

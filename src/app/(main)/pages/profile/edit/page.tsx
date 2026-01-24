@@ -659,6 +659,8 @@ export default function EditProfilePage() {
       if (!response.ok) {
         throw new Error(data.error || 'Σφάλμα διαγραφής λογαριασμού');
       }
+      const payload = data.data ?? data;
+      void payload;
 
       setAlert({
         type: 'success',

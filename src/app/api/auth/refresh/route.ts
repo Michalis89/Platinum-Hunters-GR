@@ -4,8 +4,9 @@
  * Syncs the session cookies when Supabase refreshes tokens
  */
 
-import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
     const { access_token, refresh_token, expires_in } = body;
 
     if (!access_token || !refresh_token) {
-      return NextResponse.json({ error: 'Missing tokens' }, { status: 400 });
+      return fail({ error: 'Λείπουν τα tokens' }, 400);
     }
 
     const cookieStore = await cookies();
@@ -29,9 +30,9 @@ export async function POST(req: Request) {
     cookieStore.set('sb-access-token', access_token, cookieOptions);
     cookieStore.set('sb-refresh-token', refresh_token, cookieOptions);
 
-    return NextResponse.json({ success: true });
+    return ok({ success: true });
   } catch (error) {
     console.error('Token refresh error:', error);
-    return NextResponse.json({ error: 'Failed to refresh tokens' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

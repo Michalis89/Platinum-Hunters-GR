@@ -40,7 +40,7 @@ describe('GET /api/games', () => {
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual(mockGames);
+    expect(json).toEqual({ data: mockGames });
     expect(supabase.from).toHaveBeenCalledWith('games');
     expect(mockSelect).toHaveBeenCalledWith('*');
     expect(mockOrder).toHaveBeenCalledWith('title', { ascending: true });
@@ -60,7 +60,7 @@ describe('GET /api/games', () => {
     const json = await response.json();
 
     expect(response.status).toBe(500);
-    expect(json.error).toBe('Internal server error');
+    expect(json.error).toBe('Εσωτερικό σφάλμα διακομιστή');
   });
 
   it('should return 500 on unexpected server error', async () => {
@@ -74,7 +74,7 @@ describe('GET /api/games', () => {
     const json = await response.json();
 
     expect(response.status).toBe(500);
-    expect(json.error).toBe('Internal server error');
+    expect(json.error).toBe('Εσωτερικό σφάλμα διακομιστή');
   });
 
   it('should return an empty array if no games are found', async () => {
@@ -91,7 +91,7 @@ describe('GET /api/games', () => {
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual([]);
+    expect(json).toEqual({ data: [] });
     expect(supabase.from).toHaveBeenCalledWith('games');
     expect(mockSelect).toHaveBeenCalledWith('*');
     expect(mockOrder).toHaveBeenCalledWith('title', { ascending: true });

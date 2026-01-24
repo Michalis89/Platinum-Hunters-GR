@@ -36,9 +36,10 @@ export default function ActionRow({ article }: ActionRowProps) {
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
         if (!active || !data) return;
+        const payload = data?.data ?? data;
         setLikeState({
-          liked: !!data.liked,
-          count: typeof data.count === 'number' ? data.count : article.likes || 0,
+          liked: !!payload.liked,
+          count: typeof payload.count === 'number' ? payload.count : article.likes || 0,
         });
       })
       .catch(() => {});
@@ -83,9 +84,10 @@ export default function ActionRow({ article }: ActionRowProps) {
       }
 
       const data = await response.json();
+      const payload = data?.data ?? data;
       setLikeState({
-        liked: !!data.liked,
-        count: typeof data.count === 'number' ? data.count : likeState.count,
+        liked: !!payload.liked,
+        count: typeof payload.count === 'number' ? payload.count : likeState.count,
       });
     } catch {
       // ignore like failures

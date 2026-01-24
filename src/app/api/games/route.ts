@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 export async function GET() {
   try {
@@ -10,12 +11,12 @@ export async function GET() {
 
     if (error) {
       console.error('❌ Σφάλμα στη φόρτωση των παιχνιδιών:', error);
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    return NextResponse.json(data);
+    return ok(data || []);
   } catch (error) {
     console.error('❌ Σφάλμα στη φόρτωση των παιχνιδιών:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

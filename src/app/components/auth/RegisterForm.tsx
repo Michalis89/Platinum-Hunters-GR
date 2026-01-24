@@ -223,7 +223,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       if (!response.ok) {
         throw new Error(data.error || 'Σφάλμα εγγραφής');
       }
+      const payload = data.data ?? data;
 
+      void payload;
       setAlert({
         type: 'success',
         message:

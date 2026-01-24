@@ -39,8 +39,8 @@ async function getArticle(slug: string): Promise<ArticleWithAuthor | null> {
     return null;
   }
 
-  const data = (await response.json()) as { article?: ArticleWithAuthor };
-  return data.article ?? null;
+  const data = (await response.json()) as { data?: ArticleWithAuthor };
+  return data.data ?? null;
 }
 
 export async function generateMetadata({

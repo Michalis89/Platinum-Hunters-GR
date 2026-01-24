@@ -39,8 +39,9 @@ export default function EditGuide() {
       try {
         const response = await fetch(`/api/guides/${id}`);
         const data = await response.json();
-        if (response.ok && data && data[0]) {
-          const firstGuide = data[0];
+        const payload = data?.data ?? data;
+        if (response.ok && payload && payload[0]) {
+          const firstGuide = payload[0];
           setGuideTitle(firstGuide?.title ?? '');
           setDifficultyRating(firstGuide?.difficulty_rating ?? '');
           setPlaythroughs(firstGuide?.estimated_playthroughs ?? '');

@@ -1,23 +1,8 @@
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-
-async function insertActivity(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  type: string,
-  payload: Record<string, unknown>,
-) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type,
-      payload,
-    });
-  } catch (err) {
-    console.warn(`Activity insert (${type}) failed:`, err);
-  }
-}
+import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok } from '@/lib/api/response';
 
 // GET - Check if user has liked the article
 export async function GET(
@@ -33,7 +18,7 @@ export async function GET(
     } = await supabase.auth.getSession();
 
     if (!session) {
-      return NextResponse.json({ liked: false, count: 0 });
+      return ok({ liked: false, count: 0 });
     }
 
     // Check if user has liked
@@ -50,13 +35,13 @@ export async function GET(
       .select('*', { count: 'exact', head: true })
       .eq('article_id', parseInt(id));
 
-    return NextResponse.json({
+    return ok({
       liked: !!like,
       count: count || 0,
     });
   } catch (error) {
     console.error('Error checking like status:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -69,14 +54,7 @@ export async function POST(
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     // Get article info for activity log
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,7 +64,7 @@ export async function POST(
       .single();
 
     if (articleError || !article) {
-      return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
     }
 
     // Check if already liked
@@ -98,7 +76,7 @@ export async function POST(
       .maybeSingle();
 
     if (existingLike) {
-      return NextResponse.json({ error: 'Already liked' }, { status: 409 });
+      return fail({ error: 'Το άρθρο έχει ήδη γίνει like', code: 'CONFLICT' }, 409);
     }
 
     // Get user info for activity log
@@ -118,7 +96,7 @@ export async function POST(
 
     if (insertError) {
       console.error('Error inserting like:', insertError);
-      return NextResponse.json({ error: 'Failed to like article' }, { status: 500 });
+      return fail({ error: 'Αποτυχία like άρθρου' }, 500);
     }
 
     // Log activity
@@ -137,14 +115,17 @@ export async function POST(
       .select('*', { count: 'exact', head: true })
       .eq('article_id', parseInt(id));
 
-    return NextResponse.json({
-      message: 'Article liked successfully',
+    return ok({
+      message: 'Το άρθρο έγινε like',
       liked: true,
       count: count || 0,
     });
   } catch (error) {
     console.error('Error liking article:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -157,14 +138,7 @@ export async function DELETE(
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     // Delete like
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -175,7 +149,7 @@ export async function DELETE(
 
     if (deleteError) {
       console.error('Error removing like:', deleteError);
-      return NextResponse.json({ error: 'Failed to unlike article' }, { status: 500 });
+      return fail({ error: 'Αποτυχία αφαίρεσης like' }, 500);
     }
 
     // Get updated count
@@ -184,13 +158,16 @@ export async function DELETE(
       .select('*', { count: 'exact', head: true })
       .eq('article_id', parseInt(id));
 
-    return NextResponse.json({
-      message: 'Article unliked successfully',
+    return ok({
+      message: 'Το like αφαιρέθηκε',
       liked: false,
       count: count || 0,
     });
   } catch (error) {
     console.error('Error unliking article:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

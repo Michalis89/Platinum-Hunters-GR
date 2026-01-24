@@ -27,6 +27,7 @@ import type { AppDispatch } from '@/store/store';
 import { removeFromBacklog, updateBacklogItem } from '@/store/slices/backlogSlice';
 import EditBacklogItemModal from './EditBacklogItemModal';
 import HoursInputModal from './HoursInputModal';
+import { Card, CardContent, CardFooter, CardHeader } from '@/app/components/ui/Card';
 
 interface BacklogItemProps {
   readonly item: UserBacklogWithGame;
@@ -117,65 +118,67 @@ export default function BacklogItem({ item }: BacklogItemProps) {
     });
   };
 
+  const MotionCard = motion(Card);
+
   return (
     <>
-      <motion.div
+      <MotionCard
         layout
         className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm transition-all hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
       >
-        {/* Cover Image */}
-        <Link
-          href={`/pages/guides/${game.slug}`}
-          className="relative block aspect-video overflow-hidden"
-        >
-          {game.cover_image ? (
-            <Image
-              src={game.cover_image}
-              alt={game.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-slate-800">
-              <Trophy className="h-12 w-12 text-slate-600" />
+        <CardHeader className="border-b-0 p-0">
+          {/* Cover Image */}
+          <Link
+            href={`/pages/guides/${game.slug}`}
+            className="relative block aspect-video overflow-hidden"
+          >
+            {game.cover_image ? (
+              <Image
+                src={game.cover_image}
+                alt={game.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-slate-800">
+                <Trophy className="h-12 w-12 text-slate-600" />
+              </div>
+            )}
+
+            {/* Priority Badge (Top Left) */}
+            <div className="absolute left-2 top-2">
+              <div
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${priorityConfig.color}`}
+              >
+                <Signal size={12} />
+                {priorityConfig.label}
+              </div>
             </div>
-          )}
 
-          {/* Priority Badge (Top Left) */}
-          <div className="absolute left-2 top-2">
-            <div
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${priorityConfig.color}`}
-            >
-              <Signal size={12} />
-              {priorityConfig.label}
+            {/* Status Badge (Top Right) */}
+            <div className="absolute right-2 top-2">
+              <div
+                className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${statusConfig.color}`}
+              >
+                {statusConfig.label}
+              </div>
             </div>
-          </div>
 
-          {/* Status Badge (Top Right) */}
-          <div className="absolute right-2 top-2">
-            <div
-              className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${statusConfig.color}`}
-            >
-              {statusConfig.label}
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
+
+            {/* View Guide Link */}
+            <div className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-lg">
+                <ExternalLink size={12} />
+                Δες Οδηγό
+              </div>
             </div>
-          </div>
+          </Link>
+        </CardHeader>
 
-          {/* Hover Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
-
-          {/* View Guide Link */}
-          <div className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-            <div className="flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-lg">
-              <ExternalLink size={12} />
-              Δες Οδηγό
-            </div>
-          </div>
-        </Link>
-
-        {/* Content */}
-        <div className="p-4">
-          {/* Title */}
+        <CardContent className="p-4">
           <Link href={`/pages/guides/${game.slug}`}>
             <h3 className="mb-2 line-clamp-2 text-lg font-semibold text-slate-100 transition-colors hover:text-blue-400">
               {game.title}
@@ -343,7 +346,9 @@ export default function BacklogItem({ item }: BacklogItemProps) {
             )}
           </div>
 
-          {/* Action Buttons */}
+        </CardContent>
+
+        <CardFooter className="border-t-0 p-4 pt-0">
           <div className="flex gap-2">
             <button
               onClick={() => setShowEditModal(true)}
@@ -368,7 +373,7 @@ export default function BacklogItem({ item }: BacklogItemProps) {
               <Trash2 size={14} />
             </button>
           </div>
-        </div>
+        </CardFooter>
 
         {/* Delete Confirmation Overlay */}
         <AnimatePresence>
@@ -405,7 +410,7 @@ export default function BacklogItem({ item }: BacklogItemProps) {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </MotionCard>
 
       {/* Edit Modal */}
       {showEditModal && (

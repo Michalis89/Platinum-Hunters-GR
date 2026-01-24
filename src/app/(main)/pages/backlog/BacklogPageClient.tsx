@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * Backlog Page
- * PH-31: User Backlog System
- */
-
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -136,7 +131,7 @@ function BacklogPageContent() {
 
   // Filter and sort items
   const filteredAndSortedItems = backlogItems
-    .filter((item) => {
+    .filter(item => {
       // Filter by status tab
       if (activeTab !== 'all' && item.status !== activeTab) {
         return false;
@@ -174,7 +169,7 @@ function BacklogPageContent() {
 
   const timelineGroups = useMemo(() => {
     const groups = new Map<string, UserBacklogWithGame[]>();
-    filteredAndSortedItems.forEach((item) => {
+    filteredAndSortedItems.forEach(item => {
       const releaseYear =
         typeof item.game?.release_year === 'number'
           ? item.game.release_year
@@ -208,7 +203,7 @@ function BacklogPageContent() {
   };
 
   const toggleSortOrder = () => {
-    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
   };
 
   // Show skeleton while auth initializes
@@ -378,7 +373,7 @@ function BacklogPageContent() {
             <div className="flex-1">
               <SearchBar
                 value={search}
-                onChange={(value) => setSearch(value)}
+                onChange={value => setSearch(value)}
                 placeholder="Αναζήτηση παιχνιδιών..."
                 icon={<Search size={18} />}
               />
@@ -386,7 +381,7 @@ function BacklogPageContent() {
 
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              onChange={e => setSortBy(e.target.value as SortOption)}
               className="hover:border-[var(--hb-primary-strong)]/60 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none"
             >
               <option value="priority">Προτεραιότητα</option>
@@ -506,7 +501,7 @@ function BacklogPageContent() {
             ) : viewMode === 'timeline' ? (
               <div className="space-y-4 overflow-x-auto pb-2">
                 <div className="flex min-w-full gap-4">
-                  {timelineGroups.map((group) => (
+                  {timelineGroups.map(group => (
                     <div
                       key={group.year}
                       className="min-w-[240px] rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 shadow-inner shadow-black/30"
@@ -520,7 +515,7 @@ function BacklogPageContent() {
                         </span>
                       </div>
                       <div className="mt-3 space-y-2">
-                        {group.items.map((item) => (
+                        {group.items.map(item => (
                           <Link
                             key={item.id}
                             href={`/pages/guides/${item.game.slug}`}
@@ -556,12 +551,12 @@ function BacklogPageContent() {
               </div>
             ) : (
               <div className="max-h-[80vh] min-h-[60vh] space-y-2 overflow-y-auto pr-1">
-                {filteredAndSortedItems.map((item) => (
+                {filteredAndSortedItems.map(item => (
                   <BacklogListRow
                     key={item.id}
                     item={item}
                     compact={viewMode === 'compact'}
-                    onStatusChange={(status) => handleStatusChangeInline(item.id, status)}
+                    onStatusChange={status => handleStatusChangeInline(item.id, status)}
                   />
                 ))}
               </div>
@@ -571,11 +566,7 @@ function BacklogPageContent() {
 
         {/* No Results */}
         {!isLoading && backlogItems.length > 0 && filteredAndSortedItems.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-6"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6">
             <EmptyState
               icon={<Search className="h-12 w-12 text-[var(--hb-muted)]" />}
               title="Δεν βρέθηκαν αποτελέσματα"

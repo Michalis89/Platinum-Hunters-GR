@@ -101,7 +101,8 @@ export default function GuideCreatePage() {
         method: 'GET',
         cache: 'no-store',
       });
-      const trophies = await res.json();
+      const trophiesPayload = await res.json();
+      const trophies = trophiesPayload?.data ?? trophiesPayload;
 
       console.log('trophies', trophies);
     } catch (error) {

@@ -5,27 +5,12 @@
  * PH-31: User Games Library System
  */
 
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import type { UserGameWithGame, UserGameUpdate, UserGameRow, Database } from '@/types/database';
-
-async function insertActivity(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  type: 'backlog_status',
-  payload: Record<string, unknown>,
-) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type,
-      payload,
-    });
-  } catch (err) {
-    console.warn('⚠️ Activity insert failed:', err);
-  }
-}
+import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok } from '@/lib/api/response';
 
 /**
  * PATCH - Update priority and/or notes for backlog item
@@ -34,22 +19,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const supabase = await createRouteHandlerClient();
 
-    // Get current session
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     const userId = session.user.id;
     const { id } = await params;
     const backlogId = Number.parseInt(id, 10);
 
     if (Number.isNaN(backlogId)) {
-      return NextResponse.json({ error: 'Μη έγκυρο ID' }, { status: 400 });
+      return fail({ error: 'Μη έγκυρο ID' }, 400);
     }
 
     // Parse request body
@@ -78,9 +55,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       would_recommend === undefined &&
       is_favorite === undefined
     ) {
-      return NextResponse.json(
+      return fail(
         { error: 'Πρέπει να παρέχεται τουλάχιστον ένα πεδίο για ενημέρωση' },
-        { status: 400 },
+        400,
       );
     }
 
@@ -92,16 +69,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       .single();
 
     if (checkError || !existingItem) {
-      return NextResponse.json({ error: 'Το στοιχείο δεν βρέθηκε' }, { status: 404 });
+      return fail({ error: 'Το στοιχείο δεν βρέθηκε' }, 404);
     }
 
     const typedExistingItem = existingItem as Pick<UserGameRow, 'id' | 'user_id' | 'status' | 'is_favorite'>;
 
     if (typedExistingItem.user_id !== userId) {
-      return NextResponse.json(
-        { error: 'Δεν έχεις δικαίωμα να τροποποιήσεις αυτό το στοιχείο' },
-        { status: 403 },
-      );
+      return fail({ error: 'Δεν έχεις δικαίωμα να τροποποιήσεις αυτό το στοιχείο' }, 403);
     }
 
     // Build update object with all supported fields
@@ -191,7 +165,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     if (updateError) {
       console.error('User game update error:', updateError);
-      return NextResponse.json({ error: 'Σφάλμα ενημέρωσης παιχνιδιού' }, { status: 500 });
+      return fail({ error: 'Σφάλμα ενημέρωσης παιχνιδιού' }, 500);
     }
 
     // Transform data
@@ -261,10 +235,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       });
     }
 
-    return NextResponse.json(transformedItem);
+    return ok(transformedItem);
   } catch (error) {
     console.error('Backlog update error:', error);
-    return NextResponse.json({ error: 'Σφάλμα ενημέρωσης backlog' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -275,22 +252,14 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   try {
     const supabase = await createRouteHandlerClient();
 
-    // Get current session
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     const userId = session.user.id;
     const { id } = await params;
     const backlogId = Number.parseInt(id, 10);
 
     if (Number.isNaN(backlogId)) {
-      return NextResponse.json({ error: 'Μη έγκυρο ID' }, { status: 400 });
+      return fail({ error: 'Μη έγκυρο ID' }, 400);
     }
 
     // Check if item exists and belongs to user
@@ -301,16 +270,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       .single();
 
     if (checkError || !existingItem) {
-      return NextResponse.json({ error: 'Το στοιχείο δεν βρέθηκε' }, { status: 404 });
+      return fail({ error: 'Το στοιχείο δεν βρέθηκε' }, 404);
     }
 
     const typedExistingItem = existingItem as Pick<UserGameRow, 'id' | 'user_id'>;
 
     if (typedExistingItem.user_id !== userId) {
-      return NextResponse.json(
-        { error: 'Δεν έχεις δικαίωμα να διαγράψεις αυτό το στοιχείο' },
-        { status: 403 },
-      );
+      return fail({ error: 'Δεν έχεις δικαίωμα να διαγράψεις αυτό το στοιχείο' }, 403);
     }
 
     // Delete the item
@@ -318,12 +284,15 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     if (deleteError) {
       console.error('User game delete error:', deleteError);
-      return NextResponse.json({ error: 'Σφάλμα διαγραφής παιχνιδιού' }, { status: 500 });
+      return fail({ error: 'Σφάλμα διαγραφής παιχνιδιού' }, 500);
     }
 
-    return NextResponse.json({ message: 'Το παιχνίδι αφαιρέθηκε από τη συλλογή σου' });
+    return ok({ message: 'Το παιχνίδι αφαιρέθηκε από τη συλλογή σου' });
   } catch (error) {
     console.error('Backlog delete error:', error);
-    return NextResponse.json({ error: 'Σφάλμα διαγραφής από backlog' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

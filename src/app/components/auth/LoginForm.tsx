@@ -161,12 +161,13 @@ export default function LoginForm() {
       if (!response.ok) {
         throw new Error(data.error || 'Σφάλμα σύνδεσης');
       }
+      const payload = data.data ?? data;
 
       // Set session in client-side Supabase
-      if (data.session) {
+      if (payload.session) {
         await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
+          access_token: payload.session.access_token,
+          refresh_token: payload.session.refresh_token,
         });
       }
 

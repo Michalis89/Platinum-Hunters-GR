@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 interface GuideStep {
   step_number: number;
@@ -16,7 +17,7 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
     const id = params.id;
 
     if (!id) {
-      return NextResponse.json({ error: 'Λάθος ID οδηγού' }, { status: 400 });
+      return fail({ error: 'Λάθος ID οδηγού' }, 400);
     }
 
     const { data: guides, error } = await supabase
@@ -32,14 +33,11 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
 
     if (error) {
       console.error('Database error:', error);
-      return NextResponse.json(
-        { error: 'Database error', details: error.message },
-        { status: 500 },
-      );
+      return fail({ error: 'Σφάλμα βάσης δεδομένων' }, 500);
     }
 
     if (!guides || guides.length === 0) {
-      return NextResponse.json({ error: 'Guide not found' }, { status: 404 });
+      return fail({ error: 'Ο οδηγός δεν βρέθηκε' }, 404);
     }
 
     // Transform guide_steps array to steps array with proper structure
@@ -57,9 +55,9 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
       guide_steps: undefined, // Remove the nested guide_steps property
     }));
 
-    return NextResponse.json(transformedGuides);
+    return ok(transformedGuides);
   } catch (error) {
     console.error('❌ Σφάλμα διακομιστή:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 export async function GET(
   _request: Request,
@@ -9,7 +10,7 @@ export async function GET(
     const { slug } = await params;
 
     if (!slug) {
-      return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
+      return fail({ error: 'Το slug είναι υποχρεωτικό' }, 400);
     }
 
     const { data: game, error } = await supabase
@@ -20,16 +21,16 @@ export async function GET(
 
     if (error) {
       console.error('❌ Σφάλμα στη φόρτωση του παιχνιδιού:', error);
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
     if (!game) {
-      return NextResponse.json({ error: 'Game not found' }, { status: 404 });
+      return fail({ error: 'Το παιχνίδι δεν βρέθηκε' }, 404);
     }
 
-    return NextResponse.json(game);
+    return ok(game);
   } catch (error) {
     console.error('❌ Σφάλμα στη φόρτωση του παιχνιδιού:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

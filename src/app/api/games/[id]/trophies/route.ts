@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
 import { fetchTrophiesFromPsn } from '@/lib/psnClient';
+import { fail, ok } from '@/lib/api/response';
 
 type TrophyRecord = {
   id?: number;
@@ -28,7 +28,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const gameId = Number(id);
 
   if (!Number.isFinite(gameId)) {
-    return NextResponse.json({ error: 'Μη έγκυρο game id' }, { status: 400 });
+    return fail({ error: 'Μη έγκυρο game id' }, 400);
   }
 
   try {
@@ -39,14 +39,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
     if (gameError) {
       console.error('❌ Σφάλμα ανάκτησης game:', gameError);
-      return NextResponse.json({ error: 'Αποτυχία εύρεσης παιχνιδιού' }, { status: 404 });
+      return fail({ error: 'Αποτυχία εύρεσης παιχνιδιού' }, 404);
     }
 
     if (!game?.psn_trophy_id) {
-      return NextResponse.json(
-        { error: 'Δεν υπάρχει PSN trophy id για αυτό το παιχνίδι' },
-        { status: 404 },
-      );
+      return fail({ error: 'Δεν υπάρχει PSN trophy id για αυτό το παιχνίδι' }, 404);
     }
 
     const { data: cachedTrophies, error: cacheError } = await supabase
@@ -67,7 +64,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         Date.now() - CACHE_TTL_HOURS * 60 * 60 * 1000;
 
     if (cachedTrophies && cachedTrophies.length > 0 && cacheIsFresh) {
-      return NextResponse.json({
+      return ok({
         source: 'cache',
         trophies: cachedTrophies.map(t => ({
           id: t.id,
@@ -105,7 +102,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     } catch (psnError) {
       console.error('❌ PSN fetch error (returning empty list for now):', psnError);
       // Temporary fallback: return empty list with 200 to avoid breaking UI
-      return NextResponse.json({
+      return ok({
         source: 'psn_error_fallback',
         trophies: [],
         counts: summarizeTrophies([]),
@@ -136,14 +133,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       console.warn('⚠️ Δεν ήταν δυνατή η αποθήκευση trophies στη βάση:', insertError);
     }
 
-    return NextResponse.json({
+    return ok({
       source: insertError ? 'psn_live_no_cache' : 'psn_live',
       trophies: prepared,
       counts: summarizeTrophies(prepared),
     });
   } catch (err) {
     console.error('❌ Σφάλμα ανάκτησης trophies:', err);
-    return NextResponse.json({ error: 'Αποτυχία ανάκτησης trophies' }, { status: 500 });
+    return fail({ error: 'Αποτυχία ανάκτησης trophies' }, 500);
   }
 }
 

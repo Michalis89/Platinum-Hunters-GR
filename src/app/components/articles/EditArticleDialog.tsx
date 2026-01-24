@@ -234,7 +234,8 @@ export default function EditArticleDialog({
       }
 
       const data = await response.json();
-      onSuccess?.(data.article);
+      const payload = data?.data ?? data;
+      onSuccess?.(payload.article);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');

@@ -4,10 +4,11 @@
  * PH-30: User Authentication System
  */
 
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { validateEmail, validatePassword } from '@/utils/validation/auth';
 import type { User } from '@/types/user';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 export async function POST(req: Request) {
   try {
@@ -19,15 +20,12 @@ export async function POST(req: Request) {
     // =====================================================
 
     if (!identifier || identifier.trim() === '') {
-      return NextResponse.json(
-        { error: 'Το email ή το username είναι υποχρεωτικό' },
-        { status: 400 },
-      );
+      return fail({ error: 'Το email ή το username είναι υποχρεωτικό' }, 400);
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      return NextResponse.json({ error: passwordValidation.error }, { status: 400 });
+      return fail({ error: passwordValidation.error || 'Μη έγκυρος κωδικός' }, 400);
     }
 
     // =====================================================
@@ -48,34 +46,34 @@ export async function POST(req: Request) {
 
       if (userError) {
         console.error('Username lookup error:', userError);
-        return NextResponse.json({ error: 'Σφάλμα σύνδεσης' }, { status: 500 });
+        return fail({ error: 'Σφάλμα σύνδεσης' }, 500);
       }
 
       if (!userData) {
-        return NextResponse.json({ error: 'Λάθος username ή κωδικός' }, { status: 401 });
+        return fail({ error: 'Λάθος username ή κωδικός' }, 401);
       }
 
       const typedUserData = userData as Pick<User, 'email' | 'account_status'>;
 
       // Check if account is deleted, suspended, or banned
       if (typedUserData.account_status === 'deleted') {
-        return NextResponse.json({ error: 'Ο λογαριασμός έχει διαγραφεί' }, { status: 403 });
+        return fail({ error: 'Ο λογαριασμός έχει διαγραφεί' }, 403);
       }
       if (typedUserData.account_status === 'suspended') {
-        return NextResponse.json(
+        return fail(
           { error: 'Ο λογαριασμός σας έχει ανασταλεί. Επικοινωνήστε με τη διαχείριση.' },
-          { status: 403 },
+          403,
         );
       }
       if (typedUserData.account_status === 'banned') {
-        return NextResponse.json({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, { status: 403 });
+        return fail({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, 403);
       }
       email = typedUserData.email;
     } else {
       // Validate email format
       const emailValidation = validateEmail(identifier);
       if (!emailValidation.isValid) {
-        return NextResponse.json({ error: emailValidation.error }, { status: 400 });
+        return fail({ error: emailValidation.error || 'Μη έγκυρο email' }, 400);
       }
     }
 
@@ -90,20 +88,20 @@ export async function POST(req: Request) {
 
       // Check if email is not confirmed
       if (authError.message === 'Email not confirmed') {
-        return NextResponse.json(
+        return fail(
           {
             error:
               'Το email σου δεν έχει επιβεβαιωθεί. Έλεγξε το email σου και κάνε κλικ στο link επιβεβαίωσης.',
           },
-          { status: 401 },
+          401,
         );
       }
 
-      return NextResponse.json({ error: 'Λάθος email ή κωδικός' }, { status: 401 });
+      return fail({ error: 'Λάθος email ή κωδικός' }, 401);
     }
 
     if (!authData.user) {
-      return NextResponse.json({ error: 'Αποτυχία σύνδεσης' }, { status: 500 });
+      return fail({ error: 'Αποτυχία σύνδεσης' }, 500);
     }
 
     // =====================================================
@@ -121,20 +119,20 @@ export async function POST(req: Request) {
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
-      return NextResponse.json({ error: 'Σφάλμα φόρτωσης προφίλ' }, { status: 500 });
+      return fail({ error: 'Σφάλμα φόρτωσης προφίλ' }, 500);
     }
 
     const typedUserProfile = userProfile as User;
 
     // Check if account is suspended or banned
     if (typedUserProfile.account_status === 'suspended') {
-      return NextResponse.json(
+      return fail(
         { error: 'Ο λογαριασμός σας έχει ανασταλεί. Επικοινωνήστε με τη διαχείριση.' },
-        { status: 403 },
+        403,
       );
     }
     if (typedUserProfile.account_status === 'banned') {
-      return NextResponse.json({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, { status: 403 });
+      return fail({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, 403);
     }
 
     // UPDATE LAST LOGIN
@@ -157,13 +155,13 @@ export async function POST(req: Request) {
     }
 
     // RETURN SUCCESS
-    return NextResponse.json({
+    return ok({
       user: userProfile,
       session: authData.session,
       message: 'Επιτυχής σύνδεση!',
     });
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json({ error: 'Σφάλμα σύνδεσης' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

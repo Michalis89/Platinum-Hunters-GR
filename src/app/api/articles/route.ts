@@ -4,6 +4,9 @@ import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 import { normalizeSlug } from '@/utils/slugify';
 import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok, okWithMeta } from '@/lib/api/response';
 
 // GET - Fetch articles with filtering
 export async function GET(req: Request) {
@@ -44,18 +47,16 @@ export async function GET(req: Request) {
 
     if (error) {
       console.error('Error fetching articles:', error);
-      return NextResponse.json({ error: 'Failed to fetch articles' }, { status: 500 });
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    return NextResponse.json({
-      articles,
-      total: count,
-      limit,
-      offset,
-    });
+    return okWithMeta(
+      articles ?? [],
+      { total: count ?? articles?.length ?? 0, limit, offset },
+    );
   } catch (error) {
     console.error('Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -64,14 +65,7 @@ export async function POST(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     // Check if user has permission (admin or author)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,7 +75,7 @@ export async function POST(req: Request) {
       .single();
 
     if (!userData || !['admin', 'author'].includes(userData.role as string)) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+      return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
     }
 
     const body = await req.json();
@@ -141,10 +135,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (existingArticle) {
-      return NextResponse.json(
-        { error: 'An article with this slug already exists' },
-        { status: 409 },
-      );
+      return fail({ error: 'An article with this slug already exists', code: 'CONFLICT' }, 409);
     }
 
     // Insert article
@@ -172,7 +163,7 @@ export async function POST(req: Request) {
 
     if (insertError) {
       console.error('Error inserting article:', insertError);
-      return NextResponse.json({ error: 'Failed to create article' }, { status: 500 });
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
     // Log activity
@@ -188,12 +179,12 @@ export async function POST(req: Request) {
       avatar_url: userData.avatar_url,
     });
 
-    return NextResponse.json({
-      message: 'Article created successfully',
-      article,
-    });
+    return ok({ message: 'Article created successfully', article }, { status: 201 });
   } catch (error) {
     console.error('Error creating article:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

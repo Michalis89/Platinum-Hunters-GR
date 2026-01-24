@@ -1,30 +1,11 @@
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
-
-async function insertActivity(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  type: string,
-  payload: Record<string, unknown>,
-) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type,
-      payload,
-    });
-  } catch (err) {
-    console.warn(`Activity insert (${type}) failed:`, err);
-  }
-}
-
-function normalizeSlug(value: string) {
-  const trimmed = value.replace(/^-+/, '').replace(/-+$/, '');
-  return trimmed || value;
-}
+import { normalizeSlug } from '@/utils/slugify';
+import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok } from '@/lib/api/response';
 
 // GET - Fetch single article by ID or slug
 export async function GET(
@@ -55,7 +36,7 @@ export async function GET(
     const { data: article, error } = await query.single();
 
     if (error || !article) {
-      return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
     }
 
     // Record view (optionally)
@@ -71,10 +52,10 @@ export async function GET(
       // Views tracking is optional, don't fail if it errors
     }
 
-    return NextResponse.json({ article });
+    return ok(article);
   } catch (error) {
     console.error('Error fetching article:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -87,14 +68,7 @@ export async function PUT(
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     // Get existing article
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,7 +78,7 @@ export async function PUT(
       .single();
 
     if (fetchError || !existingArticle) {
-      return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
     }
 
     // Check permission (author or admin)
@@ -118,7 +92,7 @@ export async function PUT(
     const isAdmin = userData?.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
     }
 
     const body = await req.json();
@@ -140,19 +114,19 @@ export async function PUT(
     if (title !== undefined) {
       const titleValidation = validatePlainText(title, 'Ο τίτλος');
       if (!titleValidation.isValid) {
-        return NextResponse.json({ error: titleValidation.error }, { status: 400 });
+        return fail({ error: titleValidation.error || 'Μη έγκυρος τίτλος' }, 400);
       }
     }
     if (description !== undefined) {
       const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
       if (!descriptionValidation.isValid) {
-        return NextResponse.json({ error: descriptionValidation.error }, { status: 400 });
+        return fail({ error: descriptionValidation.error || 'Μη έγκυρη περιγραφή' }, 400);
       }
     }
     if (meta_title !== undefined) {
       const metaTitleValidation = validatePlainText(meta_title, 'Ο meta τίτλος');
       if (!metaTitleValidation.isValid) {
-        return NextResponse.json({ error: metaTitleValidation.error }, { status: 400 });
+        return fail({ error: metaTitleValidation.error || 'Μη έγκυρος meta τίτλος' }, 400);
       }
     }
     if (meta_description !== undefined) {
@@ -161,13 +135,13 @@ export async function PUT(
         'Το meta description',
       );
       if (!metaDescriptionValidation.isValid) {
-        return NextResponse.json({ error: metaDescriptionValidation.error }, { status: 400 });
+        return fail({ error: metaDescriptionValidation.error || 'Μη έγκυρο meta description' }, 400);
       }
     }
     if (tags !== undefined) {
       const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
       if (!tagsValidation.isValid) {
-        return NextResponse.json({ error: tagsValidation.error }, { status: 400 });
+        return fail({ error: tagsValidation.error || 'Μη έγκυρα tags' }, 400);
       }
     }
 
@@ -205,7 +179,7 @@ export async function PUT(
 
     if (updateError) {
       console.error('Error updating article:', updateError);
-      return NextResponse.json({ error: 'Failed to update article' }, { status: 500 });
+      return fail({ error: 'Αποτυχία ενημέρωσης άρθρου' }, 500);
     }
 
     // Log activity
@@ -219,13 +193,13 @@ export async function PUT(
       avatar_url: userData?.avatar_url,
     });
 
-    return NextResponse.json({
-      message: 'Article updated successfully',
-      article,
-    });
+    return ok({ message: 'Επιτυχής ενημέρωση άρθρου', article });
   } catch (error) {
     console.error('Error updating article:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -238,14 +212,7 @@ export async function DELETE(
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     // Get existing article
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -255,7 +222,7 @@ export async function DELETE(
       .single();
 
     if (fetchError || !existingArticle) {
-      return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
     }
 
     // Check permission (author or admin)
@@ -269,7 +236,7 @@ export async function DELETE(
     const isAdmin = userData?.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
     }
 
     // Delete article (cascade will handle likes, comments, views)
@@ -280,7 +247,7 @@ export async function DELETE(
 
     if (deleteError) {
       console.error('Error deleting article:', deleteError);
-      return NextResponse.json({ error: 'Failed to delete article' }, { status: 500 });
+      return fail({ error: 'Αποτυχία διαγραφής άρθρου' }, 500);
     }
 
     // Log activity
@@ -293,11 +260,12 @@ export async function DELETE(
       avatar_url: userData?.avatar_url,
     });
 
-    return NextResponse.json({
-      message: 'Article deleted successfully',
-    });
+    return ok({ message: 'Το άρθρο διαγράφηκε επιτυχώς' });
   } catch (error) {
     console.error('Error deleting article:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

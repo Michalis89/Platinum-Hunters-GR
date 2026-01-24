@@ -109,8 +109,6 @@ export async function PUT(req: Request, context: any) {
       .eq('game_id', gameId)
       .maybeSingle();
 
-    console.log('🔎 Supabase query result:', existingGuide, 'Error:', fetchError);
-
     if (fetchError) {
       console.error('❌ Σφάλμα εύρεσης οδηγού:', fetchError);
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
@@ -191,8 +189,6 @@ export async function PUT(req: Request, context: any) {
         content_html: sanitizedStepHtml,
       };
     });
-
-    console.log('📝 Attempting to insert steps:', JSON.stringify(newSteps, null, 2));
 
     const { error: insertError } = await supabase.from('guide_steps').insert(newSteps);
 

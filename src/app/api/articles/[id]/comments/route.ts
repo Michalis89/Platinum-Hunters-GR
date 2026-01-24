@@ -1,23 +1,8 @@
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-
-async function insertActivity(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  type: string,
-  payload: Record<string, unknown>,
-) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type,
-      payload,
-    });
-  } catch (err) {
-    console.warn(`Activity insert (${type}) failed:`, err);
-  }
-}
+import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok, okWithMeta } from '@/lib/api/response';
 
 // GET - Fetch comments for an article
 export async function GET(
@@ -41,18 +26,13 @@ export async function GET(
 
     if (error) {
       console.error('Error fetching comments:', error);
-      return NextResponse.json({ error: 'Failed to fetch comments' }, { status: 500 });
+      return fail({ error: 'Αποτυχία φόρτωσης σχολίων' }, 500);
     }
 
-    return NextResponse.json({
-      comments: comments || [],
-      total: count || 0,
-      limit,
-      offset,
-    });
+    return okWithMeta(comments || [], { total: count || 0, limit, offset });
   } catch (error) {
     console.error('Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -65,24 +45,17 @@ export async function POST(
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     const body = await req.json();
     const { content } = body;
 
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
-      return NextResponse.json({ error: 'Comment content is required' }, { status: 400 });
+      return fail({ error: 'Το περιεχόμενο του σχολίου είναι υποχρεωτικό' }, 400);
     }
 
     if (content.length > 2000) {
-      return NextResponse.json({ error: 'Comment is too long (max 2000 characters)' }, { status: 400 });
+      return fail({ error: 'Το σχόλιο είναι πολύ μεγάλο (μέχρι 2000 χαρακτήρες)' }, 400);
     }
 
     // Get article info for activity log
@@ -93,7 +66,7 @@ export async function POST(
       .single();
 
     if (articleError || !article) {
-      return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
     }
 
     // Get user info for activity log
@@ -116,7 +89,7 @@ export async function POST(
 
     if (insertError) {
       console.error('Error inserting comment:', insertError);
-      return NextResponse.json({ error: 'Failed to add comment' }, { status: 500 });
+      return fail({ error: 'Αποτυχία προσθήκης σχολίου' }, 500);
     }
 
     // Log activity
@@ -131,13 +104,13 @@ export async function POST(
       avatar_url: userData?.avatar_url,
     });
 
-    return NextResponse.json({
-      message: 'Comment added successfully',
-      comment,
-    });
+    return ok({ message: 'Το σχόλιο προστέθηκε επιτυχώς', comment });
   } catch (error) {
     console.error('Error adding comment:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
@@ -149,17 +122,10 @@ export async function DELETE(req: Request) {
     const commentId = searchParams.get('commentId');
 
     if (!commentId) {
-      return NextResponse.json({ error: 'Comment ID is required' }, { status: 400 });
+      return fail({ error: 'Το ID σχολίου είναι υποχρεωτικό' }, 400);
     }
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     // Get the comment to check ownership
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -169,7 +135,7 @@ export async function DELETE(req: Request) {
       .single();
 
     if (fetchError || !comment) {
-      return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
+      return fail({ error: 'Το σχόλιο δεν βρέθηκε' }, 404);
     }
 
     // Check permission (owner or admin)
@@ -183,7 +149,7 @@ export async function DELETE(req: Request) {
     const isAdmin = userData?.role === 'admin';
 
     if (!isOwner && !isAdmin) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
     }
 
     // Delete comment
@@ -194,14 +160,15 @@ export async function DELETE(req: Request) {
 
     if (deleteError) {
       console.error('Error deleting comment:', deleteError);
-      return NextResponse.json({ error: 'Failed to delete comment' }, { status: 500 });
+      return fail({ error: 'Αποτυχία διαγραφής σχολίου' }, 500);
     }
 
-    return NextResponse.json({
-      message: 'Comment deleted successfully',
-    });
+    return ok({ message: 'Το σχόλιο διαγράφηκε επιτυχώς' });
   } catch (error) {
     console.error('Error deleting comment:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

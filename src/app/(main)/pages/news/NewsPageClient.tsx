@@ -8,6 +8,13 @@ import { motion } from 'framer-motion';
 import { FileText, Clock, Eye, Heart, Calendar, User, Tag } from 'lucide-react';
 import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
 import { PageContainer, PageHeader } from '@/app/components/layout';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/app/components/ui/Card';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
@@ -24,8 +31,10 @@ interface ArticleWithAuthor extends ArticleRow {
 
 function ArticleCard({ article }: { article: ArticleWithAuthor }) {
   const normalizedSlug = normalizeSlug(article.slug);
+  const MotionCard = motion(Card);
+
   return (
-    <motion.article
+    <MotionCard
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="hover:border-[var(--hb-primary-strong)]/50 group relative overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-[0_16px_40px_rgba(0,0,0,0.25)] transition hover:shadow-[0_18px_48px_rgba(0,0,0,0.35)]"
@@ -62,21 +71,24 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
         </div>
       </Link>
 
-      {/* Content */}
-      <div className="p-4">
+      <CardHeader className="border-b-0 p-4 pb-0">
         <Link href={`/pages/news/${normalizedSlug}`}>
-          <h2 className="text-[18px] font-semibold leading-snug text-[var(--hb-headline)] transition group-hover:text-[var(--hb-primary-strong)]">
+          <CardTitle className="text-[18px] leading-snug transition group-hover:text-[var(--hb-primary-strong)]">
             {article.title}
-          </h2>
+          </CardTitle>
         </Link>
 
         {article.description && (
-          <p className="mt-2 line-clamp-2 text-sm text-[var(--hb-muted)]">{article.description}</p>
+          <CardDescription className="mt-2 line-clamp-2">
+            {article.description}
+          </CardDescription>
         )}
+      </CardHeader>
 
+      <CardContent className="px-4 pb-4 pt-3">
         {/* Tags */}
         {article.tags && article.tags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {article.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
@@ -130,8 +142,8 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
             </div>
           </div>
         </div>
-      </div>
-    </motion.article>
+      </CardContent>
+    </MotionCard>
   );
 }
 
@@ -184,8 +196,8 @@ function NewsPageContent() {
         }
 
         const data = await response.json();
-        setArticles(data.articles || []);
-        setTotal(data.total || 0);
+        setArticles(data.data || []);
+        setTotal(data.meta?.total || 0);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong');
       } finally {

@@ -4,17 +4,12 @@ import { HobbiesHero, HobbiesCategorySection } from '@/app/components/hobbies';
 import { HOBBY_SECTIONS } from '@/config/hobbies';
 import { PageContainer } from '@/app/components/layout';
 
-/**
- * HobbiesPageClient - Hobbies hub page.
- *
- * Note: Background gradient and Footer are now provided by AppShell.
- */
 export default function HobbiesPageClient() {
   return (
     <>
       <HobbiesHero />
 
-      {HOBBY_SECTIONS.map((section) => (
+      {HOBBY_SECTIONS.map(section => (
         <HobbiesCategorySection key={section.type} section={section} />
       ))}
 

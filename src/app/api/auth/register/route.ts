@@ -4,7 +4,6 @@
  * PH-30: User Authentication System
  */
 
-import { NextResponse } from 'next/server';
 import getSupabaseServer from '@/lib/supabase-server';
 import {
   validateEmail,
@@ -15,6 +14,8 @@ import {
   validatePSNId,
   validateBio,
 } from '@/utils/validation/auth';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 export async function POST(req: Request) {
   try {
@@ -43,41 +44,41 @@ export async function POST(req: Request) {
     // Required fields
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      return NextResponse.json({ error: emailValidation.error }, { status: 400 });
+      return fail({ error: emailValidation.error || 'Μη έγκυρο email' }, 400);
     }
 
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
-      return NextResponse.json({ error: usernameValidation.error }, { status: 400 });
+      return fail({ error: usernameValidation.error || 'Μη έγκυρο username' }, 400);
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      return NextResponse.json({ error: passwordValidation.error }, { status: 400 });
+      return fail({ error: passwordValidation.error || 'Μη έγκυρος κωδικός' }, 400);
     }
 
     const nameValidation = validateFullName(full_name);
     if (!nameValidation.isValid) {
-      return NextResponse.json({ error: nameValidation.error }, { status: 400 });
+      return fail({ error: nameValidation.error || 'Μη έγκυρο ονοματεπώνυμο' }, 400);
     }
 
     const dobValidation = validateDateOfBirth(date_of_birth);
     if (!dobValidation.isValid) {
-      return NextResponse.json({ error: dobValidation.error }, { status: 400 });
+      return fail({ error: dobValidation.error || 'Μη έγκυρη ημερομηνία γέννησης' }, 400);
     }
 
     // Optional fields
     if (psn_id) {
       const psnValidation = validatePSNId(psn_id);
       if (!psnValidation.isValid) {
-        return NextResponse.json({ error: psnValidation.error }, { status: 400 });
+        return fail({ error: psnValidation.error || 'Μη έγκυρο PSN ID' }, 400);
       }
     }
 
     if (bio) {
       const bioValidation = validateBio(bio);
       if (!bioValidation.isValid) {
-        return NextResponse.json({ error: bioValidation.error }, { status: 400 });
+        return fail({ error: bioValidation.error || 'Μη έγκυρο bio' }, 400);
       }
     }
 
@@ -96,10 +97,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (existingEmail) {
-      return NextResponse.json(
-        { error: 'Αυτό το email χρησιμοποιείται ήδη' },
-        { status: 409 },
-      );
+      return fail({ error: 'Αυτό το email χρησιμοποιείται ήδη', code: 'CONFLICT' }, 409);
     }
 
     // Check if username exists (exclude deleted accounts)
@@ -111,10 +109,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (existingUsername) {
-      return NextResponse.json(
-        { error: 'Αυτό το username χρησιμοποιείται ήδη' },
-        { status: 409 },
-      );
+      return fail({ error: 'Αυτό το username χρησιμοποιείται ήδη', code: 'CONFLICT' }, 409);
     }
 
     // Check if PSN ID exists (if provided)
@@ -126,10 +121,7 @@ export async function POST(req: Request) {
         .maybeSingle();
 
       if (existingPSN) {
-        return NextResponse.json(
-          { error: 'Αυτό το PSN ID χρησιμοποιείται ήδη' },
-          { status: 409 },
-        );
+        return fail({ error: 'Αυτό το PSN ID χρησιμοποιείται ήδη', code: 'CONFLICT' }, 409);
       }
     }
 
@@ -150,11 +142,11 @@ export async function POST(req: Request) {
 
     if (authError) {
       console.error('Auth error:', authError);
-      return NextResponse.json({ error: authError.message }, { status: 400 });
+      return fail({ error: authError.message }, 400);
     }
 
     if (!authData.user) {
-      return NextResponse.json({ error: 'Αποτυχία δημιουργίας χρήστη' }, { status: 500 });
+      return fail({ error: 'Αποτυχία δημιουργίας χρήστη' }, 500);
     }
 
     // =====================================================
@@ -192,13 +184,13 @@ export async function POST(req: Request) {
     // RETURN SUCCESS
     // =====================================================
 
-    return NextResponse.json({
+    return ok({
       user: updatedUser || authData.user,
       session: authData.session,
       message: 'Ο λογαριασμός δημιουργήθηκε επιτυχώς! Ελέγξτε το email σας για επιβεβαίωση.',
     });
   } catch (error) {
     console.error('Registration error:', error);
-    return NextResponse.json({ error: 'Σφάλμα εγγραφής' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

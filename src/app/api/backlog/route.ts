@@ -1,21 +1,14 @@
-/**
- * User Games API Route
- * GET /api/backlog - Fetch user's game library with details
- * POST /api/backlog - Add game to library
- * PH-31: User Games Library System (formerly Backlog)
- */
-
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import type { UserGameWithGame, UserGameInsert, Database } from '@/types/database';
 import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok, okWithPagination } from '@/lib/api/response';
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
 
-/**
- * GET - Fetch user's backlog with game details
- */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -28,20 +21,15 @@ export async function GET(request: Request) {
 
     const supabase = await createRouteHandlerClient();
 
-    // Get current session
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     const userId = session.user.id;
 
-    // Fetch user games with game details (JOIN)
-    const { data: userGames, error: gamesError, count: totalCount } = await supabase
+    const {
+      data: userGames,
+      error: gamesError,
+      count: totalCount,
+    } = await supabase
       .from('user_games')
       .select(
         `
@@ -94,10 +82,9 @@ export async function GET(request: Request) {
 
     if (gamesError) {
       console.error('User games fetch error:', gamesError);
-      return NextResponse.json({ error: 'Σφάλμα φόρτωσης παιχνιδιών' }, { status: 500 });
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    // Transform data to flatten game object
     const transformedGames = (userGames as UserGameWithGame[]).map(item => ({
       id: item.id,
       user_id: item.user_id,
@@ -119,36 +106,26 @@ export async function GET(request: Request) {
       game: Array.isArray(item.games) ? item.games[0] : item.games,
     }));
 
-    return NextResponse.json({
-      data: transformedGames,
-      pagination: {
-        page: Math.max(page, 1),
-        limit,
-        total: totalCount ?? transformedGames.length,
-      },
+    return okWithPagination(transformedGames, {
+      page: Math.max(page, 1),
+      limit,
+      total: totalCount ?? transformedGames.length,
     });
   } catch (error) {
     console.error('Backlog error:', error);
-    return NextResponse.json({ error: 'Σφάλμα φόρτωσης backlog' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
-/**
- * POST - Add game to backlog
- */
 export async function POST(request: Request) {
   try {
     const supabase = await createRouteHandlerClient();
 
     // Get current session
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     const userId = session.user.id;
 
@@ -251,10 +228,9 @@ export async function POST(request: Request) {
         );
       }
       console.error('User games insert error:', insertError);
-      return NextResponse.json({ error: 'Σφάλμα προσθήκης παιχνιδιού' }, { status: 500 });
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    // Transform data
     const typedNewItem = newItem as UserGameWithGame;
     const transformedItem = {
       id: typedNewItem.id,
@@ -277,7 +253,6 @@ export async function POST(request: Request) {
       game: Array.isArray(typedNewItem.games) ? typedNewItem.games[0] : typedNewItem.games,
     };
 
-    // Log activity (backlog_added)
     const { data: profileData } = await supabase
       .from('users')
       .select('username, display_name, avatar_url')
@@ -300,9 +275,12 @@ export async function POST(request: Request) {
       { logContext: '⚠️ Activity insert' },
     );
 
-    return NextResponse.json(transformedItem, { status: 201 });
+    return ok(transformedItem, { status: 201 });
   } catch (error) {
     console.error('Backlog add error:', error);
-    return NextResponse.json({ error: 'Σφάλμα προσθήκης στο backlog' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

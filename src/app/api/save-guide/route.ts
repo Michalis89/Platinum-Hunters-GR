@@ -1,24 +1,10 @@
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
-
-async function insertActivity(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  payload: Record<string, unknown>,
-) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type: 'guide_created',
-      payload,
-    });
-  } catch (err) {
-    console.warn('⚠️ Activity insert (guide_created) failed:', err);
-  }
-}
+import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok } from '@/lib/api/response';
 
 interface ScrapedStep {
   title: string;
@@ -33,14 +19,7 @@ export async function POST(req: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = (await createRouteHandlerClient()) as any;
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
-    }
+    const session = await requireAuth(supabase);
 
     const { data: userData } = await supabase
       .from('users')
@@ -49,7 +28,7 @@ export async function POST(req: Request) {
       .single();
 
     if (!userData || !['admin', 'author'].includes(userData.role as string)) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
     }
 
     const {
@@ -71,27 +50,28 @@ export async function POST(req: Request) {
     } = await req.json();
     const titleValidation = validatePlainText(title, 'Ο τίτλος');
     if (!titleValidation.isValid) {
-      return NextResponse.json({ error: titleValidation.error }, { status: 400 });
+      return fail({ error: titleValidation.error || 'Μη έγκυρος τίτλος' }, 400);
     }
     const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
     if (!descriptionValidation.isValid) {
-      return NextResponse.json({ error: descriptionValidation.error }, { status: 400 });
+      return fail({ error: descriptionValidation.error || 'Μη έγκυρη περιγραφή' }, 400);
     }
     if (steps && Array.isArray(steps)) {
       const stepTitles = steps.map((step: ScrapedStep) => step.title).filter(Boolean);
-      const stepDescriptions = steps
-        .map((step: ScrapedStep) => step.description)
-        .filter(Boolean);
+      const stepDescriptions = steps.map((step: ScrapedStep) => step.description).filter(Boolean);
       const stepTitleValidation = validatePlainTextArray(stepTitles, 'Οι τίτλοι βημάτων');
       if (!stepTitleValidation.isValid) {
-        return NextResponse.json({ error: stepTitleValidation.error }, { status: 400 });
+        return fail({ error: stepTitleValidation.error || 'Μη έγκυροι τίτλοι βημάτων' }, 400);
       }
       const stepDescriptionValidation = validatePlainTextArray(
         stepDescriptions,
         'Οι περιγραφές βημάτων',
       );
       if (!stepDescriptionValidation.isValid) {
-        return NextResponse.json({ error: stepDescriptionValidation.error }, { status: 400 });
+        return fail(
+          { error: stepDescriptionValidation.error || 'Μη έγκυρες περιγραφές βημάτων' },
+          400,
+        );
       }
     }
     const sanitizedGuideContentHtml = sanitizeHtmlContent(guideContentHtml).trim() || null;
@@ -110,12 +90,12 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (existingGame) {
-      return NextResponse.json(
+      return fail(
         {
-          message: `⚠️ Ο οδηγός "${existingGame.title}" υπάρχει ήδη στη βάση!`,
-          existingData: existingGame,
+          error: `⚠️ Ο οδηγός "${existingGame.title}" υπάρχει ήδη στη βάση!`,
+          code: 'CONFLICT',
         },
-        { status: 409 },
+        409,
       );
     }
 
@@ -142,10 +122,8 @@ export async function POST(req: Request) {
 
     if (gameError) {
       console.error('❌ Σφάλμα αποθήκευσης παιχνιδιού:', gameError);
-      return NextResponse.json({ error: 'Database insert error' }, { status: 500 });
+      return fail({ error: 'Σφάλμα αποθήκευσης παιχνιδιού' }, 500);
     }
-
-    console.log(`✅ Αποθηκεύτηκε το παιχνίδι: ${game.title} με ID: ${game.id}`);
 
     // Handle platform - find or create platform and link it
     if (platform) {
@@ -197,10 +175,8 @@ export async function POST(req: Request) {
 
     if (guideError) {
       console.error('❌ Σφάλμα αποθήκευσης guide:', guideError);
-      return NextResponse.json({ error: 'Guide insert error' }, { status: 500 });
+      return fail({ error: 'Σφάλμα αποθήκευσης οδηγού' }, 500);
     }
-
-    console.log(`✅ Οδηγός δημιουργήθηκε με ID: ${guide.id}`);
 
     // Insert guide steps
     if (steps && Array.isArray(steps) && steps.length > 0) {
@@ -229,7 +205,7 @@ export async function POST(req: Request) {
       .eq('id', session.user.id)
       .maybeSingle();
 
-    await insertActivity(supabase, session.user.id, {
+    await insertActivity(supabase, session.user.id, 'guide_created', {
       guideId: guide.id,
       guideTitle: guide.title,
       gameId: game.id,
@@ -240,13 +216,16 @@ export async function POST(req: Request) {
       avatar_url: profile.data?.avatar_url,
     });
 
-    return NextResponse.json({
+    return ok({
       message: '✅ Ο οδηγός αποθηκεύτηκε!',
       game,
       guide,
     });
   } catch (error) {
     console.error('❌ Σφάλμα αποθήκευσης:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
