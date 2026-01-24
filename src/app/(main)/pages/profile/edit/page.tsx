@@ -21,7 +21,6 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
 import { Select } from '@/app/components/ui/Select';
@@ -397,9 +396,11 @@ export default function EditProfilePage() {
 
   if (loading) {
     return (
-      <PageWrapper>
-        <Skeleton type="profile-edit" />
-      </PageWrapper>
+      <div className="min-h-screen bg-[var(--hb-bg)]">
+        <div className="mx-auto max-w-4xl px-4 py-16">
+          <Skeleton type="profile-edit" />
+        </div>
+      </div>
     );
   }
 
@@ -692,28 +693,39 @@ export default function EditProfilePage() {
   };
 
   return (
-    <PageWrapper>
-      <div className="min-h-screen bg-[var(--hb-bg)] py-10 text-[var(--hb-text)]">
+    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
+      {/* Background gradient (like About/Profile page) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
+        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+      </div>
+
+      <div className="relative px-4 py-10 md:px-6">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-          {/* Top bar */}
-          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-            <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-[var(--hb-muted)]">
-                Account • Profile Settings
-              </p>
-              <h1 className="mt-1 bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-3xl font-extrabold text-transparent">
+          {/* Hero-style Header */}
+          <section className="mb-4 text-center">
+            <p className="mb-3 text-xs uppercase tracking-[0.3em] text-[var(--hb-primary-strong)]">
+              Account • Profile Settings
+            </p>
+            <h1 className="mb-2 text-3xl font-extrabold leading-tight md:text-4xl">
+              <span className="bg-gradient-to-r from-[var(--hb-headline)] via-[var(--hb-text)] to-[var(--hb-muted)] bg-clip-text text-transparent">
                 Επεξεργασία Προφίλ
-              </h1>
-            </div>
-          </div>
+              </span>
+            </h1>
+            <p className="mx-auto max-w-xl text-sm text-[var(--hb-muted)]">
+              Διαχειρίσου τις πληροφορίες, τα hobbies και τις ρυθμίσεις απορρήτου του λογαριασμού σου.
+            </p>
+          </section>
 
           {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
           <form id="edit-profile-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
-            <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-[var(--hb-headline)]">Προσωπικές Πληροφορίες</CardTitle>
+            <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <CardHeader className="border-b border-[var(--hb-border)] bg-[var(--hb-card)]/50">
+                <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
+                  Βασικά Στοιχεία
+                </p>
+                <CardTitle className="text-lg text-[var(--hb-headline)]">Προσωπικές Πληροφορίες</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
@@ -943,9 +955,12 @@ export default function EditProfilePage() {
             </Card>
 
             {/* Categories selection */}
-            <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-[var(--hb-headline)]">Κατηγορίες χόμπι</CardTitle>
+            <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <CardHeader className="border-b border-[var(--hb-border)] bg-[var(--hb-card)]/50">
+                <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
+                  Τα Hobbies μου
+                </p>
+                <CardTitle className="text-lg text-[var(--hb-headline)]">Κατηγορίες χόμπι</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-[var(--hb-muted)]">
@@ -987,9 +1002,12 @@ export default function EditProfilePage() {
 
             {/* Gaming Information */}
             {(formData.categories as string[] | undefined)?.includes('gaming') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Gaming Πληροφορίες</CardTitle>
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+                <CardHeader className="border-b border-[var(--hb-border)] bg-[var(--hb-card)]/50">
+                  <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
+                    Gaming
+                  </p>
+                  <CardTitle className="text-lg text-[var(--hb-headline)]">Gaming Πληροφορίες</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
@@ -1075,7 +1093,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Gaming Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1088,7 +1106,7 @@ export default function EditProfilePage() {
 
             {/* Coding Information */}
             {(formData.categories as string[] | undefined)?.includes('coding') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Coding Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1194,7 +1212,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Coding Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1207,7 +1225,7 @@ export default function EditProfilePage() {
 
             {/* Pet Information */}
             {(formData.categories as string[] | undefined)?.includes('pet') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Pet Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1261,7 +1279,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Pet Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1274,7 +1292,7 @@ export default function EditProfilePage() {
 
             {/* Vape Information */}
             {(formData.categories as string[] | undefined)?.includes('vape') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Vape Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1357,7 +1375,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Vape Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1370,7 +1388,7 @@ export default function EditProfilePage() {
 
             {/* TV Series Information */}
             {(formData.categories as string[] | undefined)?.includes('tv') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">TV Series Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1501,7 +1519,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">TV Series Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1514,7 +1532,7 @@ export default function EditProfilePage() {
 
             {/* Movies Information */}
             {(formData.categories as string[] | undefined)?.includes('movies') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Movies Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1657,7 +1675,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Movies Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1670,7 +1688,7 @@ export default function EditProfilePage() {
 
             {/* Books Information */}
             {(formData.categories as string[] | undefined)?.includes('books') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Books Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1766,7 +1784,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Books Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1779,7 +1797,7 @@ export default function EditProfilePage() {
 
             {/* Anime Information */}
             {(formData.categories as string[] | undefined)?.includes('anime') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Anime Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1919,7 +1937,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Anime Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -1932,7 +1950,7 @@ export default function EditProfilePage() {
 
             {/* Manga Information */}
             {(formData.categories as string[] | undefined)?.includes('manga') ? (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Manga Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -2028,7 +2046,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Manga Πληροφορίες</CardTitle>
                 </CardHeader>
@@ -2161,6 +2179,6 @@ export default function EditProfilePage() {
           </Button>
         </div>
       )}
-    </PageWrapper>
+    </div>
   );
 }
