@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Book,
   Search,
-  Mail,
   Star,
   User,
   LogIn,
@@ -24,7 +23,6 @@ import {
   Code,
   PawPrint,
   Cloud,
-  MessageSquare,
   FileText,
   ChevronDown,
   ChevronRight,
@@ -47,7 +45,6 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/pages/about', label: 'Σχετικά', icon: <Book size={18} /> },
-  { href: '/pages/contact', label: 'Επικοινωνία', icon: <Mail size={18} /> },
   { href: '/pages/scraper', label: 'Scraper', icon: <Search size={18} />, devOnly: true },
 ];
 
@@ -155,7 +152,6 @@ const HOBBY_ITEMS: NavItem[] = [
         label: 'Weird Cases',
         icon: <Sparkles size={16} />,
       },
-      { href: '/pages/contact', label: 'Help / Συζητήσεις', icon: <MessageSquare size={16} /> },
     ],
   },
   {

@@ -7,7 +7,7 @@ const NAV_LINKS = [
   { label: 'Σχετικά', href: '/pages/about' },
   { label: 'Χόμπι', href: '/pages/hobbies' },
   { label: 'Άρθρα', href: '/pages/news' },
-  { label: 'Επικοινωνία', href: '/pages/contact' },
+  { label: 'Επικοινωνία', href: '#' },
 ];
 
 const LEGAL_LINKS = [

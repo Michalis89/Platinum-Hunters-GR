@@ -1,11 +1,3 @@
-/**
- * Supabase Client for Browser
- * PH-30: User Authentication System
- *
- * This client is used in client components (browser)
- * For server-side, use supabase-server.ts
- */
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/database.types';
 
@@ -79,8 +71,6 @@ export async function signOut() {
 /**
  * Subscribe to auth state changes
  */
-export function onAuthStateChange(
-  callback: (event: string, session: unknown) => void,
-) {
+export function onAuthStateChange(callback: (event: string, session: unknown) => void) {
   return supabase.auth.onAuthStateChange(callback);
 }

@@ -34,9 +34,7 @@ const mapLocalItem = (item: Record<string, unknown>) => {
     (item.title_native as string | undefined) ||
     'Untitled';
   const subtitle =
-    (item.title_romaji as string | undefined) ||
-    (item.title_english as string | undefined) ||
-    '';
+    (item.title_romaji as string | undefined) || (item.title_english as string | undefined) || '';
   const malId = item.mal_id as number | undefined;
   return {
     source: 'local',
@@ -167,16 +165,17 @@ export async function GET(req: Request) {
       .from('media_items')
       .select('*')
       .eq('category', category)
-      .or(
-        `title_english.ilike.%${q}%,title_romaji.ilike.%${q}%,title_native.ilike.%${q}%`,
-      )
+      .or(`title_english.ilike.%${q}%,title_romaji.ilike.%${q}%,title_native.ilike.%${q}%`)
       .limit(12);
 
     if (localError) {
       console.warn('Local media search error:', localError);
     }
 
-    const typedLocalItems = localItems as Array<{ mal_id?: number | null; [key: string]: unknown }> | null;
+    const typedLocalItems = localItems as Array<{
+      mal_id?: number | null;
+      [key: string]: unknown;
+    }> | null;
     const localResults = (typedLocalItems ?? []).map(mapLocalItem);
     const remaining = Math.max(12 - localResults.length, 0);
     const localIds = new Set(

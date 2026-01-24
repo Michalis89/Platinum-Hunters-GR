@@ -13,14 +13,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/pages/reviews',
     '/pages/backlog',
     '/pages/guides',
-    '/pages/contact',
     '/pages/terms',
     '/pages/privacy',
   ];
 
   const categoryRoutes = new Set<string>();
 
-  HOBBY_CATEGORIES.forEach((category) => {
+  HOBBY_CATEGORIES.forEach(category => {
     categoryRoutes.add(category.routes.news);
     categoryRoutes.add(category.routes.reviews);
     categoryRoutes.add(category.routes.backlog);
@@ -28,7 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const now = new Date();
 
-  return [...staticRoutes, ...categoryRoutes].map((route) => ({
+  return [...staticRoutes, ...categoryRoutes].map(route => ({
     url: toUrl(route),
     lastModified: now,
   }));

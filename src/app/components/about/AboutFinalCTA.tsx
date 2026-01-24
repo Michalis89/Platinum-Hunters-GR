@@ -25,7 +25,7 @@ export function AboutFinalCTA() {
           </Link>
 
           <Link
-            href="/pages/contact"
+            href="#"
             className="hover:border-[var(--hb-primary-strong)]/60 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-8 py-3.5 text-base font-semibold text-[var(--hb-text)] transition hover:text-[var(--hb-headline)]"
           >
             <Mail className="h-4 w-4" />
