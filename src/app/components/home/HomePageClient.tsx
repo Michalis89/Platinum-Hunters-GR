@@ -7,6 +7,7 @@ import { selectIsAuthenticated, selectUser, setUser } from '@/store/slices/authS
 import type { AppDispatch } from '@/store/store';
 import { supabase } from '@/lib/supabase-client';
 import VersionBadge from '@/app/components/ui/VersionBadge';
+import { PageContainer } from '@/app/components/layout';
 
 // Guest components
 import {
@@ -26,10 +27,14 @@ import {
   HomeContinue,
 } from '@/app/components/home';
 
-import { Footer } from '@/app/components/layout/Footer';
-
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+/**
+ * HomePageClient - Main home page with guest/authenticated views.
+ *
+ * Note: Background gradient and Footer are now provided by AppShell.
+ * This component only needs to render its content.
+ */
 export default function HomePageClient() {
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -66,27 +71,18 @@ export default function HomePageClient() {
   }, [isAuthenticated, dispatch]);
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      {/* Background gradient */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
-      </div>
-
-      {/* Content */}
-      <div className="relative">
-        {isAuthenticated ? (
-          <DashboardView
-            username={user?.username ?? 'Χρήστη'}
-            displayName={user?.display_name}
-            analytics={analytics}
-          />
-        ) : (
-          <GuestView />
-        )}
-      </div>
-
+    <>
+      {isAuthenticated ? (
+        <DashboardView
+          username={user?.username ?? 'Χρήστη'}
+          displayName={user?.display_name}
+          analytics={analytics}
+        />
+      ) : (
+        <GuestView />
+      )}
       <VersionBadge />
-    </div>
+    </>
   );
 }
 
@@ -96,19 +92,17 @@ function GuestView() {
     <>
       <HomeHero />
 
-      <div className="mx-auto max-w-7xl">
+      <PageContainer size="xl">
         <HomeFeatures />
-      </div>
+      </PageContainer>
 
       <HomeHowItWorks />
 
-      <div className="mx-auto max-w-7xl">
+      <PageContainer size="xl">
         <HomeRoadmapPreview />
-      </div>
+      </PageContainer>
 
       <HomeFinalCTA />
-
-      <Footer />
     </>
   );
 }

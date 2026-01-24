@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import LoginForm from '@/app/components/auth/LoginForm';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
-import { Footer } from '@/app/components/layout/Footer';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
@@ -67,8 +66,6 @@ export default function LoginPage() {
           </div>
         </div>
       </PageWrapper>
-
-      <Footer />
     </div>
   );
 }

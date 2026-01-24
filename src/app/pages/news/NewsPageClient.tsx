@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FileText, Clock, Eye, Heart, Calendar, User, Tag, Loader2 } from 'lucide-react';
 import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
-import { Footer } from '@/app/components/layout/Footer';
+import { PageContainer } from '@/app/components/layout';
 import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/pages/news/constants';
 
 interface ArticleWithAuthor extends ArticleRow {
@@ -211,13 +211,7 @@ function NewsPageContent() {
     : 'Άρθρα και ιστορίες από όλα τα χόμπι, σε καθαρή ροή.';
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] px-4 py-16 text-[var(--hb-text)]">
-      {/* Ambient glows */}
-      <div className="pointer-events-none absolute inset-0 opacity-80 blur-[90px]">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)]" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-7xl">
+    <PageContainer size="xl" className="py-12">
         {/* Hero */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -317,9 +311,6 @@ function NewsPageContent() {
             ))}
           </motion.div>
         )}
-      </div>
-
-      <Footer />
-    </div>
+    </PageContainer>
   );
 }

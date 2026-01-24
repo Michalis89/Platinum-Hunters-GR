@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Gamepad2, Heart } from 'lucide-react';
+import { PageContainer } from './PageContainer';
 
 const NAV_LINKS = [
   { label: 'Αρχική', href: '/' },
@@ -19,12 +20,10 @@ export function Footer() {
 
   return (
     <footer className="relative mt-auto border-t border-[var(--hb-border)] bg-[var(--hb-bg)]">
-      {/* Subtle gradient overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--hb-primary-strong)]/[0.02] to-transparent" />
+      <div className="from-[var(--hb-primary-strong)]/[0.02] pointer-events-none absolute inset-0 bg-gradient-to-t to-transparent" />
 
-      <div className="relative mx-auto max-w-6xl px-4 py-12 md:px-6">
+      <PageContainer size="lg" className="relative py-12">
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
-          {/* Brand Column */}
           <div className="space-y-4">
             <Link href="/" className="group inline-flex items-center gap-2.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-lg transition group-hover:shadow-[0_8px_25px_rgba(229,9,20,0.4)]">
@@ -41,13 +40,12 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Navigation Column */}
           <div>
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
               Πλοήγηση
             </h4>
             <ul className="space-y-2.5">
-              {NAV_LINKS.map((link) => (
+              {NAV_LINKS.map(link => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -60,13 +58,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal Column */}
           <div>
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
               Νομικά
             </h4>
             <ul className="space-y-2.5">
-              {LEGAL_LINKS.map((link) => (
+              {LEGAL_LINKS.map(link => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -80,12 +77,11 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[var(--hb-border)] pt-6 text-xs text-[var(--hb-muted)] sm:flex-row">
           <p>&copy; {currentYear} Χομπίστας. Με επιφύλαξη παντός δικαιώματος.</p>
           <p>Δεν είμαστε συνδεδεμένοι με Sony Interactive Entertainment ή άλλες εταιρείες.</p>
         </div>
-      </div>
+      </PageContainer>
     </footer>
   );
 }

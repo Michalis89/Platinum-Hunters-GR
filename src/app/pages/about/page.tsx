@@ -11,7 +11,6 @@ import {
   AboutFinalCTA,
   type TeamMember,
 } from '@/app/components/about';
-import { Footer } from '@/app/components/layout/Footer';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
@@ -19,8 +18,7 @@ import { SITE_URL } from '@/config/site';
 
 export const metadata = buildMetadata({
   title: 'Σχετικά με τον Χομπίστα | Χομπίστας',
-  description:
-    'Μάθε ποιοι είμαστε, πώς δουλεύουμε και γιατί ο Χομπίστας φτιάχτηκε για κάθε χόμπι.',
+  description: 'Μάθε ποιοι είμαστε, πώς δουλεύουμε και γιατί ο Χομπίστας φτιάχτηκε για κάθε χόμπι.',
   path: '/pages/about',
 });
 
@@ -85,8 +83,6 @@ export default async function AboutPage() {
           <AboutFAQ />
 
           <AboutFinalCTA />
-
-          <Footer />
         </div>
       </div>
     </>

@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import RegisterForm from '@/app/components/auth/RegisterForm';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
-import { Footer } from '@/app/components/layout/Footer';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
@@ -24,7 +23,7 @@ export default function RegisterPage() {
           <div className="relative grid items-center gap-12 md:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-6">
               <div className="space-y-4">
-                <h1 className="text-4xl font-black leading-tight bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-transparent md:text-5xl">
+                <h1 className="bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-4xl font-black leading-tight text-transparent md:text-5xl">
                   Φτιάξε το προφίλ σου στον Χομπίστα
                 </h1>
                 <p className="max-w-xl text-lg text-[var(--hb-muted)]">
@@ -76,8 +75,6 @@ export default function RegisterPage() {
           </div>
         </div>
       </PageWrapper>
-
-      <Footer />
     </div>
   );
 }

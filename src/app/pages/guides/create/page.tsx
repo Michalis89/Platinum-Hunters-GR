@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
@@ -45,17 +45,6 @@ export default function GuideCreatePage() {
   const RAWG_API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY!;
 
   const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
-
-  const guideContentRich = useMemo(
-    () =>
-      introHtml
-        ? {
-            type: 'doc',
-            content: [{ type: 'paragraph', text: stripHtml(introHtml) }],
-          }
-        : null,
-    [introHtml],
-  );
 
   const stepRich = (text: string) =>
     text
@@ -139,9 +128,7 @@ export default function GuideCreatePage() {
     try {
       const cleanedIntroHtml = introHtml.trim();
       const sanitizedIntroHtml = sanitizeHtmlContent(cleanedIntroHtml).trim();
-      const sanitizedStepsHtml = steps.map((html) =>
-        sanitizeHtmlContent((html || '').trim()).trim(),
-      );
+      const sanitizedStepsHtml = steps.map(html => sanitizeHtmlContent((html || '').trim()).trim());
       const hasSanitizedChanges =
         sanitizedIntroHtml !== cleanedIntroHtml ||
         sanitizedStepsHtml.some((html, idx) => html !== (steps[idx] || '').trim());
@@ -261,9 +248,7 @@ export default function GuideCreatePage() {
                     error={hasTitleHtml}
                   />
                   {hasTitleHtml && (
-                    <p className="text-xs text-red-400">
-                      Ο τίτλος δεν πρέπει να περιέχει HTML.
-                    </p>
+                    <p className="text-xs text-red-400">Ο τίτλος δεν πρέπει να περιέχει HTML.</p>
                   )}
 
                   <Input
@@ -397,7 +382,7 @@ export default function GuideCreatePage() {
                       variant="secondary"
                       type="button"
                       disabled={submitting || hasTitleHtml}
-                      className="border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]"
+                      className="hover:border-[var(--hb-primary-strong)]/70 border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] transition hover:text-[var(--hb-headline)]"
                     >
                       💾 Αποθήκευση ως Draft
                     </Button>

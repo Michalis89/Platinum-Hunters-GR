@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
@@ -33,17 +33,6 @@ export default function EditGuide() {
   const [warning, setWarning] = useState<string | null>(null);
 
   const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
-
-  const guideContentRich = useMemo(
-    () =>
-      introHtml
-        ? {
-            type: 'doc',
-            content: [{ type: 'paragraph', text: stripHtml(introHtml) }],
-          }
-        : null,
-    [introHtml],
-  );
 
   useEffect(() => {
     const fetchGuide = async () => {
@@ -115,7 +104,7 @@ export default function EditGuide() {
 
     const cleanedIntroHtml = introHtml.trim();
     const sanitizedIntroHtml = sanitizeHtmlContent(cleanedIntroHtml).trim();
-    const sanitizedStepsHtml = stepsHtml.map((html) =>
+    const sanitizedStepsHtml = stepsHtml.map(html =>
       sanitizeHtmlContent((html || '').trim()).trim(),
     );
     const hasSanitizedChanges =
@@ -341,11 +330,7 @@ export default function EditGuide() {
               </Card>
 
               <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="primary"
-                  onClick={handleSave}
-                  disabled={saving || hasTitleHtml}
-                >
+                <Button variant="primary" onClick={handleSave} disabled={saving || hasTitleHtml}>
                   {saving ? '💾 Αποθήκευση...' : '💾 Αποθήκευση'}
                 </Button>
                 <Button variant="outline" onClick={() => router.back()}>
