@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Input } from '../../components/ui/Input';
-import { Card } from '../../components/ui/Card';
+import { Input } from '@/app/components/ui/Input';
+import { Card } from '@/app/components/ui/Card';
 import { ScrapedGameData } from '@/types/interfaces';
-import AlertMessage from '../../components/ui/AlertMessage';
+import AlertMessage from '@/app/components/ui/AlertMessage';
 import Button from '@/app/components/ui/Button';
 import Image from 'next/image';
 

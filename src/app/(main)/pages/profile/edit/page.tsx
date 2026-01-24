@@ -692,7 +692,7 @@ export default function EditProfilePage() {
   return (
     <PageWrapper>
       <div className="min-h-screen bg-[var(--hb-bg)] py-10 text-[var(--hb-text)]">
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
           {/* Top bar */}
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div>

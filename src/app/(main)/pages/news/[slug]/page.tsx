@@ -13,7 +13,7 @@ import {
   getBreadcrumbStructuredData,
 } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
-import { CATEGORY_LABELS, TOPIC_LABELS } from '@/app/pages/news/constants';
+import { CATEGORY_LABELS, TOPIC_LABELS } from '@/app/(main)/pages/news/constants';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 
 interface ArticleWithAuthor extends ArticleRow {

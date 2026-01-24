@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import NewsPageClient from '@/app/pages/news/NewsPageClient';
+import NewsPageClient from '@/app/(main)/pages/news/NewsPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import {
   CATEGORY_LABELS,
   CATEGORY_SUBTITLES,
   TOPIC_LABELS,
-} from '@/app/pages/news/constants';
+} from '@/app/(main)/pages/news/constants';
 import type { ArticleCategory } from '@/types/database';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';

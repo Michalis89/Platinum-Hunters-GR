@@ -5,7 +5,6 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import ScrollToTop from '@/utils/ScrollToTop';
 import StructuredData from '@/utils/seo/StructuredData';
 import AuthInit from './components/AuthInit';
-import AppShell from './components/AppShell';
 
 import { organizationStructuredData, websiteStructuredData } from '@/utils/seo/metadata/structuredData';
 import Providers from '@/store/Providers';
@@ -37,7 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <AuthInit />
           <HeartbeatPing />
           <ScrollToTop />
-          <AppShell>{children}</AppShell>
+          {children}
           <Analytics />
           <SpeedInsights />
         </Providers>

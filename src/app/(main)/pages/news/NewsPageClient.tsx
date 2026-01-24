@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { FileText, Clock, Eye, Heart, Calendar, User, Tag, Loader2 } from 'lucide-react';
 import type { ArticleRow, ArticleCategory, ArticleTopic } from '@/types/database';
 import { PageContainer, PageHeader } from '@/app/components/layout';
-import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/pages/news/constants';
+import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
 
 interface ArticleWithAuthor extends ArticleRow {

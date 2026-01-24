@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import BacklogPageClient from '@/app/pages/backlog/BacklogPageClient';
+import BacklogPageClient from '@/app/(main)/pages/backlog/BacklogPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { getCategoryBySlug } from '@/config/hobbies';
 import StructuredData from '@/utils/seo/StructuredData';

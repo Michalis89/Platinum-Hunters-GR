@@ -1,4 +1,4 @@
-import HobbiesPageClient from '@/app/pages/hobbies/HobbiesPageClient';
+import HobbiesPageClient from '@/app/(main)/pages/hobbies/HobbiesPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
