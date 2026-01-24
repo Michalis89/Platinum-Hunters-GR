@@ -3,24 +3,7 @@ import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 import { normalizeSlug } from '@/utils/slugify';
-
-async function insertActivity(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-  type: string,
-  payload: Record<string, unknown>,
-) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('activity_log') as any).insert({
-      user_id: userId,
-      type,
-      payload,
-    });
-  } catch (err) {
-    console.warn(`Activity insert (${type}) failed:`, err);
-  }
-}
+import { insertActivity } from '@/lib/services/activityService';
 
 // GET - Fetch articles with filtering
 export async function GET(req: Request) {
