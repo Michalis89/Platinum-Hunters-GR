@@ -7,6 +7,7 @@ import { getArticlesWithFilters } from '@/lib/supabase/queries';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 // GET - Fetch articles with filtering
 export async function GET(req: Request) {
@@ -162,6 +163,9 @@ export async function POST(req: Request) {
       display_name: userData.display_name,
       avatar_url: userData.avatar_url,
     });
+
+    // Revalidate article caches
+    revalidateCache.article(article.id);
 
     return ok({ message: 'Article created successfully', article }, { status: 201 });
   } catch (error) {

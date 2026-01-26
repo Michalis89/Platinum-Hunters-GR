@@ -11,3 +11,4 @@ export { HomeStatsRow } from './HomeStatsRow';
 export { HomeQuickActions } from './HomeQuickActions';
 export { HomeRecentActivity } from './HomeRecentActivity';
 export { HomeContinue } from './HomeContinue';
+export { HomeSuggestions } from './HomeSuggestions';

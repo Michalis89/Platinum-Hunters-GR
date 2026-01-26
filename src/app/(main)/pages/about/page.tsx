@@ -10,6 +10,7 @@ import {
   AboutFAQ,
   AboutFinalCTA,
   type TeamMember,
+  type AboutStatsProps,
 } from '@/app/components/about';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
@@ -42,8 +43,60 @@ async function getTeam(): Promise<TeamMember[]> {
   }
 }
 
+async function getStats(): Promise<AboutStatsProps> {
+  try {
+    const supabase = getSupabaseServer();
+    const [
+      { count: totalUsers },
+      { count: totalGuides },
+      { count: totalGames },
+      { count: totalAnime },
+      { count: totalManga },
+      { count: totalMovies },
+      { count: totalTv },
+      { count: totalBooks },
+      { count: totalArticles },
+    ] = await Promise.all([
+      supabase.from('users').select('id', { count: 'exact', head: true }),
+      supabase.from('guides').select('id', { count: 'exact', head: true }),
+      supabase.from('games').select('id', { count: 'exact', head: true }),
+      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'anime'),
+      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'manga'),
+      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'movies'),
+      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'tv'),
+      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'books'),
+      supabase.from('articles').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    ]);
+
+    return {
+      totalUsers: totalUsers ?? 0,
+      totalGuides: totalGuides ?? 0,
+      totalGames: totalGames ?? 0,
+      totalAnime: totalAnime ?? 0,
+      totalManga: totalManga ?? 0,
+      totalMovies: totalMovies ?? 0,
+      totalTv: totalTv ?? 0,
+      totalBooks: totalBooks ?? 0,
+      totalArticles: totalArticles ?? 0,
+    };
+  } catch (err) {
+    console.error('Failed to load stats', err);
+    return {
+      totalUsers: 0,
+      totalGuides: 0,
+      totalGames: 0,
+      totalAnime: 0,
+      totalManga: 0,
+      totalMovies: 0,
+      totalTv: 0,
+      totalBooks: 0,
+      totalArticles: 0,
+    };
+  }
+}
+
 export default async function AboutPage() {
-  const team = await getTeam();
+  const [team, stats] = await Promise.all([getTeam(), getStats()]);
   const breadcrumb = [
     { name: 'Αρχική', url: `${SITE_URL}/` },
     { name: 'Σχετικά', url: `${SITE_URL}/pages/about` },
@@ -72,7 +125,7 @@ export default async function AboutPage() {
             <AboutPhilosophy />
           </div>
 
-          <AboutStats />
+          <AboutStats {...stats} />
 
           <div className="mx-auto max-w-7xl">
             <AboutRoadmap />

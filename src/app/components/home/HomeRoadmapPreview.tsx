@@ -11,20 +11,20 @@ type RoadmapItem = {
 
 const roadmapItems: RoadmapItem[] = [
   {
-    title: 'Mobile App',
-    description: 'Native εφαρμογή για iOS και Android με offline mode.',
-    status: 'planned',
-    icon: <Smartphone className="h-5 w-5" />,
-  },
-  {
     title: 'API Integrations',
-    description: 'Sync με IGDB, TMDB, MyAnimeList για αυτόματα metadata.',
+    description: 'Σύνδεση με RAWG, TMDB, Jikan για αυτόματα metadata.',
     status: 'in-progress',
     icon: <Plug className="h-5 w-5" />,
   },
   {
-    title: 'Social Features',
-    description: 'Προαιρετικό sharing, recommendations, friend lists.',
+    title: 'Cross-Hobby Stats',
+    description: 'Ενιαία στατιστικά για όλα τα hobbies σου.',
+    status: 'in-progress',
+    icon: <Smartphone className="h-5 w-5" />,
+  },
+  {
+    title: 'Import/Export',
+    description: 'Εισαγωγή από Letterboxd, MAL, Goodreads.',
     status: 'planned',
     icon: <Users className="h-5 w-5" />,
   },

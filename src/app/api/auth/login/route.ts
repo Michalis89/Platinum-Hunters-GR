@@ -9,8 +9,21 @@ import { validateEmail, validatePassword } from '@/utils/validation/auth';
 import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
+import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
+  // Rate limiting: 5 login attempts per 15 minutes per IP
+  const clientIp = getClientIp(req);
+  const rateLimitResult = rateLimit(`login:${clientIp}`, RATE_LIMITS.login);
+
+  if (!rateLimitResult.success) {
+    return fail(
+      { error: 'Πολλές προσπάθειες σύνδεσης. Δοκιμάστε ξανά αργότερα.' },
+      429,
+      { headers: rateLimitHeaders(rateLimitResult) },
+    );
+  }
+
   try {
     const body = await req.json();
     const { identifier, password } = body; // Accept email OR username

@@ -10,46 +10,46 @@ type RoadmapItem = {
 
 const roadmapItems: RoadmapItem[] = [
   {
-    title: 'Mobile App',
-    description:
-      'Native εφαρμογή για iOS και Android. Quick add, notifications, offline mode.',
-    status: 'planned',
-    icon: <Smartphone className="h-5 w-5" />,
-  },
-  {
-    title: 'Social Features',
-    description:
-      'Προαιρετικό sharing. Δες τι παίζουν οι φίλοι σου, recommendations, lists.',
-    status: 'planned',
-    icon: <Users className="h-5 w-5" />,
-  },
-  {
     title: 'API Integrations',
     description:
-      'Sync με IGDB, TMDB, MyAnimeList. Αυτόματη ενημέρωση metadata και covers.',
+      'Σύνδεση με RAWG, TMDB, Jikan για αυτόματα metadata, covers και πληροφορίες.',
     status: 'in-progress',
     icon: <Plug className="h-5 w-5" />,
   },
   {
-    title: 'Multilingual',
+    title: 'Cross-Hobby Stats',
     description:
-      'Πλήρης υποστήριξη για αγγλικά, με δυνατότητα επιλογής γλώσσας.',
+      'Ενιαία στατιστικά για όλα τα hobbies. Πόσες ώρες συνολικά, τι ολοκλήρωσες τον μήνα.',
+    status: 'in-progress',
+    icon: <Rocket className="h-5 w-5" />,
+  },
+  {
+    title: 'Import/Export',
+    description:
+      'Εισαγωγή δεδομένων από Letterboxd, MAL, Goodreads. Εξαγωγή σε CSV/JSON.',
     status: 'planned',
     icon: <Globe className="h-5 w-5" />,
   },
   {
-    title: 'Custom Themes',
+    title: 'Mobile Responsive',
     description:
-      'Επέλεξε χρώματα, dark/light mode, custom accents για το profile σου.',
+      'Βελτιστοποίηση για κινητά. Γρήγορη προσθήκη και ενημέρωση on-the-go.',
     status: 'planned',
-    icon: <Palette className="h-5 w-5" />,
+    icon: <Smartphone className="h-5 w-5" />,
   },
   {
-    title: 'Public Profiles',
+    title: 'Προαιρετικό Sharing',
     description:
-      'Προαιρετική δημοσιοποίηση του backlog σου. Share achievements και stats.',
+      'Δημόσιο profile αν θέλεις. Μοιράσου τι παρακολουθείς με φίλους.',
     status: 'planned',
-    icon: <Rocket className="h-5 w-5" />,
+    icon: <Users className="h-5 w-5" />,
+  },
+  {
+    title: 'Light Mode',
+    description:
+      'Επιλογή φωτεινού theme για όσους προτιμούν light interfaces.',
+    status: 'planned',
+    icon: <Palette className="h-5 w-5" />,
   },
 ];
 

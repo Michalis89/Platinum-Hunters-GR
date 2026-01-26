@@ -16,8 +16,21 @@ import {
 } from '@/utils/validation/auth';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
+import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
+  // Rate limiting: 3 registration attempts per hour per IP
+  const clientIp = getClientIp(req);
+  const rateLimitResult = rateLimit(`register:${clientIp}`, RATE_LIMITS.register);
+
+  if (!rateLimitResult.success) {
+    return fail(
+      { error: 'Πολλές προσπάθειες εγγραφής. Δοκιμάστε ξανά αργότερα.' },
+      429,
+      { headers: rateLimitHeaders(rateLimitResult) },
+    );
+  }
+
   try {
     const body = await req.json();
     const {

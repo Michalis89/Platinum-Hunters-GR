@@ -163,7 +163,7 @@ export default function CategoryLibrary({
         ? '/api/movies'
         : category === 'books'
           ? '/api/books'
-        : null;
+          : null;
   const progressLabel =
     category === 'manga'
       ? 'Vol'

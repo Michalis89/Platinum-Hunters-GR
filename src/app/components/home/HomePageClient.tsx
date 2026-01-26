@@ -25,6 +25,7 @@ import {
   HomeQuickActions,
   HomeRecentActivity,
   HomeContinue,
+  HomeSuggestions,
 } from '@/app/components/home';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -40,10 +41,14 @@ export default function HomePageClient() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
 
-  const { data: analytics } = useSWR('/api/analytics/summary', fetcher, {
-    refreshInterval: 120000,
-    revalidateOnFocus: false,
-  });
+  const { data: personalStats } = useSWR(
+    isAuthenticated ? '/api/user/stats' : null,
+    fetcher,
+    {
+      refreshInterval: 120000,
+      revalidateOnFocus: false,
+    }
+  );
 
   // Heartbeat for authenticated users
   useEffect(() => {
@@ -76,7 +81,7 @@ export default function HomePageClient() {
         <DashboardView
           username={user?.username ?? 'Χρήστη'}
           displayName={user?.display_name}
-          analytics={analytics}
+          stats={personalStats?.data}
         />
       ) : (
         <GuestView />
@@ -108,32 +113,52 @@ function GuestView() {
 }
 
 // Logged-in dashboard
+type CategoryStats = {
+  total: number;
+  in_progress: number;
+  completed: number;
+  hours: number;
+};
+
+type PersonalStats = {
+  total_backlog: number;
+  in_progress: number;
+  completed: number;
+  total_hours: number;
+  games: CategoryStats;
+  anime: CategoryStats;
+  manga: CategoryStats & { chapters: number };
+  movies: CategoryStats;
+  tv: CategoryStats;
+  books: CategoryStats & { pages: number };
+  active_categories: string[];
+};
+
 type DashboardViewProps = {
   username: string;
   displayName?: string | null;
-  analytics?: {
-    total_users?: number;
-    active_users_now?: number;
-    total_guides?: number;
-    total_games?: number;
-  };
+  stats?: PersonalStats;
 };
 
-function DashboardView({ username, displayName, analytics }: DashboardViewProps) {
+function DashboardView({ username, displayName, stats }: DashboardViewProps) {
+  // Filter to media categories only (not games) for suggestions
+  const mediaCategories = (stats?.active_categories ?? []).filter(
+    (cat) => ['anime', 'manga', 'movies', 'tv', 'books'].includes(cat)
+  );
+
   return (
     <div className="pb-16">
       <HomeDashboardHeader username={username} displayName={displayName} />
 
-      <HomeStatsRow
-        totalUsers={analytics?.total_users ?? '–'}
-        activeNow={analytics?.active_users_now ?? '–'}
-        totalGuides={analytics?.total_guides ?? '–'}
-        totalGames={analytics?.total_games ?? '–'}
-      />
+      <HomeStatsRow stats={stats} />
 
       <HomeQuickActions />
 
       <HomeContinue />
+
+      {mediaCategories.length > 0 && (
+        <HomeSuggestions activeCategories={mediaCategories} />
+      )}
 
       <HomeRecentActivity scope="global" />
     </div>

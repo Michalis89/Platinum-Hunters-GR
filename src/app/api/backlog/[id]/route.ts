@@ -11,6 +11,7 @@ import { insertActivity } from '@/lib/services/activityService';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 /**
  * PATCH - Update priority and/or notes for backlog item
@@ -235,6 +236,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       });
     }
 
+    // Revalidate user backlog cache
+    revalidateCache.userBacklog(userId);
+
     return ok(transformedItem);
   } catch (error) {
     console.error('Backlog update error:', error);
@@ -286,6 +290,9 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       console.error('User game delete error:', deleteError);
       return fail({ error: 'Σφάλμα διαγραφής παιχνιδιού' }, 500);
     }
+
+    // Revalidate user backlog cache
+    revalidateCache.userBacklog(userId);
 
     return ok({ message: 'Το παιχνίδι αφαιρέθηκε από τη συλλογή σου' });
   } catch (error) {

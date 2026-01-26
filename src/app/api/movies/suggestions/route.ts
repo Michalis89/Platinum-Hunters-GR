@@ -160,6 +160,19 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
     }
 
+    const userId = session.user.id;
+
+    // Get user's existing media IDs to exclude from suggestions
+    const { data: userEntries } = await supabase
+      .from('user_media_entries')
+      .select('media_id, media_items!inner(category)')
+      .eq('user_id', userId)
+      .eq('media_items.category', category);
+
+    const userMediaIds = new Set(
+      (userEntries ?? []).map((e: { media_id: number }) => e.media_id)
+    );
+
     const { data, error } = await supabase
       .from('user_media_entries')
       .select(
@@ -200,6 +213,8 @@ export async function GET(req: Request) {
     const minimumVotes = 5;
 
     const suggestions = Array.from(buckets.values())
+      // Filter out items the user already has
+      .filter(item => !userMediaIds.has(item.media.id))
       .map(item => ({
         average: item.sum / item.count,
         weighted:
@@ -217,8 +232,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ items: suggestions });
     }
 
-    const popular = await fetchPopular(category, 4);
-    return NextResponse.json({ items: popular.map(item => mapPopularItem(item, category)) });
+    // Fallback to popular items, also excluding user's existing items
+    const popular = await fetchPopular(category, 8);
+    const filteredPopular = popular
+      .filter(item => !userMediaIds.has(item.id))
+      .slice(0, 4);
+    return NextResponse.json({ items: filteredPopular.map(item => mapPopularItem(item, category)) });
   } catch (error) {
     console.error('Suggestions fetch error:', error);
     return NextResponse.json({ items: [] }, { status: 500 });

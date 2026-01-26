@@ -3,6 +3,7 @@ import { insertActivity } from '@/lib/services/activityService';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 // GET - Fetch comments for an article
 export async function GET(
@@ -104,6 +105,9 @@ export async function POST(
       avatar_url: userData?.avatar_url,
     });
 
+    // Revalidate comment caches
+    revalidateCache.articleComment(article.id);
+
     return ok({ message: 'Το σχόλιο προστέθηκε επιτυχώς', comment });
   } catch (error) {
     console.error('Error adding comment:', error);
@@ -162,6 +166,9 @@ export async function DELETE(req: Request) {
       console.error('Error deleting comment:', deleteError);
       return fail({ error: 'Αποτυχία διαγραφής σχολίου' }, 500);
     }
+
+    // Revalidate comment caches
+    revalidateCache.articleComment(comment.article_id);
 
     return ok({ message: 'Το σχόλιο διαγράφηκε επιτυχώς' });
   } catch (error) {

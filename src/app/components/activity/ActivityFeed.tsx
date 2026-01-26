@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Pencil,
   Trash2,
+  Star,
 } from 'lucide-react';
 import { normalizeSlug } from '@/utils/slugify';
 import EmptyState from '@/app/components/ui/EmptyState';
@@ -142,21 +143,25 @@ function renderText(item: ActivityItem) {
     const action = p.favoriteAction === 'removed' ? 'αφαίρεσε από favorites' : 'έκανε favorite';
     return `${name} ${action} ${cat.article} ${cat.label}: ${mediaTitle}`;
   }
-  // Article activities
+  // Article/Review activities - check topic to distinguish
+  const isReview = p.topic === 'reviews';
+  const contentType = isReview ? 'το review' : 'άρθρο';
+  const contentTitle = p.articleTitle || (isReview ? 'review' : 'άρθρο');
+
   if (item.type === 'article_created') {
-    return `${name} δημοσίευσε άρθρο: ${p.articleTitle || 'άρθρο'}`;
+    return `${name} δημοσίευσε ${contentType}: ${contentTitle}`;
   }
   if (item.type === 'article_updated') {
-    return `${name} ενημέρωσε άρθρο: ${p.articleTitle || 'άρθρο'}`;
+    return `${name} ενημέρωσε ${contentType}: ${contentTitle}`;
   }
   if (item.type === 'article_deleted') {
-    return `${name} διέγραψε άρθρο: ${p.articleTitle || 'άρθρο'}`;
+    return `${name} διέγραψε ${contentType}: ${contentTitle}`;
   }
   if (item.type === 'article_liked') {
-    return `${name} έκανε like στο: ${p.articleTitle || 'άρθρο'}`;
+    return `${name} έκανε like στο: ${contentTitle}`;
   }
   if (item.type === 'article_comment') {
-    return `${name} σχολίασε στο: ${p.articleTitle || 'άρθρο'}`;
+    return `${name} σχολίασε στο: ${contentTitle}`;
   }
   return `${name} έκανε μια ενέργεια`;
 }
@@ -178,9 +183,18 @@ function iconFor(item: ActivityItem) {
   if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-sky-300" />;
   if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-300" />;
   if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-300" />;
-  // Article icons
-  if (item.type === 'article_created') return <FileText className="h-4 w-4 text-emerald-300" />;
-  if (item.type === 'article_updated') return <Pencil className="h-4 w-4 text-blue-300" />;
+  // Article/Review icons - use Star for reviews
+  const isReview = item.payload?.topic === 'reviews';
+  if (item.type === 'article_created') {
+    return isReview
+      ? <Star className="h-4 w-4 text-amber-300" />
+      : <FileText className="h-4 w-4 text-emerald-300" />;
+  }
+  if (item.type === 'article_updated') {
+    return isReview
+      ? <Star className="h-4 w-4 text-amber-300" />
+      : <Pencil className="h-4 w-4 text-blue-300" />;
+  }
   if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-red-300" />;
   if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-300" />;
   if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-cyan-300" />;

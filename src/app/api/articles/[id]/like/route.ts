@@ -3,6 +3,7 @@ import { insertActivity } from '@/lib/services/activityService';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 // GET - Check if user has liked the article
 export async function GET(
@@ -115,6 +116,9 @@ export async function POST(
       .select('*', { count: 'exact', head: true })
       .eq('article_id', Number.parseInt(id, 10));
 
+    // Revalidate like caches
+    revalidateCache.articleLike(id);
+
     return ok({
       message: 'Το άρθρο έγινε like',
       liked: true,
@@ -157,6 +161,9 @@ export async function DELETE(
       .from('article_likes')
       .select('*', { count: 'exact', head: true })
       .eq('article_id', Number.parseInt(id, 10));
+
+    // Revalidate like caches
+    revalidateCache.articleLike(id);
 
     return ok({
       message: 'Το like αφαιρέθηκε',

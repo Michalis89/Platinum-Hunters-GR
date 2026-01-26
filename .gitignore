@@ -43,3 +43,5 @@ next-env.d.ts
 # Ignore SWC cache
 .swc/
 jest-results.json
+
+docs/private

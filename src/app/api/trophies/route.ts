@@ -3,9 +3,18 @@ import { exchangeNpssoForAccessCode, exchangeCodeForAccessToken, getTitleTrophie
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 
-const NPSSO = process.env.NEXT_PUBLIC_PSN_NPSSO_TOKEN!;
+/**
+ * PSN NPSSO token for authentication.
+ * Server-only - do NOT use NEXT_PUBLIC_ prefix to avoid client bundle exposure.
+ */
+const NPSSO = process.env.PSN_NPSSO_TOKEN;
 
 export async function GET(req: NextRequest) {
+  if (!NPSSO) {
+    console.error('PSN_NPSSO_TOKEN is not configured');
+    return fail({ error: 'PSN integration not configured' }, 503);
+  }
+
   const npCommunicationId = req.nextUrl.searchParams.get('npCommunicationId');
 
   if (!npCommunicationId) {

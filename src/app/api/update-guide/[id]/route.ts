@@ -4,6 +4,7 @@ import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
 import type { Database } from '@/lib/supabase/database.types';
 import { insertActivity } from '@/lib/services/activityService';
+import { revalidateCache } from '@/lib/cache/tags';
 
 type IncomingStep = {
   title?: string;
@@ -221,6 +222,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       display_name: profile.data?.display_name,
       avatar_url: profile.data?.avatar_url,
     });
+
+    // Revalidate game and guide caches
+    revalidateCache.game(gameId, gameData?.slug);
+    revalidateCache.guide(guideId);
 
     return NextResponse.json({ message: '✅ Ο οδηγός ενημερώθηκε επιτυχώς!' });
   } catch (error) {

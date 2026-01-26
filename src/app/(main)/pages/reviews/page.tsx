@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import UnderConstruction from '@/app/components/ui/UnderConstruction';
+import ReviewsPageClient from '@/app/(main)/pages/reviews/ReviewsPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
-import { getCategoryBySlug } from '@/config/hobbies';
+import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
+import type { ArticleCategory } from '@/types/database';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
@@ -11,10 +12,13 @@ type ReviewsPageProps = {
 };
 
 export async function generateMetadata({ searchParams }: ReviewsPageProps): Promise<Metadata> {
-  const { category } = await searchParams;
-  const normalizedCategory = category?.toLowerCase();
-  const categoryData = normalizedCategory ? getCategoryBySlug(normalizedCategory) : undefined;
-  const categoryLabel = categoryData?.title;
+  const resolvedParams = await searchParams;
+  const rawCategory = resolvedParams.category;
+  const category =
+    rawCategory && CATEGORY_LABELS[rawCategory as ArticleCategory]
+      ? (rawCategory as ArticleCategory)
+      : undefined;
+  const categoryLabel = category ? CATEGORY_LABELS[category] : undefined;
 
   const title = categoryLabel
     ? `Reviews για ${categoryLabel} | Χομπίστας`
@@ -24,8 +28,7 @@ export async function generateMetadata({ searchParams }: ReviewsPageProps): Prom
     ? `Reviews και κριτικές για ${categoryLabel}, από την κοινότητα του Χομπίστα.`
     : 'Reviews και κριτικές από την κοινότητα του Χομπίστα. Δες τι αξίζει να δοκιμάσεις.';
 
-  // Canonical strategy: treat category query pages as first-class and keep their querystring.
-  const path = normalizedCategory ? `/pages/reviews?category=${normalizedCategory}` : '/pages/reviews';
+  const path = category ? `/pages/reviews?category=${category}` : '/pages/reviews';
 
   return buildMetadata({
     title,
@@ -34,11 +37,15 @@ export async function generateMetadata({ searchParams }: ReviewsPageProps): Prom
   });
 }
 
-export default async function ReviewPage({ searchParams }: ReviewsPageProps) {
-  const { category } = await searchParams;
-  const normalizedCategory = category?.toLowerCase();
-  const categoryData = normalizedCategory ? getCategoryBySlug(normalizedCategory) : undefined;
-  const categoryLabel = categoryData?.title;
+export default async function ReviewsPage({ searchParams }: ReviewsPageProps) {
+  const resolvedParams = await searchParams;
+  const rawCategory = resolvedParams.category;
+  const category =
+    rawCategory && CATEGORY_LABELS[rawCategory as ArticleCategory]
+      ? (rawCategory as ArticleCategory)
+      : undefined;
+  const categoryLabel = category ? CATEGORY_LABELS[category] : undefined;
+
   const breadcrumb = [
     { name: 'Αρχική', url: `${SITE_URL}/` },
     { name: 'Reviews', url: `${SITE_URL}/pages/reviews` },
@@ -47,14 +54,14 @@ export default async function ReviewPage({ searchParams }: ReviewsPageProps) {
   if (categoryLabel) {
     breadcrumb.push({
       name: categoryLabel,
-      url: `${SITE_URL}/pages/reviews?category=${normalizedCategory}`,
+      url: `${SITE_URL}/pages/reviews?category=${category}`,
     });
   }
 
   return (
     <>
       <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
-      <UnderConstruction />
+      <ReviewsPageClient />
     </>
   );
 }

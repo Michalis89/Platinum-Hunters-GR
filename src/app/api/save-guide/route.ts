@@ -6,6 +6,7 @@ import { insertActivity } from '@/lib/services/activityService';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 interface ScrapedStep {
   title: string;
@@ -218,6 +219,10 @@ export async function POST(req: Request) {
       display_name: profile.data?.display_name,
       avatar_url: profile.data?.avatar_url,
     });
+
+    // Revalidate game and guide caches
+    revalidateCache.game(game.id, game.slug);
+    revalidateCache.guide(guide.id);
 
     return ok({
       message: '✅ Ο οδηγός αποθηκεύτηκε!',

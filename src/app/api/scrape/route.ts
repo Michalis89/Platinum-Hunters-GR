@@ -1,8 +1,30 @@
 import { NextResponse } from 'next/server';
-import scrapePSNGuide from '@/lib/scraper/index';
 import supabase from '@/lib/db';
 
+/**
+ * Scraper API Route
+ * POST /api/scrape
+ *
+ * This endpoint uses Playwright which requires a browser binary.
+ * It is disabled in production (Vercel) via the SCRAPER_ENABLED flag.
+ *
+ * To enable locally: set SCRAPER_ENABLED=true in .env.local
+ */
+
+const isScraperEnabled = process.env.SCRAPER_ENABLED === 'true';
+
 export async function POST(req: Request) {
+  // Feature flag check - return 503 when disabled
+  if (!isScraperEnabled) {
+    return NextResponse.json(
+      {
+        error: 'Scraper is disabled in this environment',
+        hint: 'Set SCRAPER_ENABLED=true to enable (development only)',
+      },
+      { status: 503 },
+    );
+  }
+
   try {
     const { url } = await req.json();
     if (!url) {
@@ -55,6 +77,9 @@ export async function POST(req: Request) {
       console.error('❌ Fuzzy Match Error:', fuzzyError);
       // Continue without blocking scrape; just skip fuzzy match if RPC fails
     }
+
+    // Dynamic import to prevent Playwright from being bundled when scraper is disabled
+    const { default: scrapePSNGuide } = await import('@/lib/scraper/index');
 
     const scrapedData = await scrapePSNGuide(url);
     if (!scrapedData) {

@@ -1,71 +1,133 @@
+import {
+  Gamepad2,
+  BookOpen,
+  Film,
+  Tv,
+  BookText,
+  Newspaper,
+  Users,
+  Sparkles,
+  BookMarked,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+
 type Stat = {
-  value: string;
+  value: string | number;
   label: string;
-  note?: string;
+  icon: ReactNode;
 };
 
-const stats: Stat[] = [
-  {
-    value: '500+',
-    label: 'Trophy Guides',
-    note: 'και συνεχίζουμε',
-  },
-  {
-    value: '1.2K+',
-    label: 'Χρήστες',
-    note: 'beta testers',
-  },
-  {
-    value: '6',
-    label: 'Κατηγορίες',
-    note: 'hobbies',
-  },
-  {
-    value: '99.9%',
-    label: 'Uptime',
-    note: 'αξιοπιστία',
-  },
-];
+export type AboutStatsProps = {
+  totalUsers: number;
+  totalGuides: number;
+  totalGames: number;
+  totalAnime: number;
+  totalManga: number;
+  totalMovies: number;
+  totalTv: number;
+  totalBooks: number;
+  totalArticles: number;
+};
 
-export function AboutStats() {
+export function AboutStats({
+  totalUsers,
+  totalGuides,
+  totalGames,
+  totalAnime,
+  totalManga,
+  totalMovies,
+  totalTv,
+  totalBooks,
+  totalArticles,
+}: AboutStatsProps) {
+  const stats: Stat[] = [
+    {
+      value: totalGames || '—',
+      label: 'Παιχνίδια',
+      icon: <Gamepad2 className="h-5 w-5" />,
+    },
+    {
+      value: totalAnime || '—',
+      label: 'Anime',
+      icon: <Sparkles className="h-5 w-5" />,
+    },
+    {
+      value: totalManga || '—',
+      label: 'Manga',
+      icon: <BookMarked className="h-5 w-5" />,
+    },
+    {
+      value: totalMovies || '—',
+      label: 'Ταινίες',
+      icon: <Film className="h-5 w-5" />,
+    },
+    {
+      value: totalTv || '—',
+      label: 'Σειρές',
+      icon: <Tv className="h-5 w-5" />,
+    },
+    {
+      value: totalBooks || '—',
+      label: 'Βιβλία',
+      icon: <BookText className="h-5 w-5" />,
+    },
+    {
+      value: totalGuides || '—',
+      label: 'Οδηγοί',
+      icon: <BookOpen className="h-5 w-5" />,
+    },
+    {
+      value: totalArticles || '—',
+      label: 'Άρθρα',
+      icon: <Newspaper className="h-5 w-5" />,
+    },
+    {
+      value: totalUsers || '—',
+      label: 'Χρήστες',
+      icon: <Users className="h-5 w-5" />,
+    },
+  ];
+
+  // Filter out stats with 0 or '—' value to only show categories with content
+  const activeStats = stats.filter(
+    (stat) => stat.value !== 0 && stat.value !== '—'
+  );
+
+  // Show active stats, or first 6 if not enough active
+  const displayStats = activeStats.length >= 4 ? activeStats : stats.slice(0, 6);
+
   return (
     <section className="relative px-4 py-20 md:px-6 md:py-28">
       <div className="absolute inset-0 bg-gradient-to-b from-[var(--hb-bg)] via-[var(--hb-primary-strong)]/[0.03] to-[var(--hb-bg)]" />
 
-      <div className="relative mx-auto max-w-5xl">
+      <div className="relative mx-auto max-w-6xl">
         <div className="mb-12 text-center">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-            Σε αριθμούς
+            Η βιβλιοθήκη μας
           </p>
           <h2 className="text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Η κοινότητα μεγαλώνει
+            Περιεχόμενο σε αριθμούς
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-          {stats.map((stat) => (
+        <div className="flex flex-wrap justify-center gap-4">
+          {displayStats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 text-center shadow-[0_12px_30px_rgba(3,7,18,0.35)]"
+              className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)] rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[0_12px_30px_rgba(3,7,18,0.35)] transition hover:border-[var(--hb-primary-strong)]/40"
             >
-              <p className="mb-1 bg-gradient-to-r from-[var(--hb-primary-strong)] to-[var(--hb-accent)] bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
+              <div className="mb-2 flex justify-center text-[var(--hb-primary-strong)]">
+                {stat.icon}
+              </div>
+              <p className="mb-1 bg-gradient-to-r from-[var(--hb-primary-strong)] to-[var(--hb-accent)] bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
                 {stat.value}
               </p>
-              <p className="font-medium text-[var(--hb-headline)]">
+              <p className="text-sm font-medium text-[var(--hb-headline)]">
                 {stat.label}
               </p>
-              {stat.note && (
-                <p className="mt-1 text-xs text-[var(--hb-muted)]">
-                  {stat.note}
-                </p>
-              )}
             </div>
           ))}
         </div>
-
-        <p className="mt-6 text-center text-xs text-[var(--hb-muted)]">
-          * Placeholder δεδομένα — θα ενημερωθούν με πραγματικά στατιστικά
-        </p>
       </div>
     </section>
   );

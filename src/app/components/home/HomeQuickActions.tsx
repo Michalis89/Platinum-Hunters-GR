@@ -19,17 +19,17 @@ type QuickAction = {
 
 const actions: QuickAction[] = [
   {
-    title: 'Trophy Guides',
-    description: 'Αναλυτικοί οδηγοί για platinum trophies',
-    href: '/pages/guides',
-    icon: <BookOpen className="h-5 w-5" />,
-    primary: true,
-  },
-  {
     title: 'Το Backlog μου',
     description: 'Διαχείριση όλων των hobbies σου',
     href: '/pages/backlog',
     icon: <ListTodo className="h-5 w-5" />,
+    primary: true,
+  },
+  {
+    title: 'Οδηγοί',
+    description: 'Tips και οδηγοί για games',
+    href: '/pages/guides',
+    icon: <BookOpen className="h-5 w-5" />,
   },
   {
     title: 'Νέα & Άρθρα',
@@ -38,8 +38,8 @@ const actions: QuickAction[] = [
     icon: <Newspaper className="h-5 w-5" />,
   },
   {
-    title: 'Τα Trophies μου',
-    description: 'Πρόοδος και achievements',
+    title: 'Το Προφίλ μου',
+    description: 'Στατιστικά και πρόοδος',
     href: '/pages/profile',
     icon: <Trophy className="h-5 w-5" />,
   },

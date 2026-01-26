@@ -5,6 +5,7 @@ import { getUserGamesWithDetails } from '@/lib/supabase/queries';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithPagination } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
@@ -229,6 +230,9 @@ export async function POST(request: Request) {
       },
       { logContext: '⚠️ Activity insert' },
     );
+
+    // Revalidate user backlog cache
+    revalidateCache.userBacklog(userId);
 
     return ok(transformedItem, { status: 201 });
   } catch (error) {

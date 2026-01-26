@@ -7,6 +7,7 @@ import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 // GET - Fetch single article by ID or slug
 export async function GET(
@@ -194,6 +195,9 @@ export async function PUT(
       avatar_url: userData?.avatar_url,
     });
 
+    // Revalidate article caches
+    revalidateCache.article(article.id);
+
     return ok({ message: 'Επιτυχής ενημέρωση άρθρου', article });
   } catch (error) {
     console.error('Error updating article:', error);
@@ -260,6 +264,9 @@ export async function DELETE(
       display_name: userData?.display_name,
       avatar_url: userData?.avatar_url,
     });
+
+    // Revalidate article caches
+    revalidateCache.article(existingArticle.id);
 
     return ok({ message: 'Το άρθρο διαγράφηκε επιτυχώς' });
   } catch (error) {
