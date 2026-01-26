@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { Eye, EyeOff, UserPlus, ArrowRight, ArrowLeft, Check, Gamepad2, Sparkles, BookOpen, Film, Tv } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, ArrowRight, ArrowLeft, Check, Gamepad2, Sparkles, BookOpen, Film, Tv, Code, Cat, Wind } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Input } from '@/app/components/ui/Input';
@@ -37,7 +37,17 @@ const HOBBIES = [
   { id: 'movies', label: 'Ταινίες', icon: 'Film' },
   { id: 'tv', label: 'Σειρές', icon: 'Tv' },
   { id: 'books', label: 'Βιβλία', icon: 'BookOpen' },
+  { id: 'coding', label: 'Coding', icon: 'Code' },
+  { id: 'pet', label: 'Κατοικίδια', icon: 'Cat' },
+  { id: 'vape', label: 'Vape', icon: 'Wind' },
 ];
+
+const ANIME_GENRES = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Slice of Life', 'Sports'];
+const MOVIE_GENRES = ['Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller', 'Romance', 'Animation', 'Documentary', 'Fantasy'];
+const BOOK_GENRES = ['Fantasy', 'Sci-Fi', 'Mystery', 'Romance', 'Thriller', 'Biography', 'Self-Help', 'History', 'Horror', 'Literary Fiction'];
+const CODING_LANGUAGES = ['JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'Go', 'Rust', 'PHP', 'Ruby', 'Swift'];
+const PET_TYPES = ['Σκύλος', 'Γάτα', 'Πουλί', 'Ψάρια', 'Κουνέλι', 'Χάμστερ', 'Ερπετό', 'Άλλο'];
+
 const GENRES = [
   'Action',
   'RPG',
@@ -71,7 +81,16 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const selectClasses =
     'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] hover:border-[var(--hb-primary-strong)]/70 focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
 
-  const [formData, setFormData] = useState<Partial<RegisterData> & { favorite_hobbies?: string[] }>({
+  const [formData, setFormData] = useState<Partial<RegisterData> & {
+    favorite_hobbies?: string[];
+    favorite_anime_genres?: string[];
+    favorite_movie_genres?: string[];
+    favorite_book_genres?: string[];
+    favorite_languages?: string[];
+    pet_types?: string[];
+    vape_device?: string;
+    vape_flavor?: string;
+  }>({
     email: '',
     username: '',
     password: '',
@@ -85,6 +104,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     favorite_platform: '',
     favorite_genres: [],
     favorite_hobbies: [],
+    favorite_anime_genres: [],
+    favorite_movie_genres: [],
+    favorite_book_genres: [],
+    favorite_languages: [],
+    pet_types: [],
+    vape_device: '',
+    vape_flavor: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -540,6 +566,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                       BookOpen,
                       Film,
                       Tv,
+                      Code,
+                      Cat,
+                      Wind,
                     }[hobby.icon] || Gamepad2;
 
                     return (
@@ -574,11 +603,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 </div>
               </div>
 
-              {/* Gaming-specific options (only if gaming is selected) */}
+              {/* Gaming preferences */}
               {formData.favorite_hobbies?.includes('gaming') && (
-                <div className="space-y-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)]/50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--hb-muted)]">
-                    Gaming Preferences
+                <div className="space-y-4 rounded-xl border border-sky-500/30 bg-sky-500/5 p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-400">
+                    <Gamepad2 className="h-4 w-4" /> Gaming
                   </p>
                   <div>
                     <Input
@@ -593,18 +622,16 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     />
                     <FormErrorMessage message={errors.psn_id} />
                   </div>
-
                   <div>
                     <Select
-                      label="Αγαπημένη Κονσόλα (προαιρετικό)"
+                      label="Αγαπημένη Κονσόλα"
                       options={['', ...PLATFORMS]}
                       value={formData.favorite_platform}
                       onChange={handleSelectChange('favorite_platform')}
                       className={selectClasses}
                     />
                   </div>
-
-                  <div className="text-sm text-[var(--hb-headline)]">
+                  <div className="text-sm">
                     <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {GENRES.map(genre => (
@@ -623,12 +650,218 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                 }));
                               }
                             }}
-                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-primary-strong)] focus:ring-1 focus:ring-[var(--hb-primary-strong)]"
+                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-sky-500 focus:ring-1 focus:ring-sky-500"
                           />
                           {genre}
                         </label>
                       ))}
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Anime/Manga preferences */}
+              {(formData.favorite_hobbies?.includes('anime') || formData.favorite_hobbies?.includes('manga')) && (
+                <div className="space-y-4 rounded-xl border border-pink-500/30 bg-pink-500/5 p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pink-400">
+                    <Sparkles className="h-4 w-4" /> Anime & Manga
+                  </p>
+                  <div className="text-sm">
+                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {ANIME_GENRES.map(genre => (
+                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                          <input
+                            type="checkbox"
+                            checked={formData.favorite_anime_genres?.includes(genre)}
+                            onChange={e => {
+                              const genres = formData.favorite_anime_genres || [];
+                              if (e.target.checked) {
+                                setFormData(prev => ({ ...prev, favorite_anime_genres: [...genres, genre] }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_anime_genres: genres.filter(g => g !== genre),
+                                }));
+                              }
+                            }}
+                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-pink-500 focus:ring-1 focus:ring-pink-500"
+                          />
+                          {genre}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Movies/TV preferences */}
+              {(formData.favorite_hobbies?.includes('movies') || formData.favorite_hobbies?.includes('tv')) && (
+                <div className="space-y-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
+                    <Film className="h-4 w-4" /> Ταινίες & Σειρές
+                  </p>
+                  <div className="text-sm">
+                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {MOVIE_GENRES.map(genre => (
+                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                          <input
+                            type="checkbox"
+                            checked={formData.favorite_movie_genres?.includes(genre)}
+                            onChange={e => {
+                              const genres = formData.favorite_movie_genres || [];
+                              if (e.target.checked) {
+                                setFormData(prev => ({ ...prev, favorite_movie_genres: [...genres, genre] }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_movie_genres: genres.filter(g => g !== genre),
+                                }));
+                              }
+                            }}
+                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-amber-500 focus:ring-1 focus:ring-amber-500"
+                          />
+                          {genre}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Books preferences */}
+              {formData.favorite_hobbies?.includes('books') && (
+                <div className="space-y-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                    <BookOpen className="h-4 w-4" /> Βιβλία
+                  </p>
+                  <div className="text-sm">
+                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {BOOK_GENRES.map(genre => (
+                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                          <input
+                            type="checkbox"
+                            checked={formData.favorite_book_genres?.includes(genre)}
+                            onChange={e => {
+                              const genres = formData.favorite_book_genres || [];
+                              if (e.target.checked) {
+                                setFormData(prev => ({ ...prev, favorite_book_genres: [...genres, genre] }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_book_genres: genres.filter(g => g !== genre),
+                                }));
+                              }
+                            }}
+                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                          />
+                          {genre}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Coding preferences */}
+              {formData.favorite_hobbies?.includes('coding') && (
+                <div className="space-y-4 rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                    <Code className="h-4 w-4" /> Coding
+                  </p>
+                  <div className="text-sm">
+                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένες Γλώσσες:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {CODING_LANGUAGES.map(lang => (
+                        <label key={lang} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                          <input
+                            type="checkbox"
+                            checked={formData.favorite_languages?.includes(lang)}
+                            onChange={e => {
+                              const languages = formData.favorite_languages || [];
+                              if (e.target.checked) {
+                                setFormData(prev => ({ ...prev, favorite_languages: [...languages, lang] }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_languages: languages.filter(l => l !== lang),
+                                }));
+                              }
+                            }}
+                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                          />
+                          {lang}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Pet preferences */}
+              {formData.favorite_hobbies?.includes('pet') && (
+                <div className="space-y-4 rounded-xl border border-orange-500/30 bg-orange-500/5 p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-orange-400">
+                    <Cat className="h-4 w-4" /> Κατοικίδια
+                  </p>
+                  <div className="text-sm">
+                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Τι κατοικίδια έχεις;</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {PET_TYPES.map(pet => (
+                        <label key={pet} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                          <input
+                            type="checkbox"
+                            checked={formData.pet_types?.includes(pet)}
+                            onChange={e => {
+                              const pets = formData.pet_types || [];
+                              if (e.target.checked) {
+                                setFormData(prev => ({ ...prev, pet_types: [...pets, pet] }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  pet_types: pets.filter(p => p !== pet),
+                                }));
+                              }
+                            }}
+                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-orange-500 focus:ring-1 focus:ring-orange-500"
+                          />
+                          {pet}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Vape preferences */}
+              {formData.favorite_hobbies?.includes('vape') && (
+                <div className="space-y-4 rounded-xl border border-violet-500/30 bg-violet-500/5 p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-violet-400">
+                    <Wind className="h-4 w-4" /> Vape
+                  </p>
+                  <div>
+                    <Input
+                      label="Αγαπημένη Συσκευή"
+                      type="text"
+                      name="vape_device"
+                      value={formData.vape_device || ''}
+                      onChange={handleChange}
+                      placeholder="π.χ. Voopoo Drag, GeekVape..."
+                      className={inputClasses}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      label="Αγαπημένη Γεύση"
+                      type="text"
+                      name="vape_flavor"
+                      value={formData.vape_flavor || ''}
+                      onChange={handleChange}
+                      placeholder="π.χ. Tobacco, Fruity, Dessert..."
+                      className={inputClasses}
+                    />
                   </div>
                 </div>
               )}

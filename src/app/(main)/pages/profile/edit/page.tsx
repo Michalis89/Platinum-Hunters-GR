@@ -591,11 +591,23 @@ export default function EditProfilePage() {
         category_notes: category_notes || EMPTY_CATEGORY_NOTES,
       } as User['social_links'];
 
+      // Convert empty strings to null for unique constraint fields
+      const emptyToNull = (val: string | null | undefined): string | null =>
+        val && val.trim() !== '' ? val.trim() : null;
+
+      const sanitizedRest = {
+        ...rest,
+        psn_id: emptyToNull(rest.psn_id),
+        xbox_gamertag: emptyToNull(rest.xbox_gamertag),
+        steam_id: emptyToNull(rest.steam_id),
+        nintendo_id: emptyToNull(rest.nintendo_id),
+      };
+
       await dispatch(
         updateUserProfile({
           userId: user.id,
           updates: {
-            ...rest,
+            ...sanitizedRest,
             avatar_url: uploadedAvatarUrl || rest.avatar_url || user.avatar_url || null,
             privacy_settings: mergedPrivacy as User['privacy_settings'],
             social_links: mergedSocialLinks,
@@ -624,9 +636,26 @@ export default function EditProfilePage() {
       }, 1500);
     } catch (error) {
       console.error('Update error:', error);
+
+      // Handle specific database constraint errors
+      let errorMessage = '❌ Σφάλμα ενημέρωσης προφίλ. Δοκιμάστε ξανά.';
+      const errorStr = String(error);
+
+      if (errorStr.includes('23505') || errorStr.includes('unique constraint')) {
+        if (errorStr.includes('psn_id')) {
+          errorMessage = '❌ Αυτό το PSN ID χρησιμοποιείται ήδη από άλλον χρήστη.';
+        } else if (errorStr.includes('username')) {
+          errorMessage = '❌ Αυτό το username χρησιμοποιείται ήδη.';
+        } else if (errorStr.includes('email')) {
+          errorMessage = '❌ Αυτό το email χρησιμοποιείται ήδη.';
+        } else {
+          errorMessage = '❌ Αυτή η τιμή χρησιμοποιείται ήδη από άλλον χρήστη.';
+        }
+      }
+
       setAlert({
         type: 'error',
-        message: '❌ Σφάλμα ενημέρωσης προφίλ. Δοκιμάστε ξανά.',
+        message: errorMessage,
       });
     } finally {
       setSaving(false);
