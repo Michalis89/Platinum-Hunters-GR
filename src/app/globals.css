@@ -3,40 +3,62 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Χομπίστας theme tokens (Netflix-style black/red) */
+  --hb-bg: #0b0b0f;
+  --hb-surface: rgba(13, 13, 18, 1);
+  --hb-panel: rgba(16, 16, 22, 0.92);
+  --hb-card: #111018;
+  --hb-border: rgba(255, 255, 255, 0.08);
+  --hb-primary: #f6121d;
+  --hb-primary-strong: #e50914;
+  --hb-accent: #ff4d5a;
+  --hb-muted: #a1a1b3;
+  --hb-text: #f5f5f5;
+  --hb-headline: #ffffff;
+  --hb-shadow: 0 18px 60px rgba(0, 0, 0, 0.7);
+  --hb-radius: 14px;
+  --hb-radius-lg: 20px;
+  --hb-gradient:
+    radial-gradient(circle at 18% 20%, rgba(229, 9, 20, 0.22), transparent 28%),
+    radial-gradient(circle at 78% 16%, rgba(156, 0, 10, 0.22), transparent 26%),
+    radial-gradient(circle at 35% 75%, rgba(255, 40, 53, 0.18), transparent 30%),
+    radial-gradient(circle at 85% 80%, rgba(120, 0, 8, 0.2), transparent 26%);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Legacy tokens to keep Tailwind mapping working */
+  --background: var(--hb-bg);
+  --foreground: var(--hb-text);
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  color: var(--hb-text);
+  background: var(--hb-bg);
+  font-family:
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px; /* Λεπτό scrollbar */
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f2937; /* Σκούρο γκρι */
+  background: #111018;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #3b82f6, #1e3a8a); /* Μπλε gradient */
+  background: linear-gradient(180deg, #e50914, #ff4d5a);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #60a5fa, #1e40af); /* Λίγο πιο φωτεινό όταν περνάς το mouse */
+  background: linear-gradient(180deg, #f6121d, #e50914);
 }
 
 @keyframes gradient {
@@ -54,4 +76,29 @@ body {
 .animate-gradient {
   background-size: 200% auto;
   animation: gradient 3s linear infinite;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6 {
+  font-weight: 700;
+  color: var(--hb-headline);
+}
+
+.article-content h1 {
+  font-size: 1.5rem;
+  margin: 2rem 0 1rem;
+}
+
+.article-content h2 {
+  font-size: 1.25rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.article-content h3 {
+  font-size: 1.125rem;
+  margin: 1.25rem 0 0.5rem;
 }

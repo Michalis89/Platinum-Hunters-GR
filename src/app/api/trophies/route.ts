@@ -1,13 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { exchangeNpssoForAccessCode, exchangeCodeForAccessToken, getTitleTrophies } from 'psn-api';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
-const NPSSO = process.env.NEXT_PUBLIC_PSN_NPSSO_TOKEN!;
+/**
+ * PSN NPSSO token for authentication.
+ * Server-only - do NOT use NEXT_PUBLIC_ prefix to avoid client bundle exposure.
+ */
+const NPSSO = process.env.PSN_NPSSO_TOKEN;
 
 export async function GET(req: NextRequest) {
+  if (!NPSSO) {
+    console.error('PSN_NPSSO_TOKEN is not configured');
+    return fail({ error: 'PSN integration not configured' }, 503);
+  }
+
   const npCommunicationId = req.nextUrl.searchParams.get('npCommunicationId');
 
   if (!npCommunicationId) {
-    return NextResponse.json({ error: 'Missing npCommunicationId' }, { status: 400 });
+    return fail({ error: 'Λείπει το npCommunicationId' }, 400);
   }
 
   try {
@@ -18,9 +29,9 @@ export async function GET(req: NextRequest) {
       npServiceName: 'trophy',
     });
 
-    return NextResponse.json(trophiesResponse.trophies);
+    return ok(trophiesResponse.trophies);
   } catch (error) {
     console.error('Server error:', error);
-    return NextResponse.json({ error: 'Failed to fetch trophies' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

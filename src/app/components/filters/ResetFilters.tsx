@@ -7,7 +7,7 @@ export default function ResetFilters({ onReset }: Props) {
   return (
     <button
       onClick={onReset}
-      className="w-full rounded-xl border border-red-500/50 bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/40 transition hover:bg-red-600"
+      className="w-full rounded-xl border border-[var(--hb-primary-strong)]/60 bg-[var(--hb-primary-strong)] px-4 py-3 text-sm font-semibold text-[var(--hb-bg)] shadow-lg shadow-black/30 transition hover:brightness-110"
     >
       Reset
     </button>

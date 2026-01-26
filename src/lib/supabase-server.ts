@@ -1,7 +1,17 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/supabase/database.types';
 
-let supabaseServer: SupabaseClient | null = null;
-
+/**
+ * Supabase Server Client (Service Role)
+ *
+ * Creates a fresh client per invocation to avoid shared state in serverless.
+ * Uses the service role key for elevated permissions (admin operations).
+ *
+ * IMPORTANT: This client bypasses Row Level Security (RLS).
+ * Only use for admin operations that require elevated permissions.
+ *
+ * For user-context operations in API routes, use createRouteHandlerClient() instead.
+ */
 const createSupabaseServer = () => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -10,7 +20,7 @@ const createSupabaseServer = () => {
     throw new Error('Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
 
-  return createClient(url, key, {
+  return createClient<Database>(url, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -18,9 +28,12 @@ const createSupabaseServer = () => {
   });
 };
 
-const getSupabaseServer = () => {
-  supabaseServer ??= createSupabaseServer();
-  return supabaseServer;
-};
+/**
+ * Get a fresh Supabase server client.
+ *
+ * Each call creates a new client instance to ensure no shared mutable state
+ * between serverless function invocations.
+ */
+const getSupabaseServer = () => createSupabaseServer();
 
 export default getSupabaseServer;

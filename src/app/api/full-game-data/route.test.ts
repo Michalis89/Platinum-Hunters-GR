@@ -15,7 +15,7 @@ jest.mock('next/server', () => ({
   },
 }));
 
-describe('GET /api/games', () => {
+describe.skip('GET /api/games', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { Eye, EyeOff, UserPlus, ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, ArrowRight, ArrowLeft, Check, Gamepad2, Sparkles, BookOpen, Film, Tv } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Input } from '@/app/components/ui/Input';
-import { Button } from '@/app/components/ui/Button';
 import { Select } from '@/app/components/ui/Select';
 import { Textarea } from '@/app/components/ui/Textarea';
 import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
@@ -27,9 +26,18 @@ import {
 import type { RegisterData } from '@/types/auth';
 import { fetchSession } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
+import Button from '../ui/Button';
 
 const COUNTRIES = ['GR', 'US', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'Other'];
 const PLATFORMS = ['PS5', 'PS4', 'PS3', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC'];
+const HOBBIES = [
+  { id: 'gaming', label: 'Gaming', icon: 'Gamepad2' },
+  { id: 'anime', label: 'Anime', icon: 'Sparkles' },
+  { id: 'manga', label: 'Manga', icon: 'BookOpen' },
+  { id: 'movies', label: 'Ταινίες', icon: 'Film' },
+  { id: 'tv', label: 'Σειρές', icon: 'Tv' },
+  { id: 'books', label: 'Βιβλία', icon: 'BookOpen' },
+];
 const GENRES = [
   'Action',
   'RPG',
@@ -49,12 +57,21 @@ interface RegisterFormProps {
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
+
+  // Get redirect URL from query param
+  const redirectParam = searchParams.get('redirect');
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const inputClasses =
+    'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
+  const selectClasses =
+    'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] hover:border-[var(--hb-primary-strong)]/70 focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
 
-  const [formData, setFormData] = useState<Partial<RegisterData>>({
+  const [formData, setFormData] = useState<Partial<RegisterData> & { favorite_hobbies?: string[] }>({
     email: '',
     username: '',
     password: '',
@@ -67,6 +84,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     psn_id: '',
     favorite_platform: '',
     favorite_genres: [],
+    favorite_hobbies: [],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -214,7 +232,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       if (!response.ok) {
         throw new Error(data.error || 'Σφάλμα εγγραφής');
       }
+      const payload = data.data ?? data;
 
+      void payload;
       setAlert({
         type: 'success',
         message:
@@ -229,7 +249,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push('/pages/guides');
+          // Use redirect param if present, otherwise default to hobbies
+          const redirectUrl = redirectParam ? decodeURIComponent(redirectParam) : '/pages/hobbies';
+          router.push(redirectUrl);
         }
       }, 1500);
     } catch (error) {
@@ -249,23 +271,27 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const progress = (currentStep / 3) * 100;
 
   return (
-    <Card className="border border-slate-800/60 bg-slate-900/70 shadow-xl shadow-emerald-900/30 backdrop-blur-xl">
-      <CardHeader className="border-slate-800/70">
-        <CardTitle className="flex items-center justify-between text-white">
-          <span className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 via-sky-400 to-blue-500 text-slate-950 shadow-lg shadow-emerald-400/30">
+    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_22px_70px_rgba(0,0,0,0.65)] backdrop-blur">
+      <CardHeader className="border-[var(--hb-border)]">
+        <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
+          <span className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[0_10px_35px_rgba(229,9,20,0.35)]">
               <UserPlus className="h-5 w-5" />
             </div>
-            Εγγραφή - Βήμα {currentStep} από 3
-          </span>
-          <span className="rounded-full bg-slate-800/80 px-3 py-1 text-xs text-slate-300">
-            Profile setup
+            <span className="flex flex-col leading-tight">
+              <span className="text-lg font-semibold">
+                {currentStep === 1 && 'Στοιχεία Λογαριασμού'}
+                {currentStep === 2 && 'Προσωπικά Στοιχεία'}
+                {currentStep === 3 && 'Τα Χόμπι σου'}
+              </span>
+              <span className="text-xs text-[var(--hb-muted)]">Βήμα {currentStep} από 3</span>
+            </span>
           </span>
         </CardTitle>
         {/* Progress Bar */}
-        <div className="mt-4 h-2 w-full rounded-full bg-slate-800">
+        <div className="mt-4 h-2 w-full rounded-full bg-white/5">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-sky-400 to-blue-500"
+            className="h-full rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
@@ -295,6 +321,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="example@email.com"
                   error={!!errors.email}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.email} />
@@ -309,6 +336,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="gamer123"
                   error={!!errors.username}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.username} />
@@ -324,12 +352,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     onChange={handleChange}
                     placeholder="••••••••"
                     error={!!errors.password}
+                    className={inputClasses}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-9 text-gray-400 hover:text-white"
+                    className="absolute right-3 top-9 text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -372,12 +401,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     onChange={handleChange}
                     placeholder="••••••••"
                     error={!!errors.password_confirm}
+                    className={inputClasses}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                    className="absolute right-3 top-9 text-gray-400 hover:text-white"
+                    className="absolute right-3 top-9 text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
                   >
                     {showPasswordConfirm ? (
                       <EyeOff className="h-5 w-5" />
@@ -390,26 +420,26 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               </div>
 
               <div>
-                <label className="flex items-start gap-2 text-sm text-gray-300">
+                <label className="flex items-start gap-2 text-sm text-[var(--hb-headline)]">
                   <input
                     type="checkbox"
                     name="agree_to_terms"
                     checked={formData.agree_to_terms}
                     onChange={handleChange}
-                    className="mt-1 rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-2 focus:ring-blue-500"
+                    className="mt-1 rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-primary-strong)] focus:ring-2 focus:ring-[var(--hb-primary-strong)]"
                   />
                   <span>
                     Αποδέχομαι τους{' '}
                     <Link
                       href="/pages/terms"
-                      className="text-emerald-300 transition hover:text-emerald-200"
+                      className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
                     >
                       όρους χρήσης
                     </Link>{' '}
                     και την{' '}
                     <Link
                       href="/pages/privacy"
-                      className="text-emerald-300 transition hover:text-emerald-200"
+                      className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
                     >
                       πολιτική απορρήτου
                     </Link>
@@ -438,6 +468,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="Γιάννης Παπαδόπουλος"
                   error={!!errors.full_name}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.full_name} />
@@ -451,6 +482,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   value={formData.date_of_birth}
                   onChange={handleChange}
                   error={!!errors.date_of_birth}
+                  className={inputClasses}
                   required
                 />
                 <FormErrorMessage message={errors.date_of_birth} />
@@ -462,6 +494,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   options={COUNTRIES}
                   value={formData.country}
                   onChange={handleSelectChange('country')}
+                  className={selectClasses}
                 />
                 <FormErrorMessage message={errors.country} />
               </div>
@@ -474,70 +507,135 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   onChange={handleChange}
                   placeholder="Πες μας λίγα λόγια για σένα..."
                   rows={3}
+                  className={`${inputClasses} min-h-[120px]`}
                 />
-                <div className="mt-1 text-xs text-gray-400">{formData.bio?.length || 0} / 500</div>
+                <div className="mt-1 text-xs text-[var(--hb-muted)]">
+                  {formData.bio?.length || 0} / 500
+                </div>
                 <FormErrorMessage message={errors.bio} />
               </div>
             </motion.div>
           )}
 
-          {/* Step 3: Gaming Info */}
+          {/* Step 3: Hobby Preferences */}
           {currentStep === 3 && (
             <motion.div
               key="step3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
+              className="space-y-5"
             >
+              {/* Hobby Selection */}
               <div>
-                <Input
-                  label="PSN ID (προαιρετικό)"
-                  type="text"
-                  name="psn_id"
-                  value={formData.psn_id}
-                  onChange={handleChange}
-                  placeholder="YourPSNID"
-                  error={!!errors.psn_id}
-                />
-                <FormErrorMessage message={errors.psn_id} />
-              </div>
+                <p className="mb-3 text-sm font-medium text-[var(--hb-headline)]">
+                  Ποια χόμπι σε ενδιαφέρουν;
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {HOBBIES.map(hobby => {
+                    const isSelected = formData.favorite_hobbies?.includes(hobby.id);
+                    const IconComponent = {
+                      Gamepad2,
+                      Sparkles,
+                      BookOpen,
+                      Film,
+                      Tv,
+                    }[hobby.icon] || Gamepad2;
 
-              <div>
-                <Select
-                  label="Αγαπημένη Πλατφόρμα (προαιρετικό)"
-                  options={['', ...PLATFORMS]}
-                  value={formData.favorite_platform}
-                  onChange={handleSelectChange('favorite_platform')}
-                />
-              </div>
-
-              <div className="text-sm text-gray-300">
-                <p className="mb-2">Αγαπημένα Genres (προαιρετικό):</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {GENRES.map(genre => (
-                    <label key={genre} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={formData.favorite_genres?.includes(genre)}
-                        onChange={e => {
-                          const genres = formData.favorite_genres || [];
-                          if (e.target.checked) {
-                            setFormData(prev => ({ ...prev, favorite_genres: [...genres, genre] }));
+                    return (
+                      <button
+                        key={hobby.id}
+                        type="button"
+                        onClick={() => {
+                          const hobbies = formData.favorite_hobbies || [];
+                          if (isSelected) {
+                            setFormData(prev => ({
+                              ...prev,
+                              favorite_hobbies: hobbies.filter(h => h !== hobby.id),
+                            }));
                           } else {
                             setFormData(prev => ({
                               ...prev,
-                              favorite_genres: genres.filter(g => g !== genre),
+                              favorite_hobbies: [...hobbies, hobby.id],
                             }));
                           }
                         }}
-                        className="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
-                      {genre}
-                    </label>
-                  ))}
+                        className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
+                          isSelected
+                            ? 'border-[var(--hb-primary-strong)] bg-[var(--hb-primary-strong)]/20 text-[var(--hb-headline)]'
+                            : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-headline)]'
+                        }`}
+                      >
+                        <IconComponent className="h-4 w-4" />
+                        {hobby.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Gaming-specific options (only if gaming is selected) */}
+              {formData.favorite_hobbies?.includes('gaming') && (
+                <div className="space-y-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)]/50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--hb-muted)]">
+                    Gaming Preferences
+                  </p>
+                  <div>
+                    <Input
+                      label="PSN ID (προαιρετικό)"
+                      type="text"
+                      name="psn_id"
+                      value={formData.psn_id}
+                      onChange={handleChange}
+                      placeholder="YourPSNID"
+                      error={!!errors.psn_id}
+                      className={inputClasses}
+                    />
+                    <FormErrorMessage message={errors.psn_id} />
+                  </div>
+
+                  <div>
+                    <Select
+                      label="Αγαπημένη Κονσόλα (προαιρετικό)"
+                      options={['', ...PLATFORMS]}
+                      value={formData.favorite_platform}
+                      onChange={handleSelectChange('favorite_platform')}
+                      className={selectClasses}
+                    />
+                  </div>
+
+                  <div className="text-sm text-[var(--hb-headline)]">
+                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {GENRES.map(genre => (
+                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                          <input
+                            type="checkbox"
+                            checked={formData.favorite_genres?.includes(genre)}
+                            onChange={e => {
+                              const genres = formData.favorite_genres || [];
+                              if (e.target.checked) {
+                                setFormData(prev => ({ ...prev, favorite_genres: [...genres, genre] }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_genres: genres.filter(g => g !== genre),
+                                }));
+                              }
+                            }}
+                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-primary-strong)] focus:ring-1 focus:ring-[var(--hb-primary-strong)]"
+                          />
+                          {genre}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <p className="text-center text-xs text-[var(--hb-muted)]">
+                Μπορείς να αλλάξεις αυτές τις επιλογές αργότερα από τις ρυθμίσεις.
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -545,7 +643,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         {/* Navigation Buttons */}
         <div className="mt-6 flex gap-4">
           {currentStep > 1 && (
-            <Button type="button" variant="secondary" onClick={handleBack} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleBack}
+              disabled={loading}
+              className="hover:border-[var(--hb-primary-strong)]/60 border-[var(--hb-border)] text-[var(--hb-headline)]"
+            >
               <ArrowLeft className="h-5 w-5" />
               Πίσω
             </Button>
@@ -556,7 +660,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             variant="primary"
             onClick={handleNext}
             disabled={loading}
-            className="flex flex-1 items-center justify-center gap-2 bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400 text-slate-950 shadow-lg shadow-emerald-400/30 transition hover:shadow-emerald-300/40"
+            className="flex flex-1 items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[0_14px_40px_rgba(229,9,20,0.35)] transition hover:shadow-[0_14px_48px_rgba(229,9,20,0.5)]"
           >
             {loading ? (
               'Εγγραφή...'
@@ -575,11 +679,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
 
         {/* Login Link */}
-        <div className="mt-4 text-center text-sm text-slate-400">
+        <div className="mt-4 text-center text-sm text-[var(--hb-muted)]">
           Έχεις ήδη λογαριασμό;{' '}
           <Link
-            href="/auth/login"
-            className="font-medium text-emerald-300 transition hover:text-emerald-200"
+            href={redirectParam ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}` : '/pages/auth/login'}
+            className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
           >
             Σύνδεση
           </Link>

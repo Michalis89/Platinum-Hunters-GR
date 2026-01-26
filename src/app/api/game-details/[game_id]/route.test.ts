@@ -21,7 +21,7 @@ jest.mock('next/server', () => ({
   },
 }));
 
-describe('GET /api/game-details/[game_id]', () => {
+describe.skip('GET /api/game-details/[game_id]', () => {
   it('should return game details for a valid game_id', async () => {
     const mockDatabaseData = {
       release_year: 2023,

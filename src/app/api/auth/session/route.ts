@@ -1,13 +1,8 @@
-/**
- * Session API Route
- * GET /api/auth/session
- * PH-30: User Authentication System
- */
-
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { cookies } from 'next/headers';
-import type { User } from '@/types/user';
+import type { Database } from '@/lib/supabase/database.types';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 export async function GET() {
   try {
@@ -21,11 +16,11 @@ export async function GET() {
 
     if (sessionError) {
       console.error('Session error:', sessionError);
-      return NextResponse.json({ error: 'Σφάλμα ελέγχου session' }, { status: 500 });
+      return fail({ error: 'Σφάλμα ελέγχου session' }, 500);
     }
 
     if (!session) {
-      return NextResponse.json({ user: null, session: null });
+      return ok({ user: null, session: null });
     }
 
     // Fetch user profile
@@ -37,10 +32,10 @@ export async function GET() {
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
-      return NextResponse.json({ error: 'Σφάλμα φόρτωσης προφίλ' }, { status: 500 });
+      return fail({ error: 'Σφάλμα φόρτωσης προφίλ' }, 500);
     }
 
-    const typedUserProfile = userProfile as User;
+    const typedUserProfile = userProfile as Database['public']['Tables']['users']['Row'];
 
     // Check if account is deleted, suspended, or banned
     if (typedUserProfile.account_status === 'deleted') {
@@ -52,10 +47,13 @@ export async function GET() {
       cookieStore.delete('sb-access-token');
       cookieStore.delete('sb-refresh-token');
 
-      return NextResponse.json({ user: null, session: null });
+      return ok({ user: null, session: null });
     }
 
-    if (typedUserProfile.account_status === 'suspended' || typedUserProfile.account_status === 'banned') {
+    if (
+      typedUserProfile.account_status === 'suspended' ||
+      typedUserProfile.account_status === 'banned'
+    ) {
       // Sign out suspended/banned users
       await supabase.auth.signOut();
 
@@ -64,25 +62,23 @@ export async function GET() {
       cookieStore.delete('sb-access-token');
       cookieStore.delete('sb-refresh-token');
 
-      return NextResponse.json(
+      return fail(
         {
           error:
             typedUserProfile.account_status === 'suspended'
               ? 'Ο λογαριασμός σας έχει ανασταλεί'
               : 'Ο λογαριασμός σας έχει αποκλειστεί',
-          user: null,
-          session: null,
         },
-        { status: 403 },
+        403,
       );
     }
 
-    return NextResponse.json({
+    return ok({
       user: typedUserProfile,
       session,
     });
   } catch (error) {
     console.error('Session error:', error);
-    return NextResponse.json({ error: 'Σφάλμα ελέγχου session' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

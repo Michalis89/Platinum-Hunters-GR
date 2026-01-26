@@ -1,20 +1,24 @@
-import { NextResponse } from 'next/server';
 import supabase from '@/lib/db';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 interface GuideStep {
   step_number: number;
   title: string;
   description: string;
+  content_rich?: unknown;
+  content_html?: string | null;
   trophies?: unknown[];
 }
 
 export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const id = params.id;
+    const idParam = params.id;
+    const id = Number.parseInt(idParam, 10);
 
-    if (!id) {
-      return NextResponse.json({ error: 'Λάθος ID οδηγού' }, { status: 400 });
+    if (!idParam || Number.isNaN(id)) {
+      return fail({ error: 'Λάθος ID οδηγού' }, 400);
     }
 
     const { data: guides, error } = await supabase
@@ -23,21 +27,18 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         `
         *,
         guide_steps (*),
-        games!inner(slug, title)
+        games!inner(slug, title, cover_image, background_image)
       `,
       )
       .eq('game_id', id);
 
     if (error) {
       console.error('Database error:', error);
-      return NextResponse.json(
-        { error: 'Database error', details: error.message },
-        { status: 500 },
-      );
+      return fail({ error: 'Σφάλμα βάσης δεδομένων' }, 500);
     }
 
     if (!guides || guides.length === 0) {
-      return NextResponse.json({ error: 'Guide not found' }, { status: 404 });
+      return fail({ error: 'Ο οδηγός δεν βρέθηκε' }, 404);
     }
 
     // Transform guide_steps array to steps array with proper structure
@@ -48,14 +49,16 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         .map((step: GuideStep) => ({
           title: step.title,
           description: step.description,
+          content_rich: step.content_rich ?? null,
+          content_html: step.content_html ?? null,
           trophies: step.trophies || [],
         })),
       guide_steps: undefined, // Remove the nested guide_steps property
     }));
 
-    return NextResponse.json(transformedGuides);
+    return ok(transformedGuides);
   } catch (error) {
     console.error('❌ Σφάλμα διακομιστή:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

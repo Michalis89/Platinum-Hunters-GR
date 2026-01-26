@@ -30,7 +30,7 @@ export default function GenreFilter() {
   const options = [
     {
       value: '',
-      label: 'Όλα τα Είδη',
+      label: 'Genres',
       icon: getIcon('genre'),
     },
     ...(data?.genres.map(genre => ({

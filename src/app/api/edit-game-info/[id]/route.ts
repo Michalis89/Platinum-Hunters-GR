@@ -14,7 +14,17 @@ export async function POST(req: Request, context: { params: Params }) {
     }
 
     const body = await req.json();
-    const { release_year, developer, publisher, rating, metacritic, platforms } = body;
+    const {
+      release_year,
+      developer,
+      publisher,
+      rating,
+      metacritic,
+      platforms,
+      genres,
+      esrb_rating,
+      genre,
+    } = body;
 
     // Get or create developer
     let developerId = null;
@@ -73,6 +83,7 @@ export async function POST(req: Request, context: { params: Params }) {
         publisher_id: publisherId,
         metacritic_score: metacritic || null,
         rating: rating || null,
+        esrb_rating: esrb_rating || null,
       })
       .eq('id', gameId);
 
@@ -112,6 +123,74 @@ export async function POST(req: Request, context: { params: Params }) {
       }
     }
 
+    // Handle genres (if provided)
+    const incomingGenres = Array.isArray(genres)
+      ? genres
+      : genre
+      ? [genre]
+      : [];
+    if (incomingGenres.length > 0) {
+      await supabase.from('game_genres').delete().eq('game_id', gameId);
+      for (const genreName of incomingGenres) {
+        const trimmed = genreName.trim();
+        if (!trimmed) continue;
+        const slug = trimmed.toLowerCase().replaceAll(/\s+/g, '-');
+        let genreId: number | null = null;
+
+        // Try by name
+        const { data: genreData } = await supabase
+          .from('genres')
+          .select('id')
+          .ilike('name', trimmed)
+          .maybeSingle();
+
+        if (genreData?.id) {
+          genreId = genreData.id;
+        } else {
+          // Try by slug
+          const { data: genreBySlug } = await supabase
+            .from('genres')
+            .select('id')
+            .eq('slug', slug)
+            .maybeSingle();
+
+          if (genreBySlug?.id) {
+            genreId = genreBySlug.id;
+          } else {
+            const { data: newGenre, error: insertGenreError } = await supabase
+              .from('genres')
+              .insert({ name: trimmed, slug })
+              .select('id')
+              .single();
+
+            if (insertGenreError) {
+              if (insertGenreError.code === '23505') {
+                const { data: existing } = await supabase
+                  .from('genres')
+                  .select('id')
+                  .eq('slug', slug)
+                  .maybeSingle();
+                genreId = existing?.id ?? null;
+              } else {
+                console.error('❌ Failed to create genre:', insertGenreError);
+              }
+            } else {
+              genreId = newGenre?.id ?? null;
+            }
+          }
+        }
+
+        if (genreId) {
+          const { error: linkError } = await supabase
+            .from('game_genres')
+            .insert({ game_id: gameId, genre_id: genreId });
+          if (linkError) {
+            console.error('❌ Failed to link genre:', linkError);
+          }
+        }
+      }
+    }
+
     return NextResponse.json({
       message: '✅ Πληροφορίες ενημερώθηκαν επιτυχώς!',
       updatedData: {
@@ -121,6 +200,8 @@ export async function POST(req: Request, context: { params: Params }) {
         rating,
         metacritic,
         platforms,
+        genres,
+        esrb_rating,
       },
     });
   } catch (error) {

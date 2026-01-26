@@ -1,16 +1,81 @@
-import { NextResponse } from 'next/server';
-import supabase from '@/lib/db';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { Database } from '@/lib/supabase/database.types';
+import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
+import { insertActivity } from '@/lib/services/activityService';
+import { API_ERRORS } from '@/lib/api/errors';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { fail, ok } from '@/lib/api/response';
+import { revalidateCache } from '@/lib/cache/tags';
 
 interface ScrapedStep {
   title: string;
   description: string;
   trophies?: unknown[];
+  content_rich?: unknown;
+  content_html?: string | null;
 }
 
 export async function POST(req: Request) {
   try {
-    const { title, platform, gameImage, trophies, difficulty, hours, playthroughs, steps } =
-      await req.json();
+    const supabase = await createRouteHandlerClient();
+
+    const session = await requireAuth(supabase);
+
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!userData || !['admin', 'author'].includes(userData.role as string)) {
+      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
+    }
+
+    const {
+      title,
+      platform,
+      gameImage,
+      release_year,
+      rating,
+      metacritic,
+      trophies,
+      difficulty,
+      hours,
+      playthroughs,
+      steps,
+      content_rich: guideContentRich,
+      content_html: guideContentHtml,
+      description,
+      background_image,
+    } = await req.json();
+    const titleValidation = validatePlainText(title, 'Ο τίτλος');
+    if (!titleValidation.isValid) {
+      return fail({ error: titleValidation.error || 'Μη έγκυρος τίτλος' }, 400);
+    }
+    const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+    if (!descriptionValidation.isValid) {
+      return fail({ error: descriptionValidation.error || 'Μη έγκυρη περιγραφή' }, 400);
+    }
+    if (steps && Array.isArray(steps)) {
+      const stepTitles = steps.map((step: ScrapedStep) => step.title).filter(Boolean);
+      const stepDescriptions = steps.map((step: ScrapedStep) => step.description).filter(Boolean);
+      const stepTitleValidation = validatePlainTextArray(stepTitles, 'Οι τίτλοι βημάτων');
+      if (!stepTitleValidation.isValid) {
+        return fail({ error: stepTitleValidation.error || 'Μη έγκυροι τίτλοι βημάτων' }, 400);
+      }
+      const stepDescriptionValidation = validatePlainTextArray(
+        stepDescriptions,
+        'Οι περιγραφές βημάτων',
+      );
+      if (!stepDescriptionValidation.isValid) {
+        return fail(
+          { error: stepDescriptionValidation.error || 'Μη έγκυρες περιγραφές βημάτων' },
+          400,
+        );
+      }
+    }
+    const sanitizedGuideContentHtml = sanitizeHtmlContent(guideContentHtml).trim() || null;
 
     // Create slug from title
     const slug = title
@@ -26,12 +91,12 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (existingGame) {
-      return NextResponse.json(
+      return fail(
         {
-          message: `⚠️ Ο οδηγός "${existingGame.title}" υπάρχει ήδη στη βάση!`,
-          existingData: existingGame,
+          error: `⚠️ Ο οδηγός "${existingGame.title}" υπάρχει ήδη στη βάση!`,
+          code: 'CONFLICT',
         },
-        { status: 409 },
+        409,
       );
     }
 
@@ -43,10 +108,14 @@ export async function POST(req: Request) {
           title,
           slug,
           cover_image: gameImage,
+          background_image: background_image ?? gameImage,
           trophy_platinum: parseInt(trophies?.Platinum) || 0,
           trophy_gold: parseInt(trophies?.Gold) || 0,
           trophy_silver: parseInt(trophies?.Silver) || 0,
           trophy_bronze: parseInt(trophies?.Bronze) || 0,
+          release_year: release_year ?? null,
+          rating: rating ?? null,
+          metacritic_score: metacritic ?? null,
         },
       ])
       .select('*')
@@ -54,10 +123,8 @@ export async function POST(req: Request) {
 
     if (gameError) {
       console.error('❌ Σφάλμα αποθήκευσης παιχνιδιού:', gameError);
-      return NextResponse.json({ error: 'Database insert error' }, { status: 500 });
+      return fail({ error: 'Σφάλμα αποθήκευσης παιχνιδιού' }, 500);
     }
-
-    console.log(`✅ Αποθηκεύτηκε το παιχνίδι: ${game.title} με ID: ${game.id}`);
 
     // Handle platform - find or create platform and link it
     if (platform) {
@@ -95,10 +162,13 @@ export async function POST(req: Request) {
         {
           game_id: game.id,
           title: `${title} Trophy Guide`,
+          description: description ?? null,
           difficulty_rating: difficultyRating,
           estimated_hours: estimatedHours,
           estimated_playthroughs: estimatedPlaythroughs,
           status: 'published',
+          content_rich: guideContentRich ?? null,
+          content_html: sanitizedGuideContentHtml,
         },
       ])
       .select('*')
@@ -106,19 +176,22 @@ export async function POST(req: Request) {
 
     if (guideError) {
       console.error('❌ Σφάλμα αποθήκευσης guide:', guideError);
-      return NextResponse.json({ error: 'Guide insert error' }, { status: 500 });
+      return fail({ error: 'Σφάλμα αποθήκευσης οδηγού' }, 500);
     }
-
-    console.log(`✅ Οδηγός δημιουργήθηκε με ID: ${guide.id}`);
 
     // Insert guide steps
     if (steps && Array.isArray(steps) && steps.length > 0) {
-      const guideSteps = steps.map((step: ScrapedStep, index: number) => ({
+      const guideSteps: Database['public']['Tables']['guide_steps']['Insert'][] = steps.map(
+        (step: ScrapedStep, index: number) => ({
         guide_id: guide.id,
         step_number: index + 1,
         title: step.title,
         description: step.description,
-      }));
+        content_rich:
+          (step.content_rich ?? null) as Database['public']['Tables']['guide_steps']['Insert']['content_rich'],
+        content_html: sanitizeHtmlContent(step.content_html).trim() || null,
+      }),
+      );
 
       const { error: stepsError } = await supabase.from('guide_steps').insert(guideSteps);
 
@@ -129,13 +202,38 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({
+    // Activity log for guide_created
+    const profile = await supabase
+      .from('users')
+      .select('username, display_name, avatar_url')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    await insertActivity(supabase, session.user.id, 'guide_created', {
+      guideId: guide.id,
+      guideTitle: guide.title,
+      gameId: game.id,
+      gameTitle: game.title,
+      gameSlug: game.slug,
+      username: profile.data?.username,
+      display_name: profile.data?.display_name,
+      avatar_url: profile.data?.avatar_url,
+    });
+
+    // Revalidate game and guide caches
+    revalidateCache.game(game.id, game.slug);
+    revalidateCache.guide(guide.id);
+
+    return ok({
       message: '✅ Ο οδηγός αποθηκεύτηκε!',
       game,
       guide,
     });
   } catch (error) {
     console.error('❌ Σφάλμα αποθήκευσης:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

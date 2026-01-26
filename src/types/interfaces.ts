@@ -12,6 +12,8 @@ export interface Step {
   title: string;
   description: string;
   trophies: Trophy[];
+  content_rich?: unknown;
+  content_html?: string;
 }
 
 export interface Guide {
@@ -26,6 +28,8 @@ export interface Guide {
   status: 'draft' | 'published' | 'archived';
   is_verified: boolean;
   steps?: Step[];
+  content_rich?: unknown;
+  content_html?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -66,6 +70,9 @@ export interface Game {
   total_reviews: number;
   average_difficulty?: number;
   average_hours?: number;
+  // Aggregated from guides (computed in API)
+  average_playthroughs?: number | null;
+  max_playthroughs?: number | null;
 
   // Timestamps
   created_at: string;
@@ -171,10 +178,11 @@ export interface Genre {
 // PROCESSED DATA FOR UI
 // =====================================================
 
-export interface ProcessedGame extends FullGameData {
+export interface ProcessedGame extends FullGameData, ScrapedGameData {
   // Computed fields
   totalPoints: number;
   difficultyNumber: number; // For sorting/filtering
+  playthroughs: string; //IS THIS CORRECT?
 }
 
 export interface GamesResponse {
@@ -183,6 +191,18 @@ export interface GamesResponse {
   developers: string[];
   platforms: string[];
   difficulties: number[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    meta?: {
+      developersCount?: number;
+      genresCount?: number;
+      maxHours?: number | null;
+      minYearMeta?: number | null;
+      maxYearMeta?: number | null;
+    };
+  };
 }
 
 // =====================================================
@@ -196,9 +216,11 @@ export interface UserBacklog {
   status: 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
   priority: number;
   notes?: string | null;
+  personal_difficulty?: number | null;
   actual_hours_casual?: number | null;
   actual_hours_platinum?: number | null;
   personal_rating?: number | null;
+  is_favorite?: boolean | null;
   would_recommend?: boolean | null;
   added_at: string;
   started_at?: string | null;

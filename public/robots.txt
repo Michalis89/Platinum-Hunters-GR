@@ -10,8 +10,11 @@ Disallow: /scraper
 Disallow: /search?q=
 Disallow: /api/
 
-# Block crawling of dynamic query strings to avoid duplicate content
-Disallow: /*?*
+# Block auth routes
+Disallow: /pages/auth
+Disallow: /pages/auth/login
+Disallow: /pages/auth/register
+Disallow: /pages/auth/reset-password
 
 # Allow indexing of JavaScript, CSS, images, etc.
 Allow: /*.css$
@@ -24,7 +27,7 @@ Allow: /*.gif$
 Crawl-delay: 5
 
 # Specify host
-Host: https://platinumhunters.gr
+Host: https://hobbistas.gr
 
 # Sitemaps
-Sitemap: https://platinumhunters.gr/sitemap.xml
+Sitemap: https://hobbistas.gr/sitemap.xml

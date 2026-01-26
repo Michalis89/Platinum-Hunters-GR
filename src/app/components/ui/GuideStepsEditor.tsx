@@ -1,48 +1,76 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import RichTextEditor from './RichTextEditor';
 
-export function GuideStepsEditor() {
-  const [steps, setSteps] = useState<string[]>(['']);
+interface GuideStepsEditorProps {
+  readonly value?: string[];
+  readonly onChange?: (steps: string[]) => void;
+  readonly label?: string;
+  readonly placeholderPrefix?: string;
+}
 
-  const updateStep = (index: number, value: string) => {
+export function GuideStepsEditor({
+  value,
+  onChange,
+  label = 'Βήματα',
+  placeholderPrefix = 'Βήμα',
+}: GuideStepsEditorProps) {
+  const [steps, setSteps] = useState<string[]>(value ?? ['']);
+
+  useEffect(() => {
+    if (value) {
+      setSteps(value);
+    }
+  }, [value]);
+
+  const updateStep = (index: number, val: string) => {
     const updated = [...steps];
-    updated[index] = value;
+    updated[index] = val;
     setSteps(updated);
+    onChange?.(updated);
   };
 
-  const addStep = () => setSteps([...steps, '']);
+  const addStep = () => {
+    const next = [...steps, ''];
+    setSteps(next);
+    onChange?.(next);
+  };
 
   const removeStep = (index: number) => {
     const updated = steps.filter((_, i) => i !== index);
-    setSteps(updated);
+    const safe = updated.length ? updated : [''];
+    setSteps(safe);
+    onChange?.(safe);
   };
 
   return (
-    <div className="space-y-2">
-      <label htmlFor="steps" className="text-sm font-medium text-white">
-        Βήματα
-      </label>
+    <div className="space-y-3">
+      <label className="text-sm font-medium text-white">{label}</label>
+
       {steps.map((step, index) => (
-        <div key={index} className="flex gap-2">
-          <textarea
-            id="steps"
+        <div key={index} className="rounded-xl border border-slate-800/70 bg-slate-950/60 p-3">
+          <div className="mb-2 flex items-center justify-between text-sm text-slate-300">
+            <span className="font-semibold">{`${placeholderPrefix} ${index + 1}`}</span>
+            <button
+              type="button"
+              onClick={() => removeStep(index)}
+              className="text-red-400 transition hover:text-red-200"
+              aria-label="Διαγραφή βήματος"
+            >
+              ✕
+            </button>
+          </div>
+          <RichTextEditor
             value={step}
-            onChange={e => updateStep(index, e.target.value)}
-            className="w-full rounded border border-gray-700 bg-gray-900 p-2 text-white"
-            placeholder={`Βήμα ${index + 1}`}
+            onChange={val => updateStep(index, val)}
+            placeholder="Πρόσθεσε περιεχόμενο, λίστες, πίνακες ή εικόνες…"
           />
-          <button
-            type="button"
-            onClick={() => removeStep(index)}
-            className="text-red-500 hover:text-red-300"
-          >
-            ✕
-          </button>
         </div>
       ))}
+
       <button
         type="button"
         onClick={addStep}
-        className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+        className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-100 transition hover:border-sky-500/70 hover:text-white"
       >
         + Προσθήκη Βήματος
       </button>

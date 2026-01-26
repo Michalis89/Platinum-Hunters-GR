@@ -13,7 +13,15 @@ import type { RootState } from '../store';
 interface BacklogStats {
   totalGames: number;
   totalHours: number;
-  totalTrophies: {
+  totalPlayedHours: number;
+  trophiesRemaining: {
+    platinum: number;
+    gold: number;
+    silver: number;
+    bronze: number;
+    total: number;
+  };
+  trophiesEarned: {
     platinum: number;
     gold: number;
     silver: number;
@@ -33,6 +41,11 @@ interface BacklogState {
   isLoading: boolean;
   error: string | null;
   stats: BacklogStats;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
 }
 
 /**
@@ -45,7 +58,15 @@ const initialState: BacklogState = {
   stats: {
     totalGames: 0,
     totalHours: 0,
-    totalTrophies: {
+    totalPlayedHours: 0,
+    trophiesRemaining: {
+      platinum: 0,
+      gold: 0,
+      silver: 0,
+      bronze: 0,
+      total: 0,
+    },
+    trophiesEarned: {
       platinum: 0,
       gold: 0,
       silver: 0,
@@ -56,36 +77,78 @@ const initialState: BacklogState = {
     difficultyAverage: 0,
     recentlyAdded: [],
   },
+  pagination: {
+    page: 1,
+    limit: 50,
+    total: 0,
+  },
 };
 
 /**
  * Thunk: Fetch backlog
  */
-export const fetchBacklog = createAsyncThunk('backlog/fetch', async () => {
-  const response = await fetch('/api/backlog', {
-    credentials: 'include',
-  });
+export const fetchBacklog = createAsyncThunk(
+  'backlog/fetch',
+  async ({ page = 1, limit = 50 }: { page?: number; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('page', page.toString());
+    qs.set('limit', limit.toString());
+    const response = await fetch(`/api/backlog?${qs.toString()}`, {
+      credentials: 'include',
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Σφάλμα φόρτωσης backlog');
-  }
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const message = error.error || 'Σφάλμα φόρτωσης backlog';
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('UNAUTHORIZED');
+      }
+      throw new Error(message);
+    }
 
-  const data = await response.json();
-  return data as UserBacklogWithGame[];
-});
+    const data = await response.json();
+    return data as {
+      data: UserBacklogWithGame[];
+      pagination?: { page: number; limit: number; total: number };
+    };
+  },
+);
 
 /**
  * Thunk: Add to backlog
  */
 export const addToBacklog = createAsyncThunk(
   'backlog/add',
-  async ({ game_id, priority = 0, notes = null }: { game_id: number; priority?: number; notes?: string | null }) => {
+  async ({
+    game_id,
+    priority = 0,
+    notes = null,
+    personal_rating = null,
+    personal_difficulty = null,
+    would_recommend = null,
+    is_favorite = false,
+  }: {
+    game_id: number;
+    priority?: number;
+    notes?: string | null;
+    personal_rating?: number | null;
+    personal_difficulty?: number | null;
+    would_recommend?: boolean | null;
+    is_favorite?: boolean;
+  }) => {
     const response = await fetch('/api/backlog', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game_id, priority, notes }),
+      body: JSON.stringify({
+        game_id,
+        priority,
+        notes,
+        personal_rating,
+        personal_difficulty,
+        would_recommend,
+        is_favorite,
+      }),
     });
 
     if (!response.ok) {
@@ -94,7 +157,7 @@ export const addToBacklog = createAsyncThunk(
     }
 
     const data = await response.json();
-    return data as UserBacklogWithGame;
+    return (data?.data ?? data) as UserBacklogWithGame;
   },
 );
 
@@ -111,7 +174,9 @@ export const updateBacklogItem = createAsyncThunk(
     actual_hours_casual,
     actual_hours_platinum,
     personal_rating,
-    would_recommend
+    personal_difficulty,
+    would_recommend,
+    is_favorite,
   }: {
     id: number;
     status?: 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
@@ -120,7 +185,9 @@ export const updateBacklogItem = createAsyncThunk(
     actual_hours_casual?: number | null;
     actual_hours_platinum?: number | null;
     personal_rating?: number | null;
+    personal_difficulty?: number | null;
     would_recommend?: boolean | null;
+    is_favorite?: boolean;
   }) => {
     const response = await fetch(`/api/backlog/${id}`, {
       method: 'PATCH',
@@ -133,7 +200,9 @@ export const updateBacklogItem = createAsyncThunk(
         actual_hours_casual,
         actual_hours_platinum,
         personal_rating,
-        would_recommend
+        personal_difficulty,
+        would_recommend,
+        is_favorite,
       }),
     });
 
@@ -143,7 +212,7 @@ export const updateBacklogItem = createAsyncThunk(
     }
 
     const data = await response.json();
-    return data as UserBacklogWithGame;
+    return (data?.data ?? data) as UserBacklogWithGame;
   },
 );
 
@@ -168,30 +237,56 @@ export const removeFromBacklog = createAsyncThunk('backlog/remove', async (id: n
  * Calculate stats from backlog items
  */
 const calculateStats = (items: UserBacklogWithGame[]): BacklogStats => {
-  const totalGames = items.length;
-  const totalHours = items.reduce((sum, item) => sum + (item.game?.average_hours || 0), 0);
+  const sumTrophies = (list: UserBacklogWithGame[]) =>
+    list.reduce(
+      (acc, item) => {
+        const game = item.game;
+        if (game) {
+          acc.platinum += game.trophy_platinum || 0;
+          acc.gold += game.trophy_gold || 0;
+          acc.silver += game.trophy_silver || 0;
+          acc.bronze += game.trophy_bronze || 0;
+        }
+        return acc;
+      },
+      { platinum: 0, gold: 0, silver: 0, bronze: 0, total: 0 },
+    );
 
-  const totalTrophies = items.reduce(
-    (acc, item) => {
-      const game = item.game;
-      if (game) {
-        acc.platinum += game.trophy_platinum || 0;
-        acc.gold += game.trophy_gold || 0;
-        acc.silver += game.trophy_silver || 0;
-        acc.bronze += game.trophy_bronze || 0;
-        acc.total += game.trophy_total || 0;
-      }
-      return acc;
-    },
-    { platinum: 0, gold: 0, silver: 0, bronze: 0, total: 0 },
-  );
+  const activeItems = items.filter(item => item.status === 'to_play' || item.status === 'playing');
+  const finishedItems = items.filter(item => item.status === 'completed' || item.status === 'platinumed');
+  const platinumedItems = items.filter(item => item.status === 'platinumed');
+  const totalGames = items.length;
+  const totalHours = activeItems.reduce((sum, item) => sum + (item.game?.average_hours || 0), 0);
+  const totalPlayedHours = finishedItems.reduce((sum, item) => {
+    const actual =
+      item.actual_hours_casual ??
+      item.actual_hours_platinum ??
+      item.game?.average_hours ??
+      0;
+    return sum + (actual || 0);
+  }, 0);
+
+  const trophiesRemaining = sumTrophies(activeItems);
+  trophiesRemaining.total =
+    trophiesRemaining.platinum +
+    trophiesRemaining.gold +
+    trophiesRemaining.silver +
+    trophiesRemaining.bronze;
+
+  const trophiesEarned = sumTrophies(platinumedItems);
+  trophiesEarned.total =
+    trophiesEarned.platinum +
+    trophiesEarned.gold +
+    trophiesEarned.silver +
+    trophiesEarned.bronze;
 
   // Platform breakdown would require platform data from games
   // For now, we'll leave it empty - can be enhanced later
   const platformBreakdown: Record<string, number> = {};
 
   const difficultyAverage =
-    items.reduce((sum, item) => sum + (item.game?.average_difficulty || 0), 0) / (totalGames || 1);
+    activeItems.reduce((sum, item) => sum + (item.game?.average_difficulty || 0), 0) /
+    (activeItems.length || 1);
 
   const recentlyAdded = [...items]
     .sort((a, b) => new Date(b.added_at).getTime() - new Date(a.added_at).getTime())
@@ -200,7 +295,9 @@ const calculateStats = (items: UserBacklogWithGame[]): BacklogStats => {
   return {
     totalGames,
     totalHours: Math.round(totalHours * 10) / 10,
-    totalTrophies,
+    totalPlayedHours: Math.round(totalPlayedHours * 10) / 10,
+    trophiesRemaining,
+    trophiesEarned,
     platformBreakdown,
     difficultyAverage: Math.round(difficultyAverage * 10) / 10,
     recentlyAdded,
@@ -230,10 +327,26 @@ const backlogSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(fetchBacklog.fulfilled, (state, action: PayloadAction<UserBacklogWithGame[]>) => {
+      .addCase(
+        fetchBacklog.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            data: UserBacklogWithGame[];
+            pagination?: { page: number; limit: number; total: number };
+          }>,
+        ) => {
         state.isLoading = false;
-        state.items = action.payload;
-        state.stats = calculateStats(action.payload);
+          state.items =
+            action.payload.pagination?.page && action.payload.pagination.page > 1
+              ? [...state.items, ...action.payload.data]
+              : action.payload.data;
+          state.stats = calculateStats(state.items);
+          state.pagination = {
+            page: action.payload.pagination?.page ?? 1,
+            limit: action.payload.pagination?.limit ?? state.pagination.limit,
+            total: action.payload.pagination?.total ?? action.payload.data.length,
+          };
       })
       .addCase(fetchBacklog.rejected, (state, action) => {
         state.isLoading = false;

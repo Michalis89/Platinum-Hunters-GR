@@ -5,6 +5,7 @@ import { TrophiesRecord } from '@/types/interfaces';
 export default async function scrapePSNGuide(url: string) {
   try {
     const isHeadless = process.env.HEADLESS_MODE === 'true';
+    const manualClickMode = !isHeadless && process.env.MANUAL_SCRAPE_CLICK !== 'false';
 
     const browser = await chromium.launch({
       headless: isHeadless,
@@ -27,6 +28,34 @@ export default async function scrapePSNGuide(url: string) {
       }
     } catch (error) {
       console.log('🚫 Δεν βρέθηκε cookie banner, συνεχίζουμε...', error);
+    }
+
+    if (manualClickMode) {
+      const manualTimeoutMsRaw = process.env.MANUAL_CLICK_TIMEOUT_MS;
+      const manualTimeoutMs =
+        manualTimeoutMsRaw !== undefined && !Number.isNaN(Number(manualTimeoutMsRaw))
+          ? Number(manualTimeoutMsRaw)
+          : 0; // default: wait indefinitely; set >0 to limit
+
+      console.log(
+        manualTimeoutMs > 0
+          ? `🛑 Manual click mode: λύσε το bot check και κάνε ένα κλικ στο page για να συνεχίσουμε (αναμονή έως ${Math.round(
+              manualTimeoutMs / 60000,
+            )} λεπτά).`
+          : '🛑 Manual click mode: λύσε το bot check και κάνε ένα κλικ στο page για να συνεχίσουμε (χωρίς timeout).',
+      );
+      await page.bringToFront();
+      try {
+        await page.waitForSelector('.title-author h3', {
+          timeout: manualTimeoutMs > 0 ? manualTimeoutMs : 0, // 0 => no timeout
+        });
+        console.log('✅ Ολοκληρώθηκε η επαλήθευση/φόρτωση μετά το manual click.');
+      } catch (navErr) {
+        console.warn(
+          '⚠️ Καθυστέρηση ή αποτυχία στη φόρτωση μετά το manual click. Ρύθμισε MANUAL_CLICK_TIMEOUT_MS=0 για απεριόριστη αναμονή.',
+          navErr,
+        );
+      }
     }
 
     const title = await page.evaluate(() => {

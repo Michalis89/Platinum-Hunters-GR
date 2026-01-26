@@ -19,12 +19,15 @@ import {
   ExternalLink,
   Calendar,
   Signal,
+  Star,
+  Gauge,
 } from 'lucide-react';
 import type { UserBacklogWithGame } from '@/types/interfaces';
 import type { AppDispatch } from '@/store/store';
 import { removeFromBacklog, updateBacklogItem } from '@/store/slices/backlogSlice';
 import EditBacklogItemModal from './EditBacklogItemModal';
 import HoursInputModal from './HoursInputModal';
+import { Card, CardContent, CardFooter, CardHeader } from '@/app/components/ui/Card';
 
 interface BacklogItemProps {
   readonly item: UserBacklogWithGame;
@@ -115,65 +118,67 @@ export default function BacklogItem({ item }: BacklogItemProps) {
     });
   };
 
+  const MotionCard = motion(Card);
+
   return (
     <>
-      <motion.div
+      <MotionCard
         layout
         className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm transition-all hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
       >
-        {/* Cover Image */}
-        <Link
-          href={`/pages/guides/${game.slug}`}
-          className="relative block aspect-video overflow-hidden"
-        >
-          {game.cover_image ? (
-            <Image
-              src={game.cover_image}
-              alt={game.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-slate-800">
-              <Trophy className="h-12 w-12 text-slate-600" />
+        <CardHeader className="border-b-0 p-0">
+          {/* Cover Image */}
+          <Link
+            href={`/pages/guides/${game.slug}`}
+            className="relative block aspect-video overflow-hidden"
+          >
+            {game.cover_image ? (
+              <Image
+                src={game.cover_image}
+                alt={game.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-slate-800">
+                <Trophy className="h-12 w-12 text-slate-600" />
+              </div>
+            )}
+
+            {/* Priority Badge (Top Left) */}
+            <div className="absolute left-2 top-2">
+              <div
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${priorityConfig.color}`}
+              >
+                <Signal size={12} />
+                {priorityConfig.label}
+              </div>
             </div>
-          )}
 
-          {/* Priority Badge (Top Left) */}
-          <div className="absolute left-2 top-2">
-            <div
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${priorityConfig.color}`}
-            >
-              <Signal size={12} />
-              {priorityConfig.label}
+            {/* Status Badge (Top Right) */}
+            <div className="absolute right-2 top-2">
+              <div
+                className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${statusConfig.color}`}
+              >
+                {statusConfig.label}
+              </div>
             </div>
-          </div>
 
-          {/* Status Badge (Top Right) */}
-          <div className="absolute right-2 top-2">
-            <div
-              className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${statusConfig.color}`}
-            >
-              {statusConfig.label}
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
+
+            {/* View Guide Link */}
+            <div className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-lg">
+                <ExternalLink size={12} />
+                Δες Οδηγό
+              </div>
             </div>
-          </div>
+          </Link>
+        </CardHeader>
 
-          {/* Hover Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
-
-          {/* View Guide Link */}
-          <div className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-            <div className="flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-lg">
-              <ExternalLink size={12} />
-              Δες Οδηγό
-            </div>
-          </div>
-        </Link>
-
-        {/* Content */}
-        <div className="p-4">
-          {/* Title */}
+        <CardContent className="p-4">
           <Link href={`/pages/guides/${game.slug}`}>
             <h3 className="mb-2 line-clamp-2 text-lg font-semibold text-slate-100 transition-colors hover:text-blue-400">
               {game.title}
@@ -209,15 +214,41 @@ export default function BacklogItem({ item }: BacklogItemProps) {
             )}
           </div>
 
-          {/* Actual Hours Display */}
-          {(item.actual_hours_casual || item.actual_hours_platinum) && (
-            <div className="mb-3 rounded-lg border border-blue-800 bg-blue-950/30 px-3 py-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-blue-300">Οι δικές σου ώρες:</span>
-                <div className="flex items-center gap-2 font-medium text-blue-400">
-                  {item.actual_hours_casual && <span>🎮 {item.actual_hours_casual}h</span>}
-                  {item.actual_hours_platinum && <span>🏆 {item.actual_hours_platinum}h</span>}
-                </div>
+          {/* Personal Stats Display */}
+          {(item.actual_hours_casual ||
+            item.actual_hours_platinum ||
+            item.personal_rating ||
+            item.personal_difficulty) && (
+            <div className="mb-3 rounded-xl border border-slate-800/80 bg-gradient-to-r from-slate-900 via-slate-900/80 to-slate-900/60 px-4 py-3 shadow-inner shadow-slate-950/40">
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-slate-200">
+                <span className="text-slate-300">Τα δικά σου δεδομένα</span>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                {item.actual_hours_casual && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-1 text-blue-200 ring-1 ring-blue-500/40">
+                    <Clock className="h-3.5 w-3.5" />
+                    {item.actual_hours_casual}h
+                  </span>
+                )}
+                {item.actual_hours_platinum && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-amber-100 ring-1 ring-amber-400/40">
+                    <Trophy className="h-3.5 w-3.5" />
+                    {item.actual_hours_platinum}h
+                  </span>
+                )}
+                {item.personal_rating && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-100 ring-1 ring-emerald-400/40 shadow-[0_0_0_1px_rgba(16,185,129,0.15)]">
+                    <Star className="h-3.5 w-3.5" />
+                    Rating: {item.personal_rating}/5
+                  </span>
+                )}
+                {item.personal_difficulty && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-1 text-amber-100 ring-1 ring-amber-400/40 shadow-[0_0_0_1px_rgba(251,191,36,0.15)]">
+                    <Gauge className="h-3.5 w-3.5" />
+                    Δυσκολία: {item.personal_difficulty}/10
+                  </span>
+                )}
               </div>
             </div>
           )}
@@ -315,7 +346,9 @@ export default function BacklogItem({ item }: BacklogItemProps) {
             )}
           </div>
 
-          {/* Action Buttons */}
+        </CardContent>
+
+        <CardFooter className="border-t-0 p-4 pt-0">
           <div className="flex gap-2">
             <button
               onClick={() => setShowEditModal(true)}
@@ -340,7 +373,7 @@ export default function BacklogItem({ item }: BacklogItemProps) {
               <Trash2 size={14} />
             </button>
           </div>
-        </div>
+        </CardFooter>
 
         {/* Delete Confirmation Overlay */}
         <AnimatePresence>
@@ -377,7 +410,7 @@ export default function BacklogItem({ item }: BacklogItemProps) {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </MotionCard>
 
       {/* Edit Modal */}
       {showEditModal && (

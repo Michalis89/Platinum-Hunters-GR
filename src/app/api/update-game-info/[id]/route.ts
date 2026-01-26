@@ -162,6 +162,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         publisher_id: publisherId,
         metacritic_score: gameInfo.metacritic,
         rating: gameInfo.rating,
+        esrb_rating: gameInfo.esrb_rating,
       })
       .eq('id', gameId);
 

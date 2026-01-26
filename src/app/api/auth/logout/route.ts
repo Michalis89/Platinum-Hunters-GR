@@ -4,9 +4,10 @@
  * PH-30: User Authentication System
  */
 
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { cookies } from 'next/headers';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail, ok } from '@/lib/api/response';
 
 export async function POST() {
   try {
@@ -16,7 +17,7 @@ export async function POST() {
 
     if (error) {
       console.error('Logout error:', error);
-      return NextResponse.json({ error: 'Σφάλμα αποσύνδεσης' }, { status: 500 });
+      return fail({ error: 'Σφάλμα αποσύνδεσης' }, 500);
     }
 
     // Clear session cookies
@@ -24,11 +25,11 @@ export async function POST() {
     cookieStore.delete('sb-access-token');
     cookieStore.delete('sb-refresh-token');
 
-    return NextResponse.json({
+    return ok({
       message: 'Επιτυχής αποσύνδεση',
     });
   } catch (error) {
     console.error('Logout error:', error);
-    return NextResponse.json({ error: 'Σφάλμα αποσύνδεσης' }, { status: 500 });
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }

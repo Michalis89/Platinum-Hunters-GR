@@ -115,7 +115,7 @@ describe.skip('GET /api/guides/[id]', () => {
     const json = await response.json();
 
     expect(response.status).toBe(500);
-    expect(json.error).toBe('Database error');
+    expect(json.error).toBe('Σφάλμα βάσης δεδομένων');
   });
 
   it('should return 404 if no guides are found', async () => {
@@ -135,7 +135,7 @@ describe.skip('GET /api/guides/[id]', () => {
     const json = await response.json();
 
     expect(response.status).toBe(404);
-    expect(json.error).toBe('Guide not found');
+    expect(json.error).toBe('Ο οδηγός δεν βρέθηκε');
   });
 
   it('should return 500 on unexpected server error', async () => {
@@ -152,6 +152,6 @@ describe.skip('GET /api/guides/[id]', () => {
     const json = await response.json();
 
     expect(response.status).toBe(500);
-    expect(json.error).toBe('Internal server error');
+    expect(json.error).toBe('Εσωτερικό σφάλμα διακομιστή');
   });
 });

@@ -1,50 +1,92 @@
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_ALT,
+  SITE_LANGUAGE,
+  SITE_NAME,
+  SITE_URL,
+} from '@/config/site';
+
+type ArticleStructuredDataInput = {
+  title: string;
+  description?: string | null;
+  url: string;
+  image?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  authorName?: string | null;
+};
+
+type BreadcrumbItem = {
+  name: string;
+  url: string;
+};
+
+const absoluteUrl = (path: string) => new URL(path, SITE_URL).toString();
+
+export const organizationStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: SITE_NAME,
+  url: SITE_URL,
+  logo: {
+    '@type': 'ImageObject',
+    url: absoluteUrl(DEFAULT_OG_IMAGE),
+    width: 1200,
+    height: 630,
+    caption: DEFAULT_OG_IMAGE_ALT,
+  },
+};
+
 export const websiteStructuredData = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'Platinum Hunters GR',
-  url: 'https://platinumhunters.gr',
-  description:
-    'Complete trophy guides and strategies to achieve platinum trophies in your favorite games.',
-  publisher: {
-    '@type': 'Organization',
-    name: 'Platinum Hunters GR',
-    logo: {
-      '@type': 'ImageObject',
-      url: '/og-image.png',
-      width: 1200,
-      height: 630,
-    },
-  },
+  name: SITE_NAME,
+  url: SITE_URL,
+  description: DEFAULT_DESCRIPTION,
+  inLanguage: SITE_LANGUAGE,
+  publisher: organizationStructuredData,
   potentialAction: {
     '@type': 'SearchAction',
-    target: 'https://platinumhunters.gr/?s={search_term_string}',
+    target: `${SITE_URL}/pages/guides?search={search_term_string}`,
     'query-input': 'required name=search_term_string',
   },
 };
 
-export const trophyGuideStructuredData = {
+export const getArticleStructuredData = ({
+  title,
+  description,
+  url,
+  image,
+  publishedAt,
+  updatedAt,
+  authorName,
+}: ArticleStructuredDataInput) => ({
   '@context': 'https://schema.org',
-  '@type': 'HowTo',
-  name: 'Complete Trophy Guide for Assassin’s Creed Mirage',
-  description: 'Complete guide to achieve all trophies for Assassin’s Creed Mirage.',
-  totalTime: 'PT5H',
-  difficulty: 'hard',
-  tool: [
-    {
-      '@type': 'HowToTool',
-      name: 'Game Controller',
-    },
-  ],
-};
-
-export const contactFormStructuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'ContactPage',
-  mainEntity: {
-    '@type': 'ContactPoint',
-    contactType: 'Customer Support',
-    email: 'support@platinumhunters.gr',
-    availableLanguage: ['English', 'Greek'],
-    areaServed: ['Greece'],
+  '@type': 'Article',
+  headline: title,
+  description: description || DEFAULT_DESCRIPTION,
+  image: [image ? absoluteUrl(image) : absoluteUrl(DEFAULT_OG_IMAGE)],
+  datePublished: publishedAt ?? undefined,
+  dateModified: updatedAt ?? publishedAt ?? undefined,
+  author: {
+    '@type': 'Person',
+    name: authorName || SITE_NAME,
   },
-};
+  publisher: organizationStructuredData,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': url,
+  },
+});
+
+export const getBreadcrumbStructuredData = (items: BreadcrumbItem[]) => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: item.url,
+  })),
+});

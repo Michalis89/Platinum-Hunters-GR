@@ -5,9 +5,17 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
-import type { Database } from '@/types/database';
+import type { Database } from '@/lib/supabase/database.types';
 
-export async function createRouteHandlerClient() {
+type RouteHandlerOptions = {
+  ignoreCookies?: boolean;
+};
+
+export async function createRouteHandlerClient(
+  accessTokenOverride?: string,
+  options: RouteHandlerOptions = {},
+) {
+  const { ignoreCookies = false } = options;
   const cookieStore = await cookies();
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,9 +25,14 @@ export async function createRouteHandlerClient() {
     throw new Error('Missing Supabase environment variables');
   }
 
-  // Get auth tokens from cookies
-  const accessToken = cookieStore.get('sb-access-token')?.value;
-  const refreshToken = cookieStore.get('sb-refresh-token')?.value;
+  // Get auth tokens from cookies (unless an override is provided)
+  const accessToken =
+    accessTokenOverride ??
+    (ignoreCookies ? undefined : cookieStore.get('sb-access-token')?.value);
+  const refreshToken =
+    accessTokenOverride !== undefined || ignoreCookies
+      ? undefined
+      : cookieStore.get('sb-refresh-token')?.value;
 
   const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
@@ -36,11 +49,11 @@ export async function createRouteHandlerClient() {
     },
   });
 
-  // If we have tokens, set the session
-  if (accessToken && refreshToken) {
+  // If we have tokens, set the session (access only is OK for short-lived calls)
+  if (accessToken) {
     await supabase.auth.setSession({
       access_token: accessToken,
-      refresh_token: refreshToken,
+      refresh_token: refreshToken || '',
     });
   }
 

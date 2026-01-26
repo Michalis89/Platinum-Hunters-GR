@@ -1,8 +1,30 @@
 import { NextResponse } from 'next/server';
-import scrapePSNGuide from '@/lib/scraper/index';
 import supabase from '@/lib/db';
 
+/**
+ * Scraper API Route
+ * POST /api/scrape
+ *
+ * This endpoint uses Playwright which requires a browser binary.
+ * It is disabled in production (Vercel) via the SCRAPER_ENABLED flag.
+ *
+ * To enable locally: set SCRAPER_ENABLED=true in .env.local
+ */
+
+const isScraperEnabled = process.env.SCRAPER_ENABLED === 'true';
+
 export async function POST(req: Request) {
+  // Feature flag check - return 503 when disabled
+  if (!isScraperEnabled) {
+    return NextResponse.json(
+      {
+        error: 'Scraper is disabled in this environment',
+        hint: 'Set SCRAPER_ENABLED=true to enable (development only)',
+      },
+      { status: 503 },
+    );
+  }
+
   try {
     const { url } = await req.json();
     if (!url) {
@@ -33,24 +55,31 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data, error } = await supabase.rpc('fuzzy_search', {
-      search_title: extractedTitle,
-    });
+    try {
+      const { data, error } = await supabase.rpc('fuzzy_search', {
+        search_title: extractedTitle,
+      });
 
-    if (error) {
-      console.error('❌ Fuzzy Match Error:', error);
-      return NextResponse.json({ error: 'Database error during fuzzy search' }, { status: 500 });
+      if (error) {
+        throw error;
+      }
+
+      if (data.length > 0 && data[0].similarity > 0.8) {
+        return NextResponse.json(
+          {
+            message: `⚠️ Ο οδηγός "${data[0].title}" υπάρχει ήδη στη βάση (πιθανό match)!`,
+            existingData: data[0],
+          },
+          { status: 409 },
+        );
+      }
+    } catch (fuzzyError) {
+      console.error('❌ Fuzzy Match Error:', fuzzyError);
+      // Continue without blocking scrape; just skip fuzzy match if RPC fails
     }
 
-    if (data.length > 0 && data[0].similarity > 0.8) {
-      return NextResponse.json(
-        {
-          message: `⚠️ Ο οδηγός "${data[0].title}" υπάρχει ήδη στη βάση (πιθανό match)!`,
-          existingData: data[0],
-        },
-        { status: 409 },
-      );
-    }
+    // Dynamic import to prevent Playwright from being bundled when scraper is disabled
+    const { default: scrapePSNGuide } = await import('@/lib/scraper/index');
 
     const scrapedData = await scrapePSNGuide(url);
     if (!scrapedData) {

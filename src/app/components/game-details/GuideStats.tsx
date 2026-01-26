@@ -21,7 +21,7 @@ export default function GuideStats({
     <div className="mt-4 flex flex-wrap justify-center gap-2 text-base md:gap-4 md:text-lg">
       <Badge text={`${difficulty} Δυσκολία`} color={difficultyColor} />
       <Badge
-        text={`${playthroughs} ${playthroughs === 1 ? 'Πέρασμα' : 'Περάσματα'}`}
+        text={`${playthroughs} ${playthroughs === 1 ? 'Run' : 'Runs'}`}
         color={playthroughsColor}
       />
       <Badge text={`${hours} Ώρες`} color={hoursColor} />

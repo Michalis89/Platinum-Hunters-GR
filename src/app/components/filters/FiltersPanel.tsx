@@ -11,14 +11,19 @@ import YearFilter from './YearFilter';
 import ResetFilters from './ResetFilters';
 import SortFilter from './SortFilter';
 import { ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-react';
+import RunsFilter from './RunsFilter';
 
 interface FiltersPanelProps {
   readonly hourRange: [number, number];
+  readonly runValue: number;
   readonly setHourRange: (value: [number, number]) => void;
+  readonly setRunValue: (value: number) => void;
   readonly yearRange: [number, number];
   readonly setYearRange: (value: [number, number]) => void;
   readonly minHour: number;
   readonly maxHour: number;
+  readonly minRun: number;
+  readonly maxRun: number;
   readonly minYear: number;
   readonly maxYear: number;
   readonly onResetFilters: () => void;
@@ -32,11 +37,15 @@ interface FiltersPanelProps {
 
 export default function FiltersPanel({
   hourRange,
+  runValue,
   setHourRange,
+  setRunValue,
   yearRange,
   setYearRange,
   minHour,
   maxHour,
+  minRun,
+  maxRun,
   minYear,
   maxYear,
   onResetFilters,
@@ -72,19 +81,20 @@ export default function FiltersPanel({
       initial={{ y: -300, opacity: 0, scale: 0 }}
       animate={{ y: isOpen ? 0 : -300, opacity: isOpen ? 1 : 0, scale: isOpen ? 1 : 0 }}
       transition={{ type: 'spring', stiffness: 500, damping: 80 }}
-      className="relative w-full rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-xl shadow-blue-900/30 backdrop-blur-xl"
+      className="relative w-full rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 shadow-xl shadow-black/30 backdrop-blur-xl"
       aria-label="Φίλτρα αναζήτησης"
       tabIndex={-1}
     >
       {isOpen && (
         <div className="mt-4 flex flex-col gap-4">
           {/* Top row: platforms + genres */}
-          <div className="grid grid-cols-1">
+          <div className="grid grid-cols-2">
             <PlatformFilter />
-          </div>
-          <div className="grid grid-cols-1">
             <GenreFilter />
           </div>
+          {/* <div className="grid grid-cols-1">
+            <GenreFilter />
+          </div> */}
           {/* Developer row */}
           <div className="grid grid-cols-1">
             <DeveloperFilter />
@@ -102,8 +112,9 @@ export default function FiltersPanel({
           </div>
 
           {/* Sliders */}
-          <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-800/70 bg-slate-950/60 p-3">
+          <div className="grid grid-cols-1 gap-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3">
             <DifficultyFilter />
+            <RunsFilter value={runValue} onChange={setRunValue} min={minRun} max={maxRun} />
             <HourFilter value={hourRange} onChange={setHourRange} min={minHour} max={maxHour} />
             <YearFilter value={yearRange} onChange={setYearRange} min={minYear} max={maxYear} />
           </div>
@@ -111,10 +122,10 @@ export default function FiltersPanel({
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => onOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className={`flex h-12 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white transition ${
+              className={`flex h-12 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
                 sortOrder === 'asc'
-                  ? 'bg-blue-500 hover:bg-blue-600'
-                  : 'bg-red-500 hover:bg-red-600'
+                  ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] hover:brightness-110'
+                  : 'border border-[var(--hb-primary-strong)]/50 bg-[var(--hb-card)] text-[var(--hb-primary-strong)] hover:border-[var(--hb-primary-strong)]'
               }`}
               aria-label={`Αλλαγή σειράς ταξινόμησης. Τρέχουσα: ${sortOrder === 'asc' ? 'Αύξουσα' : 'Φθίνουσα'}`}
             >

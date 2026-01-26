@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, Hammer, ArrowRight } from 'lucide-react';
+import { Hammer, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 export default function UnderConstruction() {
   const router = useRouter();
@@ -61,8 +62,11 @@ export default function UnderConstruction() {
         transition={{ delay: 0.7, duration: 0.5 }}
         className="mt-6 text-gray-400"
       >
-        <Loader2 className="mr-2 inline-block h-5 w-5 animate-spin" />
-        Ανυπομονείτε; Μπορείτε να εξερευνήσετε το site μας!
+        <LoadingSpinner
+          size="sm"
+          inline
+          label="Ανυπομονείτε; Μπορείτε να εξερευνήσετε το site μας!"
+        />
       </motion.div>
     </div>
   );

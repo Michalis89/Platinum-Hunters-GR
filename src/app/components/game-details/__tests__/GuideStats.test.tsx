@@ -15,7 +15,7 @@ describe('GuideStats Component', () => {
     );
 
     expect(screen.getByText('Hard Δυσκολία')).toBeInTheDocument();
-    expect(screen.getByText('2 Περάσματα')).toBeInTheDocument();
+    expect(screen.getByText('2 Runs')).toBeInTheDocument();
     expect(screen.getByText('50 Ώρες')).toBeInTheDocument();
   });
 
@@ -31,6 +31,6 @@ describe('GuideStats Component', () => {
       />,
     );
 
-    expect(screen.getByText('1 Πέρασμα')).toBeInTheDocument();
+    expect(screen.getByText('1 Run')).toBeInTheDocument();
   });
 });

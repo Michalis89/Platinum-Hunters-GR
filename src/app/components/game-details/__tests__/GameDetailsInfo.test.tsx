@@ -18,13 +18,13 @@ describe('GameDetailsInfo Component', () => {
     expect(screen.getByText('Έτος Κυκλοφορίας:')).toBeInTheDocument();
     expect(screen.getByText('2022')).toBeInTheDocument();
 
-    expect(screen.getByText('Προγραμματιστής:')).toBeInTheDocument();
+    expect(screen.getByText('Developer:')).toBeInTheDocument();
     expect(screen.getByText('Naughty Dog')).toBeInTheDocument();
 
-    expect(screen.getByText('Εκδότης:')).toBeInTheDocument();
+    expect(screen.getByText('Publisher:')).toBeInTheDocument();
     expect(screen.getByText('Sony Interactive Entertainment')).toBeInTheDocument();
 
-    expect(screen.getByText('Είδος:')).toBeInTheDocument();
+    expect(screen.getByText('Genre:')).toBeInTheDocument();
     expect(screen.getByText('Action-Adventure')).toBeInTheDocument();
 
     expect(screen.getByText('Βαθμολογία:')).toBeInTheDocument();

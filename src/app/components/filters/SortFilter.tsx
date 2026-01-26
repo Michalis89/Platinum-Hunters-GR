@@ -57,8 +57,10 @@ export default function SortFilter({
       {showOrderButton && (
         <button
           onClick={handleOrderChange}
-          className={`flex h-12 items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold text-white transition-all duration-300 ${
-            sortOrder === 'asc' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-red-500 hover:bg-red-600'
+          className={`flex h-12 items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all duration-300 ${
+            sortOrder === 'asc'
+              ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] hover:brightness-110'
+              : 'border border-[var(--hb-primary-strong)]/60 bg-[var(--hb-card)] text-[var(--hb-primary-strong)] hover:border-[var(--hb-primary-strong)]'
           }`}
           aria-label={`Αλλαγή σειράς ταξινόμησης. Τρέχουσα: ${sortOrder === 'asc' ? 'Αύξουσα' : 'Φθίνουσα'}`}
         >

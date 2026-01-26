@@ -5,6 +5,7 @@ interface GameDetailsInfoProps {
   readonly developer?: string | null;
   readonly publisher?: string | null;
   readonly genre?: string | null;
+  readonly genres?: string[] | null;
   readonly rating?: number | null;
   readonly metacritic?: number | null;
   readonly esrb_rating?: string | null;
@@ -15,6 +16,7 @@ export default function GameDetailsInfo({
   developer,
   publisher,
   genre,
+  genres,
   rating,
   metacritic,
   esrb_rating,
@@ -32,22 +34,24 @@ export default function GameDetailsInfo({
         {developer && (
           <p className="flex items-center">
             <Building2 className="mr-2 h-4 w-4 text-blue-400" />
-            <span className="font-semibold">Προγραμματιστής:</span>
+            <span className="font-semibold">Developer:</span>
             <span className="ml-2 text-white">{developer}</span>
           </p>
         )}
         {publisher && (
           <p className="flex items-center">
             <BookOpen className="mr-2 h-4 w-4 text-purple-400" />
-            <span className="font-semibold">Εκδότης:</span>
+            <span className="font-semibold">Publisher:</span>
             <span className="ml-2 text-white">{publisher}</span>
           </p>
         )}
-        {genre && (
+        {(genre || (genres && genres.length > 0)) && (
           <p className="flex items-center">
             <Joystick className="mr-2 h-4 w-4 text-yellow-400" />
-            <span className="font-semibold">Είδος:</span>
-            <span className="ml-2 text-white">{genre}</span>
+            <span className="font-semibold">Genre:</span>
+            <span className="ml-2 text-white">
+              {(genres && genres.length > 0 ? genres : genre ? [genre] : []).join(', ')}
+            </span>
           </p>
         )}
       </div>
