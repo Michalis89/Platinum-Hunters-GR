@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, ListTodo, Newspaper, Trophy, Plus, ArrowRight, Star } from 'lucide-react';
+import { BookOpen, Newspaper, Trophy, Plus, ArrowRight, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { selectUser } from '@/store/slices/authSlice';
@@ -18,15 +18,8 @@ const actions: QuickAction[] = [
     title: 'Το Προφίλ μου',
     description: 'Στατιστικά και πρόοδος',
     href: '/pages/profile',
-    icon: <Trophy className="h-5 w-5" />,
-  },
-  {
-    title: 'Το Backlog μου',
-    description: 'Διαχείριση όλων των hobbies σου',
-    href: '/pages/backlog',
-    icon: <ListTodo className="h-5 w-5" />,
     primary: true,
-    requires: ['gaming'],
+    icon: <Trophy className="h-5 w-5" />,
   },
   {
     title: 'Οδηγοί',

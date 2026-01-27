@@ -1,5 +1,9 @@
+'use client';
+
+import { useState, createContext, useContext } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 import {
   Clock,
   Gamepad2,
@@ -18,6 +22,16 @@ import { normalizeSlug } from '@/utils/slugify';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import AlertMessage from '@/app/components/ui/AlertMessage';
+import { selectUser } from '@/store/slices/authSlice';
+
+// Context to pass down category alert state to FeedText
+type CategoryAlertState = {
+  showCategoryAlert: (category: string) => void;
+  userCategories: string[] | null;
+};
+
+const CategoryAlertContext = createContext<CategoryAlertState | null>(null);
 
 type ActivityType =
   | 'backlog_added'
@@ -201,6 +215,15 @@ function iconFor(item: ActivityItem) {
   return <UserIcon className="h-4 w-4 text-slate-300" />;
 }
 
+// Category labels for alerts
+const categoryLabels: Record<string, string> = {
+  anime: 'Anime',
+  manga: 'Manga',
+  movies: 'Ταινίες',
+  books: 'Βιβλία',
+  tv: 'Σειρές',
+};
+
 export function ActivityFeed({
   scope,
   limit = 10,
@@ -214,10 +237,42 @@ export function ActivityFeed({
     { revalidateOnFocus: false },
   );
 
+  const user = useSelector(selectUser);
+  const userCategories = user?.categories ?? null;
+
+  // State for category access alert
+  const [alertCategory, setAlertCategory] = useState<string | null>(null);
+
+  const showCategoryAlert = (category: string) => {
+    setAlertCategory(category);
+  };
+
   const activities: ActivityItem[] = data?.activities ?? [];
 
   return (
     <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[0_12px_30px_rgba(3,7,18,0.45)]">
+      {/* Category access alert */}
+      {alertCategory && (
+        <AlertMessage
+          type="info"
+          title="Κατηγορία μη διαθέσιμη"
+          message={
+            <span>
+              Δεν έχεις επιλέξει την κατηγορία <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
+              <Link
+                href="/pages/profile/edit#categories"
+                className="font-semibold text-[var(--hb-primary)] hover:text-[var(--hb-accent)] underline"
+              >
+                Πρόσθεσέ την εδώ
+              </Link>
+            </span>
+          }
+          duration={0}
+          onClose={() => setAlertCategory(null)}
+          showProgress={false}
+        />
+      )}
+
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-base font-semibold text-[var(--hb-headline)]">
           {title || 'Τελευταίες ενέργειες'}
@@ -236,22 +291,24 @@ export function ActivityFeed({
         <EmptyState title="Καμία πρόσφατη ενέργεια." />
       )}
 
-      <div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: `${height ?? 360}px` }}>
-        {activities.map(item => (
-          <div
-            key={item.id}
-            className={`flex items-start gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 ${
-              compact ? 'text-sm' : 'text-base'
-            }`}
-          >
-            <div className="mt-0.5">{iconFor(item)}</div>
-            <div className="flex-1">
-              <FeedText item={item} />
-              <p className="text-xs text-[var(--hb-muted)]">{timeAgo(item.created_at)}</p>
+      <CategoryAlertContext.Provider value={{ showCategoryAlert, userCategories }}>
+        <div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: `${height ?? 360}px` }}>
+          {activities.map(item => (
+            <div
+              key={item.id}
+              className={`flex items-start gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 ${
+                compact ? 'text-sm' : 'text-base'
+              }`}
+            >
+              <div className="mt-0.5">{iconFor(item)}</div>
+              <div className="flex-1">
+                <FeedText item={item} />
+                <p className="text-xs text-[var(--hb-muted)]">{timeAgo(item.created_at)}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </CategoryAlertContext.Provider>
     </div>
   );
 }
@@ -269,6 +326,7 @@ function slugifyTitle(title: string) {
 function FeedText({ item }: { item: ActivityItem }) {
   const text = renderText(item);
   const payload = item.payload || {};
+  const alertContext = useContext(CategoryAlertContext);
 
   // Article activities - link to article
   if (
@@ -310,12 +368,31 @@ function FeedText({ item }: { item: ActivityItem }) {
       </Link>
     );
   }
+
+  // Media activities - check if user has access to the category
   if (
     (item.type === 'media_added' ||
       item.type === 'media_status' ||
       item.type === 'media_favorite') &&
     payload.category
   ) {
+    const category = payload.category as string;
+    const userCategories = alertContext?.userCategories;
+    const hasCategory = userCategories?.includes(category);
+
+    // If user doesn't have this category, show alert on click instead of navigating
+    if (!hasCategory && alertContext) {
+      return (
+        <button
+          onClick={() => alertContext.showCategoryAlert(category)}
+          className="text-left text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
+        >
+          {text}
+        </button>
+      );
+    }
+
+    // User has the category, navigate normally
     return (
       <Link
         href={`/pages/backlog?category=${payload.category}`}

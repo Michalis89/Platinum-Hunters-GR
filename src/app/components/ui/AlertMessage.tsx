@@ -8,7 +8,7 @@ type AlertType = 'success' | 'error' | 'warning' | 'info';
 
 interface AlertProps {
   readonly type: AlertType;
-  readonly message: string;
+  readonly message: React.ReactNode;
   readonly title?: string;
   readonly duration?: number;
   readonly onClose?: () => void;
@@ -135,7 +135,7 @@ export default function AlertMessage({
                 {title && (
                   <p className="text-sm font-semibold text-[var(--hb-headline)] mb-0.5">{title}</p>
                 )}
-                <p className="text-sm text-[var(--hb-text)]/90 leading-relaxed">{message}</p>
+                <div className="text-sm text-[var(--hb-text)]/90 leading-relaxed">{message}</div>
               </div>
 
               {/* Close button */}

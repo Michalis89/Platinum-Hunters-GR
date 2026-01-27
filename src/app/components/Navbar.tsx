@@ -27,12 +27,15 @@ import {
   ChevronDown,
   ChevronRight,
   PenLine,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import AddArticleDialog from './articles/AddArticleDialog';
 import { usePathname } from 'next/navigation';
-import { logout, selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
+import { logout, selectIsAuthenticated, selectIsLoading, selectUser } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import Button from './ui/Button';
+import { useTheme } from '@/context/ThemeContext';
 
 type NavItem = {
   href: string;
@@ -217,9 +220,11 @@ export default function Navbar() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAuthLoading = useSelector(selectIsLoading);
   const user = useSelector(selectUser);
   const isDev = process.env.NODE_ENV === 'development';
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
   const canQuickAdd = !!user && (user.role === 'admin' || user.role === 'author');
 
   const handleLogout = async () => {
@@ -396,7 +401,12 @@ export default function Navbar() {
                 Προσθήκη
               </Button>
             )}
-            {isAuthenticated && user ? (
+            {isAuthLoading ? (
+              <div className="flex items-center gap-2 px-3 py-1">
+                <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
+                <div className="h-4 w-20 animate-pulse rounded bg-white/10" />
+              </div>
+            ) : isAuthenticated && user ? (
               <>
                 <div ref={profileRef} className="relative">
                   <button
@@ -435,6 +445,14 @@ export default function Navbar() {
                         <span>Επεξεργασία Προφίλ</span>
                       </Link>
                       <button
+                        onClick={toggleTheme}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--hb-text)] transition hover:bg-white/5 hover:text-[var(--hb-primary-strong)]"
+                      >
+                        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                        <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                      </button>
+                      <div className="my-1 border-t border-[var(--hb-border)]" />
+                      <button
                         onClick={() => {
                           handleLogout();
                           setProfileOpen(false);
@@ -450,6 +468,13 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                <button
+                  onClick={toggleTheme}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--hb-muted)] transition hover:bg-white/5 hover:text-[var(--hb-primary-strong)]"
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
                 <Button
                   href="/pages/auth/login"
                   variant="outline"
@@ -527,9 +552,25 @@ export default function Navbar() {
                   ))}
                 </div>
 
+                {/* Mobile Theme Toggle */}
+                <div className="border-t border-[var(--hb-border)] pt-3">
+                  <button
+                    onClick={toggleTheme}
+                    className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary-strong)]"
+                  >
+                    {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                    <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                  </button>
+                </div>
+
                 {/* Mobile Auth */}
                 <div className="border-t border-[var(--hb-border)] pt-3">
-                  {isAuthenticated && user ? (
+                  {isAuthLoading ? (
+                    <div className="flex items-center justify-center gap-2 py-2">
+                      <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
+                      <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
+                    </div>
+                  ) : isAuthenticated && user ? (
                     <div className="flex flex-col gap-2">
                       {canQuickAdd && (
                         <Button

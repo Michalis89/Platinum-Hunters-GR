@@ -312,6 +312,21 @@ export default function EditProfilePage() {
     }
   }, [loading, isAuthenticated, router]);
 
+  // Handle hash scroll after page load (for links like #categories)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      // Small delay to ensure the element is rendered
+      const timer = setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -984,7 +999,10 @@ export default function EditProfilePage() {
             </Card>
 
             {/* Categories selection */}
-            <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+            <Card
+              id="categories"
+              className="scroll-mt-24 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+            >
               <CardHeader className="border-b border-[var(--hb-border)] bg-[var(--hb-card)]/50">
                 <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
                   Τα Hobbies μου

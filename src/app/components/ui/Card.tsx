@@ -5,11 +5,13 @@ import { ReactNode } from 'react';
 interface CardProps {
   readonly children: ReactNode;
   readonly className?: string;
+  readonly id?: string;
 }
 
-export function Card({ children, className = '' }: Readonly<CardProps>) {
+export function Card({ children, className = '', id }: Readonly<CardProps>) {
   return (
     <div
+      id={id}
       className={`rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.45)] ${className}`}
     >
       {children}

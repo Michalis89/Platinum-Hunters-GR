@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+html {
+  scroll-behavior: smooth;
+}
+
+:root,
+[data-theme='dark'] {
   /* Χομπίστας theme tokens (Netflix-style black/red) */
   --hb-bg: #0b0b0f;
   --hb-surface: rgba(13, 13, 18, 1);
@@ -27,6 +32,41 @@
   /* Legacy tokens to keep Tailwind mapping working */
   --background: var(--hb-bg);
   --foreground: var(--hb-text);
+
+  /* Scrollbar colors */
+  --scrollbar-track: #111018;
+  --scrollbar-thumb: linear-gradient(180deg, #e50914, #ff4d5a);
+  --scrollbar-thumb-hover: linear-gradient(180deg, #f6121d, #e50914);
+}
+
+[data-theme='light'] {
+  /* Light theme tokens - softer/warmer palette */
+  --hb-bg: #e8e6e3;
+  --hb-surface: #f0eeeb;
+  --hb-panel: rgba(240, 238, 235, 0.95);
+  --hb-card: #f5f3f0;
+  --hb-border: rgba(0, 0, 0, 0.1);
+  --hb-primary: #c41e1e;
+  --hb-primary-strong: #a01818;
+  --hb-accent: #d93636;
+  --hb-muted: #5c5c5c;
+  --hb-text: #2d2d2d;
+  --hb-headline: #1a1a1a;
+  --hb-shadow: 0 18px 60px rgba(0, 0, 0, 0.15);
+  --hb-gradient:
+    radial-gradient(circle at 18% 20%, rgba(196, 30, 30, 0.06), transparent 28%),
+    radial-gradient(circle at 78% 16%, rgba(160, 24, 24, 0.06), transparent 26%),
+    radial-gradient(circle at 35% 75%, rgba(217, 54, 54, 0.05), transparent 30%),
+    radial-gradient(circle at 85% 80%, rgba(140, 20, 20, 0.05), transparent 26%);
+
+  /* Legacy tokens */
+  --background: var(--hb-bg);
+  --foreground: var(--hb-text);
+
+  /* Scrollbar colors */
+  --scrollbar-track: #d4d2cf;
+  --scrollbar-thumb: linear-gradient(180deg, #c41e1e, #d93636);
+  --scrollbar-thumb-hover: linear-gradient(180deg, #a01818, #c41e1e);
 }
 
 body {
@@ -48,17 +88,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #111018;
+  background: var(--scrollbar-track);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #e50914, #ff4d5a);
+  background: var(--scrollbar-thumb);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #f6121d, #e50914);
+  background: var(--scrollbar-thumb-hover);
 }
 
 @keyframes gradient {
