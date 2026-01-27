@@ -171,7 +171,7 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-end justify-center p-0 md:items-center md:p-4">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -183,14 +183,15 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
 
         {/* Modal */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative z-10 flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl"
+          initial={{ opacity: 0, y: '100%' }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative z-10 flex h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl border border-slate-800 bg-slate-900 shadow-2xl md:h-[80vh] md:max-w-4xl md:rounded-2xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-800 p-6">
-            <h2 className="text-xl font-bold text-slate-100">Προσθήκη στο Backlog</h2>
+          <div className="flex items-center justify-between border-b border-slate-800 p-4 md:p-6">
+            <h2 className="text-lg font-bold text-slate-100 md:text-xl">Προσθήκη στο Backlog</h2>
             <button
               onClick={onClose}
               className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
@@ -199,10 +200,10 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
             </button>
           </div>
 
-          {/* Content */}
-          <div className="flex flex-1 overflow-hidden">
+          {/* Content - Stacked on mobile, side by side on desktop */}
+          <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
             {/* Left: Game List */}
-            <div className="flex w-1/2 flex-col border-r border-slate-800">
+            <div className={`flex flex-col border-slate-800 md:w-1/2 md:border-r ${selectedGame ? 'hidden md:flex' : 'flex-1'}`}>
               {/* Search */}
               <div className="border-b border-slate-800 p-4">
                 <div className="relative">
@@ -238,9 +239,16 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
             </div>
 
             {/* Right: Selected Game Details */}
-            <div className="flex w-1/2 flex-col">
+            <div className={`flex flex-col md:w-1/2 ${selectedGame ? 'flex-1' : 'hidden md:flex'}`}>
               {selectedGame ? (
-                <div className="flex flex-1 flex-col p-6">
+                <div className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6">
+                  {/* Mobile back button */}
+                  <button
+                    onClick={() => setSelectedGame(null)}
+                    className="mb-4 flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 md:hidden"
+                  >
+                    ← Πίσω στη λίστα
+                  </button>
                   {/* Selected Game Info */}
                   <div className="mb-6">
                     <h3 className="mb-2 text-lg font-semibold text-slate-100">
@@ -261,12 +269,12 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
                   )}
 
                   {/* Priority Selection */}
-                  <div className="mb-6">
-                    <label className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-300">
+                  <div className="mb-4 md:mb-6">
+                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-300 md:mb-3">
                       <Signal size={16} />
                       Προτεραιότητα
                     </label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                       {PRIORITY_OPTIONS.map(option => (
                         <button
                           key={option.value}
@@ -285,7 +293,7 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
                   </div>
 
                   {/* Notes */}
-                  <div className="mb-6 flex-1">
+                  <div className="mb-4 md:mb-6">
                     <label className="mb-2 block text-sm font-medium text-slate-300">
                       Σημειώσεις
                       <span className="ml-2 text-xs text-slate-500">(προαιρετικό)</span>
@@ -294,7 +302,7 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
                       value={notes}
                       onChange={e => setNotes(e.target.value)}
                       placeholder="Γιατί θέλω να παίξω αυτό το παιχνίδι..."
-                      rows={4}
+                      rows={3}
                       maxLength={500}
                       className="w-full rounded-lg border border-slate-700 bg-slate-800/50 p-3 text-sm text-slate-200 placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                     />

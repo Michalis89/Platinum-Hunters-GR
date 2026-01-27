@@ -16,13 +16,14 @@ export default function LoginPage() {
     <div className="relative min-h-screen overflow-hidden bg-[var(--hb-bg)] text-[var(--hb-text)]">
       <div className="pointer-events-none absolute inset-0 bg-[var(--hb-gradient)] opacity-60" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_25%,rgba(229,9,20,0.22),transparent_32%),radial-gradient(circle_at_85%_10%,rgba(255,77,90,0.18),transparent_28%),radial-gradient(circle_at_65%_85%,rgba(229,9,20,0.12),transparent_32%)]" />
-      <PageWrapper className="relative py-16">
-        <div className="relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] bg-[var(--hb-surface)]/95 px-6 py-10 shadow-[0_25px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:px-12">
+      <PageWrapper className="relative py-6 md:py-16">
+        <div className="relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] bg-[var(--hb-surface)]/95 px-4 py-6 shadow-[0_25px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:px-12 md:py-10">
           <div className="pointer-events-none absolute -left-10 top-10 h-64 w-64 rounded-full bg-[var(--hb-primary-strong)]/15 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[var(--hb-primary)]/12 blur-3xl" />
 
-          <div className="relative grid items-center gap-12 md:grid-cols-[1.05fr_0.95fr]">
-            <div className="space-y-6">
+          <div className="relative grid items-center gap-6 md:gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+            {/* Hero content - hidden on mobile */}
+            <div className="hidden space-y-6 lg:block">
               <div className="space-y-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--hb-primary)]">
                   Καλώς ήρθες πίσω
@@ -74,6 +75,16 @@ export default function LoginPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Mobile header */}
+            <div className="text-center lg:hidden">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--hb-primary)]">
+                Καλώς ήρθες πίσω
+              </p>
+              <h1 className="mt-2 bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-2xl font-black leading-tight text-transparent">
+                Συνέχισε το ταξίδι σου
+              </h1>
             </div>
 
             <div className="relative">

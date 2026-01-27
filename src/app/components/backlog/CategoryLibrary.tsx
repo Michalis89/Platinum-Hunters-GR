@@ -727,7 +727,7 @@ export default function CategoryLibrary({
                 {createResults.map(entry => (
                   <div
                     key={`create-${entry.id}`}
-                    className="flex items-center gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3"
+                    className="flex w-full min-w-0 items-start gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-2"
                   >
                     <div className="relative h-16 w-12 overflow-hidden rounded-lg bg-[var(--hb-card)]">
                       <Image src={entry.cover} alt={entry.title} fill className="object-cover" />
@@ -1082,7 +1082,7 @@ export default function CategoryLibrary({
 
         {selectedEntry && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur"
             onClick={event => {
               if (event.target === event.currentTarget) {
                 setSelectedEntry(null);
@@ -1091,7 +1091,7 @@ export default function CategoryLibrary({
           >
             <div className="w-full max-w-3xl rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
               <div className="flex flex-col gap-6 md:flex-row">
-                <div className="relative h-52 w-36 overflow-hidden rounded-2xl bg-[var(--hb-card)]">
+                <div className="relative hidden h-52 w-36 overflow-hidden rounded-2xl bg-[var(--hb-card)] sm:block">
                   <Image
                     src={selectedEntry.cover}
                     alt={selectedEntry.title}

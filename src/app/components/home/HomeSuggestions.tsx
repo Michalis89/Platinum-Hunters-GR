@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 type SuggestionItem = {
   id: string;
@@ -88,9 +88,7 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
   // Filter configs to only show active categories
-  const visibleConfigs = categoryConfigs.filter((c) =>
-    activeCategories.includes(c.key)
-  );
+  const visibleConfigs = categoryConfigs.filter(c => activeCategories.includes(c.key));
 
   // Set initial tab
   useEffect(() => {
@@ -107,7 +105,7 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
         const windowHeight = window.innerHeight;
         const inViewRatio = Math.max(
           0,
-          Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height))
+          Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height)),
         );
         setScrollY(inViewRatio);
       }
@@ -118,14 +116,12 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const activeConfig = visibleConfigs.find((c) => c.key === activeTab);
+  const activeConfig = visibleConfigs.find(c => c.key === activeTab);
 
   // Fetch suggestions for active category
-  const { data: suggestionsData } = useSWR(
-    activeConfig ? activeConfig.apiPath : null,
-    fetcher,
-    { revalidateOnFocus: false }
-  );
+  const { data: suggestionsData } = useSWR(activeConfig ? activeConfig.apiPath : null, fetcher, {
+    revalidateOnFocus: false,
+  });
 
   const suggestions: SuggestionItem[] = suggestionsData?.items ?? [];
 
@@ -137,7 +133,7 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
     <section ref={containerRef} className="relative overflow-hidden px-4 py-12 md:px-6">
       {/* Parallax Background - Brand gradient */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-[var(--hb-primary-strong)]/10 via-transparent to-[var(--hb-accent)]/5 transition-all duration-500"
+        className="from-[var(--hb-primary-strong)]/10 to-[var(--hb-accent)]/5 absolute inset-0 bg-gradient-to-br via-transparent transition-all duration-500"
         style={{
           transform: `translateY(${scrollY * -20}px)`,
         }}
@@ -154,29 +150,27 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)]">
+            <div className="bg-[var(--hb-primary-strong)]/20 flex h-10 w-10 items-center justify-center rounded-xl text-[var(--hb-primary-strong)]">
               <Lightbulb className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
-                Προτάσεις για σένα
+                Προτάσεις από την κοινότητα
               </h2>
-              <p className="text-xs text-[var(--hb-muted)]">
-                Βασισμένες στα αγαπημένα σου
-              </p>
+              <p className="text-xs text-[var(--hb-muted)]">Βασισμένες στις βαθμολογίες</p>
             </div>
           </div>
 
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-2">
-            {visibleConfigs.map((config) => (
+            {visibleConfigs.map(config => (
               <button
                 key={config.key}
                 onClick={() => setActiveTab(config.key)}
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${
                   activeTab === config.key
                     ? 'bg-[var(--hb-primary-strong)] text-white'
-                    : 'border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-muted)] hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-text)]'
+                    : 'hover:border-[var(--hb-primary-strong)]/50 border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
                 }`}
               >
                 {config.icon}
@@ -201,14 +195,15 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] py-12 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)]">
+            <div className="bg-[var(--hb-primary-strong)]/20 mb-3 flex h-12 w-12 items-center justify-center rounded-full text-[var(--hb-primary-strong)]">
               {activeConfig?.icon ?? <Sparkles className="h-6 w-6" />}
             </div>
             <p className="mb-2 font-medium text-[var(--hb-headline)]">
               Δεν υπάρχουν προτάσεις ακόμα
             </p>
             <p className="mb-4 max-w-xs text-sm text-[var(--hb-muted)]">
-              Βαθμολόγησε περισσότερα {activeConfig?.label.toLowerCase()} για να λάβεις εξατομικευμένες προτάσεις
+              Βαθμολόγησε περισσότερα {activeConfig?.label.toLowerCase()} για να λάβεις
+              εξατομικευμένες προτάσεις
             </p>
             <Link
               href={activeConfig?.addPath ?? '/pages/backlog'}
@@ -238,7 +233,7 @@ function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) 
   return (
     <Link
       href={addPath}
-      className="group relative overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--hb-primary-strong)]/50 hover:shadow-lg hover:shadow-[var(--hb-primary-strong)]/10"
+      className="hover:border-[var(--hb-primary-strong)]/50 hover:shadow-[var(--hb-primary-strong)]/10 group relative overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
       style={{
         transform: `translateY(${parallaxOffset}px)`,
       }}
@@ -253,11 +248,11 @@ function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) 
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] via-[var(--hb-bg)]/40 to-transparent" />
+        <div className="via-[var(--hb-bg)]/40 absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] to-transparent" />
 
         {/* Score Badge */}
         {item.score && (
-          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-[var(--hb-bg)]/80 px-2 py-1 text-xs font-medium text-[var(--hb-accent)] backdrop-blur-sm">
+          <div className="bg-[var(--hb-bg)]/80 absolute right-2 top-2 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-[var(--hb-accent)] backdrop-blur-sm">
             <Star className="h-3 w-3 fill-current" />
             {item.score}
           </div>
@@ -268,15 +263,13 @@ function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) 
           <h3 className="line-clamp-2 text-sm font-semibold text-[var(--hb-headline)]">
             {item.title}
           </h3>
-          {item.year && (
-            <p className="mt-0.5 text-xs text-[var(--hb-muted)]">{item.year}</p>
-          )}
+          {item.year && <p className="mt-0.5 text-xs text-[var(--hb-muted)]">{item.year}</p>}
           {item.tags && item.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
-              {item.tags.slice(0, 2).map((tag) => (
+              {item.tags.slice(0, 2).map(tag => (
                 <span
                   key={tag}
-                  className="rounded bg-[var(--hb-primary-strong)]/20 px-1.5 py-0.5 text-[10px] text-[var(--hb-accent)]"
+                  className="bg-[var(--hb-primary-strong)]/20 rounded px-1.5 py-0.5 text-[10px] text-[var(--hb-accent)]"
                 >
                   {tag}
                 </span>

@@ -248,15 +248,6 @@ export default function Navbar() {
     return `${base} ${isActive(href) ? active : inactive}`;
   };
 
-  const mobileLinkClass = (href: string) => {
-    const base =
-      'flex items-center justify-center gap-2 rounded-full px-4 py-2 text-base font-medium transition';
-    const active =
-      'border border-[var(--hb-border)] bg-white/5 text-[var(--hb-primary-strong)] shadow-[0_10px_30px_rgba(229,9,20,0.25)]';
-    const inactive = 'text-[var(--hb-text)] hover:text-[var(--hb-primary-strong)] hover:bg-white/5';
-    return `${base} ${isActive(href) ? active : inactive}`;
-  };
-
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--hb-border)] bg-[var(--hb-surface)] backdrop-blur-xl">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
@@ -469,72 +460,52 @@ export default function Navbar() {
           {menuOpen && (
             <motion.div
               data-testid="mobile-menu"
-              className="absolute inset-x-0 top-full mt-2 w-full border-b border-t border-[var(--hb-border)] bg-[var(--hb-bg)] pb-6 pt-4 md:hidden"
+              className="absolute inset-x-0 top-full mt-0 max-h-[80vh] w-full overflow-y-auto border-b border-[var(--hb-border)] bg-[var(--hb-bg)] pb-6 pt-4 md:hidden"
               initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
             >
-              <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4">
+              <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4">
+                {/* Hobbies - Horizontal scroll */}
                 <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3">
-                  <div className="mb-2 flex items-center justify-between text-sm font-semibold text-[var(--hb-headline)]">
-                    <div className="flex items-center gap-2">
-                      <Layers size={16} />
-                      <span>Χόμπι</span>
-                    </div>
+                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
+                    <Layers size={16} />
+                    <span>Χόμπι</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex gap-2 overflow-x-auto pb-2">
                     {hobbyLinks.map(item => (
-                      <div
+                      <Link
                         key={item.href}
-                        className="flex flex-col gap-1 rounded-xl border border-[var(--hb-border)] px-3 py-2 text-[var(--hb-text)]"
+                        href={item.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex shrink-0 items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-primary-strong)]"
                       >
-                        <Link
-                          href={item.href}
-                          onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2 text-sm transition hover:text-[var(--hb-headline)]"
-                        >
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </Link>
-                        {item.children && (
-                          <div className="flex flex-col gap-1 pl-6">
-                            {item.children.map(child => (
-                              <Link
-                                key={child.href}
-                                href={child.href}
-                                onClick={() => setMenuOpen(false)}
-                                className="flex items-center gap-2 text-xs text-[var(--hb-muted)] transition hover:text-[var(--hb-headline)]"
-                              >
-                                {child.icon}
-                                <span>{child.label}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
                     ))}
                   </div>
                 </div>
 
-                <ul className="flex flex-col gap-3">
+                {/* Quick Links */}
+                <div className="flex flex-wrap gap-2">
                   {navLinks.map(({ href, label, icon }) => (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        className={mobileLinkClass(href)}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {icon}
-                        <span>{label}</span>
-                      </Link>
-                    </li>
+                    <Link
+                      key={href}
+                      href={href}
+                      className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-primary-strong)]"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {icon}
+                      <span>{label}</span>
+                    </Link>
                   ))}
-                </ul>
+                </div>
 
                 {/* Mobile Auth */}
-                <div className="mt-3 border-t border-[var(--hb-border)] pt-4">
+                <div className="border-t border-[var(--hb-border)] pt-3">
                   {isAuthenticated && user ? (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
                       {canQuickAdd && (
                         <Button
                           onClick={() => {
@@ -548,38 +519,32 @@ export default function Navbar() {
                           Προσθήκη
                         </Button>
                       )}
-                      <Link
-                        href="/pages/profile"
-                        className={mobileLinkClass('/pages/profile')}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        <User size={18} />
-                        <span>{user.username}</span>
-                      </Link>
-                      <Link
-                        href="/pages/profile/edit"
-                        className={mobileLinkClass('/pages/profile/edit')}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        <PenLine size={18} />
-                        <span>Επεξεργασία Προφίλ</span>
-                      </Link>
-                      <Button
-                        onClick={handleLogout}
-                        variant="ghost"
-                        icon={<LogOut size={18} />}
-                        className="justify-center"
-                      >
-                        Έξοδος
-                      </Button>
+                      <div className="flex gap-2">
+                        <Link
+                          href="/pages/profile"
+                          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary-strong)]"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <User size={18} />
+                          <span className="truncate">{user.username}</span>
+                        </Link>
+                        <Button
+                          onClick={handleLogout}
+                          variant="outline"
+                          icon={<LogOut size={18} />}
+                          iconOnly
+                          ariaLabel="Αποσύνδεση"
+                          className="h-10 w-10 shrink-0"
+                        />
+                      </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
                       <Button
                         href="/pages/auth/login"
                         variant="outline"
                         icon={<LogIn size={18} />}
-                        className="justify-center"
+                        className="flex-1 justify-center"
                         onClick={() => setMenuOpen(false)}
                       >
                         Σύνδεση
@@ -588,7 +553,7 @@ export default function Navbar() {
                         href="/pages/auth/register"
                         variant="primary"
                         icon={<UserPlus size={18} />}
-                        className="justify-center"
+                        className="flex-1 justify-center"
                         onClick={() => setMenuOpen(false)}
                       >
                         Εγγραφή

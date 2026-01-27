@@ -4,13 +4,14 @@ import Link, { type LinkProps } from 'next/link';
 type Variant = 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
 
 type BaseProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   variant?: Variant;
   icon?: React.ReactNode;
   className?: string;
   disabled?: boolean;
   title?: string;
   ariaLabel?: string;
+  iconOnly?: boolean;
 };
 
 type LinkButtonProps = BaseProps & {
@@ -48,9 +49,10 @@ const isLinkButtonProps = (props: ButtonProps): props is LinkButtonProps =>
   'href' in props && props.href !== undefined;
 
 const Button = (props: ButtonProps) => {
-  const { children, variant = 'outline', icon, className, disabled, title, ariaLabel } = props;
+  const { children, variant = 'outline', icon, className, disabled, title, ariaLabel, iconOnly } = props;
   const disabledClass = disabled ? 'opacity-60 cursor-not-allowed pointer-events-none' : '';
-  const classes = [baseClass, variantClasses[variant], disabledClass, className]
+  const iconOnlyClass = iconOnly ? 'p-2' : '';
+  const classes = [baseClass, variantClasses[variant], disabledClass, iconOnlyClass, className]
     .filter(Boolean)
     .join(' ');
   const accessibleLabel =
@@ -68,7 +70,7 @@ const Button = (props: ButtonProps) => {
         onClick={props.onClick}
       >
         {icon}
-        <span>{children}</span>
+        {children && <span>{children}</span>}
       </Link>
     );
   }
@@ -84,7 +86,7 @@ const Button = (props: ButtonProps) => {
       aria-label={accessibleLabel}
     >
       {icon}
-      <span className="inline-flex flex-row items-center justify-center gap-2">{children}</span>
+      {children && <span className="inline-flex flex-row items-center justify-center gap-2">{children}</span>}
     </button>
   );
 };

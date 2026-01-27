@@ -250,6 +250,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           psn_id: formData.psn_id || null,
           favorite_platform: formData.favorite_platform || null,
           favorite_genres: formData.favorite_genres || null,
+          categories: formData.favorite_hobbies || null,
         }),
       });
 
@@ -550,14 +551,14 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-5"
+              className="max-h-[60vh] space-y-4 overflow-y-auto pr-1 md:max-h-none md:overflow-visible"
             >
               {/* Hobby Selection */}
               <div>
-                <p className="mb-3 text-sm font-medium text-[var(--hb-headline)]">
+                <p className="mb-2 text-sm font-medium text-[var(--hb-headline)]">
                   Ποια χόμπι σε ενδιαφέρουν;
                 </p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {HOBBIES.map(hobby => {
                     const isSelected = formData.favorite_hobbies?.includes(hobby.id);
                     const IconComponent = {
@@ -589,7 +590,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             }));
                           }
                         }}
-                        className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
+                        className={`flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm ${
                           isSelected
                             ? 'border-[var(--hb-primary-strong)] bg-[var(--hb-primary-strong)]/20 text-[var(--hb-headline)]'
                             : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-headline)]'

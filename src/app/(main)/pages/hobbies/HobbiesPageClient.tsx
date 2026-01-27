@@ -1,17 +1,48 @@
 'use client';
 
+import { useSelector } from 'react-redux';
 import { HobbiesHero, HobbiesCategorySection } from '@/app/components/hobbies';
 import { HOBBY_SECTIONS } from '@/config/hobbies';
 import { PageContainer } from '@/app/components/layout';
+import { selectUser, selectIsAuthenticated } from '@/store/slices/authSlice';
 
 export default function HobbiesPageClient() {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectUser);
+
+  // Filter sections based on user's selected categories (if logged in)
+  const userCategories = (user?.categories as string[] | undefined) ?? [];
+  const filteredSections = isAuthenticated && userCategories.length > 0
+    ? HOBBY_SECTIONS.filter(section => userCategories.includes(section.type))
+    : HOBBY_SECTIONS;
+
   return (
     <>
       <HobbiesHero />
 
-      {HOBBY_SECTIONS.map(section => (
-        <HobbiesCategorySection key={section.type} section={section} />
-      ))}
+      {filteredSections.length > 0 ? (
+        filteredSections.map(section => (
+          <HobbiesCategorySection key={section.type} section={section} />
+        ))
+      ) : (
+        <PageContainer size="lg" className="py-10">
+          <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-8 text-center">
+            <div className="mb-4 text-5xl">🎯</div>
+            <h2 className="mb-2 text-xl font-bold text-[var(--hb-headline)]">
+              Δεν έχεις επιλέξει κατηγορίες
+            </h2>
+            <p className="mb-6 text-[var(--hb-muted)]">
+              Πήγαινε στις ρυθμίσεις προφίλ για να επιλέξεις τα χόμπι που σε ενδιαφέρουν.
+            </p>
+            <a
+              href="/pages/profile/edit"
+              className="inline-block rounded-full bg-[var(--hb-primary-strong)] px-6 py-2 font-medium text-white transition hover:bg-[var(--hb-primary)]"
+            >
+              Ρυθμίσεις Προφίλ
+            </a>
+          </div>
+        </PageContainer>
+      )}
 
       {/* Legend */}
       <PageContainer size="lg" className="py-10">

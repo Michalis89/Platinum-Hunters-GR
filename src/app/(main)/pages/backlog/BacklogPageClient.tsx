@@ -92,6 +92,10 @@ function BacklogPageContent() {
     }
   }, [isAuthenticated, isAuthLoading, router]);
 
+  // Check if user has access to this category
+  const userCategories = (user?.categories as string[] | undefined) ?? [];
+  const hasAccessToCategory = !categoryParam || userCategories.length === 0 || userCategories.includes(categoryParam);
+
   // Refresh session once on mount to keep auth state in sync across reloads
   useEffect(() => {
     if (hasCheckedSession.current) return;
@@ -213,6 +217,38 @@ function BacklogPageContent() {
 
   if (!isAuthenticated) {
     return null; // Will redirect
+  }
+
+  // Show access denied if user doesn't have this category enabled
+  if (!hasAccessToCategory) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--hb-bg)] px-4 text-center">
+        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-8 shadow-lg">
+          <div className="mb-4 text-6xl">🚫</div>
+          <h2 className="mb-2 text-xl font-bold text-[var(--hb-headline)]">
+            Δεν έχεις πρόσβαση σε αυτή την κατηγορία
+          </h2>
+          <p className="mb-6 text-[var(--hb-muted)]">
+            Για να δεις το <strong className="text-[var(--hb-headline)]">{categoryParam}</strong> backlog,
+            πρέπει πρώτα να ενεργοποιήσεις αυτή την κατηγορία στο προφίλ σου.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <button
+              onClick={() => router.push('/pages/profile/edit')}
+              className="rounded-full bg-[var(--hb-primary-strong)] px-6 py-2 font-medium text-white transition hover:bg-[var(--hb-primary)]"
+            >
+              Ρυθμίσεις Προφίλ
+            </button>
+            <button
+              onClick={() => router.push('/pages/hobbies')}
+              className="rounded-full border border-[var(--hb-border)] px-6 py-2 font-medium text-[var(--hb-text)] transition hover:bg-white/5"
+            >
+              Πίσω στο Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (mediaCategory) {

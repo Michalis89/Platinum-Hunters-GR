@@ -48,6 +48,7 @@ export async function POST(req: Request) {
       favorite_platform,
       favorite_genres,
       gaming_since,
+      categories,
     } = body;
 
     // =====================================================
@@ -183,6 +184,7 @@ export async function POST(req: Request) {
         favorite_platform: favorite_platform || null,
         favorite_genres: favorite_genres || null,
         gaming_since: gaming_since || null,
+        categories: categories || null,
       })
       .eq('id', authData.user.id)
       .select()
