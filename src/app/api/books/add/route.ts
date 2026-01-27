@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import getSupabaseServer from '@/lib/supabase-server';
 import type { Database } from '@/lib/supabase/database.types';
 import { insertActivity } from '@/lib/services/activityService';
 
@@ -120,7 +121,9 @@ export async function POST(req: Request) {
 
     let mediaId = (existingMedia as { id?: number } | null)?.id;
     if (!mediaId) {
-      const { data: inserted, error: insertError } = await supabase
+      // Use service role client for catalog writes (media_items has RLS blocking user writes)
+      const supabaseAdmin = getSupabaseServer();
+      const { data: inserted, error: insertError } = await supabaseAdmin
         .from('media_items')
         .insert(payload as never)
         .select('id')
