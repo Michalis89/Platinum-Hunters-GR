@@ -150,9 +150,19 @@ export async function PATCH(req: Request) {
 
     const { data, error } = await supabase
       .from('user_media_entries')
-      .update(updateData)
-      .eq('user_id', session.user.id)
-      .eq('media_id', body.mediaId)
+      .upsert(
+        {
+          user_id: session.user.id,
+          media_id: body.mediaId,
+          status: body.status ?? existingEntry?.status ?? 'planned',
+          is_favorite: updateData.is_favorite,
+          priority: updateData.priority,
+          score: updateData.score,
+          progress: updateData.progress,
+          notes: updateData.notes,
+        },
+        { onConflict: 'user_id,media_id' }
+      )
       .select('*')
       .single();
 
