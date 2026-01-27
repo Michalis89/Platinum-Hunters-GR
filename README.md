@@ -22,13 +22,6 @@
     <img src="https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css" alt="Tailwind">
     <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase" alt="Supabase">
   </p>
-
-  <p>
-    <a href="https://github.com/Michalis89/Platinum-Hunters-GR/actions">
-      <img src="https://github.com/Michalis89/Platinum-Hunters-GR/actions/workflows/main.yml/badge.svg" alt="CI/CD">
-    </a>
-    <img src="https://coveralls.io/repos/github/Michalis89/Platinum-Hunters-GR/badge.svg?branch=develop" alt="Coverage">
-  </p>
 </div>
 
 ---
