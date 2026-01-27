@@ -32,10 +32,16 @@ import {
 } from 'lucide-react';
 import AddArticleDialog from './articles/AddArticleDialog';
 import { usePathname } from 'next/navigation';
-import { logout, selectIsAuthenticated, selectIsLoading, selectUser } from '@/store/slices/authSlice';
+import {
+  logout,
+  selectIsAuthenticated,
+  selectIsLoading,
+  selectUser,
+} from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import Button from './ui/Button';
 import { useTheme } from '@/context/ThemeContext';
+import VersionBadge from './ui/VersionBadge';
 
 type NavItem = {
   href: string;
@@ -293,7 +299,10 @@ export default function Navbar() {
             <span className="text-sm font-semibold tracking-tight text-[var(--hb-headline)]">
               Χομπίστας
             </span>
-            <span className="text-[11px] text-[var(--hb-muted)]">Personal hobby hub</span>
+            <span className="text-[11px] text-[var(--hb-muted)]">
+              Personal hobby hub
+              <VersionBadge />
+            </span>
           </div>
         </Link>
 

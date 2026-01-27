@@ -6,7 +6,6 @@ import useSWR from 'swr';
 import { selectIsAuthenticated, selectUser, setUser } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import { supabase } from '@/lib/supabase-client';
-import VersionBadge from '@/app/components/ui/VersionBadge';
 import { PageContainer } from '@/app/components/layout';
 
 // Guest components
@@ -28,7 +27,7 @@ import {
   HomeSuggestions,
 } from '@/app/components/home';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 /**
  * HomePageClient - Main home page with guest/authenticated views.
@@ -41,14 +40,10 @@ export default function HomePageClient() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
 
-  const { data: personalStats } = useSWR(
-    isAuthenticated ? '/api/user/stats' : null,
-    fetcher,
-    {
-      refreshInterval: 120000,
-      revalidateOnFocus: false,
-    }
-  );
+  const { data: personalStats } = useSWR(isAuthenticated ? '/api/user/stats' : null, fetcher, {
+    refreshInterval: 120000,
+    revalidateOnFocus: false,
+  });
 
   // Heartbeat for authenticated users
   useEffect(() => {
@@ -62,7 +57,7 @@ export default function HomePageClient() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then((res) => {
+        .then(res => {
           if (res.status === 401) {
             supabase.auth.getSession().then(({ data: refreshed }) => {
               if (!refreshed.session) {
@@ -86,7 +81,6 @@ export default function HomePageClient() {
       ) : (
         <GuestView />
       )}
-      <VersionBadge />
     </>
   );
 }
@@ -142,8 +136,8 @@ type DashboardViewProps = {
 
 function DashboardView({ username, displayName, stats }: DashboardViewProps) {
   // Filter to media categories only (not games) for suggestions
-  const mediaCategories = (stats?.active_categories ?? []).filter(
-    (cat) => ['anime', 'manga', 'movies', 'tv', 'books'].includes(cat)
+  const mediaCategories = (stats?.active_categories ?? []).filter(cat =>
+    ['anime', 'manga', 'movies', 'tv', 'books'].includes(cat),
   );
 
   return (
@@ -156,9 +150,7 @@ function DashboardView({ username, displayName, stats }: DashboardViewProps) {
 
       <HomeContinue />
 
-      {mediaCategories.length > 0 && (
-        <HomeSuggestions activeCategories={mediaCategories} />
-      )}
+      {mediaCategories.length > 0 && <HomeSuggestions activeCategories={mediaCategories} />}
 
       <HomeRecentActivity scope="global" />
     </div>
