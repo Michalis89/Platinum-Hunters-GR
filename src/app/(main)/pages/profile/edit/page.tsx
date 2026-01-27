@@ -756,7 +756,8 @@ export default function EditProfilePage() {
               </span>
             </h1>
             <p className="mx-auto max-w-xl text-sm text-[var(--hb-muted)]">
-              Διαχειρίσου τις πληροφορίες, τα hobbies και τις ρυθμίσεις απορρήτου του λογαριασμού σου.
+              Διαχειρίσου τις πληροφορίες, τα hobbies και τις ρυθμίσεις απορρήτου του λογαριασμού
+              σου.
             </p>
           </section>
 
@@ -765,11 +766,13 @@ export default function EditProfilePage() {
           <form id="edit-profile-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
             <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-              <CardHeader className="border-b border-[var(--hb-border)] bg-[var(--hb-card)]/50">
+              <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
                 <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
                   Βασικά Στοιχεία
                 </p>
-                <CardTitle className="text-lg text-[var(--hb-headline)]">Προσωπικές Πληροφορίες</CardTitle>
+                <CardTitle className="text-lg text-[var(--hb-headline)]">
+                  Προσωπικές Πληροφορίες
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
@@ -1003,11 +1006,13 @@ export default function EditProfilePage() {
               id="categories"
               className="scroll-mt-24 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
             >
-              <CardHeader className="border-b border-[var(--hb-border)] bg-[var(--hb-card)]/50">
+              <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
                 <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
                   Τα Hobbies μου
                 </p>
-                <CardTitle className="text-lg text-[var(--hb-headline)]">Κατηγορίες χόμπι</CardTitle>
+                <CardTitle className="text-lg text-[var(--hb-headline)]">
+                  Κατηγορίες χόμπι
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-[var(--hb-muted)]">
@@ -1049,12 +1054,17 @@ export default function EditProfilePage() {
 
             {/* Gaming Information */}
             {(formData.categories as string[] | undefined)?.includes('gaming') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-                <CardHeader className="border-b border-[var(--hb-border)] bg-[var(--hb-card)]/50">
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
+                <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
                   <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
                     Gaming
                   </p>
-                  <CardTitle className="text-lg text-[var(--hb-headline)]">Gaming Πληροφορίες</CardTitle>
+                  <CardTitle className="text-lg text-[var(--hb-headline)]">
+                    Πληροφορίες για Gaming
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
@@ -1142,7 +1152,9 @@ export default function EditProfilePage() {
             ) : (
               <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Gaming Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Gaming
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-[var(--hb-muted)]">
                   Πρόσθεσε την κατηγορία &quot;Gaming&quot; για να εμφανιστεί η φόρμα με τα gaming
@@ -1151,358 +1163,37 @@ export default function EditProfilePage() {
               </Card>
             )}
 
-            {/* Coding Information */}
-            {(formData.categories as string[] | undefined)?.includes('coding') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+            {/* Anime Information */}
+            {(formData.categories as string[] | undefined)?.includes('anime') ? (
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Coding Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Anime</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(() => {
-                    const note = getCategoryNote('coding');
+                    const note = getCategoryNote('anime');
+                    const platformsList =
+                      Array.isArray(note.platforms) && (note.platforms as string[]).length > 0
+                        ? (note.platforms as string[])
+                        : [];
                     return (
                       <>
                         <div>
                           <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Γλώσσες που χρησιμοποιείς
+                            Αγαπημένα Είδη Anime
                           </label>
                           <div className="flex flex-wrap gap-2">
-                            {CODING_LANGUAGES.map(lang => {
-                              const list =
-                                (note.languages as string[] | undefined) &&
-                                Array.isArray(note.languages)
-                                  ? (note.languages as string[])
-                                  : [];
-                              const active = list.includes(lang);
-                              return (
-                                <button
-                                  type="button"
-                                  key={lang}
-                                  onClick={() =>
-                                    handleCategoryListToggle('coding', 'languages', lang)
-                                  }
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {lang}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Focus / Κατεύθυνση
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {CODING_FOCUS.map(focus => {
-                              const list =
-                                (note.focus as string[] | undefined) && Array.isArray(note.focus)
-                                  ? (note.focus as string[])
-                                  : [];
-                              const active = list.includes(focus);
-                              return (
-                                <button
-                                  type="button"
-                                  key={focus}
-                                  onClick={() => handleCategoryListToggle('coding', 'focus', focus)}
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {focus}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <Input
-                            label="Coding Since (Έτος)"
-                            type="number"
-                            value={(note.since as string) || ''}
-                            onChange={e =>
-                              handleCategoryNoteField('coding', 'since')(e.target.value)
-                            }
-                            placeholder="2012"
-                            min="1970"
-                            max={new Date().getFullYear()}
-                          />
-                          <Input
-                            label="Tools / Stack"
-                            type="text"
-                            value={(note.tools as string) || ''}
-                            onChange={e =>
-                              handleCategoryNoteField('coding', 'tools')(e.target.value)
-                            }
-                            placeholder="VS Code, Git, React..."
-                          />
-                        </div>
-
-                        <Textarea
-                          label="Σημειώσεις"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('coding', 'notes')(e.target.value)}
-                          placeholder="Τι σε εμπνέει στο coding, ποια projects αγαπάς..."
-                          rows={3}
-                        />
-                      </>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Coding Πληροφορίες</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
-                  Πρόσθεσε την κατηγορία &quot;Coding&quot; για να εμφανιστεί η φόρμα με τα coding
-                  στοιχεία σου.
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Pet Information */}
-            {(formData.categories as string[] | undefined)?.includes('pet') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Pet Πληροφορίες</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {(() => {
-                    const note = getCategoryNote('pet');
-                    return (
-                      <>
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <Select
-                            label="Είδος"
-                            options={['', ...PET_TYPES]}
-                            value={(note.type as string) || ''}
-                            onChange={value => handleCategoryNoteField('pet', 'type')(value)}
-                          />
-                          <Input
-                            label="Όνομα"
-                            type="text"
-                            value={(note.name as string) || ''}
-                            onChange={e => handleCategoryNoteField('pet', 'name')(e.target.value)}
-                            placeholder="π.χ. Luna"
-                          />
-                          <Input
-                            label="Ράτσα / Breed"
-                            type="text"
-                            value={(note.breed as string) || ''}
-                            onChange={e => handleCategoryNoteField('pet', 'breed')(e.target.value)}
-                            placeholder="π.χ. Labrador"
-                          />
-                          <Input
-                            label="Μαζί από (Έτος)"
-                            type="number"
-                            value={(note.since as string) || ''}
-                            onChange={e => handleCategoryNoteField('pet', 'since')(e.target.value)}
-                            placeholder="2019"
-                            min="1970"
-                            max={new Date().getFullYear()}
-                          />
-                        </div>
-
-                        <Textarea
-                          label="Μικρές ιστορίες"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('pet', 'notes')(e.target.value)}
-                          placeholder="Τι χαρακτήρα έχει, αγαπημένες συνήθειες..."
-                          rows={3}
-                        />
-                      </>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Pet Πληροφορίες</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
-                  Πρόσθεσε την κατηγορία &quot;Pet&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
-                  του κατοικιδίου σου.
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Vape Information */}
-            {(formData.categories as string[] | undefined)?.includes('vape') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Vape Πληροφορίες</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {(() => {
-                    const note = getCategoryNote('vape');
-                    return (
-                      <>
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <Select
-                            label="Συσκευή"
-                            options={['', ...VAPE_DEVICES]}
-                            value={(note.device as string) || ''}
-                            onChange={value => handleCategoryNoteField('vape', 'device')(value)}
-                          />
-                          <Input
-                            label="Νικοτίνη (mg)"
-                            type="number"
-                            value={(note.nicotine as string) || ''}
-                            onChange={e =>
-                              handleCategoryNoteField('vape', 'nicotine')(e.target.value)
-                            }
-                            placeholder="3"
-                            min="0"
-                            max="50"
-                          />
-                          <Input
-                            label="Vaping Since (Έτος)"
-                            type="number"
-                            value={(note.since as string) || ''}
-                            onChange={e => handleCategoryNoteField('vape', 'since')(e.target.value)}
-                            placeholder="2018"
-                            min="1970"
-                            max={new Date().getFullYear()}
-                          />
-                        </div>
-
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Αγαπημένες Γεύσεις
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {VAPE_FLAVORS.map(flavor => {
-                              const list =
-                                (note.flavors as string[] | undefined) &&
-                                Array.isArray(note.flavors)
-                                  ? (note.flavors as string[])
-                                  : [];
-                              const active = list.includes(flavor);
-                              return (
-                                <button
-                                  type="button"
-                                  key={flavor}
-                                  onClick={() =>
-                                    handleCategoryListToggle('vape', 'flavors', flavor)
-                                  }
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {flavor}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <Textarea
-                          label="Σημειώσεις"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('vape', 'notes')(e.target.value)}
-                          placeholder="Αγαπημένα υγρά, συνήθειες, προτιμήσεις..."
-                          rows={3}
-                        />
-                      </>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Vape Πληροφορίες</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
-                  Πρόσθεσε την κατηγορία &quot;Vape&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
-                  για το vaping σου.
-                </CardContent>
-              </Card>
-            )}
-
-            {/* TV Series Information */}
-            {(formData.categories as string[] | undefined)?.includes('tv') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">TV Series Πληροφορίες</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {(() => {
-                    const note = getCategoryNote('tv');
-                    const serviceOptions = CATEGORY_SERVICES.tv || ['Other'];
-                    return (
-                      <>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Αγαπημένες Πλατφόρμες Streaming
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {serviceOptions.map(service => {
-                              const list =
-                                (note.services as string[] | undefined) &&
-                                Array.isArray(note.services)
-                                  ? (note.services as string[])
-                                  : [];
-                              const active = list.includes(service);
-                              return (
-                                <button
-                                  type="button"
-                                  key={service}
-                                  onClick={() =>
-                                    handleCategoryListToggle('tv', 'services', service)
-                                  }
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {service}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          {Array.isArray(note.services) && note.services.includes('Other') && (
-                            <div className="mt-3">
-                              <Input
-                                label="Άλλη υπηρεσία"
-                                name="tv_service_other"
-                                value={(note.service_other as string) || ''}
-                                onChange={e =>
-                                  handleCategoryNoteField('tv', 'service_other')(e.target.value)
-                                }
-                                placeholder="π.χ. Cosmote TV"
-                              />
-                            </div>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Αγαπημένα Genres Σειρών
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {TV_GENRES.map(genre => {
+                            {ANIME_GENRES.map(genre => {
                               const active =
                                 Array.isArray(note.genres) && note.genres.includes(genre);
                               return (
                                 <button
                                   type="button"
                                   key={genre}
-                                  onClick={() => handleCategoryGenreToggle('tv', genre)}
+                                  onClick={() => handleCategoryGenreToggle('anime', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
                                       ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
@@ -1518,46 +1209,97 @@ export default function EditProfilePage() {
 
                         <div>
                           <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Preferred Watching Style
+                            Preferred Watching Format
                           </label>
                           <div className="flex flex-wrap gap-2">
-                            {TV_STYLES.map(style => {
-                              const active = note.style === style;
+                            {ANIME_FORMATS.map(format => {
+                              const active = note.format === format;
                               return (
                                 <button
                                   type="button"
-                                  key={style}
-                                  onClick={() => handleCategoryNoteField('tv', 'style')(style)}
+                                  key={format}
+                                  onClick={() => handleCategoryNoteField('anime', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
                                       ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
                                       : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
                                   }`}
                                 >
-                                  {style}
+                                  {format}
                                 </button>
                               );
                             })}
                           </div>
                         </div>
 
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Preferred Source / Platform
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {ANIME_PLATFORMS.map(platform => {
+                              const active = platformsList.includes(platform);
+                              return (
+                                <button
+                                  type="button"
+                                  key={platform}
+                                  onClick={() =>
+                                    handleCategoryListToggle('anime', 'platforms', platform)
+                                  }
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {platform}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {platformsList.includes('Other') && (
+                            <div className="mt-3">
+                              <Input
+                                label="Άλλη πλατφόρμα"
+                                name="anime_platform_other"
+                                value={(note.platform_other as string) || ''}
+                                onChange={e =>
+                                  handleCategoryNoteField('anime', 'platform_other')(e.target.value)
+                                }
+                                placeholder="π.χ. local streaming app"
+                              />
+                            </div>
+                          )}
+                        </div>
+
                         <Input
-                          label="Watching Since (Έτος)"
+                          label="Watching Anime Since (Έτος)"
                           type="number"
-                          name="tv_since"
+                          name="anime_since"
                           value={(note.since as string | number | undefined) || ''}
-                          onChange={e => handleCategoryNoteField('tv', 'since')(e.target.value)}
-                          placeholder="π.χ. 2010"
+                          onChange={e => handleCategoryNoteField('anime', 'since')(e.target.value)}
+                          placeholder="π.χ. 2004"
                           min="1970"
                           max={new Date().getFullYear()}
                         />
 
                         <Textarea
-                          name="tv_people"
-                          value={(note.people as string) || ''}
-                          onChange={e => handleCategoryNoteField('tv', 'people')(e.target.value)}
-                          label="Αγαπημένοι Ηθοποιοί / Σκηνοθέτες"
-                          placeholder="Αγαπημένοι ηθοποιοί/σκηνοθέτες ή έξτρα σημειώσεις."
+                          label="Favorite Anime Directors / Studios"
+                          name="anime_directors"
+                          value={(note.directors as string) || ''}
+                          onChange={e =>
+                            handleCategoryNoteField('anime', 'directors')(e.target.value)
+                          }
+                          placeholder="Favorite directors / studios (π.χ. Miyazaki, Ufotable)"
+                          rows={3}
+                        />
+
+                        <Textarea
+                          label="Notes / Extra"
+                          name="anime_notes"
+                          value={(note.notes as string) || ''}
+                          onChange={e => handleCategoryNoteField('anime', 'notes')(e.target.value)}
+                          placeholder="Notes (sub/dub, Blu-ray collection, rewatch habits κ.λπ.)"
                           rows={3}
                         />
                       </>
@@ -1568,20 +1310,137 @@ export default function EditProfilePage() {
             ) : (
               <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">TV Series Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Anime</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-[var(--hb-muted)]">
-                  Πρόσθεσε την κατηγορία &quot;TV Series&quot; για να εμφανιστεί η φόρμα με τα
-                  στοιχεία σου.
+                  Πρόσθεσε την κατηγορία &quot;Anime&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
+                  σου.
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Manga Information */}
+            {(formData.categories as string[] | undefined)?.includes('manga') ? (
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
+                <CardHeader>
+                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για manga</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(() => {
+                    const note = getCategoryNote('manga');
+                    return (
+                      <>
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Αγαπημένα Είδη / Demographics
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {MANGA_GENRES.map(genre => {
+                              const active =
+                                Array.isArray(note.genres) && note.genres.includes(genre);
+                              return (
+                                <button
+                                  type="button"
+                                  key={genre}
+                                  onClick={() => handleCategoryGenreToggle('manga', genre)}
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {genre}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Preferred Reading Format
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {MANGA_FORMATS.map(format => {
+                              const active = note.format === format;
+                              return (
+                                <button
+                                  type="button"
+                                  key={format}
+                                  onClick={() => handleCategoryNoteField('manga', 'format')(format)}
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {format}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <Input
+                          label="Reading Manga Since (Έτος)"
+                          type="number"
+                          name="manga_since"
+                          value={(note.since as string | number | undefined) || ''}
+                          onChange={e => handleCategoryNoteField('manga', 'since')(e.target.value)}
+                          placeholder="π.χ. 2018"
+                          min="1970"
+                          max={new Date().getFullYear()}
+                        />
+
+                        <Textarea
+                          label="Favorite Mangaka / Artists"
+                          name="manga_authors"
+                          value={(note.authors as string) || ''}
+                          onChange={e =>
+                            handleCategoryNoteField('manga', 'authors')(e.target.value)
+                          }
+                          placeholder="Favorite mangaka / artists"
+                          rows={3}
+                        />
+
+                        <Textarea
+                          label="Notes / Extra"
+                          name="manga_notes"
+                          value={(note.notes as string) || ''}
+                          onChange={e => handleCategoryNoteField('manga', 'notes')(e.target.value)}
+                          placeholder="Notes (συλλογή, εκδοτικοί, physical vs digital κ.λπ.)"
+                          rows={3}
+                        />
+                      </>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για manga</CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-[var(--hb-muted)]">
+                  Πρόσθεσε την κατηγορία &quot;Manga&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
+                  σου.
                 </CardContent>
               </Card>
             )}
 
             {/* Movies Information */}
             {(formData.categories as string[] | undefined)?.includes('movies') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Movies Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Ταινίες
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(() => {
@@ -1724,7 +1583,9 @@ export default function EditProfilePage() {
             ) : (
               <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Movies Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Ταινίες
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-[var(--hb-muted)]">
                   Πρόσθεσε την κατηγορία &quot;Movies&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
@@ -1733,11 +1594,167 @@ export default function EditProfilePage() {
               </Card>
             )}
 
-            {/* Books Information */}
-            {(formData.categories as string[] | undefined)?.includes('books') ? (
+            {/* TV Series Information */}
+            {(formData.categories as string[] | undefined)?.includes('tv') ? (
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
+                <CardHeader>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Σειρές
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(() => {
+                    const note = getCategoryNote('tv');
+                    const serviceOptions = CATEGORY_SERVICES.tv || ['Other'];
+                    return (
+                      <>
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Αγαπημένες Πλατφόρμες Streaming
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {serviceOptions.map(service => {
+                              const list =
+                                (note.services as string[] | undefined) &&
+                                Array.isArray(note.services)
+                                  ? (note.services as string[])
+                                  : [];
+                              const active = list.includes(service);
+                              return (
+                                <button
+                                  type="button"
+                                  key={service}
+                                  onClick={() =>
+                                    handleCategoryListToggle('tv', 'services', service)
+                                  }
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {service}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {Array.isArray(note.services) && note.services.includes('Other') && (
+                            <div className="mt-3">
+                              <Input
+                                label="Άλλη υπηρεσία"
+                                name="tv_service_other"
+                                value={(note.service_other as string) || ''}
+                                onChange={e =>
+                                  handleCategoryNoteField('tv', 'service_other')(e.target.value)
+                                }
+                                placeholder="π.χ. Cosmote TV"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Αγαπημένα Genres Σειρών
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {TV_GENRES.map(genre => {
+                              const active =
+                                Array.isArray(note.genres) && note.genres.includes(genre);
+                              return (
+                                <button
+                                  type="button"
+                                  key={genre}
+                                  onClick={() => handleCategoryGenreToggle('tv', genre)}
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {genre}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Preferred Watching Style
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {TV_STYLES.map(style => {
+                              const active = note.style === style;
+                              return (
+                                <button
+                                  type="button"
+                                  key={style}
+                                  onClick={() => handleCategoryNoteField('tv', 'style')(style)}
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {style}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <Input
+                          label="Watching Since (Έτος)"
+                          type="number"
+                          name="tv_since"
+                          value={(note.since as string | number | undefined) || ''}
+                          onChange={e => handleCategoryNoteField('tv', 'since')(e.target.value)}
+                          placeholder="π.χ. 2010"
+                          min="1970"
+                          max={new Date().getFullYear()}
+                        />
+
+                        <Textarea
+                          name="tv_people"
+                          value={(note.people as string) || ''}
+                          onChange={e => handleCategoryNoteField('tv', 'people')(e.target.value)}
+                          label="Αγαπημένοι Ηθοποιοί / Σκηνοθέτες"
+                          placeholder="Αγαπημένοι ηθοποιοί/σκηνοθέτες ή έξτρα σημειώσεις."
+                          rows={3}
+                        />
+                      </>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            ) : (
               <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Books Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Σειρές
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-[var(--hb-muted)]">
+                  Πρόσθεσε την κατηγορία &quot;TV Series&quot; για να εμφανιστεί η φόρμα με τα
+                  στοιχεία σου.
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Books Information */}
+            {(formData.categories as string[] | undefined)?.includes('books') ? (
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
+                <CardHeader>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Βιβλία
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(() => {
@@ -1833,7 +1850,9 @@ export default function EditProfilePage() {
             ) : (
               <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Books Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Βιβλία
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-[var(--hb-muted)]">
                   Πρόσθεσε την κατηγορία &quot;Books&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
@@ -1842,85 +1861,40 @@ export default function EditProfilePage() {
               </Card>
             )}
 
-            {/* Anime Information */}
-            {(formData.categories as string[] | undefined)?.includes('anime') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+            {/* Coding Information */}
+            {(formData.categories as string[] | undefined)?.includes('coding') ? (
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Anime Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Κώδικα
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(() => {
-                    const note = getCategoryNote('anime');
-                    const platformsList =
-                      Array.isArray(note.platforms) && (note.platforms as string[]).length > 0
-                        ? (note.platforms as string[])
-                        : [];
+                    const note = getCategoryNote('coding');
                     return (
                       <>
                         <div>
                           <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Αγαπημένα Είδη Anime
+                            Γλώσσες που χρησιμοποιείς
                           </label>
                           <div className="flex flex-wrap gap-2">
-                            {ANIME_GENRES.map(genre => {
-                              const active =
-                                Array.isArray(note.genres) && note.genres.includes(genre);
+                            {CODING_LANGUAGES.map(lang => {
+                              const list =
+                                (note.languages as string[] | undefined) &&
+                                Array.isArray(note.languages)
+                                  ? (note.languages as string[])
+                                  : [];
+                              const active = list.includes(lang);
                               return (
                                 <button
                                   type="button"
-                                  key={genre}
-                                  onClick={() => handleCategoryGenreToggle('anime', genre)}
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {genre}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Preferred Watching Format
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {ANIME_FORMATS.map(format => {
-                              const active = note.format === format;
-                              return (
-                                <button
-                                  type="button"
-                                  key={format}
-                                  onClick={() => handleCategoryNoteField('anime', 'format')(format)}
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {format}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Preferred Source / Platform
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {ANIME_PLATFORMS.map(platform => {
-                              const active = platformsList.includes(platform);
-                              return (
-                                <button
-                                  type="button"
-                                  key={platform}
+                                  key={lang}
                                   onClick={() =>
-                                    handleCategoryListToggle('anime', 'platforms', platform)
+                                    handleCategoryListToggle('coding', 'languages', lang)
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
@@ -1928,54 +1902,70 @@ export default function EditProfilePage() {
                                       : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
                                   }`}
                                 >
-                                  {platform}
+                                  {lang}
                                 </button>
                               );
                             })}
                           </div>
-                          {platformsList.includes('Other') && (
-                            <div className="mt-3">
-                              <Input
-                                label="Άλλη πλατφόρμα"
-                                name="anime_platform_other"
-                                value={(note.platform_other as string) || ''}
-                                onChange={e =>
-                                  handleCategoryNoteField('anime', 'platform_other')(e.target.value)
-                                }
-                                placeholder="π.χ. local streaming app"
-                              />
-                            </div>
-                          )}
                         </div>
 
-                        <Input
-                          label="Watching Anime Since (Έτος)"
-                          type="number"
-                          name="anime_since"
-                          value={(note.since as string | number | undefined) || ''}
-                          onChange={e => handleCategoryNoteField('anime', 'since')(e.target.value)}
-                          placeholder="π.χ. 2004"
-                          min="1970"
-                          max={new Date().getFullYear()}
-                        />
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Focus / Κατεύθυνση
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {CODING_FOCUS.map(focus => {
+                              const list =
+                                (note.focus as string[] | undefined) && Array.isArray(note.focus)
+                                  ? (note.focus as string[])
+                                  : [];
+                              const active = list.includes(focus);
+                              return (
+                                <button
+                                  type="button"
+                                  key={focus}
+                                  onClick={() => handleCategoryListToggle('coding', 'focus', focus)}
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {focus}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <Input
+                            label="Coding Since (Έτος)"
+                            type="number"
+                            value={(note.since as string) || ''}
+                            onChange={e =>
+                              handleCategoryNoteField('coding', 'since')(e.target.value)
+                            }
+                            placeholder="2012"
+                            min="1970"
+                            max={new Date().getFullYear()}
+                          />
+                          <Input
+                            label="Tools / Stack"
+                            type="text"
+                            value={(note.tools as string) || ''}
+                            onChange={e =>
+                              handleCategoryNoteField('coding', 'tools')(e.target.value)
+                            }
+                            placeholder="VS Code, Git, React..."
+                          />
+                        </div>
 
                         <Textarea
-                          label="Favorite Anime Directors / Studios"
-                          name="anime_directors"
-                          value={(note.directors as string) || ''}
-                          onChange={e =>
-                            handleCategoryNoteField('anime', 'directors')(e.target.value)
-                          }
-                          placeholder="Favorite directors / studios (π.χ. Miyazaki, Ufotable)"
-                          rows={3}
-                        />
-
-                        <Textarea
-                          label="Notes / Extra"
-                          name="anime_notes"
+                          label="Σημειώσεις"
                           value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('anime', 'notes')(e.target.value)}
-                          placeholder="Notes (sub/dub, Blu-ray collection, rewatch habits κ.λπ.)"
+                          onChange={e => handleCategoryNoteField('coding', 'notes')(e.target.value)}
+                          placeholder="Τι σε εμπνέει στο coding, ποια projects αγαπάς..."
                           rows={3}
                         />
                       </>
@@ -1986,105 +1976,70 @@ export default function EditProfilePage() {
             ) : (
               <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Anime Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Κώδικα
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-[var(--hb-muted)]">
-                  Πρόσθεσε την κατηγορία &quot;Anime&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
-                  σου.
+                  Πρόσθεσε την κατηγορία &quot;Coding&quot; για να εμφανιστεί η φόρμα με τα coding
+                  στοιχεία σου.
                 </CardContent>
               </Card>
             )}
 
-            {/* Manga Information */}
-            {(formData.categories as string[] | undefined)?.includes('manga') ? (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+            {/* Pet Information */}
+            {(formData.categories as string[] | undefined)?.includes('pet') ? (
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Manga Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Κατοικίδια
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(() => {
-                    const note = getCategoryNote('manga');
+                    const note = getCategoryNote('pet');
                     return (
                       <>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Αγαπημένα Είδη / Demographics
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {MANGA_GENRES.map(genre => {
-                              const active =
-                                Array.isArray(note.genres) && note.genres.includes(genre);
-                              return (
-                                <button
-                                  type="button"
-                                  key={genre}
-                                  onClick={() => handleCategoryGenreToggle('manga', genre)}
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {genre}
-                                </button>
-                              );
-                            })}
-                          </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <Select
+                            label="Είδος"
+                            options={['', ...PET_TYPES]}
+                            value={(note.type as string) || ''}
+                            onChange={value => handleCategoryNoteField('pet', 'type')(value)}
+                          />
+                          <Input
+                            label="Όνομα"
+                            type="text"
+                            value={(note.name as string) || ''}
+                            onChange={e => handleCategoryNoteField('pet', 'name')(e.target.value)}
+                            placeholder="π.χ. Luna"
+                          />
+                          <Input
+                            label="Ράτσα / Breed"
+                            type="text"
+                            value={(note.breed as string) || ''}
+                            onChange={e => handleCategoryNoteField('pet', 'breed')(e.target.value)}
+                            placeholder="π.χ. Labrador"
+                          />
+                          <Input
+                            label="Μαζί από (Έτος)"
+                            type="number"
+                            value={(note.since as string) || ''}
+                            onChange={e => handleCategoryNoteField('pet', 'since')(e.target.value)}
+                            placeholder="2019"
+                            min="1970"
+                            max={new Date().getFullYear()}
+                          />
                         </div>
 
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
-                            Preferred Reading Format
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {MANGA_FORMATS.map(format => {
-                              const active = note.format === format;
-                              return (
-                                <button
-                                  type="button"
-                                  key={format}
-                                  onClick={() => handleCategoryNoteField('manga', 'format')(format)}
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
-                                  }`}
-                                >
-                                  {format}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <Input
-                          label="Reading Manga Since (Έτος)"
-                          type="number"
-                          name="manga_since"
-                          value={(note.since as string | number | undefined) || ''}
-                          onChange={e => handleCategoryNoteField('manga', 'since')(e.target.value)}
-                          placeholder="π.χ. 2018"
-                          min="1970"
-                          max={new Date().getFullYear()}
-                        />
-
                         <Textarea
-                          label="Favorite Mangaka / Artists"
-                          name="manga_authors"
-                          value={(note.authors as string) || ''}
-                          onChange={e =>
-                            handleCategoryNoteField('manga', 'authors')(e.target.value)
-                          }
-                          placeholder="Favorite mangaka / artists"
-                          rows={3}
-                        />
-
-                        <Textarea
-                          label="Notes / Extra"
-                          name="manga_notes"
+                          label="Μικρές ιστορίες"
                           value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('manga', 'notes')(e.target.value)}
-                          placeholder="Notes (συλλογή, εκδοτικοί, physical vs digital κ.λπ.)"
+                          onChange={e => handleCategoryNoteField('pet', 'notes')(e.target.value)}
+                          placeholder="Τι χαρακτήρα έχει, αγαπημένες συνήθειες..."
                           rows={3}
                         />
                       </>
@@ -2095,11 +2050,112 @@ export default function EditProfilePage() {
             ) : (
               <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Manga Πληροφορίες</CardTitle>
+                  <CardTitle className="text-[var(--hb-headline)]">
+                    Πληροφορίες για Κατοικίδια
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-[var(--hb-muted)]">
-                  Πρόσθεσε την κατηγορία &quot;Manga&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
-                  σου.
+                  Πρόσθεσε την κατηγορία &quot;Pet&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
+                  του κατοικιδίου σου.
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Vape Information */}
+            {(formData.categories as string[] | undefined)?.includes('vape') ? (
+              <Card
+                collapsible
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              >
+                <CardHeader>
+                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Vape</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(() => {
+                    const note = getCategoryNote('vape');
+                    return (
+                      <>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <Select
+                            label="Συσκευή"
+                            options={['', ...VAPE_DEVICES]}
+                            value={(note.device as string) || ''}
+                            onChange={value => handleCategoryNoteField('vape', 'device')(value)}
+                          />
+                          <Input
+                            label="Νικοτίνη (mg)"
+                            type="number"
+                            value={(note.nicotine as string) || ''}
+                            onChange={e =>
+                              handleCategoryNoteField('vape', 'nicotine')(e.target.value)
+                            }
+                            placeholder="3"
+                            min="0"
+                            max="50"
+                          />
+                          <Input
+                            label="Vaping Since (Έτος)"
+                            type="number"
+                            value={(note.since as string) || ''}
+                            onChange={e => handleCategoryNoteField('vape', 'since')(e.target.value)}
+                            placeholder="2018"
+                            min="1970"
+                            max={new Date().getFullYear()}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Αγαπημένες Γεύσεις
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {VAPE_FLAVORS.map(flavor => {
+                              const list =
+                                (note.flavors as string[] | undefined) &&
+                                Array.isArray(note.flavors)
+                                  ? (note.flavors as string[])
+                                  : [];
+                              const active = list.includes(flavor);
+                              return (
+                                <button
+                                  type="button"
+                                  key={flavor}
+                                  onClick={() =>
+                                    handleCategoryListToggle('vape', 'flavors', flavor)
+                                  }
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
+                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                  }`}
+                                >
+                                  {flavor}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <Textarea
+                          label="Σημειώσεις"
+                          value={(note.notes as string) || ''}
+                          onChange={e => handleCategoryNoteField('vape', 'notes')(e.target.value)}
+                          placeholder="Αγαπημένα υγρά, συνήθειες, προτιμήσεις..."
+                          rows={3}
+                        />
+                      </>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Vape</CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-[var(--hb-muted)]">
+                  Πρόσθεσε την κατηγορία &quot;Vape&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
+                  για το vaping σου.
                 </CardContent>
               </Card>
             )}
@@ -2109,8 +2165,8 @@ export default function EditProfilePage() {
               {/* Primary Button */}
               <Button
                 type="submit"
-                disabled={saving}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-6 py-2.5 font-semibold text-[var(--hb-bg)] shadow-[0_4px_12px_rgba(229,9,20,0.25),0_0_12px_rgba(229,9,20,0.45)] transition-all duration-300 hover:shadow-[0_6px_16px_rgba(229,9,20,0.35),0_0_18px_rgba(229,9,20,0.55)] active:scale-[0.97]"
+                disabled={saving || !isDirty}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-6 py-2.5 font-semibold text-[var(--hb-bg)] shadow-[0_4px_12px_rgba(229,9,20,0.25),0_0_12px_rgba(229,9,20,0.45)] transition-all duration-300 hover:shadow-[0_6px_16px_rgba(229,9,20,0.35),0_0_18px_rgba(229,9,20,0.55)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
               >
                 <Save className="h-4 w-4" />
                 <span>{saving ? 'Αποθήκευση...' : 'Αποθήκευση'}</span>
@@ -2215,14 +2271,14 @@ export default function EditProfilePage() {
             className="pointer-events-auto flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-4 py-2 text-sm font-semibold text-[var(--hb-bg)] shadow-[0_10px_30px_rgba(229,9,20,0.35)] transition hover:shadow-[0_14px_36px_rgba(229,9,20,0.45)]"
           >
             <Save className="h-4 w-4" />
-            {saving ? 'Αποθήκευση...' : 'Save'}
+            {saving ? 'Αποθήκευση...' : 'Αποθήκευση'}
           </Button>
           <Button
             onClick={handleCancel}
             disabled={saving}
             className="pointer-events-auto rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-sm font-medium text-[var(--hb-text)] shadow-[0_8px_20px_rgba(0,0,0,0.35)] transition hover:border-[var(--hb-border)] hover:bg-[var(--hb-card)]"
           >
-            Άκυρο
+            Ακύρωση
           </Button>
         </div>
       )}
