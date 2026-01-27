@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -227,6 +227,8 @@ export default function Navbar() {
     setMenuOpen(false);
   };
 
+  const profileRef = useRef<HTMLDivElement>(null);
+
   const navLinks = NAV_ITEMS.filter(item => (item.devOnly ? isDev : true));
   const userCategories = (user?.categories as string[] | undefined) ?? [];
   const hobbyLinks =
@@ -238,6 +240,29 @@ export default function Navbar() {
     if (href === '/') return pathname === '/';
     return pathname?.startsWith(href);
   };
+
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (profileRef.current && !profileRef.current.contains(target)) {
+        setProfileOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setProfileOpen(false);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [profileOpen]);
 
   const desktopLinkClass = (href: string) => {
     const base = 'flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition';
@@ -373,7 +398,7 @@ export default function Navbar() {
             )}
             {isAuthenticated && user ? (
               <>
-                <div className="relative">
+                <div ref={profileRef} className="relative">
                   <button
                     onClick={() => setProfileOpen(open => !open)}
                     className="flex items-center gap-2 rounded-full px-3 py-1 text-sm text-[var(--hb-text)] transition hover:bg-white/5 hover:text-[var(--hb-primary-strong)]"
@@ -478,7 +503,7 @@ export default function Navbar() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setMenuOpen(false)}
-                        className="flex shrink-0 items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-primary-strong)]"
+                        className="hover:border-[var(--hb-primary-strong)]/50 flex shrink-0 items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary-strong)]"
                       >
                         {item.icon}
                         <span>{item.label}</span>
@@ -493,7 +518,7 @@ export default function Navbar() {
                     <Link
                       key={href}
                       href={href}
-                      className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-primary-strong)]"
+                      className="hover:border-[var(--hb-primary-strong)]/50 flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary-strong)]"
                       onClick={() => setMenuOpen(false)}
                     >
                       {icon}

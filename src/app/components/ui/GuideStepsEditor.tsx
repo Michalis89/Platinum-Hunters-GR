@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
-import RichTextEditor from './RichTextEditor';
+import dynamic from 'next/dynamic';
 
+const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
+  ssr: false,
+});
 interface GuideStepsEditorProps {
   readonly value?: string[];
   readonly onChange?: (steps: string[]) => void;

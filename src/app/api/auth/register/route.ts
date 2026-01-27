@@ -49,6 +49,13 @@ export async function POST(req: Request) {
       favorite_genres,
       gaming_since,
       categories,
+      favorite_anime_genres,
+      favorite_movie_genres,
+      favorite_book_genres,
+      favorite_languages,
+      pet_types,
+      vape_device,
+      vape_flavor,
     } = body;
 
     // =====================================================
@@ -185,6 +192,13 @@ export async function POST(req: Request) {
         favorite_genres: favorite_genres || null,
         gaming_since: gaming_since || null,
         categories: categories || null,
+        favorite_anime_genres: favorite_anime_genres || null,
+        favorite_movie_genres: favorite_movie_genres || null,
+        favorite_book_genres: favorite_book_genres || null,
+        favorite_languages: favorite_languages || null,
+        pet_types: pet_types || null,
+        vape_device: vape_device || null,
+        vape_flavor: vape_flavor || null,
       })
       .eq('id', authData.user.id)
       .select()

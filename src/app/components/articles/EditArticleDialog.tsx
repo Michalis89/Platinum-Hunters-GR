@@ -6,14 +6,17 @@ import { X, Save, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
-import RichTextEditor from '../ui/RichTextEditor';
 import Button from '../ui/Button';
 import ErrorState from '../ui/ErrorState';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import type { ArticleCategory, ArticleTopic, ArticleStatus, ArticleRow } from '@/types/database';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import dynamic from 'next/dynamic';
 
+const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
+  ssr: false,
+});
 interface EditArticleDialogProps {
   isOpen: boolean;
   article: ArticleRow;
@@ -319,9 +322,7 @@ export default function EditArticleDialog({
 
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
-                  {error && (
-                    <ErrorState error={error} />
-                  )}
+                  {error && <ErrorState error={error} />}
                   {warning && (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
                       {warning}
@@ -389,9 +390,7 @@ export default function EditArticleDialog({
                     error={!titleValidation.isValid}
                   />
                   {!titleValidation.isValid && (
-                    <p className="text-xs text-red-400">
-                      Ο τίτλος δεν πρέπει να περιέχει HTML.
-                    </p>
+                    <p className="text-xs text-red-400">Ο τίτλος δεν πρέπει να περιέχει HTML.</p>
                   )}
 
                   <Textarea
@@ -403,9 +402,7 @@ export default function EditArticleDialog({
                     className={!descriptionValidation.isValid ? 'border-red-500' : undefined}
                   />
                   {!descriptionValidation.isValid && (
-                    <p className="text-xs text-red-400">
-                      Η περιγραφή δεν πρέπει να περιέχει HTML.
-                    </p>
+                    <p className="text-xs text-red-400">Η περιγραφή δεν πρέπει να περιέχει HTML.</p>
                   )}
 
                   <div className="space-y-1">
@@ -474,22 +471,12 @@ export default function EditArticleDialog({
                     onClick={handleDelete}
                     disabled={isSubmitting || isDeleting}
                   >
-                    {isDeleting ? (
-                      <LoadingSpinner size="sm" inline />
-                    ) : (
-                      'Διαγραφή άρθρου'
-                    )}
+                    {isDeleting ? <LoadingSpinner size="sm" inline /> : 'Διαγραφή άρθρου'}
                   </Button>
                 </div>
                 <Button
                   variant="primary"
-                  icon={
-                    isSubmitting ? (
-                      <LoadingSpinner size="sm" inline />
-                    ) : (
-                      <Save size={16} />
-                    )
-                  }
+                  icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Save size={16} />}
                   onClick={handleSubmit}
                   disabled={isSubmitting || hasPlainTextError}
                 >

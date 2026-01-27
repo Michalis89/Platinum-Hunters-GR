@@ -119,9 +119,9 @@ export default function AddToBacklogModal({ onClose }: AddToBacklogModalProps) {
             <Image
               src={game.cover_image}
               alt={game.title}
-              fill
-              sizes="64px"
-              className="object-cover"
+              width={64}
+              height={64}
+              className="h-full w-full object-cover"
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-slate-800">

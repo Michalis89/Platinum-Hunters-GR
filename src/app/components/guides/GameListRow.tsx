@@ -20,13 +20,16 @@ export default function GameListRow({ game, compact = false }: GameListRowProps)
       href={`/pages/guides/${game.slug}`}
       className={containerClasses}
     >
-      <div className={`relative w-full overflow-hidden rounded-lg ${compact ? 'h-16' : 'h-20'}`}>
+      <div className={`relative overflow-hidden rounded-lg ${compact ? 'h-16 w-[72px]' : 'h-20 w-[96px]'}`}>
         <Image
           src={game.cover_image || game.background_image || '/og-image.png'}
           alt={game.title}
-          fill
-          className="object-cover"
+          width={compact ? 72 : 96}
+          height={compact ? 64 : 80}
+          className="h-full w-full object-cover"
           sizes={compact ? '72px' : '96px'}
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzFlMjkzYiIvPjwvc3ZnPg=="
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
       </div>

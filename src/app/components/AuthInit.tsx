@@ -14,7 +14,26 @@ import type { AppDispatch } from '@/store/store';
 
 const AUTH_STORAGE_KEY = 'platinum-hunters-auth';
 const RETURN_URL_KEY = 'platinum-hunters-return-url';
-const SESSION_CHECK_INTERVAL_MS = 60 * 1000; // Check every 1 minute
+const SESSION_CHECK_INTERVAL_MS = 5 * 60 * 1000; // Check every 5 minutes (reduced from 1 min for performance)
+
+/**
+ * Schedule a callback to run during browser idle time
+ * Falls back to setTimeout for browsers without requestIdleCallback
+ */
+function scheduleIdleCallback(callback: () => void, timeout = 5000): number {
+  if (typeof requestIdleCallback !== 'undefined') {
+    return requestIdleCallback(callback, { timeout });
+  }
+  return setTimeout(callback, 100) as unknown as number;
+}
+
+function cancelIdleCallback(id: number): void {
+  if (typeof window.cancelIdleCallback !== 'undefined') {
+    window.cancelIdleCallback(id);
+  } else {
+    clearTimeout(id);
+  }
+}
 
 /**
  * Check if a session token is expired or expiring soon
@@ -189,20 +208,21 @@ export default function AuthInit() {
     };
   }, [dispatch, forceLogout, validateSession]);
 
-  // Keep session fresh on focus/interval to avoid stale "logged-in" UI after expiry
+  // Keep session fresh on visibility change/interval to avoid stale "logged-in" UI after expiry
   useEffect(() => {
     let cancelled = false;
     let lastCheckTime = 0;
-    const FOCUS_CHECK_DEBOUNCE_MS = 5000; // Don't check more than once every 5 seconds on focus
+    let pendingIdleCallback: number | null = null;
+    const VISIBILITY_CHECK_DEBOUNCE_MS = 5000; // Don't check more than once every 5 seconds
 
-    // Quick check on focus - only validates localStorage expiry, no API call
+    // Quick check on visibility - only validates localStorage expiry, no API call
     const quickCheckSession = async () => {
       if (initialFetchInFlight.current) return;
       if (!currentUser) return;
 
       // Debounce: don't check too frequently
       const now = Date.now();
-      if (now - lastCheckTime < FOCUS_CHECK_DEBOUNCE_MS) return;
+      if (now - lastCheckTime < VISIBILITY_CHECK_DEBOUNCE_MS) return;
       lastCheckTime = now;
 
       const { data, error } = await supabase.auth.getSession();
@@ -226,41 +246,47 @@ export default function AuthInit() {
       // components like ActivityFeed, causing unwanted data refetches.
     };
 
-    // Full validation with server - only on interval
-    const fullCheckSession = async () => {
+    // Full validation with server - scheduled during idle time to not block interactions
+    const fullCheckSession = () => {
       if (initialFetchInFlight.current) return;
       if (!currentUser) return;
 
-      const isValid = await validateSession();
-      if (cancelled) return;
+      // Schedule the actual validation during browser idle time
+      pendingIdleCallback = scheduleIdleCallback(async () => {
+        if (cancelled) return;
+        const isValid = await validateSession();
+        if (cancelled) return;
 
-      if (!isValid) {
-        await forceLogout();
-      }
+        if (!isValid) {
+          await forceLogout();
+        }
+      });
     };
 
     const onVisibility = () => {
       if (document.visibilityState === 'visible') quickCheckSession();
     };
-    const onFocus = () => quickCheckSession();
 
     document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('focus', onFocus);
-    // Full validation with server every 1 minute
+    // Full validation with server every 5 minutes (using idle callback to not block INP)
     const intervalId = window.setInterval(fullCheckSession, SESSION_CHECK_INTERVAL_MS);
 
     return () => {
       cancelled = true;
       document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('focus', onFocus);
       window.clearInterval(intervalId);
+      if (pendingIdleCallback !== null) {
+        cancelIdleCallback(pendingIdleCallback);
+      }
     };
   }, [dispatch, currentUser, forceLogout, validateSession]);
 
   // Idle logout after 1h of inactivity (only for authenticated users)
   useEffect(() => {
     const IDLE_LIMIT_MS = 60 * 60 * 1000; // 1 hour
+    const ACTIVITY_DEBOUNCE_MS = 1000; // Only process activity once per second
     let timer: ReturnType<typeof setTimeout> | null = null;
+    let lastActivityTime = 0;
     let cancelled = false;
 
     const resetTimer = () => {
@@ -277,10 +303,17 @@ export default function AuthInit() {
       }, IDLE_LIMIT_MS);
     };
 
-    const activityEvents = ['click', 'keydown', 'mousemove', 'touchstart', 'focus', 'visibilitychange'];
-    const onActivity = () => resetTimer();
+    // Debounced activity handler - prevents excessive calls from mousemove etc.
+    const onActivity = () => {
+      const now = Date.now();
+      if (now - lastActivityTime < ACTIVITY_DEBOUNCE_MS) return;
+      lastActivityTime = now;
+      resetTimer();
+    };
 
-    activityEvents.forEach(ev => window.addEventListener(ev, onActivity));
+    const activityEvents = ['click', 'keydown', 'mousemove', 'touchstart', 'focus', 'visibilitychange'];
+    // Use passive listeners for better scroll/touch performance
+    activityEvents.forEach(ev => window.addEventListener(ev, onActivity, { passive: true }));
     resetTimer();
 
     return () => {

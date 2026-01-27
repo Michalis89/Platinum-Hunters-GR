@@ -6,13 +6,17 @@ import { X, Save, Eye, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
-import RichTextEditor from '../ui/RichTextEditor';
 import Button from '../ui/Button';
 import ErrorState from '../ui/ErrorState';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import type { ArticleCategory, ArticleTopic, ArticleStatus } from '@/types/database';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import dynamic from 'next/dynamic';
+
+const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
+  ssr: false,
+});
 
 interface AddArticleDialogProps {
   isOpen: boolean;
@@ -300,9 +304,7 @@ export default function AddArticleDialog({
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
                   {/* Error message */}
-                  {error && (
-                    <ErrorState error={error} />
-                  )}
+                  {error && <ErrorState error={error} />}
                   {warning && (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
                       {warning}
@@ -375,9 +377,7 @@ export default function AddArticleDialog({
                     error={!titleValidation.isValid}
                   />
                   {!titleValidation.isValid && (
-                    <p className="text-xs text-red-400">
-                      Ο τίτλος δεν πρέπει να περιέχει HTML.
-                    </p>
+                    <p className="text-xs text-red-400">Ο τίτλος δεν πρέπει να περιέχει HTML.</p>
                   )}
 
                   {/* Description */}
@@ -390,9 +390,7 @@ export default function AddArticleDialog({
                     className={!descriptionValidation.isValid ? 'border-red-500' : undefined}
                   />
                   {!descriptionValidation.isValid && (
-                    <p className="text-xs text-red-400">
-                      Η περιγραφή δεν πρέπει να περιέχει HTML.
-                    </p>
+                    <p className="text-xs text-red-400">Η περιγραφή δεν πρέπει να περιέχει HTML.</p>
                   )}
 
                   {/* Cover Image */}
@@ -463,13 +461,7 @@ export default function AddArticleDialog({
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
-                    icon={
-                      isSubmitting ? (
-                        <LoadingSpinner size="sm" inline />
-                      ) : (
-                        <Save size={16} />
-                      )
-                    }
+                    icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Save size={16} />}
                     onClick={() => handleSubmit('draft')}
                     disabled={isSubmitting || hasPlainTextError}
                   >
@@ -477,13 +469,7 @@ export default function AddArticleDialog({
                   </Button>
                   <Button
                     variant="primary"
-                    icon={
-                      isSubmitting ? (
-                        <LoadingSpinner size="sm" inline />
-                      ) : (
-                        <Eye size={16} />
-                      )
-                    }
+                    icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Eye size={16} />}
                     onClick={() => handleSubmit('published')}
                     disabled={isSubmitting || hasPlainTextError}
                   >

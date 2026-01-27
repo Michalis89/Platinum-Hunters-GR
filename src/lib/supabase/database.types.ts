@@ -1714,7 +1714,11 @@ export type Database = {
           display_name: string | null
           email: string
           email_verified: boolean | null
+          favorite_anime_genres: string[] | null
+          favorite_book_genres: string[] | null
           favorite_genres: string[] | null
+          favorite_languages: string[] | null
+          favorite_movie_genres: string[] | null
           favorite_platform: string | null
           full_name: string | null
           gaming_since: number | null
@@ -1723,6 +1727,7 @@ export type Database = {
           last_login: string | null
           nintendo_id: string | null
           notification_settings: Json | null
+          pet_types: string[] | null
           privacy_settings: Json | null
           psn_id: string | null
           role: string | null
@@ -1734,6 +1739,8 @@ export type Database = {
           total_platinums: number | null
           updated_at: string | null
           username: string
+          vape_device: string | null
+          vape_flavor: string | null
           xbox_gamertag: string | null
         }
         Insert: {
@@ -1747,7 +1754,11 @@ export type Database = {
           display_name?: string | null
           email: string
           email_verified?: boolean | null
+          favorite_anime_genres?: string[] | null
+          favorite_book_genres?: string[] | null
           favorite_genres?: string[] | null
+          favorite_languages?: string[] | null
+          favorite_movie_genres?: string[] | null
           favorite_platform?: string | null
           full_name?: string | null
           gaming_since?: number | null
@@ -1756,6 +1767,7 @@ export type Database = {
           last_login?: string | null
           nintendo_id?: string | null
           notification_settings?: Json | null
+          pet_types?: string[] | null
           privacy_settings?: Json | null
           psn_id?: string | null
           role?: string | null
@@ -1767,6 +1779,8 @@ export type Database = {
           total_platinums?: number | null
           updated_at?: string | null
           username: string
+          vape_device?: string | null
+          vape_flavor?: string | null
           xbox_gamertag?: string | null
         }
         Update: {
@@ -1780,7 +1794,11 @@ export type Database = {
           display_name?: string | null
           email?: string
           email_verified?: boolean | null
+          favorite_anime_genres?: string[] | null
+          favorite_book_genres?: string[] | null
           favorite_genres?: string[] | null
+          favorite_languages?: string[] | null
+          favorite_movie_genres?: string[] | null
           favorite_platform?: string | null
           full_name?: string | null
           gaming_since?: number | null
@@ -1789,6 +1807,7 @@ export type Database = {
           last_login?: string | null
           nintendo_id?: string | null
           notification_settings?: Json | null
+          pet_types?: string[] | null
           privacy_settings?: Json | null
           psn_id?: string | null
           role?: string | null
@@ -1800,6 +1819,8 @@ export type Database = {
           total_platinums?: number | null
           updated_at?: string | null
           username?: string
+          vape_device?: string | null
+          vape_flavor?: string | null
           xbox_gamertag?: string | null
         }
         Relationships: []

@@ -1,6 +1,6 @@
 {
   "name": "platinum-hunters",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,7 @@
     "ci": "npm run lint && npm test && npm run build",
     "build": "next build",
     "start": "next start",
+    "analyze": "set ANALYZE=true && next build",
     "lint": "next lint",
     "test": "jest --coverage",
     "test:coverage": "npm test -- --coverage --coverageReporters=text-lcov > lcov.info",
@@ -15,6 +16,7 @@
     "cypress:open": "concurrently \"npm run build && npm run start\" \"cypress open\" "
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.2.6",
     "@reduxjs/toolkit": "^2.6.1",
     "@supabase/supabase-js": "^2.48.1",
     "@tiptap/extension-bubble-menu": "^3.17.0",
@@ -30,6 +32,8 @@
     "@tiptap/starter-kit": "^3.17.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "framer-motion": "^12.4.3",
     "lodash.clonedeep": "^4.5.0",
     "lowlight": "^3.3.0",
@@ -44,11 +48,14 @@
     "react-redux": "^9.2.0",
     "sanitize-html": "^2.12.1",
     "swr": "^2.3.6",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
     "xml2js": "^0.6.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^16.1.5",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",

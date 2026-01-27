@@ -251,6 +251,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           favorite_platform: formData.favorite_platform || null,
           favorite_genres: formData.favorite_genres || null,
           categories: formData.favorite_hobbies || null,
+          favorite_anime_genres: formData.favorite_anime_genres || null,
+          favorite_movie_genres: formData.favorite_movie_genres || null,
+          favorite_book_genres: formData.favorite_book_genres || null,
+          favorite_languages: formData.favorite_languages || null,
+          pet_types: formData.pet_types || null,
+          vape_device: formData.vape_device || null,
+          vape_flavor: formData.vape_flavor || null,
         }),
       });
 

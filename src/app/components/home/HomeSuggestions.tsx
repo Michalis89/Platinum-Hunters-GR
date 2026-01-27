@@ -243,9 +243,12 @@ function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) 
         <Image
           src={item.cover}
           alt={item.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          width={200}
+          height={300}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PC9zdmc+"
         />
         {/* Gradient Overlay */}
         <div className="via-[var(--hb-bg)]/40 absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] to-transparent" />

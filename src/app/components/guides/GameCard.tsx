@@ -76,9 +76,12 @@ export default function GameCard({ game }: GameCardProps) {
           <Image
             src={game.cover_image || game.background_image || '/og-image.png'}
             alt={game.title}
-            fill
-            className="object-cover"
+            width={300}
+            height={176}
+            className="h-full w-full object-cover"
             sizes="(min-width: 1024px) 300px, 100vw"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE3NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PC9zdmc+"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
           <div className="absolute bottom-4 left-4 flex flex-col gap-1">

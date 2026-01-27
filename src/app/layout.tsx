@@ -13,12 +13,14 @@ export { metadata } from '@/utils/seo/metadata/metadata';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
+  display: 'swap',
 });
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

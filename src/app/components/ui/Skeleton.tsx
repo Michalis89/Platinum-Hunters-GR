@@ -77,20 +77,40 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
                 </div>
               </div>
 
-              {/* Grid */}
+              {/* Grid - matches GameCard height */}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 9 }).map((_, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-lg shadow-black/30 backdrop-blur-sm"
+                    className="flex flex-col overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-lg shadow-black/30 backdrop-blur-sm"
                     data-testid="skeleton-item"
                   >
-                    <div className="h-4 w-5/6 rounded bg-white/10" />
-                    <div className="mt-3 h-4 w-2/3 rounded bg-white/10" />
-                    <div className="mt-3 h-4 w-1/2 rounded bg-white/10" />
-                    <div className="mt-4 flex gap-2">
-                      <div className="h-6 w-16 rounded-full bg-white/10" />
-                      <div className="h-6 w-16 rounded-full bg-white/10" />
+                    {/* Image placeholder - h-44 like GameCard */}
+                    <div className="h-44 w-full bg-white/5" />
+                    {/* Title */}
+                    <div className="px-5 pb-0 pt-5">
+                      <div className="mx-auto h-5 w-3/4 rounded bg-white/10" />
+                    </div>
+                    {/* Content */}
+                    <div className="flex flex-1 flex-col gap-3 px-5 pt-3">
+                      <div className="flex flex-wrap justify-center gap-2">
+                        <div className="h-6 w-16 rounded-full bg-white/5" />
+                        <div className="h-6 w-14 rounded-full bg-white/5" />
+                        <div className="h-6 w-18 rounded-full bg-white/5" />
+                      </div>
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="h-8 w-24 rounded-full bg-white/5" />
+                        <div className="flex gap-4">
+                          <div className="h-6 w-14 rounded-full bg-white/5" />
+                          <div className="h-6 w-14 rounded-full bg-white/5" />
+                          <div className="h-6 w-14 rounded-full bg-white/5" />
+                        </div>
+                      </div>
+                    </div>
+                    {/* Footer */}
+                    <div className="flex items-center justify-between px-5 pb-5 pt-3">
+                      <div className="h-4 w-28 rounded bg-white/10" />
+                      <div className="h-4 w-20 rounded bg-white/10" />
                     </div>
                   </div>
                 ))}
@@ -151,23 +171,38 @@ export default function Skeleton({ type = 'page', count = 6, className = '' }: S
             <div className="bg-[var(--hb-primary-strong)]/25 h-11 w-52 rounded-lg" />
           </div>
 
-          {/* Grid */}
+          {/* Grid - matches BacklogItem height */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4"
+                className="overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)]"
                 data-testid="skeleton-item"
               >
-                <div className="h-5 w-3/4 rounded bg-white/10" />
-                <div className="mt-3 space-y-2">
-                  <div className="h-4 w-full rounded bg-white/10" />
-                  <div className="h-4 w-5/6 rounded bg-white/10" />
-                  <div className="h-4 w-2/3 rounded bg-white/10" />
+                {/* Cover image - aspect-video like BacklogItem */}
+                <div className="aspect-video w-full bg-white/5" />
+                {/* Content */}
+                <div className="p-4">
+                  <div className="h-5 w-3/4 rounded bg-white/10" />
+                  <div className="mb-3 mt-2 flex flex-wrap gap-3">
+                    <div className="h-4 w-16 rounded bg-white/5" />
+                    <div className="h-4 w-20 rounded bg-white/5" />
+                    <div className="h-4 w-14 rounded bg-white/5" />
+                  </div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-white/5" />
+                    <div className="h-3 w-32 rounded bg-white/5" />
+                  </div>
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <div className="h-8 flex-1 rounded-lg bg-white/5" />
+                    <div className="h-8 w-24 rounded-lg bg-white/5" />
+                  </div>
                 </div>
-                <div className="mt-4 flex gap-2">
-                  <div className="h-6 w-16 rounded-full bg-white/10" />
-                  <div className="h-6 w-20 rounded-full bg-white/10" />
+                {/* Footer */}
+                <div className="flex gap-2 p-4 pt-0">
+                  <div className="h-10 flex-1 rounded-lg bg-white/5" />
+                  <div className="h-10 w-10 rounded-lg bg-white/5" />
+                  <div className="h-10 w-10 rounded-lg bg-white/5" />
                 </div>
               </div>
             ))}

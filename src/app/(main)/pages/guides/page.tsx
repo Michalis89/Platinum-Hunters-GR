@@ -410,47 +410,47 @@ function GuidesClient() {
     if (filteredGames && filteredGames.length > 0) {
       if (viewMode === 'timeline') {
         return (
-            <div className="min-h-[60vh]">
-              <div className="w-full overflow-x-auto pb-2">
-                <div className="flex w-fit gap-4 pr-2">
-                  {timelineGroups.map(group => (
-                    <div
-                      key={group.year}
-                      className="min-w-[240px] rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 shadow-inner shadow-black/20"
-                    >
-                      <div className="flex items-center justify-between text-sm text-[var(--hb-text)]">
-                        <span className="text-base font-semibold text-[var(--hb-primary-strong)]">
-                          {group.year}
-                        </span>
-                        <span className="rounded-full bg-[var(--hb-card)] px-2 py-0.5 text-xs text-[var(--hb-muted)]">
-                          {group.items.length}
-                        </span>
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        {group.items.map(game => (
-                          <Link
-                            key={game.id}
-                            href={`/pages/guides/${game.slug}`}
-                            className="group flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] p-2 text-xs text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/60"
-                          >
-                            <div className="relative h-12 w-12 overflow-hidden rounded-md bg-[var(--hb-panel)]">
-                              <Image
-                                src={game.cover_image || game.background_image || '/og-image.png'}
-                                alt={game.title}
-                                fill
-                                className="object-cover"
-                                sizes="48px"
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate text-[13px] font-semibold group-hover:text-[var(--hb-primary-strong)]">
-                                {game.title}
-                              </p>
-                              <p className="truncate text-[11px] text-[var(--hb-muted)]">
-                                {game.platforms?.slice(0, 2).join(' • ') || 'N/A'}
-                              </p>
-                            </div>
-                          </Link>
+          <div className="min-h-[60vh]">
+            <div className="w-full overflow-x-auto pb-2">
+              <div className="flex w-fit gap-4 pr-2">
+                {timelineGroups.map(group => (
+                  <div
+                    key={group.year}
+                    className="min-w-[240px] rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 shadow-inner shadow-black/20"
+                  >
+                    <div className="flex items-center justify-between text-sm text-[var(--hb-text)]">
+                      <span className="text-base font-semibold text-[var(--hb-primary-strong)]">
+                        {group.year}
+                      </span>
+                      <span className="rounded-full bg-[var(--hb-card)] px-2 py-0.5 text-xs text-[var(--hb-muted)]">
+                        {group.items.length}
+                      </span>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {group.items.map(game => (
+                        <Link
+                          key={game.id}
+                          href={`/pages/guides/${game.slug}`}
+                          className="hover:border-[var(--hb-primary-strong)]/60 group flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] p-2 text-xs text-[var(--hb-text)] transition"
+                        >
+                          <div className="relative h-12 w-12 overflow-hidden rounded-md bg-[var(--hb-panel)]">
+                            <Image
+                              src={game.cover_image || game.background_image || '/og-image.png'}
+                              alt={game.title}
+                              fill
+                              className="object-cover"
+                              sizes="48px"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-[13px] font-semibold group-hover:text-[var(--hb-primary-strong)]">
+                              {game.title}
+                            </p>
+                            <p className="truncate text-[11px] text-[var(--hb-muted)]">
+                              {game.platforms?.slice(0, 2).join(' • ') || 'N/A'}
+                            </p>
+                          </div>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -462,7 +462,7 @@ function GuidesClient() {
       }
 
       return (
-        <div className="min-h-[60vh] max-h-[80vh] overflow-y-auto pr-1">
+        <div className="max-h-[80vh] min-h-[60vh] overflow-y-auto pr-1">
           {viewMode === 'grid' ? (
             <GameGrid games={filteredGames || []} />
           ) : (
@@ -513,9 +513,9 @@ function GuidesClient() {
       <div className="relative mx-auto flex max-w-7xl flex-col gap-10">
         {/* Ambient glows */}
         <div className="pointer-events-none absolute inset-0 opacity-60">
-          <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-[var(--hb-primary-strong)]/15 blur-3xl" />
-          <div className="absolute right-0 top-32 h-52 w-52 rounded-full bg-[var(--hb-accent)]/15 blur-3xl" />
-          <div className="absolute bottom-10 left-1/2 h-24 w-48 -translate-x-1/2 rounded-full bg-[var(--hb-primary)]/10 blur-3xl" />
+          <div className="bg-[var(--hb-primary-strong)]/15 absolute -left-16 top-10 h-64 w-64 rounded-full blur-3xl" />
+          <div className="bg-[var(--hb-accent)]/15 absolute right-0 top-32 h-52 w-52 rounded-full blur-3xl" />
+          <div className="bg-[var(--hb-primary)]/10 absolute bottom-10 left-1/2 h-24 w-48 -translate-x-1/2 rounded-full blur-3xl" />
         </div>
 
         {/* Hero */}
@@ -523,7 +523,7 @@ function GuidesClient() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-3">
               <h1 className="flex items-center gap-3 text-4xl font-bold tracking-tight text-[var(--hb-headline)] md:text-5xl">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)] shadow-lg shadow-black/40">
+                <span className="bg-[var(--hb-primary-strong)]/20 flex h-12 w-12 items-center justify-center rounded-2xl text-[var(--hb-primary-strong)] shadow-lg shadow-black/40">
                   <BookOpen className="h-6 w-6" />
                 </span>
                 Οδηγοί
@@ -544,7 +544,9 @@ function GuidesClient() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-3 shadow-inner shadow-black/20">
-                  <p className="text-xs uppercase tracking-wide text-[var(--hb-muted)]">Developer</p>
+                  <p className="text-xs uppercase tracking-wide text-[var(--hb-muted)]">
+                    Developer
+                  </p>
                   <p className="text-center text-2xl font-semibold text-[var(--hb-primary-strong)]">
                     {games?.pagination?.meta?.developersCount ??
                       (combinedGames.length > 0
@@ -682,7 +684,7 @@ function GuidesClient() {
                       className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
                         difficultyCategory === option.value
                           ? 'border-[var(--hb-primary-strong)]/70 bg-[var(--hb-primary-strong)]/10 text-[var(--hb-primary-strong)] shadow-[0_0_0_1px_rgba(229,9,20,0.35)]'
-                          : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]/60 hover:text-[var(--hb-headline)]'
+                          : 'hover:border-[var(--hb-primary-strong)]/60 border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:text-[var(--hb-headline)]'
                       }`}
                     >
                       <span className="flex flex-col items-start leading-tight">
@@ -693,7 +695,7 @@ function GuidesClient() {
                   ))}
                   <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="flex items-center gap-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)] lg:hidden"
+                    className="hover:border-[var(--hb-primary-strong)]/70 flex items-center gap-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:text-[var(--hb-headline)] lg:hidden"
                   >
                     Φίλτρα
                     <ChevronDown
@@ -751,16 +753,10 @@ function GuidesClient() {
             </div>
 
             <motion.div
-              key={`${sortOrder}-${sortBy}-${hourRange}-${runValue}-${yearRange}-${platformFilter}-${genreFilter}-${developerFilter}-${difficultyFilter}-${difficultyCategory}`}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
-              transition={{
-                type: 'spring',
-                stiffness: 200,
-                damping: 40,
-                duration: 0.4,
-              }}
+              transition={{ type: 'spring', stiffness: 200, damping: 40 }}
               className="w-full"
             >
               {content()}
@@ -776,7 +772,7 @@ function GuidesClient() {
                     setPage(p => p + 1);
                   }}
                   disabled={isFetching}
-                  className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/60 hover:text-[var(--hb-headline)] disabled:opacity-50"
+                  className="hover:border-[var(--hb-primary-strong)]/60 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:text-[var(--hb-headline)] disabled:opacity-50"
                 >
                   {isFetching ? 'Φόρτωση...' : 'Φόρτωσε περισσότερα'}
                 </button>

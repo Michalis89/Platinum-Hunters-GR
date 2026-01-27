@@ -95,9 +95,9 @@ export function ProfileFavorites({
             <Image
               src={fav.game?.cover_image || fav.game?.background_image || '/og-image.png'}
               alt={fav.game?.title || 'Item'}
-              fill
-              className="object-cover"
-              sizes="56px"
+              width={56}
+              height={56}
+              className="h-full w-full object-cover"
             />
             {/* Favorite heart overlay */}
             <div className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--hb-bg)]/80">

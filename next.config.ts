@@ -1,5 +1,11 @@
 import { join } from 'node:path';
 import type { NextConfig } from 'next';
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: !!process.env.ANALYZE,
+  openAnalyzer: true,
+});
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: join(process.cwd()),
@@ -46,4 +52,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

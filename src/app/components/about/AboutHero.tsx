@@ -1,8 +1,13 @@
+'use client';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import PageHero from '@/app/components/shared/PageHero';
+import { selectIsAuthenticated } from '@/store/slices/authSlice';
+import { useSelector } from 'react-redux';
 
 export function AboutHero() {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+
   return (
     <PageHero
       eyebrow="Το προσωπικό σου hobby hub"
@@ -22,18 +27,20 @@ export function AboutHero() {
       titleClassName="mb-6 text-4xl md:text-5xl lg:text-6xl"
       actions={
         <>
-          <Link
-            href="/pages/auth/register"
-            className="group inline-flex items-center gap-2 rounded-full bg-[var(--hb-primary-strong)] px-8 py-3.5 text-base font-semibold text-white transition hover:brightness-110"
-          >
-            <Sparkles className="h-5 w-5" />
-            Ξεκίνα δωρεάν
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          {!isAuthenticated && (
+            <Link
+              href="/pages/auth/register"
+              className="group inline-flex items-center gap-2 rounded-full bg-[var(--hb-primary-strong)] px-8 py-3.5 text-base font-semibold text-white transition hover:brightness-110"
+            >
+              <Sparkles className="h-5 w-5" />
+              Ξεκίνα δωρεάν
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
 
           <Link
             href="/pages/hobbies"
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-8 py-3.5 text-base font-semibold text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]/60 hover:text-[var(--hb-headline)]"
+            className="hover:border-[var(--hb-primary-strong)]/60 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-8 py-3.5 text-base font-semibold text-[var(--hb-text)] transition hover:text-[var(--hb-headline)]"
           >
             Εξερεύνησε τα hobbies
           </Link>

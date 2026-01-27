@@ -1,14 +1,14 @@
 <div align="center">
-  <img src="assets/platinum-hunters-gr.png" alt="Platinum Hunters Logo" width="320">
+  <img src="public/og-image.png" alt="Hobbistas Logo" width="320">
 
-  <h1>Platinum Hunters / Hobbistas</h1>
+  <h1>Hobbistas</h1>
 
   <p>
     <strong>A Greek hobby tracking platform for trophy guides, backlog management, and multi-media libraries</strong>
   </p>
 
   <p>
-    <a href="https://platinum-hunters-gr.vercel.app/">Live Demo</a> &bull;
+    <a href="https://platinum-hunters-gr/">Live Demo</a> &bull;
     <a href="#features">Features</a> &bull;
     <a href="#getting-started">Getting Started</a> &bull;
     <a href="#deployment">Deployment</a> &bull;
@@ -51,17 +51,17 @@ Platinum Hunters (Hobbistas) is a comprehensive platform for Greek gaming enthus
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Framework** | Next.js 15 (App Router) |
-| **UI** | React 19, Tailwind CSS 3.4 |
-| **State** | Redux Toolkit + RTK Query |
-| **Database** | Supabase (PostgreSQL) |
-| **Auth** | Supabase Auth (JWT) |
-| **Rich Text** | Tiptap 3.17 |
-| **Animation** | Framer Motion |
-| **Testing** | Jest, React Testing Library, Cypress |
-| **Deployment** | Vercel |
+| Layer          | Technology                           |
+| -------------- | ------------------------------------ |
+| **Framework**  | Next.js 15 (App Router)              |
+| **UI**         | React 19, Tailwind CSS 3.4           |
+| **State**      | Redux Toolkit + RTK Query            |
+| **Database**   | Supabase (PostgreSQL)                |
+| **Auth**       | Supabase Auth (JWT)                  |
+| **Rich Text**  | Tiptap 3.17                          |
+| **Animation**  | Framer Motion                        |
+| **Testing**    | Jest, React Testing Library, Cypress |
+| **Deployment** | Vercel                               |
 
 ### External APIs
 
@@ -136,16 +136,16 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ## Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm test` | Run Jest tests with coverage |
-| `npm run ci` | Full CI pipeline (lint + test + build) |
-| `npm run sitemap` | Generate sitemap |
-| `npm run cypress:open` | Open Cypress E2E tests |
+| Script                 | Description                            |
+| ---------------------- | -------------------------------------- |
+| `npm run dev`          | Start development server               |
+| `npm run build`        | Production build                       |
+| `npm run start`        | Start production server                |
+| `npm run lint`         | Run ESLint                             |
+| `npm test`             | Run Jest tests with coverage           |
+| `npm run ci`           | Full CI pipeline (lint + test + build) |
+| `npm run sitemap`      | Generate sitemap                       |
+| `npm run cypress:open` | Open Cypress E2E tests                 |
 
 ---
 
@@ -174,14 +174,14 @@ vercel
 
 Add the following environment variables in your Vercel project settings:
 
-| Variable | Required | Notes |
-|----------|----------|-------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-only) |
-| `NEXT_PUBLIC_SITE_URL` | Yes | Your production domain |
-| `RAWG_API_KEY` | No | For game metadata |
-| `PSN_NPSSO_TOKEN` | No | For PSN trophy data |
+| Variable                        | Required | Notes                                   |
+| ------------------------------- | -------- | --------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Your Supabase project URL               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase anonymous key                  |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Supabase service role key (server-only) |
+| `NEXT_PUBLIC_SITE_URL`          | Yes      | Your production domain                  |
+| `RAWG_API_KEY`                  | No       | For game metadata                       |
+| `PSN_NPSSO_TOKEN`               | No       | For PSN trophy data                     |
 
 ### Vercel Configuration
 
@@ -251,12 +251,14 @@ src/
 ### Common Vercel Issues
 
 #### Build Fails with Memory Error
+
 ```bash
 # Increase Node memory limit in package.json scripts or Vercel settings
 NODE_OPTIONS=--max-old-space-size=4096 npm run build
 ```
 
 #### Playwright/Chromium Errors
+
 The scraper feature uses Playwright which is **not compatible with Vercel Serverless Functions**. The scraper is disabled by default and controlled via the `SCRAPER_ENABLED` environment variable.
 
 ```bash
@@ -269,13 +271,17 @@ SCRAPER_ENABLED=true
 For production scraping, consider external services like Browserless.io or Apify.
 
 #### Cold Start Timeouts
+
 If API routes timeout on first request:
+
 1. Check function duration in Vercel dashboard
 2. Consider adding `maxDuration` configuration in `vercel.json`
 3. Optimize heavy imports with dynamic loading
 
 #### Supabase Connection Issues
+
 For serverless environments:
+
 1. Use Supabase connection pooler URL
 2. Avoid singleton patterns in route handlers
 3. Handle connection errors gracefully
@@ -283,12 +289,14 @@ For serverless environments:
 ### Local Development Issues
 
 #### Port Already in Use
+
 ```bash
 npx kill-port 3000
 npm run dev
 ```
 
 #### Supabase Auth Not Working
+
 1. Verify `.env.local` variables are set correctly
 2. Check Supabase dashboard for auth configuration
 3. Ensure redirect URLs are configured in Supabase Auth settings

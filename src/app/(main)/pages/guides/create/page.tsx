@@ -11,10 +11,14 @@ import Feedback from '@/app/components/ui/Feedback';
 import GameDetailsInfo from '@/app/components/game-details/GameDetailsInfo';
 import { GuideStepsEditor } from '@/app/components/ui/GuideStepsEditor';
 import { Trophy, TrophySidebar } from '@/app/components/ui/TrophySidebar';
-import RichTextEditor from '@/app/components/ui/RichTextEditor';
 import Button from '@/app/components/ui/Button';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import dynamic from 'next/dynamic';
+
+const RichTextEditor = dynamic(() => import('@/app/components/editor/RichTextEditor.client'), {
+  ssr: false,
+});
 
 interface GameDetailsInfoProps {
   readonly release_year?: number | null;

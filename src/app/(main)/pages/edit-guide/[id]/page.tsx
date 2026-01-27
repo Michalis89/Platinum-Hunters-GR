@@ -8,10 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Ca
 import { Input } from '@/app/components/ui/Input';
 import Feedback from '@/app/components/ui/Feedback';
 import { GuideStepsEditor } from '@/app/components/ui/GuideStepsEditor';
-import RichTextEditor from '@/app/components/ui/RichTextEditor';
 import Button from '@/app/components/ui/Button';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
+import dynamic from 'next/dynamic';
+
+const RichTextEditor = dynamic(() => import('@/app/components/editor/RichTextEditor.client'), {
+  ssr: false,
+});
 
 export default function EditGuide() {
   const { id } = useParams();
