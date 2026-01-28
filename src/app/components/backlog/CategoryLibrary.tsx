@@ -295,8 +295,11 @@ export default function CategoryLibrary({
     // Respect user's explicit status choice - only auto-complete if user hasn't changed status
     // or if they explicitly set it to completed
     const nextStatus = editState.status;
+    const shouldAutoCompleteProgress = category !== 'games';
     const nextProgressValue =
-      editState.status === 'completed' && totalCount !== undefined ? totalCount : nextProgress;
+      shouldAutoCompleteProgress && editState.status === 'completed' && totalCount !== undefined
+        ? totalCount
+        : nextProgress;
     const nextFavorite = editState.isFavorite;
 
     if (supportsExternal && selectedEntry.mediaId) {
@@ -449,6 +452,7 @@ export default function CategoryLibrary({
           type={alert.type}
           title={alert.title}
           message={alert.message}
+          duration={2000}
           onClose={() => setAlert(null)}
         />
       )}

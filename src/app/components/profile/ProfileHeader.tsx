@@ -21,7 +21,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
       <div className="mx-auto max-w-4xl">
         {/* Eyebrow */}
         <p className="mb-6 text-center text-xs uppercase tracking-[0.3em] text-[var(--hb-primary-strong)]">
-          Χομπίστας • Προφίλ
+          Hobbistas • Προφίλ
         </p>
 
         {/* Avatar + Name Group */}
@@ -56,7 +56,9 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
           <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             {/* Role badge */}
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
-              {(isAdmin || isAuthor) && <ShieldCheck className="h-3.5 w-3.5 text-[var(--hb-primary-strong)]" />}
+              {(isAdmin || isAuthor) && (
+                <ShieldCheck className="h-3.5 w-3.5 text-[var(--hb-primary-strong)]" />
+              )}
               {user.role}
             </span>
 

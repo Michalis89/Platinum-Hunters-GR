@@ -2,9 +2,9 @@ import HomePageClient from '@/app/components/home/HomePageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
-  title: 'Αρχική | Χομπίστας',
+  title: 'Αρχική | Hobbistas',
   description:
-    'Ο Χομπίστας είναι η ελληνική κοινότητα για άρθρα, οδηγούς, reviews και backlog σε κάθε hobby.',
+    'Ο Hobbistas είναι η ελληνική κοινότητα για άρθρα, οδηγούς, reviews και backlog σε κάθε hobby.',
   path: '/',
 });
 

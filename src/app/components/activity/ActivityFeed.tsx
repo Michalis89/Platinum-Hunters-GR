@@ -36,8 +36,6 @@ const CategoryAlertContext = createContext<CategoryAlertState | null>(null);
 type ActivityType =
   | 'backlog_added'
   | 'backlog_status'
-  | 'guide_created'
-  | 'step_completed'
   | 'media_added'
   | 'media_status'
   | 'media_favorite'
@@ -109,15 +107,6 @@ function renderText(item: ActivityItem) {
       dropped: 'το άφησε',
     };
     return `${name} ${statusLabel[status] || 'άλλαξε status σε ' + status}: ${title}`;
-  }
-  if (item.type === 'guide_created') {
-    if (item.payload?.action === 'updated') {
-      return `${name} ενημέρωσε οδηγό για ${title}`;
-    }
-    return `${name} ανέβασε οδηγό για ${title}`;
-  }
-  if (item.type === 'step_completed') {
-    return `${name} ολοκλήρωσε βήμα: ${p.stepTitle || 'guide step'}`;
   }
   if (item.type === 'media_added') {
     const cat = categoryWithArticle[category] || { article: 'το', label: 'media' };
@@ -192,8 +181,6 @@ function iconFor(item: ActivityItem) {
       return <Heart className="h-4 w-4 text-slate-500" />;
     return <Gamepad2 className="h-4 w-4 text-amber-300" />;
   }
-  if (item.type === 'guide_created') return <Sparkles className="h-4 w-4 text-violet-300" />;
-  if (item.type === 'step_completed') return <TrophyIcon className="h-4 w-4 text-amber-300" />;
   if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-sky-300" />;
   if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-300" />;
   if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-300" />;
@@ -313,16 +300,6 @@ export function ActivityFeed({
   );
 }
 
-function slugifyTitle(title: string) {
-  return title
-    .toString()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '');
-}
-
 function FeedText({ item }: { item: ActivityItem }) {
   const text = renderText(item);
   const payload = item.payload || {};
@@ -347,21 +324,26 @@ function FeedText({ item }: { item: ActivityItem }) {
     );
   }
 
-  // Game/guide activities
-  const slug =
-    (payload.gameSlug as string | undefined) ||
-    (payload.slug as string | undefined) ||
-    (payload.gameTitle ? slugifyTitle(payload.gameTitle as string) : undefined);
+  if (item.type === 'backlog_status' || item.type === 'backlog_added') {
+    const category = payload.category as string | undefined;
+    const userCategories = alertContext?.userCategories ?? [];
+    const hasCategory = !category || userCategories.includes(category);
 
-  if (
-    (item.type === 'guide_created' ||
-      item.type === 'backlog_status' ||
-      item.type === 'backlog_added') &&
-    slug
-  ) {
+    if (category && !hasCategory && alertContext?.showCategoryAlert) {
+      return (
+        <button
+          onClick={() => alertContext.showCategoryAlert(category)}
+          className="text-left text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
+        >
+          {text}
+        </button>
+      );
+    }
+
+    const backlogUrl = `/pages/backlog${category ? `?category=${category}` : ''}`;
     return (
       <Link
-        href={`/pages/guides/${slug}`}
+        href={backlogUrl}
         className="text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
       >
         {text}

@@ -100,7 +100,6 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # Optional - External APIs
 RAWG_API_KEY=your-rawg-key
-PSN_NPSSO_TOKEN=your-psn-token
 TMDB_ACCESS_TOKEN=your-tmdb-token
 MAL_CLIENT_ID=your-mal-client-id
 MAL_CLIENT_SECRET=your-mal-secret
@@ -174,7 +173,6 @@ Add the following environment variables in your Vercel project settings:
 | `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Supabase service role key (server-only) |
 | `NEXT_PUBLIC_SITE_URL`          | Yes      | Your production domain                  |
 | `RAWG_API_KEY`                  | No       | For game metadata                       |
-| `PSN_NPSSO_TOKEN`               | No       | For PSN trophy data                     |
 
 ### Vercel Configuration
 

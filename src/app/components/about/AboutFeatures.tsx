@@ -20,13 +20,13 @@ const features: Feature[] = [
   {
     title: 'Multi-hobby Backlog',
     description:
-      'Games, anime, manga, ταινίες, σειρές, βιβλία — μία λίστα για όλα. Κοινή δομή, διαφορετικά metadata ανά κατηγορία.',
+      'Games, anime, manga, ταινίες, σειρές, βιβλία μία λίστα για όλα. Κοινή δομή, διαφορετικά metadata ανά κατηγορία.',
     icon: <Layers className="h-6 w-6" />,
   },
   {
     title: 'Progress Tracking',
     description:
-      'Παρακολούθησε την πρόοδό σου: ώρες, επεισόδια, κεφάλαια, σελίδες. Quick update με ένα click.',
+      'Παρακολούθησε την πρόοδό σου: ώρες, επεισόδια, τόμους, σελίδες. Quick update με ένα click.',
     icon: <ListTodo className="h-6 w-6" />,
   },
   {
@@ -48,9 +48,9 @@ const features: Feature[] = [
     icon: <StickyNote className="h-6 w-6" />,
   },
   {
-    title: 'Trophy Guides',
+    title: 'Trophy Tips',
     description:
-      'Οδηγοί για platinum trophies και achievements. Difficulty, εκτιμώμενες ώρες, missables, tips.',
+      'Συμβουλές για platinum trophies και achievements. Difficulty, εκτιμώμενες ώρες, missables, tips.',
     icon: <Trophy className="h-6 w-6" />,
   },
   {
@@ -79,18 +79,17 @@ export function AboutFeatures() {
             Όλα όσα χρειάζεσαι, τίποτα παραπάνω
           </h2>
           <p className="mx-auto max-w-2xl text-[var(--hb-muted)]">
-            Σχεδιασμένο για hobbyists που θέλουν να οργανώνουν χωρίς περιττή
-            πολυπλοκότητα.
+            Σχεδιασμένο για hobbyists που θέλουν να οργανώνουν χωρίς περιττή πολυπλοκότητα.
           </p>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => (
+          {features.map(feature => (
             <div
               key={feature.title}
-              className="group relative rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--hb-primary-strong)]/50 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
+              className="hover:border-[var(--hb-primary-strong)]/50 group relative rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10 text-[var(--hb-primary-strong)] transition-colors group-hover:bg-[var(--hb-primary-strong)]/20">
+              <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
                 {feature.icon}
               </div>
               <h3 className="mb-2 text-base font-semibold text-[var(--hb-headline)]">

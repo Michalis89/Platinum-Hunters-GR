@@ -36,7 +36,7 @@ export function ProfileFavorites({
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <div
             key={i}
             className="flex animate-pulse items-center gap-3 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4"
@@ -73,7 +73,7 @@ export function ProfileFavorites({
           key={fav.id}
           draggable
           onDragStart={() => setDragIndex(idx)}
-          onDragOver={(e) => e.preventDefault()}
+          onDragOver={e => e.preventDefault()}
           onDrop={() => {
             onReorder(dragIndex, idx);
             setDragIndex(null);
@@ -81,7 +81,7 @@ export function ProfileFavorites({
           className={`group flex cursor-grab items-center gap-4 rounded-2xl border bg-[var(--hb-card)] p-4 transition-all duration-200 active:cursor-grabbing ${
             dragIndex === idx
               ? 'border-[var(--hb-primary-strong)]/70 bg-[var(--hb-primary-strong)]/5 shadow-[0_0_20px_rgba(229,9,20,0.15)]'
-              : 'border-[var(--hb-border)] hover:-translate-y-0.5 hover:border-[var(--hb-primary-strong)]/40 hover:shadow-[0_12px_30px_rgba(3,7,18,0.4)]'
+              : 'hover:border-[var(--hb-primary-strong)]/40 border-[var(--hb-border)] hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(3,7,18,0.4)]'
           }`}
         >
           {/* Drag handle + Rank */}
@@ -100,7 +100,7 @@ export function ProfileFavorites({
               className="h-full w-full object-cover"
             />
             {/* Favorite heart overlay */}
-            <div className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--hb-bg)]/80">
+            <div className="bg-[var(--hb-bg)]/80 absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full">
               <Heart className="h-3 w-3 fill-[var(--hb-primary-strong)] text-[var(--hb-primary-strong)]" />
             </div>
           </div>
@@ -119,7 +119,7 @@ export function ProfileFavorites({
 
       {/* Hint text */}
       <p className="mt-4 text-center text-xs text-[var(--hb-muted)]">
-        {category === 'gaming'
+        {category === 'games'
           ? 'Για να προσθέσεις/αφαιρέσεις favorites, χρησιμοποίησε το toggle "Favorite" στα backlog items.'
           : 'Σύρε για αναδιάταξη. Πρόσθεσε favorites από το library.'}
       </p>

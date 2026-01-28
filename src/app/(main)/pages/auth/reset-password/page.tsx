@@ -2,7 +2,7 @@ import ResetPasswordForm from '@/app/components/auth/ResetPasswordForm';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
-  title: 'Επαναφορά Κωδικού | Χομπίστας',
+  title: 'Επαναφορά Κωδικού | Hobbistas',
   description: 'Ορισμός νέου κωδικού πρόσβασης για τον λογαριασμό σου.',
   path: '/pages/auth/reset-password',
   noindex: true,

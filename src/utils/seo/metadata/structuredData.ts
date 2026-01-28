@@ -48,7 +48,7 @@ export const websiteStructuredData = {
   publisher: organizationStructuredData,
   potentialAction: {
     '@type': 'SearchAction',
-    target: `${SITE_URL}/pages/guides?search={search_term_string}`,
+    target: `${SITE_URL}/pages/news?search={search_term_string}`,
     'query-input': 'required name=search_term_string',
   },
 };

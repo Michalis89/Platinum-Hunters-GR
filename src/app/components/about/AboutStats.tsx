@@ -1,14 +1,4 @@
-import {
-  Gamepad2,
-  BookOpen,
-  Film,
-  Tv,
-  BookText,
-  Newspaper,
-  Users,
-  Sparkles,
-  BookMarked,
-} from 'lucide-react';
+import { Gamepad2, Film, Tv, BookText, Newspaper, Users, Sparkles, BookMarked } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type Stat = {
@@ -19,7 +9,6 @@ type Stat = {
 
 export type AboutStatsProps = {
   totalUsers: number;
-  totalGuides: number;
   totalGames: number;
   totalAnime: number;
   totalManga: number;
@@ -31,7 +20,6 @@ export type AboutStatsProps = {
 
 export function AboutStats({
   totalUsers,
-  totalGuides,
   totalGames,
   totalAnime,
   totalManga,
@@ -72,11 +60,6 @@ export function AboutStats({
       icon: <BookText className="h-5 w-5" />,
     },
     {
-      value: totalGuides || '—',
-      label: 'Οδηγοί',
-      icon: <BookOpen className="h-5 w-5" />,
-    },
-    {
       value: totalArticles || '—',
       label: 'Άρθρα',
       icon: <Newspaper className="h-5 w-5" />,
@@ -89,16 +72,14 @@ export function AboutStats({
   ];
 
   // Filter out stats with 0 or '—' value to only show categories with content
-  const activeStats = stats.filter(
-    (stat) => stat.value !== 0 && stat.value !== '—'
-  );
+  const activeStats = stats.filter(stat => stat.value !== 0 && stat.value !== '—');
 
   // Show active stats, or first 6 if not enough active
   const displayStats = activeStats.length >= 4 ? activeStats : stats.slice(0, 6);
 
   return (
     <section className="relative px-4 py-20 md:px-6 md:py-28">
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--hb-bg)] via-[var(--hb-primary-strong)]/[0.03] to-[var(--hb-bg)]" />
+      <div className="via-[var(--hb-primary-strong)]/[0.03] absolute inset-0 bg-gradient-to-b from-[var(--hb-bg)] to-[var(--hb-bg)]" />
 
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-12 text-center">
@@ -111,10 +92,10 @@ export function AboutStats({
         </div>
 
         <div className="flex flex-wrap justify-center gap-4">
-          {displayStats.map((stat) => (
+          {displayStats.map(stat => (
             <div
               key={stat.label}
-              className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)] rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[0_12px_30px_rgba(3,7,18,0.35)] transition hover:border-[var(--hb-primary-strong)]/40"
+              className="hover:border-[var(--hb-primary-strong)]/40 w-[calc(50%-0.5rem)] rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[0_12px_30px_rgba(3,7,18,0.35)] transition sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)]"
             >
               <div className="mb-2 flex justify-center text-[var(--hb-primary-strong)]">
                 {stat.icon}
@@ -122,9 +103,7 @@ export function AboutStats({
               <p className="mb-1 bg-gradient-to-r from-[var(--hb-primary-strong)] to-[var(--hb-accent)] bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
                 {stat.value}
               </p>
-              <p className="text-sm font-medium text-[var(--hb-headline)]">
-                {stat.label}
-              </p>
+              <p className="text-sm font-medium text-[var(--hb-headline)]">{stat.label}</p>
             </div>
           ))}
         </div>

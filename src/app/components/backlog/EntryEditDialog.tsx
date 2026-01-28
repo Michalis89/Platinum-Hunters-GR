@@ -67,11 +67,12 @@ export default function EntryEditDialog({
   if (!entry) return null;
 
   const total = getTotalCount(entry, category);
+  const shouldAutoCompleteProgress = category !== 'games';
 
   const handleStatusChange = (nextStatus: MediaStatus) => {
     setEditState(prev => {
       // If changing TO completed, set progress to total
-      if (nextStatus === 'completed' && total !== undefined) {
+      if (nextStatus === 'completed' && total !== undefined && shouldAutoCompleteProgress) {
         return { ...prev, status: nextStatus, progress: String(total) };
       }
       // If changing FROM completed to something else, reset progress
@@ -83,10 +84,13 @@ export default function EntryEditDialog({
     });
   };
 
+  const clampProgress = category !== 'games';
   const setProgress = (next: number) => {
     const nextValue = Math.max(0, next);
-    const nextClamped = total ? Math.min(nextValue, total) : nextValue;
-    const shouldComplete = total !== undefined && nextClamped >= total;
+    const nextClamped =
+      clampProgress && total ? Math.min(nextValue, total) : nextValue;
+    const shouldComplete =
+      clampProgress && total !== undefined && nextClamped >= total;
 
     setEditState(prev => ({
       ...prev,
@@ -105,7 +109,7 @@ export default function EntryEditDialog({
 
     const numericProgress = Number.parseInt(value, 10);
     const shouldComplete =
-      total !== undefined && Number.isFinite(numericProgress) && numericProgress >= total;
+      clampProgress && total !== undefined && Number.isFinite(numericProgress) && numericProgress >= total;
 
     setEditState(prev => ({
       ...prev,
@@ -202,6 +206,18 @@ export default function EntryEditDialog({
                   </span>
                 ))}
               </div>
+              {/* Game-specific: Platforms */}
+              {category === 'games' && entry.platforms && (
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--hb-muted)]">
+                  {entry.platforms && entry.platforms.length > 0 && (
+                    <span className="flex items-center gap-1.5">
+                      <span className="font-medium text-[var(--hb-text)]">Platforms:</span>
+                      {entry.platforms.slice(0, 4).join(', ')}
+                      {entry.platforms.length > 4 && ` +${entry.platforms.length - 4}`}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -224,9 +240,6 @@ export default function EntryEditDialog({
                   ▾
                 </span>
               </div>
-              <p className="mt-2 text-xs text-[var(--hb-muted)]">
-                Tip: το dropdown list είναι native (OS-controlled).
-              </p>
             </div>
 
             {/* Progress (non-movies) or Duration (movies) */}
@@ -240,40 +253,47 @@ export default function EntryEditDialog({
                       onChange={event => handleProgressInputChange(event.target.value)}
                       className="h-full w-20 bg-transparent px-3 text-sm text-[var(--hb-text)] focus:outline-none"
                       inputMode="numeric"
-                      placeholder=""
+                      placeholder="0"
                     />
-                    <div className="h-5 w-px bg-[var(--hb-border)] opacity-80" />
-                    <div className="flex h-full flex-1 items-center justify-center whitespace-nowrap px-3 text-sm text-[var(--hb-muted)]">
-                      {total ?? '—'}
+                    {category !== 'games' && (
+                      <>
+                        <div className="h-5 w-px bg-[var(--hb-border)] opacity-80" />
+
+                        <div className="flex h-full flex-1 items-center justify-center whitespace-nowrap px-3 text-sm text-[var(--hb-muted)]">
+                          {total ?? '—'}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {category !== 'games' && (
+                    <div className="flex flex-1 items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setProgress((hasNumeric ? safeValue : 0) - 1)}
+                        className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
+                      >
+                        −1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProgress((hasNumeric ? safeValue : 0) + 1)}
+                        className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
+                      >
+                        +1
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!total}
+                        onClick={() => total && setProgress(total)}
+                        className="border-[var(--hb-primary-strong)]/40 bg-[var(--hb-primary-strong)]/10 text-s rounded-full border px-3 py-1 font-semibold text-[var(--hb-primary-strong)] disabled:opacity-40"
+                        title="Complete"
+                      >
+                        Max
+                      </button>
                     </div>
-                  </div>
-                  <div className="flex flex-1 items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setProgress((hasNumeric ? safeValue : 0) - 1)}
-                      className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
-                    >
-                      −1
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setProgress((hasNumeric ? safeValue : 0) + 1)}
-                      className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
-                    >
-                      +1
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!total}
-                      onClick={() => total && setProgress(total)}
-                      className="border-[var(--hb-primary-strong)]/40 bg-[var(--hb-primary-strong)]/10 text-s rounded-full border px-3 py-1 font-semibold text-[var(--hb-primary-strong)] disabled:opacity-40"
-                      title="Complete"
-                    >
-                      Max
-                    </button>
-                  </div>
+                  )}
                 </div>
-                {total && hasNumeric && (
+                {total && hasNumeric && category !== 'games' && (
                   <div className="mt-3 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] p-1">
                     <div className="relative h-3 w-full overflow-hidden rounded-full bg-[var(--hb-card)]">
                       <div

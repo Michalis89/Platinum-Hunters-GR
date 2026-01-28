@@ -24,7 +24,6 @@ interface ArticleWithAuthor extends ArticleRow {
   } | null;
 }
 
-
 async function getArticle(slug: string): Promise<ArticleWithAuthor | null> {
   const headersList = await headers();
   const protocol = headersList.get('x-forwarded-proto') ?? 'http';
@@ -43,33 +42,29 @@ async function getArticle(slug: string): Promise<ArticleWithAuthor | null> {
   return data.data ?? null;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = await getArticle(slug);
   const path = `/pages/news/${slug}`;
 
   if (!article) {
     return buildMetadata({
-      title: 'Άρθρο | Χομπίστας',
+      title: 'Άρθρο | Hobbistas',
       description: 'Το άρθρο που ζήτησες δεν είναι διαθέσιμο αυτή τη στιγμή.',
       path,
     });
   }
 
-  const authorName = article.users?.display_name || article.users?.username || 'Χομπίστας';
+  const authorName = article.users?.display_name || article.users?.username || 'Hobbistas';
   const coverImage = article.cover_image ?? undefined;
   const metaTitle = article.meta_title || article.title;
   const metaDescription =
     article.meta_description ||
     article.description ||
-    'Διάβασε το άρθρο και ανακάλυψε ιδέες, εμπειρίες και πρακτικά guides στον Χομπίστα.';
+    'Διάβασε το άρθρο και ανακάλυψε ιδέες, εμπειρίες και πρακτικά άρθρα στον Χομπίστα.';
 
   return buildMetadata({
-    title: `${metaTitle} | Χομπίστας`,
+    title: `${metaTitle} | Hobbistas`,
     description: metaDescription,
     path: `/pages/news/${article.slug}`,
     openGraphType: 'article',
@@ -79,11 +74,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function ArticlePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const headersList = await headers();
   const { slug } = await params;
   const article = await getArticle(slug);
@@ -100,9 +91,7 @@ export default async function ArticlePage({
       })
     : null;
 
-  const readTime = article.reading_time_minutes
-    ? `${article.reading_time_minutes} λεπτά`
-    : null;
+  const readTime = article.reading_time_minutes ? `${article.reading_time_minutes} λεπτά` : null;
 
   const referer = headersList.get('referer');
   const host = headersList.get('host');
@@ -166,14 +155,14 @@ export default async function ArticlePage({
         ) : (
           <div className="h-full w-full bg-[var(--hb-panel)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] via-[var(--hb-bg)]/60 to-transparent" />
+        <div className="via-[var(--hb-bg)]/60 absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] to-transparent" />
 
         <div className="absolute left-4 top-4 z-10">
           <Button
             href={backHref}
             variant="secondary"
             icon={<ArrowLeft size={16} />}
-            className="border-[var(--hb-border)] bg-[var(--hb-panel)]/80 text-[var(--hb-headline)] backdrop-blur-sm"
+            className="bg-[var(--hb-panel)]/80 border-[var(--hb-border)] text-[var(--hb-headline)] backdrop-blur-sm"
           >
             Πίσω
           </Button>
@@ -185,10 +174,10 @@ export default async function ArticlePage({
         <article className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl backdrop-blur-xl md:p-10">
           <header className="mx-auto max-w-[760px]">
             <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-              <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)]/80 px-3 py-1">
+              <span className="bg-[var(--hb-panel)]/80 rounded-full border border-[var(--hb-border)] px-3 py-1">
                 {CATEGORY_LABELS[article.category]}
               </span>
-              <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)]/80 px-3 py-1">
+              <span className="bg-[var(--hb-panel)]/80 rounded-full border border-[var(--hb-border)] px-3 py-1">
                 {TOPIC_LABELS[article.topic]}
               </span>
             </div>
@@ -257,7 +246,7 @@ export default async function ArticlePage({
                 {article.tags.map(tag => (
                   <span
                     key={tag}
-                    className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)]/80 px-3 py-1 text-[11px] text-[var(--hb-text)] backdrop-blur-sm"
+                    className="bg-[var(--hb-panel)]/80 rounded-full border border-[var(--hb-border)] px-3 py-1 text-[11px] text-[var(--hb-text)] backdrop-blur-sm"
                   >
                     {tag}
                   </span>
@@ -268,21 +257,7 @@ export default async function ArticlePage({
 
           {sanitizedContentHtml && (
             <section
-              className="article-content mx-auto max-w-[760px] pt-8 text-[17px] leading-[1.8] text-[var(--hb-text)]
-                [&_h1]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[var(--hb-headline)]
-                [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-[var(--hb-headline)]
-                [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-[var(--hb-headline)]
-                [&_p]:mb-3
-                [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-6
-                [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-6
-                [&_li]:mb-1
-                [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--hb-primary)] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[var(--hb-muted)]
-                [&_code]:rounded [&_code]:bg-[var(--hb-panel)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-[var(--hb-primary)]
-                [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-[var(--hb-panel)] [&_pre]:p-4
-                [&_pre_code]:bg-transparent [&_pre_code]:p-0
-                [&_hr]:my-6 [&_hr]:border-[var(--hb-border)]
-                [&_a]:text-[var(--hb-primary)] [&_a]:underline [&_a]:underline-offset-2
-                [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg"
+              className="article-content mx-auto max-w-[760px] pt-8 text-[17px] leading-[1.8] text-[var(--hb-text)] [&_a]:text-[var(--hb-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--hb-primary)] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[var(--hb-muted)] [&_code]:rounded [&_code]:bg-[var(--hb-panel)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-[var(--hb-primary)] [&_h1]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[var(--hb-headline)] [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-[var(--hb-headline)] [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-[var(--hb-headline)] [&_hr]:my-6 [&_hr]:border-[var(--hb-border)] [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg [&_li]:mb-1 [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-3 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-[var(--hb-panel)] [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-6"
               dangerouslySetInnerHTML={{ __html: sanitizedContentHtml }}
             />
           )}

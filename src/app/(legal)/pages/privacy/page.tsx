@@ -6,8 +6,8 @@ import { SITE_CONTACT_EMAIL, SITE_NAME, SITE_URL } from '@/config/site';
 import { PageContainer, PageHeader } from '@/app/components/layout';
 
 export const metadata = buildMetadata({
-  title: 'Πολιτική Απορρήτου | Χομπίστας',
-  description: 'Μάθε πώς ο Χομπίστας συλλέγει και προστατεύει τα δεδομένα σου.',
+  title: 'Πολιτική Απορρήτου | Hobbistas',
+  description: 'Μάθε πώς ο Hobbistas συλλέγει και προστατεύει τα δεδομένα σου.',
   path: '/pages/privacy',
 });
 
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
                   </li>
                   <li>
                     <span className="font-semibold">Δεδομένα χρήσης:</span> ρυθμίσεις προφίλ, backlog
-                    entries, status παιχνιδιών, ώρες που καταχωρείς εσύ, guides που δημιουργείς ή
+                    entries, status παιχνιδιών, ώρες που καταχωρείς εσύ, άρθρα που δημιουργείς ή
                     επεξεργάζεσαι.
                   </li>
                   <li>
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>
                     <span className="font-semibold">Δημιουργία και διαχείριση λογαριασμού:</span> για
-                    να μπορείς να συνδεθείς, να αποθηκεύεις backlog, guides, προφίλ κ.λπ. (νομική
+                    να μπορείς να συνδεθείς, να αποθηκεύεις backlog, προφίλ κ.λπ. (νομική
                     βάση: εκτέλεση σύμβασης).
                   </li>
                   <li>

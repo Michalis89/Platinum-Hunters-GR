@@ -17,15 +17,17 @@ export async function generateMetadata({ searchParams }: BacklogPageProps): Prom
   const categoryLabel = categoryData?.title;
 
   const title = categoryLabel
-    ? `Backlog για ${categoryLabel} | Χομπίστας`
-    : 'Backlog & Πρόοδος | Χομπίστας';
+    ? `Backlog για ${categoryLabel} | Hobbistas`
+    : 'Backlog & Πρόοδος | Hobbistas';
 
   const description = categoryLabel
     ? `Οργάνωσε το backlog σου για ${categoryLabel}, με στόχους, σημειώσεις και πρόοδο.`
     : 'Οργάνωσε το backlog σου με στόχους, πρόοδο και στατιστικά ανά χόμπι.';
 
   // Canonical strategy: treat category query pages as first-class and keep their querystring.
-  const path = normalizedCategory ? `/pages/backlog?category=${normalizedCategory}` : '/pages/backlog';
+  const path = normalizedCategory
+    ? `/pages/backlog?category=${normalizedCategory}`
+    : '/pages/backlog';
 
   return buildMetadata({
     title,

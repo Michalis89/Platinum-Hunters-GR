@@ -17,16 +17,14 @@ export async function GET() {
     const [
       { count: totalUsers, error: usersError },
       { count: activeUsers, error: activeError },
-      { count: totalGuides, error: guidesError },
       { count: totalGames, error: gamesError },
     ] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact', head: true }),
       supabase.from('users').select('id', { count: 'exact', head: true }).gte('last_login', since5m),
-      supabase.from('guides').select('id', { count: 'exact', head: true }),
       supabase.from('games').select('id', { count: 'exact', head: true }),
     ]);
 
-    const error = usersError || activeError || guidesError || gamesError;
+    const error = usersError || activeError || gamesError;
     if (error) {
       console.error('❌ Analytics fetch error:', error);
       return NextResponse.json({ error: 'Σφάλμα φόρτωσης analytics' }, { status: 500 });
@@ -35,7 +33,6 @@ export async function GET() {
     return NextResponse.json({
       total_users: totalUsers ?? 0,
       active_users_now: activeUsers ?? 0,
-      total_guides: totalGuides ?? 0,
       total_games: totalGames ?? 0,
     });
   } catch (err) {

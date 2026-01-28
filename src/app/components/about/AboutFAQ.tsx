@@ -10,14 +10,14 @@ type FAQItem = {
 
 const faqItems: FAQItem[] = [
   {
-    question: 'Είναι δωρεάν ο Χομπίστας;',
+    question: 'Είναι δωρεάν ο Hobbistas;',
     answer:
-      'Ναι, η βασική λειτουργικότητα είναι εντελώς δωρεάν. Backlog, progress tracking, notes, και πρόσβαση σε όλους τους οδηγούς χωρίς κόστος. Μελλοντικά μπορεί να προστεθούν premium features για advanced χρήστες.',
+      'Ναι, η βασική λειτουργικότητα είναι εντελώς δωρεάν. Backlog, progress tracking, notes, και πρόσβαση σε όλα τα άρθρα και reviews χωρίς κόστος. Μελλοντικά μπορεί να προστεθούν premium features για advanced χρήστες.',
   },
   {
     question: 'Ποιες κατηγορίες hobbies υποστηρίζονται;',
     answer:
-      'Αυτή τη στιγμή υποστηρίζουμε: Games (PS, Xbox, PC, Nintendo), Anime, Manga, Ταινίες, Σειρές/TV Shows, και Βιβλία. Κάθε κατηγορία έχει τα δικά της metadata και πεδία πρόοδού.',
+      'Αυτή τη στιγμή υποστηρίζουμε: Games, Anime, Manga, Ταινίες, Σειρές/TV Shows, και Βιβλία. Κάθε κατηγορία έχει τα δικά της metadata και πεδία πρόοδού.',
   },
   {
     question: 'Μπορώ να κάνω import το backlog μου από άλλες υπηρεσίες;',
@@ -67,16 +67,14 @@ export function AboutFAQ() {
           {faqItems.map((item, index) => (
             <div
               key={index}
-              className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] transition-colors hover:border-[var(--hb-primary-strong)]/30"
+              className="hover:border-[var(--hb-primary-strong)]/30 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] transition-colors"
             >
               <button
                 onClick={() => toggleFAQ(index)}
                 className="flex w-full items-center justify-between gap-4 p-5 text-left"
                 aria-expanded={openIndex === index}
               >
-                <span className="font-medium text-[var(--hb-headline)]">
-                  {item.question}
-                </span>
+                <span className="font-medium text-[var(--hb-headline)]">{item.question}</span>
                 <ChevronDown
                   className={`h-5 w-5 shrink-0 text-[var(--hb-muted)] transition-transform duration-200 ${
                     openIndex === index ? 'rotate-180' : ''
@@ -85,9 +83,7 @@ export function AboutFAQ() {
               </button>
               <div
                 className={`grid transition-all duration-200 ease-in-out ${
-                  openIndex === index
-                    ? 'grid-rows-[1fr] opacity-100'
-                    : 'grid-rows-[0fr] opacity-0'
+                  openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                 }`}
               >
                 <div className="overflow-hidden">

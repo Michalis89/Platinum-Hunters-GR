@@ -7,7 +7,6 @@ import { FiMenu, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Book,
-  Search,
   Star,
   User,
   LogIn,
@@ -52,26 +51,22 @@ type NavItem = {
   category?: string;
 };
 
-const NAV_ITEMS: NavItem[] = [
-  { href: '/pages/about', label: 'Σχετικά', icon: <Book size={18} /> },
-  { href: '/pages/scraper', label: 'Scraper', icon: <Search size={18} />, devOnly: true },
-];
+const NAV_ITEMS: NavItem[] = [{ href: '/pages/about', label: 'Σχετικά', icon: <Book size={18} /> }];
 
 const HOBBY_ITEMS: NavItem[] = [
   {
-    href: '/pages/backlog?category=gaming',
-    label: 'Gaming',
+    href: '/pages/backlog?category=games',
+    label: 'Games',
     icon: <Gamepad2 size={18} />,
-    category: 'gaming',
+    category: 'games',
     children: [
-      { href: '/pages/news?category=gaming', label: 'Άρθρα', icon: <FileText size={16} /> },
+      { href: '/pages/news?category=games', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
-        href: '/pages/backlog?category=gaming',
+        href: '/pages/backlog?category=games',
         label: 'Gaming Library',
         icon: <ListChecks size={16} />,
       },
-      { href: '/pages/guides', label: 'Οδηγοί', icon: <Book size={16} /> },
-      { href: '/pages/reviews?category=gaming', label: 'Reviews', icon: <Star size={16} /> },
+      { href: '/pages/reviews?category=games', label: 'Reviews', icon: <Star size={16} /> },
     ],
   },
   {
@@ -176,7 +171,7 @@ const HOBBY_ITEMS: NavItem[] = [
       },
       {
         href: '/pages/news?category=pet&topic=care',
-        label: 'Οδηγοί φροντίδας',
+        label: 'Φροντίδα',
         icon: <BookOpen size={16} />,
       },
       {
@@ -291,13 +286,13 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-[0_10px_35px_rgba(229,9,20,0.35)]">
             <span className="text-xl font-black leading-none text-slate-950 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]">
-              X
+              Η
             </span>
           </div>
 
           <div className="flex flex-col leading-tight">
             <span className="text-sm font-semibold tracking-tight text-[var(--hb-headline)]">
-              Χομπίστας
+              Hobbistas
             </span>
             <span className="text-[11px] text-[var(--hb-muted)]">
               Personal hobby hub

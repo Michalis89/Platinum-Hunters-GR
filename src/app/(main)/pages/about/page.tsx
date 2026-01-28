@@ -18,8 +18,8 @@ import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData
 import { SITE_URL } from '@/config/site';
 
 export const metadata = buildMetadata({
-  title: 'Σχετικά με τον Χομπίστα | Χομπίστας',
-  description: 'Μάθε ποιοι είμαστε, πώς δουλεύουμε και γιατί ο Χομπίστας φτιάχτηκε για κάθε χόμπι.',
+  title: 'Σχετικά με τον Hobbista',
+  description: 'Μάθε ποιοι είμαστε, πώς δουλεύουμε και γιατί ο Hobbistas φτιάχτηκε για κάθε χόμπι.',
   path: '/pages/about',
 });
 
@@ -48,7 +48,6 @@ async function getStats(): Promise<AboutStatsProps> {
     const supabase = getSupabaseServer();
     const [
       { count: totalUsers },
-      { count: totalGuides },
       { count: totalGames },
       { count: totalAnime },
       { count: totalManga },
@@ -58,19 +57,38 @@ async function getStats(): Promise<AboutStatsProps> {
       { count: totalArticles },
     ] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact', head: true }),
-      supabase.from('guides').select('id', { count: 'exact', head: true }),
-      supabase.from('games').select('id', { count: 'exact', head: true }),
-      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'anime'),
-      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'manga'),
-      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'movies'),
-      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'tv'),
-      supabase.from('media_items').select('id', { count: 'exact', head: true }).eq('category', 'books'),
-      supabase.from('articles').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+      supabase
+        .from('media_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('category', 'games'),
+      supabase
+        .from('media_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('category', 'anime'),
+      supabase
+        .from('media_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('category', 'manga'),
+      supabase
+        .from('media_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('category', 'movies'),
+      supabase
+        .from('media_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('category', 'tv'),
+      supabase
+        .from('media_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('category', 'books'),
+      supabase
+        .from('articles')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'published'),
     ]);
 
     return {
       totalUsers: totalUsers ?? 0,
-      totalGuides: totalGuides ?? 0,
       totalGames: totalGames ?? 0,
       totalAnime: totalAnime ?? 0,
       totalManga: totalManga ?? 0,
@@ -83,7 +101,6 @@ async function getStats(): Promise<AboutStatsProps> {
     console.error('Failed to load stats', err);
     return {
       totalUsers: 0,
-      totalGuides: 0,
       totalGames: 0,
       totalAnime: 0,
       totalManga: 0,

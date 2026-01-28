@@ -2,86 +2,10 @@
  * Database Types
  * Auto-generated types for Supabase tables
  * PH-30: User Authentication System
- * PH-31: User Games Library System
  */
 
 import { User } from './user';
 import { Game, Guide } from './interfaces';
-
-/**
- * User Game status type
- */
-export type UserGameStatus = 'to_play' | 'playing' | 'completed' | 'platinumed' | 'dropped';
-
-/**
- * User Games table row type
- */
-export interface UserGameRow {
-  id: number;
-  user_id: string;
-  game_id: number;
-  status: UserGameStatus;
-  priority: number;
-  actual_hours_casual: number | null;
-  actual_hours_platinum: number | null;
-  notes: string | null;
-  personal_rating: number | null;
-  personal_difficulty: number | null;
-  would_recommend: boolean | null;
-  is_favorite: boolean | null;
-  added_at: string;
-  started_at: string | null;
-  completed_at: string | null;
-  platinumed_at: string | null;
-  dropped_at: string | null;
-}
-
-/**
- * User Games table insert type
- */
-export interface UserGameInsert {
-  user_id: string;
-  game_id: number;
-  status?: UserGameStatus;
-  priority?: number;
-  actual_hours_casual?: number | null;
-  actual_hours_platinum?: number | null;
-  notes?: string | null;
-  personal_rating?: number | null;
-  personal_difficulty?: number | null;
-  would_recommend?: boolean | null;
-  is_favorite?: boolean | null;
-  started_at?: string | null;
-  completed_at?: string | null;
-  platinumed_at?: string | null;
-  dropped_at?: string | null;
-}
-
-/**
- * User Games table update type
- */
-export interface UserGameUpdate {
-  status?: UserGameStatus;
-  priority?: number;
-  actual_hours_casual?: number | null;
-  actual_hours_platinum?: number | null;
-  notes?: string | null;
-  personal_rating?: number | null;
-  personal_difficulty?: number | null;
-  would_recommend?: boolean | null;
-  is_favorite?: boolean | null;
-  started_at?: string | null;
-  completed_at?: string | null;
-  platinumed_at?: string | null;
-  dropped_at?: string | null;
-}
-
-/**
- * User Games with Game JOIN result type
- */
-export interface UserGameWithGame extends UserGameRow {
-  games: Game | Game[] | null;
-}
 
 /**
  * Article status type
@@ -92,7 +16,7 @@ export type ArticleStatus = 'draft' | 'published' | 'archived';
  * Article category type
  */
 export type ArticleCategory =
-  | 'gaming'
+  | 'games'
   | 'anime'
   | 'manga'
   | 'books'
@@ -109,7 +33,6 @@ export type ArticleTopic =
   | 'articles'
   | 'reviews'
   | 'tutorials'
-  | 'guides'
   | 'weird-cases'
   | 'care'
   | 'experiences'
@@ -455,12 +378,6 @@ export interface Database {
         Row: Guide;
         Insert: Partial<Guide>;
         Update: Partial<Guide>;
-        Relationships: [];
-      };
-      user_games: {
-        Row: UserGameRow;
-        Insert: UserGameInsert;
-        Update: UserGameUpdate;
         Relationships: [];
       };
       activity_log: {

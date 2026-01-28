@@ -23,7 +23,7 @@ import { normalizeSlug } from '@/utils/slugify';
 
 // Review-specific categories (gaming + media categories + vape)
 const REVIEW_CATEGORIES: Record<string, string> = {
-  gaming: 'Gaming',
+  games: 'Games',
   anime: 'Anime',
   manga: 'Manga',
   movies: 'Ταινίες',
@@ -90,9 +90,7 @@ function ReviewCard({ article }: { article: ArticleWithAuthor }) {
         </Link>
 
         {article.description && (
-          <CardDescription className="mt-2 line-clamp-2">
-            {article.description}
-          </CardDescription>
+          <CardDescription className="mt-2 line-clamp-2">{article.description}</CardDescription>
         )}
       </CardHeader>
 
@@ -100,7 +98,7 @@ function ReviewCard({ article }: { article: ArticleWithAuthor }) {
         {/* Tags */}
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {article.tags.slice(0, 3).map((tag) => (
+            {article.tags.slice(0, 3).map(tag => (
               <span
                 key={tag}
                 className="inline-flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-surface)] px-2.5 py-0.5 text-[11px] text-[var(--hb-muted)]"
@@ -214,7 +212,7 @@ function ReviewsPageContent() {
     fetchReviews();
   }, [category]);
 
-  const categoryLabel = category ? REVIEW_CATEGORIES[category] ?? null : null;
+  const categoryLabel = category ? (REVIEW_CATEGORIES[category] ?? null) : null;
   const metaLine = `${total} reviews • ενημερώνεται τακτικά`;
 
   const pageTitle = categoryLabel ? `Reviews - ${categoryLabel}` : 'Reviews';
@@ -254,7 +252,7 @@ function ReviewsPageContent() {
             </span>
           }
           aside={
-            <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40 p-3 shadow-[0_12px_28px_rgba(0,0,0,0.25)]">
+            <div className="bg-[var(--hb-card)]/40 rounded-2xl border border-[var(--hb-border)] p-3 shadow-[0_12px_28px_rgba(0,0,0,0.25)]">
               <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
                 <span>Κατηγορίες</span>
                 <span className="text-[10px]">
@@ -266,8 +264,8 @@ function ReviewsPageContent() {
                   href="/pages/reviews"
                   className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                     !category
-                      ? 'bg-amber-500/20 ring-amber-500/50 text-amber-400 ring-1'
-                      : 'hover:border-amber-500/50 border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
+                      ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/50'
+                      : 'border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:border-amber-500/50 hover:text-[var(--hb-headline)]'
                   }`}
                 >
                   Όλα
@@ -278,8 +276,8 @@ function ReviewsPageContent() {
                     href={`/pages/reviews?category=${cat}`}
                     className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                       category === cat
-                        ? 'bg-amber-500/20 ring-amber-500/50 text-amber-400 ring-1'
-                        : 'hover:border-amber-500/50 border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
+                        ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/50'
+                        : 'border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:border-amber-500/50 hover:text-[var(--hb-headline)]'
                     }`}
                   >
                     {label}
@@ -311,7 +309,7 @@ function ReviewsPageContent() {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {articles.map((article) => (
+          {articles.map(article => (
             <ReviewCard key={article.id} article={article} />
           ))}
         </motion.div>

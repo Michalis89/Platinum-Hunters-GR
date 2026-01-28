@@ -28,10 +28,6 @@ export const CACHE_TAGS = {
   GAME_BY_SLUG: (slug: string) => `game-slug-${slug}`,
   GAME_TROPHIES: (gameId: number | string) => `game-${gameId}-trophies`,
 
-  // Guide-related tags
-  GUIDES: 'guides',
-  GUIDE: (id: number | string) => `guide-${id}`,
-
   // User-specific tags (scoped to userId)
   USER_BACKLOG: (userId: string) => `user-${userId}-backlog`,
   USER_PROFILE: (userId: string) => `user-${userId}-profile`,
@@ -96,17 +92,6 @@ export const revalidateCache = {
   },
 
   /**
-   * Revalidate guide caches after create/update/delete
-   */
-  guide(guideId?: number | string) {
-    revalidateTag(CACHE_TAGS.GUIDES);
-    if (guideId) {
-      revalidateTag(CACHE_TAGS.GUIDE(guideId));
-    }
-    revalidateTag(CACHE_TAGS.ACTIVITY_FEED);
-  },
-
-  /**
    * Revalidate user backlog after add/update/remove
    */
   userBacklog(userId: string) {
@@ -161,7 +146,6 @@ export const revalidateCache = {
    */
   allGamePages() {
     revalidatePath('/games', 'layout');
-    revalidatePath('/guides', 'layout');
   },
 };
 

@@ -31,12 +31,11 @@ interface CategoryConfig {
 }
 
 const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
-  gaming: {
-    label: 'Gaming',
+  games: {
+    label: 'Games',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
       { value: 'reviews', label: 'Reviews' },
-      { value: 'guides', label: 'Οδηγοί' },
     ],
   },
   anime: {
@@ -86,7 +85,7 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
     label: 'Pet',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
-      { value: 'care', label: 'Οδηγοί φροντίδας' },
+      { value: 'care', label: 'Φροντίδα' },
       { value: 'experiences', label: 'Εμπειρίες' },
       { value: 'health', label: 'Υγεία' },
     ],

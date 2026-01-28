@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Skeleton from '@/app/components/ui/Skeleton';
 import { ActivityFeed } from '@/app/components/activity/ActivityFeed';
 import {
@@ -16,14 +16,6 @@ import {
   categoryMeta,
 } from '@/app/components/profile';
 import { selectUser, selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
-import {
-  fetchBacklog,
-  selectBacklogItems,
-  selectStatusCounts,
-  updateBacklogItem,
-} from '@/store/slices/backlogSlice';
-import type { AppDispatch } from '@/store/store';
-import type { UserBacklogWithGame } from '@/types/interfaces';
 
 type FavoriteItem = {
   id: string;
@@ -35,7 +27,7 @@ type FavoriteItem = {
 };
 
 const categoryLabels: Record<string, string> = {
-  gaming: 'Favorite Games',
+  games: 'Favorite Games',
   anime: 'Favorite Anime',
   manga: 'Favorite Manga',
   books: 'Favorite Books',
@@ -50,87 +42,47 @@ const articleOnlyCategories = new Set(['coding', 'pet', 'vape']);
 
 export default function ProfilePage() {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const loading = useSelector(selectIsLoading);
-  const userGames = useSelector(selectBacklogItems);
-  const statusCounts = useSelector(selectStatusCounts);
 
   const [reordering, setReordering] = useState(false);
   const [mediaFavorites, setMediaFavorites] = useState<Record<string, FavoriteItem[]>>({});
   const [mediaFavoritesLoading, setMediaFavoritesLoading] = useState<Record<string, boolean>>({});
   const [mediaStats, setMediaStats] = useState<
-    Record<string, { total: number; completed: number; current: number; planned: number; dropped: number; favorites: number }>
+    Record<
+      string,
+      {
+        total: number;
+        completed: number;
+        current: number;
+        planned: number;
+        dropped: number;
+        favorites: number;
+        totalTime?: number;
+      }
+    >
   >({});
-
-  // Compute total hours
-  const totalHours = useMemo(
-    () =>
-      Math.round(
-        userGames.reduce(
-          (sum, g) => sum + (g.actual_hours_casual || 0) + (g.actual_hours_platinum || 0),
-          0
-        )
-      ),
-    [userGames]
-  );
-
-  // Get gaming meta helper
-  const getGamingMeta = (item: UserBacklogWithGame) => {
-    const statusLabels: Record<UserBacklogWithGame['status'], string> = {
-      to_play: 'Backlog',
-      playing: 'Παίζω',
-      completed: 'Ολοκληρωμένο',
-      platinumed: 'Platinum',
-      dropped: 'Dropped',
-    };
-    const hours = (item.actual_hours_casual ?? 0) + (item.actual_hours_platinum ?? 0);
-    const hoursLabel = hours > 0 ? ` • ${Math.round(hours)}h` : '';
-    return `${statusLabels[item.status]}${hoursLabel}`;
-  };
-
-  // Gaming favorites
-  const gamingFavorites = useMemo(() => {
-    return [...userGames]
-      .filter((item) => item.is_favorite)
-      .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-      .slice(0, 5)
-      .map((item) => ({
-        id: String(item.id),
-        is_favorite: Boolean(item.is_favorite),
-        priority: item.priority ?? 0,
-        game: {
-          title: item.game?.title || '—',
-          slug: item.game?.slug || '',
-          cover_image: item.game?.cover_image || '/og-image.png',
-          background_image: item.game?.background_image,
-        },
-        meta: getGamingMeta(item),
-      }));
-  }, [userGames]);
+  const [categoryTimes, setCategoryTimes] = useState<Record<string, number>>({});
 
   // User categories
   const role = user?.role ?? 'user';
-  const categories = useMemo(
-    () => (user?.categories as string[] | undefined) ?? ['gaming'],
-    [user]
-  );
+  const categories = useMemo(() => (user?.categories as string[] | undefined) ?? ['games'], [user]);
   const isPrivileged = role === 'admin' || role === 'author';
 
   // Showcase categories (all categories user has access to)
   const showcaseCategories = useMemo(
     () =>
-      ['gaming', 'anime', 'manga', 'books', 'movies', 'tv', 'coding', 'pet', 'vape'].filter(
-        (cat) => isPrivileged || categories.includes(cat)
+      ['games', 'anime', 'manga', 'books', 'movies', 'tv', 'coding', 'pet', 'vape'].filter(
+        cat => isPrivileged || categories.includes(cat),
       ),
-    [categories, isPrivileged]
+    [categories, isPrivileged],
   );
 
   // Favorite categories (categories that support favorites)
   const favoriteCategories = useMemo(
-    () => showcaseCategories.filter((cat) => cat === 'gaming' || isPrivileged),
-    [showcaseCategories, isPrivileged]
+    () => showcaseCategories.filter(cat => cat === 'games' || isPrivileged),
+    [showcaseCategories, isPrivileged],
   );
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -142,29 +94,26 @@ export default function ProfilePage() {
     }
   }, [favoriteCategories, activeCategory]);
 
-  // Fetch backlog
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchBacklog({}));
-    }
-  }, [isAuthenticated, dispatch]);
-
-  // Fetch media favorites
+  // Fetch media favorites (including games)
   useEffect(() => {
     if (!isAuthenticated) return;
     let ignore = false;
 
-    const loadMediaFavorites = async (category: 'anime' | 'manga' | 'movies' | 'tv' | 'books') => {
-      setMediaFavoritesLoading((prev) => ({ ...prev, [category]: true }));
+    const loadMediaFavorites = async (
+      category: 'anime' | 'manga' | 'movies' | 'tv' | 'books' | 'games',
+    ) => {
+      setMediaFavoritesLoading(prev => ({ ...prev, [category]: true }));
       try {
         const base =
-          category === 'anime' || category === 'manga'
-            ? '/api/anime/library'
-            : category === 'movies' || category === 'tv'
-              ? '/api/movies/library'
-              : category === 'books'
-                ? '/api/books/library'
-                : null;
+          category === 'games'
+            ? '/api/games/library'
+            : category === 'anime' || category === 'manga'
+              ? '/api/anime/library'
+              : category === 'movies' || category === 'tv'
+                ? '/api/movies/library'
+                : category === 'books'
+                  ? '/api/books/library'
+                  : null;
         if (!base) throw new Error('Missing favorites endpoint');
 
         const response = await fetch(`${base}?category=${category}`);
@@ -176,7 +125,8 @@ export default function ProfilePage() {
         // Compute stats from all items
         const stats = {
           total: items.length,
-          completed: items.filter((item: { status?: string }) => item.status === 'completed').length,
+          completed: items.filter((item: { status?: string }) => item.status === 'completed')
+            .length,
           current: items.filter((item: { status?: string }) => item.status === 'current').length,
           planned: items.filter((item: { status?: string }) => item.status === 'planned').length,
           dropped: items.filter((item: { status?: string }) => item.status === 'dropped').length,
@@ -201,7 +151,7 @@ export default function ProfilePage() {
                 totalEpisodes?: number;
                 score?: string;
               },
-              idx: number
+              idx: number,
             ) => ({
               id: String(item.entryId ?? item.mediaId ?? item.id ?? `${category}-${idx}`),
               is_favorite: true,
@@ -221,12 +171,12 @@ export default function ProfilePage() {
                 slug: item.subtitle || item.year || '',
                 cover_image: item.cover || '/og-image.png',
               },
-            })
+            }),
           );
 
         if (!ignore) {
-          setMediaStats((prev) => ({ ...prev, [category]: stats }));
-          setMediaFavorites((prev) => ({
+          setMediaStats(prev => ({ ...prev, [category]: stats }));
+          setMediaFavorites(prev => ({
             ...prev,
             [category]: favorites.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)),
           }));
@@ -234,18 +184,54 @@ export default function ProfilePage() {
       } catch (error) {
         console.warn('Favorites fetch failed:', error);
         if (!ignore) {
-          setMediaFavorites((prev) => ({ ...prev, [category]: [] }));
+          setMediaFavorites(prev => ({ ...prev, [category]: [] }));
         }
       } finally {
         if (!ignore) {
-          setMediaFavoritesLoading((prev) => ({ ...prev, [category]: false }));
+          setMediaFavoritesLoading(prev => ({ ...prev, [category]: false }));
         }
       }
     };
 
-    (['anime', 'manga', 'movies', 'tv', 'books'] as const).forEach((category) => {
+    (['games', 'anime', 'manga', 'movies', 'tv', 'books'] as const).forEach(category => {
       loadMediaFavorites(category);
     });
+
+    return () => {
+      ignore = true;
+    };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let ignore = false;
+
+    const loadCategoryTimes = async () => {
+      try {
+        const response = await fetch('/api/user/stats');
+        if (!response.ok) {
+          throw new Error('Failed to load user stats');
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const payload = (await response.json()) as { data?: { [key: string]: any } };
+        const data = payload.data;
+        if (!data || ignore) return;
+
+        setCategoryTimes({
+          games: data.games?.hours ?? 0,
+          anime: data.anime?.hours ?? 0,
+          manga: data.manga?.hours ?? 0,
+          movies: data.movies?.hours ?? 0,
+          tv: data.tv?.hours ?? 0,
+          books: data.books?.hours ?? 0,
+        });
+      } catch (error) {
+        console.warn('User stats time fetch failed:', error);
+      }
+    };
+
+    loadCategoryTimes();
 
     return () => {
       ignore = true;
@@ -261,7 +247,6 @@ export default function ProfilePage() {
 
   // Get favorites for category
   const getFavoritesForCategory = (cat: string): FavoriteItem[] => {
-    if (cat === 'gaming') return gamingFavorites;
     return mediaFavorites[cat] ?? [];
   };
 
@@ -270,18 +255,27 @@ export default function ProfilePage() {
     if (reordering || sourceIndex === null || sourceIndex === targetIndex) return;
     setReordering(true);
 
-    const nextOrder = [...gamingFavorites];
+    const nextOrder = [...(mediaFavorites['games'] ?? [])];
     const [moved] = nextOrder.splice(sourceIndex, 1);
     nextOrder.splice(targetIndex, 0, moved);
+    setMediaFavorites(prev => ({ ...prev, games: nextOrder }));
 
     const updates = nextOrder.map((item, idx) => ({
-      id: Number(item.id),
+      mediaId: item.mediaId,
       priority: (nextOrder.length - idx) * 10,
     }));
 
     try {
       await Promise.all(
-        updates.map((u) => dispatch(updateBacklogItem({ id: u.id, priority: u.priority })).unwrap())
+        updates.map(u =>
+          u.mediaId
+            ? fetch('/api/games/library', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mediaId: u.mediaId, priority: u.priority }),
+              })
+            : Promise.resolve(),
+        ),
       );
     } catch (err) {
       console.error('Reorder favorites failed:', err);
@@ -294,7 +288,7 @@ export default function ProfilePage() {
   const handleMediaReorder = async (
     category: string,
     sourceIndex: number | null,
-    targetIndex: number
+    targetIndex: number,
   ) => {
     if (reordering || sourceIndex === null || sourceIndex === targetIndex) return;
     setReordering(true);
@@ -302,7 +296,7 @@ export default function ProfilePage() {
     const nextOrder = [...(mediaFavorites[category] ?? [])];
     const [moved] = nextOrder.splice(sourceIndex, 1);
     nextOrder.splice(targetIndex, 0, moved);
-    setMediaFavorites((prev) => ({ ...prev, [category]: nextOrder }));
+    setMediaFavorites(prev => ({ ...prev, [category]: nextOrder }));
 
     const updates = nextOrder.map((item, idx) => ({
       mediaId: item.mediaId,
@@ -321,15 +315,15 @@ export default function ProfilePage() {
 
       if (endpoint) {
         await Promise.all(
-          updates.map((u) =>
+          updates.map(u =>
             u.mediaId
               ? fetch(endpoint, {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ mediaId: u.mediaId, priority: u.priority }),
                 })
-              : Promise.resolve()
-          )
+              : Promise.resolve(),
+          ),
         );
       }
     } catch (err) {
@@ -389,14 +383,17 @@ export default function ProfilePage() {
         )}
 
         {/* Dynamic Stats based on active category */}
-        {activeCategory && ['gaming', 'anime', 'manga', 'movies', 'tv', 'books'].includes(activeCategory) && (
-          <ProfileStats
-            category={activeCategory}
-            gamingStats={activeCategory === 'gaming' ? statusCounts : undefined}
-            totalHours={activeCategory === 'gaming' ? totalHours : undefined}
-            mediaStats={activeCategory !== 'gaming' ? mediaStats[activeCategory] : undefined}
-          />
-        )}
+        {activeCategory &&
+          ['games', 'anime', 'manga', 'movies', 'tv', 'books'].includes(activeCategory) && (
+            <ProfileStats
+              category={activeCategory}
+              mediaStats={
+                mediaStats[activeCategory]
+                  ? { ...mediaStats[activeCategory], totalTime: categoryTimes[activeCategory] ?? 0 }
+                  : undefined
+              }
+            />
+          )}
 
         {/* Favorites + Category Info Section */}
         {activeCategory && favoriteCategories.includes(activeCategory) && (
@@ -421,12 +418,10 @@ export default function ProfilePage() {
                     favorites={getFavoritesForCategory(activeCategory)}
                     category={activeCategory}
                     categoryLabel={categoryLabels[activeCategory]}
-                    isLoading={
-                      activeCategory !== 'gaming' && mediaFavoritesLoading[activeCategory]
-                    }
+                    isLoading={mediaFavoritesLoading[activeCategory]}
                     isArticleOnly={articleOnlyCategories.has(activeCategory)}
                     onReorder={(source, target) => {
-                      if (activeCategory === 'gaming') {
+                      if (activeCategory === 'games') {
                         handleGamingReorder(source, target);
                       } else {
                         handleMediaReorder(activeCategory, source, target);

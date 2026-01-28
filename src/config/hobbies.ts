@@ -36,19 +36,11 @@ export type HobbySection = {
   categories: string[]; // slugs
 };
 
-/**
- * All hobby categories with their configurations
- * Extracted from existing codebase:
- * - MediaCategory: anime, manga, books, movies, tv (from CategoryLibrary.tsx)
- * - ArticleCategory: gaming, coding, pet, vape (from database.ts)
- * - Gaming backlog: default backlog without category param
- */
 export const HOBBY_CATEGORIES: HobbyCategory[] = [
-  // Gaming (special case - uses default backlog, not category param)
   {
-    slug: 'gaming',
-    title: 'Gaming',
-    description: 'Backlog, trophy guides, πρόοδος και achievements για gamers.',
+    slug: 'games',
+    title: 'Games',
+    description: 'Backlog, trophy stats, πρόοδος και achievements για gamers.',
     icon: 'Gamepad2',
     modules: {
       backlog: true,
@@ -57,8 +49,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     },
     routes: {
       backlog: '/pages/backlog',
-      news: '/pages/news?category=gaming',
-      reviews: '/pages/reviews?category=gaming',
+      news: '/pages/news?category=games',
+      reviews: '/pages/reviews?category=games',
     },
     requiresAuth: {
       backlog: true,
@@ -252,19 +244,19 @@ export const HOBBY_SECTIONS: HobbySection[] = [
     type: 'backlog',
     title: 'Backlog & Πρόοδος',
     description: 'Οργάνωσε τα hobbies σου με status, progress και notes.',
-    categories: ['gaming', 'anime', 'manga', 'movies', 'tv', 'books'],
+    categories: ['games', 'anime', 'manga', 'movies', 'tv', 'books'],
   },
   {
     type: 'news',
     title: 'Άρθρα & Νέα',
     description: 'Διάβασε άρθρα, tutorials και ιστορίες από την κοινότητα.',
-    categories: ['gaming', 'coding', 'pet', 'vape'],
+    categories: ['games', 'coding', 'pet', 'vape'],
   },
   {
     type: 'reviews',
     title: 'Κριτικές',
     description: 'Κριτικές και εντυπώσεις από τα μέλη της κοινότητας.',
-    categories: ['gaming', 'anime', 'manga', 'movies', 'tv', 'books'],
+    categories: ['games', 'anime', 'manga', 'movies', 'tv', 'books'],
   },
 ];
 
@@ -272,26 +264,20 @@ export const HOBBY_SECTIONS: HobbySection[] = [
  * Helper to get a category by slug
  */
 export function getCategoryBySlug(slug: string): HobbyCategory | undefined {
-  return HOBBY_CATEGORIES.find((cat) => cat.slug === slug);
+  return HOBBY_CATEGORIES.find(cat => cat.slug === slug);
 }
 
 /**
  * Helper to check if a module is available for a category
  */
-export function isModuleAvailable(
-  category: HobbyCategory,
-  module: HobbyModule
-): boolean {
+export function isModuleAvailable(category: HobbyCategory, module: HobbyModule): boolean {
   return category.modules[module] === true;
 }
 
 /**
  * Helper to check if a module is under construction
  */
-export function isModuleUnderConstruction(
-  category: HobbyCategory,
-  module: HobbyModule
-): boolean {
+export function isModuleUnderConstruction(category: HobbyCategory, module: HobbyModule): boolean {
   return category.modules[module] === 'under-construction';
 }
 
@@ -300,6 +286,6 @@ export function isModuleUnderConstruction(
  */
 export function getCategoriesForSection(section: HobbySection): HobbyCategory[] {
   return section.categories
-    .map((slug) => getCategoryBySlug(slug))
+    .map(slug => getCategoryBySlug(slug))
     .filter((cat): cat is HobbyCategory => cat !== undefined);
 }

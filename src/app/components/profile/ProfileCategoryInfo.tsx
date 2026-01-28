@@ -9,10 +9,7 @@ type ProfileCategoryInfoProps = {
   categoryNotes: Record<string, unknown>;
 };
 
-function InfoRow({
-  label,
-  children,
-}: Readonly<{ label: string; children: React.ReactNode }>) {
+function InfoRow({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
   if (!children) return null;
   return (
     <div className="flex flex-col gap-1">
@@ -28,7 +25,7 @@ function ChipList({ items, label }: Readonly<{ items: string[]; label: string }>
     <div>
       <p className="mb-2 text-xs text-[var(--hb-muted)]">{label}</p>
       <div className="flex flex-wrap gap-2">
-        {items.map((item) => (
+        {items.map(item => (
           <span
             key={item}
             className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1.5 text-xs font-medium text-[var(--hb-text)]"
@@ -49,7 +46,7 @@ export function ProfileCategoryInfo({
   const notes = categoryNotes[category] as Record<string, unknown> | undefined;
 
   const sectionTitle: Record<string, string> = {
-    gaming: 'Gaming Πληροφορίες',
+    games: 'Gaming Πληροφορίες',
     anime: 'Anime Πληροφορίες',
     manga: 'Manga Πληροφορίες',
     movies: 'Movies Πληροφορίες',
@@ -61,7 +58,7 @@ export function ProfileCategoryInfo({
   };
 
   // Gaming-specific info from user object
-  if (category === 'gaming') {
+  if (category === 'games') {
     const hasGamingInfo =
       user.psn_id ||
       user.xbox_gamertag ||
@@ -72,12 +69,7 @@ export function ProfileCategoryInfo({
       user.gaming_since;
 
     if (!hasGamingInfo) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Gaming ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Gaming ακόμα." size="sm" />;
     }
 
     return (
@@ -104,21 +96,20 @@ export function ProfileCategoryInfo({
 
   // TV-specific info
   if (category === 'tv') {
-    const tvNotes = notes as {
-      services?: string[];
-      service_other?: string;
-      genres?: string[];
-      style?: string;
-      since?: string | number;
-      people?: string;
-    } | undefined;
+    const tvNotes = notes as
+      | {
+          services?: string[];
+          service_other?: string;
+          genres?: string[];
+          style?: string;
+          since?: string | number;
+          people?: string;
+        }
+      | undefined;
 
     if (!tvNotes) {
       return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες TV Series ακόμα."
-          size="sm"
-        />
+        <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες TV Series ακόμα." size="sm" />
       );
     }
 
@@ -127,35 +118,36 @@ export function ProfileCategoryInfo({
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
           {sectionTitle[category]}
         </p>
-        {tvNotes.services?.length && <ChipList items={tvNotes.services} label="Αγαπημένες Πλατφόρμες" />}
+        {tvNotes.services?.length && (
+          <ChipList items={tvNotes.services} label="Αγαπημένες Πλατφόρμες" />
+        )}
         {tvNotes.service_other && <InfoRow label="Άλλη υπηρεσία">{tvNotes.service_other}</InfoRow>}
         {tvNotes.genres?.length && <ChipList items={tvNotes.genres} label="Αγαπημένα Genres" />}
         {tvNotes.style && <InfoRow label="Watching Style">{tvNotes.style}</InfoRow>}
         {tvNotes.since && <InfoRow label="Watching Since">{tvNotes.since}</InfoRow>}
-        {tvNotes.people && <InfoRow label="Αγαπημένοι Ηθοποιοί / Σκηνοθέτες">{tvNotes.people}</InfoRow>}
+        {tvNotes.people && (
+          <InfoRow label="Αγαπημένοι Ηθοποιοί / Σκηνοθέτες">{tvNotes.people}</InfoRow>
+        )}
       </div>
     );
   }
 
   // Movies-specific info
   if (category === 'movies') {
-    const moviesNotes = notes as {
-      services?: string[];
-      service_other?: string;
-      genres?: string[];
-      style?: string;
-      since?: string | number;
-      directors?: string;
-      actors?: string;
-    } | undefined;
+    const moviesNotes = notes as
+      | {
+          services?: string[];
+          service_other?: string;
+          genres?: string[];
+          style?: string;
+          since?: string | number;
+          directors?: string;
+          actors?: string;
+        }
+      | undefined;
 
     if (!moviesNotes) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Movies ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Movies ακόμα." size="sm" />;
     }
 
     return (
@@ -163,12 +155,20 @@ export function ProfileCategoryInfo({
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
           {sectionTitle[category]}
         </p>
-        {moviesNotes.services?.length && <ChipList items={moviesNotes.services} label="Αγαπημένες Πλατφόρμες" />}
-        {moviesNotes.service_other && <InfoRow label="Άλλη υπηρεσία">{moviesNotes.service_other}</InfoRow>}
-        {moviesNotes.genres?.length && <ChipList items={moviesNotes.genres} label="Αγαπημένα Genres" />}
+        {moviesNotes.services?.length && (
+          <ChipList items={moviesNotes.services} label="Αγαπημένες Πλατφόρμες" />
+        )}
+        {moviesNotes.service_other && (
+          <InfoRow label="Άλλη υπηρεσία">{moviesNotes.service_other}</InfoRow>
+        )}
+        {moviesNotes.genres?.length && (
+          <ChipList items={moviesNotes.genres} label="Αγαπημένα Genres" />
+        )}
         {moviesNotes.style && <InfoRow label="Watching Style">{moviesNotes.style}</InfoRow>}
         {moviesNotes.since && <InfoRow label="Watching Since">{moviesNotes.since}</InfoRow>}
-        {moviesNotes.directors && <InfoRow label="Favorite Directors">{moviesNotes.directors}</InfoRow>}
+        {moviesNotes.directors && (
+          <InfoRow label="Favorite Directors">{moviesNotes.directors}</InfoRow>
+        )}
         {moviesNotes.actors && <InfoRow label="Favorite Actors">{moviesNotes.actors}</InfoRow>}
       </div>
     );
@@ -176,23 +176,20 @@ export function ProfileCategoryInfo({
 
   // Anime-specific info
   if (category === 'anime') {
-    const animeNotes = notes as {
-      platforms?: string[];
-      platform_other?: string;
-      genres?: string[];
-      format?: string;
-      since?: string | number;
-      directors?: string;
-      notes?: string;
-    } | undefined;
+    const animeNotes = notes as
+      | {
+          platforms?: string[];
+          platform_other?: string;
+          genres?: string[];
+          format?: string;
+          since?: string | number;
+          directors?: string;
+          notes?: string;
+        }
+      | undefined;
 
     if (!animeNotes) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Anime ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Anime ακόμα." size="sm" />;
     }
 
     return (
@@ -200,12 +197,20 @@ export function ProfileCategoryInfo({
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
           {sectionTitle[category]}
         </p>
-        {animeNotes.platforms?.length && <ChipList items={animeNotes.platforms} label="Πλατφόρμες" />}
-        {animeNotes.platform_other && <InfoRow label="Άλλη πλατφόρμα">{animeNotes.platform_other}</InfoRow>}
-        {animeNotes.genres?.length && <ChipList items={animeNotes.genres} label="Αγαπημένα Genres" />}
+        {animeNotes.platforms?.length && (
+          <ChipList items={animeNotes.platforms} label="Πλατφόρμες" />
+        )}
+        {animeNotes.platform_other && (
+          <InfoRow label="Άλλη πλατφόρμα">{animeNotes.platform_other}</InfoRow>
+        )}
+        {animeNotes.genres?.length && (
+          <ChipList items={animeNotes.genres} label="Αγαπημένα Genres" />
+        )}
         {animeNotes.format && <InfoRow label="Watching Format">{animeNotes.format}</InfoRow>}
         {animeNotes.since && <InfoRow label="Watching Since">{animeNotes.since}</InfoRow>}
-        {animeNotes.directors && <InfoRow label="Directors / Studios">{animeNotes.directors}</InfoRow>}
+        {animeNotes.directors && (
+          <InfoRow label="Directors / Studios">{animeNotes.directors}</InfoRow>
+        )}
         {animeNotes.notes && <InfoRow label="Notes">{animeNotes.notes}</InfoRow>}
       </div>
     );
@@ -213,21 +218,18 @@ export function ProfileCategoryInfo({
 
   // Books-specific info
   if (category === 'books') {
-    const booksNotes = notes as {
-      genres?: string[];
-      format?: string;
-      since?: string | number;
-      authors?: string;
-      notes?: string;
-    } | undefined;
+    const booksNotes = notes as
+      | {
+          genres?: string[];
+          format?: string;
+          since?: string | number;
+          authors?: string;
+          notes?: string;
+        }
+      | undefined;
 
     if (!booksNotes) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Books ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Books ακόμα." size="sm" />;
     }
 
     return (
@@ -235,7 +237,9 @@ export function ProfileCategoryInfo({
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
           {sectionTitle[category]}
         </p>
-        {booksNotes.genres?.length && <ChipList items={booksNotes.genres} label="Αγαπημένα Genres" />}
+        {booksNotes.genres?.length && (
+          <ChipList items={booksNotes.genres} label="Αγαπημένα Genres" />
+        )}
         {booksNotes.format && <InfoRow label="Reading Format">{booksNotes.format}</InfoRow>}
         {booksNotes.since && <InfoRow label="Reading Since">{booksNotes.since}</InfoRow>}
         {booksNotes.authors && <InfoRow label="Favorite Authors">{booksNotes.authors}</InfoRow>}
@@ -246,21 +250,18 @@ export function ProfileCategoryInfo({
 
   // Manga-specific info
   if (category === 'manga') {
-    const mangaNotes = notes as {
-      genres?: string[];
-      format?: string;
-      since?: string | number;
-      authors?: string;
-      notes?: string;
-    } | undefined;
+    const mangaNotes = notes as
+      | {
+          genres?: string[];
+          format?: string;
+          since?: string | number;
+          authors?: string;
+          notes?: string;
+        }
+      | undefined;
 
     if (!mangaNotes) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Manga ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Manga ακόμα." size="sm" />;
     }
 
     return (
@@ -268,7 +269,9 @@ export function ProfileCategoryInfo({
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
           {sectionTitle[category]}
         </p>
-        {mangaNotes.genres?.length && <ChipList items={mangaNotes.genres} label="Αγαπημένα Genres" />}
+        {mangaNotes.genres?.length && (
+          <ChipList items={mangaNotes.genres} label="Αγαπημένα Genres" />
+        )}
         {mangaNotes.format && <InfoRow label="Reading Format">{mangaNotes.format}</InfoRow>}
         {mangaNotes.since && <InfoRow label="Reading Since">{mangaNotes.since}</InfoRow>}
         {mangaNotes.authors && <InfoRow label="Favorite Mangaka">{mangaNotes.authors}</InfoRow>}
@@ -279,21 +282,18 @@ export function ProfileCategoryInfo({
 
   // Coding-specific info
   if (category === 'coding') {
-    const codingNotes = notes as {
-      languages?: string[];
-      focus?: string[];
-      since?: string | number;
-      tools?: string;
-      notes?: string;
-    } | undefined;
+    const codingNotes = notes as
+      | {
+          languages?: string[];
+          focus?: string[];
+          since?: string | number;
+          tools?: string;
+          notes?: string;
+        }
+      | undefined;
 
     if (!codingNotes) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Coding ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Coding ακόμα." size="sm" />;
     }
 
     return (
@@ -301,7 +301,9 @@ export function ProfileCategoryInfo({
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
           {sectionTitle[category]}
         </p>
-        {codingNotes.languages?.length && <ChipList items={codingNotes.languages} label="Γλώσσες" />}
+        {codingNotes.languages?.length && (
+          <ChipList items={codingNotes.languages} label="Γλώσσες" />
+        )}
         {codingNotes.focus?.length && <ChipList items={codingNotes.focus} label="Focus" />}
         {codingNotes.since && <InfoRow label="Coding Since">{codingNotes.since}</InfoRow>}
         {codingNotes.tools && <InfoRow label="Tools / Stack">{codingNotes.tools}</InfoRow>}
@@ -312,21 +314,18 @@ export function ProfileCategoryInfo({
 
   // Pet-specific info
   if (category === 'pet') {
-    const petNotes = notes as {
-      type?: string;
-      name?: string;
-      breed?: string;
-      since?: string | number;
-      notes?: string;
-    } | undefined;
+    const petNotes = notes as
+      | {
+          type?: string;
+          name?: string;
+          breed?: string;
+          since?: string | number;
+          notes?: string;
+        }
+      | undefined;
 
     if (!petNotes) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Pet ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Pet ακόμα." size="sm" />;
     }
 
     return (
@@ -345,21 +344,18 @@ export function ProfileCategoryInfo({
 
   // Vape-specific info
   if (category === 'vape') {
-    const vapeNotes = notes as {
-      device?: string;
-      nicotine?: string;
-      since?: string | number;
-      flavors?: string[];
-      notes?: string;
-    } | undefined;
+    const vapeNotes = notes as
+      | {
+          device?: string;
+          nicotine?: string;
+          since?: string | number;
+          flavors?: string[];
+          notes?: string;
+        }
+      | undefined;
 
     if (!vapeNotes) {
-      return (
-        <EmptyState
-          title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Vape ακόμα."
-          size="sm"
-        />
-      );
+      return <EmptyState title="Δεν υπάρχουν αποθηκευμένες πληροφορίες Vape ακόμα." size="sm" />;
     }
 
     return (

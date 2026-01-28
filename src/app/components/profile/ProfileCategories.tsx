@@ -1,7 +1,6 @@
 'use client';
 
 import { Gamepad2, Sparkles, BookOpen, Film, Tv, Code, PawPrint, Cloud } from 'lucide-react';
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 type CategoryMeta = {
@@ -12,11 +11,11 @@ type CategoryMeta = {
 };
 
 const categoryMeta: Record<string, CategoryMeta> = {
-  gaming: {
-    title: 'Gaming',
+  games: {
+    title: 'Games',
     desc: 'Backlog, progress, reviews',
     icon: <Gamepad2 className="h-4 w-4" />,
-    href: '/pages/backlog?category=gaming',
+    href: '/pages/backlog?category=games',
   },
   anime: {
     title: 'Anime',
@@ -56,7 +55,7 @@ const categoryMeta: Record<string, CategoryMeta> = {
   },
   pet: {
     title: 'Pet',
-    desc: 'Care guides, experiences',
+    desc: 'Care tips, experiences',
     icon: <PawPrint className="h-4 w-4" />,
     href: '/pages/news?category=pet',
   },
@@ -143,14 +142,6 @@ export function ProfileCategories({
               >
                 Δες Reviews
               </a>
-            )}
-            {activeCategory === 'gaming' && (
-              <Link
-                href="/pages/guides"
-                className="hover:border-[var(--hb-primary-strong)]/50 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-5 py-2 text-sm font-medium text-[var(--hb-headline)] transition"
-              >
-                Trophy Guides
-              </Link>
             )}
           </div>
         )}

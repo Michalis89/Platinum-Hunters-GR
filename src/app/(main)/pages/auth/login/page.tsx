@@ -5,8 +5,8 @@ import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
-  title: 'Σύνδεση | Χομπίστας',
-  description: 'Συνδέσου στο Χομπίστας για να οργανώσεις όλα τα χόμπι σου.',
+  title: 'Σύνδεση | Hobbistas',
+  description: 'Συνδέσου στο Hobbista για να οργανώσεις όλα τα χόμπι σου.',
   path: '/pages/auth/login',
   noindex: true,
 });
@@ -17,9 +17,9 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 bg-[var(--hb-gradient)] opacity-60" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_25%,rgba(229,9,20,0.22),transparent_32%),radial-gradient(circle_at_85%_10%,rgba(255,77,90,0.18),transparent_28%),radial-gradient(circle_at_65%_85%,rgba(229,9,20,0.12),transparent_32%)]" />
       <PageWrapper className="relative py-6 md:py-16">
-        <div className="relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] bg-[var(--hb-surface)]/95 px-4 py-6 shadow-[0_25px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:px-12 md:py-10">
-          <div className="pointer-events-none absolute -left-10 top-10 h-64 w-64 rounded-full bg-[var(--hb-primary-strong)]/15 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[var(--hb-primary)]/12 blur-3xl" />
+        <div className="bg-[var(--hb-surface)]/95 relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] px-4 py-6 shadow-[0_25px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:px-12 md:py-10">
+          <div className="bg-[var(--hb-primary-strong)]/15 pointer-events-none absolute -left-10 top-10 h-64 w-64 rounded-full blur-3xl" />
+          <div className="bg-[var(--hb-primary)]/12 pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full blur-3xl" />
 
           <div className="relative grid items-center gap-6 md:gap-12 lg:grid-cols-[1.05fr_0.95fr]">
             {/* Hero content - hidden on mobile */}
@@ -88,7 +88,7 @@ export default function LoginPage() {
             </div>
 
             <div className="relative">
-              <div className="absolute -right-6 bottom-6 h-16 w-16 rounded-full bg-[var(--hb-primary-strong)]/30 blur-2xl" />
+              <div className="bg-[var(--hb-primary-strong)]/30 absolute -right-6 bottom-6 h-16 w-16 rounded-full blur-2xl" />
               <div className="relative">
                 <Suspense fallback={<div className="h-[420px]" />}>
                   <LoginForm />

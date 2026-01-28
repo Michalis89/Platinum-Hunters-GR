@@ -78,7 +78,7 @@ const categoryConfig: CategoryConfig[] = [
     icon: <BookMarked className="h-4 w-4" />,
     color: 'text-orange-400',
     metric: 'chapters',
-    metricLabel: 'κεφάλαια',
+    metricLabel: 'Volumes',
   },
   {
     key: 'movies',
@@ -136,16 +136,14 @@ export function HomeStatsRow({ stats }: HomeStatsRowProps) {
 
   // Filter to only show active categories
   const activeCategories = stats?.active_categories ?? [];
-  const visibleCategories = categoryConfig.filter((cat) =>
-    activeCategories.includes(cat.key)
-  );
+  const visibleCategories = categoryConfig.filter(cat => activeCategories.includes(cat.key));
 
   return (
     <section className="space-y-6 px-4 md:px-6">
       <div className="mx-auto max-w-7xl">
         {/* Summary Stats Row */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {summaryStats.map((stat) => (
+          {summaryStats.map(stat => (
             <div
               key={stat.label}
               className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4"
@@ -170,7 +168,7 @@ export function HomeStatsRow({ stats }: HomeStatsRowProps) {
               Ανά Κατηγορία
             </h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {visibleCategories.map((cat) => {
+              {visibleCategories.map(cat => {
                 const catStats = stats?.[cat.key];
                 if (!catStats) return null;
 
@@ -184,7 +182,7 @@ export function HomeStatsRow({ stats }: HomeStatsRowProps) {
                 return (
                   <div
                     key={cat.key}
-                    className="flex items-center gap-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 transition hover:border-[var(--hb-primary-strong)]/40"
+                    className="hover:border-[var(--hb-primary-strong)]/40 flex items-center gap-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 transition"
                   >
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/5 ${cat.color}`}
@@ -201,9 +199,7 @@ export function HomeStatsRow({ stats }: HomeStatsRowProps) {
                     </div>
                     {metricValue > 0 && (
                       <div className="text-right">
-                        <p className="text-lg font-bold text-[var(--hb-headline)]">
-                          {metricValue}
-                        </p>
+                        <p className="text-lg font-bold text-[var(--hb-headline)]">{metricValue}</p>
                         <p className="text-xs text-[var(--hb-muted)]">{cat.metricLabel}</p>
                       </div>
                     )}

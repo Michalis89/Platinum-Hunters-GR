@@ -54,7 +54,7 @@ const GENRES = [
   'Platform',
 ];
 const CATEGORIES = [
-  'gaming',
+  'games',
   'anime',
   'manga',
   'books',
@@ -344,7 +344,7 @@ export default function EditProfilePage() {
         favorite_platform: user.favorite_platform || '',
         favorite_genres: user.favorite_genres || [],
         gaming_since: user.gaming_since || null,
-        categories: (user.categories as string[] | undefined) ?? ['gaming'],
+        categories: (user.categories as string[] | undefined) ?? ['games'],
         category_notes: initialCategoryNotes,
       });
 
@@ -383,7 +383,7 @@ export default function EditProfilePage() {
           favorite_platform: user.favorite_platform || '',
           favorite_genres: user.favorite_genres || [],
           gaming_since: user.gaming_since || null,
-          categories: (user.categories as string[] | undefined) ?? ['gaming'],
+          categories: (user.categories as string[] | undefined) ?? ['games'],
           category_notes: initialCategoryNotes,
         },
         {
@@ -1023,7 +1023,7 @@ export default function EditProfilePage() {
                   {CATEGORIES.map(cat => {
                     const active = (formData.categories as string[] | undefined)?.includes(cat);
                     const labels: Record<string, string> = {
-                      gaming: 'Gaming',
+                      games: 'Games',
                       anime: 'Anime',
                       manga: 'Manga',
                       books: 'Books',
@@ -1053,7 +1053,7 @@ export default function EditProfilePage() {
             </Card>
 
             {/* Gaming Information */}
-            {(formData.categories as string[] | undefined)?.includes('gaming') ? (
+            {(formData.categories as string[] | undefined)?.includes('games') ? (
               <Card
                 collapsible
                 className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"

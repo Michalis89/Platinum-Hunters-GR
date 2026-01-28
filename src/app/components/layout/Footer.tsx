@@ -29,7 +29,7 @@ export function Footer() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-lg transition group-hover:shadow-[0_8px_25px_rgba(229,9,20,0.4)]">
                 <Gamepad2 className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold text-[var(--hb-headline)]">Χομπίστας</span>
+              <span className="text-xl font-bold text-[var(--hb-headline)]">Hobbistas</span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-[var(--hb-muted)]">
               Ο χώρος σου για gaming, anime, manga, ταινίες, σειρές και βιβλία. Όλα οργανωμένα,
@@ -78,7 +78,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[var(--hb-border)] pt-6 text-xs text-[var(--hb-muted)] sm:flex-row">
-          <p>&copy; {currentYear} Χομπίστας. Με επιφύλαξη παντός δικαιώματος.</p>
+          <p>&copy; {currentYear} Hobbistas. Με επιφύλαξη παντός δικαιώματος.</p>
           <p>Δεν είμαστε συνδεδεμένοι με Sony Interactive Entertainment ή άλλες εταιρείες.</p>
         </div>
       </PageContainer>

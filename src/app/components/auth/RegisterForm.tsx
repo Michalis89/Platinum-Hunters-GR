@@ -3,7 +3,22 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { Eye, EyeOff, UserPlus, ArrowRight, ArrowLeft, Check, Gamepad2, Sparkles, BookOpen, Film, Tv, Code, Cat, Wind } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  UserPlus,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Gamepad2,
+  Sparkles,
+  BookOpen,
+  Film,
+  Tv,
+  Code,
+  Cat,
+  Wind,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Input } from '@/app/components/ui/Input';
@@ -31,7 +46,7 @@ import Button from '../ui/Button';
 const COUNTRIES = ['GR', 'US', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'Other'];
 const PLATFORMS = ['PS5', 'PS4', 'PS3', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC'];
 const HOBBIES = [
-  { id: 'gaming', label: 'Gaming', icon: 'Gamepad2' },
+  { id: 'games', label: 'Games', icon: 'Gamepad2' },
   { id: 'anime', label: 'Anime', icon: 'Sparkles' },
   { id: 'manga', label: 'Manga', icon: 'BookOpen' },
   { id: 'movies', label: 'Ταινίες', icon: 'Film' },
@@ -42,10 +57,54 @@ const HOBBIES = [
   { id: 'vape', label: 'Vape', icon: 'Wind' },
 ];
 
-const ANIME_GENRES = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Slice of Life', 'Sports'];
-const MOVIE_GENRES = ['Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller', 'Romance', 'Animation', 'Documentary', 'Fantasy'];
-const BOOK_GENRES = ['Fantasy', 'Sci-Fi', 'Mystery', 'Romance', 'Thriller', 'Biography', 'Self-Help', 'History', 'Horror', 'Literary Fiction'];
-const CODING_LANGUAGES = ['JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'Go', 'Rust', 'PHP', 'Ruby', 'Swift'];
+const ANIME_GENRES = [
+  'Action',
+  'Adventure',
+  'Comedy',
+  'Drama',
+  'Fantasy',
+  'Horror',
+  'Romance',
+  'Sci-Fi',
+  'Slice of Life',
+  'Sports',
+];
+const MOVIE_GENRES = [
+  'Action',
+  'Comedy',
+  'Drama',
+  'Horror',
+  'Sci-Fi',
+  'Thriller',
+  'Romance',
+  'Animation',
+  'Documentary',
+  'Fantasy',
+];
+const BOOK_GENRES = [
+  'Fantasy',
+  'Sci-Fi',
+  'Mystery',
+  'Romance',
+  'Thriller',
+  'Biography',
+  'Self-Help',
+  'History',
+  'Horror',
+  'Literary Fiction',
+];
+const CODING_LANGUAGES = [
+  'JavaScript',
+  'TypeScript',
+  'Python',
+  'Java',
+  'C#',
+  'Go',
+  'Rust',
+  'PHP',
+  'Ruby',
+  'Swift',
+];
 const PET_TYPES = ['Σκύλος', 'Γάτα', 'Πουλί', 'Ψάρια', 'Κουνέλι', 'Χάμστερ', 'Ερπετό', 'Άλλο'];
 
 const GENRES = [
@@ -81,16 +140,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const selectClasses =
     'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] hover:border-[var(--hb-primary-strong)]/70 focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
 
-  const [formData, setFormData] = useState<Partial<RegisterData> & {
-    favorite_hobbies?: string[];
-    favorite_anime_genres?: string[];
-    favorite_movie_genres?: string[];
-    favorite_book_genres?: string[];
-    favorite_languages?: string[];
-    pet_types?: string[];
-    vape_device?: string;
-    vape_flavor?: string;
-  }>({
+  const [formData, setFormData] = useState<
+    Partial<RegisterData> & {
+      favorite_hobbies?: string[];
+      favorite_anime_genres?: string[];
+      favorite_movie_genres?: string[];
+      favorite_book_genres?: string[];
+      favorite_languages?: string[];
+      pet_types?: string[];
+      vape_device?: string;
+      vape_flavor?: string;
+    }
+  >({
     email: '',
     username: '',
     password: '',
@@ -568,16 +629,17 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {HOBBIES.map(hobby => {
                     const isSelected = formData.favorite_hobbies?.includes(hobby.id);
-                    const IconComponent = {
-                      Gamepad2,
-                      Sparkles,
-                      BookOpen,
-                      Film,
-                      Tv,
-                      Code,
-                      Cat,
-                      Wind,
-                    }[hobby.icon] || Gamepad2;
+                    const IconComponent =
+                      {
+                        Gamepad2,
+                        Sparkles,
+                        BookOpen,
+                        Film,
+                        Tv,
+                        Code,
+                        Cat,
+                        Wind,
+                      }[hobby.icon] || Gamepad2;
 
                     return (
                       <button
@@ -599,8 +661,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         }}
                         className={`flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm ${
                           isSelected
-                            ? 'border-[var(--hb-primary-strong)] bg-[var(--hb-primary-strong)]/20 text-[var(--hb-headline)]'
-                            : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary-strong)]/50 hover:text-[var(--hb-headline)]'
+                            ? 'bg-[var(--hb-primary-strong)]/20 border-[var(--hb-primary-strong)] text-[var(--hb-headline)]'
+                            : 'hover:border-[var(--hb-primary-strong)]/50 border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
                         }`}
                       >
                         <IconComponent className="h-4 w-4" />
@@ -612,7 +674,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               </div>
 
               {/* Gaming preferences */}
-              {formData.favorite_hobbies?.includes('gaming') && (
+              {formData.favorite_hobbies?.includes('games') && (
                 <div className="space-y-4 rounded-xl border border-sky-500/30 bg-sky-500/5 p-4">
                   <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-400">
                     <Gamepad2 className="h-4 w-4" /> Gaming
@@ -643,14 +705,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {GENRES.map(genre => (
-                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                        <label
+                          key={genre}
+                          className="flex items-center gap-2 text-[var(--hb-muted)]"
+                        >
                           <input
                             type="checkbox"
                             checked={formData.favorite_genres?.includes(genre)}
                             onChange={e => {
                               const genres = formData.favorite_genres || [];
                               if (e.target.checked) {
-                                setFormData(prev => ({ ...prev, favorite_genres: [...genres, genre] }));
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_genres: [...genres, genre],
+                                }));
                               } else {
                                 setFormData(prev => ({
                                   ...prev,
@@ -669,7 +737,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               )}
 
               {/* Anime/Manga preferences */}
-              {(formData.favorite_hobbies?.includes('anime') || formData.favorite_hobbies?.includes('manga')) && (
+              {(formData.favorite_hobbies?.includes('anime') ||
+                formData.favorite_hobbies?.includes('manga')) && (
                 <div className="space-y-4 rounded-xl border border-pink-500/30 bg-pink-500/5 p-4">
                   <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pink-400">
                     <Sparkles className="h-4 w-4" /> Anime & Manga
@@ -678,14 +747,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {ANIME_GENRES.map(genre => (
-                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                        <label
+                          key={genre}
+                          className="flex items-center gap-2 text-[var(--hb-muted)]"
+                        >
                           <input
                             type="checkbox"
                             checked={formData.favorite_anime_genres?.includes(genre)}
                             onChange={e => {
                               const genres = formData.favorite_anime_genres || [];
                               if (e.target.checked) {
-                                setFormData(prev => ({ ...prev, favorite_anime_genres: [...genres, genre] }));
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_anime_genres: [...genres, genre],
+                                }));
                               } else {
                                 setFormData(prev => ({
                                   ...prev,
@@ -704,7 +779,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               )}
 
               {/* Movies/TV preferences */}
-              {(formData.favorite_hobbies?.includes('movies') || formData.favorite_hobbies?.includes('tv')) && (
+              {(formData.favorite_hobbies?.includes('movies') ||
+                formData.favorite_hobbies?.includes('tv')) && (
                 <div className="space-y-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
                   <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
                     <Film className="h-4 w-4" /> Ταινίες & Σειρές
@@ -713,14 +789,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {MOVIE_GENRES.map(genre => (
-                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                        <label
+                          key={genre}
+                          className="flex items-center gap-2 text-[var(--hb-muted)]"
+                        >
                           <input
                             type="checkbox"
                             checked={formData.favorite_movie_genres?.includes(genre)}
                             onChange={e => {
                               const genres = formData.favorite_movie_genres || [];
                               if (e.target.checked) {
-                                setFormData(prev => ({ ...prev, favorite_movie_genres: [...genres, genre] }));
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_movie_genres: [...genres, genre],
+                                }));
                               } else {
                                 setFormData(prev => ({
                                   ...prev,
@@ -748,14 +830,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {BOOK_GENRES.map(genre => (
-                        <label key={genre} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                        <label
+                          key={genre}
+                          className="flex items-center gap-2 text-[var(--hb-muted)]"
+                        >
                           <input
                             type="checkbox"
                             checked={formData.favorite_book_genres?.includes(genre)}
                             onChange={e => {
                               const genres = formData.favorite_book_genres || [];
                               if (e.target.checked) {
-                                setFormData(prev => ({ ...prev, favorite_book_genres: [...genres, genre] }));
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_book_genres: [...genres, genre],
+                                }));
                               } else {
                                 setFormData(prev => ({
                                   ...prev,
@@ -783,14 +871,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένες Γλώσσες:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {CODING_LANGUAGES.map(lang => (
-                        <label key={lang} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                        <label
+                          key={lang}
+                          className="flex items-center gap-2 text-[var(--hb-muted)]"
+                        >
                           <input
                             type="checkbox"
                             checked={formData.favorite_languages?.includes(lang)}
                             onChange={e => {
                               const languages = formData.favorite_languages || [];
                               if (e.target.checked) {
-                                setFormData(prev => ({ ...prev, favorite_languages: [...languages, lang] }));
+                                setFormData(prev => ({
+                                  ...prev,
+                                  favorite_languages: [...languages, lang],
+                                }));
                               } else {
                                 setFormData(prev => ({
                                   ...prev,
@@ -923,7 +1017,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         <div className="mt-4 text-center text-sm text-[var(--hb-muted)]">
           Έχεις ήδη λογαριασμό;{' '}
           <Link
-            href={redirectParam ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}` : '/pages/auth/login'}
+            href={
+              redirectParam
+                ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}`
+                : '/pages/auth/login'
+            }
             className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
           >
             Σύνδεση

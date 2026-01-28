@@ -22,7 +22,7 @@ export function AboutHero() {
           </span>
         </>
       }
-      subtitle="Ο Χομπίστας είναι ο χώρος για να οργανώνεις, παρακολουθείς και απολαμβάνεις τα gaming, anime, manga, ταινίες, σειρές και βιβλία σου — όλα σε ένα καθαρό, μινιμαλιστικό περιβάλλον."
+      subtitle="Ο Hobbistas είναι ο χώρος για να οργανώνεις, παρακολουθείς και απολαμβάνεις τα gaming, anime, manga, ταινίες, σειρές και βιβλία σου — όλα σε ένα καθαρό, μινιμαλιστικό περιβάλλον."
       sectionClassName="pb-24 pt-16 md:pb-32 md:pt-24"
       titleClassName="mb-6 text-4xl md:text-5xl lg:text-6xl"
       actions={

@@ -15,12 +15,12 @@ type ContinueItem = {
 
 const continueItems: ContinueItem[] = [
   {
-    category: 'Gaming',
+    category: 'Games',
     title: 'Συνέχισε να παίζεις',
     progress: 'Κατάσταση: Playing',
-    href: '/pages/backlog?category=gaming&status=current',
+    href: '/pages/backlog?category=games&status=current',
     icon: <Gamepad2 className="h-5 w-5" />,
-    requires: ['gaming'],
+    requires: ['games'],
   },
   {
     category: 'Anime',

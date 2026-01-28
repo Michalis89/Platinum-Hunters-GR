@@ -12,7 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/pages/news',
     '/pages/reviews',
     '/pages/backlog',
-    '/pages/guides',
     '/pages/terms',
     '/pages/privacy',
   ];

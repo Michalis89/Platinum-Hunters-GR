@@ -38,28 +38,26 @@ export function AboutPhilosophy() {
               Η φιλοσοφία μας
             </p>
             <h2 className="mb-5 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-              Γιατί υπάρχει ο Χομπίστας
+              Γιατί υπάρχει ο Hobbistas
             </h2>
-            <p className="mb-6 leading-relaxed text-[var(--hb-text)]/90">
-              Θέλαμε ένα εργαλείο που δεν υπήρχε: ένα ενιαίο library για όλα τα
-              hobbies, χωρίς την πολυπλοκότητα των μεγάλων platforms. Κάτι
-              γρήγορο, καθαρό, personal.
+            <p className="text-[var(--hb-text)]/90 mb-6 leading-relaxed">
+              Θέλαμε ένα εργαλείο που δεν υπήρχε: ένα ενιαίο library για όλα τα hobbies, χωρίς την
+              πολυπλοκότητα των μεγάλων platforms. Κάτι γρήγορο, καθαρό, personal.
             </p>
             <p className="leading-relaxed text-[var(--hb-muted)]">
-              Ο Χομπίστας γεννήθηκε από gamers και cinephiles που ήθελαν να
-              οργανώσουν τα backlogs τους χωρίς να χάνονται σε περιττές
-              λειτουργίες. Το αποτέλεσμα είναι μια πλατφόρμα που κάνει ακριβώς
-              αυτό που χρειάζεται — και τίποτα παραπάνω.
+              Ο Hobbistas γεννήθηκε από gamers και cinephiles που ήθελαν να οργανώσουν τα backlogs
+              τους χωρίς να χάνονται σε περιττές λειτουργίες. Το αποτέλεσμα είναι μια πλατφόρμα που
+              κάνει ακριβώς αυτό που χρειάζεται — και τίποτα παραπάνω.
             </p>
           </div>
 
           <div className="space-y-4">
-            {principles.map((principle) => (
+            {principles.map(principle => (
               <div
                 key={principle.title}
-                className="flex gap-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition hover:border-[var(--hb-primary-strong)]/40"
+                className="hover:border-[var(--hb-primary-strong)]/40 flex gap-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--hb-primary-strong)]/10 text-[var(--hb-primary-strong)]">
+                <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[var(--hb-primary-strong)]">
                   {principle.icon}
                 </div>
                 <div>

@@ -5,9 +5,9 @@ import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData
 import { SITE_URL } from '@/config/site';
 
 export const metadata = buildMetadata({
-  title: 'Χόμπι & Κατηγορίες | Χομπίστας',
+  title: 'Χόμπι & Κατηγορίες | Hobbistas',
   description:
-    'Ανακάλυψε όλες τις κατηγορίες του Χομπίστα: gaming, anime, manga, ταινίες, σειρές, βιβλία και πολλά ακόμη.',
+    'Ανακάλυψε όλες τις κατηγορίες του Hobbista: games, anime, manga, ταινίες, σειρές, βιβλία και πολλά ακόμη.',
   path: '/pages/hobbies',
 });
 

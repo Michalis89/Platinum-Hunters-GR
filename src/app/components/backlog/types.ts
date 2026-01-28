@@ -1,6 +1,6 @@
-import { Film, BookOpen, Sparkles, Tv } from 'lucide-react';
+import { Film, BookOpen, Sparkles, Tv, Gamepad2 } from 'lucide-react';
 
-export type MediaCategory = 'anime' | 'manga' | 'books' | 'movies' | 'tv';
+export type MediaCategory = 'anime' | 'manga' | 'books' | 'movies' | 'tv' | 'games';
 
 export type MediaStatus = 'planned' | 'current' | 'completed' | 'dropped';
 
@@ -25,6 +25,13 @@ export type MediaEntry = {
   totalPages?: number;
   mediaId?: number;
   entryId?: number;
+  rawgId?: number;
+  // Game-specific fields
+  platforms?: string[];
+  developer?: string;
+  publisher?: string;
+  metacritic?: number;
+  runtime?: number; // Hours for games
 };
 
 export type SearchResult = MediaEntry & {
@@ -51,7 +58,8 @@ export const isMediaCategory = (value: string | null): value is MediaCategory =>
     value === 'manga' ||
     value === 'books' ||
     value === 'movies' ||
-    value === 'tv'
+    value === 'tv' ||
+    value === 'games'
   );
 };
 
@@ -106,12 +114,23 @@ export const CATEGORY_CONFIG: Record<MediaCategory, CategoryConfig> = {
     droppedLabel: 'Dropped',
     icon: Tv,
   },
+  games: {
+    title: 'Games Library',
+    subtitle: 'Track your gaming backlog and platinum progress.',
+    searchPlaceholder: 'Αναζήτηση παιχνιδιών...',
+    currentLabel: 'Playing',
+    plannedLabel: 'Backlog',
+    completedLabel: 'Completed',
+    droppedLabel: 'Dropped',
+    icon: Gamepad2,
+  },
 };
 
 export const getApiBase = (category: MediaCategory): string | null => {
   if (category === 'anime' || category === 'manga') return '/api/anime';
   if (category === 'movies' || category === 'tv') return '/api/movies';
   if (category === 'books') return '/api/books';
+  if (category === 'games') return '/api/games';
   return null;
 };
 
@@ -119,6 +138,7 @@ export const getProgressLabel = (category: MediaCategory): string => {
   if (category === 'manga') return 'Τόμος';
   if (category === 'movies') return 'Λεπτά';
   if (category === 'books') return 'Σελίδες';
+  if (category === 'games') return 'Ώρες';
   return 'Επεισόδια';
 };
 
@@ -128,7 +148,8 @@ export const supportsExternalApi = (category: MediaCategory): boolean => {
     category === 'manga' ||
     category === 'movies' ||
     category === 'tv' ||
-    category === 'books'
+    category === 'books' ||
+    category === 'games'
   );
 };
 
@@ -174,6 +195,9 @@ export const getTotalCount = (
   }
   if (category === 'books') {
     return normalizeCount(entry.totalPages) ?? normalizeCount(payload?.page_count) ?? undefined;
+  }
+  if (category === 'games') {
+    return normalizeCount(entry.runtime) ?? normalizeCount(payload?.runtime) ?? undefined;
   }
   return undefined;
 };

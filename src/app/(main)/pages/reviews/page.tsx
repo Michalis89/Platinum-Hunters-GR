@@ -21,13 +21,12 @@ export async function generateMetadata({ searchParams }: ReviewsPageProps): Prom
   const categoryLabel = category ? CATEGORY_LABELS[category] : undefined;
 
   const title = categoryLabel
-    ? `Reviews για ${categoryLabel} | Χομπίστας`
-    : 'Reviews & Κριτικές | Χομπίστας';
+    ? `Reviews για ${categoryLabel} | Hobbistas`
+    : 'Reviews & Κριτικές | Hobbistas';
 
   const description = categoryLabel
-    ? `Reviews και κριτικές για ${categoryLabel}, από την κοινότητα του Χομπίστα.`
-    : 'Reviews και κριτικές από την κοινότητα του Χομπίστα. Δες τι αξίζει να δοκιμάσεις.';
-
+    ? `Reviews και κριτικές για ${categoryLabel}, από την κοινότητα του Hobbistas.`
+    : 'Reviews και κριτικές από την κοινότητα του Hobbistas. Δες τι αξίζει να δοκιμάσεις.';
   const path = category ? `/pages/reviews?category=${category}` : '/pages/reviews';
 
   return buildMetadata({

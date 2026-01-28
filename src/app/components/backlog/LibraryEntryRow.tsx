@@ -35,7 +35,13 @@ export default function LibraryEntryRow({
 
   const progressValue = entry.progress ?? null;
   const progressDisplay =
-    progressValue !== null ? `${progressValue}${total ? ` / ${total}` : ''}` : '—';
+    category !== 'games'
+      ? progressValue !== null
+        ? `${progressValue}${total ? ` / ${total}` : ''}`
+        : '—'
+      : progressValue !== null
+        ? `${progressValue}${total ? ` ` : ''}`
+        : '—';
 
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
@@ -82,6 +88,7 @@ export default function LibraryEntryRow({
             {statusLabel}
           </span>
         </div>
+
         <div className="flex w-full items-center justify-center text-sm text-[var(--hb-muted)]">
           {progressDisplay}
         </div>
@@ -89,7 +96,6 @@ export default function LibraryEntryRow({
         <div className="flex w-full items-center justify-center text-sm font-semibold text-[var(--hb-headline)]">
           {entry.score ?? '—'}
         </div>
-
         <div className="flex w-full items-center justify-center gap-2">
           <Button
             type="button"

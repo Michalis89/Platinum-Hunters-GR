@@ -29,14 +29,14 @@ export async function generateMetadata({ searchParams }: NewsPageProps): Promise
   const heading = topicLabel ?? 'Άρθρα';
 
   const title = categoryLabel
-    ? `${heading} για ${categoryLabel} | Χομπίστας`
-    : `${heading} | Χομπίστας`;
+    ? `${heading} για ${categoryLabel} | Hobbistas`
+    : `${heading} | Hobbistas`;
 
   const description =
     category && categoryLabel
-      ? CATEGORY_SUBTITLES[category] ??
-        'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Χομπίστα.'
-      : 'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Χομπίστα.';
+      ? (CATEGORY_SUBTITLES[category] ??
+        'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Hobbista.')
+      : 'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Hobbista.';
 
   const params = new URLSearchParams();
   if (category) params.set('category', category);
