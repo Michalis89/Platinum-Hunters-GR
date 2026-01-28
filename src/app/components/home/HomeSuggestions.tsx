@@ -10,6 +10,7 @@ import {
   Film,
   Tv,
   BookText,
+  Gamepad2,
   ChevronRight,
   Star,
   Lightbulb,
@@ -41,6 +42,13 @@ type CategoryConfig = {
 };
 
 const categoryConfigs: CategoryConfig[] = [
+  {
+    key: 'games',
+    label: 'Παιχνίδια',
+    icon: <Gamepad2 className="h-4 w-4" />,
+    apiPath: '/api/games/suggestions?category=games',
+    addPath: '/pages/backlog?category=games',
+  },
   {
     key: 'anime',
     label: 'Anime',
@@ -87,17 +95,14 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
   const [scrollY, setScrollY] = useState(0);
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  // Filter configs to only show active categories
   const visibleConfigs = categoryConfigs.filter(c => activeCategories.includes(c.key));
 
-  // Set initial tab
   useEffect(() => {
     if (visibleConfigs.length > 0 && !activeTab) {
       setActiveTab(visibleConfigs[0].key);
     }
   }, [visibleConfigs, activeTab]);
 
-  // Parallax scroll effect
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current) {
@@ -118,7 +123,6 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
 
   const activeConfig = visibleConfigs.find(c => c.key === activeTab);
 
-  // Fetch suggestions for active category
   const { data: suggestionsData } = useSWR(activeConfig ? activeConfig.apiPath : null, fetcher, {
     revalidateOnFocus: false,
   });

@@ -245,12 +245,10 @@ export default function ProfilePage() {
     }
   }, [loading, isAuthenticated, router]);
 
-  // Get favorites for category
   const getFavoritesForCategory = (cat: string): FavoriteItem[] => {
     return mediaFavorites[cat] ?? [];
   };
 
-  // Handle gaming favorites reorder
   const handleGamingReorder = async (sourceIndex: number | null, targetIndex: number) => {
     if (reordering || sourceIndex === null || sourceIndex === targetIndex) return;
     setReordering(true);

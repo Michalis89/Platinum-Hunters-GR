@@ -1,11 +1,4 @@
-import {
-  Layers,
-  ListTodo,
-  BarChart3,
-  Trophy,
-  StickyNote,
-  Gamepad2,
-} from 'lucide-react';
+import { Layers, ListTodo, BarChart3, Trophy, StickyNote, Gamepad2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type Feature = {
@@ -16,39 +9,35 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    title: 'Multi-hobby Backlog',
+    title: 'Όλα τα hobbies, σε ένα σημείο',
     description:
-      'Games, anime, manga, ταινίες, σειρές, βιβλία — μία ενιαία λίστα με ξεχωριστά metadata ανά κατηγορία.',
+      'Games, anime, manga, ταινίες, σειρές, βιβλία — ξεχωριστές λίστες με κοινή λογική και ίδιο “flow” καταγραφής.',
     icon: <Layers className="h-6 w-6" />,
   },
+
   {
     title: 'Progress Tracking',
-    description:
-      'Ώρες, επεισόδια, κεφάλαια, σελίδες. Ενημέρωσε την πρόοδό σου με ένα click.',
+    description: 'Ώρες, επεισόδια, κεφάλαια, σελίδες. Ενημέρωσε την πρόοδό σου με ένα click.',
     icon: <ListTodo className="h-6 w-6" />,
   },
   {
     title: 'Στατιστικά',
-    description:
-      'Πόσο χρόνο αφιέρωσες, τι ολοκλήρωσες, ποια genres και platforms προτιμάς.',
+    description: 'Πόσο χρόνο αφιέρωσες, τι ολοκλήρωσες, ποια genres και platforms προτιμάς.',
     icon: <BarChart3 className="h-6 w-6" />,
   },
   {
     title: 'Trophy Guides',
-    description:
-      'Αναλυτικοί οδηγοί για platinum trophies: difficulty, ώρες, missables, tips.',
+    description: 'Αναλυτικοί οδηγοί για platinum trophies: difficulty, ώρες, missables, tips.',
     icon: <Trophy className="h-6 w-6" />,
   },
   {
     title: 'Σημειώσεις',
-    description:
-      'Quick notes για κάθε entry. Θυμήσου πού σταμάτησες ή τι ήθελες να δοκιμάσεις.',
+    description: 'Quick notes για κάθε entry. Θυμήσου πού σταμάτησες ή τι ήθελες να δοκιμάσεις.',
     icon: <StickyNote className="h-6 w-6" />,
   },
   {
     title: 'Gaming Focus',
-    description:
-      'Ειδική υποστήριξη για gamers: platforms, trophy stats, completion rate.',
+    description: 'Ειδική υποστήριξη για gamers: platforms, trophy stats, completion rate.',
     icon: <Gamepad2 className="h-6 w-6" />,
   },
 ];
@@ -70,12 +59,12 @@ export function HomeFeatures() {
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
+          {features.map(feature => (
             <div
               key={feature.title}
-              className="group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--hb-primary-strong)]/50 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
+              className="hover:border-[var(--hb-primary-strong)]/50 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10 text-[var(--hb-primary-strong)] transition-colors group-hover:bg-[var(--hb-primary-strong)]/20">
+              <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
                 {feature.icon}
               </div>
               <h3 className="mb-2 text-base font-semibold text-[var(--hb-headline)]">

@@ -122,7 +122,8 @@ export async function GET(req: Request) {
     });
 
     const globalAverage = globalCount > 0 ? globalSum / globalCount : 0;
-    const minimumVotes = 5;
+    // Lower minimumVotes to show items even with few ratings
+    const minimumVotes = 2;
 
     const suggestions = Array.from(buckets.values())
       // Filter out items the user already has

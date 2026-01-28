@@ -29,12 +29,6 @@ import {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-/**
- * HomePageClient - Main home page with guest/authenticated views.
- *
- * Note: Background gradient and Footer are now provided by AppShell.
- * This component only needs to render its content.
- */
 export default function HomePageClient() {
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -135,9 +129,8 @@ type DashboardViewProps = {
 };
 
 function DashboardView({ username, displayName, stats }: DashboardViewProps) {
-  // Filter to media categories only (not games) for suggestions
   const mediaCategories = (stats?.active_categories ?? []).filter(cat =>
-    ['anime', 'manga', 'movies', 'tv', 'books'].includes(cat),
+    ['games', 'anime', 'manga', 'movies', 'tv', 'books'].includes(cat),
   );
 
   return (

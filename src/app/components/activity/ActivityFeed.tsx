@@ -90,6 +90,7 @@ function renderText(item: ActivityItem) {
     movies: { article: 'την', label: 'ταινία' },
     books: { article: 'το', label: 'βιβλίο' },
     tv: { article: 'την', label: 'σειρά' },
+    games: { article: 'το', label: 'παιχνίδι' },
   };
   if (item.type === 'backlog_added') {
     return `${name} πρόσθεσε στο backlog: ${title}`;
@@ -112,33 +113,68 @@ function renderText(item: ActivityItem) {
     const cat = categoryWithArticle[category] || { article: 'το', label: 'media' };
     const status = (p.status || 'planned').toString();
 
-    // Different verbs for books vs video content
+    // Different verbs based on category
     const isBook = category === 'books';
-    const currentVerb = isBook
-      ? `ξεκίνησε να διαβάζει ${cat.article}`
-      : `ξεκίνησε να παρακολουθεί ${cat.article}`;
+    const isGame = category === 'games';
+
+    let currentVerb: string;
+    let plannedVerb: string;
+
+    if (isGame) {
+      currentVerb = `παίζει τώρα ${cat.article}`;
+      plannedVerb = `πρόσθεσε ${cat.article} ${cat.label} στο backlog`;
+    } else if (isBook) {
+      currentVerb = `ξεκίνησε να διαβάζει ${cat.article}`;
+      plannedVerb = `πρόσθεσε ${cat.article}`;
+    } else {
+      currentVerb = `ξεκίνησε να παρακολουθεί ${cat.article}`;
+      plannedVerb = `πρόσθεσε ${cat.article}`;
+    }
 
     const statusActions: Record<string, string> = {
-      planned: `πρόσθεσε ${cat.article}`,
+      planned: plannedVerb,
       current: currentVerb,
       completed: `ολοκλήρωσε ${cat.article}`,
       dropped: `παράτησε ${cat.article}`,
     };
     const action = statusActions[status] || `πρόσθεσε ${cat.article}`;
+    // For games with planned status, don't repeat "παιχνίδι" twice
+    if (isGame && status === 'planned') {
+      return `${name} ${action}: ${mediaTitle}`;
+    }
     return `${name} ${action} ${cat.label}: ${mediaTitle}`;
   }
   if (item.type === 'media_status') {
     const cat = categoryWithArticle[category] || { article: 'το', label: 'media' };
     const status = (p.status || '').toString();
     const isBook = category === 'books';
-    const currentVerb = isBook ? `διαβάζει ${cat.article}` : `παρακολουθεί ${cat.article}`;
+    const isGame = category === 'games';
+
+    let currentVerb: string;
+    let plannedVerb: string;
+
+    if (isGame) {
+      currentVerb = `παίζει τώρα ${cat.article}`;
+      plannedVerb = `πρόσθεσε ${cat.article} ${cat.label} στο backlog`;
+    } else if (isBook) {
+      currentVerb = `διαβάζει ${cat.article}`;
+      plannedVerb = `πρόσθεσε ${cat.article}`;
+    } else {
+      currentVerb = `παρακολουθεί ${cat.article}`;
+      plannedVerb = `πρόσθεσε ${cat.article}`;
+    }
 
     const statusActions: Record<string, string> = {
-      planned: `πρόσθεσε ${cat.article}`,
+      planned: plannedVerb,
       current: currentVerb,
       completed: `ολοκλήρωσε ${cat.article}`,
       dropped: `παράτησε ${cat.article}`,
     };
+
+    // For games with planned status, don't repeat "παιχνίδι" twice
+    if (isGame && status === 'planned') {
+      return `${name} ${statusActions[status] || 'άλλαξε status'}: ${mediaTitle}`;
+    }
     return `${name} ${statusActions[status] || 'άλλαξε status'} ${cat.label}: ${mediaTitle}`;
   }
   if (item.type === 'media_favorite') {
@@ -209,6 +245,7 @@ const categoryLabels: Record<string, string> = {
   movies: 'Ταινίες',
   books: 'Βιβλία',
   tv: 'Σειρές',
+  games: 'Παιχνίδια',
 };
 
 export function ActivityFeed({

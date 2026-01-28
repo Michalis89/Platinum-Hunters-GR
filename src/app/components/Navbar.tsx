@@ -63,7 +63,7 @@ const HOBBY_ITEMS: NavItem[] = [
       { href: '/pages/news?category=games', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=games',
-        label: 'Gaming Library',
+        label: 'Gaming Backlog',
         icon: <ListChecks size={16} />,
       },
       { href: '/pages/reviews?category=games', label: 'Reviews', icon: <Star size={16} /> },
@@ -98,20 +98,6 @@ const HOBBY_ITEMS: NavItem[] = [
     ],
   },
   {
-    href: '/pages/backlog?category=books',
-    label: 'Βιβλία',
-    icon: <BookOpen size={18} />,
-    category: 'books',
-    children: [
-      {
-        href: '/pages/backlog?category=books',
-        label: 'Books Library',
-        icon: <ListChecks size={16} />,
-      },
-      { href: '/pages/reviews?category=books', label: 'Reviews', icon: <Star size={16} /> },
-    ],
-  },
-  {
     href: '/pages/backlog?category=movies',
     label: 'Movies',
     icon: <Film size={18} />,
@@ -133,6 +119,20 @@ const HOBBY_ITEMS: NavItem[] = [
     children: [
       { href: '/pages/backlog?category=tv', label: 'TV Library', icon: <ListChecks size={16} /> },
       { href: '/pages/reviews?category=tv', label: 'Reviews', icon: <Star size={16} /> },
+    ],
+  },
+  {
+    href: '/pages/backlog?category=books',
+    label: 'Βιβλία',
+    icon: <BookOpen size={18} />,
+    category: 'books',
+    children: [
+      {
+        href: '/pages/backlog?category=books',
+        label: 'Books Library',
+        icon: <ListChecks size={16} />,
+      },
+      { href: '/pages/reviews?category=books', label: 'Reviews', icon: <Star size={16} /> },
     ],
   },
   {

@@ -333,18 +333,15 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       setAlert({
         type: 'success',
         message:
-          '✅ Επιτυχής εγγραφή! Έλεγξε το email σου για να επιβεβαιώσεις το λογαριασμό σου. Ανακατεύθυνση...',
+          'Επιτυχής εγγραφή! Έλεγξε το email σου για να επιβεβαιώσεις το λογαριασμό σου. Ανακατεύθυνση...',
       });
 
-      // Fetch session to update Redux state
       await dispatch(fetchSession());
 
-      // Redirect after short delay
       setTimeout(() => {
         if (onSuccess) {
           onSuccess();
         } else {
-          // Use redirect param if present, otherwise default to hobbies
           const redirectUrl = redirectParam ? decodeURIComponent(redirectParam) : '/pages/hobbies';
           router.push(redirectUrl);
         }
@@ -352,7 +349,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     } catch (error) {
       console.error('Registration error:', error);
       const errorMessage =
-        error instanceof Error ? error.message : '❌ Σφάλμα εγγραφής. Δοκιμάστε ξανά.';
+        error instanceof Error ? error.message : 'Σφάλμα εγγραφής. Δοκιμάστε ξανά.';
       setAlert({
         type: 'error',
         message: errorMessage,
@@ -362,7 +359,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     }
   };
 
-  // Progress indicator
   const progress = (currentStep / 3) * 100;
 
   return (
@@ -383,7 +379,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             </span>
           </span>
         </CardTitle>
-        {/* Progress Bar */}
         <div className="mt-4 h-2 w-full rounded-full bg-white/5">
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)]"
@@ -398,7 +393,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
         <AnimatePresence mode="wait">
-          {/* Step 1: Account Info */}
           {currentStep === 1 && (
             <motion.div
               key="step1"
@@ -545,7 +539,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             </motion.div>
           )}
 
-          {/* Step 2: Personal Info */}
           {currentStep === 2 && (
             <motion.div
               key="step2"
@@ -612,7 +605,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             </motion.div>
           )}
 
-          {/* Step 3: Hobby Preferences */}
           {currentStep === 3 && (
             <motion.div
               key="step3"
@@ -621,7 +613,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               exit={{ opacity: 0, x: -20 }}
               className="max-h-[60vh] space-y-4 overflow-y-auto pr-1 md:max-h-none md:overflow-visible"
             >
-              {/* Hobby Selection */}
               <div>
                 <p className="mb-2 text-sm font-medium text-[var(--hb-headline)]">
                   Ποια χόμπι σε ενδιαφέρουν;
@@ -975,7 +966,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           )}
         </AnimatePresence>
 
-        {/* Navigation Buttons */}
         <div className="mt-6 flex gap-4">
           {currentStep > 1 && (
             <Button
@@ -1013,7 +1003,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           </Button>
         </div>
 
-        {/* Login Link */}
         <div className="mt-4 text-center text-sm text-[var(--hb-muted)]">
           Έχεις ήδη λογαριασμό;{' '}
           <Link

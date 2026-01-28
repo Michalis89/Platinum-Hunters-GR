@@ -11,44 +11,39 @@ type RoadmapItem = {
 const roadmapItems: RoadmapItem[] = [
   {
     title: 'API Integrations',
-    description:
-      'Σύνδεση με RAWG, TMDB, Jikan για αυτόματα metadata, covers και πληροφορίες.',
-    status: 'in-progress',
+    description: 'Σύνδεση με RAWG, TMDB, Jikan για αυτόματα metadata, covers και πληροφορίες.',
+    status: 'planned',
     icon: <Plug className="h-5 w-5" />,
   },
   {
     title: 'Cross-Hobby Stats',
     description:
       'Ενιαία στατιστικά για όλα τα hobbies. Πόσες ώρες συνολικά, τι ολοκλήρωσες τον μήνα.',
-    status: 'in-progress',
+    status: 'planned',
     icon: <Rocket className="h-5 w-5" />,
   },
   {
     title: 'Import/Export',
-    description:
-      'Εισαγωγή δεδομένων από Letterboxd, MAL, Goodreads. Εξαγωγή σε CSV/JSON.',
+    description: 'Εισαγωγή δεδομένων από Letterboxd, MAL, Goodreads. Εξαγωγή σε CSV/JSON.',
     status: 'planned',
     icon: <Globe className="h-5 w-5" />,
   },
   {
     title: 'Mobile Responsive',
-    description:
-      'Βελτιστοποίηση για κινητά. Γρήγορη προσθήκη και ενημέρωση on-the-go.',
+    description: 'Βελτιστοποίηση για κινητά. Γρήγορη προσθήκη και ενημέρωση on-the-go.',
     status: 'planned',
     icon: <Smartphone className="h-5 w-5" />,
   },
   {
     title: 'Προαιρετικό Sharing',
-    description:
-      'Δημόσιο profile αν θέλεις. Μοιράσου τι παρακολουθείς με φίλους.',
+    description: 'Δημόσιο profile αν θέλεις. Μοιράσου τι παρακολουθείς με φίλους.',
     status: 'planned',
     icon: <Users className="h-5 w-5" />,
   },
   {
     title: 'Light Mode',
-    description:
-      'Επιλογή φωτεινού theme για όσους προτιμούν light interfaces.',
-    status: 'planned',
+    description: 'Επιλογή φωτεινού theme για όσους προτιμούν light interfaces.',
+    status: 'in-progress',
     icon: <Palette className="h-5 w-5" />,
   },
 ];
@@ -78,16 +73,16 @@ export function AboutRoadmap() {
             Τι έρχεται
           </h2>
           <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
-            Συνεχίζουμε να βελτιώνουμε τον Χομπίστα. Εδώ είναι μερικά από τα
-            features που σχεδιάζουμε.
+            Συνεχίζουμε να βελτιώνουμε τον Χομπίστα. Εδώ είναι μερικά από τα features που
+            σχεδιάζουμε.
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {roadmapItems.map((item) => (
+          {roadmapItems.map(item => (
             <div
               key={item.title}
-              className="group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition hover:border-[var(--hb-primary-strong)]/40"
+              className="hover:border-[var(--hb-primary-strong)]/40 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition"
             >
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-[var(--hb-muted)] transition-colors group-hover:text-[var(--hb-primary-strong)]">
@@ -99,12 +94,8 @@ export function AboutRoadmap() {
                   {statusLabels[item.status]}
                 </span>
               </div>
-              <h3 className="mb-2 font-semibold text-[var(--hb-headline)]">
-                {item.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-[var(--hb-muted)]">
-                {item.description}
-              </p>
+              <h3 className="mb-2 font-semibold text-[var(--hb-headline)]">{item.title}</h3>
+              <p className="text-sm leading-relaxed text-[var(--hb-muted)]">{item.description}</p>
             </div>
           ))}
         </div>

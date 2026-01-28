@@ -1,45 +1,42 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
-type Category = 'books';
-
 type SuggestionRow = {
   media_id: number;
   score: number | null;
   media_items: {
     id: number;
-    category: Category;
+    category: string;
     title: string | null;
-    original_title: string | null;
+    title_english: string | null;
     description: string | null;
+    season_year: number | null;
     release_date: string | null;
-    page_count: number | null;
     cover_image_large: string | null;
     cover_image_medium: string | null;
     genres: string[] | null;
-    tags: string[] | null;
   } | null;
 };
 
 const mapSuggestedItem = (
   media: NonNullable<SuggestionRow['media_items']>,
   average: number,
+  userCount: number,
 ) => {
-  const title = media.title || media.original_title || 'Untitled';
-  const subtitle = (media.tags && media.tags.length > 0 ? media.tags.join(', ') : '') || '';
-  const year = media.release_date?.slice(0, 4) || undefined;
+  const title = media.title || media.title_english || 'Untitled';
+  const year =
+    media.season_year?.toString() || media.release_date?.slice(0, 4) || undefined;
   return {
     source: 'local',
     id: `suggest-${media.id}`,
     mediaId: media.id,
     title,
-    subtitle,
+    subtitle: `${userCount} users`,
     year,
     status: 'planned',
     score: average.toFixed(1),
     tags: media.genres ?? [],
     cover: media.cover_image_large || media.cover_image_medium || '/og-image.png',
-    totalPages: media.page_count ?? undefined,
     description: media.description ?? undefined,
   };
 };
@@ -47,9 +44,9 @@ const mapSuggestedItem = (
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const category = (searchParams.get('category') || 'books') as Category;
+    const category = searchParams.get('category') || 'games';
 
-    if (category !== 'books') {
+    if (category !== 'games') {
       return NextResponse.json({ error: 'Unsupported category' }, { status: 400 });
     }
 
@@ -70,24 +67,26 @@ export async function GET(req: Request) {
       .from('user_media_entries')
       .select('media_id, media_items!inner(category)')
       .eq('user_id', userId)
-      .eq('media_items.category', category);
+      .eq('media_items.category', 'games');
 
     const userMediaIds = new Set(
-      (userEntries ?? []).map((e: { media_id: number }) => e.media_id)
+      (userEntries ?? []).map((e: { media_id: number }) => e.media_id),
     );
 
+    // Get all scored entries for games from ALL users
     const { data, error } = await supabase
       .from('user_media_entries')
       .select(
-        'media_id,score,media_items!inner(id,category,title,original_title,description,release_date,page_count,cover_image_large,cover_image_medium,genres,tags)',
+        'media_id,score,media_items!inner(id,category,title,title_english,description,season_year,release_date,cover_image_large,cover_image_medium,genres)',
       )
-      .eq('media_items.category', category)
+      .eq('media_items.category', 'games')
       .not('score', 'is', null);
 
     if (error) {
       throw error;
     }
 
+    // Group by media_id and calculate weighted score
     const buckets = new Map<
       number,
       { sum: number; count: number; media: NonNullable<SuggestionRow['media_items']> }
@@ -116,25 +115,32 @@ export async function GET(req: Request) {
     // Lower minimumVotes to show items even with few ratings
     const minimumVotes = 2;
 
+    // Calculate popularity score: weighted average that favors items with more votes
+    // Using Bayesian average: (count / (count + m)) * average + (m / (count + m)) * globalAverage
     const suggestions = Array.from(buckets.values())
       // Filter out items the user already has
       .filter(item => !userMediaIds.has(item.media.id))
-      .map(item => ({
-        average: item.sum / item.count,
-        weighted:
+      .map(item => {
+        const average = item.sum / item.count;
+        const weighted =
           item.count + minimumVotes > 0
-            ? (item.count / (item.count + minimumVotes)) * (item.sum / item.count) +
+            ? (item.count / (item.count + minimumVotes)) * average +
               (minimumVotes / (item.count + minimumVotes)) * globalAverage
-            : 0,
-        media: item.media,
-      }))
+            : 0;
+        return {
+          average,
+          weighted,
+          count: item.count,
+          media: item.media,
+        };
+      })
       .sort((a, b) => b.weighted - a.weighted)
       .slice(0, 4)
-      .map(item => mapSuggestedItem(item.media, item.weighted));
+      .map(item => mapSuggestedItem(item.media, item.weighted, item.count));
 
     return NextResponse.json({ items: suggestions });
   } catch (error) {
-    console.error('Suggestions fetch error:', error);
+    console.error('Games suggestions fetch error:', error);
     return NextResponse.json({ items: [] }, { status: 500 });
   }
 }

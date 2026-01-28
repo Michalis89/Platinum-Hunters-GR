@@ -30,11 +30,12 @@ const features: Feature[] = [
     icon: <ListTodo className="h-6 w-6" />,
   },
   {
-    title: 'Στατιστικά & Insights',
+    title: 'Στατιστικά προόδου',
     description:
-      'Δες πόσο χρόνο αφιέρωσες, τι ολοκλήρωσες, ποια είναι τα αγαπημένα σου genres και platforms.',
+      'Συγκεντρωτικά stats για να βλέπεις τι ολοκληρώνεις και πόσο χρόνο επενδύεις, ανά κατηγορία.',
     icon: <BarChart3 className="h-6 w-6" />,
   },
+
   {
     title: 'Reviews & Βαθμολογίες',
     description:
