@@ -55,8 +55,8 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
   };
 
   const age = ageFromDob();
-  const visibleSocialLinks = socialPlatforms.filter(
-    (p) => (socialLinks[p.key] as string | undefined)?.trim()
+  const visibleSocialLinks = socialPlatforms.filter(p =>
+    (socialLinks[p.key] as string | undefined)?.trim(),
   );
 
   return (
@@ -71,12 +71,12 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_12px_30px_rgba(3,7,18,0.35)]">
+        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
           {/* Info Grid */}
           <div className="mb-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {/* Full name */}
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10">
+              <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <User className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
@@ -89,7 +89,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
             {/* Display name */}
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10">
+              <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <Mail className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
@@ -103,7 +103,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             {/* Age (if visible) */}
             {showAge && (
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10">
+                <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                   <Calendar className="h-5 w-5 text-[var(--hb-primary-strong)]" />
                 </div>
                 <div>
@@ -117,7 +117,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
             {/* Location */}
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10">
+              <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <MapPin className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
@@ -132,7 +132,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
             {/* Timezone */}
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10">
+              <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <Globe2 className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
@@ -153,7 +153,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
               {visibleSocialLinks.length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {visibleSocialLinks.map((platform) => {
+                  {visibleSocialLinks.map(platform => {
                     const value = (socialLinks[platform.key] as string) || '';
                     return (
                       <a
@@ -161,7 +161,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
                         href={normalizeSocialUrl(value)}
                         target="_blank"
                         rel="noreferrer"
-                        className="group flex items-center gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 transition-all hover:-translate-y-0.5 hover:border-[var(--hb-primary-strong)]/40"
+                        className="hover:border-[var(--hb-primary-strong)]/40 group flex items-center gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 transition-all hover:-translate-y-0.5"
                       >
                         <span className="text-[var(--hb-primary-strong)] transition-colors group-hover:text-[var(--hb-accent)]">
                           {platform.icon}

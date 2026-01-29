@@ -31,7 +31,8 @@ export default function ActionRow({ article }: ActionRowProps) {
 
   const canEdit =
     !!currentUser && (currentUser.role === 'admin' || currentUser.role === 'author');
-  const fallbackHref = `/pages/news?category=${article.category}`;
+  const fallbackBase = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
+  const fallbackHref = `${fallbackBase}?category=${article.category}`;
 
   useEffect(() => {
     let active = true;

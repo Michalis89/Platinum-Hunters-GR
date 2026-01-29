@@ -709,7 +709,7 @@ export default function EditProfilePage() {
 
       setAlert({
         type: 'success',
-        message: '✅ Ο λογαριασμός διαγράφηκε. Ανακατεύθυνση...',
+        message: 'Ο λογαριασμός διαγράφηκε. Ανακατεύθυνση στην αρχική σελίδα...',
       });
 
       try {
@@ -765,7 +765,7 @@ export default function EditProfilePage() {
 
           <form id="edit-profile-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
-            <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+            <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
               <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
                 <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
                   Βασικά Στοιχεία
@@ -838,10 +838,6 @@ export default function EditProfilePage() {
                       value={formData.timezone || ''}
                       onChange={handleSelectChange('timezone')}
                     />
-                    <div className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-xs text-[var(--hb-muted)]">
-                      Ασύγκριτα πιο επαγγελματικό: ενημερωμένα στοιχεία χώρας/πόλης και ζώνης ώρας
-                      βοηθούν στο matchmaking και τα sessions.
-                    </div>
                   </div>
                 </div>
 
@@ -979,8 +975,8 @@ export default function EditProfilePage() {
                             }
                             className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition ${
                               active
-                                ? 'border-emerald-400/70 bg-emerald-500/10 text-emerald-50'
-                                : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:border-[var(--hb-border)]'
+                                ? `border-emerald-600/25 bg-emerald-500/10 text-emerald-800 dark:border-emerald-400/70 dark:bg-emerald-500/10 dark:text-emerald-50`
+                                : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                             }`}
                           >
                             <span className="text-sm font-medium">{setting.label}</span>
@@ -1004,7 +1000,7 @@ export default function EditProfilePage() {
             {/* Categories selection */}
             <Card
               id="categories"
-              className="scroll-mt-24 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+              className="scroll-mt-24 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
             >
               <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
                 <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
@@ -1040,8 +1036,8 @@ export default function EditProfilePage() {
                         onClick={() => toggleCategory(cat)}
                         className={`rounded-full border px-3 py-1.5 text-sm transition ${
                           active
-                            ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                            : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                            ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                            : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                         }`}
                       >
                         {labels[cat] || cat}
@@ -1056,7 +1052,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('games') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
                   <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
@@ -1126,8 +1122,8 @@ export default function EditProfilePage() {
                             onClick={() => handleGenreToggle(genre)}
                             className={`rounded-full border px-3 py-1 text-xs transition ${
                               active
-                                ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                             }`}
                           >
                             {genre}
@@ -1150,7 +1146,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
                     Πληροφορίες για Gaming
@@ -1167,7 +1163,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('anime') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Anime</CardTitle>
@@ -1196,8 +1192,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('anime', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {genre}
@@ -1221,8 +1217,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('anime', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {format}
@@ -1248,8 +1244,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {platform}
@@ -1308,7 +1304,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Anime</CardTitle>
                 </CardHeader>
@@ -1323,7 +1319,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('manga') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για manga</CardTitle>
@@ -1348,8 +1344,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('manga', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {genre}
@@ -1373,8 +1369,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('manga', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {format}
@@ -1420,7 +1416,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για manga</CardTitle>
                 </CardHeader>
@@ -1435,7 +1431,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('movies') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
@@ -1468,8 +1464,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {service}
@@ -1507,8 +1503,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('movies', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {genre}
@@ -1532,8 +1528,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('movies', 'style')(style)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {style}
@@ -1581,7 +1577,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
                     Πληροφορίες για Ταινίες
@@ -1598,7 +1594,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('tv') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
@@ -1632,8 +1628,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {service}
@@ -1671,8 +1667,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('tv', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {genre}
@@ -1696,8 +1692,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('tv', 'style')(style)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {style}
@@ -1732,7 +1728,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
                     Πληροφορίες για Σειρές
@@ -1749,7 +1745,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('books') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
@@ -1776,8 +1772,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('books', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {genre}
@@ -1801,8 +1797,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('books', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {format}
@@ -1848,7 +1844,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
                     Πληροφορίες για Βιβλία
@@ -1865,7 +1861,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('coding') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
@@ -1898,8 +1894,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {lang}
@@ -1927,8 +1923,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryListToggle('coding', 'focus', focus)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {focus}
@@ -1974,7 +1970,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
                     Πληροφορίες για Κώδικα
@@ -1991,7 +1987,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('pet') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
@@ -2048,7 +2044,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">
                     Πληροφορίες για Κατοικίδια
@@ -2065,7 +2061,7 @@ export default function EditProfilePage() {
             {(formData.categories as string[] | undefined)?.includes('vape') ? (
               <Card
                 collapsible
-                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur"
+                className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur"
               >
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Vape</CardTitle>
@@ -2125,8 +2121,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-100'
-                                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-border)]'
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
                                   }`}
                                 >
                                   {flavor}
@@ -2149,7 +2145,7 @@ export default function EditProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.35)] backdrop-blur">
+              <Card className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
                 <CardHeader>
                   <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Vape</CardTitle>
                 </CardHeader>
@@ -2161,12 +2157,12 @@ export default function EditProfilePage() {
             )}
 
             {/* Bottom Save Buttons */}
-            <div className="mt-6 flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur">
+            <div className="mt-6 flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-3 shadow-[var(--hb-shadow-md)] backdrop-blur">
               {/* Primary Button */}
               <Button
                 type="submit"
                 disabled={saving || !isDirty}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-6 py-2.5 font-semibold text-[var(--hb-bg)] shadow-[0_4px_12px_rgba(229,9,20,0.25),0_0_12px_rgba(229,9,20,0.45)] transition-all duration-300 hover:shadow-[0_6px_16px_rgba(229,9,20,0.35),0_0_18px_rgba(229,9,20,0.55)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-6 py-2.5 font-semibold text-[var(--hb-bg)] shadow-[var(--hb-shadow-md)] transition-all duration-300 hover:shadow-[var(--hb-shadow-md-hover)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
               >
                 <Save className="h-4 w-4" />
                 <span>{saving ? 'Αποθήκευση...' : 'Αποθήκευση'}</span>
@@ -2175,7 +2171,7 @@ export default function EditProfilePage() {
               <Button
                 onClick={handleCancel}
                 disabled={saving}
-                className="flex items-center gap-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-6 py-2.5 font-medium text-[var(--hb-text)] shadow-[inset_0_0_8px_rgba(255,255,255,0.05)] backdrop-blur-lg transition-all duration-300 hover:border-[var(--hb-border)] hover:bg-[var(--hb-card)] active:scale-[0.97]"
+                className="flex items-center gap-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-6 py-2.5 font-medium text-[var(--hb-text)] shadow-[var(--hb-shadow-md)] backdrop-blur-lg transition-all duration-300 hover:border-[var(--hb-border)] hover:bg-[var(--hb-card)] active:scale-[0.97]"
               >
                 <X className="h-4 w-4 text-[var(--hb-muted)]" />
                 Ακύρωση
@@ -2208,7 +2204,7 @@ export default function EditProfilePage() {
               {!showDeleteConfirm ? (
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-2 rounded-xl border border-red-600/60 bg-red-900/20 px-5 py-2.5 font-semibold text-red-300 shadow-[inset_0_0_12px_rgba(255,0,0,0.15)] backdrop-blur-lg transition-all duration-300 hover:border-red-500 hover:bg-red-900/30 hover:text-red-200 hover:shadow-[inset_0_0_14px_rgba(255,0,0,0.25),0_0_12px_rgba(255,0,0,0.25)] active:scale-[0.97]"
+                  className="flex items-center gap-2 rounded-xl border border-red-600/60 bg-red-900/20 px-5 py-2.5 font-semibold text-red-300 shadow-[var(--hb-shadow-md)] backdrop-blur-lg transition-all duration-300 hover:border-red-500 hover:bg-red-900/30 hover:text-red-200 hover:shadow-[var(--hb-shadow-md-hover)] active:scale-[0.97]"
                 >
                   <Trash2 className="h-4 w-4" />
                   Διαγραφή Λογαριασμού
@@ -2268,7 +2264,7 @@ export default function EditProfilePage() {
             type="submit"
             form="edit-profile-form"
             disabled={saving}
-            className="pointer-events-auto flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-4 py-2 text-sm font-semibold text-[var(--hb-bg)] shadow-[0_10px_30px_rgba(229,9,20,0.35)] transition hover:shadow-[0_14px_36px_rgba(229,9,20,0.45)]"
+            className="pointer-events-auto flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-4 py-2 text-sm font-semibold text-[var(--hb-bg)] shadow-[var(--hb-shadow-md)] transition hover:shadow-[var(--hb-shadow-md-hover)]"
           >
             <Save className="h-4 w-4" />
             {saving ? 'Αποθήκευση...' : 'Αποθήκευση'}
@@ -2276,7 +2272,7 @@ export default function EditProfilePage() {
           <Button
             onClick={handleCancel}
             disabled={saving}
-            className="pointer-events-auto rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-sm font-medium text-[var(--hb-text)] shadow-[0_8px_20px_rgba(0,0,0,0.35)] transition hover:border-[var(--hb-border)] hover:bg-[var(--hb-card)]"
+            className="pointer-events-auto rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-sm font-medium text-[var(--hb-text)] shadow-[var(--hb-shadow-md)] transition hover:border-[var(--hb-border)] hover:bg-[var(--hb-card)]"
           >
             Ακύρωση
           </Button>

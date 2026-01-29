@@ -408,7 +408,7 @@ export default function ProfilePage() {
 
               <div className="grid gap-8 lg:grid-cols-2">
                 {/* Favorites List */}
-                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_12px_30px_rgba(3,7,18,0.35)]">
+                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
                   <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
                     Top {categoryLabels[activeCategory]}
                   </h3>
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Category Info */}
-                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_12px_30px_rgba(3,7,18,0.35)]">
+                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
                   <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
                     Πληροφορίες Κατηγορίας
                   </h3>

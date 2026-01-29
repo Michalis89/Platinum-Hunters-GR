@@ -71,12 +71,8 @@ export function AboutStats({
     },
   ];
 
-  console.log(stats);
-  console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
-  // Filter out stats with 0 or '—' value to only show categories with content
   const activeStats = stats.filter(stat => stat.value !== 0 && stat.value !== '—');
 
-  // Show active stats, or first 6 if not enough active
   const displayStats = activeStats.length >= 4 ? activeStats : stats.slice(0, 6);
 
   return (
@@ -97,7 +93,7 @@ export function AboutStats({
           {displayStats.map(stat => (
             <div
               key={stat.label}
-              className="hover:border-[var(--hb-primary-strong)]/40 w-[calc(50%-0.5rem)] rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[0_12px_30px_rgba(3,7,18,0.35)] transition sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)]"
+              className="hover:border-[var(--hb-primary-strong)]/40 w-[calc(50%-0.5rem)] rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[var(--hb-shadow-md)] transition sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)]"
             >
               <div className="mb-2 flex justify-center text-[var(--hb-primary-strong)]">
                 {stat.icon}

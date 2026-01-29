@@ -1,6 +1,6 @@
 'use client';
 
-import { Edit, ShieldCheck, CheckCircle } from 'lucide-react';
+import { Edit, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Button from '@/app/components/ui/Button';
 import type { User } from '@/types/user';
@@ -28,7 +28,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
         <div className="flex flex-col items-center text-center">
           {/* Avatar */}
           {avatarUrl ? (
-            <div className="relative mb-5 h-28 w-28 overflow-hidden rounded-full border-2 border-[var(--hb-border)] shadow-[0_12px_40px_rgba(3,7,18,0.6)] md:h-32 md:w-32">
+            <div className="relative mb-5 h-28 w-28 overflow-hidden rounded-full border-2 border-[var(--hb-border)] shadow-[var(--hb-shadow-md)] md:h-32 md:w-32">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={avatarUrl}
@@ -37,7 +37,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
               />
             </div>
           ) : (
-            <div className="mb-5 flex h-28 w-28 items-center justify-center rounded-full border-2 border-[var(--hb-border)] bg-[var(--hb-card)] text-4xl font-bold text-[var(--hb-headline)] shadow-[0_12px_40px_rgba(3,7,18,0.6)] md:h-32 md:w-32">
+            <div className="mb-5 flex h-28 w-28 items-center justify-center rounded-full border-2 border-[var(--hb-border)] bg-[var(--hb-card)] text-4xl font-bold text-[var(--hb-headline)] shadow-[var(--hb-shadow-md)] md:h-32 md:w-32">
               {user.username?.charAt(0).toUpperCase() || 'U'}
             </div>
           )}
@@ -64,8 +64,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
 
             {/* Verified badge */}
             {user.email_verified && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300">
-                <CheckCircle className="h-3.5 w-3.5" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
                 Επιβεβαιωμένο
               </span>
             )}

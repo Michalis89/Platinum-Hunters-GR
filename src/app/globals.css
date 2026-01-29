@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import 'slick-carousel/slick/slick.css';
+@import 'slick-carousel/slick/slick-theme.css';
 
 html {
   scroll-behavior: smooth;
@@ -20,9 +22,19 @@ html {
   --hb-muted: #a1a1b3;
   --hb-text: #f5f5f5;
   --hb-headline: #ffffff;
-  --hb-shadow: 0 18px 60px rgba(0, 0, 0, 0.7);
+  --hb-shadow-md: 0 12px 30px rgba(3, 7, 18, 0.14);
+  --hb-shadow-md-hover: 0 18px 45px rgba(3, 7, 18, 0.18);
+
   --hb-radius: 14px;
   --hb-radius-lg: 20px;
+  --hb-input-bg: rgba(255, 255, 255, 0.04);
+  --hb-input-border: rgba(255, 255, 255, 0.1);
+  --hb-input-placeholder: rgba(245, 245, 245, 0.45);
+  --hb-ring: rgba(229, 9, 20, 0.35);
+
+  --hb-popover-bg: rgba(16, 16, 22, 0.98);
+  --hb-popover-border: rgba(255, 255, 255, 0.1);
+  --hb-popover-shadow: 0 22px 70px rgba(0, 0, 0, 0.75);
   --hb-gradient:
     radial-gradient(circle at 18% 20%, rgba(229, 9, 20, 0.22), transparent 28%),
     radial-gradient(circle at 78% 16%, rgba(156, 0, 10, 0.22), transparent 26%),
@@ -40,30 +52,37 @@ html {
 }
 
 [data-theme='light'] {
-  /* Light theme tokens - softer/warmer palette */
-  --hb-bg: #e8e6e3;
-  --hb-surface: #f0eeeb;
-  --hb-panel: rgba(240, 238, 235, 0.95);
-  --hb-card: #f5f3f0;
-  --hb-border: rgba(0, 0, 0, 0.1);
-  --hb-primary: #c41e1e;
-  --hb-primary-strong: #a01818;
-  --hb-accent: #d93636;
-  --hb-muted: #5c5c5c;
-  --hb-text: #2d2d2d;
-  --hb-headline: #1a1a1a;
-  --hb-shadow: 0 18px 60px rgba(0, 0, 0, 0.15);
-  --hb-gradient:
-    radial-gradient(circle at 18% 20%, rgba(196, 30, 30, 0.06), transparent 28%),
-    radial-gradient(circle at 78% 16%, rgba(160, 24, 24, 0.06), transparent 26%),
-    radial-gradient(circle at 35% 75%, rgba(217, 54, 54, 0.05), transparent 30%),
-    radial-gradient(circle at 85% 80%, rgba(140, 20, 20, 0.05), transparent 26%);
+  --hb-bg: #f7f6f3;
+  --hb-surface: #ffffff;
+  --hb-panel: #ffffff;
+  --hb-card: #fcfbf8;
+  --hb-border: rgba(15, 15, 15, 0.1);
 
-  /* Legacy tokens */
+  --hb-primary: #d12c2c;
+  --hb-primary-strong: #d11a2a;
+  --hb-accent: #e14949;
+
+  --hb-muted: #5a5955;
+  --hb-text: #1f1f1f;
+  --hb-headline: #0f0f0f;
+
+  --hb-shadow-md: 0 12px 30px rgba(3, 7, 18, 0.14);
+  --hb-shadow-md-hover: 0 18px 45px rgba(3, 7, 18, 0.18);
+
+  --hb-input-bg: #ffffff;
+  --hb-input-border: rgba(15, 15, 15, 0.12);
+  --hb-input-placeholder: rgba(20, 20, 20, 0.45);
+  --hb-ring: rgba(209, 26, 42, 0.22);
+
+  --hb-popover-bg: #ffffff;
+  --hb-popover-border: rgba(15, 15, 15, 0.12);
+  --hb-popover-shadow: 0 22px 60px rgba(0, 0, 0, 0.16);
+
+  --hb-gradient: ...;
+
   --background: var(--hb-bg);
   --foreground: var(--hb-text);
 
-  /* Scrollbar colors */
   --scrollbar-track: #d4d2cf;
   --scrollbar-thumb: linear-gradient(180deg, #c41e1e, #d93636);
   --scrollbar-thumb-hover: linear-gradient(180deg, #a01818, #c41e1e);
@@ -101,23 +120,6 @@ body {
   background: var(--scrollbar-thumb-hover);
 }
 
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient {
-  background-size: 200% auto;
-  animation: gradient 3s linear infinite;
-}
-
 .article-content h1,
 .article-content h2,
 .article-content h3,
@@ -141,4 +143,71 @@ body {
 .article-content h3 {
   font-size: 1.125rem;
   margin: 1.25rem 0 0.5rem;
+}
+input,
+textarea,
+select {
+  background: var(--hb-input-bg);
+  border-color: var(--hb-input-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--hb-input-placeholder);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--hb-ring);
+  border-color: var(--hb-primary-strong);
+}
+:where(
+  input:not([type]),
+  input[type='text'],
+  input[type='search'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  input[type='url'],
+  textarea,
+  select
+) {
+  background: var(--hb-input-bg);
+  border-color: var(--hb-input-border);
+}
+
+:where(
+    input:not([type]),
+    input[type='text'],
+    input[type='search'],
+    input[type='email'],
+    input[type='password'],
+    input[type='number'],
+    input[type='url'],
+    textarea
+  )::placeholder {
+  color: var(--hb-input-placeholder);
+}
+
+:where(
+    input:not([type]),
+    input[type='text'],
+    input[type='search'],
+    input[type='email'],
+    input[type='password'],
+    input[type='number'],
+    input[type='url'],
+    textarea,
+    select
+  ):focus {
+  outline: none;
+  border-color: var(--hb-primary-strong);
+  box-shadow: 0 0 0 3px var(--hb-ring);
+}
+:where([role='dialog'], [role='menu'], [data-radix-popper-content-wrapper] > *) {
+  background: var(--hb-popover-bg);
+  border-color: var(--hb-popover-border);
+  box-shadow: var(--hb-popover-shadow);
 }

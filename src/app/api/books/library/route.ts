@@ -141,6 +141,9 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'No updates provided' }, { status: 400 });
     }
 
+    const updatedAt = new Date().toISOString();
+    updateData.updated_at = updatedAt;
+
     const { data: existingEntry } = await supabase
       .from('user_media_entries')
       .select('status,is_favorite')
@@ -160,6 +163,7 @@ export async function PATCH(req: Request) {
           score: updateData.score,
           progress: updateData.progress,
           notes: updateData.notes,
+          updated_at: updatedAt,
         },
         { onConflict: 'user_id,media_id' }
       )

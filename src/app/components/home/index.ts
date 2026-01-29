@@ -10,5 +10,5 @@ export { HomeDashboardHeader } from './HomeDashboardHeader';
 export { HomeStatsRow } from './HomeStatsRow';
 export { HomeQuickActions } from './HomeQuickActions';
 export { HomeRecentActivity } from './HomeRecentActivity';
-export { HomeContinue } from './HomeContinue';
 export { HomeSuggestions } from './HomeSuggestions';
+export { ContinueHero } from './ContinueHero';

@@ -1,0 +1,98 @@
+/* ContinueHero.module.css */
+
+/* Remove slick default bullet */
+.continueHero :global(.continueHero-dots li button:before) {
+  content: none !important;
+  display: none !important;
+}
+
+/* Dots wrapper */
+.continueHero :global(.continueHero-dots) {
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+  list-style: none !important;
+}
+
+/* Each dot item */
+.continueHero :global(.continueHero-dots li) {
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Base dot (LIGHT mode default) */
+.continueHero :global(.continueHero-dots li button.continueHero-dot) {
+  padding: 0 !important;
+  width: 0.85rem !important;
+  height: 0.85rem !important;
+  border-radius: 9999px !important;
+  display: block !important;
+  line-height: 0 !important;
+
+  border: 1px solid rgba(15, 23, 42, 0.35) !important;
+  background: rgba(15, 23, 42, 0.45) !important;
+
+  opacity: 1 !important;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+/* Light hover */
+.continueHero :global(.continueHero-dots li button.continueHero-dot:hover),
+.continueHero :global(.continueHero-dots li button.continueHero-dot:focus-visible) {
+  background: rgba(15, 23, 42, 0.65) !important;
+  transform: scale(1.15) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.18) !important;
+}
+
+/* Active dot (ALL themes) */
+.continueHero :global(.continueHero-dots li.slick-active button.continueHero-dot) {
+  background: var(--hb-primary-strong) !important;
+  border-color: var(--hb-primary-strong) !important;
+  transform: scale(1.25) !important;
+}
+
+/* ===================================================== */
+/* DARK MODE (data-theme="dark") */
+/* ===================================================== */
+
+/* ===================================================== */
+/* DARK MODE (data-theme="dark") */
+/* ===================================================== */
+
+/* Dark INACTIVE dots only */
+:global(html[data-theme='dark'])
+  .continueHero
+  :global(.continueHero-dots li:not(.slick-active) button.continueHero-dot) {
+  background: rgb(88 99 123 / 45%) !important;
+  border-color: rgb(88 99 123 / 65%) !important;
+}
+
+/* Dark hover (inactive only) */
+:global(html[data-theme='dark'])
+  .continueHero
+  :global(.continueHero-dots li:not(.slick-active) button.continueHero-dot:hover),
+:global(html[data-theme='dark'])
+  .continueHero
+  :global(.continueHero-dots li:not(.slick-active) button.continueHero-dot:focus-visible) {
+  background: rgb(88 99 123 / 70%) !important;
+  border-color: rgb(88 99 123 / 85%) !important;
+  box-shadow: 0 0 0 3px rgb(88 99 123 / 25%) !important;
+}
+
+:global(html[data-theme='dark'])
+  .continueHero
+  :global(.continueHero-dots li.slick-active button.continueHero-dot) {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(255, 0, 0, 0.25) !important;
+}

@@ -223,14 +223,18 @@ function iconFor(item: ActivityItem) {
   // Article/Review icons - use Star for reviews
   const isReview = item.payload?.topic === 'reviews';
   if (item.type === 'article_created') {
-    return isReview
-      ? <Star className="h-4 w-4 text-amber-300" />
-      : <FileText className="h-4 w-4 text-emerald-300" />;
+    return isReview ? (
+      <Star className="h-4 w-4 text-amber-300" />
+    ) : (
+      <FileText className="h-4 w-4 text-emerald-300" />
+    );
   }
   if (item.type === 'article_updated') {
-    return isReview
-      ? <Star className="h-4 w-4 text-amber-300" />
-      : <Pencil className="h-4 w-4 text-blue-300" />;
+    return isReview ? (
+      <Star className="h-4 w-4 text-amber-300" />
+    ) : (
+      <Pencil className="h-4 w-4 text-blue-300" />
+    );
   }
   if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-red-300" />;
   if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-300" />;
@@ -274,7 +278,7 @@ export function ActivityFeed({
   const activities: ActivityItem[] = data?.activities ?? [];
 
   return (
-    <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[0_12px_30px_rgba(3,7,18,0.45)]">
+    <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)]">
       {/* Category access alert */}
       {alertCategory && (
         <AlertMessage
@@ -282,10 +286,11 @@ export function ActivityFeed({
           title="Κατηγορία μη διαθέσιμη"
           message={
             <span>
-              Δεν έχεις επιλέξει την κατηγορία <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
+              Δεν έχεις επιλέξει την κατηγορία{' '}
+              <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
               <Link
                 href="/pages/profile/edit#categories"
-                className="font-semibold text-[var(--hb-primary)] hover:text-[var(--hb-accent)] underline"
+                className="font-semibold text-[var(--hb-primary)] underline hover:text-[var(--hb-accent)]"
               >
                 Πρόσθεσέ την εδώ
               </Link>
@@ -308,9 +313,7 @@ export function ActivityFeed({
       </div>
 
       {isLoading && <LoadingSpinner size="sm" label="Φόρτωση..." />}
-      {error && (
-        <ErrorState error="Σφάλμα φόρτωσης activity. Προσπάθησε ξανά αργότερα." />
-      )}
+      {error && <ErrorState error="Σφάλμα φόρτωσης activity. Προσπάθησε ξανά αργότερα." />}
       {!isLoading && !error && activities.length === 0 && (
         <EmptyState title="Καμία πρόσφατη ενέργεια." />
       )}

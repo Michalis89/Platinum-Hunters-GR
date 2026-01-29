@@ -110,11 +110,7 @@ export default function AlertMessage({
           className="fixed inset-x-0 top-6 z-50 mx-auto flex w-auto max-w-md px-4"
         >
           <div
-            className={`
-              relative w-full overflow-hidden rounded-2xl border backdrop-blur-xl
-              bg-[var(--hb-panel)]/95 shadow-[0_20px_50px_rgba(0,0,0,0.5)]
-              ${config.border}
-            `}
+            className={`bg-[var(--hb-panel)]/95 relative w-full overflow-hidden rounded-2xl border shadow-[var(--hb-shadow-md)] backdrop-blur-xl ${config.border} `}
           >
             {/* Gradient overlay */}
             <div
@@ -131,19 +127,17 @@ export default function AlertMessage({
               </div>
 
               {/* Text content */}
-              <div className="flex-1 min-w-0 pt-0.5">
+              <div className="min-w-0 flex-1 pt-0.5">
                 {title && (
-                  <p className="text-sm font-semibold text-[var(--hb-headline)] mb-0.5">{title}</p>
+                  <p className="mb-0.5 text-sm font-semibold text-[var(--hb-headline)]">{title}</p>
                 )}
-                <div className="text-sm text-[var(--hb-text)]/90 leading-relaxed">{message}</div>
+                <div className="text-[var(--hb-text)]/90 text-sm leading-relaxed">{message}</div>
               </div>
 
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg
-                         text-[var(--hb-muted)] transition-colors hover:text-[var(--hb-text)]
-                         hover:bg-[var(--hb-border)] focus:outline-none"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[var(--hb-muted)] transition-colors hover:bg-[var(--hb-border)] hover:text-[var(--hb-text)] focus:outline-none"
                 aria-label="Κλείσιμο"
               >
                 <X className="h-4 w-4" />

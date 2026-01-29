@@ -7,7 +7,11 @@ import { selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Skeleton from '@/app/components/ui/Skeleton';
 import CategoryLibrary from '@/app/components/backlog/CategoryLibrary';
-import { isMediaCategory, type MediaCategory } from '@/app/components/backlog/types';
+import {
+  isMediaCategory,
+  type MediaCategory,
+  type MediaStatus,
+} from '@/app/components/backlog/types';
 
 function BacklogFallback() {
   return (
@@ -29,9 +33,21 @@ function BacklogPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
+  const statusParam = searchParams.get('status');
+  const searchParam = searchParams.get('search');
 
   // Default to 'games' if no category specified
   const category: MediaCategory = isMediaCategory(categoryParam) ? categoryParam : 'games';
+  const normalizedStatus = statusParam?.toLowerCase();
+  const statusLookup: Record<string, MediaStatus | 'all'> = {
+    all: 'all',
+    current: 'current',
+    planned: 'planned',
+    completed: 'completed',
+    dropped: 'dropped',
+  };
+  const statusFromParams = normalizedStatus ? statusLookup[normalizedStatus] : undefined;
+  const searchFromParams = searchParam?.trim() ?? undefined;
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
@@ -93,5 +109,12 @@ function BacklogPageContent() {
     );
   }
 
-  return <CategoryLibrary category={category} username={user?.username} />;
+  return (
+    <CategoryLibrary
+      category={category}
+      username={user?.username}
+      initialStatus={statusFromParams}
+      initialSearch={searchFromParams}
+    />
+  );
 }

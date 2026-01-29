@@ -22,7 +22,7 @@ export default function CategoryHeader({
   return (
     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-4">
-        <div className="bg-[var(--hb-primary-strong)]/20 flex h-14 w-14 items-center justify-center rounded-2xl text-[var(--hb-primary-strong)] shadow-[0_0_24px_rgba(229,9,20,0.35)]">
+        <div className="bg-[var(--hb-primary-strong)]/20 flex h-14 w-14 items-center justify-center rounded-2xl text-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)]">
           <Icon className="h-6 w-6" />
         </div>
         <div>
@@ -30,7 +30,9 @@ export default function CategoryHeader({
             {username ? `${username} • ` : ''}
             {category.toUpperCase()}
           </p>
-          <h1 className="text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">{config.title}</h1>
+          <h1 className="text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
+            {config.title}
+          </h1>
           <p className="text-sm text-[var(--hb-muted)]">{config.subtitle}</p>
         </div>
       </div>
@@ -44,7 +46,7 @@ export default function CategoryHeader({
         </Button>
         <Button
           variant="primary"
-          className="bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] hover:brightness-110"
+          className="dark: bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] hover:brightness-110 dark:bg-[var(--hb-primary-strong)] dark:text-[var(--hb-bg)]"
           onClick={onSuggestionsClick}
         >
           Προτάσεις

@@ -1,0 +1,11 @@
+{
+  "typescript.tsserver.exclude": [
+    "node_modules"
+  ],
+  "search.exclude": {
+    "**/node_modules": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true
+  }
+}

@@ -80,8 +80,8 @@ export function ProfileFavorites({
           }}
           className={`group flex cursor-grab items-center gap-4 rounded-2xl border bg-[var(--hb-card)] p-4 transition-all duration-200 active:cursor-grabbing ${
             dragIndex === idx
-              ? 'border-[var(--hb-primary-strong)]/70 bg-[var(--hb-primary-strong)]/5 shadow-[0_0_20px_rgba(229,9,20,0.15)]'
-              : 'hover:border-[var(--hb-primary-strong)]/40 border-[var(--hb-border)] hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(3,7,18,0.4)]'
+              ? 'border-[var(--hb-primary-strong)]/70 bg-[var(--hb-primary-strong)]/5 shadow-[var(--hb-shadow-md)]'
+              : 'hover:border-[var(--hb-primary-strong)]/40 border-[var(--hb-border)] hover:-translate-y-0.5 hover:shadow-[var(--hb-shadow-md-hover)]'
           }`}
         >
           {/* Drag handle + Rank */}

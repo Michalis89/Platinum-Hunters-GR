@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { mutate } from 'swr';
 import ErrorState from '@/app/components/ui/ErrorState';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 
@@ -34,12 +35,18 @@ type AlertState = {
 export default function CategoryLibrary({
   category,
   username,
+  initialStatus = 'all',
+  initialSearch,
 }: Readonly<{
   category: MediaCategory;
   username?: string | null;
+  initialStatus?: MediaStatus | 'all';
+  initialSearch?: string;
 }>) {
-  const [search, setSearch] = useState('');
-  const [activeStatus, setActiveStatus] = useState<MediaStatus | 'all'>('all');
+  const normalizedInitialStatus = initialStatus ?? 'all';
+  const normalizedInitialSearch = initialSearch?.trim() ?? '';
+  const [search, setSearch] = useState(normalizedInitialSearch);
+  const [activeStatus, setActiveStatus] = useState<MediaStatus | 'all'>(normalizedInitialStatus);
   const [ctaMode, setCtaMode] = useState<'create' | 'suggestions' | null>(null);
   const [libraryEntries, setLibraryEntries] = useState<MediaEntry[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
@@ -91,13 +98,13 @@ export default function CategoryLibrary({
   );
 
   useEffect(() => {
-    setActiveStatus('all');
-    setSearch('');
+    setActiveStatus(normalizedInitialStatus);
+    setSearch(normalizedInitialSearch);
     setCreateQuery('');
     setCreateResults([]);
     setCtaMode(null);
     loadLibraryEntries();
-  }, [category, loadLibraryEntries]);
+  }, [category, normalizedInitialStatus, normalizedInitialSearch, loadLibraryEntries]);
 
   useEffect(() => {
     if (ctaMode !== 'create') return;
@@ -323,6 +330,7 @@ export default function CategoryLibrary({
           throw new Error('Failed to update entry');
         }
         await loadLibraryEntries();
+        await mutate('/api/user/continue');
         setAlert({
           type: 'success',
           title: 'Αποθηκεύτηκε',
@@ -358,6 +366,7 @@ export default function CategoryLibrary({
           throw new Error('Failed to add entry');
         }
         await loadLibraryEntries();
+        await mutate('/api/user/continue');
         setAlert({
           type: 'success',
           title: 'Επιτυχής προσθήκη',
@@ -419,6 +428,7 @@ export default function CategoryLibrary({
           throw new Error('Failed to delete entry');
         }
         await loadLibraryEntries();
+        await mutate('/api/user/continue');
         if (selectedEntry?.id === entry.id) {
           setSelectedEntry(null);
         }
@@ -463,7 +473,7 @@ export default function CategoryLibrary({
           <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_20%,var(--hb-accent),transparent_55%)]" />
         </div>
 
-        <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+        <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)] backdrop-blur">
           <CategoryHeader
             category={category}
             username={username}

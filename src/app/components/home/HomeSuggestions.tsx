@@ -87,15 +87,15 @@ const categoryConfigs: CategoryConfig[] = [
 ];
 
 type HomeSuggestionsProps = {
-  activeCategories: string[];
+  enabledCategories: string[];
 };
 
-export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
+export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState(0);
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  const visibleConfigs = categoryConfigs.filter(c => activeCategories.includes(c.key));
+  const visibleConfigs = categoryConfigs.filter(c => enabledCategories.includes(c.key));
 
   useEffect(() => {
     if (visibleConfigs.length > 0 && !activeTab) {
@@ -161,26 +161,31 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
               <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
                 Προτάσεις από την κοινότητα
               </h2>
-              <p className="text-xs text-[var(--hb-muted)]">Βασισμένες στις βαθμολογίες</p>
+              <p className="text-s text-[var(--hb-muted)]">
+                Βασισμένες στις βαθμολογίες της κοινότητας
+              </p>
             </div>
           </div>
 
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-2">
-            {visibleConfigs.map(config => (
-              <button
-                key={config.key}
-                onClick={() => setActiveTab(config.key)}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                  activeTab === config.key
-                    ? 'bg-[var(--hb-primary-strong)] text-white'
-                    : 'hover:border-[var(--hb-primary-strong)]/50 border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
-                }`}
-              >
-                {config.icon}
-                <span>{config.label}</span>
-              </button>
-            ))}
+            {visibleConfigs.map(config => {
+              const isActiveTab = activeTab === config.key;
+              return (
+                <button
+                  key={config.key}
+                  onClick={() => setActiveTab(config.key)}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                    isActiveTab
+                      ? 'bg-[var(--hb-primary-strong)] text-white'
+                      : 'border border-[var(--hb-border)] bg-transparent text-[var(--hb-muted)] hover:bg-white/10 hover:text-[var(--hb-text)]'
+                  }`}
+                >
+                  {config.icon}
+                  <span>{config.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -206,9 +211,10 @@ export function HomeSuggestions({ activeCategories }: HomeSuggestionsProps) {
               Δεν υπάρχουν προτάσεις ακόμα
             </p>
             <p className="mb-4 max-w-xs text-sm text-[var(--hb-muted)]">
-              Βαθμολόγησε περισσότερα {activeConfig?.label.toLowerCase()} για να λάβεις
-              εξατομικευμένες προτάσεις
+              Όταν η κοινότητα προσθέσει περισσότερες βαθμολογίες στα{' '}
+              {activeConfig?.label.toLowerCase()}, θα ξεκλειδώσουν οι προτάσεις της κοινότητας.
             </p>
+
             <Link
               href={activeConfig?.addPath ?? '/pages/backlog'}
               className="inline-flex items-center gap-1 rounded-full bg-[var(--hb-primary-strong)] px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
@@ -237,7 +243,7 @@ function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) 
   return (
     <Link
       href={addPath}
-      className="hover:border-[var(--hb-primary-strong)]/50 hover:shadow-[var(--hb-primary-strong)]/10 group relative overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+      className="group relative overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
       style={{
         transform: `translateY(${parallaxOffset}px)`,
       }}
@@ -254,35 +260,19 @@ function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) 
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PC9zdmc+"
         />
-        {/* Gradient Overlay */}
-        <div className="via-[var(--hb-bg)]/40 absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] to-transparent" />
-
         {/* Score Badge */}
         {item.score && (
-          <div className="bg-[var(--hb-bg)]/80 absolute right-2 top-2 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-[var(--hb-accent)] backdrop-blur-sm">
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
             <Star className="h-3 w-3 fill-current" />
             {item.score}
           </div>
         )}
 
-        {/* Content Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
         <div className="absolute inset-x-0 bottom-0 p-3">
-          <h3 className="line-clamp-2 text-sm font-semibold text-[var(--hb-headline)]">
-            {item.title}
-          </h3>
-          {item.year && <p className="mt-0.5 text-xs text-[var(--hb-muted)]">{item.year}</p>}
-          {item.tags && item.tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {item.tags.slice(0, 2).map(tag => (
-                <span
-                  key={tag}
-                  className="bg-[var(--hb-primary-strong)]/20 rounded px-1.5 py-0.5 text-[10px] text-[var(--hb-accent)]"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <h3 className="line-clamp-2 text-sm font-semibold text-white">{item.title}</h3>
+          {item.year && <p className="mt-0.5 text-xs text-white/80">{item.year}</p>}
         </div>
       </div>
     </Link>

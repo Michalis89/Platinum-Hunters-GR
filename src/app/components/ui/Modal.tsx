@@ -43,20 +43,20 @@ export function Modal({ isOpen, onClose, title, children }: Readonly<ModalProps>
     >
       <dialog
         ref={dialogRef}
-        className="w-full max-w-md rounded-lg bg-gray-900 p-6 shadow-lg backdrop-blur-sm backdrop:bg-black/70"
+        className="w-full max-w-md rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-surface)] p-6 shadow-[var(--hb-shadow-md)] backdrop-blur-sm"
         aria-labelledby="modal-title"
       >
         {title && (
-          <h3 id="modal-title" className="mb-4 text-xl font-semibold text-white">
+          <h3 id="modal-title" className="mb-4 text-xl font-semibold text-[var(--hb-headline)]">
             {title}
           </h3>
         )}
-        <div className="text-white">{children}</div>
+        <div className="text-[var(--hb-text)]">{children}</div>
 
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="text-sm text-gray-400 transition hover:text-white"
+            className="text-sm text-[var(--hb-muted)] transition hover:text-[var(--hb-headline)]"
           ></button>
         </div>
       </dialog>

@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useRef, useState, MouseEvent, KeyboardEvent } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,11 +27,11 @@ import {
   ChevronDown,
   ChevronRight,
   PenLine,
+  Plus,
   Sun,
   Moon,
 } from 'lucide-react';
 import AddArticleDialog from './articles/AddArticleDialog';
-import { usePathname } from 'next/navigation';
 import {
   logout,
   selectIsAuthenticated,
@@ -40,7 +41,6 @@ import {
 import type { AppDispatch } from '@/store/store';
 import Button from './ui/Button';
 import { useTheme } from '@/context/ThemeContext';
-import VersionBadge from './ui/VersionBadge';
 
 type NavItem = {
   href: string;
@@ -51,7 +51,11 @@ type NavItem = {
   category?: string;
 };
 
-const NAV_ITEMS: NavItem[] = [{ href: '/pages/about', label: 'Σχετικά', icon: <Book size={18} /> }];
+const NAV_ITEMS: NavItem[] = [
+  { href: '/pages/news', label: 'Άρθρα', icon: <FileText size={18} /> },
+  { href: '/pages/reviews', label: 'Κριτικές', icon: <Star size={18} /> },
+  { href: '/pages/about', label: 'Σχετικά', icon: <Book size={18} /> },
+];
 
 const HOBBY_ITEMS: NavItem[] = [
   {
@@ -225,6 +229,7 @@ export default function Navbar() {
   const user = useSelector(selectUser);
   const isDev = process.env.NODE_ENV === 'development';
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const canQuickAdd = !!user && (user.role === 'admin' || user.role === 'author');
 
@@ -242,9 +247,32 @@ export default function Navbar() {
       ? HOBBY_ITEMS.filter(item => !item.category || userCategories.includes(item.category))
       : HOBBY_ITEMS;
 
+  const normalizeHref = (href: string) => href.split('?')[0];
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
-    return pathname?.startsWith(href);
+    if (!pathname) return false;
+    const path = normalizeHref(href);
+    if (path === '/pages/backlog') {
+      return pathname?.startsWith('/pages/backlog') || pathname === '/pages/hobbies';
+    }
+    return pathname.startsWith(path);
+  };
+
+  const handleGoToHobbies = () => {
+    setHobbiesOpen(false);
+    router.push('/pages/hobbies');
+  };
+
+  const handleHobbyLabelClick = (event: MouseEvent<HTMLSpanElement>) => {
+    event.stopPropagation();
+    handleGoToHobbies();
+  };
+
+  const handleHobbyLabelKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+      handleGoToHobbies();
+    }
   };
 
   useEffect(() => {
@@ -257,23 +285,17 @@ export default function Navbar() {
       }
     };
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setProfileOpen(false);
-    };
-
     document.addEventListener('pointerdown', handlePointerDown, true);
-    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown, true);
-      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [profileOpen]);
 
   const desktopLinkClass = (href: string) => {
     const base = 'flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition';
     const active =
-      'border border-[var(--hb-border)] bg-white/5 text-[var(--hb-primary-strong)] shadow-[0_8px_30px_rgba(229,9,20,0.25)]';
+      'border border-[var(--hb-border)] bg-white/5 text-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)]';
     const inactive =
       'text-[var(--hb-muted)] hover:text-[var(--hb-primary-strong)] hover:bg-white/5';
     return `${base} ${isActive(href) ? active : inactive}`;
@@ -284,8 +306,8 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-[0_10px_35px_rgba(229,9,20,0.35)]">
-            <span className="text-xl font-black leading-none text-slate-950 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)]">
+            <span className="text-xl font-black leading-none text-slate-950 drop-shadow-[var(--hb-shadow-md)]">
               Η
             </span>
           </div>
@@ -293,10 +315,6 @@ export default function Navbar() {
           <div className="flex flex-col leading-tight">
             <span className="text-sm font-semibold tracking-tight text-[var(--hb-headline)]">
               Hobbistas
-            </span>
-            <span className="text-[11px] text-[var(--hb-muted)]">
-              Personal hobby hub
-              <VersionBadge />
             </span>
           </div>
         </Link>
@@ -312,7 +330,15 @@ export default function Navbar() {
                 className={desktopLinkClass('/pages/backlog?category')}
               >
                 <Layers size={18} />
-                <span>Χόμπι</span>
+                <span
+                  role="link"
+                  tabIndex={0}
+                  className="cursor-pointer"
+                  onClick={handleHobbyLabelClick}
+                  onKeyDown={handleHobbyLabelKeyDown}
+                >
+                  Χόμπι
+                </span>
                 <ChevronDown size={14} />
               </button>
               <AnimatePresence>
@@ -394,17 +420,7 @@ export default function Navbar() {
           </ul>
 
           {/* Auth Links */}
-          <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 shadow-[0_10px_30px_rgba(3,7,18,0.4)]">
-            {canQuickAdd && (
-              <Button
-                onClick={() => setAddDialogOpen(true)}
-                variant="primary"
-                icon={<PenLine size={16} />}
-                className="h-9 px-4"
-              >
-                Προσθήκη
-              </Button>
-            )}
+          <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
             {isAuthLoading ? (
               <div className="flex items-center gap-2 px-3 py-1">
                 <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
@@ -431,7 +447,20 @@ export default function Navbar() {
                     <ChevronDown size={14} />
                   </button>
                   {profileOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-2 shadow-lg shadow-black/30">
+                    <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-2 shadow-lg shadow-black/20">
+                      {canQuickAdd && (
+                        <button
+                          onClick={() => {
+                            setAddDialogOpen(true);
+                            setProfileOpen(false);
+                          }}
+                          className="hover:bg-[var(--hb-accent)]/10 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-accent)]"
+                          aria-label="Προσθήκη άρθρου"
+                        >
+                          <Plus size={16} />
+                          <span>Προσθήκη</span>
+                        </button>
+                      )}
                       <Link
                         href="/pages/profile"
                         className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--hb-text)] transition hover:bg-white/5 hover:text-[var(--hb-primary-strong)]"
@@ -448,13 +477,23 @@ export default function Navbar() {
                         <PenLine size={16} />
                         <span>Επεξεργασία Προφίλ</span>
                       </Link>
+
                       <button
                         onClick={toggleTheme}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--hb-text)] transition hover:bg-white/5 hover:text-[var(--hb-primary-strong)]"
+                        className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-[var(--hb-text)] transition hover:bg-black/5 dark:hover:bg-white/5"
                       >
-                        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                        <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                        <span className="grid h-8 w-8 place-items-center rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)]">
+                          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                        </span>
+
+                        <div className="flex flex-col text-left leading-tight">
+                          <span>Θέμα</span>
+                          <span className="text-[11px] text-[var(--hb-muted)]">
+                            {theme === 'dark' ? 'Ενεργό: Dark' : 'Ενεργό: Light'}
+                          </span>
+                        </div>
                       </button>
+
                       <div className="my-1 border-t border-[var(--hb-border)]" />
                       <button
                         onClick={() => {
@@ -577,17 +616,16 @@ export default function Navbar() {
                   ) : isAuthenticated && user ? (
                     <div className="flex flex-col gap-2">
                       {canQuickAdd && (
-                        <Button
+                        <button
                           onClick={() => {
                             setMenuOpen(false);
                             setAddDialogOpen(true);
                           }}
-                          variant="primary"
-                          icon={<PenLine size={18} />}
-                          className="justify-center"
+                          className="hover:bg-[var(--hb-accent)]/10 flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:text-[var(--hb-accent)]"
                         >
-                          Προσθήκη
-                        </Button>
+                          <Plus size={16} />
+                          <span>Προσθήκη</span>
+                        </button>
                       )}
                       <div className="flex gap-2">
                         <Link

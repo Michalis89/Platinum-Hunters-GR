@@ -1,0 +1,271 @@
+import { NextResponse } from 'next/server';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { API_ERRORS } from '@/lib/api/errors';
+import { fail } from '@/lib/api/response';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const DASHBOARD_CATEGORIES = ['games', 'anime', 'manga', 'movies', 'tv', 'books'] as const;
+const SLIDE_CATEGORIES = ['games', 'anime', 'manga', 'tv', 'books'] as const;
+type DashboardCategory = (typeof DASHBOARD_CATEGORIES)[number];
+
+type ContinueSlide = {
+  category: string;
+  entry_id: number;
+  media_id: number;
+  status: string;
+  progress: number | null;
+  score: string | null;
+  updated_at: string;
+  created_at: string;
+  title: string | null;
+  season_year: number | null;
+  release_date: string | null;
+  cover_image_large: string | null;
+  cover_image_medium: string | null;
+};
+
+type CountBucket = {
+  total: number;
+  planned: number;
+  current: number;
+  completed: number;
+  dropped: number;
+};
+
+type MediaPreview = {
+  category: string | null;
+  title: string | null;
+  title_english: string | null;
+  title_romaji: string | null;
+  title_native: string | null;
+  original_title: string | null;
+  season_year: number | null;
+  release_date: string | null;
+  cover_image_large: string | null;
+  cover_image_medium: string | null;
+};
+
+type ContinueEntry = {
+  id: number;
+  media_id: number;
+  status: string;
+  progress: number | null;
+  score: number | null;
+  updated_at: string | null;
+  created_at: string | null;
+  media_items: MediaPreview | null;
+};
+
+type CountEntry = {
+  status: string | null;
+  media_items: { category: string | null } | null;
+};
+
+const toTimestamp = (value: string | null | undefined) => {
+  if (!value) return 0;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const compareEntryDates = (a: ContinueEntry, b: ContinueEntry) => {
+  const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
+  if (updatedDiff !== 0) return updatedDiff;
+  return toTimestamp(b.created_at) - toTimestamp(a.created_at);
+};
+
+const resolveTitle = (media: MediaPreview | null) =>
+  media?.title ??
+  media?.title_english ??
+  media?.title_romaji ??
+  media?.title_native ??
+  media?.original_title ??
+  null;
+
+const normalizeEnabledCategories = (categories: string[]) =>
+  categories.filter(category => DASHBOARD_CATEGORIES.includes(category as DashboardCategory));
+
+/**
+ * GET /api/user/continue
+ * Returns continue-where-you-left-off slides, enabled categories, and counts.
+ */
+export async function GET() {
+  try {
+    const supabase = await createRouteHandlerClient();
+    const session = await requireAuth(supabase);
+    const userId = session.user.id;
+
+    const { data: userPrefs, error: userError } = await supabase
+      .from('users')
+      .select('categories')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (userError) {
+      throw userError;
+    }
+
+    const preferredCategories = Array.isArray(userPrefs?.categories)
+      ? userPrefs?.categories
+      : [];
+
+    let enabledCategories =
+      preferredCategories.length > 0 ? preferredCategories : ([] as string[]);
+
+    if (enabledCategories.length === 0) {
+      const { data: categoryRows, error: categoryError } = await supabase
+        .from('user_media_entries')
+        .select('media_items!inner(category)')
+        .eq('user_id', userId);
+
+      if (categoryError) {
+        throw categoryError;
+      }
+
+      const categorySet = new Set<string>();
+      for (const row of (categoryRows ?? []) as { media_items: { category: string | null } }[]) {
+        const category = row.media_items?.category;
+        if (category) {
+          categorySet.add(category);
+        }
+      }
+
+      enabledCategories = Array.from(categorySet);
+    }
+
+    const normalizedCategories = normalizeEnabledCategories(enabledCategories);
+    const slideCategories = normalizedCategories.filter(category =>
+      SLIDE_CATEGORIES.includes(category as (typeof SLIDE_CATEGORIES)[number]),
+    );
+
+    if (normalizedCategories.length === 0) {
+      return NextResponse.json({
+        enabledCategories: normalizedCategories,
+        slides: [],
+        countsByCategory: {},
+      });
+    }
+
+    let entries: ContinueEntry[] = [];
+    if (slideCategories.length > 0) {
+      const { data: currentEntries, error: currentError } = await supabase
+        .from('user_media_entries')
+        .select(
+          `
+          id,
+          media_id,
+          status,
+          progress,
+          score,
+          updated_at,
+          created_at,
+          media_items!inner (
+            category,
+            title,
+            title_english,
+            title_romaji,
+            title_native,
+            original_title,
+            season_year,
+            release_date,
+            cover_image_large,
+            cover_image_medium
+          )
+        `,
+        )
+        .eq('user_id', userId)
+        .eq('status', 'current')
+        .in('media_items.category', slideCategories)
+        .order('updated_at', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (currentError) {
+        throw currentError;
+      }
+
+      entries = Array.isArray(currentEntries) ? (currentEntries as ContinueEntry[]) : [];
+    }
+    const sortedEntries = entries
+      .filter(entry => entry.media_items?.category)
+      .sort(compareEntryDates);
+
+    const latestByCategory = new Map<string, ContinueSlide>();
+    for (const entry of sortedEntries) {
+      const media = entry.media_items;
+      const category = media?.category;
+      if (!category || latestByCategory.has(category)) {
+        continue;
+      }
+
+      latestByCategory.set(category, {
+        category,
+        entry_id: entry.id,
+        media_id: entry.media_id,
+        status: entry.status,
+        progress: entry.progress ?? null,
+        score: entry.score !== null && entry.score !== undefined ? String(entry.score) : null,
+        updated_at: entry.updated_at ?? entry.created_at ?? '',
+        created_at: entry.created_at ?? entry.updated_at ?? '',
+        title: resolveTitle(media),
+        season_year: media?.season_year ?? null,
+        release_date: media?.release_date ?? null,
+        cover_image_large: media?.cover_image_large ?? null,
+        cover_image_medium: media?.cover_image_medium ?? null,
+      });
+    }
+
+    const slides = Array.from(latestByCategory.values()).sort((a, b) => {
+      const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
+      if (updatedDiff !== 0) return updatedDiff;
+      return toTimestamp(b.created_at) - toTimestamp(a.created_at);
+    });
+
+    const { data: countEntries, error: countError } = await supabase
+      .from('user_media_entries')
+      .select('status, media_items!inner(category)')
+      .eq('user_id', userId)
+      .in('media_items.category', normalizedCategories);
+
+    if (countError) {
+      throw countError;
+    }
+
+    const countsByCategory: Record<string, CountBucket> = {};
+    for (const category of normalizedCategories) {
+      countsByCategory[category] = {
+        total: 0,
+        planned: 0,
+        current: 0,
+        completed: 0,
+        dropped: 0,
+      };
+    }
+
+    for (const entry of (countEntries ?? []) as CountEntry[]) {
+      const category = entry.media_items?.category;
+      if (!category || !(category in countsByCategory)) continue;
+
+      if (!entry.status) continue;
+      const status = entry.status;
+      countsByCategory[category].total += 1;
+
+      if (status in countsByCategory[category]) {
+        countsByCategory[category][status as keyof CountBucket] += 1;
+      }
+    }
+
+    return NextResponse.json({
+      enabledCategories: normalizedCategories,
+      slides,
+      countsByCategory,
+    });
+  } catch (error) {
+    console.error('Continue endpoint error:', error);
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+  }
+}

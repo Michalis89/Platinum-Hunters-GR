@@ -141,7 +141,7 @@ export function ProfileStats({ category, mediaStats }: Readonly<ProfileStatsProp
           {primaryStats.map(stat => (
             <div
               key={stat.label}
-              className="hover:border-[var(--hb-primary-strong)]/40 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[0_12px_30px_rgba(3,7,18,0.35)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
+              className="hover:border-[var(--hb-primary-strong)]/40 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[var(--hb-shadow-md)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]"
             >
               {/* Icon */}
               <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
@@ -170,7 +170,7 @@ export function ProfileStats({ category, mediaStats }: Readonly<ProfileStatsProp
                 return (
                   <div
                     key={stat.label}
-                    className="hover:border-[var(--hb-primary-strong)]/40 group w-full rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[0_12px_30px_rgba(3,7,18,0.35)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
+                    className="hover:border-[var(--hb-primary-strong)]/40 group w-full rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[var(--hb-shadow-md)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]"
                   >
                     <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
                       {stat.icon}
@@ -180,17 +180,7 @@ export function ProfileStats({ category, mediaStats }: Readonly<ProfileStatsProp
                     </p>
                     <p className="flex items-center justify-center gap-2 text-sm font-medium text-[var(--hb-headline)]">
                       {stat.label}
-                      {tipText && (
-                        <InfoHint
-                          tip={tipText}
-                          className="ml-0"
-                          icon={
-                            <span className="select-none rounded-full text-xs font-semibold text-[var(--hb-primary-strong)]">
-                              i
-                            </span>
-                          }
-                        />
-                      )}
+                      {tipText && <InfoHint tip={tipText} />}
                     </p>
                     {stat.note && (
                       <p className="mt-1 text-xs text-[var(--hb-muted)]">{stat.note}</p>

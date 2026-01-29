@@ -19,7 +19,7 @@ type AboutPeopleProps = {
 
 const roleLabel: Record<string, string> = {
   admin: 'Founder',
-  author: 'Contributor',
+  author: 'Author',
 };
 
 const roleColors: Record<string, string> = {
@@ -39,8 +39,8 @@ export function AboutPeople({ team }: AboutPeopleProps) {
             Οι άνθρωποι πίσω από τον Χομπίστα
           </h2>
           <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
-            Μια μικρή ομάδα hobbyists που αγαπάει τα games, το anime, τις ταινίες
-            — και θέλει να φτιάξει το καλύτερο εργαλείο για τους υπόλοιπους.
+            Μια μικρή ομάδα hobbyists που αγαπάει τα games, το anime, τις ταινίες — και θέλει να
+            φτιάξει το καλύτερο εργαλείο για τους υπόλοιπους.
           </p>
         </div>
 
@@ -52,10 +52,10 @@ export function AboutPeople({ team }: AboutPeopleProps) {
           />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">
-            {team.map((member) => (
+            {team.map(member => (
               <div
                 key={member.id}
-                className="group flex gap-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition hover:border-[var(--hb-primary-strong)]/40"
+                className="hover:border-[var(--hb-primary-strong)]/40 group flex gap-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition"
               >
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/5">
                   {member.avatar_url ? (
@@ -88,9 +88,7 @@ export function AboutPeople({ team }: AboutPeopleProps) {
                   </div>
 
                   {member.bio && (
-                    <p className="text-sm leading-relaxed text-[var(--hb-muted)]">
-                      {member.bio}
-                    </p>
+                    <p className="text-sm leading-relaxed text-[var(--hb-muted)]">{member.bio}</p>
                   )}
 
                   <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-[var(--hb-muted)]">

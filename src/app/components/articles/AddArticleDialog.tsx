@@ -278,7 +278,7 @@ export default function AddArticleDialog({
           {/* Dialog Container - Centered */}
           <dialog
             ref={dialogRef}
-            className="fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-surface)] p-0 shadow-2xl backdrop:bg-transparent"
+            className="fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-surface)] p-0 shadow-[var(--hb-shadow-md)] backdrop:bg-transparent"
             onClose={onClose}
           >
             <motion.div

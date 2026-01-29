@@ -35,7 +35,7 @@ export function Card({
     <CardContext.Provider value={{ isCollapsed, isCollapsible: collapsible, toggle }}>
       <div
         id={id}
-        className={`rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_12px_30px_rgba(3,7,18,0.45)] ${className}`}
+        className={`rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-[var(--hb-shadow-md)] dark:border-[var(--hb-border)] dark:bg-[var(--hb-panel)] dark:text-[var(--hb-text)] dark:shadow-[var(--hb-shadow-md)] ${className}`}
       >
         {children}
       </div>
@@ -81,19 +81,25 @@ export function CardHeader({ children, className = '' }: Readonly<CardContentPro
       <button
         type="button"
         onClick={toggle}
-        className={`flex w-full items-center justify-between border-b border-[var(--hb-border)] p-4 text-left transition-colors hover:bg-[var(--hb-card)] ${isCollapsed ? 'border-b-0' : ''} ${className}`}
+        className={`dark:bg-[var(--hb-card)]/60 flex w-full items-center justify-between border-b border-slate-200 bg-white/80 p-4 text-left text-slate-900 transition-colors hover:bg-slate-100 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] dark:hover:bg-[var(--hb-card)] ${isCollapsed ? 'border-b-0' : ''} ${className}`}
       >
         <div className="flex-1">{children}</div>
         <ChevronDown
-          className={`ml-2 h-5 w-5 text-[var(--hb-muted)] transition-transform duration-200 ${
+          className={`ml-2 h-5 w-5 text-slate-500 transition-transform duration-200 ${
             isCollapsed ? '' : 'rotate-180'
-          }`}
+          } dark:text-[var(--hb-muted)]`}
         />
       </button>
     );
   }
 
-  return <div className={`border-b border-[var(--hb-border)] p-4 ${className}`}>{children}</div>;
+  return (
+    <div
+      className={`dark:bg-[var(--hb-card)]/60 border-b border-slate-200 bg-white/80 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] ${className}`}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function CardFooter({ children, className = '' }: Readonly<CardContentProps>) {
@@ -102,7 +108,13 @@ export function CardFooter({ children, className = '' }: Readonly<CardContentPro
   const isCollapsible = context?.isCollapsible ?? false;
 
   if (!isCollapsible) {
-    return <div className={`border-t border-[var(--hb-border)] p-4 ${className}`}>{children}</div>;
+    return (
+      <div
+        className={`border-t border-slate-200 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] ${className}`}
+      >
+        {children}
+      </div>
+    );
   }
 
   return (
@@ -112,7 +124,7 @@ export function CardFooter({ children, className = '' }: Readonly<CardContentPro
       }`}
     >
       <div className="overflow-hidden">
-        <div className={`border-t border-[var(--hb-border)] p-4 ${className}`}>{children}</div>
+        <div className={`border-t border-slate-200 p-4 ${className}`}>{children}</div>
       </div>
     </div>
   );
@@ -120,10 +132,16 @@ export function CardFooter({ children, className = '' }: Readonly<CardContentPro
 
 export function CardTitle({ children, className = '' }: Readonly<CardContentProps>) {
   return (
-    <h3 className={`text-lg font-semibold text-[var(--hb-headline)] ${className}`}>{children}</h3>
+    <h3
+      className={`text-lg font-semibold text-slate-900 dark:text-[var(--hb-headline)] ${className}`}
+    >
+      {children}
+    </h3>
   );
 }
 
 export function CardDescription({ children, className = '' }: Readonly<CardContentProps>) {
-  return <p className={`text-sm text-[var(--hb-muted)] ${className}`}>{children}</p>;
+  return (
+    <p className={`text-sm text-slate-600 dark:text-[var(--hb-muted)] ${className}`}>{children}</p>
+  );
 }

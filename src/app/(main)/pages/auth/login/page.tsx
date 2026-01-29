@@ -17,7 +17,7 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 bg-[var(--hb-gradient)] opacity-60" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_25%,rgba(229,9,20,0.22),transparent_32%),radial-gradient(circle_at_85%_10%,rgba(255,77,90,0.18),transparent_28%),radial-gradient(circle_at_65%_85%,rgba(229,9,20,0.12),transparent_32%)]" />
       <PageWrapper className="relative py-6 md:py-16">
-        <div className="bg-[var(--hb-surface)]/95 relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] px-4 py-6 shadow-[0_25px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:px-12 md:py-10">
+        <div className="bg-[var(--hb-surface)]/95 relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] px-4 py-6 shadow-[var(--hb-shadow-md)] backdrop-blur-2xl md:px-12 md:py-10">
           <div className="bg-[var(--hb-primary-strong)]/15 pointer-events-none absolute -left-10 top-10 h-64 w-64 rounded-full blur-3xl" />
           <div className="bg-[var(--hb-primary)]/12 pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full blur-3xl" />
 
@@ -56,7 +56,7 @@ export default function LoginPage() {
               </div>
 
               <div className="grid gap-3 text-sm text-[var(--hb-headline)] md:grid-cols-2">
-                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[0_15px_40px_rgba(0,0,0,0.35)]">
+                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[var(--hb-shadow-md)]">
                   <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--hb-primary)]" />
                   <div>
                     <p className="font-semibold">Η πρόοδος σου σε σε περιμένει</p>
@@ -65,7 +65,7 @@ export default function LoginPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[0_15px_40px_rgba(0,0,0,0.35)]">
+                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[var(--hb-shadow-md)]">
                   <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--hb-accent)]" />
                   <div>
                     <p className="font-semibold">Χωρίς χαμένες λίστες</p>

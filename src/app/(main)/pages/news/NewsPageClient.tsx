@@ -41,7 +41,7 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
     <MotionCard
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="hover:border-[var(--hb-primary-strong)]/50 group relative overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-[0_16px_40px_rgba(0,0,0,0.25)] transition hover:shadow-[0_18px_48px_rgba(0,0,0,0.35)]"
+      className="hover:border-[var(--hb-primary-strong)]/50 group relative overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-[var(--hb-shadow-md)] transition hover:shadow-[var(--hb-shadow-md-hover)]"
     >
       {/* Cover Image */}
       <Link href={`/pages/news/${normalizedSlug}`} className="block">
@@ -68,7 +68,7 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
           </div>
           {/* Topic Badge */}
           <div className="absolute right-3 top-3">
-            <span className="rounded-full bg-sky-500 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+            <span className="rounded-full bg-sky-500 px-3 py-1 text-[11px] font-semibold text-white shadow-[var(--hb-shadow-md)]">
               {TOPIC_LABELS[article.topic]}
             </span>
           </div>
@@ -237,7 +237,7 @@ function NewsPageContent() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative mb-10 overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-8 shadow-2xl backdrop-blur-xl md:px-10"
+        className="relative mb-10 overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-8 shadow-xl backdrop-blur-xl md:px-10"
       >
         <PageHeader
           eyebrow="Αίθουσα Τύπου"
@@ -259,7 +259,7 @@ function NewsPageContent() {
             </span>
           }
           aside={
-            <div className="bg-[var(--hb-card)]/40 rounded-2xl border border-[var(--hb-border)] p-3 shadow-[0_12px_28px_rgba(0,0,0,0.25)]">
+            <div className="bg-[var(--hb-card)]/40 rounded-2xl border border-[var(--hb-border)] p-3 shadow-[var(--hb-shadow-md)]">
               <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
                 <span>Κατηγορίες</span>
                 <span className="text-[10px]">

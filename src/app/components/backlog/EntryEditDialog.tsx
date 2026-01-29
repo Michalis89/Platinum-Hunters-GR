@@ -87,10 +87,8 @@ export default function EntryEditDialog({
   const clampProgress = category !== 'games';
   const setProgress = (next: number) => {
     const nextValue = Math.max(0, next);
-    const nextClamped =
-      clampProgress && total ? Math.min(nextValue, total) : nextValue;
-    const shouldComplete =
-      clampProgress && total !== undefined && nextClamped >= total;
+    const nextClamped = clampProgress && total ? Math.min(nextValue, total) : nextValue;
+    const shouldComplete = clampProgress && total !== undefined && nextClamped >= total;
 
     setEditState(prev => ({
       ...prev,
@@ -109,7 +107,10 @@ export default function EntryEditDialog({
 
     const numericProgress = Number.parseInt(value, 10);
     const shouldComplete =
-      clampProgress && total !== undefined && Number.isFinite(numericProgress) && numericProgress >= total;
+      clampProgress &&
+      total !== undefined &&
+      Number.isFinite(numericProgress) &&
+      numericProgress >= total;
 
     setEditState(prev => ({
       ...prev,
@@ -151,7 +152,7 @@ export default function EntryEditDialog({
         }
       }}
     >
-      <div className="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
+      <div className="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
         <div className="overflow-y-auto p-6">
           <div className="flex flex-col gap-6 md:flex-row">
             <div className="relative hidden h-52 w-36 overflow-hidden rounded-2xl bg-[var(--hb-card)] sm:block">
@@ -229,7 +230,7 @@ export default function EntryEditDialog({
                 <select
                   value={editState.status}
                   onChange={event => handleStatusChange(event.target.value as MediaStatus)}
-                  className="w-full appearance-none rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-3 pr-10 text-sm text-[var(--hb-text)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
+                  className="h-10 w-full appearance-none rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 pr-10 text-sm text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
                 >
                   <option value="planned">{config.plannedLabel}</option>
                   {category !== 'movies' && <option value="current">{config.currentLabel}</option>}

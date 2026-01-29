@@ -17,7 +17,7 @@ export default function RegisterPage() {
       <div className="pointer-events-none absolute inset-0 bg-[var(--hb-gradient)] opacity-60" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(229,9,20,0.18),transparent_32%),radial-gradient(circle_at_82%_12%,rgba(255,77,90,0.16),transparent_28%),radial-gradient(circle_at_70%_80%,rgba(229,9,20,0.12),transparent_32%)]" />
       <PageWrapper className="relative py-6 md:py-16">
-        <div className="bg-[var(--hb-surface)]/95 relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] px-4 py-6 shadow-[0_25px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:px-12 md:py-10">
+        <div className="bg-[var(--hb-surface)]/95 relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] px-4 py-6 shadow-[var(--hb-shadow-md)] backdrop-blur-2xl md:px-12 md:py-10">
           <div className="bg-[var(--hb-primary-strong)]/12 pointer-events-none absolute -left-12 top-4 h-72 w-72 rounded-full blur-3xl" />
           <div className="bg-[var(--hb-primary)]/12 pointer-events-none absolute bottom-2 right-0 h-80 w-80 rounded-full blur-3xl" />
 
@@ -56,7 +56,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="grid gap-3 text-sm text-[var(--hb-headline)] md:grid-cols-2">
-                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[0_15px_40px_rgba(0,0,0,0.35)]">
+                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[var(--hb-shadow-md)]">
                   <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-sky-500/20 text-sky-400">
                     <ListChecks className="h-3.5 w-3.5" />
                   </div>
@@ -67,7 +67,7 @@ export default function RegisterPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[0_15px_40px_rgba(0,0,0,0.35)]">
+                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[var(--hb-shadow-md)]">
                   <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
                     <Trophy className="h-3.5 w-3.5" />
                   </div>
@@ -78,7 +78,7 @@ export default function RegisterPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[0_15px_40px_rgba(0,0,0,0.35)] md:col-span-2">
+                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[var(--hb-shadow-md)] md:col-span-2">
                   <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-rose-500/20 text-rose-400">
                     <Heart className="h-3.5 w-3.5" />
                   </div>

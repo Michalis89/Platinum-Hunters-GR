@@ -124,7 +124,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 # Required - Site
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+SITE_URL =http://localhost:3000
 
 # Optional - External APIs
 RAWG_API_KEY=your-rawg-key
@@ -252,7 +252,7 @@ src/
 | `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase project URL   |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase anonymous key |
 | `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Service role key       |
-| `NEXT_PUBLIC_SITE_URL`          | Yes      | Production domain      |
+| `SITE_URL `                     | Yes      | Production domain      |
 | `RAWG_API_KEY`                  | No       | Game metadata          |
 | `MAL_CLIENT_ID`                 | No       | Anime/manga metadata   |
 | `GOOGLE_BOOKS_API_KEY`          | No       | Book metadata          |

@@ -29,11 +29,11 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[0_12px_30px_rgba(3,7,18,0.35)]">
+        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
           <div className="grid gap-6 sm:grid-cols-3">
             {/* Member since */}
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10">
+              <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <Calendar className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
@@ -47,7 +47,7 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
             {/* Last login */}
             {user.last_login && (
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--hb-primary-strong)]/10">
+                <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                   <Clock className="h-5 w-5 text-[var(--hb-primary-strong)]" />
                 </div>
                 <div>

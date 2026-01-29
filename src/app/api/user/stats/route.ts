@@ -7,6 +7,7 @@ type CategoryStats = {
   total: number;
   in_progress: number;
   completed: number;
+  dropped: number;
   hours: number;
 };
 
@@ -82,24 +83,26 @@ export async function GET() {
 
     const statsEntries = Array.isArray(entries) ? (entries as StatsEntry[]) : [];
 
-    const gameStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, hours: 0 };
-    const animeStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, hours: 0 };
-    const mangaStats: CategoryStats & { chapters: number } = {
-      total: 0,
-      in_progress: 0,
-      completed: 0,
-      hours: 0,
-      chapters: 0,
-    };
-    const movieStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, hours: 0 };
-    const tvStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, hours: 0 };
-    const bookStats: CategoryStats & { pages: number } = {
-      total: 0,
-      in_progress: 0,
-      completed: 0,
-      hours: 0,
-      pages: 0,
-    };
+  const gameStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
+  const animeStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
+  const mangaStats: CategoryStats & { chapters: number } = {
+    total: 0,
+    in_progress: 0,
+    completed: 0,
+    dropped: 0,
+    hours: 0,
+    chapters: 0,
+  };
+    const movieStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
+    const tvStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
+  const bookStats: CategoryStats & { pages: number } = {
+    total: 0,
+    in_progress: 0,
+    completed: 0,
+    dropped: 0,
+    hours: 0,
+    pages: 0,
+  };
 
     for (const entry of statsEntries) {
       const media = entry.media_items;
@@ -111,11 +114,13 @@ export async function GET() {
       const isInProgress =
         normalizedCategory === 'movies' ? status === 'planned' : status === 'current';
 
-      switch (normalizedCategory) {
+       const isDropped = status === 'dropped';
+       switch (normalizedCategory) {
         case 'games': {
           gameStats.total++;
           if (isInProgress) gameStats.in_progress++;
           if (isCompleted) gameStats.completed++;
+          if (isDropped) gameStats.dropped++;
           gameStats.hours += entry.progress ?? 0;
           break;
         }
@@ -123,6 +128,7 @@ export async function GET() {
           animeStats.total++;
           if (isInProgress) animeStats.in_progress++;
           if (isCompleted) animeStats.completed++;
+          if (isDropped) animeStats.dropped++;
           const duration = media.duration ?? ANIME_EPISODE_MINUTES;
           const totalEpisodes = media.number_of_episodes ?? media.episodes ?? 0;
           if (isCompleted) {
@@ -137,6 +143,7 @@ export async function GET() {
 
           if (isInProgress) mangaStats.in_progress++;
           if (isCompleted) mangaStats.completed++;
+          if (isDropped) mangaStats.dropped++;
 
           const volumesRead = isCompleted ? (media.volumes ?? 0) : (entry.progress ?? 0);
 
@@ -159,12 +166,14 @@ export async function GET() {
             movieStats.completed++;
             movieStats.hours += (media.runtime ?? 120) / 60;
           }
+          if (isDropped) movieStats.dropped++;
           break;
         }
         case 'tv': {
           tvStats.total++;
           if (isInProgress) tvStats.in_progress++;
           if (isCompleted) tvStats.completed++;
+          if (isDropped) tvStats.dropped++;
           const totalEpisodes = media.number_of_episodes ?? media.episodes ?? 0;
           const episodeDuration = media.runtime ?? TV_EPISODE_MINUTES;
           if (isCompleted) {
@@ -179,6 +188,7 @@ export async function GET() {
 
           if (isInProgress) bookStats.in_progress++;
           if (isCompleted) bookStats.completed++;
+          if (isDropped) bookStats.dropped++;
 
           const pagesRead = isCompleted ? (media.page_count ?? 0) : (entry.progress ?? 0);
 

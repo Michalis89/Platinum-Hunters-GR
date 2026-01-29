@@ -37,7 +37,7 @@ const variantClasses: Record<Variant, string> = {
   outline:
     'border border-[var(--hb-border)] text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]',
   ghost: 'text-[var(--hb-text)] hover:text-[var(--hb-headline)]',
-  danger: 'bg-red-600 text-white hover:bg-red-500',
+  danger: 'bg-[var(--hb-accent)] text-[var(--hb-headline)] hover:brightness-110',
   success: 'bg-emerald-500 text-slate-950 hover:bg-emerald-400',
   warning: 'bg-amber-400 text-slate-950 hover:bg-amber-300',
 };

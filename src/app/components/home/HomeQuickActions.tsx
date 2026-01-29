@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Newspaper, Plus, ArrowRight, Star, Cog } from 'lucide-react';
+import { Plus, ArrowRight, Star, Sparkles } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { selectUser } from '@/store/slices/authSlice';
@@ -15,22 +15,23 @@ type QuickAction = {
 
 const actions: QuickAction[] = [
   {
-    title: 'Το Προφίλ μου',
-    description: 'Στατιστικά και πρόοδος',
-    href: '/pages/profile',
-    icon: <Cog className="h-5 w-5" />,
+    title: 'Πρόσθεσε στο backlog',
+    description: 'Οργάνωσε έναν νέο τίτλο στη λίστα σου',
+    href: '/pages/backlog',
+    icon: <Plus className="h-5 w-5" />,
+    primary: true,
   },
   {
-    title: 'Νέα & Άρθρα',
-    description: 'Τελευταία νέα και updates',
-    href: '/pages/news',
-    icon: <Newspaper className="h-5 w-5" />,
-  },
-  {
-    title: 'Reviews',
-    description: 'Τελευταία reviews',
+    title: 'Κριτικές της κοινότητας',
+    description: 'Δες τι προτείνει η κοινότητα',
     href: '/pages/reviews',
     icon: <Star className="h-5 w-5" />,
+  },
+  {
+    title: 'Ανακάλυψε κάτι νέο',
+    description: 'Βρες νέους τίτλους και ιδέες για το επόμενο hobby σου',
+    href: '/pages/news',
+    icon: <Sparkles className="h-5 w-5" />,
   },
 ];
 
@@ -47,14 +48,7 @@ export function HomeQuickActions() {
     <section className="px-4 py-8 md:px-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[var(--hb-headline)]">Γρήγορη πρόσβαση</h2>
-          <Link
-            href="/pages/backlog"
-            className="group flex items-center gap-1 text-sm text-[var(--hb-primary-strong)] transition hover:text-[var(--hb-accent)]"
-          >
-            <Plus className="h-4 w-4" />
-            Πρόσθεσε στο backlog
-          </Link>
+          <h2 className="text-lg font-semibold text-[var(--hb-headline)]">Σήμερα θέλεις να…</h2>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -62,10 +56,10 @@ export function HomeQuickActions() {
             <Link
               key={action.title}
               href={action.href}
-              className={`group flex items-start gap-4 rounded-xl border p-4 transition hover:-translate-y-0.5 ${
+              className={`group flex items-start gap-4 rounded-2xl border bg-[var(--hb-panel)] p-5 transition ${
                 action.primary
-                  ? 'border-[var(--hb-primary-strong)]/30 bg-[var(--hb-primary-strong)]/5 hover:border-[var(--hb-primary-strong)]/50'
-                  : 'hover:border-[var(--hb-primary-strong)]/40 border-[var(--hb-border)] bg-[var(--hb-panel)]'
+                  ? 'border-[var(--hb-primary-strong)]/30 bg-[var(--hb-primary-strong)]/10 hover:border-[var(--hb-primary-strong)]/60'
+                  : 'hover:border-[var(--hb-primary-strong)]/40 border-[var(--hb-border)]'
               }`}
             >
               <div

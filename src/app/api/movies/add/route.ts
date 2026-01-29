@@ -123,6 +123,7 @@ export async function POST(req: Request) {
         typedMediaRow?.title_native ||
         'Untitled';
 
+      const updatedAt = new Date().toISOString();
       const { data: entry, error: entryError } = await supabase
         .from('user_media_entries')
         .upsert(
@@ -134,6 +135,7 @@ export async function POST(req: Request) {
             progress: body.progress ?? null,
             score: body.score ?? null,
             notes: body.notes ?? null,
+            updated_at: updatedAt,
           } as never,
           { onConflict: 'user_id,media_id' },
         )
@@ -211,6 +213,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Failed to resolve media ID' }, { status: 500 });
     }
 
+    const updatedAt = new Date().toISOString();
     const { data: entry, error: entryError } = await supabase
       .from('user_media_entries')
       .upsert(
@@ -222,6 +225,7 @@ export async function POST(req: Request) {
           progress: body.progress ?? null,
           score: body.score ?? null,
           notes: body.notes ?? null,
+          updated_at: updatedAt,
         } as never,
         { onConflict: 'user_id,media_id' },
       )

@@ -28,7 +28,7 @@ export default function StatusFilterBar({
     }`;
 
   return (
-    <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 backdrop-blur">
+    <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)] backdrop-blur">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex-1">
           <SearchBar

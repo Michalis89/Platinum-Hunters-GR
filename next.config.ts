@@ -50,6 +50,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/pages/news/jujutsu-kaisen-anime-manga-1010',
+        destination: '/pages/reviews/jujutsu-kaisen-anime-manga-1010',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withBundleAnalyzer(nextConfig);

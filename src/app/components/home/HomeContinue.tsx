@@ -78,9 +78,12 @@ export function HomeContinue() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-5 flex items-center gap-2">
           <Clock className="h-5 w-5 text-[var(--hb-primary-strong)]" />
-          <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
-            Συνέχισε από εκεί που σταμάτησες
-          </h2>
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
+              Άλλα που έχεις ανοιχτά
+            </h2>
+            <p className="text-xs text-[var(--hb-muted)]">Μικρά reminders για να αποφασίσεις</p>
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -9,17 +9,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export function Input({ label, error, className = '', ...props }: Readonly<InputProps>) {
   const baseClasses =
-    'w-full rounded-lg border p-2 text-white bg-gray-900 placeholder:text-gray-500 placeholder:opacity-80 focus:placeholder-transparent transition focus:outline-none focus:ring-2 focus:ring-blue-500';
-  const errorClasses = error ? 'border-red-500' : 'border-gray-700';
+    'w-full rounded-lg border bg-[var(--hb-panel)] p-3 text-[var(--hb-text)] dark:text-[var(--hb-text)] placeholder:text-[var(--hb-muted)] placeholder:opacity-80 focus:placeholder-transparent transition focus:outline-none focus:ring-2 focus:ring-[var(--hb-primary)] focus:border-[var(--hb-primary-strong)] dark:focus:ring-[var(--hb-primary)] dark:focus:border-[var(--hb-primary-strong)]';
+  const errorClasses = error ? 'border-red-500' : 'border-[var(--hb-border)]';
 
   return (
     <div className="space-y-1">
-      {label && <label className="text-sm font-medium text-white">{label}</label>}
-      <input
-        {...props}
-        className={cn(baseClasses, errorClasses, className)}
-        suppressHydrationWarning
-      />
+      {label && <label className="text-sm font-medium text-[var(--hb-headline)]">{label}</label>}
+      <input {...props} className={cn(baseClasses, errorClasses, className)} />
     </div>
   );
 }

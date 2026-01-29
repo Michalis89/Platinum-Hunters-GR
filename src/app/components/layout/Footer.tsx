@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Gamepad2, Heart } from 'lucide-react';
+import { Gamepad2 } from 'lucide-react';
 import { PageContainer } from './PageContainer';
+import VersionBadge from '@/app/components/ui/VersionBadge';
 
 const NAV_LINKS = [
   { label: 'Αρχική', href: '/' },
@@ -26,7 +27,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
           <div className="space-y-4">
             <Link href="/" className="group inline-flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-lg transition group-hover:shadow-[0_8px_25px_rgba(229,9,20,0.4)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-lg transition group-hover:shadow-[var(--hb-shadow-md-hover)]">
                 <Gamepad2 className="h-5 w-5" />
               </div>
               <span className="text-xl font-bold text-[var(--hb-headline)]">Hobbistas</span>
@@ -35,8 +36,8 @@ export function Footer() {
               Ο χώρος σου για gaming, anime, manga, ταινίες, σειρές και βιβλία. Όλα οργανωμένα,
               χωρίς θόρυβο.
             </p>
-            <p className="flex items-center gap-1.5 text-xs text-[var(--hb-muted)]">
-              Με <Heart className="h-3 w-3 text-[var(--hb-primary)]" /> από την Ελλάδα
+            <p className="text-xs font-semibold text-[var(--hb-muted)]">
+              Personal Hobby Hub<VersionBadge />
             </p>
           </div>
 

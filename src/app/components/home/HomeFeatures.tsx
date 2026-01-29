@@ -62,7 +62,7 @@ export function HomeFeatures() {
           {features.map(feature => (
             <div
               key={feature.title}
-              className="hover:border-[var(--hb-primary-strong)]/50 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]"
+              className="hover:border-[var(--hb-primary-strong)]/50 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]"
             >
               <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
                 {feature.icon}

@@ -108,7 +108,7 @@ export function HobbiesCategoryCard({ category }: HobbiesCategoryCardProps) {
   const IconComponent = ICON_MAP[category.icon] || Gamepad2;
 
   return (
-    <div className="hover:border-[var(--hb-primary-strong)]/50 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(229,9,20,0.1)]">
+    <div className="hover:border-[var(--hb-primary-strong)]/50 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]">
       <div className="mb-4 flex items-start justify-between">
         <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 flex h-12 w-12 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
           <IconComponent className="h-6 w-6" />

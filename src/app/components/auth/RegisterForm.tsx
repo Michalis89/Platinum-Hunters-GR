@@ -362,11 +362,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const progress = (currentStep / 3) * 100;
 
   return (
-    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_22px_70px_rgba(0,0,0,0.65)] backdrop-blur">
+    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
       <CardHeader className="border-[var(--hb-border)]">
         <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
           <span className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[0_10px_35px_rgba(229,9,20,0.35)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[var(--hb-shadow-md)]">
               <UserPlus className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
@@ -985,7 +985,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             variant="primary"
             onClick={handleNext}
             disabled={loading}
-            className="flex flex-1 items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[0_14px_40px_rgba(229,9,20,0.35)] transition hover:shadow-[0_14px_48px_rgba(229,9,20,0.5)]"
+            className="shadow-[var(--hb-shadow-md-hover)]0_12px_30px_rgba(3,7,18,0.20)] flex flex-1 items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white transition hover:shadow-[var(--hb-shadow-md)]"
           >
             {loading ? (
               'Εγγραφή...'

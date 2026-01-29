@@ -210,11 +210,11 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[0_22px_70px_rgba(0,0,0,0.65)] backdrop-blur">
+    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
       <CardHeader className="border-[var(--hb-border)]">
         <CardTitle className="flex items-center justify-between text-xl text-[var(--hb-headline)]">
           <span className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[0_10px_35px_rgba(229,9,20,0.35)]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[var(--hb-shadow-md)]">
               <LogIn className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
@@ -307,7 +307,7 @@ export default function LoginForm() {
             type="submit"
             variant="primary"
             icon={!loading ? <LogIn className="h-5 w-5" /> : undefined}
-            className="flex w-full items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[0_14px_40px_rgba(229,9,20,0.35)] transition hover:shadow-[0_14px_48px_rgba(229,9,20,0.5)]"
+            className="flex w-full items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[var(--hb-shadow-md)] transition hover:shadow-[var(--hb-shadow-md-hover)]"
             disabled={loading}
           >
             {loading ? 'Σύνδεση...' : 'Σύνδεση'}
@@ -317,7 +317,11 @@ export default function LoginForm() {
           <div className="pt-1 text-center text-sm text-[var(--hb-muted)]">
             Δεν έχεις λογαριασμό;{' '}
             <Link
-              href={redirectParam ? `/pages/auth/register?redirect=${encodeURIComponent(redirectParam)}` : '/pages/auth/register'}
+              href={
+                redirectParam
+                  ? `/pages/auth/register?redirect=${encodeURIComponent(redirectParam)}`
+                  : '/pages/auth/register'
+              }
               className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
             >
               Δημιούργησε έναν
@@ -326,7 +330,7 @@ export default function LoginForm() {
         </form>
 
         {showResetPanel && (
-          <div className="bg-[var(--hb-card)]/80 space-y-3 rounded-xl border border-[var(--hb-border)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.45)]">
+          <div className="bg-[var(--hb-card)]/80 space-y-3 rounded-xl border border-[var(--hb-border)] p-4 shadow-[var(--hb-shadow-md)]">
             <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
               <Mail className="h-4 w-4 text-[var(--hb-primary)]" />
               Ανάκτηση κωδικού
@@ -364,7 +368,7 @@ export default function LoginForm() {
                 variant="primary"
                 onClick={handleSendResetEmail}
                 disabled={resetLoading}
-                className="bg-[var(--hb-primary-strong)] text-white shadow-[0_10px_32px_rgba(229,9,20,0.35)]"
+                className="bg-[var(--hb-primary-strong)] text-white shadow-[var(--hb-shadow-md)]"
               >
                 {resetLoading ? 'Αποστολή...' : 'Στείλε email ανάκτησης'}
               </Button>
