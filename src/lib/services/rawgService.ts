@@ -55,7 +55,7 @@ export type GamePayload = {
   runtime: number | null;
 };
 
-const RAWG_API_KEY = process.env.RAWG_API_KEY || process.env.NEXT_PUBLIC_RAWG_API_KEY;
+const RAWG_API_KEY = process.env.RAWG_API_KEY || '';
 
 export async function searchRawgGames(query: string, limit = 12): Promise<RawgGame[]> {
   if (!RAWG_API_KEY) {

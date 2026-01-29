@@ -30,7 +30,7 @@ type MediaPayload = {
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
 
 const getTmdbApiKey = () => {
-  return process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY || '';
+  return process.env.TMDB_API_KEY || '';
 };
 
 const fetchDetails = async (category: Category, tmdbId: number) => {
@@ -59,9 +59,9 @@ const fetchDetails = async (category: Category, tmdbId: number) => {
 
   const runtime =
     category === 'movies'
-      ? data.runtime ?? null
+      ? (data.runtime ?? null)
       : Array.isArray(data.episode_run_time) && data.episode_run_time.length > 0
-        ? data.episode_run_time[0] ?? null
+        ? (data.episode_run_time[0] ?? null)
         : null;
 
   return {

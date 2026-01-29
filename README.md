@@ -57,12 +57,12 @@ Hobbistas is a comprehensive platform for Greek hobby enthusiasts to track and m
 
 ### External APIs
 
-| API              | Purpose                    |
-| ---------------- | -------------------------- |
-| **RAWG**         | Game metadata and search   |
-| **MyAnimeList**  | Anime & manga database     |
-| **TMDB**         | Movies and TV information  |
-| **Google Books** | Book search and metadata   |
+| API              | Purpose                   |
+| ---------------- | ------------------------- |
+| **RAWG**         | Game metadata and search  |
+| **MyAnimeList**  | Anime & manga database    |
+| **TMDB**         | Movies and TV information |
+| **Google Books** | Book search and metadata  |
 
 ---
 
@@ -84,6 +84,7 @@ The application uses a unified media system:
 ### Media Categories
 
 The `media_items` table supports these categories:
+
 - `games` - Video games (via RAWG API)
 - `anime` - Anime series (via MAL API)
 - `manga` - Manga (via MAL API)
@@ -127,7 +128,6 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # Optional - External APIs
 RAWG_API_KEY=your-rawg-key
-TMDB_ACCESS_TOKEN=your-tmdb-token
 MAL_CLIENT_ID=your-mal-client-id
 MAL_CLIENT_SECRET=your-mal-secret
 GOOGLE_BOOKS_API_KEY=your-google-books-key
@@ -153,42 +153,46 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 ## API Endpoints
 
 ### Authentication
-| Method | Endpoint                | Description         |
-| ------ | ----------------------- | ------------------- |
-| POST   | `/api/auth/login`       | User login          |
-| POST   | `/api/auth/register`    | User registration   |
-| POST   | `/api/auth/logout`      | User logout         |
-| GET    | `/api/auth/session`     | Get current session |
-| DELETE | `/api/auth/delete-account` | Delete account   |
+
+| Method | Endpoint                   | Description         |
+| ------ | -------------------------- | ------------------- |
+| POST   | `/api/auth/login`          | User login          |
+| POST   | `/api/auth/register`       | User registration   |
+| POST   | `/api/auth/logout`         | User logout         |
+| GET    | `/api/auth/session`        | Get current session |
+| DELETE | `/api/auth/delete-account` | Delete account      |
 
 ### Media Library (per category: anime, manga, games, movies, books)
-| Method | Endpoint                    | Description                  |
-| ------ | --------------------------- | ---------------------------- |
-| GET    | `/api/{category}/library`   | Get user's library           |
-| PATCH  | `/api/{category}/library`   | Update library entry         |
-| DELETE | `/api/{category}/library`   | Remove from library          |
-| GET    | `/api/{category}/search`    | Search media (local + API)   |
-| POST   | `/api/{category}/add`       | Add item to library          |
+
+| Method | Endpoint                  | Description                |
+| ------ | ------------------------- | -------------------------- |
+| GET    | `/api/{category}/library` | Get user's library         |
+| PATCH  | `/api/{category}/library` | Update library entry       |
+| DELETE | `/api/{category}/library` | Remove from library        |
+| GET    | `/api/{category}/search`  | Search media (local + API) |
+| POST   | `/api/{category}/add`     | Add item to library        |
 
 ### Articles
-| Method | Endpoint                        | Description           |
-| ------ | ------------------------------- | --------------------- |
-| GET    | `/api/articles`                 | List articles         |
-| POST   | `/api/articles`                 | Create article        |
-| GET    | `/api/articles/[id]`            | Get article           |
-| PATCH  | `/api/articles/[id]`            | Update article        |
-| DELETE | `/api/articles/[id]`            | Delete article        |
-| POST   | `/api/articles/[id]/like`       | Like/unlike article   |
-| GET    | `/api/articles/[id]/comments`   | Get comments          |
-| POST   | `/api/articles/[id]/comments`   | Add comment           |
+
+| Method | Endpoint                      | Description         |
+| ------ | ----------------------------- | ------------------- |
+| GET    | `/api/articles`               | List articles       |
+| POST   | `/api/articles`               | Create article      |
+| GET    | `/api/articles/[id]`          | Get article         |
+| PATCH  | `/api/articles/[id]`          | Update article      |
+| DELETE | `/api/articles/[id]`          | Delete article      |
+| POST   | `/api/articles/[id]/like`     | Like/unlike article |
+| GET    | `/api/articles/[id]/comments` | Get comments        |
+| POST   | `/api/articles/[id]/comments` | Add comment         |
 
 ### Other
-| Method | Endpoint                 | Description              |
-| ------ | ------------------------ | ------------------------ |
-| GET    | `/api/activity`          | Get activity feed        |
-| POST   | `/api/activity/heartbeat`| Update user presence     |
-| GET    | `/api/analytics/summary` | Admin analytics          |
-| GET    | `/api/user/stats`        | User statistics          |
+
+| Method | Endpoint                  | Description          |
+| ------ | ------------------------- | -------------------- |
+| GET    | `/api/activity`           | Get activity feed    |
+| POST   | `/api/activity/heartbeat` | Update user presence |
+| GET    | `/api/analytics/summary`  | Admin analytics      |
+| GET    | `/api/user/stats`         | User statistics      |
 
 ---
 
@@ -243,16 +247,15 @@ src/
 
 #### Environment Variables on Vercel
 
-| Variable                        | Required | Notes                     |
-| ------------------------------- | -------- | ------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase project URL      |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase anonymous key    |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Service role key          |
-| `NEXT_PUBLIC_SITE_URL`          | Yes      | Production domain         |
-| `RAWG_API_KEY`                  | No       | Game metadata             |
-| `TMDB_ACCESS_TOKEN`             | No       | Movie/TV metadata         |
-| `MAL_CLIENT_ID`                 | No       | Anime/manga metadata      |
-| `GOOGLE_BOOKS_API_KEY`          | No       | Book metadata             |
+| Variable                        | Required | Notes                  |
+| ------------------------------- | -------- | ---------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase project URL   |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Service role key       |
+| `NEXT_PUBLIC_SITE_URL`          | Yes      | Production domain      |
+| `RAWG_API_KEY`                  | No       | Game metadata          |
+| `MAL_CLIENT_ID`                 | No       | Anime/manga metadata   |
+| `GOOGLE_BOOKS_API_KEY`          | No       | Book metadata          |
 
 ### Database Setup
 

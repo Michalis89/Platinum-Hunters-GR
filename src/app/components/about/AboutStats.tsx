@@ -71,6 +71,8 @@ export function AboutStats({
     },
   ];
 
+  console.log(stats);
+  console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
   // Filter out stats with 0 or '—' value to only show categories with content
   const activeStats = stats.filter(stat => stat.value !== 0 && stat.value !== '—');
 

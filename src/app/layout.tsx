@@ -1,12 +1,14 @@
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
-import ScrollToTop from '@/utils/ScrollToTop';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import StructuredData from '@/utils/seo/StructuredData';
 import AuthInit from './components/AuthInit';
 
-import { organizationStructuredData, websiteStructuredData } from '@/utils/seo/metadata/structuredData';
+import {
+  organizationStructuredData,
+  websiteStructuredData,
+} from '@/utils/seo/metadata/structuredData';
 import Providers from '@/store/Providers';
 import HeartbeatPing from './components/HeartbeatPing';
 export { metadata } from '@/utils/seo/metadata/metadata';
@@ -37,7 +39,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Providers>
           <AuthInit />
           <HeartbeatPing />
-          <ScrollToTop />
           {children}
           <Analytics />
           <SpeedInsights />
