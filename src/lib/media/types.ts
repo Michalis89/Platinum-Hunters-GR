@@ -1,0 +1,51 @@
+﻿import type { MediaCategory, MediaStatus } from '@/app/components/backlog/types';
+
+export type MediaItem = {
+  id: number;
+  category: MediaCategory;
+  slug?: string | null;
+  title?: string | null;
+  original_title?: string | null;
+  title_english?: string | null;
+  title_romaji?: string | null;
+  title_native?: string | null;
+  description?: string | null;
+  format?: string | null;
+  season_year?: number | null;
+  start_date?: string | null;
+  release_date?: string | null;
+  first_air_date?: string | null;
+  cover_image_large?: string | null;
+  cover_image_medium?: string | null;
+  banner_image?: string | null;
+  genres?: string[] | null;
+  episodes?: number | null;
+  chapters?: number | null;
+  volumes?: number | null;
+  runtime?: number | null;
+  number_of_episodes?: number | null;
+  page_count?: number | null;
+  rating?: number | null;
+  popularity?: number | null;
+  mal_id?: number | null;
+  tmdb_id?: number | null;
+  google_books_id?: string | null;
+  rawg_id?: number | null;
+  platforms?: string[] | null;
+  developer?: string | null;
+  publisher?: string | null;
+  metacritic?: number | null;
+  esrb_rating?: string | null;
+};
+
+export type MediaEntryState = {
+  entryId: number;
+  mediaId: number;
+  status: MediaStatus;
+  rating: number | null;
+  favorite: boolean | null;
+  progress: number | null;
+  notes: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+};

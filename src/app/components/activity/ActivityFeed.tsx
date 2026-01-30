@@ -19,6 +19,7 @@ import {
   Star,
 } from 'lucide-react';
 import { normalizeSlug } from '@/utils/slugify';
+import { getActivityHref } from './activityHelpers';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
@@ -414,10 +415,14 @@ function FeedText({ item }: { item: ActivityItem }) {
       );
     }
 
-    // User has the category, navigate normally
+    const href = getActivityHref(item);
+    if (!href) {
+      return <p className="text-[var(--hb-headline)]">{text}</p>;
+    }
+
     return (
       <Link
-        href={`/pages/backlog?category=${payload.category}`}
+        href={href}
         className="text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
       >
         {text}
