@@ -4,6 +4,7 @@ import { Edit, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Button from '@/app/components/ui/Button';
 import type { User } from '@/types/user';
+import { hasAnyRole } from '@/lib/roles';
 
 type ProfileHeaderProps = {
   user: User;
@@ -13,8 +14,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
   const router = useRouter();
   const avatarUrl = (user.avatar_url || '').trim();
   const displayName = user.display_name || user.username;
-  const isAdmin = user.role === 'admin';
-  const isAuthor = user.role === 'author';
+  const showShield = hasAnyRole(user, ['admin', 'owner', 'moderator', 'author', 'reviewer']);
 
   return (
     <section className="relative px-4 pb-12 pt-8 md:px-6 md:pb-16 md:pt-12">
@@ -56,7 +56,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
           <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             {/* Role badge */}
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
-              {(isAdmin || isAuthor) && (
+              {showShield && (
                 <ShieldCheck className="h-3.5 w-3.5 text-[var(--hb-primary-strong)]" />
               )}
               {user.role}

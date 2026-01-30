@@ -8,6 +8,7 @@ import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
+import { hasAnyRole } from '@/lib/roles';
 
 // GET - Fetch articles with filtering
 export async function GET(req: Request) {
@@ -58,11 +59,11 @@ export async function POST(req: Request) {
     // Check if user has permission (admin or author)
     const { data: userData } = await supabase
       .from('users')
-      .select('role, username, display_name, avatar_url')
+      .select('role, roles, username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
 
-    if (!userData || !['admin', 'author'].includes(userData.role as string)) {
+    if (!userData || !hasAnyRole(userData, ['admin', 'owner', 'author', 'reviewer'])) {
       return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
     }
 

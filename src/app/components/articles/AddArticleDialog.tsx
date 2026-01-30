@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Eye, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { useSelector } from 'react-redux';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import Button from '../ui/Button';
@@ -13,6 +14,8 @@ import type { ArticleCategory, ArticleTopic, ArticleStatus } from '@/types/datab
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import dynamic from 'next/dynamic';
+import { selectUser } from '@/store/slices/authSlice';
+import { hasAnyRole } from '@/lib/roles';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
   ssr: false,
@@ -24,7 +27,7 @@ interface AddArticleDialogProps {
   onSuccess?: () => void;
 }
 
-type ContentType = 'article';
+type ContentType = 'article' | 'review';
 
 interface CategoryConfig {
   label: string;
@@ -33,6 +36,17 @@ interface CategoryConfig {
 
 const CONTENT_TYPES: { value: ContentType; label: string }[] = [
   { value: 'article', label: 'Άρθρο' },
+  { value: 'review', label: 'Κριτική' },
+];
+
+const REVIEW_CATEGORIES: ArticleCategory[] = [
+  'games',
+  'anime',
+  'manga',
+  'books',
+  'movies',
+  'tv',
+  'vape',
 ];
 
 const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
@@ -40,42 +54,36 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
     label: 'Games',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
-      { value: 'reviews', label: 'Reviews' },
     ],
   },
   anime: {
     label: 'Anime',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
-      { value: 'reviews', label: 'Reviews' },
     ],
   },
   manga: {
     label: 'Manga',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
-      { value: 'reviews', label: 'Reviews' },
     ],
   },
   books: {
     label: 'Βιβλία',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
-      { value: 'reviews', label: 'Reviews' },
     ],
   },
   movies: {
     label: 'Movies',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
-      { value: 'reviews', label: 'Reviews' },
     ],
   },
   tv: {
     label: 'TV Series',
     topics: [
       { value: 'articles', label: 'Άρθρα' },
-      { value: 'reviews', label: 'Reviews' },
     ],
   },
   coding: {
@@ -102,7 +110,6 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
       { value: 'devices', label: 'Ατμοποιητές/Συσκευές' },
       { value: 'liquids', label: 'Υγρά' },
       { value: 'experiences', label: 'Εμπειρίες' },
-      { value: 'reviews', label: 'Κριτικές' },
     ],
   },
 };
@@ -129,6 +136,18 @@ export default function AddArticleDialog({
   onSuccess,
 }: Readonly<AddArticleDialogProps>) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const user = useSelector(selectUser);
+  const canWriteArticles = hasAnyRole(user, ['admin', 'owner', 'author']);
+  const canWriteReviews = hasAnyRole(user, ['admin', 'owner', 'reviewer']);
+  const availableContentTypes = useMemo(
+    () =>
+      CONTENT_TYPES.filter(type => {
+        if (type.value === 'article') return canWriteArticles;
+        if (type.value === 'review') return canWriteReviews;
+        return false;
+      }),
+    [canWriteArticles, canWriteReviews],
+  );
 
   // Form state
   const [contentType, setContentType] = useState<ContentType>('article');
@@ -159,7 +178,7 @@ export default function AddArticleDialog({
   // Reset form when dialog opens
   useEffect(() => {
     if (isOpen) {
-      setContentType('article');
+      setContentType(availableContentTypes[0]?.value ?? 'article');
       setCategory('');
       setTopic('articles');
       setTitle('');
@@ -171,14 +190,32 @@ export default function AddArticleDialog({
       setWarning(null);
       setIsCoverPreviewValid(true);
     }
-  }, [isOpen]);
+  }, [isOpen, availableContentTypes]);
+
+  useEffect(() => {
+    if (!availableContentTypes.some(type => type.value === contentType)) {
+      setContentType(availableContentTypes[0]?.value ?? 'article');
+    }
+  }, [availableContentTypes, contentType]);
 
   // Update topic when category changes
   useEffect(() => {
-    if (category) {
-      setTopic('articles');
+    if (!category) return;
+    if (contentType === 'review') {
+      setTopic('reviews');
+      return;
     }
-  }, [category]);
+    const topics = CATEGORIES[category]?.topics ?? [];
+    setTopic(topics[0]?.value ?? 'articles');
+  }, [category, contentType]);
+
+  useEffect(() => {
+    if (!category) return;
+    if (contentType === 'review' && !REVIEW_CATEGORIES.includes(category as ArticleCategory)) {
+      setCategory('');
+      setTopic('reviews');
+    }
+  }, [category, contentType]);
 
   useEffect(() => {
     setIsCoverPreviewValid(true);
@@ -191,8 +228,16 @@ export default function AddArticleDialog({
     !titleValidation.isValid || !descriptionValidation.isValid || !tagsValidation.isValid;
 
   const handleSubmit = async (saveStatus: ArticleStatus) => {
+    if (noPermission) {
+      setError('Δεν έχεις δικαίωμα για δημιουργία περιεχομένου.');
+      return;
+    }
     if (!category) {
       setError('Παρακαλώ επιλέξτε κατηγορία');
+      return;
+    }
+    if (contentType === 'review' && !REVIEW_CATEGORIES.includes(category as ArticleCategory)) {
+      setError('Η κατηγορία δεν υποστηρίζει reviews.');
       return;
     }
     if (!title.trim()) {
@@ -237,7 +282,7 @@ export default function AddArticleDialog({
           slug,
           description: description.trim() || null,
           category,
-          topic,
+          topic: contentType === 'review' ? 'reviews' : topic,
           tags: tagsArray,
           cover_image: coverImage.trim() || null,
           content_html: sanitizedContentHtml || null,
@@ -260,7 +305,15 @@ export default function AddArticleDialog({
     }
   };
 
-  const availableTopics = category ? CATEGORIES[category].topics : [];
+  const dialogTitle = contentType === 'review' ? 'Νέα Κριτική' : 'Νέο Άρθρο';
+  const noPermission = availableContentTypes.length === 0;
+  const availableTopics = category
+    ? contentType === 'review'
+      ? [{ value: 'reviews', label: 'Κριτικές' }]
+      : CATEGORIES[category].topics
+    : [];
+  const availableCategories =
+    contentType === 'review' ? REVIEW_CATEGORIES : (Object.keys(CATEGORIES) as ArticleCategory[]);
 
   return (
     <AnimatePresence>
@@ -290,7 +343,7 @@ export default function AddArticleDialog({
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-[var(--hb-border)] px-6 py-4">
-                <h2 className="text-xl font-semibold text-[var(--hb-headline)]">Νέο Άρθρο</h2>
+                <h2 className="text-xl font-semibold text-[var(--hb-headline)]">{dialogTitle}</h2>
                 <button
                   onClick={onClose}
                   className="rounded-lg p-2 text-[var(--hb-muted)] transition hover:bg-white/5 hover:text-white"
@@ -304,6 +357,9 @@ export default function AddArticleDialog({
                 <div className="space-y-6">
                   {/* Error message */}
                   {error && <ErrorState error={error} />}
+                  {noPermission && (
+                    <ErrorState error="Δεν έχεις δικαίωμα να δημιουργήσεις άρθρο ή review." />
+                  )}
                   {warning && (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
                       {warning}
@@ -318,9 +374,10 @@ export default function AddArticleDialog({
                       <select
                         value={contentType}
                         onChange={e => setContentType(e.target.value as ContentType)}
+                        disabled={availableContentTypes.length <= 1}
                         className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
                       >
-                        {CONTENT_TYPES.map(type => (
+                        {availableContentTypes.map(type => (
                           <option key={type.value} value={type.value}>
                             {type.label}
                           </option>
@@ -339,7 +396,7 @@ export default function AddArticleDialog({
                         className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
                       >
                         <option value="">-- Επιλέξτε --</option>
-                        {(Object.keys(CATEGORIES) as ArticleCategory[]).map(cat => (
+                        {availableCategories.map(cat => (
                           <option key={cat} value={cat}>
                             {CATEGORIES[cat].label}
                           </option>
@@ -355,7 +412,7 @@ export default function AddArticleDialog({
                       <select
                         value={topic}
                         onChange={e => setTopic(e.target.value as ArticleTopic)}
-                        disabled={!category}
+                        disabled={!category || contentType === 'review'}
                         className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2 disabled:opacity-50"
                       >
                         {availableTopics.map(t => (
@@ -462,7 +519,7 @@ export default function AddArticleDialog({
                     variant="outline"
                     icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Save size={16} />}
                     onClick={() => handleSubmit('draft')}
-                    disabled={isSubmitting || hasPlainTextError}
+                    disabled={isSubmitting || hasPlainTextError || noPermission}
                   >
                     Αποθήκευση ως Draft
                   </Button>
@@ -470,7 +527,7 @@ export default function AddArticleDialog({
                     variant="primary"
                     icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Eye size={16} />}
                     onClick={() => handleSubmit('published')}
-                    disabled={isSubmitting || hasPlainTextError}
+                    disabled={isSubmitting || hasPlainTextError || noPermission}
                   >
                     Δημοσίευση
                   </Button>

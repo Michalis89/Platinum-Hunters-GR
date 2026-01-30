@@ -4,6 +4,7 @@ import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
+import { hasAnyRole } from '@/lib/roles';
 
 // GET - Fetch comments for an article
 export async function GET(
@@ -145,12 +146,12 @@ export async function DELETE(req: Request) {
     // Check permission (owner or admin)
     const { data: userData } = await supabase
       .from('users')
-      .select('role')
+      .select('role, roles')
       .eq('id', session.user.id)
       .single();
 
     const isOwner = comment.user_id === session.user.id;
-    const isAdmin = userData?.role === 'admin';
+    const isAdmin = hasAnyRole(userData, ['admin', 'owner']);
 
     if (!isOwner && !isAdmin) {
       return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);

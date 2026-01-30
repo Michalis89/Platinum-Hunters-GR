@@ -16,6 +16,7 @@ import {
   categoryMeta,
 } from '@/app/components/profile';
 import { selectUser, selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
+import { hasAnyRole } from '@/lib/roles';
 
 type FavoriteItem = {
   id: string;
@@ -66,9 +67,8 @@ export default function ProfilePage() {
   const [categoryTimes, setCategoryTimes] = useState<Record<string, number>>({});
 
   // User categories
-  const role = user?.role ?? 'user';
   const categories = useMemo(() => (user?.categories as string[] | undefined) ?? ['games'], [user]);
-  const isPrivileged = role === 'admin' || role === 'author';
+  const isPrivileged = hasAnyRole(user, ['admin', 'owner', 'author', 'reviewer']);
 
   // Showcase categories (all categories user has access to)
   const showcaseCategories = useMemo(

@@ -8,6 +8,7 @@ import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
+import { hasAnyRole } from '@/lib/roles';
 
 // GET - Fetch single article by ID or slug
 export async function GET(
@@ -86,12 +87,12 @@ export async function PUT(
     // Check permission (author or admin)
     const { data: userData } = await supabase
       .from('users')
-      .select('role, username, display_name, avatar_url')
+      .select('role, roles, username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
 
     const isAuthor = existingArticle.author_id === session.user.id;
-    const isAdmin = userData?.role === 'admin';
+    const isAdmin = hasAnyRole(userData, ['admin', 'owner', 'reviewer']);
 
     if (!isAuthor && !isAdmin) {
       return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
@@ -233,12 +234,12 @@ export async function DELETE(
     // Check permission (author or admin)
     const { data: userData } = await supabase
       .from('users')
-      .select('role, username, display_name, avatar_url')
+      .select('role, roles, username, display_name, avatar_url')
       .eq('id', session.user.id)
       .single();
 
     const isAuthor = existingArticle.author_id === session.user.id;
-    const isAdmin = userData?.role === 'admin';
+    const isAdmin = hasAnyRole(userData, ['admin', 'owner', 'reviewer']);
 
     if (!isAuthor && !isAdmin) {
       return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);

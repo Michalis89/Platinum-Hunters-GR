@@ -24,12 +24,15 @@ import {
   PawPrint,
   Cloud,
   FileText,
+  MessageCircle,
   ChevronDown,
   ChevronRight,
   PenLine,
   Plus,
   Sun,
   Moon,
+  ShieldCheck,
+  Ticket,
 } from 'lucide-react';
 import AddArticleDialog from './articles/AddArticleDialog';
 import {
@@ -41,6 +44,7 @@ import {
 import type { AppDispatch } from '@/store/store';
 import Button from './ui/Button';
 import { useTheme } from '@/context/ThemeContext';
+import { hasAnyRole } from '@/lib/roles';
 
 type NavItem = {
   href: string;
@@ -55,6 +59,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/pages/news', label: 'Άρθρα', icon: <FileText size={18} /> },
   { href: '/pages/reviews', label: 'Κριτικές', icon: <Star size={18} /> },
   { href: '/pages/about', label: 'Σχετικά', icon: <Book size={18} /> },
+  { href: '/pages/support', label: 'Επικοινωνία', icon: <MessageCircle size={18} /> },
 ];
 
 const HOBBY_ITEMS: NavItem[] = [
@@ -79,6 +84,7 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <Sparkles size={18} />,
     category: 'anime',
     children: [
+      { href: '/pages/news?category=anime', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=anime',
         label: 'Anime Library',
@@ -93,6 +99,7 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <BookOpen size={18} />,
     category: 'manga',
     children: [
+      { href: '/pages/news?category=manga', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=manga',
         label: 'Manga Library',
@@ -107,6 +114,7 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <Film size={18} />,
     category: 'movies',
     children: [
+      { href: '/pages/news?category=movies', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=movies',
         label: 'Movies Library',
@@ -121,6 +129,7 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <Tv size={18} />,
     category: 'tv',
     children: [
+      { href: '/pages/news?category=tv', label: 'Άρθρα', icon: <FileText size={16} /> },
       { href: '/pages/backlog?category=tv', label: 'TV Library', icon: <ListChecks size={16} /> },
       { href: '/pages/reviews?category=tv', label: 'Reviews', icon: <Star size={16} /> },
     ],
@@ -131,6 +140,7 @@ const HOBBY_ITEMS: NavItem[] = [
     icon: <BookOpen size={18} />,
     category: 'books',
     children: [
+      { href: '/pages/news?category=books', label: 'Άρθρα', icon: <FileText size={16} /> },
       {
         href: '/pages/backlog?category=books',
         label: 'Books Library',
@@ -231,7 +241,10 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
-  const canQuickAdd = !!user && (user.role === 'admin' || user.role === 'author');
+  const canQuickAdd =
+    !!user &&
+    hasAnyRole(user, ['admin', 'author', 'reviewer', 'owner']);
+  const canAccessAdminPanel = !!user && hasAnyRole(user, ['admin', 'moderator', 'owner']);
 
   const handleLogout = async () => {
     await dispatch(logout());
@@ -477,6 +490,24 @@ export default function Navbar() {
                         <PenLine size={16} />
                         <span>Επεξεργασία Προφίλ</span>
                       </Link>
+                      <Link
+                        href="/pages/support/tickets"
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--hb-text)] transition hover:bg-white/5 hover:text-[var(--hb-primary-strong)]"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <Ticket size={16} />
+                        <span>Τα tickets μου</span>
+                      </Link>
+                      {canAccessAdminPanel && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--hb-text)] transition hover:bg-white/5 hover:text-[var(--hb-primary-strong)]"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          <ShieldCheck size={16} />
+                          <span>Admin Panel</span>
+                        </Link>
+                      )}
 
                       <button
                         onClick={toggleTheme}
@@ -645,6 +676,24 @@ export default function Navbar() {
                           className="h-10 w-10 shrink-0"
                         />
                       </div>
+                      <Link
+                        href="/pages/support/tickets"
+                        className="flex items-center justify-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary-strong)]"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Ticket size={18} />
+                        <span>Τα tickets μου</span>
+                      </Link>
+                      {canAccessAdminPanel && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center justify-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary-strong)]"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <ShieldCheck size={18} />
+                          <span>Admin Panel</span>
+                        </Link>
+                      )}
                     </div>
                   ) : (
                     <div className="flex gap-2">

@@ -1,7 +1,15 @@
 import React from 'react';
 import Link, { type LinkProps } from 'next/link';
 
-type Variant = 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
+type Variant =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'outline'
+  | 'ghost'
+  | 'danger'
+  | 'success'
+  | 'warning';
 
 type BaseProps = {
   children?: React.ReactNode;
@@ -30,7 +38,7 @@ type NativeButtonProps = BaseProps & {
 type ButtonProps = LinkButtonProps | NativeButtonProps;
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-[var(--hb-primary-strong)] text-slate-950 hover:brightness-110',
+  primary: 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] hover:brightness-110',
   secondary:
     'border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]',
   tertiary: 'bg-[var(--hb-panel)] text-[var(--hb-text)] hover:text-[var(--hb-headline)]',
@@ -38,8 +46,10 @@ const variantClasses: Record<Variant, string> = {
     'border border-[var(--hb-border)] text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]/70 hover:text-[var(--hb-headline)]',
   ghost: 'text-[var(--hb-text)] hover:text-[var(--hb-headline)]',
   danger: 'bg-[var(--hb-accent)] text-[var(--hb-headline)] hover:brightness-110',
-  success: 'bg-emerald-500 text-slate-950 hover:bg-emerald-400',
-  warning: 'bg-amber-400 text-slate-950 hover:bg-amber-300',
+  success:
+    'bg-[var(--hb-primary)]/90 text-[var(--hb-bg)] hover:bg-[var(--hb-primary)]',
+  warning:
+    'bg-[var(--hb-accent)]/90 text-[var(--hb-bg)] hover:bg-[var(--hb-accent)]',
 };
 
 const baseClass =
@@ -49,7 +59,16 @@ const isLinkButtonProps = (props: ButtonProps): props is LinkButtonProps =>
   'href' in props && props.href !== undefined;
 
 const Button = (props: ButtonProps) => {
-  const { children, variant = 'outline', icon, className, disabled, title, ariaLabel, iconOnly } = props;
+  const {
+    children,
+    variant = 'outline',
+    icon,
+    className,
+    disabled,
+    title,
+    ariaLabel,
+    iconOnly,
+  } = props;
   const disabledClass = disabled ? 'opacity-60 cursor-not-allowed pointer-events-none' : '';
   const iconOnlyClass = iconOnly ? 'p-2' : '';
   const classes = [baseClass, variantClasses[variant], disabledClass, iconOnlyClass, className]
@@ -86,7 +105,9 @@ const Button = (props: ButtonProps) => {
       aria-label={accessibleLabel}
     >
       {icon}
-      {children && <span className="inline-flex flex-row items-center justify-center gap-2">{children}</span>}
+      {children && (
+        <span className="inline-flex flex-row items-center justify-center gap-2">{children}</span>
+      )}
     </button>
   );
 };

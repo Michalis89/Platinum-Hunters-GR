@@ -8,6 +8,7 @@ import type { ArticleRow } from '@/types/database';
 import { selectUser } from '@/store/slices/authSlice';
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import { hasAnyRole } from '@/lib/roles';
 
 type ActionRowProps = {
   article: ArticleRow;
@@ -29,8 +30,7 @@ export default function ActionRow({ article }: ActionRowProps) {
   const [likeLoading, setLikeLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const canEdit =
-    !!currentUser && (currentUser.role === 'admin' || currentUser.role === 'author');
+  const canEdit = !!currentUser && hasAnyRole(currentUser, ['admin', 'author', 'reviewer', 'owner']);
   const fallbackBase = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
   const fallbackHref = `${fallbackBase}?category=${article.category}`;
 

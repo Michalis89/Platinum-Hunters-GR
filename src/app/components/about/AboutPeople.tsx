@@ -7,6 +7,7 @@ export type TeamMember = {
   username: string;
   display_name: string | null;
   role: string;
+  roles?: string[] | null;
   bio: string | null;
   avatar_url: string | null;
   country: string | null;
@@ -18,16 +19,42 @@ type AboutPeopleProps = {
 };
 
 const roleLabel: Record<string, string> = {
-  admin: 'Founder',
+  owner: 'Founder',
+  admin: 'Admin',
+  moderator: 'Moderator',
   author: 'Author',
+  reviewer: 'Reviewer',
 };
 
 const roleColors: Record<string, string> = {
-  admin: 'border-[var(--hb-primary-strong)]/50 text-[var(--hb-primary-strong)]',
+  owner: 'border-[var(--hb-primary-strong)]/60 text-[var(--hb-primary-strong)]',
+  admin: 'border-[var(--hb-primary-strong)]/45 text-[var(--hb-primary-strong)]',
+  moderator: 'border-sky-500/40 text-sky-400',
+  reviewer: 'border-amber-500/40 text-amber-400',
   author: 'border-[var(--hb-border)] text-[var(--hb-muted)]',
 };
 
+const ROLE_PRIORITY = ['owner', 'admin', 'moderator', 'author', 'reviewer', 'user'];
+
+const getDisplayRole = (member: TeamMember) => {
+  const roles = Array.isArray(member.roles) ? member.roles : [];
+  const roleFromArray = ROLE_PRIORITY.find(role => roles.includes(role));
+  return roleFromArray ?? member.role;
+};
+
 export function AboutPeople({ team }: AboutPeopleProps) {
+  const sortedTeam = [...team].sort((a, b) => {
+    const roleA = getDisplayRole(a);
+    const roleB = getDisplayRole(b);
+    const rankA = ROLE_PRIORITY.indexOf(roleA);
+    const rankB = ROLE_PRIORITY.indexOf(roleB);
+    if (rankA !== rankB) {
+      return (rankA === -1 ? ROLE_PRIORITY.length : rankA) -
+        (rankB === -1 ? ROLE_PRIORITY.length : rankB);
+    }
+    return (a.display_name || a.username).localeCompare(b.display_name || b.username, 'el');
+  });
+
   return (
     <section className="px-4 py-20 md:px-6 md:py-28">
       <div className="mx-auto max-w-5xl">
@@ -52,7 +79,7 @@ export function AboutPeople({ team }: AboutPeopleProps) {
           />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">
-            {team.map(member => (
+            {sortedTeam.map(member => (
               <div
                 key={member.id}
                 className="hover:border-[var(--hb-primary-strong)]/40 group flex gap-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition"
@@ -78,13 +105,18 @@ export function AboutPeople({ team }: AboutPeopleProps) {
                     <span className="font-semibold text-[var(--hb-headline)]">
                       {member.display_name || member.username}
                     </span>
-                    <span
-                      className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
-                        roleColors[member.role] || roleColors.author
-                      }`}
-                    >
-                      {roleLabel[member.role] || member.role}
-                    </span>
+                    {(() => {
+                      const displayRole = getDisplayRole(member);
+                      return (
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
+                            roleColors[displayRole] || roleColors.author
+                          }`}
+                        >
+                          {roleLabel[displayRole] || displayRole}
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   {member.bio && (

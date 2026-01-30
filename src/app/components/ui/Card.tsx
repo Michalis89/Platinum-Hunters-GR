@@ -81,7 +81,7 @@ export function CardHeader({ children, className = '' }: Readonly<CardContentPro
       <button
         type="button"
         onClick={toggle}
-        className={`dark:bg-[var(--hb-card)]/60 flex w-full items-center justify-between border-b border-slate-200 bg-white/80 p-4 text-left text-slate-900 transition-colors hover:bg-slate-100 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] dark:hover:bg-[var(--hb-card)] ${isCollapsed ? 'border-b-0' : ''} ${className}`}
+        className={`bg-[var(--hb-card) flex w-full items-center justify-between border-b border-slate-200 bg-white/80 p-4 text-left text-slate-900 transition-colors hover:bg-slate-100 dark:border-[var(--hb-border)] dark:bg-[var(--hb-card)] dark:text-[var(--hb-text)] ${isCollapsed ? 'border-b-0' : ''} ${className}`}
       >
         <div className="flex-1">{children}</div>
         <ChevronDown
@@ -95,7 +95,7 @@ export function CardHeader({ children, className = '' }: Readonly<CardContentPro
 
   return (
     <div
-      className={`dark:bg-[var(--hb-card)]/60 border-b border-slate-200 bg-white/80 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] ${className}`}
+      className={`border-b border-[var(--hb-border)] border-slate-200 bg-[var(--hb-card)] p-4 text-slate-900 dark:border-[var(--hb-border)] dark:bg-[var(--hb-card)] dark:text-[var(--hb-text)] ${className}`}
     >
       {children}
     </div>

@@ -56,7 +56,8 @@ function ModuleButton({
   const router = useRouter();
 
   const isUnderConstruction = status === 'under-construction';
-  const isDisabled = isUnderConstruction;
+  const isDisabled = status !== true;
+  const disabledTitle = isUnderConstruction ? 'Υπό κατασκευή' : 'Μη διαθέσιμο';
   const needsLogin = requiresAuth && !isAuthenticated && status === true;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -79,7 +80,7 @@ function ModuleButton({
         type="button"
         disabled
         className="flex items-center gap-1.5 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1.5 text-xs font-medium text-[var(--hb-muted)] opacity-50"
-        title="Υπό κατασκευή"
+        title={disabledTitle}
       >
         <Construction className="h-3 w-3" />
         <span>{label}</span>

@@ -5,16 +5,22 @@ import { HobbiesHero, HobbiesCategorySection } from '@/app/components/hobbies';
 import { HOBBY_SECTIONS } from '@/config/hobbies';
 import { PageContainer } from '@/app/components/layout';
 import { selectUser, selectIsAuthenticated } from '@/store/slices/authSlice';
+import { hasAnyRole } from '@/lib/roles';
 
 export default function HobbiesPageClient() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
+  const hasAllAccess = hasAnyRole(user, ['admin', 'owner', 'moderator']);
 
   // Filter sections based on user's selected categories (if logged in)
   const userCategories = (user?.categories as string[] | undefined) ?? [];
-  const filteredSections = isAuthenticated && userCategories.length > 0
-    ? HOBBY_SECTIONS.filter(section => userCategories.includes(section.type))
-    : HOBBY_SECTIONS;
+  const filteredSections = hasAllAccess
+    ? HOBBY_SECTIONS
+    : isAuthenticated && userCategories.length > 0
+      ? HOBBY_SECTIONS.filter(section =>
+          section.categories.some(category => userCategories.includes(category)),
+        )
+      : HOBBY_SECTIONS;
 
   return (
     <>
@@ -74,7 +80,7 @@ export default function HobbiesPageClient() {
               <div>
                 <p className="font-medium text-[var(--hb-headline)]">Κριτικές</p>
                 <p className="text-[var(--hb-muted)]">
-                  Υπό κατασκευή. Σύντομα κριτικές από την κοινότητα.
+                  Διαθέσιμες για επιλεγμένες κατηγορίες. Δες τις κριτικές της κοινότητας.
                 </p>
               </div>
             </div>

@@ -45,7 +45,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     modules: {
       backlog: true,
       news: true,
-      reviews: 'under-construction',
+      reviews: true,
     },
     routes: {
       backlog: '/pages/backlog',
@@ -66,8 +66,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     icon: 'Sparkles',
     modules: {
       backlog: true,
-      news: 'under-construction',
-      reviews: 'under-construction',
+      news: true,
+      reviews: true,
     },
     routes: {
       backlog: '/pages/backlog?category=anime',
@@ -88,8 +88,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     icon: 'BookOpen',
     modules: {
       backlog: true,
-      news: 'under-construction',
-      reviews: 'under-construction',
+      news: true,
+      reviews: true,
     },
     routes: {
       backlog: '/pages/backlog?category=manga',
@@ -110,8 +110,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     icon: 'Film',
     modules: {
       backlog: true,
-      news: 'under-construction',
-      reviews: 'under-construction',
+      news: true,
+      reviews: true,
     },
     routes: {
       backlog: '/pages/backlog?category=movies',
@@ -132,8 +132,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     icon: 'Tv',
     modules: {
       backlog: true,
-      news: 'under-construction',
-      reviews: 'under-construction',
+      news: true,
+      reviews: true,
     },
     routes: {
       backlog: '/pages/backlog?category=tv',
@@ -154,8 +154,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     icon: 'Book',
     modules: {
       backlog: true,
-      news: 'under-construction',
-      reviews: 'under-construction',
+      news: true,
+      reviews: true,
     },
     routes: {
       backlog: '/pages/backlog?category=books',
@@ -177,7 +177,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     modules: {
       backlog: 'under-construction',
       news: true,
-      reviews: 'under-construction',
+      reviews: false,
     },
     routes: {
       backlog: '/pages/backlog?category=coding',
@@ -199,7 +199,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     modules: {
       backlog: 'under-construction',
       news: true,
-      reviews: 'under-construction',
+      reviews: false,
     },
     routes: {
       backlog: '/pages/backlog?category=pet',
@@ -221,7 +221,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
     modules: {
       backlog: 'under-construction',
       news: true,
-      reviews: 'under-construction',
+      reviews: true,
     },
     routes: {
       backlog: '/pages/backlog?category=vape',
@@ -250,13 +250,13 @@ export const HOBBY_SECTIONS: HobbySection[] = [
     type: 'news',
     title: 'Άρθρα & Νέα',
     description: 'Διάβασε άρθρα, tutorials και ιστορίες από την κοινότητα.',
-    categories: ['games', 'coding', 'pet', 'vape'],
+    categories: ['games', 'anime', 'manga', 'books', 'movies', 'tv', 'coding', 'pet', 'vape'],
   },
   {
     type: 'reviews',
     title: 'Κριτικές',
     description: 'Κριτικές και εντυπώσεις από τα μέλη της κοινότητας.',
-    categories: ['games', 'anime', 'manga', 'movies', 'tv', 'books'],
+    categories: ['games', 'anime', 'manga', 'books', 'movies', 'tv', 'vape'],
   },
 ];
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Star, Clock, Eye, Heart, Calendar, User, Tag } from 'lucide-react';
-import type { ArticleRow } from '@/types/database';
+import type { ArticleCategory, ArticleRow } from '@/types/database';
 import { PageContainer, PageHeader } from '@/app/components/layout';
 import {
   Card,
@@ -21,15 +21,15 @@ import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
 
-// Review-specific categories (gaming + media categories + vape)
-const REVIEW_CATEGORIES: Record<string, string> = {
-  games: 'Games',
-  anime: 'Anime',
-  manga: 'Manga',
-  movies: 'Ταινίες',
-  tv: 'Σειρές',
-  vape: 'Vape',
-};
+const REVIEW_CATEGORIES = new Set<ArticleCategory>([
+  'games',
+  'anime',
+  'manga',
+  'books',
+  'movies',
+  'tv',
+  'vape',
+]);
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -175,7 +175,10 @@ export default function ReviewsPageClient() {
 function ReviewsPageContent() {
   const searchParams = useSearchParams();
   const rawCategory = searchParams.get('category');
-  const category = rawCategory && REVIEW_CATEGORIES[rawCategory] ? rawCategory : null;
+  const category =
+    rawCategory && REVIEW_CATEGORIES.has(rawCategory as ArticleCategory)
+      ? (rawCategory as ArticleCategory)
+      : null;
 
   const [articles, setArticles] = useState<ArticleWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,8 +215,8 @@ function ReviewsPageContent() {
     fetchReviews();
   }, [category]);
 
-  const categoryLabel = category ? (REVIEW_CATEGORIES[category] ?? null) : null;
-  const metaLine = `${total} reviews • ενημερώνεται τακτικά`;
+  const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
+  const metaLine = `${total} reviews`;
 
   const pageTitle = categoryLabel ? `Reviews - ${categoryLabel}` : 'Reviews';
   const subtitle = categoryLabel

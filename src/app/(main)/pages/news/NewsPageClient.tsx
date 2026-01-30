@@ -216,7 +216,7 @@ function NewsPageContent() {
 
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
   const topicLabel = normalizedTopic ? TOPIC_LABELS[normalizedTopic] : null;
-  const metaLine = `${total} άρθρα • ενημερώνεται τακτικά`;
+  const metaLine = `${total} άρθρα`;
 
   const pageTitle = categoryLabel
     ? topicLabel

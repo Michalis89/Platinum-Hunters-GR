@@ -2,17 +2,38 @@ import { cn } from '@/utils/utils';
 
 interface SelectProps {
   label?: string;
+  labelClassName?: string;
   options: string[];
+  optionLabels?: Record<string, string>;
   value?: string;
   onChange?: (value: string) => void;
   className?: string;
+  placeholder?: string;
+  error?: boolean;
 }
 
-export function Select({ label, options, value, onChange, className = '' }: Readonly<SelectProps>) {
+export function Select({
+  label,
+  labelClassName = '',
+  options,
+  optionLabels,
+  value,
+  onChange,
+  className = '',
+  placeholder = '-- Επιλέξτε --',
+  error = false,
+}: Readonly<SelectProps>) {
   return (
     <div className="space-y-1">
       {label && (
-        <label className="text-sm font-medium text-slate-700 dark:text-white">{label}</label>
+        <label
+          className={cn(
+            'text-sm font-medium text-slate-700 dark:text-white',
+            labelClassName,
+          )}
+        >
+          {label}
+        </label>
       )}
 
       <div className="relative">
@@ -30,6 +51,7 @@ export function Select({ label, options, value, onChange, className = '' }: Read
             'dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-100 dark:shadow-slate-950/40',
             'dark:hover:border-emerald-400/70 dark:hover:bg-slate-900/90',
             'dark:focus:border-emerald-300 dark:focus:ring-emerald-400/50',
+            error && 'border-red-500 focus:border-red-500 focus:ring-red-500/40',
 
             className,
           )}
@@ -39,7 +61,7 @@ export function Select({ label, options, value, onChange, className = '' }: Read
             value=""
             className="bg-white text-slate-400 dark:bg-slate-950 dark:text-slate-400"
           >
-            -- Επιλέξτε --
+            {placeholder}
           </option>
 
           {/* Options */}
@@ -49,7 +71,7 @@ export function Select({ label, options, value, onChange, className = '' }: Read
               value={opt}
               className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100"
             >
-              {opt}
+              {optionLabels?.[opt] ?? opt}
             </option>
           ))}
         </select>

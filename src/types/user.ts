@@ -1,6 +1,6 @@
 import type { Database } from '@/lib/supabase/database.types';
 
-export type UserRole = 'user' | 'author' | 'moderator' | 'admin';
+export type UserRole = 'user' | 'author' | 'reviewer' | 'moderator' | 'admin' | 'owner';
 export type AccountStatus = 'active' | 'suspended' | 'banned' | 'deleted';
 export type ProfileVisibility = 'public' | 'friends' | 'private';
 
@@ -45,6 +45,7 @@ export type User = Omit<
   social_links: SocialLinks | null;
   favorite_genres: string[] | null;
   categories: string[] | null;
+  roles: UserRole[] | null;
 };
 
 export interface PublicUserProfile {

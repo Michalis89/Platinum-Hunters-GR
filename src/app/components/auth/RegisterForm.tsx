@@ -366,7 +366,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       <CardHeader className="border-[var(--hb-border)]">
         <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
           <span className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[var(--hb-shadow-md)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-card)] text-white shadow-[var(--hb-shadow-md)] dark:bg-[var(--hb-card)]">
               <UserPlus className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">

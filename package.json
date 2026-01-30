@@ -1,6 +1,6 @@
 {
   "name": "hobbistas",
-  "version": "2.8.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,8 @@
     "test": "jest --coverage",
     "test:coverage": "npm test -- --coverage --coverageReporters=text-lcov > lcov.info",
     "sitemap": "next-sitemap",
-    "cypress:open": "concurrently \"npm run build && npm run start\" \"cypress open\" "
+    "cypress:open": "concurrently \"npm run build && npm run start\" \"cypress open\" ",
+    "db:types": "supabase gen types typescript --project-id jolfksxuhyktpwncniks > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.2.6",
