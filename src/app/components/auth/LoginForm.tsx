@@ -83,20 +83,21 @@ export default function LoginForm() {
 
     setResetLoading(true);
     try {
-      const redirectTo =
-        (typeof window !== 'undefined' ? window.location.origin : '') +
-        '/pages/auth/reset-password';
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo,
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail }),
       });
 
-      if (error) {
-        throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Δεν στάλθηκε το email. Δοκίμασε ξανά.');
       }
 
       setResetAlert({
         type: 'success',
-        message: 'Στάλθηκε email ανάκτησης. Έλεγξε τα εισερχόμενα (και τα spam).',
+        message: 'Αν υπάρχει λογαριασμός με αυτό το email, σου στείλαμε link επαναφοράς.',
       });
     } catch (err) {
       console.error('Reset password error:', err);
