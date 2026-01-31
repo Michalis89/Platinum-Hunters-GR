@@ -1,46 +1,15 @@
 import Link from 'next/link';
-import { Smartphone, Users, Plug, ArrowRight } from 'lucide-react';
-import type { ReactNode } from 'react';
-
-type RoadmapItem = {
-  title: string;
-  description: string;
-  status: 'in-progress' | 'planned';
-  icon: ReactNode;
-};
-
-const roadmapItems: RoadmapItem[] = [
-  {
-    title: 'API Integrations',
-    description: 'Σύνδεση με RAWG, TMDB, Jikan για αυτόματα metadata.',
-    status: 'in-progress',
-    icon: <Plug className="h-5 w-5" />,
-  },
-  {
-    title: 'Cross-Hobby Stats',
-    description: 'Ενιαία στατιστικά για όλα τα hobbies σου.',
-    status: 'in-progress',
-    icon: <Smartphone className="h-5 w-5" />,
-  },
-  {
-    title: 'Import/Export',
-    description: 'Εισαγωγή από Letterboxd, MAL, Goodreads.',
-    status: 'planned',
-    icon: <Users className="h-5 w-5" />,
-  },
-];
+import { ArrowRight } from 'lucide-react';
+import { getStatusLabel, getTeaserRoadmapItems } from '@/config/roadmap';
 
 const statusColors = {
+  done: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
   'in-progress':
     'bg-[var(--hb-primary-strong)]/10 text-[var(--hb-primary-strong)] border-[var(--hb-primary-strong)]/30',
-  planned:
-    'bg-[var(--hb-muted)]/10 text-[var(--hb-muted)] border-[var(--hb-border)]',
+  planned: 'bg-[var(--hb-muted)]/10 text-[var(--hb-muted)] border-[var(--hb-border)]',
 };
 
-const statusLabels = {
-  'in-progress': 'Σε εξέλιξη',
-  planned: 'Σύντομα',
-};
+const previewItems = getTeaserRoadmapItems();
 
 export function HomeRoadmapPreview() {
   return (
@@ -59,19 +28,19 @@ export function HomeRoadmapPreview() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          {roadmapItems.map((item) => (
+          {previewItems.map(item => (
             <div
               key={item.title}
               className="group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition hover:border-[var(--hb-primary-strong)]/40"
             >
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-[var(--hb-muted)] transition-colors group-hover:text-[var(--hb-primary-strong)]">
-                  {item.icon}
+                  <item.icon className="h-5 w-5" aria-hidden />
                 </div>
                 <span
                   className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${statusColors[item.status]}`}
                 >
-                  {statusLabels[item.status]}
+                  {getStatusLabel(item.status, 'teaser')}
                 </span>
               </div>
               <h3 className="mb-2 font-semibold text-[var(--hb-headline)]">
