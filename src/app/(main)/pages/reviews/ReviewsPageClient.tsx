@@ -20,7 +20,7 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
-import CategoryFilter from '@/app/(main)/pages/_shared/CategoryFilter';
+import FilterBar from '@/app/components/shared/FilterBar';
 import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
 
 interface ArticleWithAuthor extends ArticleRow {
@@ -250,23 +250,7 @@ function ReviewsPageContent() {
               <Star className="h-6 w-6" />
             </span>
           }
-          aside={
-            <div className="bg-[var(--hb-card)]/40 rounded-2xl border border-[var(--hb-border)] p-3 shadow-[var(--hb-shadow-md)]">
-              <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-                <span>Κατηγορίες</span>
-                <span className="text-[10px]">
-                  {categoryLabel ? `Φίλτρο: ${categoryLabel}` : 'Όλες'}
-                </span>
-              </div>
-              <CategoryFilter scope="reviews" currentCategory={category} />
-              {tag && (
-                <div className="mt-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-                  <Tag size={12} />
-                  <span>{tag}</span>
-                </div>
-              )}
-            </div>
-          }
+          aside={<FilterBar scope="reviews" currentCategory={category} tagLabel={tag} />}
         />
       </motion.div>
 
