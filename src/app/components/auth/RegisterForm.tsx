@@ -44,6 +44,7 @@ import type { RegisterData } from '@/types/auth';
 import { fetchSession } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import Button from '../ui/Button';
+import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
 import {
   ANIME_GENRES,
   BOOK_GENRES,
@@ -195,6 +196,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
   const passwordStrength = formData.password ? getPasswordStrength(formData.password) : null;
 
@@ -312,6 +316,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   const handleSubmit = async () => {
     setAlert(null);
+
+    if (!captchaToken) {
+      setCaptchaError('Ολοκλήρωσε το CAPTCHA για να συνεχίσεις.');
+      return;
+    }
+
+    setCaptchaError(null);
     setLoading(true);
 
     try {
@@ -337,6 +348,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           pet_types: formData.pet_types || null,
           vape_device: formData.vape_device || null,
           vape_flavor: formData.vape_flavor || null,
+          captchaToken,
         }),
       });
 
@@ -366,6 +378,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       }, 1500);
     } catch (error) {
       console.error('Registration error:', error);
+      if (error instanceof Error && error.message.toLowerCase().includes('captcha')) {
+        setCaptchaError('CAPTCHA validation failed, please retry.');
+        setCaptchaResetKey(prev => prev + 1);
+        setCaptchaToken(null);
+      }
       const errorMessage =
         error instanceof Error ? error.message : 'Σφάλμα εγγραφής. Δοκιμάστε ξανά.';
       setAlert({
@@ -1028,6 +1045,22 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         </AnimatePresence>
         </div>
 
+        {currentStep === 3 && (
+          <div className="space-y-2 px-5 sm:px-0">
+            <CaptchaWidget
+              helperText="Ολοκλήρωσε το CAPTCHA για τη θωράκιση του λογαριασμού σου."
+              onTokenChange={token => {
+                setCaptchaToken(token);
+                if (token) {
+                  setCaptchaError(null);
+                }
+              }}
+              resetSignal={captchaResetKey}
+            />
+            <FormErrorMessage message={captchaError ?? undefined} />
+          </div>
+        )}
+
         <div className="sticky bottom-0 z-10 -mx-5 flex flex-col gap-4 border-t border-[var(--hb-border)] bg-[var(--hb-panel)] px-5 pt-4 sm:mx-0 sm:px-0">
           {currentStep > 1 && (
             <Button
@@ -1046,7 +1079,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             type="button"
             variant="primary"
             onClick={handleNext}
-            disabled={loading}
+            disabled={loading || (currentStep === 3 && !captchaToken)}
             className="shadow-[var(--hb-shadow-md-hover)]0_12px_30px_rgba(3,7,18,0.20)] flex flex-1 items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white transition hover:shadow-[var(--hb-shadow-md)]"
           >
             {loading ? (

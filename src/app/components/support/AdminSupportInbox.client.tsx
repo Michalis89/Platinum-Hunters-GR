@@ -17,6 +17,7 @@ import Button from '@/app/components/ui/Button';
 import Feedback from '@/app/components/ui/Feedback';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
+import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 
 const STATUS_OPTIONS = ['open', 'in_progress', 'waiting_user', 'resolved', 'closed'];
 const CATEGORY_OPTIONS = ['bug', 'feature', 'author_rights', 'general'];
@@ -71,6 +72,7 @@ type AdminTicket = {
 };
 
 export default function AdminSupportInbox() {
+  const { isAuthenticated, isLoading } = useRequireAuth();
   const user = useSelector(selectUser);
   const isAdmin = hasAnyRole(user, ['admin', 'owner', 'moderator']);
 
@@ -93,6 +95,10 @@ export default function AdminSupportInbox() {
   } | null>(null);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     if (!isAdmin) {
       setLoading(false);
       return;
@@ -132,7 +138,19 @@ export default function AdminSupportInbox() {
     return () => {
       ignore = true;
     };
-  }, [filters, isAdmin]);
+  }, [filters, isAdmin, isAuthenticated]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
+        <LoadingSpinner size="lg" label="Φόρτωση..." />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (!isAdmin) {
     return (

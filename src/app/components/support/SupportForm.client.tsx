@@ -17,7 +17,9 @@ import Button from '@/app/components/ui/Button';
 import Feedback from '@/app/components/ui/Feedback';
 import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
 import { InfoHint } from '@/app/components/ui/InfoHint';
-import { selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import { selectUser } from '@/store/slices/authSlice';
+import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
@@ -86,8 +88,8 @@ export default function SupportForm({}: Readonly<{
   securityEmail?: string | null;
   contactEmail?: string | null;
 }>) {
+  const { isAuthenticated, isLoading } = useRequireAuth();
   const user = useSelector(selectUser);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const [category, setCategory] = useState('bug');
   const [formData, setFormData] = useState({
@@ -326,6 +328,18 @@ export default function SupportForm({}: Readonly<{
       setSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
+        <LoadingSpinner size="lg" label="Φόρτωση..." />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">

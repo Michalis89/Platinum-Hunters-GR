@@ -17,6 +17,7 @@ import {
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
+import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
 
 export async function POST(req: Request) {
   // Rate limiting: 3 registration attempts per hour per IP
@@ -56,7 +57,13 @@ export async function POST(req: Request) {
       pet_types,
       vape_device,
       vape_flavor,
+      captchaToken,
     } = body;
+
+    const captchaResult = await verifyCaptchaToken(captchaToken);
+    if (!captchaResult.success) {
+      return fail({ error: 'CAPTCHA validation failed, please retry' }, 403);
+    }
 
     // =====================================================
     // VALIDATION

@@ -10,6 +10,7 @@ import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
+import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
 
 export async function POST(req: Request) {
   // Rate limiting: 5 login attempts per 15 minutes per IP
@@ -26,7 +27,12 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { identifier, password } = body; // Accept email OR username
+    const { identifier, password, captchaToken } = body; // Accept email OR username
+
+    const captchaResult = await verifyCaptchaToken(captchaToken);
+    if (!captchaResult.success) {
+      return fail({ error: 'CAPTCHA validation failed, please retry' }, 403);
+    }
 
     if (!identifier || identifier.trim() === '') {
       return fail({ error: 'Το email ή το username είναι υποχρεωτικό' }, 400);

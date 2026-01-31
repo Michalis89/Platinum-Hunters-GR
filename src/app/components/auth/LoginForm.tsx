@@ -14,8 +14,8 @@ import { fetchSession } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import { supabase } from '@/lib/supabase-client';
 import Button from '../ui/Button';
-
-const RETURN_URL_KEY = 'platinum-hunters-return-url';
+import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
+import { RETURN_URL_KEY } from '@/lib/hooks/useRequireAuth';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -45,6 +45,9 @@ export default function LoginForm() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -142,6 +145,12 @@ export default function LoginForm() {
       return;
     }
 
+    if (!captchaToken) {
+      setCaptchaError('Ολοκλήρωσε το CAPTCHA για να συνεχίσεις.');
+      return;
+    }
+
+    setCaptchaError(null);
     setLoading(true);
 
     try {
@@ -153,6 +162,7 @@ export default function LoginForm() {
         body: JSON.stringify({
           identifier: formData.identifier,
           password: formData.password,
+          captchaToken,
         }),
       });
 
@@ -198,6 +208,11 @@ export default function LoginForm() {
       }, 1000);
     } catch (error) {
       console.error('Login error:', error);
+      if (error instanceof Error && error.message.toLowerCase().includes('captcha')) {
+        setCaptchaError('CAPTCHA validation failed, please retry.');
+        setCaptchaResetKey(prev => prev + 1);
+        setCaptchaToken(null);
+      }
       const errorMessage =
         error instanceof Error ? error.message : '❌ Σφάλμα σύνδεσης. Ελέγξτε τα στοιχεία σας.';
       setAlert({
@@ -302,13 +317,27 @@ export default function LoginForm() {
             </button>
           </div>
 
+          <div>
+            <CaptchaWidget
+              helperText="Ολοκλήρωσε το CAPTCHA για την προστασία του λογαριασμού σου."
+              onTokenChange={token => {
+                setCaptchaToken(token);
+                if (token) {
+                  setCaptchaError(null);
+                }
+              }}
+              resetSignal={captchaResetKey}
+            />
+            <FormErrorMessage message={captchaError ?? undefined} />
+          </div>
+
           {/* Submit Button */}
           <Button
             type="submit"
             variant="primary"
             icon={!loading ? <LogIn className="h-5 w-5" /> : undefined}
             className="flex w-full items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[var(--hb-shadow-md)] transition hover:shadow-[var(--hb-shadow-md-hover)]"
-            disabled={loading}
+            disabled={loading || !captchaToken}
           >
             {loading ? 'Σύνδεση...' : 'Σύνδεση'}
           </Button>
