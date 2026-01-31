@@ -333,15 +333,15 @@ export default async function ArticleDetailPage({
       <ReadingProgress />
 
       {/* Hero */}
-      <div className="relative h-[40vh] min-h-[280px] w-full overflow-hidden">
+      <div className="relative h-[clamp(280px,45vh,480px)] w-full overflow-hidden">
         {article.cover_image ? (
           <Image
             src={article.cover_image}
             alt={article.title}
             fill
             priority
-            sizes="100vw"
-            className="object-cover"
+            sizes="(min-width: 1280px) 1120px, 100vw"
+            className="object-cover object-[center_35%]"
           />
         ) : (
           <div className="h-full w-full bg-[var(--hb-panel)]" />
