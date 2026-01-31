@@ -44,7 +44,10 @@ type ActivityType =
   | 'article_updated'
   | 'article_deleted'
   | 'article_liked'
-  | 'article_comment';
+  | 'article_unliked'
+  | 'article_comment'
+  | 'article_commented'
+  | 'article_comment_deleted';
 
 type ActivityItem = {
   id: number;
@@ -200,8 +203,17 @@ function renderText(item: ActivityItem) {
   if (item.type === 'article_liked') {
     return `${name} έκανε like στο: ${contentTitle}`;
   }
+  if (item.type === 'article_unliked') {
+    return `${name} αφαίρεσε το like από: ${contentTitle}`;
+  }
   if (item.type === 'article_comment') {
     return `${name} σχολίασε στο: ${contentTitle}`;
+  }
+  if (item.type === 'article_commented') {
+    return `${name} σχολίασε στο: ${contentTitle}`;
+  }
+  if (item.type === 'article_comment_deleted') {
+    return `${name} διέγραψε σχόλιο στο: ${contentTitle}`;
   }
   return `${name} έκανε μια ενέργεια`;
 }
@@ -239,7 +251,11 @@ function iconFor(item: ActivityItem) {
   }
   if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-red-300" />;
   if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-300" />;
+  if (item.type === 'article_unliked') return <Heart className="h-4 w-4 text-slate-500" />;
   if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-cyan-300" />;
+  if (item.type === 'article_commented') return <MessageSquare className="h-4 w-4 text-cyan-300" />;
+  if (item.type === 'article_comment_deleted')
+    return <MessageSquare className="h-4 w-4 text-slate-500" />;
   return <UserIcon className="h-4 w-4 text-slate-300" />;
 }
 
@@ -351,7 +367,10 @@ function FeedText({ item }: { item: ActivityItem }) {
     (item.type === 'article_created' ||
       item.type === 'article_updated' ||
       item.type === 'article_liked' ||
-      item.type === 'article_comment') &&
+      item.type === 'article_unliked' ||
+      item.type === 'article_comment' ||
+      item.type === 'article_commented' ||
+      item.type === 'article_comment_deleted') &&
     payload.articleSlug
   ) {
     const articleSlug = normalizeSlug(payload.articleSlug as string);

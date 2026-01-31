@@ -13,6 +13,7 @@ import type { ArticleCategory, ArticleTopic, ArticleStatus, ArticleRow } from '@
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import dynamic from 'next/dynamic';
+import { uploadArticleCoverImage } from '@/lib/media/uploadArticleCover';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
   ssr: false,
@@ -132,6 +133,9 @@ export default function EditArticleDialog({
   const [title, setTitle] = useState(article.title);
   const [description, setDescription] = useState(article.description ?? '');
   const [coverImage, setCoverImage] = useState(article.cover_image ?? '');
+  const [isCoverUploading, setIsCoverUploading] = useState(false);
+  const [coverUploadError, setCoverUploadError] = useState<string | null>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
   const [contentHtml, setContentHtml] = useState(article.content_html ?? '');
   const [tags, setTags] = useState((article.tags ?? []).join(', '));
   const [status, setStatus] = useState<ArticleStatus>(article.status);
@@ -176,6 +180,33 @@ export default function EditArticleDialog({
   useEffect(() => {
     setIsCoverPreviewValid(true);
   }, [coverImage]);
+
+  const handleCoverUploadClick = () => {
+    coverFileInputRef.current?.click();
+  };
+
+  const handleCoverFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setCoverUploadError(null);
+    setIsCoverUploading(true);
+    try {
+      const uploadedUrl = await uploadArticleCoverImage(file);
+      setCoverImage(uploadedUrl);
+      setIsCoverPreviewValid(true);
+    } catch (uploadErr) {
+      console.error('Cover upload failed:', uploadErr);
+      setCoverUploadError(
+        uploadErr instanceof Error
+          ? uploadErr.message
+          : 'Αποτυχία ανέβασμα εικόνας. Δοκίμασε ξανά.',
+      );
+    } finally {
+      setIsCoverUploading(false);
+    }
+  };
 
   const titleValidation = validatePlainText(title, 'Ο τίτλος');
   const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
@@ -408,15 +439,40 @@ export default function EditArticleDialog({
                     <label className="text-sm font-medium text-[var(--hb-headline)]">
                       Εικόνα εξωφύλλου
                     </label>
-                    <div className="flex gap-3">
-                      <Input
-                        placeholder="URL εικόνας"
-                        value={coverImage}
-                        onChange={event => setCoverImage(event.target.value)}
-                        className="flex-1"
-                      />
-                      {coverImage && isCoverPreviewValid ? (
-                        <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[var(--hb-border)]">
+                    <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-1 min-w-[220px] flex-col gap-2">
+                        <Input
+                          placeholder="URL εικόνας"
+                          value={coverImage}
+                          onChange={event => {
+                            setCoverImage(event.target.value);
+                            setCoverUploadError(null);
+                          }}
+                          className="flex-1"
+                        />
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--hb-muted)]">
+                          <Button
+                            variant="ghost"
+                            icon={
+                              isCoverUploading ? (
+                                <LoadingSpinner size="sm" inline />
+                              ) : (
+                                <ImageIcon size={16} />
+                              )
+                            }
+                            onClick={handleCoverUploadClick}
+                            disabled={isCoverUploading}
+                          >
+                            {isCoverUploading ? 'Ανεβαίνει...' : 'Ανέβασε αρχείο'}
+                          </Button>
+                          <span>Το URL προέρχεται από το Supabase storage.</span>
+                        </div>
+                        {coverUploadError && (
+                          <p className="text-xs text-amber-300">{coverUploadError}</p>
+                        )}
+                      </div>
+                      <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[var(--hb-border)]">
+                        {coverImage && isCoverPreviewValid ? (
                           <Image
                             src={coverImage}
                             alt="Preview"
@@ -426,13 +482,20 @@ export default function EditArticleDialog({
                             onError={() => setIsCoverPreviewValid(false)}
                             unoptimized
                           />
-                        </div>
-                      ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)]">
-                          <ImageIcon size={20} className="text-[var(--hb-muted)]" />
-                        </div>
-                      )}
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-[var(--hb-card)]">
+                            <ImageIcon size={20} className="text-[var(--hb-muted)]" />
+                          </div>
+                        )}
+                      </div>
                     </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={coverFileInputRef}
+                      className="hidden"
+                      onChange={handleCoverFileChange}
+                    />
                   </div>
 
                   <RichTextEditor

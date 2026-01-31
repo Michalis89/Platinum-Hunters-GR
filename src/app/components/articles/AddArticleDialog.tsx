@@ -16,6 +16,7 @@ import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import dynamic from 'next/dynamic';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
+import { uploadArticleCoverImage } from '@/lib/media/uploadArticleCover';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
   ssr: false,
@@ -156,6 +157,9 @@ export default function AddArticleDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState('');
+  const [isCoverUploading, setIsCoverUploading] = useState(false);
+  const [coverUploadError, setCoverUploadError] = useState<string | null>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
   const [contentHtml, setContentHtml] = useState('');
   const [tags, setTags] = useState('');
   const [isCoverPreviewValid, setIsCoverPreviewValid] = useState(true);
@@ -220,6 +224,33 @@ export default function AddArticleDialog({
   useEffect(() => {
     setIsCoverPreviewValid(true);
   }, [coverImage]);
+
+  const handleCoverUploadClick = () => {
+    coverFileInputRef.current?.click();
+  };
+
+  const handleCoverFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setCoverUploadError(null);
+    setIsCoverUploading(true);
+    try {
+      const uploadedUrl = await uploadArticleCoverImage(file);
+      setCoverImage(uploadedUrl);
+      setIsCoverPreviewValid(true);
+    } catch (uploadErr) {
+      console.error('Cover upload failed:', uploadErr);
+      setCoverUploadError(
+        uploadErr instanceof Error
+          ? uploadErr.message
+          : 'Αποτυχία ανέβασμα εικόνας. Δοκίμασε ξανά.',
+      );
+    } finally {
+      setIsCoverUploading(false);
+    }
+  };
 
   const titleValidation = validatePlainText(title, 'Ο τίτλος');
   const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
@@ -454,15 +485,40 @@ export default function AddArticleDialog({
                     <label className="text-sm font-medium text-[var(--hb-headline)]">
                       Εικόνα εξωφύλλου
                     </label>
-                    <div className="flex gap-3">
-                      <Input
-                        placeholder="URL εικόνας"
-                        value={coverImage}
-                        onChange={e => setCoverImage(e.target.value)}
-                        className="flex-1"
-                      />
-                      {coverImage && isCoverPreviewValid && (
-                        <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[var(--hb-border)]">
+                    <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-1 min-w-[220px] flex-col gap-2">
+                        <Input
+                          placeholder="URL εικόνας"
+                          value={coverImage}
+                          onChange={e => {
+                            setCoverImage(e.target.value);
+                            setCoverUploadError(null);
+                          }}
+                          className="flex-1"
+                        />
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--hb-muted)]">
+                          <Button
+                            variant="ghost"
+                            icon={
+                              isCoverUploading ? (
+                                <LoadingSpinner size="sm" inline />
+                              ) : (
+                                <ImageIcon size={16} />
+                              )
+                            }
+                            onClick={handleCoverUploadClick}
+                            disabled={isCoverUploading}
+                          >
+                            {isCoverUploading ? 'Ανεβαίνει...' : 'Ανέβασε αρχείο'}
+                          </Button>
+                          <span>Το URL προέρχεται από το Supabase storage.</span>
+                        </div>
+                        {coverUploadError && (
+                          <p className="text-xs text-amber-300">{coverUploadError}</p>
+                        )}
+                      </div>
+                      <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[var(--hb-border)]">
+                        {coverImage && isCoverPreviewValid ? (
                           <Image
                             src={coverImage}
                             alt="Preview"
@@ -472,14 +528,20 @@ export default function AddArticleDialog({
                             onError={() => setIsCoverPreviewValid(false)}
                             unoptimized
                           />
-                        </div>
-                      )}
-                      {(!coverImage || !isCoverPreviewValid) && (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)]">
-                          <ImageIcon size={20} className="text-[var(--hb-muted)]" />
-                        </div>
-                      )}
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-[var(--hb-card)]">
+                            <ImageIcon size={20} className="text-[var(--hb-muted)]" />
+                          </div>
+                        )}
+                      </div>
                     </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={coverFileInputRef}
+                      className="hidden"
+                      onChange={handleCoverFileChange}
+                    />
                   </div>
 
                   {/* Content */}

@@ -106,7 +106,7 @@ export default function RegisterPage() {
             <div className="relative">
               <div className="bg-[var(--hb-primary-strong)]/30 absolute -right-6 bottom-6 h-16 w-16 rounded-full blur-2xl" />
               <div className="relative">
-                <Suspense fallback={<div className="h-[420px]" />}>
+                <Suspense fallback={<div className="h-[min(92vh,760px)] w-full" />}>
                   <RegisterForm />
                 </Suspense>
               </div>

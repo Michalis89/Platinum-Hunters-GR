@@ -855,13 +855,21 @@ export type Database = {
     Views: {
       [_ in never]: never
     }
-    Functions: {
-      is_admin: { Args: never; Returns: boolean }
-      is_admin_or_moderator: { Args: never; Returns: boolean }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
-      update_user_last_login: { Args: { user_id: string }; Returns: undefined }
-    }
+      Functions: {
+        is_admin: { Args: never; Returns: boolean }
+        is_admin_or_moderator: { Args: never; Returns: boolean }
+        show_limit: { Args: never; Returns: number }
+        show_trgm: { Args: { "": string }; Returns: string[] }
+        update_user_last_login: { Args: { user_id: string }; Returns: undefined }
+        user_set_support_ticket_flags: {
+          Args: {
+            p_ticket_id: string
+            p_archived?: boolean | null
+            p_deleted?: boolean | null
+          }
+          Returns: Database['public']['Tables']['support_tickets']['Row']
+        }
+      }
     Enums: {
       [_ in never]: never
     }

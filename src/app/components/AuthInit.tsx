@@ -1,11 +1,5 @@
 'use client';
 
-/**
- * AuthInit Component
- * Initializes authentication state on app mount
- * PH-30: User Authentication System
- */
-
 import { useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSession, setUser, logout, selectUser } from '@/store/slices/authSlice';
@@ -14,12 +8,8 @@ import type { AppDispatch } from '@/store/store';
 
 const AUTH_STORAGE_KEY = 'platinum-hunters-auth';
 const RETURN_URL_KEY = 'platinum-hunters-return-url';
-const SESSION_CHECK_INTERVAL_MS = 5 * 60 * 1000; // Check every 5 minutes (reduced from 1 min for performance)
+const SESSION_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
-/**
- * Schedule a callback to run during browser idle time
- * Falls back to setTimeout for browsers without requestIdleCallback
- */
 function scheduleIdleCallback(callback: () => void, timeout = 5000): number {
   if (typeof requestIdleCallback !== 'undefined') {
     return requestIdleCallback(callback, { timeout });
@@ -72,7 +62,11 @@ function clearAuthStorage() {
  * Sync session tokens to httpOnly cookies via API
  * This ensures the backend can read the latest tokens
  */
-async function syncCookies(session: { access_token: string; refresh_token: string; expires_in?: number }) {
+async function syncCookies(session: {
+  access_token: string;
+  refresh_token: string;
+  expires_in?: number;
+}) {
   try {
     await fetch('/api/auth/refresh', {
       method: 'POST',
@@ -311,7 +305,14 @@ export default function AuthInit() {
       resetTimer();
     };
 
-    const activityEvents = ['click', 'keydown', 'mousemove', 'touchstart', 'focus', 'visibilitychange'];
+    const activityEvents = [
+      'click',
+      'keydown',
+      'mousemove',
+      'touchstart',
+      'focus',
+      'visibilitychange',
+    ];
     // Use passive listeners for better scroll/touch performance
     activityEvents.forEach(ev => window.addEventListener(ev, onActivity, { passive: true }));
     resetTimer();

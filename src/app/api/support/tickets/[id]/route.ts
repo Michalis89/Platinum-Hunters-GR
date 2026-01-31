@@ -44,8 +44,7 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
 
     const attachmentsWithUrls = await Promise.all(
       (attachments ?? []).map(async attachment => {
-        const { data: signedData } = await supabase
-          .storage
+        const { data: signedData } = await supabase.storage
           .from('support-attachments')
           .createSignedUrl(attachment.storage_path, 60 * 60);
 
@@ -71,3 +70,47 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
 }
 
 export const dynamic = 'force-dynamic';
+
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    const supabase = await createRouteHandlerClient();
+    await requireAuth(supabase);
+    const { id: ticketId } = await context.params;
+    const body = await req.json();
+    const action = body?.action as 'archive' | 'unarchive' | 'delete';
+
+    let archived: boolean | null = null;
+    let deleted: boolean | null = null;
+
+    if (action === 'archive') archived = true;
+    if (action === 'unarchive') archived = false;
+    if (action === 'delete') deleted = true;
+
+    if (archived === null && deleted === null) {
+      return fail({ error: 'Μη έγκυρη ενέργεια.' }, 400);
+    }
+
+    const { data, error } = await supabase.rpc('user_set_support_ticket_flags', {
+      p_ticket_id: ticketId,
+      p_archived: archived,
+      p_deleted: deleted,
+    });
+
+    if (error) {
+      const msg = error.message || '';
+      if (msg.includes('NOT_FOUND_OR_FORBIDDEN')) {
+        return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
+      }
+      console.error('Ticket archive/delete error:', error);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    return ok({ ticket: data });
+  } catch (error) {
+    console.error('Support ticket update flags error:', error);
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+  }
+}

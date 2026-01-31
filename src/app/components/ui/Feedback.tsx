@@ -17,6 +17,8 @@ interface FeedbackProps {
   readonly icon?: ReactNode;
   readonly actionLabel?: string;
   readonly onAction?: () => void;
+  readonly secondaryActionLabel?: string;
+  readonly onSecondaryAction?: () => void;
   readonly onDismiss?: () => void;
   readonly dismissible?: boolean;
   readonly className?: string;
@@ -102,6 +104,8 @@ export default function Feedback({
   icon,
   actionLabel,
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
   onDismiss,
   dismissible = true,
   className,
@@ -163,23 +167,40 @@ export default function Feedback({
               </div>
             )}
 
-            {actionLabel && onAction && (
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={onAction}
-                  className={cn(
-                    'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition',
-                    isSolid
-                      ? 'bg-white/15 text-white hover:bg-white/25 focus-visible:ring-white/60'
-                      : 'bg-black/5 text-slate-900 hover:bg-black/10 focus-visible:ring-slate-300',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white/30'
-                  )}
-                >
-                  {actionLabel}
-                </button>
+            {(actionLabel && onAction) || (secondaryActionLabel && onSecondaryAction) ? (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {actionLabel && onAction && (
+                  <button
+                    type="button"
+                    onClick={onAction}
+                    className={cn(
+                      'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition',
+                      isSolid
+                        ? 'bg-white/15 text-white hover:bg-white/25 focus-visible:ring-white/60'
+                        : 'bg-black/5 text-slate-900 hover:bg-black/10 focus-visible:ring-slate-300',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white/30'
+                    )}
+                  >
+                    {actionLabel}
+                  </button>
+                )}
+                {secondaryActionLabel && onSecondaryAction && (
+                  <button
+                    type="button"
+                    onClick={onSecondaryAction}
+                    className={cn(
+                      'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition',
+                      isSolid
+                        ? 'bg-white/10 text-white hover:bg-white/20 focus-visible:ring-white/60'
+                        : 'bg-white text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-300',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white/30 border border-black/5'
+                    )}
+                  >
+                    {secondaryActionLabel}
+                  </button>
+                )}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 

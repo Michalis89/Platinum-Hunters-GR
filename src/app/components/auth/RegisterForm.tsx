@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import {
@@ -18,6 +18,8 @@ import {
   Code,
   Cat,
   Wind,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -42,9 +44,16 @@ import type { RegisterData } from '@/types/auth';
 import { fetchSession } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import Button from '../ui/Button';
-
-const COUNTRIES = ['GR', 'US', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'Other'];
-const PLATFORMS = ['PS5', 'PS4', 'PS3', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC'];
+import {
+  ANIME_GENRES,
+  BOOK_GENRES,
+  CODING_LANGUAGES,
+  COUNTRIES,
+  GENRES,
+  MOVIE_GENRES,
+  PET_TYPES,
+  PLATFORMS,
+} from '@/data/hobbyConstants';
 const HOBBIES = [
   { id: 'games', label: 'Games', icon: 'Gamepad2' },
   { id: 'anime', label: 'Anime', icon: 'Sparkles' },
@@ -57,68 +66,65 @@ const HOBBIES = [
   { id: 'vape', label: 'Vape', icon: 'Wind' },
 ];
 
-const ANIME_GENRES = [
-  'Action',
-  'Adventure',
-  'Comedy',
-  'Drama',
-  'Fantasy',
-  'Horror',
-  'Romance',
-  'Sci-Fi',
-  'Slice of Life',
-  'Sports',
-];
-const MOVIE_GENRES = [
-  'Action',
-  'Comedy',
-  'Drama',
-  'Horror',
-  'Sci-Fi',
-  'Thriller',
-  'Romance',
-  'Animation',
-  'Documentary',
-  'Fantasy',
-];
-const BOOK_GENRES = [
-  'Fantasy',
-  'Sci-Fi',
-  'Mystery',
-  'Romance',
-  'Thriller',
-  'Biography',
-  'Self-Help',
-  'History',
-  'Horror',
-  'Literary Fiction',
-];
-const CODING_LANGUAGES = [
-  'JavaScript',
-  'TypeScript',
-  'Python',
-  'Java',
-  'C#',
-  'Go',
-  'Rust',
-  'PHP',
-  'Ruby',
-  'Swift',
-];
-const PET_TYPES = ['Σκύλος', 'Γάτα', 'Πουλί', 'Ψάρια', 'Κουνέλι', 'Χάμστερ', 'Ερπετό', 'Άλλο'];
+type PreferenceSectionProps = {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  sectionKey: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  className?: string;
+  children: ReactNode;
+};
 
-const GENRES = [
-  'Action',
-  'RPG',
-  'Adventure',
-  'Shooter',
-  'Sports',
-  'Racing',
-  'Fighting',
-  'Puzzle',
-  'Horror',
-  'Platform',
-];
+const PreferenceSection = ({
+  title,
+  icon: Icon,
+  sectionKey,
+  isOpen,
+  onToggle,
+  className = '',
+  children,
+}: PreferenceSectionProps) => (
+  <div className={`space-y-4 rounded-xl border px-4 py-4 shadow-[var(--hb-shadow-sm)] ${className}`}>
+    <div className="flex items-center justify-between">
+      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--hb-headline)]">
+        <Icon className="h-4 w-4" />
+        {title}
+      </p>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
+      >
+        {isOpen ? (
+          <>
+            Απόκρυψη
+            <ChevronUp className="h-3 w-3" />
+          </>
+        ) : (
+          <>
+            Εμφάνιση
+            <ChevronDown className="h-3 w-3" />
+          </>
+        )}
+      </button>
+    </div>
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <motion.div
+          key={`${sectionKey}-content`}
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden space-y-4"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
 
 interface RegisterFormProps {
   readonly onSuccess?: () => void;
@@ -135,6 +141,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [openPreferences, setOpenPreferences] = useState<Record<string, boolean>>({
+    gaming: true,
+    anime: true,
+    movies: true,
+    books: true,
+    coding: true,
+    pet: true,
+    vape: true,
+  });
+  const togglePreference = (key: string) => {
+    setOpenPreferences(prev => ({ ...prev, [key]: !prev[key] }));
+  };
   const inputClasses =
     'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
   const selectClasses =
@@ -362,7 +380,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const progress = (currentStep / 3) * 100;
 
   return (
-    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
+    <Card className="relative flex h-[min(92vh,760px)] w-full max-w-[520px] flex-col border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur overflow-hidden">
       <CardHeader className="border-[var(--hb-border)]">
         <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
           <span className="flex items-center gap-3">
@@ -389,10 +407,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-5">
-        {alert && <AlertMessage type={alert.type} message={alert.message} />}
+      <CardContent className="flex h-full flex-col gap-4 px-5 pb-0 pt-6 sm:px-6">
+        <div className="flex-1 overflow-y-auto space-y-6 pr-1">
+          {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
-        <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
           {currentStep === 1 && (
             <motion.div
               key="step1"
@@ -611,7 +630,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-h-[60vh] space-y-4 overflow-y-auto pr-1 md:max-h-none md:overflow-visible"
+              className="space-y-4"
             >
               <div>
                 <p className="mb-2 text-sm font-medium text-[var(--hb-headline)]">
@@ -666,297 +685,339 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
               {/* Gaming preferences */}
               {formData.favorite_hobbies?.includes('games') && (
-                <div className="space-y-4 rounded-xl border border-sky-500/30 bg-sky-500/5 p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-400">
-                    <Gamepad2 className="h-4 w-4" /> Gaming
-                  </p>
-                  <div>
-                    <Input
-                      label="PSN ID (προαιρετικό)"
-                      type="text"
-                      name="psn_id"
-                      value={formData.psn_id}
-                      onChange={handleChange}
-                      placeholder="YourPSNID"
-                      error={!!errors.psn_id}
-                      className={inputClasses}
-                    />
-                    <FormErrorMessage message={errors.psn_id} />
-                  </div>
-                  <div>
-                    <Select
-                      label="Αγαπημένη Κονσόλα"
-                      options={['', ...PLATFORMS]}
-                      value={formData.favorite_platform}
-                      onChange={handleSelectChange('favorite_platform')}
-                      className={selectClasses}
-                    />
-                  </div>
-                  <div className="text-sm">
-                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {GENRES.map(genre => (
-                        <label
-                          key={genre}
-                          className="flex items-center gap-2 text-[var(--hb-muted)]"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.favorite_genres?.includes(genre)}
-                            onChange={e => {
-                              const genres = formData.favorite_genres || [];
-                              if (e.target.checked) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_genres: [...genres, genre],
-                                }));
-                              } else {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_genres: genres.filter(g => g !== genre),
-                                }));
-                              }
-                            }}
-                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-sky-500 focus:ring-1 focus:ring-sky-500"
-                          />
-                          {genre}
-                        </label>
-                      ))}
+                <PreferenceSection
+                  title="Gaming"
+                  icon={Gamepad2}
+                  sectionKey="gaming"
+                  isOpen={openPreferences.gaming}
+                  onToggle={() => togglePreference('gaming')}
+                  className="border-sky-500/30 bg-sky-500/5"
+                >
+                  <>
+                    <div>
+                      <Input
+                        label="PSN ID (προαιρετικό)"
+                        type="text"
+                        name="psn_id"
+                        value={formData.psn_id}
+                        onChange={handleChange}
+                        placeholder="YourPSNID"
+                        error={!!errors.psn_id}
+                        className={inputClasses}
+                      />
+                      <FormErrorMessage message={errors.psn_id} />
                     </div>
-                  </div>
-                </div>
+                    <div>
+                      <Select
+                        label="Αγαπημένη Κονσόλα"
+                        options={['', ...PLATFORMS]}
+                        value={formData.favorite_platform}
+                        onChange={handleSelectChange('favorite_platform')}
+                        className={selectClasses}
+                      />
+                    </div>
+                    <div className="text-sm">
+                      <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {GENRES.map(genre => (
+                          <label
+                            key={genre}
+                            className="flex items-center gap-2 text-[var(--hb-muted)]"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.favorite_genres?.includes(genre)}
+                              onChange={e => {
+                                const genres = formData.favorite_genres || [];
+                                if (e.target.checked) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_genres: [...genres, genre],
+                                  }));
+                                } else {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_genres: genres.filter(g => g !== genre),
+                                  }));
+                                }
+                              }}
+                              className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-sky-500 focus:ring-1 focus:ring-sky-500"
+                            />
+                            {genre}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                </PreferenceSection>
               )}
 
               {/* Anime/Manga preferences */}
               {(formData.favorite_hobbies?.includes('anime') ||
                 formData.favorite_hobbies?.includes('manga')) && (
-                <div className="space-y-4 rounded-xl border border-pink-500/30 bg-pink-500/5 p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pink-400">
-                    <Sparkles className="h-4 w-4" /> Anime & Manga
-                  </p>
-                  <div className="text-sm">
-                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {ANIME_GENRES.map(genre => (
-                        <label
-                          key={genre}
-                          className="flex items-center gap-2 text-[var(--hb-muted)]"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.favorite_anime_genres?.includes(genre)}
-                            onChange={e => {
-                              const genres = formData.favorite_anime_genres || [];
-                              if (e.target.checked) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_anime_genres: [...genres, genre],
-                                }));
-                              } else {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_anime_genres: genres.filter(g => g !== genre),
-                                }));
-                              }
-                            }}
-                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-pink-500 focus:ring-1 focus:ring-pink-500"
-                          />
-                          {genre}
-                        </label>
-                      ))}
+                <PreferenceSection
+                  title="Anime & Manga"
+                  icon={Sparkles}
+                  sectionKey="anime"
+                  isOpen={openPreferences.anime}
+                  onToggle={() => togglePreference('anime')}
+                  className="border-pink-500/30 bg-pink-500/5"
+                >
+                  <>
+                    <div className="text-sm">
+                      <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {ANIME_GENRES.map(genre => (
+                          <label
+                            key={genre}
+                            className="flex items-center gap-2 text-[var(--hb-muted)]"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.favorite_anime_genres?.includes(genre)}
+                              onChange={e => {
+                                const genres = formData.favorite_anime_genres || [];
+                                if (e.target.checked) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_anime_genres: [...genres, genre],
+                                  }));
+                                } else {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_anime_genres: genres.filter(g => g !== genre),
+                                  }));
+                                }
+                              }}
+                              className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-pink-500 focus:ring-1 focus:ring-pink-500"
+                            />
+                            {genre}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                </PreferenceSection>
               )}
 
               {/* Movies/TV preferences */}
               {(formData.favorite_hobbies?.includes('movies') ||
                 formData.favorite_hobbies?.includes('tv')) && (
-                <div className="space-y-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
-                    <Film className="h-4 w-4" /> Ταινίες & Σειρές
-                  </p>
-                  <div className="text-sm">
-                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {MOVIE_GENRES.map(genre => (
-                        <label
-                          key={genre}
-                          className="flex items-center gap-2 text-[var(--hb-muted)]"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.favorite_movie_genres?.includes(genre)}
-                            onChange={e => {
-                              const genres = formData.favorite_movie_genres || [];
-                              if (e.target.checked) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_movie_genres: [...genres, genre],
-                                }));
-                              } else {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_movie_genres: genres.filter(g => g !== genre),
-                                }));
-                              }
-                            }}
-                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-amber-500 focus:ring-1 focus:ring-amber-500"
-                          />
-                          {genre}
-                        </label>
-                      ))}
+                <PreferenceSection
+                  title="Ταινίες & Σειρές"
+                  icon={Film}
+                  sectionKey="movies"
+                  isOpen={openPreferences.movies}
+                  onToggle={() => togglePreference('movies')}
+                  className="border-amber-500/30 bg-amber-500/5"
+                >
+                  <>
+                    <div className="text-sm">
+                      <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {MOVIE_GENRES.map(genre => (
+                          <label
+                            key={genre}
+                            className="flex items-center gap-2 text-[var(--hb-muted)]"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.favorite_movie_genres?.includes(genre)}
+                              onChange={e => {
+                                const genres = formData.favorite_movie_genres || [];
+                                if (e.target.checked) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_movie_genres: [...genres, genre],
+                                  }));
+                                } else {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_movie_genres: genres.filter(g => g !== genre),
+                                  }));
+                                }
+                              }}
+                              className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-amber-500 focus:ring-1 focus:ring-amber-500"
+                            />
+                            {genre}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                </PreferenceSection>
               )}
 
               {/* Books preferences */}
               {formData.favorite_hobbies?.includes('books') && (
-                <div className="space-y-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                    <BookOpen className="h-4 w-4" /> Βιβλία
-                  </p>
-                  <div className="text-sm">
-                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {BOOK_GENRES.map(genre => (
-                        <label
-                          key={genre}
-                          className="flex items-center gap-2 text-[var(--hb-muted)]"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.favorite_book_genres?.includes(genre)}
-                            onChange={e => {
-                              const genres = formData.favorite_book_genres || [];
-                              if (e.target.checked) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_book_genres: [...genres, genre],
-                                }));
-                              } else {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_book_genres: genres.filter(g => g !== genre),
-                                }));
-                              }
-                            }}
-                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                          />
-                          {genre}
-                        </label>
-                      ))}
+                <PreferenceSection
+                  title="Βιβλία"
+                  icon={BookOpen}
+                  sectionKey="books"
+                  isOpen={openPreferences.books}
+                  onToggle={() => togglePreference('books')}
+                  className="border-emerald-500/30 bg-emerald-500/5"
+                >
+                  <>
+                    <div className="text-sm">
+                      <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {BOOK_GENRES.map(genre => (
+                          <label
+                            key={genre}
+                            className="flex items-center gap-2 text-[var(--hb-muted)]"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.favorite_book_genres?.includes(genre)}
+                              onChange={e => {
+                                const genres = formData.favorite_book_genres || [];
+                                if (e.target.checked) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_book_genres: [...genres, genre],
+                                  }));
+                                } else {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_book_genres: genres.filter(g => g !== genre),
+                                  }));
+                                }
+                              }}
+                              className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                            />
+                            {genre}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                </PreferenceSection>
               )}
 
               {/* Coding preferences */}
               {formData.favorite_hobbies?.includes('coding') && (
-                <div className="space-y-4 rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
-                    <Code className="h-4 w-4" /> Coding
-                  </p>
-                  <div className="text-sm">
-                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένες Γλώσσες:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {CODING_LANGUAGES.map(lang => (
-                        <label
-                          key={lang}
-                          className="flex items-center gap-2 text-[var(--hb-muted)]"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.favorite_languages?.includes(lang)}
-                            onChange={e => {
-                              const languages = formData.favorite_languages || [];
-                              if (e.target.checked) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_languages: [...languages, lang],
-                                }));
-                              } else {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  favorite_languages: languages.filter(l => l !== lang),
-                                }));
-                              }
-                            }}
-                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                          />
-                          {lang}
-                        </label>
-                      ))}
+                <PreferenceSection
+                  title="Coding"
+                  icon={Code}
+                  sectionKey="coding"
+                  isOpen={openPreferences.coding}
+                  onToggle={() => togglePreference('coding')}
+                  className="border-cyan-500/30 bg-cyan-500/5"
+                >
+                  <>
+                    <div className="text-sm">
+                      <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένες Γλώσσες:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {CODING_LANGUAGES.map(lang => (
+                          <label
+                            key={lang}
+                            className="flex items-center gap-2 text-[var(--hb-muted)]"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.favorite_languages?.includes(lang)}
+                              onChange={e => {
+                                const languages = formData.favorite_languages || [];
+                                if (e.target.checked) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_languages: [...languages, lang],
+                                  }));
+                                } else {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    favorite_languages: languages.filter(l => l !== lang),
+                                  }));
+                                }
+                              }}
+                              className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                            />
+                            {lang}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                </PreferenceSection>
               )}
 
               {/* Pet preferences */}
               {formData.favorite_hobbies?.includes('pet') && (
-                <div className="space-y-4 rounded-xl border border-orange-500/30 bg-orange-500/5 p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-orange-400">
-                    <Cat className="h-4 w-4" /> Κατοικίδια
-                  </p>
-                  <div className="text-sm">
-                    <p className="mb-2 text-xs text-[var(--hb-muted)]">Τι κατοικίδια έχεις;</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {PET_TYPES.map(pet => (
-                        <label key={pet} className="flex items-center gap-2 text-[var(--hb-muted)]">
-                          <input
-                            type="checkbox"
-                            checked={formData.pet_types?.includes(pet)}
-                            onChange={e => {
-                              const pets = formData.pet_types || [];
-                              if (e.target.checked) {
-                                setFormData(prev => ({ ...prev, pet_types: [...pets, pet] }));
-                              } else {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  pet_types: pets.filter(p => p !== pet),
-                                }));
-                              }
-                            }}
-                            className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-orange-500 focus:ring-1 focus:ring-orange-500"
-                          />
-                          {pet}
-                        </label>
-                      ))}
+                <PreferenceSection
+                  title="Κατοικίδια"
+                  icon={Cat}
+                  sectionKey="pet"
+                  isOpen={openPreferences.pet}
+                  onToggle={() => togglePreference('pet')}
+                  className="border-orange-500/30 bg-orange-500/5"
+                >
+                  <>
+                    <div className="text-sm">
+                      <p className="mb-2 text-xs text-[var(--hb-muted)]">Τι κατοικίδια έχεις;</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {PET_TYPES.map(pet => (
+                          <label key={pet} className="flex items-center gap-2 text-[var(--hb-muted)]">
+                            <input
+                              type="checkbox"
+                              checked={formData.pet_types?.includes(pet)}
+                              onChange={e => {
+                                const pets = formData.pet_types || [];
+                                if (e.target.checked) {
+                                  setFormData(prev => ({ ...prev, pet_types: [...pets, pet] }));
+                                } else {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    pet_types: pets.filter(p => p !== pet),
+                                  }));
+                                }
+                              }}
+                              className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-orange-500 focus:ring-1 focus:ring-orange-500"
+                            />
+                            {pet}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                </PreferenceSection>
               )}
 
               {/* Vape preferences */}
               {formData.favorite_hobbies?.includes('vape') && (
-                <div className="space-y-4 rounded-xl border border-violet-500/30 bg-violet-500/5 p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-violet-400">
-                    <Wind className="h-4 w-4" /> Vape
-                  </p>
-                  <div>
-                    <Input
-                      label="Αγαπημένη Συσκευή"
-                      type="text"
-                      name="vape_device"
-                      value={formData.vape_device || ''}
-                      onChange={handleChange}
-                      placeholder="π.χ. Voopoo Drag, GeekVape..."
-                      className={inputClasses}
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      label="Αγαπημένη Γεύση"
-                      type="text"
-                      name="vape_flavor"
-                      value={formData.vape_flavor || ''}
-                      onChange={handleChange}
-                      placeholder="π.χ. Tobacco, Fruity, Dessert..."
-                      className={inputClasses}
-                    />
-                  </div>
-                </div>
+                <PreferenceSection
+                  title="Vape"
+                  icon={Wind}
+                  sectionKey="vape"
+                  isOpen={openPreferences.vape}
+                  onToggle={() => togglePreference('vape')}
+                  className="border-violet-500/30 bg-violet-500/5"
+                >
+                  <>
+                    <div>
+                      <Input
+                        label="Αγαπημένη Συσκευή"
+                        type="text"
+                        name="vape_device"
+                        value={formData.vape_device || ''}
+                        onChange={handleChange}
+                        placeholder="π.χ. Voopoo Drag, GeekVape..."
+                        className={inputClasses}
+                      />
+                    </div>
+                    <div>
+                      <Input
+                        label="Αγαπημένη Γεύση"
+                        type="text"
+                        name="vape_flavor"
+                        value={formData.vape_flavor || ''}
+                        onChange={handleChange}
+                        placeholder="π.χ. Tobacco, Fruity, Dessert..."
+                        className={inputClasses}
+                      />
+                    </div>
+                  </>
+                </PreferenceSection>
               )}
 
               <p className="text-center text-xs text-[var(--hb-muted)]">
@@ -965,8 +1026,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
 
-        <div className="mt-6 flex gap-4">
+        <div className="sticky bottom-0 z-10 -mx-5 flex flex-col gap-4 border-t border-[var(--hb-border)] bg-[var(--hb-panel)] px-5 pt-4 sm:mx-0 sm:px-0">
           {currentStep > 1 && (
             <Button
               type="button"
@@ -1001,20 +1063,19 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               </>
             )}
           </Button>
-        </div>
-
-        <div className="mt-4 text-center text-sm text-[var(--hb-muted)]">
-          Έχεις ήδη λογαριασμό;{' '}
-          <Link
-            href={
-              redirectParam
-                ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}`
-                : '/pages/auth/login'
-            }
-            className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
-          >
-            Σύνδεση
-          </Link>
+          <div className="text-center text-sm text-[var(--hb-muted)]">
+            Έχεις ήδη λογαριασμό;{' '}
+            <Link
+              href={
+                redirectParam
+                  ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}`
+                  : '/pages/auth/login'
+              }
+              className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
+            >
+              Σύνδεση
+            </Link>
+          </div>
         </div>
       </CardContent>
     </Card>

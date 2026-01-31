@@ -5,7 +5,6 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
 import { hasAnyRole } from '@/lib/roles';
-
 // GET - Fetch comments for an article
 export async function GET(
   req: Request,
@@ -172,8 +171,74 @@ export async function DELETE(req: Request) {
     revalidateCache.articleComment(comment.article_id);
 
     return ok({ message: 'Το σχόλιο διαγράφηκε επιτυχώς' });
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      if (error instanceof UnauthorizedError) {
+        return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+      }
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+}
+
+// PATCH - Update a comment (own or admin)
+export async function PATCH(req: Request) {
+  try {
+    const supabase = await createRouteHandlerClient();
+    const session = await requireAuth(supabase);
+    const body = await req.json();
+    const commentId = Number.parseInt(body?.commentId ?? '', 10);
+    const content = typeof body?.content === 'string' ? body.content.trim() : '';
+
+    if (!commentId || !content) {
+      return fail({ error: 'Το ID και περιεχόμενο του σχολίου είναι υποχρεωτικά' }, 400);
+    }
+
+    if (content.length > 2000) {
+      return fail({ error: 'Το σχόλιο είναι πολύ μεγάλο (μέχρι 2000 χαρακτήρες)' }, 400);
+    }
+
+    const { data: comment, error: fetchError } = await supabase
+      .from('article_comments')
+      .select('*')
+      .eq('id', commentId)
+      .single();
+
+    if (fetchError || !comment) {
+      return fail({ error: 'Το σχόλιο δεν βρέθηκε' }, 404);
+    }
+
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role, roles')
+      .eq('id', session.user.id)
+      .single();
+
+    const isOwner = comment.user_id === session.user.id;
+    const isAdmin = hasAnyRole(userData, ['admin', 'owner']);
+
+    if (!isOwner && !isAdmin) {
+      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
+    }
+
+    const { data: updatedComment, error: updateError } = await supabase
+      .from('article_comments')
+      .update({
+        content,
+      })
+      .eq('id', commentId)
+      .select('*, users!user_id(username, display_name, avatar_url)')
+      .single();
+
+    if (updateError || !updatedComment) {
+      console.error('Error updating comment:', updateError);
+      return fail({ error: 'Αποτυχία ενημέρωσης σχολίου' }, 500);
+    }
+
+    revalidateCache.articleComment(comment.article_id);
+
+    return ok({ message: 'Το σχόλιο ενημερώθηκε επιτυχώς', comment: updatedComment });
   } catch (error) {
-    console.error('Error deleting comment:', error);
+    console.error('Error updating comment:', error);
     if (error instanceof UnauthorizedError) {
       return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
     }

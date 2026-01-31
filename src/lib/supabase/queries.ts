@@ -17,6 +17,7 @@ type GetArticlesParams = {
   status?: string;
   authorId?: string | null;
   featured?: boolean;
+  tag?: string | null;
   limit: number;
   offset: number;
 };
@@ -25,7 +26,7 @@ export async function getArticlesWithFilters(
   supabase: DbClient,
   params: GetArticlesParams,
 ): Promise<{ data: ArticleWithAuthor[] | null; error: PostgrestError | null; count: number | null }> {
-  const { category, topic, status, authorId, featured, limit, offset } = params;
+  const { category, topic, status, authorId, featured, limit, offset, tag } = params;
   const resolvedStatus = status ?? 'published';
 
   let query = supabase
@@ -47,6 +48,9 @@ export async function getArticlesWithFilters(
   }
   if (featured) {
     query = query.eq('is_featured', true);
+  }
+  if (tag) {
+    query = query.contains('tags', [tag]);
   }
 
   const { data, error, count } = await query;

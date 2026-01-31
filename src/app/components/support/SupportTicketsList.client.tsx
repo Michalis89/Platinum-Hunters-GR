@@ -13,6 +13,9 @@ import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
+import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
+import { Select } from '@/app/components/ui/Select';
+import Feedback from '@/app/components/ui/Feedback';
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
 
 const statusLabels: Record<string, string> = {
@@ -53,6 +56,7 @@ type TicketItem = {
   severity: string | null;
   created_at: string;
   updated_at: string;
+  user_archived?: boolean;
 };
 
 export default function SupportTicketsList() {
@@ -63,6 +67,15 @@ export default function SupportTicketsList() {
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<'active' | 'all' | 'archive'>('active');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{
+    type: 'success' | 'error' | 'warning';
+    message: string;
+    onConfirm?: () => void;
+    onCancel?: () => void;
+  } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -102,6 +115,85 @@ export default function SupportTicketsList() {
     };
   }, [isAuthenticated]);
 
+  const handleArchiveToggle = async (id: string, archived: boolean) => {
+    if (actionLoading) return;
+    setActionLoading(id);
+    try {
+      const response = await fetch(`/api/support/tickets/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: archived ? 'archive' : 'unarchive' }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Αποτυχία ενημέρωσης');
+      }
+      setTickets(prev => prev.map(t => (t.id === id ? { ...t, user_archived: archived } : t)));
+    } catch (err) {
+      console.error(err);
+      setAlert({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Σφάλμα',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const performDelete = async (id: string) => {
+    if (actionLoading) return;
+    setActionLoading(id);
+    try {
+      const response = await fetch(`/api/support/tickets/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete' }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Αποτυχία διαγραφής');
+      }
+      setTickets(prev => prev.filter(t => t.id !== id));
+      setAlert({ type: 'success', message: 'Το ticket αφαιρέθηκε από τη δική σου προβολή.' });
+    } catch (err) {
+      console.error(err);
+      setAlert({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Σφάλμα',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    setAlert({
+      type: 'warning',
+      message: 'Να αφαιρεθεί το ticket από τη δική σου προβολή; (Admins το βλέπουν πάντα)',
+      onConfirm: () => {
+        setAlert(null);
+        performDelete(id);
+      },
+      onCancel: () => {
+        setAlert(null);
+      },
+    });
+  };
+
+  const filteredTickets = useMemo(() => {
+    const activeStatuses = ['open', 'in_progress', 'waiting_user'];
+    const archivedStatuses = ['resolved', 'closed'];
+    return tickets
+      .filter(ticket => {
+        const archivedFlag = ticket.user_archived === true;
+        if (view === 'active') return activeStatuses.includes(ticket.status) && !archivedFlag;
+        if (view === 'archive') return archivedFlag || archivedStatuses.includes(ticket.status);
+        // 'all' => all non-archived tickets
+        return !archivedFlag;
+      })
+      .filter(ticket => (categoryFilter ? ticket.category === categoryFilter : true));
+  }, [tickets, view, categoryFilter]);
+
   const content = useMemo(() => {
     if (loading) {
       return (
@@ -115,12 +207,20 @@ export default function SupportTicketsList() {
       return <ErrorState error={error} onRetry={() => window.location.reload()} />;
     }
 
-    if (tickets.length === 0) {
+    if (filteredTickets.length === 0) {
       return (
         <EmptyState
           icon={<Inbox className="h-10 w-10 text-[var(--hb-primary)]" />}
-          title="Δεν υπάρχουν tickets ακόμα"
-          description="Ξεκίνα με το πρώτο σου αίτημα υποστήριξης."
+          title={
+            view === 'archive'
+              ? 'Δεν υπάρχουν αρχειοθετημένα tickets'
+              : 'Δεν υπάρχουν tickets για τα φίλτρα που επέλεξες'
+          }
+          description={
+            view === 'archive'
+              ? 'Τα κλειστά tickets θα εμφανιστούν εδώ ως ιστορικό.'
+              : 'Άλλαξε φίλτρα ή δημιούργησε νέο αίτημα.'
+          }
           action={
             <Button href="/pages/support" variant="primary">
               Νέο αίτημα
@@ -132,7 +232,7 @@ export default function SupportTicketsList() {
 
     return (
       <div className="space-y-4">
-        {tickets.map(ticket => (
+        {filteredTickets.map(ticket => (
           <Card
             key={ticket.id}
             className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]"
@@ -143,7 +243,10 @@ export default function SupportTicketsList() {
                   <Ticket className="h-5 w-5 text-[var(--hb-primary)]" />
                   {ticket.subject}
                 </span>
-                <Badge text={statusLabels[ticket.status] || ticket.status} color={statusColors[ticket.status] || 'gray'} />
+                <Badge
+                  text={statusLabels[ticket.status] || ticket.status}
+                  color={statusColors[ticket.status] || 'gray'}
+                />
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-[var(--hb-muted)]">
@@ -160,17 +263,47 @@ export default function SupportTicketsList() {
                   Τελευταία ενημέρωση: {new Date(ticket.updated_at).toLocaleString('el-GR')}
                 </span>
               </div>
-              <div className="pt-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 <Button href={`/pages/support/tickets/${ticket.id}`} variant="secondary">
                   Δες λεπτομέρειες
                 </Button>
+                {view === 'archive' ? (
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleArchiveToggle(ticket.id, false)}
+                    className="text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                    disabled={actionLoading === ticket.id}
+                  >
+                    Επαναφορά από αρχείο
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleArchiveToggle(ticket.id, true)}
+                    className="text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                    disabled={actionLoading === ticket.id}
+                  >
+                    Μεταφορά στο αρχείο
+                  </Button>
+                )}
+                {view === 'archive' && (
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDelete(ticket.id)}
+                    className="text-[var(--hb-headline)]"
+                    disabled={actionLoading === ticket.id}
+                  >
+                    Διαγραφή
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
     );
-  }, [tickets, loading, error]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredTickets, loading, error, view]);
 
   if (!isAuthenticated && authLoading) {
     return (
@@ -192,10 +325,58 @@ export default function SupportTicketsList() {
       <div className="relative">
         <PageHero
           eyebrow="Υποστήριξη"
-          title={<span className="text-3xl text-[var(--hb-headline)] md:text-5xl">Τα tickets μου</span>}
+          title={
+            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">Τα tickets μου</span>
+          }
           subtitle="Δες όλα τα αιτήματα υποστήριξης και την εξέλιξή τους."
         />
         <PageContainer size="md" className="pb-20">
+          {alert && (
+            <div className="mb-4">
+              <Feedback
+                variant={alert.type}
+                tone="solid"
+                layout="inline"
+                description={alert.message}
+                actionLabel={alert.onConfirm ? 'Διαγραφή' : undefined}
+                onAction={alert.onConfirm}
+                secondaryActionLabel={alert.onCancel ? 'Άκυρο' : undefined}
+              onSecondaryAction={() => {
+                alert.onCancel?.();
+                setAlert(null);
+              }}
+              onDismiss={() => {
+                setAlert(null);
+              }}
+            />
+          </div>
+        )}
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <SegmentedControl
+              options={[
+                { id: 'active', label: 'Ενεργά' },
+                { id: 'all', label: 'Όλα' },
+                { id: 'archive', label: 'Αρχείο' },
+              ]}
+              value={view}
+              onChange={value => setView(value as typeof view)}
+            />
+            <div className="md:w-64">
+              <Select
+                label="Κατηγορία"
+                options={['', 'bug', 'feature', 'author_rights', 'general']}
+                optionLabels={{
+                  '': 'Όλες',
+                  bug: 'Σφάλμα',
+                  feature: 'Πρόταση',
+                  author_rights: 'Author',
+                  general: 'Γενικά',
+                }}
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+              />
+            </div>
+          </div>
           {content}
           <div className="mt-8 flex justify-center">
             <Link

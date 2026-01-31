@@ -67,9 +67,10 @@ export async function GET() {
     const { data, error } = await supabase
       .from('support_tickets')
       .select(
-        'id, category, subject, status, severity, created_at, updated_at, assigned_to, labels',
+        'id, category, subject, status, severity, created_at, updated_at, assigned_to, labels, user_archived, user_deleted',
       )
       .eq('user_id', session.user.id)
+      .eq('user_deleted', false)
       .order('updated_at', { ascending: false });
 
     if (error) {

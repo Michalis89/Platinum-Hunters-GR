@@ -1,9 +1,9 @@
-'use client';
+ 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { Heart, Pencil, Share2, Trash2 } from 'lucide-react';
+import { ClipboardCopy, Heart, Pencil, Share2, Trash2 } from 'lucide-react';
 import type { ArticleRow } from '@/types/database';
 import { selectUser } from '@/store/slices/authSlice';
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
@@ -29,6 +29,8 @@ export default function ActionRow({ article }: ActionRowProps) {
   });
   const [likeLoading, setLikeLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const canEdit = !!currentUser && hasAnyRole(currentUser, ['admin', 'author', 'reviewer', 'owner']);
   const fallbackBase = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
@@ -52,6 +54,14 @@ export default function ActionRow({ article }: ActionRowProps) {
     };
   }, [article.id, article.likes]);
 
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleShare = async () => {
     const shareData = {
       title: article.title,
@@ -72,6 +82,24 @@ export default function ActionRow({ article }: ActionRowProps) {
       await navigator.clipboard.writeText(shareData.url);
     } catch {
       // ignore clipboard failure
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (typeof navigator === 'undefined' || typeof window === 'undefined' || !navigator.clipboard) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => {
+        setCopied(false);
+      }, 1800);
+    } catch {
+      // ignore clipboard failures
     }
   };
 
@@ -131,7 +159,7 @@ export default function ActionRow({ article }: ActionRowProps) {
 
   return (
     <>
-      <div className="flex min-h-[36px] items-center gap-2">
+      <div className="flex min-h-[44px] items-center justify-center gap-3">
         <button
           type="button"
           onClick={handleShare}
@@ -140,6 +168,17 @@ export default function ActionRow({ article }: ActionRowProps) {
           className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-[var(--hb-text)] transition hover:text-[var(--hb-primary)]"
         >
           <Share2 size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          aria-label="Αντιγραφή συνδέσμου"
+          title={copied ? 'Ο σύνδεσμος αντιγράφηκε' : 'Αντιγραφή συνδέσμου'}
+          className={`rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] transition ${
+            copied ? 'text-[var(--hb-primary)]' : 'text-[var(--hb-text)]'
+          }`}
+        >
+          <ClipboardCopy size={14} />
         </button>
         <button
           type="button"

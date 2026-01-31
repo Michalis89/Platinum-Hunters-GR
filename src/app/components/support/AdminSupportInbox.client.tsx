@@ -14,6 +14,7 @@ import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
+import Feedback from '@/app/components/ui/Feedback';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 
@@ -61,7 +62,12 @@ type AdminTicket = {
   updated_at: string;
   email: string | null;
   name: string | null;
-  users?: { id: string; username: string; display_name: string | null; email: string | null } | null;
+  users?: {
+    id: string;
+    username: string;
+    display_name: string | null;
+    email: string | null;
+  } | null;
 };
 
 export default function AdminSupportInbox() {
@@ -78,6 +84,13 @@ export default function AdminSupportInbox() {
     q: '',
   });
   const [meta, setMeta] = useState<{ total: number; limit: number; offset: number } | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{
+    type: 'success' | 'error' | 'warning';
+    message: string;
+    onConfirm?: () => void;
+    onCancel?: () => void;
+  } | null>(null);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -134,10 +147,14 @@ export default function AdminSupportInbox() {
       <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
         <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
       </div>
-      <div className="relative">
+      <div className="relative mt-10">
         <PageHero
           eyebrow="Διαχείριση"
-          title={<span className="text-3xl text-[var(--hb-headline)] md:text-5xl">Εισερχόμενα Υποστήριξης</span>}
+          title={
+            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">
+              Εισερχόμενα Υποστήριξης
+            </span>
+          }
           subtitle="Διαχειρίσου όλα τα εισερχόμενα αιτήματα υποστήριξης."
           badges={
             <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
@@ -147,7 +164,24 @@ export default function AdminSupportInbox() {
           }
         />
 
-        <PageContainer size="lg" className="pb-20">
+        <PageContainer size="lg" className="mt-10 pb-20">
+          {alert && (
+            <div className="mb-4">
+              <Feedback
+                variant={alert.type}
+                tone="solid"
+                description={alert.message}
+                actionLabel={alert.onConfirm ? 'Διαγραφή' : undefined}
+                onAction={alert.onConfirm}
+                secondaryActionLabel={alert.onCancel ? 'Άκυρο' : undefined}
+                onSecondaryAction={() => {
+                  alert.onCancel?.();
+                  setAlert(null);
+                }}
+                onDismiss={() => setAlert(null)}
+              />
+            </div>
+          )}
           <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
             <CardHeader className="border-[var(--hb-border)]">
               <CardTitle className="text-[var(--hb-headline)]">Φίλτρα</CardTitle>
@@ -247,15 +281,55 @@ export default function AdminSupportInbox() {
                         <span>{new Date(ticket.updated_at).toLocaleString('el-GR')}</span>
                       </div>
                       <div className="text-xs text-[var(--hb-muted)]">
-                        Από: {ticket.name || ticket.users?.display_name || ticket.users?.username || '—'}
+                        Από:{' '}
+                        {ticket.name || ticket.users?.display_name || ticket.users?.username || '—'}
                         {' • '}
                         {ticket.email || ticket.users?.email || '—'}
                       </div>
-                      <div className="pt-2">
-                        <Button href={`/admin/support/${ticket.id}`} variant="secondary">
-                          Άνοιγμα ticket
+                     <div className="pt-2">
+                       <Button href={`/admin/support/${ticket.id}`} variant="secondary">
+                         Άνοιγμα ticket
+                       </Button>
+                        <Button
+                          variant="danger"
+                          disabled={actionLoading === ticket.id}
+                          onClick={() => {
+                            setAlert({
+                              type: 'warning',
+                              message: 'Οριστική διαγραφή ticket; Η ενέργεια δεν αναιρείται.',
+                              onConfirm: async () => {
+                                setAlert(null);
+                                setActionLoading(ticket.id);
+                                try {
+                                  const res = await fetch(`/api/admin/support/tickets/${ticket.id}`, {
+                                    method: 'DELETE',
+                                  });
+                                  const payload = await res.json().catch(() => null);
+                                  if (!res.ok) {
+                                    throw new Error(payload?.error || 'Αποτυχία διαγραφής');
+                                  }
+                          setTickets(prev => prev.filter(t => t.id !== ticket.id));
+                          setAlert(null);
+                          setTimeout(
+                            () => setAlert({ type: 'success', message: 'Το ticket διαγράφηκε.' }),
+                            80,
+                          );
+                                } catch (err) {
+                                  setAlert({
+                                    type: 'error',
+                                    message: err instanceof Error ? err.message : 'Σφάλμα διαγραφής',
+                                  });
+                                } finally {
+                                  setActionLoading(null);
+                                }
+                              },
+                              onCancel: () => setAlert(null),
+                            });
+                          }}
+                        >
+                          Διαγραφή
                         </Button>
-                      </div>
+                     </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -264,7 +338,9 @@ export default function AdminSupportInbox() {
           </div>
 
           <div className="mt-10 text-center text-xs text-[var(--hb-muted)]">
-            <Link href="/" className="hover:text-[var(--hb-primary)]">Επιστροφή στην αρχική</Link>
+            <Link href="/" className="hover:text-[var(--hb-primary)]">
+              Επιστροφή στην αρχική
+            </Link>
           </div>
         </PageContainer>
       </div>

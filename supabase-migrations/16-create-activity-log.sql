@@ -47,6 +47,56 @@ CREATE POLICY "Users can insert their own activity"
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+-- Helper for logging article likes
+CREATE OR REPLACE FUNCTION public.log_article_like_activity()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    INSERT INTO activity_log (user_id, type, payload)
+    VALUES (
+      NEW.user_id,
+      'article_liked',
+      jsonb_build_object('article_id', NEW.article_id)
+    );
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    INSERT INTO activity_log (user_id, type, payload)
+    VALUES (
+      OLD.user_id,
+      'article_unliked',
+      jsonb_build_object('article_id', OLD.article_id)
+    );
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Helper for logging article comments
+CREATE OR REPLACE FUNCTION public.log_article_comment_activity()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    INSERT INTO activity_log (user_id, type, payload)
+    VALUES (
+      NEW.user_id,
+      'article_commented',
+      jsonb_build_object('article_id', NEW.article_id, 'comment_id', NEW.id)
+    );
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    INSERT INTO activity_log (user_id, type, payload)
+    VALUES (
+      OLD.user_id,
+      'article_comment_deleted',
+      jsonb_build_object('article_id', OLD.article_id, 'comment_id', OLD.id)
+    );
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
 -- =====================================================
 -- Success message
 -- =====================================================

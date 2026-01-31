@@ -144,6 +144,24 @@ export async function DELETE(
 
     const session = await requireAuth(supabase);
 
+    // Get article info for activity log
+    const { data: article, error: articleError } = await supabase
+      .from('articles')
+      .select('id, title, slug')
+      .eq('id', Number.parseInt(id, 10))
+      .single();
+
+    if (articleError || !article) {
+      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
+    }
+
+    // Get user info for activity log
+    const { data: userData } = await supabase
+      .from('users')
+      .select('username, display_name, avatar_url')
+      .eq('id', session.user.id)
+      .single();
+
     // Delete like
     const { error: deleteError } = await supabase
       .from('article_likes')
@@ -155,6 +173,16 @@ export async function DELETE(
       console.error('Error removing like:', deleteError);
       return fail({ error: 'Αποτυχία αφαίρεσης like' }, 500);
     }
+
+    // Log activity
+    await insertActivity(supabase, session.user.id, 'article_unliked', {
+      articleId: article.id,
+      articleTitle: article.title,
+      articleSlug: article.slug,
+      username: userData?.username,
+      display_name: userData?.display_name,
+      avatar_url: userData?.avatar_url,
+    });
 
     // Get updated count
     const { count } = await supabase

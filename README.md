@@ -8,7 +8,7 @@
   </p>
 
   <p>
-    <a href="https://platinumhunters.gr">Live Demo</a> &bull;
+    <a href="https://hobbistas-hub.com">Live Demo</a> &bull;
     <a href="#features">Features</a> &bull;
     <a href="#getting-started">Getting Started</a> &bull;
     <a href="#deployment">Deployment</a>

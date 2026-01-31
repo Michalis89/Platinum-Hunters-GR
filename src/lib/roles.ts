@@ -1,20 +1,15 @@
 import type { UserRole } from '@/types/user';
 
-const VALID_ROLES: UserRole[] = [
-  'user',
-  'author',
-  'reviewer',
-  'moderator',
-  'admin',
-  'owner',
-];
+const VALID_ROLES: UserRole[] = ['user', 'author', 'reviewer', 'moderator', 'admin', 'owner'];
 
 const VALID_ROLE_SET = new Set<UserRole>(VALID_ROLES);
 
-type RoleCarrier = {
-  role?: string | null;
-  roles?: string[] | null;
-} | null
+type RoleCarrier =
+  | {
+      role?: string | null;
+      roles?: string[] | null;
+    }
+  | null
   | undefined;
 
 const normalizeRoles = (roles: (string | null | undefined)[]) =>
@@ -40,8 +35,9 @@ export const hasAnyRole = (user: RoleCarrier, roles: UserRole[]): boolean => {
   return roles.some(role => userRoles.includes(role));
 };
 
-export const isAdminLike = (user: RoleCarrier): boolean =>
-  hasAnyRole(user, ['admin', 'owner']);
+export const isAdminLike = (user: RoleCarrier): boolean => hasAnyRole(user, ['admin', 'owner']);
 
 export const isAdminOrModerator = (user: RoleCarrier): boolean =>
   hasAnyRole(user, ['admin', 'owner', 'moderator']);
+
+export const isOwner = (user: RoleCarrier): boolean => hasAnyRole(user, ['owner']);

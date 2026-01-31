@@ -38,140 +38,24 @@ import type { AppDispatch } from '@/store/store';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
 import Button from '@/app/components/ui/Button';
+import {
+  ANIME_GENRES,
+  BOOK_GENRES,
+  CATEGORY_SERVICES,
+  CATEGORIES,
+  CODING_FOCUS,
+  CODING_LANGUAGES,
+  COUNTRIES,
+  GENRES,
+  MOVIE_GENRES,
+  MOVIE_STYLES,
+  PET_TYPES,
+  PLATFORMS,
+  TV_GENRES,
+  TV_STYLES,
+  VAPE_FLAVORS,
+} from '@/data/hobbyConstants';
 
-const COUNTRIES = ['GR', 'US', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'Other'];
-const PLATFORMS = ['PS5', 'PS4', 'PS3', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC'];
-const GENRES = [
-  'Action',
-  'RPG',
-  'Adventure',
-  'Shooter',
-  'Sports',
-  'Racing',
-  'Fighting',
-  'Puzzle',
-  'Horror',
-  'Platform',
-];
-const CATEGORIES = [
-  'games',
-  'anime',
-  'manga',
-  'books',
-  'movies',
-  'tv',
-  'coding',
-  'pet',
-  'vape',
-] as const;
-const CATEGORY_SERVICES: Record<string, string[]> = {
-  anime: ['Anilist', 'MyAnimeList', 'Crunchyroll', 'Netflix', 'Other'],
-  manga: ['Anilist', 'MyAnimeList', 'MangaPlus', 'Comixology', 'Other'],
-  books: ['Goodreads', 'StoryGraph', 'Kindle', 'Audible', 'Other'],
-  movies: [
-    'Netflix',
-    'HBO / Max',
-    'Disney+',
-    'Amazon Prime',
-    'Apple TV+',
-    'Hulu',
-    'Cinema',
-    'Blu-ray / Physical',
-    'Other',
-  ],
-  tv: ['Netflix', 'HBO / Max', 'Disney+', 'Amazon Prime', 'Apple TV+', 'Hulu', 'Other'],
-};
-const TV_GENRES = [
-  'Action',
-  'Drama',
-  'Comedy',
-  'Sci-Fi',
-  'Fantasy',
-  'Thriller',
-  'Crime',
-  'Mystery',
-  'Horror',
-  'Romance',
-  'Documentary',
-  'Animated',
-  'Sitcom',
-  'Superhero',
-];
-const TV_STYLES = ['Binge watching', '1–2 episodes per day', 'Weekly releases', 'Depends'];
-const MOVIE_GENRES = [
-  'Action',
-  'Adventure',
-  'Sci-Fi',
-  'Fantasy',
-  'Comedy',
-  'Drama',
-  'Thriller',
-  'Crime',
-  'Mystery',
-  'Horror',
-  'Romance',
-  'Documentary',
-  'Animation',
-  'Superhero',
-  'War',
-  'Western',
-  'Musical',
-  'Biography',
-  'Historical',
-];
-const MOVIE_STYLES = [
-  'Cinema first',
-  'Streaming only',
-  'Depends on the movie',
-  'Watch occasionally',
-  'Movie marathon sessions',
-];
-const CODING_LANGUAGES = [
-  'JavaScript',
-  'TypeScript',
-  'Python',
-  'C#',
-  'C++',
-  'Java',
-  'Go',
-  'Rust',
-  'PHP',
-  'Ruby',
-  'Other',
-];
-const CODING_FOCUS = [
-  'Web',
-  'Mobile',
-  'Backend',
-  'Game Dev',
-  'Data',
-  'DevOps',
-  'Embedded',
-  'Other',
-];
-const PET_TYPES = ['Σκύλος', 'Γάτα', 'Πτηνά', 'Ψάρια', 'Ερπετά', 'Άλλα'];
-const VAPE_DEVICES = ['Pod', 'Mod', 'Disposable', 'MTL', 'DTL', 'Άλλα'];
-const VAPE_FLAVORS = ['Tobacco', 'Dessert', 'Fruits', 'Menthol', 'Drinks', 'Άλλα'];
-const BOOK_GENRES = [
-  'Fantasy',
-  'Sci-Fi',
-  'Mystery',
-  'Thriller',
-  'Horror',
-  'Romance',
-  'Historical Fiction',
-  'Drama / Literary Fiction',
-  'Adventure',
-  'Crime',
-  'Philosophy',
-  'Psychology',
-  'Biography',
-  'Self-help',
-  'Poetry',
-  'Comics / Graphic Novels',
-  'Young Adult',
-  'Children’s Literature',
-];
 const BOOK_FORMATS = ['Physical books', 'eBooks', 'Audiobooks', 'Mixed', 'Depends on the book'];
 const MANGA_GENRES = [
   'Shōnen',
@@ -201,30 +85,6 @@ const MANGA_FORMATS = [
   'Webtoons',
   'Scanlations',
   'Mixed',
-];
-const ANIME_GENRES = [
-  'Shōnen',
-  'Seinen',
-  'Shōjo',
-  'Josei',
-  'Isekai',
-  'Fantasy',
-  'Sci-Fi',
-  'Mecha',
-  'Action',
-  'Adventure',
-  'Romance',
-  'Drama',
-  'Mystery',
-  'Horror',
-  'Thriller',
-  'Comedy',
-  'Slice of Life',
-  'Supernatural',
-  'Psychological',
-  'Sports',
-  'Historical',
-  'Music',
 ];
 const ANIME_FORMATS = [
   'Binge watching',
@@ -282,7 +142,15 @@ export default function EditProfilePage() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const loading = useSelector(selectIsLoading);
 
-  const [formData, setFormData] = useState<ProfileFormData>({});
+  const [formData, setFormData] = useState<ProfileFormData>({
+    favorite_anime_genres: [],
+    favorite_movie_genres: [],
+    favorite_book_genres: [],
+    favorite_languages: [],
+    pet_types: [],
+    vape_device: '',
+    vape_flavor: '',
+  });
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
   const [locationCity, setLocationCity] = useState('');
   const [privacySettings, setPrivacySettings] = useState({
@@ -343,9 +211,16 @@ export default function EditProfilePage() {
         nintendo_id: user.nintendo_id || '',
         favorite_platform: user.favorite_platform || '',
         favorite_genres: user.favorite_genres || [],
+        favorite_anime_genres: user.favorite_anime_genres || [],
+        favorite_movie_genres: user.favorite_movie_genres || [],
+        favorite_book_genres: user.favorite_book_genres || [],
+        favorite_languages: user.favorite_languages || [],
         gaming_since: user.gaming_since || null,
         categories: (user.categories as string[] | undefined) ?? ['games'],
         category_notes: initialCategoryNotes,
+        pet_types: user.pet_types || [],
+        vape_device: user.vape_device || '',
+        vape_flavor: user.vape_flavor || '',
       });
 
       const rawSocial = (user.social_links as Record<string, unknown> | undefined) || {};
@@ -382,9 +257,16 @@ export default function EditProfilePage() {
           nintendo_id: user.nintendo_id || '',
           favorite_platform: user.favorite_platform || '',
           favorite_genres: user.favorite_genres || [],
+          favorite_anime_genres: user.favorite_anime_genres || [],
+          favorite_movie_genres: user.favorite_movie_genres || [],
+          favorite_book_genres: user.favorite_book_genres || [],
+          favorite_languages: user.favorite_languages || [],
           gaming_since: user.gaming_since || null,
           categories: (user.categories as string[] | undefined) ?? ['games'],
           category_notes: initialCategoryNotes,
+          pet_types: user.pet_types || [],
+          vape_device: user.vape_device || '',
+          vape_flavor: user.vape_flavor || '',
         },
         {
           discord: (rawSocial.discord as string) || '',
@@ -542,9 +424,21 @@ export default function EditProfilePage() {
     setFormData(prev => {
       const notes = (prev.category_notes as Record<string, unknown> | undefined) || {};
       const current = (notes[cat] as Record<string, unknown> | undefined) || {};
+      const fallbackGenres = (() => {
+        if (cat === 'anime' || cat === 'manga') {
+          return ((prev.favorite_anime_genres as string[] | undefined) || []).map(String);
+        }
+        if (cat === 'movies' || cat === 'tv') {
+          return ((prev.favorite_movie_genres as string[] | undefined) || []).map(String);
+        }
+        if (cat === 'books') {
+          return ((prev.favorite_book_genres as string[] | undefined) || []).map(String);
+        }
+        return [];
+      })();
       const list: string[] = Array.isArray((current as { genres?: unknown }).genres)
         ? ((current as { genres?: string[] }).genres as string[])
-        : [];
+        : fallbackGenres;
       const nextGenres = list.includes(genre) ? list.filter(g => g !== genre) : [...list, genre];
       return {
         ...prev,
@@ -572,6 +466,77 @@ export default function EditProfilePage() {
         },
       };
     });
+  };
+
+  const togglePetType = (type: string) => {
+    setFormData(prev => {
+      const current = (prev.pet_types as string[] | undefined) || [];
+      const next = current.includes(type) ? current.filter(t => t !== type) : [...current, type];
+      return { ...prev, pet_types: next };
+    });
+  };
+
+  const resolveGenreList = (
+    note: Record<string, unknown> | undefined,
+    fallback?: string[] | null,
+  ) => {
+    if (note && Array.isArray(note.genres) && note.genres.length) {
+      return (note.genres as string[]).map(String);
+    }
+    return (fallback || []).map(String);
+  };
+
+  const resolveLanguageList = (
+    note: Record<string, unknown> | undefined,
+    fallback?: string[] | null,
+  ) => {
+    if (note && Array.isArray(note.languages) && note.languages.length) {
+      return (note.languages as string[]).map(String);
+    }
+    return (fallback || []).map(String);
+  };
+
+  const deriveFavoritePayload = (notes: CategoryNotes | undefined) => {
+    const categoryNotes =
+      notes || (formData.category_notes as CategoryNotes) || EMPTY_CATEGORY_NOTES;
+    const animeGenres = resolveGenreList(
+      categoryNotes.anime as Record<string, unknown> | undefined,
+      formData.favorite_anime_genres,
+    );
+    const movieGenres = resolveGenreList(
+      categoryNotes.movies as Record<string, unknown> | undefined,
+      formData.favorite_movie_genres,
+    );
+    const bookGenres = resolveGenreList(
+      categoryNotes.books as Record<string, unknown> | undefined,
+      formData.favorite_book_genres,
+    );
+    const codingLanguages = resolveLanguageList(
+      categoryNotes.coding as Record<string, unknown> | undefined,
+      formData.favorite_languages,
+    );
+    const noteVape = categoryNotes.vape as Record<string, unknown> | undefined;
+    const noteVapeFlavors = Array.isArray(noteVape?.flavors) ? (noteVape.flavors as string[]) : [];
+    const derivedVapeFlavor =
+      noteVapeFlavors.length > 0
+        ? noteVapeFlavors[0]
+        : formData.vape_flavor
+          ? String(formData.vape_flavor)
+          : null;
+    const derivedVapeDevice =
+      (noteVape?.device as string | undefined) ||
+      (formData.vape_device as string | undefined) ||
+      null;
+
+    return {
+      favorite_anime_genres: animeGenres,
+      favorite_movie_genres: movieGenres,
+      favorite_book_genres: bookGenres,
+      favorite_languages: codingLanguages,
+      pet_types: (formData.pet_types as string[] | undefined) || [],
+      vape_device: derivedVapeDevice,
+      vape_flavor: derivedVapeFlavor,
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -618,11 +583,14 @@ export default function EditProfilePage() {
         nintendo_id: emptyToNull(rest.nintendo_id),
       };
 
+      const favoritePayload = deriveFavoritePayload(category_notes);
+
       await dispatch(
         updateUserProfile({
           userId: user.id,
           updates: {
             ...sanitizedRest,
+            ...favoritePayload,
             avatar_url: uploadedAvatarUrl || rest.avatar_url || user.avatar_url || null,
             privacy_settings: mergedPrivacy as User['privacy_settings'],
             social_links: mergedSocialLinks,
@@ -1171,6 +1139,7 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('anime');
+                    const animeGenres = resolveGenreList(note, formData.favorite_anime_genres);
                     const platformsList =
                       Array.isArray(note.platforms) && (note.platforms as string[]).length > 0
                         ? (note.platforms as string[])
@@ -1183,8 +1152,7 @@ export default function EditProfilePage() {
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {ANIME_GENRES.map(genre => {
-                              const active =
-                                Array.isArray(note.genres) && note.genres.includes(genre);
+                              const active = animeGenres.includes(genre);
                               return (
                                 <button
                                   type="button"
@@ -1289,15 +1257,6 @@ export default function EditProfilePage() {
                           placeholder="Favorite directors / studios (π.χ. Miyazaki, Ufotable)"
                           rows={3}
                         />
-
-                        <Textarea
-                          label="Notes / Extra"
-                          name="anime_notes"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('anime', 'notes')(e.target.value)}
-                          placeholder="Notes (sub/dub, Blu-ray collection, rewatch habits κ.λπ.)"
-                          rows={3}
-                        />
                       </>
                     );
                   })()}
@@ -1327,6 +1286,7 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('manga');
+                    const mangaGenres = resolveGenreList(note, formData.favorite_anime_genres);
                     return (
                       <>
                         <div>
@@ -1335,8 +1295,7 @@ export default function EditProfilePage() {
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {MANGA_GENRES.map(genre => {
-                              const active =
-                                Array.isArray(note.genres) && note.genres.includes(genre);
+                              const active = mangaGenres.includes(genre);
                               return (
                                 <button
                                   type="button"
@@ -1401,15 +1360,6 @@ export default function EditProfilePage() {
                           placeholder="Favorite mangaka / artists"
                           rows={3}
                         />
-
-                        <Textarea
-                          label="Notes / Extra"
-                          name="manga_notes"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('manga', 'notes')(e.target.value)}
-                          placeholder="Notes (συλλογή, εκδοτικοί, physical vs digital κ.λπ.)"
-                          rows={3}
-                        />
                       </>
                     );
                   })()}
@@ -1441,6 +1391,7 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('movies');
+                    const movieGenres = resolveGenreList(note, formData.favorite_movie_genres);
                     const serviceOptions = CATEGORY_SERVICES.movies || ['Other'];
                     const servicesList =
                       Array.isArray(note.services) && (note.services as string[]).length > 0
@@ -1494,8 +1445,7 @@ export default function EditProfilePage() {
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {MOVIE_GENRES.map(genre => {
-                              const active =
-                                Array.isArray(note.genres) && note.genres.includes(genre);
+                              const active = movieGenres.includes(genre);
                               return (
                                 <button
                                   type="button"
@@ -1551,24 +1501,13 @@ export default function EditProfilePage() {
                         />
 
                         <Textarea
-                          label="Αγαπημένοι Σκηνοθέτες"
-                          name="movies_directors"
-                          value={(note.directors as string) || ''}
+                          label="Αγαπημένοι Ηθοποιοί / Σκηνοθέτες"
+                          name="movies_people"
+                          value={(note.people as string) || ''}
                           onChange={e =>
-                            handleCategoryNoteField('movies', 'directors')(e.target.value)
+                            handleCategoryNoteField('movies', 'people')(e.target.value)
                           }
-                          placeholder="Αγαπημένοι σκηνοθέτες (π.χ. Nolan, Scorsese, Tarantino)"
-                          rows={3}
-                        />
-
-                        <Textarea
-                          label="Αγαπημένοι Ηθοποιοί"
-                          name="movies_actors"
-                          value={(note.actors as string) || ''}
-                          onChange={e =>
-                            handleCategoryNoteField('movies', 'actors')(e.target.value)
-                          }
-                          placeholder="Αγαπημένοι ηθοποιοί"
+                          placeholder="Αγαπημένοι ηθοποιοί ή σκηνοθέτες που σε εμπνέουν"
                           rows={3}
                         />
                       </>
@@ -1604,6 +1543,7 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('tv');
+                    const tvGenres = resolveGenreList(note, formData.favorite_movie_genres);
                     const serviceOptions = CATEGORY_SERVICES.tv || ['Other'];
                     return (
                       <>
@@ -1658,8 +1598,7 @@ export default function EditProfilePage() {
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {TV_GENRES.map(genre => {
-                              const active =
-                                Array.isArray(note.genres) && note.genres.includes(genre);
+                              const active = tvGenres.includes(genre);
                               return (
                                 <button
                                   type="button"
@@ -1755,6 +1694,7 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('books');
+                    const bookGenres = resolveGenreList(note, formData.favorite_book_genres);
                     return (
                       <>
                         <div>
@@ -1763,8 +1703,7 @@ export default function EditProfilePage() {
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {BOOK_GENRES.map(genre => {
-                              const active =
-                                Array.isArray(note.genres) && note.genres.includes(genre);
+                              const active = bookGenres.includes(genre);
                               return (
                                 <button
                                   type="button"
@@ -1829,15 +1768,6 @@ export default function EditProfilePage() {
                           placeholder="Αγαπημένοι συγγραφείς"
                           rows={3}
                         />
-
-                        <Textarea
-                          label="Σημειώσεις"
-                          name="books_notes"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('books', 'notes')(e.target.value)}
-                          placeholder="Σημειώσεις / extra πληροφορίες"
-                          rows={3}
-                        />
                       </>
                     );
                   })()}
@@ -1871,6 +1801,7 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('coding');
+                    const codingLanguages = resolveLanguageList(note, formData.favorite_languages);
                     return (
                       <>
                         <div>
@@ -1879,12 +1810,7 @@ export default function EditProfilePage() {
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {CODING_LANGUAGES.map(lang => {
-                              const list =
-                                (note.languages as string[] | undefined) &&
-                                Array.isArray(note.languages)
-                                  ? (note.languages as string[])
-                                  : [];
-                              const active = list.includes(lang);
+                              const active = codingLanguages.includes(lang);
                               return (
                                 <button
                                   type="button"
@@ -1956,14 +1882,6 @@ export default function EditProfilePage() {
                             placeholder="VS Code, Git, React..."
                           />
                         </div>
-
-                        <Textarea
-                          label="Σημειώσεις"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('coding', 'notes')(e.target.value)}
-                          placeholder="Τι σε εμπνέει στο coding, ποια projects αγαπάς..."
-                          rows={3}
-                        />
                       </>
                     );
                   })()}
@@ -1997,47 +1915,126 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('pet');
+                    const petSelection = (formData.pet_types as string[] | undefined) || [];
+                    const fallbackType = note.type ? [String(note.type)] : [];
+                    const activePetTypes = petSelection.length > 0 ? petSelection : fallbackType;
+                    const petEntries =
+                      (note.entries as Record<string, Record<string, string>> | undefined) || {};
+                    const getPetEntryValue = (type: string, key: string) => {
+                      const entry = petEntries[type] || {};
+                      if (entry[key]) return entry[key];
+                      if (type === String(note.type)) {
+                        if (key === 'name') return String(note.name || '');
+                        if (key === 'breed') return String(note.breed || '');
+                        if (key === 'since') return String(note.since || '');
+                      }
+                      return '';
+                    };
+                    const handlePetEntryField = (type: string, key: string) => (value: string) => {
+                      setFormData(prev => {
+                        const notes =
+                          (prev.category_notes as Record<string, unknown> | undefined) || {};
+                        const petNote = (notes.pet as Record<string, unknown> | undefined) || {};
+                        const entries =
+                          (petNote.entries as Record<string, Record<string, string>> | undefined) ||
+                          {};
+                        const currentEntry =
+                          (entries[type] as Record<string, string> | undefined) || {};
+                        return {
+                          ...prev,
+                          category_notes: {
+                            ...notes,
+                            pet: {
+                              ...petNote,
+                              entries: {
+                                ...entries,
+                                [type]: {
+                                  ...currentEntry,
+                                  [key]: value,
+                                },
+                              },
+                            },
+                          },
+                        };
+                      });
+                    };
+
                     return (
                       <>
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <Select
-                            label="Είδος"
-                            options={['', ...PET_TYPES]}
-                            value={(note.type as string) || ''}
-                            onChange={value => handleCategoryNoteField('pet', 'type')(value)}
-                          />
-                          <Input
-                            label="Όνομα"
-                            type="text"
-                            value={(note.name as string) || ''}
-                            onChange={e => handleCategoryNoteField('pet', 'name')(e.target.value)}
-                            placeholder="π.χ. Luna"
-                          />
-                          <Input
-                            label="Ράτσα / Breed"
-                            type="text"
-                            value={(note.breed as string) || ''}
-                            onChange={e => handleCategoryNoteField('pet', 'breed')(e.target.value)}
-                            placeholder="π.χ. Labrador"
-                          />
-                          <Input
-                            label="Μαζί από (Έτος)"
-                            type="number"
-                            value={(note.since as string) || ''}
-                            onChange={e => handleCategoryNoteField('pet', 'since')(e.target.value)}
-                            placeholder="2019"
-                            min="1970"
-                            max={new Date().getFullYear()}
-                          />
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                            Είδη Κατοικιδίων
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {PET_TYPES.map(type => {
+                              const active = petSelection.includes(type);
+                              return (
+                                <button
+                                  type="button"
+                                  key={`pet-type-${type}`}
+                                  onClick={() => togglePetType(type)}
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    active
+                                      ? `border-emerald-600/40 bg-emerald-500/30 text-emerald-900 dark:border-emerald-400/70 dark:bg-emerald-500/15 dark:text-emerald-100`
+                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-emerald-500/30 hover:bg-emerald-500/5`
+                                  }`}
+                                >
+                                  {type}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
 
-                        <Textarea
-                          label="Μικρές ιστορίες"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('pet', 'notes')(e.target.value)}
-                          placeholder="Τι χαρακτήρα έχει, αγαπημένες συνήθειες..."
-                          rows={3}
-                        />
+                        {activePetTypes.length === 0 ? (
+                          <p className="text-sm text-[var(--hb-muted)]">
+                            Επίλεξε ένα κατοικίδιο για να αποθηκευτούν τα στοιχεία του.
+                          </p>
+                        ) : (
+                          <div className="space-y-4">
+                            {activePetTypes.map(type => (
+                              <div
+                                key={`pet-entry-${type}`}
+                                className="bg-[var(--hb-card)]/60 space-y-3 rounded-2xl border border-[var(--hb-border)] px-4 py-3"
+                              >
+                                <p className="text-sm font-semibold text-[var(--hb-headline)]">
+                                  {type}
+                                </p>
+                                <div className="grid gap-4 md:grid-cols-3">
+                                  <Input
+                                    label={`Όνομα (${type})`}
+                                    type="text"
+                                    value={getPetEntryValue(type, 'name')}
+                                    onChange={e =>
+                                      handlePetEntryField(type, 'name')(e.target.value)
+                                    }
+                                    placeholder={`Όνομα ${type.toLowerCase()}`}
+                                  />
+                                  <Input
+                                    label="Φυλή"
+                                    type="text"
+                                    value={getPetEntryValue(type, 'breed')}
+                                    onChange={e =>
+                                      handlePetEntryField(type, 'breed')(e.target.value)
+                                    }
+                                    placeholder="π.χ. Labrador"
+                                  />
+                                  <Input
+                                    label="Μαζί από (Έτος)"
+                                    type="number"
+                                    value={getPetEntryValue(type, 'since')}
+                                    onChange={e =>
+                                      handlePetEntryField(type, 'since')(e.target.value)
+                                    }
+                                    placeholder="2019"
+                                    min="1970"
+                                    max={new Date().getFullYear()}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </>
                     );
                   })()}
@@ -2069,14 +2066,26 @@ export default function EditProfilePage() {
                 <CardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('vape');
+                    const vapeDeviceValue =
+                      (note.device as string) || (formData.vape_device as string) || '';
+                    const fallbackFlavor = formData.vape_flavor
+                      ? [String(formData.vape_flavor)]
+                      : [];
+                    const vapeFlavors =
+                      Array.isArray(note.flavors) && (note.flavors as string[]).length > 0
+                        ? (note.flavors as string[])
+                        : fallbackFlavor;
                     return (
                       <>
                         <div className="grid gap-4 md:grid-cols-2">
-                          <Select
+                          <Input
                             label="Συσκευή"
-                            options={['', ...VAPE_DEVICES]}
-                            value={(note.device as string) || ''}
-                            onChange={value => handleCategoryNoteField('vape', 'device')(value)}
+                            type="text"
+                            value={vapeDeviceValue}
+                            onChange={e =>
+                              handleCategoryNoteField('vape', 'device')(e.target.value)
+                            }
+                            placeholder="π.χ. Berserker B3"
                           />
                           <Input
                             label="Νικοτίνη (mg)"
@@ -2106,12 +2115,7 @@ export default function EditProfilePage() {
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {VAPE_FLAVORS.map(flavor => {
-                              const list =
-                                (note.flavors as string[] | undefined) &&
-                                Array.isArray(note.flavors)
-                                  ? (note.flavors as string[])
-                                  : [];
-                              const active = list.includes(flavor);
+                              const active = vapeFlavors.includes(flavor);
                               return (
                                 <button
                                   type="button"
@@ -2131,14 +2135,6 @@ export default function EditProfilePage() {
                             })}
                           </div>
                         </div>
-
-                        <Textarea
-                          label="Σημειώσεις"
-                          value={(note.notes as string) || ''}
-                          onChange={e => handleCategoryNoteField('vape', 'notes')(e.target.value)}
-                          placeholder="Αγαπημένα υγρά, συνήθειες, προτιμήσεις..."
-                          rows={3}
-                        />
                       </>
                     );
                   })()}

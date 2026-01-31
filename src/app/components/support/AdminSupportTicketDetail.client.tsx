@@ -16,7 +16,9 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import Feedback from '@/app/components/ui/Feedback';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
-import AttachmentDropzone, { type AttachmentItem } from '@/app/components/support/AttachmentDropzone.client';
+import AttachmentDropzone, {
+  type AttachmentItem,
+} from '@/app/components/support/AttachmentDropzone.client';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 
@@ -104,13 +106,20 @@ export default function AdminSupportTicketDetail() {
   const [labels, setLabels] = useState('');
   const [assignToMe, setAssignToMe] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveResult, setSaveResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [saveResult, setSaveResult] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const [replyText, setReplyText] = useState('');
   const [replyInternal, setReplyInternal] = useState(false);
   const [replyAttachments, setReplyAttachments] = useState<AttachmentItem[]>([]);
   const [replyLoading, setReplyLoading] = useState(false);
-  const [replyResult, setReplyResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [replyResult, setReplyResult] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -238,7 +247,10 @@ export default function AdminSupportTicketDetail() {
       setReplyText('');
       setReplyAttachments([]);
       setReplyInternal(false);
-      setReplyResult({ type: 'success', message: replyInternal ? 'Σημείωση προστέθηκε.' : 'Η απάντηση στάλθηκε.' });
+      setReplyResult({
+        type: 'success',
+        message: replyInternal ? 'Σημείωση προστέθηκε.' : 'Η απάντηση στάλθηκε.',
+      });
 
       const refresh = await fetch(`/api/admin/support/tickets/${ticketId}`);
       const refreshPayload = await refresh.json();
@@ -289,11 +301,16 @@ export default function AdminSupportTicketDetail() {
       <div className="relative">
         <PageHero
           eyebrow="Διαχείριση"
-          title={<span className="text-3xl text-[var(--hb-headline)] md:text-5xl">{ticket.subject}</span>}
+          title={
+            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">{ticket.subject}</span>
+          }
           subtitle={`Κατηγορία: ${categoryLabels[ticket.category] || ticket.category}`}
           badges={
             <>
-              <Badge text={statusLabels[ticket.status] || ticket.status} color={statusColors[ticket.status] || 'gray'} />
+              <Badge
+                text={statusLabels[ticket.status] || ticket.status}
+                color={statusColors[ticket.status] || 'gray'}
+              />
               {ticket.severity ? (
                 <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs">
                   Σοβαρότητα: {severityLabels[ticket.severity] || ticket.severity}
@@ -304,6 +321,40 @@ export default function AdminSupportTicketDetail() {
         />
 
         <PageContainer size="lg" className="pb-20">
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => router.push('/admin/support')}>
+              Πίσω
+            </Button>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                if (deleteLoading) return;
+                const confirmed = window.confirm('Οριστική διαγραφή αυτού του ticket;');
+                if (!confirmed) return;
+                setDeleteLoading(true);
+                try {
+                  const res = await fetch(`/api/admin/support/tickets/${ticket.id}`, {
+                    method: 'DELETE',
+                  });
+                  const payload = await res.json().catch(() => null);
+                  if (!res.ok) {
+                    throw new Error(payload?.error || 'Αποτυχία διαγραφής');
+                  }
+                  router.push('/admin/support');
+                } catch (err) {
+                  setReplyResult({
+                    type: 'error',
+                    message: err instanceof Error ? err.message : 'Σφάλμα διαγραφής',
+                  });
+                } finally {
+                  setDeleteLoading(false);
+                }
+              }}
+              disabled={deleteLoading}
+            >
+              Διαγραφή
+            </Button>
+          </div>
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
               <CardHeader className="border-[var(--hb-border)]">
@@ -329,7 +380,11 @@ export default function AdminSupportTicketDetail() {
                         {message.author_role === 'admin' ? (
                           <ShieldCheck className="h-4 w-4 text-[var(--hb-primary)]" />
                         ) : null}
-                        {message.is_internal ? 'Εσωτερική σημείωση' : message.author_role === 'admin' ? 'Διαχειριστής' : 'Χρήστης'}
+                        {message.is_internal
+                          ? 'Εσωτερική σημείωση'
+                          : message.author_role === 'admin'
+                            ? 'Διαχειριστής'
+                            : 'Χρήστης'}
                       </span>
                       <span>{new Date(message.created_at).toLocaleString('el-GR')}</span>
                     </div>
@@ -356,8 +411,13 @@ export default function AdminSupportTicketDetail() {
                   </div>
                 ))}
 
-                <form onSubmit={handleReply} className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                  <div className="text-sm font-semibold text-[var(--hb-headline)]">Απάντηση / Σημείωση</div>
+                <form
+                  onSubmit={handleReply}
+                  className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4"
+                >
+                  <div className="text-sm font-semibold text-[var(--hb-headline)]">
+                    Απάντηση / Σημείωση
+                  </div>
                   {replyResult ? (
                     <Feedback
                       variant={replyResult.type === 'success' ? 'success' : 'error'}
@@ -390,13 +450,17 @@ export default function AdminSupportTicketDetail() {
                     disabled={replyLoading}
                     className="bg-[var(--hb-primary-strong)] text-white"
                   >
-                    {replyLoading ? 'Αποστολή...' : replyInternal ? 'Προσθήκη σημείωσης' : 'Αποστολή απάντησης'}
+                    {replyLoading
+                      ? 'Αποστολή...'
+                      : replyInternal
+                        ? 'Προσθήκη σημείωσης'
+                        : 'Αποστολή απάντησης'}
                   </Button>
                 </form>
               </CardContent>
             </Card>
 
-            <div className="space-y-6">
+            <div className="mt-10 space-y-6">
               <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
                 <CardHeader className="border-[var(--hb-border)]">
                   <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
@@ -464,7 +528,10 @@ export default function AdminSupportTicketDetail() {
                     <p>Δεν υπάρχουν ακόμη events.</p>
                   ) : (
                     events.map(event => (
-                      <div key={event.id} className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3">
+                      <div
+                        key={event.id}
+                        className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3"
+                      >
                         <div className="text-xs uppercase text-[var(--hb-muted)]">{event.type}</div>
                         <div className="text-xs text-[var(--hb-muted)]">
                           {new Date(event.created_at).toLocaleString('el-GR')}

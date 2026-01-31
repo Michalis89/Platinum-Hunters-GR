@@ -30,7 +30,12 @@ export default function AppShell({ children }: Props) {
       {/* Content wrapper with flex layout for sticky footer */}
       <div className="relative flex min-h-screen flex-col">
         <NavbarWrapper />
-        <main className="flex-1 pb-12 pt-4">{children}</main>
+        <main
+          className="flex-1 pb-12 pt-4 scroll-smooth"
+          style={{ scrollPaddingBlockStart: '6rem' }}
+        >
+          {children}
+        </main>
         <Footer />
       </div>
     </div>

@@ -24,6 +24,8 @@ import {
   TOPIC_LABELS,
 } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
+import CategoryFilter from '@/app/(main)/pages/_shared/CategoryFilter';
+import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -47,14 +49,13 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
       <Link href={`/pages/news/${normalizedSlug}`} className="block">
         <div className="relative aspect-[16/10] overflow-hidden bg-[var(--hb-surface)]">
           {article.cover_image ? (
-            <Image
-              src={article.cover_image}
-              alt={article.title}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition duration-300 group-hover:scale-[1.02]"
-              unoptimized
-            />
+          <Image
+            src={article.cover_image}
+            alt={article.title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition duration-300 group-hover:scale-[1.02]"
+          />
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--hb-primary-strong)] to-[var(--hb-accent)]">
               <FileText size={48} className="text-white/50" />
@@ -92,13 +93,14 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {article.tags.slice(0, 3).map(tag => (
-              <span
+              <Link
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-surface)] px-2.5 py-0.5 text-[11px] text-[var(--hb-muted)]"
+                href={`/pages/news?tag=${encodeURIComponent(tag)}`}
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-surface)] px-2.5 py-0.5 text-[11px] text-[var(--hb-muted)] transition hover:border-[var(--hb-primary)] hover:text-[var(--hb-headline)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hb-primary)]"
               >
                 <Tag size={10} />
                 {tag}
-              </span>
+              </Link>
             ))}
             {article.tags.length > 3 && (
               <span className="text-[11px] text-[var(--hb-muted)]">+{article.tags.length - 3}</span>
@@ -168,12 +170,15 @@ export default function NewsPageClient() {
 function NewsPageContent() {
   const searchParams = useSearchParams();
   const rawCategory = searchParams.get('category');
+  const availableCategories = getVisibleCategories({ scope: 'news' });
   const category =
-    rawCategory && CATEGORY_LABELS[rawCategory as ArticleCategory]
+    rawCategory && availableCategories.includes(rawCategory as ArticleCategory)
       ? (rawCategory as ArticleCategory)
       : null;
   const topic = searchParams.get('topic') as ArticleTopic | null;
   const normalizedTopic = topic === 'articles' ? null : topic;
+  const rawTag = searchParams.get('tag');
+  const tag = rawTag ? rawTag : null;
 
   const [articles, setArticles] = useState<ArticleWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,16 +186,17 @@ function NewsPageContent() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      setLoading(true);
-      setError(null);
+      const fetchArticles = async () => {
+        setLoading(true);
+        setError(null);
 
-      try {
-        const params = new URLSearchParams();
-        if (category) params.set('category', category);
-        if (normalizedTopic) params.set('topic', normalizedTopic);
-        params.set('status', 'published');
-        params.set('limit', '20');
+        try {
+          const params = new URLSearchParams();
+          if (category) params.set('category', category);
+          if (normalizedTopic) params.set('topic', normalizedTopic);
+          if (tag) params.set('tag', tag);
+          params.set('status', 'published');
+          params.set('limit', '20');
 
         const response = await fetch(`/api/articles?${params.toString()}`);
         if (!response.ok) {
@@ -212,11 +218,11 @@ function NewsPageContent() {
     };
 
     fetchArticles();
-  }, [category, normalizedTopic]);
+  }, [category, normalizedTopic, tag]);
 
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
   const topicLabel = normalizedTopic ? TOPIC_LABELS[normalizedTopic] : null;
-  const metaLine = `${total} άρθρα`;
+  const metaLine = tag ? `${total} άρθρα • ${tag}` : `${total} άρθρα`;
 
   const pageTitle = categoryLabel
     ? topicLabel
@@ -266,31 +272,13 @@ function NewsPageContent() {
                   {categoryLabel ? `Φίλτρο: ${categoryLabel}` : 'Όλες'}
                 </span>
               </div>
-              <div className="flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <Link
-                  href="/pages/news"
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    !category
-                      ? 'border border-sky-500/30 bg-sky-500/10 text-sky-400 ring-1 ring-sky-500/30 hover:border-sky-500/50 hover:bg-sky-500/20'
-                      : 'border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:border-sky-500/50 hover:bg-sky-500/10 hover:text-[var(--hb-headline)]'
-                  }`}
-                >
-                  Όλα
-                </Link>
-                {(Object.keys(CATEGORY_LABELS) as ArticleCategory[]).map(cat => (
-                  <Link
-                    key={cat}
-                    href={`/pages/news?category=${cat}`}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                      category === cat
-                        ? 'border border-sky-500/30 bg-sky-500/10 text-sky-400 ring-1 ring-sky-500/30 hover:border-sky-500/50 hover:bg-sky-500/20'
-                        : 'hover:border-[var(--hb-primary-strong)]/50 border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
-                    }`}
-                  >
-                    {CATEGORY_LABELS[cat] ?? cat}
-                  </Link>
-                ))}
-              </div>
+              <CategoryFilter scope="news" currentCategory={category} />
+              {tag && (
+                <div className="mt-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
+                  <Tag size={12} />
+                  <span>{tag}</span>
+                </div>
+              )}
             </div>
           }
         />

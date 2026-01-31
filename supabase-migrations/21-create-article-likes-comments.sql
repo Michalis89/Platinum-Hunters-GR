@@ -61,6 +61,12 @@ CREATE POLICY "Users can delete their own comments"
   ON article_comments FOR DELETE
   USING (auth.uid() = user_id);
 
+DROP TRIGGER IF EXISTS trigger_log_article_comment_activity ON article_comments;
+CREATE TRIGGER trigger_log_article_comment_activity
+  AFTER INSERT OR DELETE ON article_comments
+  FOR EACH ROW
+  EXECUTE FUNCTION public.log_article_comment_activity();
+
 -- Function to update articles.likes count when a like is added/removed
 CREATE OR REPLACE FUNCTION update_article_likes_count()
 RETURNS TRIGGER AS $$
@@ -82,3 +88,9 @@ CREATE TRIGGER trigger_update_article_likes_count
   AFTER INSERT OR DELETE ON article_likes
   FOR EACH ROW
   EXECUTE FUNCTION update_article_likes_count();
+
+DROP TRIGGER IF EXISTS trigger_log_article_like_activity ON article_likes;
+CREATE TRIGGER trigger_log_article_like_activity
+  AFTER INSERT OR DELETE ON article_likes
+  FOR EACH ROW
+  EXECUTE FUNCTION public.log_article_like_activity();

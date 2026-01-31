@@ -20,16 +20,8 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
-
-const REVIEW_CATEGORIES = new Set<ArticleCategory>([
-  'games',
-  'anime',
-  'manga',
-  'books',
-  'movies',
-  'tv',
-  'vape',
-]);
+import CategoryFilter from '@/app/(main)/pages/_shared/CategoryFilter';
+import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -59,7 +51,6 @@ function ReviewCard({ article }: { article: ArticleWithAuthor }) {
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition duration-300 group-hover:scale-[1.02]"
-              unoptimized
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--hb-primary-strong)] to-[var(--hb-accent)]">
@@ -99,13 +90,14 @@ function ReviewCard({ article }: { article: ArticleWithAuthor }) {
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {article.tags.slice(0, 3).map(tag => (
-              <span
+              <Link
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-surface)] px-2.5 py-0.5 text-[11px] text-[var(--hb-muted)]"
+                href={`/pages/reviews?tag=${encodeURIComponent(tag)}`}
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-surface)] px-2.5 py-0.5 text-[11px] text-[var(--hb-muted)] transition hover:border-[var(--hb-primary)] hover:text-[var(--hb-headline)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hb-primary)]"
               >
                 <Tag size={10} />
                 {tag}
-              </span>
+              </Link>
             ))}
             {article.tags.length > 3 && (
               <span className="text-[11px] text-[var(--hb-muted)]">+{article.tags.length - 3}</span>
@@ -175,10 +167,13 @@ export default function ReviewsPageClient() {
 function ReviewsPageContent() {
   const searchParams = useSearchParams();
   const rawCategory = searchParams.get('category');
+  const allowedCategories = getVisibleCategories({ scope: 'reviews' });
   const category =
-    rawCategory && REVIEW_CATEGORIES.has(rawCategory as ArticleCategory)
+    rawCategory && allowedCategories.includes(rawCategory as ArticleCategory)
       ? (rawCategory as ArticleCategory)
       : null;
+  const rawTag = searchParams.get('tag');
+  const tag = rawTag ? rawTag : null;
 
   const [articles, setArticles] = useState<ArticleWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -193,6 +188,7 @@ function ReviewsPageContent() {
       try {
         const params = new URLSearchParams();
         if (category) params.set('category', category);
+        if (tag) params.set('tag', tag);
         params.set('topic', 'reviews'); // Always fetch reviews
         params.set('status', 'published');
         params.set('limit', '20');
@@ -213,10 +209,10 @@ function ReviewsPageContent() {
     };
 
     fetchReviews();
-  }, [category]);
+  }, [category, tag]);
 
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
-  const metaLine = `${total} reviews`;
+  const metaLine = tag ? `${total} reviews • ${tag}` : `${total} reviews`;
 
   const pageTitle = categoryLabel ? `Reviews - ${categoryLabel}` : 'Reviews';
   const subtitle = categoryLabel
@@ -262,31 +258,13 @@ function ReviewsPageContent() {
                   {categoryLabel ? `Φίλτρο: ${categoryLabel}` : 'Όλες'}
                 </span>
               </div>
-              <div className="flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <Link
-                  href="/pages/reviews"
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    !category
-                      ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/50'
-                      : 'border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:border-amber-500/50 hover:text-[var(--hb-headline)]'
-                  }`}
-                >
-                  Όλα
-                </Link>
-                {Object.entries(REVIEW_CATEGORIES).map(([cat, label]) => (
-                  <Link
-                    key={cat}
-                    href={`/pages/reviews?category=${cat}`}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                      category === cat
-                        ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/50'
-                        : 'border border-[var(--hb-border)] bg-[var(--hb-surface)] text-[var(--hb-muted)] hover:border-amber-500/50 hover:text-[var(--hb-headline)]'
-                    }`}
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </div>
+              <CategoryFilter scope="reviews" currentCategory={category} />
+              {tag && (
+                <div className="mt-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
+                  <Tag size={12} />
+                  <span>{tag}</span>
+                </div>
+              )}
             </div>
           }
         />

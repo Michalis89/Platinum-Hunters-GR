@@ -16,6 +16,7 @@ type MetadataInput = {
   openGraphType?: 'website' | 'article';
   publishedTime?: string;
   authors?: string[];
+  modifiedTime?: string;
   noindex?: boolean;
 };
 
@@ -44,6 +45,7 @@ export const buildMetadata = ({
   openGraphType = 'website',
   publishedTime,
   authors,
+  modifiedTime,
   noindex,
 }: MetadataInput): Metadata => {
   const url = toAbsoluteUrl(path);
@@ -64,8 +66,9 @@ export const buildMetadata = ({
       locale: SITE_LOCALE,
       type: openGraphType,
       images: ogImages,
-      ...(publishedTime ? { publishedTime } : {}),
-      ...(authors ? { authors } : {}),
+    ...(publishedTime ? { publishedTime } : {}),
+    ...(modifiedTime ? { modifiedTime } : {}),
+    ...(authors ? { authors } : {}),
     },
     twitter: {
       card: 'summary_large_image',

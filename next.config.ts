@@ -48,6 +48,18 @@ const nextConfig: NextConfig = {
         hostname: 'jolfksxuhyktpwncniks.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.replacesmoke.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.thedirect.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'c.scdn.gr',
+      },
     ],
   },
   async redirects() {

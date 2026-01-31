@@ -4,6 +4,7 @@ import { ok, fail } from '@/lib/api/response';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { hasAnyRole } from '@/lib/roles';
 import type { Database, Json } from '@/lib/supabase/database.types';
+import getSupabaseServer from '@/lib/supabase-server';
 
 const STATUS_SET = new Set(['open', 'in_progress', 'waiting_user', 'resolved', 'closed']);
 
@@ -202,3 +203,29 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 }
 
 export const dynamic = 'force-dynamic';
+
+export async function DELETE(_req: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    const supabase = await createRouteHandlerClient();
+    await ensureAdmin(supabase);
+    const { id: ticketId } = await context.params;
+
+    const supabaseServer = getSupabaseServer();
+    const { error } = await supabaseServer.from('support_tickets').delete().eq('id', ticketId);
+    if (error) {
+      console.error('Admin support ticket delete error:', error);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    return ok({ message: 'Ticket διαγράφηκε οριστικά.' });
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+    }
+    if (error instanceof Error && error.message === 'FORBIDDEN') {
+      return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
+    }
+    console.error('Admin support ticket delete error:', error);
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+  }
+}
