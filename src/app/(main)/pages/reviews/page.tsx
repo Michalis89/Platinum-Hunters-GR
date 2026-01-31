@@ -26,7 +26,7 @@ export async function generateMetadata({ searchParams }: ReviewsPageProps): Prom
 
   const description = categoryLabel
     ? `Reviews και κριτικές για ${categoryLabel}, από την κοινότητα του Hobbistas.`
-    : 'Reviews και κριτικές από την κοινότητα του Hobbistas. Δες τι αξίζει να δοκιμάσεις.';
+    : 'Αντικειμενικές κριτικές για Games, Anime, Manga, Ταινίες, Σειρές, Βιβλία και Vapes από την κοινότητα του Hobbistas.';
   const path = category ? `/pages/reviews?category=${category}` : '/pages/reviews';
 
   return buildMetadata({

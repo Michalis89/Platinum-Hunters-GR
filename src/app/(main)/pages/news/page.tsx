@@ -35,8 +35,8 @@ export async function generateMetadata({ searchParams }: NewsPageProps): Promise
   const description =
     category && categoryLabel
       ? (CATEGORY_SUBTITLES[category] ??
-        'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Hobbista.')
-      : 'Άρθρα, ιστορίες και οδηγοί για κάθε χόμπι, επιμελημένα από την κοινότητα του Hobbista.';
+        'Άρθρα, ιστορίες και εμπειρίες για κάθε χόμπι, επιμελημένα από την κοινότητα του Hobbista.')
+      : 'Άρθρα, ιστορίες και εμπειρίες για κάθε χόμπι, επιμελημένα από την κοινότητα του Hobbista.';
 
   const params = new URLSearchParams();
   if (category) params.set('category', category);
