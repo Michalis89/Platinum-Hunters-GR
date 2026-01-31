@@ -17,11 +17,16 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/favicon.svg', // Αν είναι το λογότυπό σου σε μαύρο/μονόχρωμο
+      },
+    ],
   },
   manifest: '/manifest.webmanifest',
   openGraph: {
