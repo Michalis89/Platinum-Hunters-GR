@@ -6,7 +6,7 @@ import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
   title: 'Εγγραφή | Hobbistas',
-  description: 'Δημιούργησε λογαριασμό στον Χομπίστα για να οργανώσεις τα χόμπι σου.',
+  description: 'Δημιούργησε λογαριασμό στον Hobbista για να οργανώσεις τα χόμπι σου.',
   path: '/pages/auth/register',
   noindex: true,
 });

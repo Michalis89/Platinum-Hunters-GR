@@ -390,7 +390,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const progress = (currentStep / 3) * 100;
 
   return (
-    <Card className="flex h-[600px] flex-col overflow-hidden bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
+    <Card className="flex h-[800px] flex-col overflow-hidden bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
       <CardHeader className="flex-none border-[var(--hb-border)]">
         <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
           <span className="flex items-center gap-3">
@@ -538,7 +538,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 </div>
 
                 <div>
-                  <label className="flex items-start gap-2 text-sm text-[var(--hb-headline)]">
+                  <label className="mt-2 flex items-start gap-2 text-sm text-[var(--hb-headline)]">
                     <input
                       type="checkbox"
                       name="agree_to_terms"
