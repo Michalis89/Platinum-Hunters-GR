@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import Image from 'next/image';
 import { GripVertical, Heart } from 'lucide-react';
 import EmptyState from '@/app/components/ui/EmptyState';
@@ -23,7 +23,7 @@ type ProfileFavoritesProps = {
   onReorder: (sourceIndex: number | null, targetIndex: number) => void;
 };
 
-export function ProfileFavorites({
+function ProfileFavoritesComponent({
   favorites,
   category,
   categoryLabel,
@@ -126,3 +126,11 @@ export function ProfileFavorites({
     </div>
   );
 }
+
+const areFavoritesEqual = (prev: ProfileFavoritesProps, next: ProfileFavoritesProps) =>
+  prev.favorites === next.favorites &&
+  prev.isLoading === next.isLoading &&
+  prev.category === next.category &&
+  prev.categoryLabel === next.categoryLabel;
+
+export const ProfileFavorites = memo(ProfileFavoritesComponent, areFavoritesEqual);

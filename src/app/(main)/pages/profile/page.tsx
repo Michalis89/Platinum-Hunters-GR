@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import Skeleton from '@/app/components/ui/Skeleton';
@@ -65,6 +65,7 @@ export default function ProfilePage() {
     >
   >({});
   const [categoryTimes, setCategoryTimes] = useState<Record<string, number>>({});
+  const [, startTransition] = useTransition();
 
   // User categories
   const categories = useMemo(() => (user?.categories as string[] | undefined) ?? ['games'], [user]);
@@ -90,9 +91,11 @@ export default function ProfilePage() {
   // Set initial active category
   useEffect(() => {
     if (favoriteCategories.length > 0 && !activeCategory) {
-      setActiveCategory(favoriteCategories[0]);
+      startTransition(() => {
+        setActiveCategory(favoriteCategories[0]);
+      });
     }
-  }, [favoriteCategories, activeCategory]);
+  }, [favoriteCategories, activeCategory, startTransition]);
 
   // Fetch media favorites (including games)
   useEffect(() => {
@@ -175,20 +178,26 @@ export default function ProfilePage() {
           );
 
         if (!ignore) {
-          setMediaStats(prev => ({ ...prev, [category]: stats }));
-          setMediaFavorites(prev => ({
-            ...prev,
-            [category]: favorites.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)),
-          }));
+          startTransition(() => {
+            setMediaStats(prev => ({ ...prev, [category]: stats }));
+            setMediaFavorites(prev => ({
+              ...prev,
+              [category]: favorites.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)),
+            }));
+          });
         }
       } catch (error) {
         console.warn('Favorites fetch failed:', error);
         if (!ignore) {
-          setMediaFavorites(prev => ({ ...prev, [category]: [] }));
+          startTransition(() => {
+            setMediaFavorites(prev => ({ ...prev, [category]: [] }));
+          });
         }
       } finally {
         if (!ignore) {
-          setMediaFavoritesLoading(prev => ({ ...prev, [category]: false }));
+          startTransition(() => {
+            setMediaFavoritesLoading(prev => ({ ...prev, [category]: false }));
+          });
         }
       }
     };
@@ -200,7 +209,7 @@ export default function ProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, startTransition]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -218,13 +227,15 @@ export default function ProfilePage() {
         const data = payload.data;
         if (!data || ignore) return;
 
-        setCategoryTimes({
-          games: data.games?.hours ?? 0,
-          anime: data.anime?.hours ?? 0,
-          manga: data.manga?.hours ?? 0,
-          movies: data.movies?.hours ?? 0,
-          tv: data.tv?.hours ?? 0,
-          books: data.books?.hours ?? 0,
+        startTransition(() => {
+          setCategoryTimes({
+            games: data.games?.hours ?? 0,
+            anime: data.anime?.hours ?? 0,
+            manga: data.manga?.hours ?? 0,
+            movies: data.movies?.hours ?? 0,
+            tv: data.tv?.hours ?? 0,
+            books: data.books?.hours ?? 0,
+          });
         });
       } catch (error) {
         console.warn('User stats time fetch failed:', error);
@@ -236,7 +247,7 @@ export default function ProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, startTransition]);
 
   // Redirect if not authenticated
   useEffect(() => {

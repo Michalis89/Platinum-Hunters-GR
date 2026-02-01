@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, createContext, useContext } from 'react';
+import { memo, useState, createContext, useContext } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
@@ -269,7 +269,7 @@ const categoryLabels: Record<string, string> = {
   games: 'Παιχνίδια',
 };
 
-export function ActivityFeed({
+function ActivityFeedComponent({
   scope,
   limit = 10,
   title,
@@ -356,6 +356,8 @@ export function ActivityFeed({
     </div>
   );
 }
+
+export const ActivityFeed = memo(ActivityFeedComponent);
 
 function FeedText({ item }: { item: ActivityItem }) {
   const text = renderText(item);

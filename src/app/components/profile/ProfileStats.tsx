@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { InfoHint } from '@/app/components/ui/InfoHint';
+import { memo } from 'react';
 
 type Stat = {
   value: number | string;
@@ -64,7 +65,7 @@ const readingTips: Record<string, string> = {
     'Κατά προσέγγιση: ~35–45 σελίδες/ώρα (ανάλογα τη δυσκολία), με βάση έναν μέσο ρυθμό ανάγνωσης.',
 };
 
-export function ProfileStats({ category, mediaStats }: Readonly<ProfileStatsProps>) {
+function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsProps>) {
   const titles = categoryTitles[category] || { eyebrow: 'Stats', title: 'Τα στατιστικά σου' };
 
   const labels: Record<string, { completed: string; current: string; planned: string }> = {
@@ -195,3 +196,5 @@ export function ProfileStats({ category, mediaStats }: Readonly<ProfileStatsProp
     </section>
   );
 }
+
+export const ProfileStats = memo(ProfileStatsComponent);
