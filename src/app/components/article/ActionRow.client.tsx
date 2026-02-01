@@ -33,6 +33,7 @@ export default function ActionRow({ article }: ActionRowProps) {
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const canEdit = !!currentUser && hasAnyRole(currentUser, ['admin', 'author', 'reviewer', 'owner']);
+  const isAuthor = Boolean(currentUser && article.author_id && currentUser.id === article.author_id);
   const fallbackBase = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
   const fallbackHref = `${fallbackBase}?category=${article.category}`;
 
@@ -104,7 +105,7 @@ export default function ActionRow({ article }: ActionRowProps) {
   };
 
   const toggleLike = async () => {
-    if (likeLoading) return;
+    if (likeLoading || isAuthor) return;
     setLikeLoading(true);
 
     try {
@@ -183,12 +184,18 @@ export default function ActionRow({ article }: ActionRowProps) {
         <button
           type="button"
           onClick={toggleLike}
-          aria-label={likeState.liked ? 'Αφαίρεση like' : 'Like'}
-          title={likeState.liked ? 'Αφαίρεση like' : 'Like'}
+          aria-label={isAuthor ? 'Δεν μπορείτε να κάνετε like στο δικό σας άρθρο' : likeState.liked ? 'Αφαίρεση like' : 'Like'}
+          title={
+            isAuthor
+              ? 'Δεν μπορείς να κάνεις like στο δικό σου άρθρο'
+              : likeState.liked
+                ? 'Αφαίρεση like'
+                : 'Like'
+          }
           className={`rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] transition ${
             likeState.liked ? 'text-[var(--hb-primary)]' : 'text-[var(--hb-text)]'
-          }`}
-          disabled={likeLoading}
+          } ${isAuthor ? 'cursor-not-allowed opacity-70' : 'hover:text-[var(--hb-primary)]'}`}
+          disabled={likeLoading || isAuthor}
         >
           <Heart size={14} />
         </button>

@@ -22,6 +22,7 @@ import getSupabaseServer from '@/lib/supabase-server';
 import { normalizeSlug } from '@/utils/slugify';
 import ArticleComments from '@/app/components/article/ArticleComments.client';
 import ArticleAuthHint from '@/app/components/article/ArticleAuthHint.client';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -141,8 +142,8 @@ async function fetchRelatedArticles(
       query = query.eq('category', filters.category);
     }
 
-    return query;
-  };
+        return query;
+      };
 
   const execute = async (filters: { topic?: ArticleTopic | null; category?: string | null }) => {
     const { data, error } = await buildQuery(filters);
@@ -158,9 +159,9 @@ async function fetchRelatedArticles(
     return byTopicAndCategory;
   }
 
-  const byTopicOnly = await execute({ topic: article.topic });
-  if (byTopicOnly && byTopicOnly.length > 0) {
-    return byTopicOnly;
+  const byCategoryOnly = await execute({ category: article.category });
+  if (byCategoryOnly && byCategoryOnly.length > 0) {
+    return byCategoryOnly;
   }
 
   return [];
@@ -188,16 +189,19 @@ async function fetchArticle(
     return null;
   }
 
+  return article;
+}
+
+async function trackArticleView(articleId: number, userId: string | null) {
+  const supabase = getSupabaseServer();
   try {
     await supabase.from('article_views').insert({
-      article_id: article.id,
-      user_id: null,
+      article_id: articleId,
+      user_id: userId ?? null,
     });
   } catch {
     // Tracking views is optional, swallow failures
   }
-
-  return article;
 }
 
 export async function buildArticleDetailMetadata({
@@ -246,10 +250,21 @@ export default async function ArticleDetailPage({
   topicFilter,
 }: ArticleDetailPageProps) {
   const { slug } = await params;
+  const sessionClient = await createRouteHandlerClient();
+  const {
+    data: { session },
+  } = await sessionClient.auth.getSession();
+  const currentUserId = session?.user.id ?? null;
   const article = await fetchArticle(slug, topicFilter);
 
   if (!article) {
     notFound();
+  }
+
+  const isAuthorViewer =
+    !!currentUserId && !!article.author_id && currentUserId === article.author_id;
+  if (!isAuthorViewer) {
+    await trackArticleView(article.id, currentUserId);
   }
 
   const headersList = await headers();

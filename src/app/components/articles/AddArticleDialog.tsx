@@ -17,6 +17,11 @@ import dynamic from 'next/dynamic';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 import { uploadArticleCoverImage } from '@/lib/media/uploadArticleCover';
+import {
+  CONTENT_PUBLISHED_EVENT,
+  ContentPublicationType,
+  ContentPublishedEventDetail,
+} from '@/app/constants/contentEvents';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
   ssr: false,
@@ -28,7 +33,7 @@ interface AddArticleDialogProps {
   onSuccess?: () => void;
 }
 
-type ContentType = 'article' | 'review';
+type ContentType = ContentPublicationType;
 
 interface CategoryConfig {
   label: string;
@@ -129,6 +134,18 @@ const generateSlug = (title: string): string => {
 
 const stripEmptyParagraphs = (html: string) => {
   return html.replace(/<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '');
+};
+
+const dispatchContentPublishedEvent = (type: ContentPublicationType) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const event = new CustomEvent<ContentPublishedEventDetail>(CONTENT_PUBLISHED_EVENT, {
+    detail: { type },
+  });
+
+  window.dispatchEvent(event);
 };
 
 export default function AddArticleDialog({
@@ -328,6 +345,9 @@ export default function AddArticleDialog({
       }
 
       onSuccess?.();
+      if (saveStatus === 'published') {
+        dispatchContentPublishedEvent(contentType);
+      }
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');

@@ -22,6 +22,10 @@ import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
 import FilterBar from '@/app/components/shared/FilterBar';
 import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
+import {
+  CONTENT_PUBLISHED_EVENT,
+  ContentPublishedEventDetail,
+} from '@/app/constants/contentEvents';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -179,6 +183,7 @@ function ReviewsPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
+  const [refreshSignal, setRefreshSignal] = useState(0);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -209,7 +214,21 @@ function ReviewsPageContent() {
     };
 
     fetchReviews();
-  }, [category, tag]);
+  }, [category, tag, refreshSignal]);
+
+  useEffect(() => {
+    const handleContentPublished = (event: Event) => {
+      const customEvent = event as CustomEvent<ContentPublishedEventDetail>;
+      if (customEvent?.detail?.type === 'review') {
+        setRefreshSignal(signal => signal + 1);
+      }
+    };
+
+    window.addEventListener(CONTENT_PUBLISHED_EVENT, handleContentPublished);
+    return () => {
+      window.removeEventListener(CONTENT_PUBLISHED_EVENT, handleContentPublished);
+    };
+  }, []);
 
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
   const metaLine = tag ? `${total} reviews • ${tag}` : `${total} reviews`;

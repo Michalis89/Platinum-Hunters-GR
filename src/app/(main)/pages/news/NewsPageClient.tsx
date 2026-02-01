@@ -26,6 +26,10 @@ import {
 import { normalizeSlug } from '@/utils/slugify';
 import FilterBar from '@/app/components/shared/FilterBar';
 import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
+import {
+  CONTENT_PUBLISHED_EVENT,
+  ContentPublishedEventDetail,
+} from '@/app/constants/contentEvents';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -184,9 +188,10 @@ function NewsPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
+  const [refreshSignal, setRefreshSignal] = useState(0);
 
   useEffect(() => {
-      const fetchArticles = async () => {
+    const fetchArticles = async () => {
         setLoading(true);
         setError(null);
 
@@ -218,7 +223,21 @@ function NewsPageContent() {
     };
 
     fetchArticles();
-  }, [category, normalizedTopic, tag]);
+  }, [category, normalizedTopic, tag, refreshSignal]);
+
+  useEffect(() => {
+    const handleContentPublished = (event: Event) => {
+      const customEvent = event as CustomEvent<ContentPublishedEventDetail>;
+      if (customEvent?.detail?.type === 'article') {
+        setRefreshSignal(signal => signal + 1);
+      }
+    };
+
+    window.addEventListener(CONTENT_PUBLISHED_EVENT, handleContentPublished);
+    return () => {
+      window.removeEventListener(CONTENT_PUBLISHED_EVENT, handleContentPublished);
+    };
+  }, []);
 
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
   const topicLabel = normalizedTopic ? TOPIC_LABELS[normalizedTopic] : null;
