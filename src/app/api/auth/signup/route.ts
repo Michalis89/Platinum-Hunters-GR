@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/api/errors';
@@ -20,7 +22,7 @@ import {
  * Signup API route that creates a Supabase user via the Admin API and
  * ships a Resend confirmation email with the Supabase action link.
  */
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   const siteUrl = process.env.SITE_URL;
   if (!siteUrl) {
     console.error('Missing SITE_URL environment variable for signup flow');
@@ -228,3 +230,5 @@ export async function POST(req: Request) {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const POST = withApiRoute(POSTHandler);

@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11,7 +13,7 @@ function supabaseAdmin() {
   );
 }
 
-export async function GET() {
+async function GETHandler() {
   const supabase = supabaseAdmin();
 
   const [users, games, anime, manga, movies, tv, books, articles] = await Promise.all([
@@ -61,3 +63,5 @@ export async function GET() {
     totalArticles: articles.count ?? 0,
   });
 }
+
+export const GET = withApiRoute(GETHandler);

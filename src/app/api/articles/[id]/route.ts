@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
@@ -11,7 +13,7 @@ import { revalidateCache } from '@/lib/cache/tags';
 import { hasAnyRole } from '@/lib/roles';
 
 // GET - Fetch single article by ID or slug
-export async function GET(
+async function GETHandler(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -63,7 +65,7 @@ export async function GET(
 }
 
 // PUT - Update article
-export async function PUT(
+async function PUTHandler(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -210,7 +212,7 @@ export async function PUT(
 }
 
 // DELETE - Delete article
-export async function DELETE(
+async function DELETEHandler(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -278,3 +280,7 @@ export async function DELETE(
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);
+export const PUT = withApiRoute(PUTHandler);
+export const DELETE = withApiRoute(DELETEHandler);

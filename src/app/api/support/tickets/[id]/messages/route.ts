@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import getSupabaseServer from '@/lib/supabase-server';
 import { API_ERRORS } from '@/lib/api/errors';
@@ -36,7 +38,7 @@ const validateAttachments = (files: File[]) => {
   return null;
 };
 
-export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+async function POSTHandler(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
@@ -146,3 +148,5 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+
+export const POST = withApiRoute(POSTHandler);

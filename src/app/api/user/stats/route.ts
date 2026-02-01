@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { API_ERRORS } from '@/lib/api/errors';
@@ -51,7 +53,7 @@ type StatsEntry = {
  * GET /api/user/stats
  * Returns detailed personal stats for the authenticated user's dashboard
  */
-export async function GET() {
+async function GETHandler() {
   try {
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
@@ -285,3 +287,5 @@ export async function GET() {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);

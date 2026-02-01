@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 /**
  * Login API Route
  * POST /api/auth/login
@@ -12,7 +14,7 @@ import { fail, ok } from '@/lib/api/response';
 import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
 import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   // Rate limiting: 5 login attempts per 15 minutes per IP
   const clientIp = getClientIp(req);
   const rateLimitResult = rateLimit(`login:${clientIp}`, RATE_LIMITS.login);
@@ -173,3 +175,5 @@ export async function POST(req: Request) {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const POST = withApiRoute(POSTHandler);

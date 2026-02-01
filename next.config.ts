@@ -1,13 +1,20 @@
 import { join } from 'node:path';
 import type { NextConfig } from 'next';
 import bundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs';
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: !!process.env.ANALYZE,
   openAnalyzer: true,
 });
 
-const nextConfig: NextConfig = {
+type NextConfigWithInstrumentation = NextConfig & {
+  experimental?: NextConfig['experimental'] & {
+    instrumentationHook?: boolean;
+  };
+};
+
+const nextConfig: NextConfigWithInstrumentation = {
   outputFileTracingRoot: join(process.cwd()),
   images: {
     remotePatterns: [
@@ -73,4 +80,8 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+const sentryWebpackPluginOptions = {
+  silent: true,
+};
+
+export default withBundleAnalyzer(withSentryConfig(nextConfig, sentryWebpackPluginOptions));

@@ -27,7 +27,7 @@
 
 ## Overview
 
-Hobbistas is a comprehensive platform for Greek hobby enthusiasts to track and manage their entertainment libraries across multiple categories. Whether you're tracking games, anime, movies, books, or TV shows - Hobbistas provides a unified experience.
+Hobbistas is a Greek-first hobby hub that unifies games, anime, manga, movies, TV, and books under a single backlog, activity, and editorial experience.
 
 ### Key Features
 
@@ -115,22 +115,24 @@ npm install
 
 ### Environment Setup
 
-Create a `.env.local` file in the root directory:
+Copy `.env.example` to `.env.local` and populate the keys below before running locally or deploying:
 
 ```bash
-# Required - Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://XXX.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=anon-public-key
+SUPABASE_SERVICE_ROLE_KEY=service-role-key
 
-# Required - Site
-SITE_URL =http://localhost:3000
+# Site metadata
+SITE_URL=https://platinumhunters.gr
+NEXT_PUBLIC_CONTACT_EMAIL=ops@example.com
 
-# Optional - External APIs
-RAWG_API_KEY=your-rawg-key
-MAL_CLIENT_ID=your-mal-client-id
-MAL_CLIENT_SECRET=your-mal-secret
-GOOGLE_BOOKS_API_KEY=your-google-books-key
+# External APIs (optional but recommended for metadata)
+RAWG_API_KEY=rawg-api-key
+MAL_CLIENT_ID=mal-client-id
+MAL_CLIENT_SECRET=mal-client-secret
+GOOGLE_BOOKS_API_KEY=google-books-key
+RESEND_API_KEY=resend-api-key
 ```
 
 ### Development
@@ -200,28 +202,27 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── (main)/            # Main layout group
-│   │   └── pages/         # Application pages
-│   ├── (legal)/           # Legal pages
-│   ├── api/               # API route handlers
-│   │   ├── anime/         # Anime endpoints
-│   │   ├── books/         # Books endpoints
-│   │   ├── games/         # Games endpoints
-│   │   ├── movies/        # Movies/TV endpoints
-│   │   ├── articles/      # Articles endpoints
-│   │   ├── auth/          # Auth endpoints
-│   │   └── ...
-│   └── components/        # React components
-├── store/                 # Redux store
-│   ├── slices/           # Redux slices (auth)
-│   └── store.ts          # Store configuration
-├── lib/                   # Core libraries
-│   ├── supabase/         # Database client & types
-│   └── services/         # API services (RAWG, TMDB, etc)
-├── types/                 # TypeScript definitions
-├── utils/                 # Utility functions
-└── config/               # App configuration
+├── app/                        # Next.js App Router (App Shell + routes)
+│   ├── (main)/                 # Primary user experience (home, backlog, profile)
+│   ├── (legal)/                # Privacy/terms pricing
+│   ├── api/                    # Route handlers (auth, media, articles, support, activity)
+│   └── components/             # Shared UI atoms, modals, loaders, editors
+├── store/                      # Redux toolkit (auth slice + store)
+├── context/                    # Theme/context helpers
+├── lib/
+│   ├── supabase/               # Clients, route helpers, types, validation
+│   ├── services/               # External API adapters (RAWG, TMDB, Google Books)
+│   ├── cache/                  # Cache tagging + revalidation helpers
+│   ├── email/                  # Resend helpers and templates
+│   └── validation/             # Shared form validators (PSN IDs, inputs)
+├── config/                     # Site constants, roadmap text, SEO strings
+├── utils/
+│   ├── seo/                    # Metadata builders + structured data
+│   └── security/               # Sanitizers (HTML, slugify)
+├── data/                       # Static choices (genres, categories)
+├── types/                      # Schema definitions generated from Supabase
+supabase-migrations/           # SQL migrations and RLS policies
+docs/private/                  # Review/Audit/Architecture playbooks
 ```
 
 ---
@@ -239,27 +240,34 @@ src/
 
 ---
 
-## Deployment
+## Deployment & Security Notes
 
 ### Vercel (Recommended)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Michalis89/Platinum-Hunters-GR)
 
-#### Environment Variables on Vercel
+Key environment variables:
 
-| Variable                        | Required | Notes                  |
-| ------------------------------- | -------- | ---------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase project URL   |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase anonymous key |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Service role key       |
-| `SITE_URL `                     | Yes      | Production domain      |
-| `RAWG_API_KEY`                  | No       | Game metadata          |
-| `MAL_CLIENT_ID`                 | No       | Anime/manga metadata   |
-| `GOOGLE_BOOKS_API_KEY`          | No       | Book metadata          |
+| Variable                        | Required | Notes                                |
+| ------------------------------- | -------- | ------------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`      | ✅       | Public Supabase URL                   |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅       | Public anon key                        |
+| `SUPABASE_SERVICE_ROLE_KEY`     | ✅       | Server-only service role key          |
+| `SITE_URL`                      | ✅       | Canonical domain                      |
+| `RESEND_API_KEY`                | ✅       | Email provider (notifications)       |
+| `RAWG_API_KEY`                  | ✳️       | Game metadata                         |
+| `MAL_CLIENT_ID`                 | ✳️       | Anime/manga data                      |
+| `MAL_CLIENT_SECRET`             | ✳️       | Anime/manga data                      |
+| `GOOGLE_BOOKS_API_KEY`          | ✳️       | Book metadata                         |
+
+Security posture:
+1. Supabase RLS policies live under `supabase-migrations/05-create-rls-policies.sql`; service role key is exclusively used in `src/lib/supabase-server.ts` & the sitemap seed (`next-sitemap.config.js`). Never commit this key or expose it client-side.  
+2. API gatekeeping uses `src/lib/api/auth.ts` + `src/lib/rate-limit.ts` (applied in `/api/auth/login` & `/api/auth/signup`) and explicit role checks for admin/uploads.  
+3. File uploads leverage Supabase storage and sanitize inputs before writing. Harden stale tokens via `src/app/components/AuthInit.tsx` + `HeartbeatPing.tsx`.
 
 ### Database Setup
 
-Run the migrations in order from `supabase-migrations/` folder in your Supabase SQL editor.
+Run migrations sequentially from `supabase-migrations/` in the Supabase SQL editor or via `supabase db push` to rebuild the schema.
 
 ---
 
@@ -271,11 +279,12 @@ Run the migrations in order from `supabase-migrations/` folder in your Supabase 
 4. Run tests: `npm test`
 5. Submit a pull request
 
-### Code Style
+### How to Use the Docs
 
-- TypeScript strict mode
-- ESLint + Prettier
-- Tailwind CSS utility classes
+- `docs/private/REVIEW.md`: snapshot of prior production audit findings and Vercel hardening notes.  
+- `docs/private/codex/ARCHITECTURE.md`: architecture map + state/data strategy.  
+- `docs/private/codex/AUDIT_REPORT.md`: cleaned audit findings with severity tiers.  
+- `docs/private/codex/ROADMAP.md`: 30/60/90 engineering + marketing plan and monetization tiers.
 
 ---
 

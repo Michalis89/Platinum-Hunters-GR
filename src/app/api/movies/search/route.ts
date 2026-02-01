@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
@@ -130,7 +132,7 @@ const fetchTmdb = async (search: string, category: Category, limit: number) => {
   return (result.results ?? []).slice(0, limit);
 };
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get('q')?.trim() || '';
@@ -207,3 +209,5 @@ export async function GET(req: Request) {
     return NextResponse.json({ source: 'external', items: [] }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute(GETHandler);

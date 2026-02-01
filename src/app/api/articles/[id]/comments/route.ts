@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { insertActivity } from '@/lib/services/activityService';
 import { API_ERRORS } from '@/lib/api/errors';
@@ -6,7 +8,7 @@ import { fail, ok, okWithMeta } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
 import { hasAnyRole } from '@/lib/roles';
 // GET - Fetch comments for an article
-export async function GET(
+async function GETHandler(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -38,7 +40,7 @@ export async function GET(
 }
 
 // POST - Add a comment to an article
-export async function POST(
+async function POSTHandler(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -119,7 +121,7 @@ export async function POST(
 }
 
 // DELETE - Delete a comment (own comments only or admin)
-export async function DELETE(req: Request) {
+async function DELETEHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const { searchParams } = new URL(req.url);
@@ -181,7 +183,7 @@ export async function DELETE(req: Request) {
 }
 
 // PATCH - Update a comment (own or admin)
-export async function PATCH(req: Request) {
+async function PATCHHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
@@ -245,3 +247,8 @@ export async function PATCH(req: Request) {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);
+export const POST = withApiRoute(POSTHandler);
+export const DELETE = withApiRoute(DELETEHandler);
+export const PATCH = withApiRoute(PATCHHandler);

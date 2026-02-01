@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, okWithMeta } from '@/lib/api/response';
@@ -23,7 +25,7 @@ async function ensureAdmin(supabase: Awaited<ReturnType<typeof createRouteHandle
   return session;
 }
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     await ensureAdmin(supabase);
@@ -89,3 +91,5 @@ export async function GET(req: Request) {
 }
 
 export const dynamic = 'force-dynamic';
+
+export const GET = withApiRoute(GETHandler);

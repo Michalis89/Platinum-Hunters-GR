@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { API_ERRORS } from '@/lib/api/errors';
 import { ok, fail } from '@/lib/api/response';
@@ -23,7 +25,7 @@ async function ensureAdmin(supabase: Awaited<ReturnType<typeof createRouteHandle
   return session;
 }
 
-export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
+async function GETHandler(_req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
     await ensureAdmin(supabase);
@@ -105,7 +107,7 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
   }
 }
 
-export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
+async function PATCHHandler(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
     const session = await ensureAdmin(supabase);
@@ -204,7 +206,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 
 export const dynamic = 'force-dynamic';
 
-export async function DELETE(_req: Request, context: { params: Promise<{ id: string }> }) {
+async function DELETEHandler(_req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
     await ensureAdmin(supabase);
@@ -229,3 +231,7 @@ export async function DELETE(_req: Request, context: { params: Promise<{ id: str
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);
+export const PATCH = withApiRoute(PATCHHandler);
+export const DELETE = withApiRoute(DELETEHandler);

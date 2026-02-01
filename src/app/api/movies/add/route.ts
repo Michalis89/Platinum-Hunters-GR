@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import getSupabaseServer from '@/lib/supabase-server';
@@ -75,7 +77,7 @@ const fetchDetails = async (category: Category, tmdbId: number) => {
   };
 };
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const {
@@ -253,3 +255,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute(POSTHandler);

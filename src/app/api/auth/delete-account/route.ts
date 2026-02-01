@@ -1,10 +1,12 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import getSupabaseServer from '@/lib/supabase-server';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
 
-export async function POST() {
+async function POSTHandler() {
   try {
     const supabase = await createRouteHandlerClient();
 
@@ -43,3 +45,5 @@ export async function POST() {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const POST = withApiRoute(POSTHandler);

@@ -1,10 +1,12 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 ﻿import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { isMediaCategory, type MediaStatus } from '@/app/components/backlog/types';
 import type { MediaEntryState } from '@/lib/media/types';
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
@@ -62,3 +64,5 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute(GETHandler);

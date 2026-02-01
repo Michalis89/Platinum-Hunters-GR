@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { insertActivity } from '@/lib/services/activityService';
 import { API_ERRORS } from '@/lib/api/errors';
@@ -6,7 +8,7 @@ import { fail, ok } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
 
 // GET - Check if user has liked the article
-export async function GET(
+async function GETHandler(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -47,7 +49,7 @@ export async function GET(
 }
 
 // POST - Like the article
-export async function POST(
+async function POSTHandler(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -134,7 +136,7 @@ export async function POST(
 }
 
 // DELETE - Unlike the article
-export async function DELETE(
+async function DELETEHandler(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -206,3 +208,7 @@ export async function DELETE(
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);
+export const POST = withApiRoute(POSTHandler);
+export const DELETE = withApiRoute(DELETEHandler);

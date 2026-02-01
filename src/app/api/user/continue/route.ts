@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
@@ -91,7 +93,7 @@ const normalizeEnabledCategories = (categories: string[]) =>
  * GET /api/user/continue
  * Returns continue-where-you-left-off slides, enabled categories, and counts.
  */
-export async function GET() {
+async function GETHandler() {
   try {
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
@@ -269,3 +271,5 @@ export async function GET() {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);

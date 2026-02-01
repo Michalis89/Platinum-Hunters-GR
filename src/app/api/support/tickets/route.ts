@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import getSupabaseServer from '@/lib/supabase-server';
@@ -59,7 +61,7 @@ const validateAttachments = (files: File[]) => {
   return null;
 };
 
-export async function GET() {
+async function GETHandler() {
   try {
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
@@ -88,7 +90,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const formData = await req.formData();
@@ -308,3 +310,6 @@ export const maxDuration = 60;
 export async function OPTIONS() {
   return NextResponse.json({}, { status: 200 });
 }
+
+export const GET = withApiRoute(GETHandler);
+export const POST = withApiRoute(POSTHandler);

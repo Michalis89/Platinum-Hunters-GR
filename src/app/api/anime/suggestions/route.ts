@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
@@ -53,7 +55,7 @@ const mapSuggestedItem = (
   };
 };
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = (searchParams.get('category') || 'anime') as Category;
@@ -147,3 +149,5 @@ export async function GET(req: Request) {
     return NextResponse.json({ items: [] }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute(GETHandler);

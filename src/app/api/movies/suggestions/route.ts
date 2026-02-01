@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
@@ -141,7 +143,7 @@ const fetchPopular = async (category: Category, limit: number) => {
   return (result.results ?? []).slice(0, limit);
 };
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = (searchParams.get('category') || 'movies') as Category;
@@ -244,3 +246,5 @@ export async function GET(req: Request) {
     return NextResponse.json({ items: [] }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute(GETHandler);

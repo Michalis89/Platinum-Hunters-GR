@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
@@ -11,7 +13,7 @@ import { revalidateCache } from '@/lib/cache/tags';
 import { hasAnyRole } from '@/lib/roles';
 
 // GET - Fetch articles with filtering
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const { searchParams } = new URL(req.url);
@@ -50,7 +52,7 @@ export async function GET(req: Request) {
 }
 
 // POST - Create new article
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
 
@@ -177,3 +179,6 @@ export async function POST(req: Request) {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);
+export const POST = withApiRoute(POSTHandler);

@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/api/errors';
@@ -6,7 +8,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { sendResetPasswordEmail } from '@/lib/email/send';
 import { validateEmail } from '@/utils/validation/auth';
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   const siteUrl = process.env.SITE_URL;
   if (!siteUrl) {
     console.error('Missing SITE_URL environment variable for forgot-password flow');
@@ -49,3 +51,5 @@ export async function POST(req: Request) {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const POST = withApiRoute(POSTHandler);

@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import type { Database } from '@/lib/supabase/database.types';
@@ -63,7 +65,7 @@ const mapLibraryEntry = (row: LibraryRow) => {
   };
 };
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = (searchParams.get('category') || 'anime') as Category;
@@ -109,7 +111,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+async function PATCHHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const {
@@ -232,7 +234,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+async function DELETEHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const {
@@ -265,3 +267,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute(GETHandler);
+export const PATCH = withApiRoute(PATCHHandler);
+export const DELETE = withApiRoute(DELETEHandler);

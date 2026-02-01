@@ -1,9 +1,11 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { API_ERRORS } from '@/lib/api/errors';
 import { ok, fail } from '@/lib/api/response';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 
-export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
+async function GETHandler(_req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
     await requireAuth(supabase);
@@ -71,7 +73,7 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
 
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
+async function PATCHHandler(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
     await requireAuth(supabase);
@@ -114,3 +116,6 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const GET = withApiRoute(GETHandler);
+export const PATCH = withApiRoute(PATCHHandler);

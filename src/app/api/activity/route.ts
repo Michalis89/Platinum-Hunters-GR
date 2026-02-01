@@ -1,10 +1,12 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const scope = searchParams.get('scope') === 'me' ? 'me' : 'global';
@@ -46,3 +48,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Σφάλμα φόρτωσης activity' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute(GETHandler);

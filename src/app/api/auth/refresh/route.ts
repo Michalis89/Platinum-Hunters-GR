@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 /**
  * Token Refresh API Route
  * POST /api/auth/refresh
@@ -8,7 +10,7 @@ import { cookies } from 'next/headers';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const body = await req.json();
     const { access_token, refresh_token, expires_in } = body;
@@ -36,3 +38,5 @@ export async function POST(req: Request) {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
+
+export const POST = withApiRoute(POSTHandler);

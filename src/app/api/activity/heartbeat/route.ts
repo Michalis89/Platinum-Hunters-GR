@@ -1,7 +1,9 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const authHeader = req.headers.get('authorization');
     const bearerMatch = authHeader?.match(/^Bearer (.+)$/i);
@@ -51,3 +53,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Σφάλμα server' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute(POSTHandler);

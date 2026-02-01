@@ -1,3 +1,5 @@
+import { withApiRoute } from '@/lib/observability/withApiRoute';
+
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
@@ -18,7 +20,7 @@ const buildStoragePath = (extension: string) => {
   return `articles/cover-${uuid}.${extension}`;
 };
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
@@ -84,3 +86,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Σφάλμα ανέβασμα εικόνας.' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute(POSTHandler);
