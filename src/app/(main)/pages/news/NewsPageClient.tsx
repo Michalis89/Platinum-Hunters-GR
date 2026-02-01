@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useTransition, memo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -17,7 +17,6 @@ import {
 } from '@/app/components/ui/Card';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import {
   CATEGORY_LABELS,
   CATEGORY_SUBTITLES,
@@ -39,7 +38,7 @@ interface ArticleWithAuthor extends ArticleRow {
   } | null;
 }
 
-function ArticleCard({ article }: { article: ArticleWithAuthor }) {
+const ArticleCard = memo(function ArticleCard({ article }: { article: ArticleWithAuthor }) {
   const normalizedSlug = normalizeSlug(article.slug);
   const MotionCard = motion(Card);
 
@@ -153,12 +152,41 @@ function ArticleCard({ article }: { article: ArticleWithAuthor }) {
       </CardContent>
     </MotionCard>
   );
+});
+ArticleCard.displayName = 'ArticleCard';
+
+const SKELETON_COUNT = 6;
+
+const ArticleCardSkeleton = () => (
+  <div className="min-h-[320px] overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-[var(--hb-shadow-md)]">
+    <div className="relative aspect-[16/10] overflow-hidden bg-[var(--hb-surface)]">
+      <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-[var(--hb-border)]/60 to-[var(--hb-card)]" />
+    </div>
+    <div className="space-y-3 p-4">
+      <div className="h-4 w-3/4 rounded-full bg-[var(--hb-border)]/50 animate-pulse" />
+      <div className="h-3 rounded-full bg-[var(--hb-border)]/40 animate-pulse" />
+      <div className="flex items-center gap-2">
+        <span className="h-3 w-16 rounded-full bg-[var(--hb-border)]/40 animate-pulse" />
+        <span className="h-3 w-10 rounded-full bg-[var(--hb-border)]/40 animate-pulse" />
+      </div>
+    </div>
+  </div>
+);
+
+function NewsSkeletonGrid({ count = SKELETON_COUNT }: { count?: number }) {
+  return (
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: count }, (_, index) => (
+        <ArticleCardSkeleton key={`news-skeleton-${index}`} />
+      ))}
+    </div>
+  );
 }
 
 function NewsFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-      <LoadingSpinner size="lg" />
+      <NewsSkeletonGrid />
     </div>
   );
 }
@@ -189,19 +217,21 @@ function NewsPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [refreshSignal, setRefreshSignal] = useState(0);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    let isMounted = true;
     const fetchArticles = async () => {
-        setLoading(true);
-        setError(null);
+      setLoading(true);
+      setError(null);
 
-        try {
-          const params = new URLSearchParams();
-          if (category) params.set('category', category);
-          if (normalizedTopic) params.set('topic', normalizedTopic);
-          if (tag) params.set('tag', tag);
-          params.set('status', 'published');
-          params.set('limit', '20');
+      try {
+        const params = new URLSearchParams();
+        if (category) params.set('category', category);
+        if (normalizedTopic) params.set('topic', normalizedTopic);
+        if (tag) params.set('tag', tag);
+        params.set('status', 'published');
+        params.set('limit', '20');
 
         const response = await fetch(`/api/articles?${params.toString()}`);
         if (!response.ok) {
@@ -209,20 +239,28 @@ function NewsPageContent() {
         }
 
         const data = await response.json();
-        // Filter out reviews from news page (reviews have their own dedicated page)
         const articlesData = (data.data || []).filter(
           (article: ArticleWithAuthor) => article.topic !== 'reviews',
         );
-        setArticles(articlesData);
-        setTotal(articlesData.length);
+        const totalCount = articlesData.length;
+
+        startTransition(() => {
+          if (!isMounted) return;
+          setArticles(articlesData);
+          setTotal(totalCount);
+          setLoading(false);
+        });
       } catch (err) {
+        if (!isMounted) return;
         setError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
         setLoading(false);
       }
     };
 
     fetchArticles();
+    return () => {
+      isMounted = false;
+    };
   }, [category, normalizedTopic, tag, refreshSignal]);
 
   useEffect(() => {
@@ -242,6 +280,7 @@ function NewsPageContent() {
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
   const topicLabel = normalizedTopic ? TOPIC_LABELS[normalizedTopic] : null;
   const metaLine = tag ? `${total} άρθρα • ${tag}` : `${total} άρθρα`;
+  const shouldShowSkeleton = loading || isPending;
 
   const pageTitle = categoryLabel
     ? topicLabel
@@ -288,10 +327,8 @@ function NewsPageContent() {
       </motion.div>
 
       {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <LoadingSpinner size="lg" />
-        </div>
+      {shouldShowSkeleton ? (
+        <NewsSkeletonGrid />
       ) : error ? (
         <ErrorState error={error} />
       ) : articles.length === 0 ? (

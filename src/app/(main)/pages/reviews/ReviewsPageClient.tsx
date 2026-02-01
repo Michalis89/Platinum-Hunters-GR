@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useTransition, memo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -35,7 +35,7 @@ interface ArticleWithAuthor extends ArticleRow {
   } | null;
 }
 
-function ReviewCard({ article }: { article: ArticleWithAuthor }) {
+const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithAuthor }) {
   const normalizedSlug = normalizeSlug(article.slug);
   const MotionCard = motion(Card);
 
@@ -150,6 +150,35 @@ function ReviewCard({ article }: { article: ArticleWithAuthor }) {
       </CardContent>
     </MotionCard>
   );
+});
+ReviewCard.displayName = 'ReviewCard';
+
+const SKELETON_COUNT = 6;
+
+const ReviewCardSkeleton = () => (
+  <div className="min-h-[320px] overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-[var(--hb-shadow-md)]">
+    <div className="relative aspect-[16/10] overflow-hidden bg-[var(--hb-surface)]">
+      <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-[var(--hb-border)]/60 to-[var(--hb-card)]" />
+    </div>
+    <div className="space-y-3 p-4">
+      <div className="h-4 w-3/4 rounded-full bg-[var(--hb-border)]/50 animate-pulse" />
+      <div className="h-3 rounded-full bg-[var(--hb-border)]/40 animate-pulse" />
+      <div className="flex items-center gap-2">
+        <span className="h-3 w-16 rounded-full bg-[var(--hb-border)]/40 animate-pulse" />
+        <span className="h-3 w-10 rounded-full bg-[var(--hb-border)]/40 animate-pulse" />
+      </div>
+    </div>
+  </div>
+);
+
+function ReviewSkeletonGrid({ count = SKELETON_COUNT }: { count?: number }) {
+  return (
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: count }, (_, index) => (
+        <ReviewCardSkeleton key={`skeleton-${index}`} />
+      ))}
+    </div>
+  );
 }
 
 function ReviewsFallback() {
@@ -184,8 +213,10 @@ function ReviewsPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [refreshSignal, setRefreshSignal] = useState(0);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    let isMounted = true;
     const fetchReviews = async () => {
       setLoading(true);
       setError(null);
@@ -204,17 +235,30 @@ function ReviewsPageContent() {
         }
 
         const data = await response.json();
-        setArticles(data.data || []);
-        setTotal(data.meta?.total || 0);
+        if (!isMounted) return;
+
+        const payload = data.data || [];
+        const metaTotal = data.meta?.total || 0;
+
+        startTransition(() => {
+          if (!isMounted) return;
+          setArticles(payload);
+          setTotal(metaTotal);
+          setLoading(false);
+        });
       } catch (err) {
+        if (!isMounted) return;
         setError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
         setLoading(false);
       }
     };
 
     fetchReviews();
-  }, [category, tag, refreshSignal]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [category, tag, refreshSignal, startTransition]);
 
   useEffect(() => {
     const handleContentPublished = (event: Event) => {
@@ -240,6 +284,7 @@ function ReviewsPageContent() {
   const emptyDescription = categoryLabel
     ? `Δεν βρέθηκαν reviews στην κατηγορία "${categoryLabel}"`
     : 'Δεν υπάρχουν ακόμα δημοσιευμένα reviews';
+  const shouldShowSkeleton = loading || isPending;
 
   return (
     <PageContainer size="xl" className="py-12">
@@ -274,10 +319,8 @@ function ReviewsPageContent() {
       </motion.div>
 
       {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <LoadingSpinner size="lg" />
-        </div>
+      {shouldShowSkeleton ? (
+        <ReviewSkeletonGrid />
       ) : error ? (
         <ErrorState error={error} />
       ) : articles.length === 0 ? (
