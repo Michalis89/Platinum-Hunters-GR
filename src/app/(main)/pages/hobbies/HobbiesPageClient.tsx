@@ -1,26 +1,40 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { HobbiesHero, HobbiesCategorySection } from '@/app/components/hobbies';
 import { HOBBY_SECTIONS } from '@/config/hobbies';
 import { PageContainer } from '@/app/components/layout';
-import { selectUser, selectIsAuthenticated } from '@/store/slices/authSlice';
+import { selectUser, selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 
 export default function HobbiesPageClient() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAuthLoading = useSelector(selectIsLoading);
   const user = useSelector(selectUser);
+
+  // Prevent hydration mismatch by tracking client mount
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const hasAllAccess = hasAnyRole(user, ['admin', 'owner', 'moderator']);
 
   // Filter sections based on user's selected categories (if logged in)
+  // Only apply filtering after client mount to prevent hydration mismatch
   const userCategories = (user?.categories as string[] | undefined) ?? [];
-  const filteredSections = hasAllAccess
-    ? HOBBY_SECTIONS
-    : isAuthenticated && userCategories.length > 0
-      ? HOBBY_SECTIONS.filter(section =>
-          section.categories.some(category => userCategories.includes(category)),
-        )
-      : HOBBY_SECTIONS;
+  const filteredSections =
+    !hasMounted || isAuthLoading
+      ? HOBBY_SECTIONS // During SSR/hydration, show all sections
+      : hasAllAccess
+        ? HOBBY_SECTIONS
+        : isAuthenticated && userCategories.length > 0
+          ? HOBBY_SECTIONS.filter(section =>
+              section.categories.some(category => userCategories.includes(category)),
+            )
+          : HOBBY_SECTIONS;
 
   return (
     <>

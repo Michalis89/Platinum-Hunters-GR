@@ -233,6 +233,8 @@ export default function Navbar() {
   const [hoveredHobby, setHoveredHobby] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  // Prevent hydration mismatch by tracking client mount
+  const [hasMounted, setHasMounted] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isAuthLoading = useSelector(selectIsLoading);
@@ -245,6 +247,14 @@ export default function Navbar() {
     !!user &&
     hasAnyRole(user, ['admin', 'author', 'reviewer', 'owner']);
   const canAccessAdminPanel = !!user && hasAnyRole(user, ['admin', 'moderator', 'owner']);
+
+  // Set mounted after hydration
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Use consistent loading state for SSR/hydration
+  const showAuthLoading = !hasMounted || isAuthLoading;
 
   const handleLogout = async () => {
     await dispatch(logout());
@@ -434,7 +444,7 @@ export default function Navbar() {
 
           {/* Auth Links */}
           <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
-            {isAuthLoading ? (
+            {showAuthLoading ? (
               <div className="flex items-center gap-2 px-3 py-1">
                 <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
                 <div className="h-4 w-20 animate-pulse rounded bg-white/10" />
@@ -639,7 +649,7 @@ export default function Navbar() {
 
                 {/* Mobile Auth */}
                 <div className="border-t border-[var(--hb-border)] pt-3">
-                  {isAuthLoading ? (
+                  {showAuthLoading ? (
                     <div className="flex items-center justify-center gap-2 py-2">
                       <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
                       <div className="h-4 w-24 animate-pulse rounded bg-white/10" />

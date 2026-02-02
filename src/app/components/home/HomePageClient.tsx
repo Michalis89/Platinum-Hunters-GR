@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import useSWR from 'swr';
-import { selectIsAuthenticated, selectUser, setUser } from '@/store/slices/authSlice';
+import { selectIsAuthenticated, selectIsLoading, selectUser, setUser } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import { supabase } from '@/lib/supabase-client';
 import { PageContainer } from '@/app/components/layout';
@@ -33,7 +33,15 @@ const noStoreFetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(r
 export default function HomePageClient() {
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAuthLoading = useSelector(selectIsLoading);
   const user = useSelector(selectUser);
+
+  // Prevent hydration mismatch by waiting for client mount
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const { data: personalStats } = useSWR(isAuthenticated ? '/api/user/stats' : null, fetcher, {
     refreshInterval: 120000,
@@ -73,6 +81,12 @@ export default function HomePageClient() {
         .catch(() => {});
     });
   }, [isAuthenticated, dispatch]);
+
+  // Show GuestView during SSR and initial hydration to prevent mismatch
+  // Once mounted and auth is loaded, show the correct view
+  if (!hasMounted || isAuthLoading) {
+    return <GuestView />;
+  }
 
   return (
     <>

@@ -1,9 +1,9 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
+import { selectIsAuthenticated, selectUser, selectIsLoading } from '@/store/slices/authSlice';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Skeleton from '@/app/components/ui/Skeleton';
 import CategoryLibrary from '@/app/components/backlog/CategoryLibrary';
@@ -36,6 +36,13 @@ function BacklogPageContent() {
   const statusParam = searchParams.get('status');
   const searchParam = searchParams.get('search');
 
+  // Prevent hydration mismatch by tracking client mount
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   // Default to 'games' if no category specified
   const category: MediaCategory = isMediaCategory(categoryParam) ? categoryParam : 'games';
   const normalizedStatus = statusParam?.toLowerCase();
@@ -51,9 +58,7 @@ function BacklogPageContent() {
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
-  const isAuthLoading = useSelector(
-    (state: { auth: { isLoading: boolean } }) => state.auth.isLoading,
-  );
+  const isAuthLoading = useSelector(selectIsLoading);
 
   // Check authentication - wait for auth to initialize before redirecting
   useEffect(() => {
@@ -67,8 +72,8 @@ function BacklogPageContent() {
   const hasAccessToCategory =
     userCategories.length === 0 || userCategories.includes(category);
 
-  // Show skeleton while auth initializes
-  if (isAuthLoading) {
+  // Show skeleton while auth initializes or before client mount (prevents hydration mismatch)
+  if (!hasMounted || isAuthLoading) {
     return <Skeleton type="backlog" />;
   }
 
