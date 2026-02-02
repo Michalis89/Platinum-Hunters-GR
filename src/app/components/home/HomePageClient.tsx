@@ -82,10 +82,10 @@ export default function HomePageClient() {
     });
   }, [isAuthenticated, dispatch]);
 
-  // Show GuestView during SSR and initial hydration to prevent mismatch
-  // Once mounted and auth is loaded, show the correct view
+  // GuestView includes the full landing markup, so it differs wildly between SSR and the authenticated dashboard.
+  // Render a minimal placeholder shell here so the initial HTML stays stable until auth settles.
   if (!hasMounted || isAuthLoading) {
-    return <GuestView />;
+    return <HomeShellLoading />;
   }
 
   return (
@@ -122,6 +122,28 @@ function GuestView() {
 
       <HomeFinalCTA />
     </>
+  );
+}
+
+// Minimal shell rendered during hydration before auth resolves.
+function HomeShellLoading() {
+  return (
+    <div className="pb-12">
+      <PageContainer size="xl">
+        <div className="animate-pulse space-y-6 rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-8 shadow-[var(--hb-shadow-md)]">
+          <div className="h-8 w-1/2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)]/70" />
+          <div className="space-y-3">
+            <div className="h-4 w-3/4 rounded-full bg-[var(--hb-card)]/60" />
+            <div className="h-4 w-2/3 rounded-full bg-[var(--hb-card)]/60" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="h-24 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
+            <div className="h-24 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
+            <div className="h-24 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
+          </div>
+        </div>
+      </PageContainer>
+    </div>
   );
 }
 
