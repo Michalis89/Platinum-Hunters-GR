@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from 'next/font/google';
+import { cookies } from 'next/headers';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -25,18 +26,21 @@ const geistMono = Geist_Mono({
   display: 'swap',
 });
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+type Theme = 'dark' | 'light';
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get('theme')?.value;
+  const initialTheme: Theme = themeCookie === 'light' ? 'light' : 'dark';
+
   return (
-    <html lang="el">
+    <html lang="el" data-theme={initialTheme}>
       <head>
         <StructuredData data={organizationStructuredData} />
         <StructuredData data={websiteStructuredData} />
       </head>
-      <body
-        suppressHydrationWarning
-        className={` ${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers initialTheme={initialTheme}>
           <AuthInit />
           <HeartbeatPing />
           {children}

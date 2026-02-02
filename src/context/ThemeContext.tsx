@@ -13,27 +13,41 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'hobbistas-hub-theme';
+const THEME_COOKIE_NAME = 'theme';
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
-  const [mounted, setMounted] = useState(false);
+// Set cookie that server can read
+function setThemeCookie(theme: Theme) {
+  document.cookie = `${THEME_COOKIE_NAME}=${theme}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+}
 
-  // Initialize theme from localStorage or system preference
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  initialTheme?: Theme;
+}
+
+export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<Theme>(initialTheme);
+
+  // Sync with localStorage/system preference on mount (client-side only)
   useEffect(() => {
-    setMounted(true);
-
     const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
     if (stored && (stored === 'dark' || stored === 'light')) {
-      setThemeState(stored);
-      document.documentElement.setAttribute('data-theme', stored);
+      if (stored !== theme) {
+        setThemeState(stored);
+        document.documentElement.setAttribute('data-theme', stored);
+        setThemeCookie(stored);
+      }
     } else {
-      // Check system preference
+      // Check system preference if no stored preference
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const systemTheme = prefersDark ? 'dark' : 'light';
-      setThemeState(systemTheme);
-      document.documentElement.setAttribute('data-theme', systemTheme);
+      if (systemTheme !== theme) {
+        setThemeState(systemTheme);
+        document.documentElement.setAttribute('data-theme', systemTheme);
+        setThemeCookie(systemTheme);
+      }
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listen for system preference changes
   useEffect(() => {
@@ -46,6 +60,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         const newTheme = e.matches ? 'dark' : 'light';
         setThemeState(newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
+        setThemeCookie(newTheme);
       }
     };
 
@@ -57,16 +72,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    setThemeCookie(newTheme);
   }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
-
-  // Prevent flash of wrong theme
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
