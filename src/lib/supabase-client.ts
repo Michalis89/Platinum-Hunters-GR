@@ -22,13 +22,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     // Detect session from URL (for email confirmation, password reset, etc.)
     detectSessionInUrl: true,
     // Storage key for session
-    storageKey: 'platinum-hunters-auth',
+    storageKey: 'hobbistas-hub-auth',
     // Use localStorage for session storage
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
   },
   global: {
     headers: {
-      'x-application-name': 'platinum-hunters-gr',
+      'x-application-name': 'hobbistas-hub-com',
     },
   },
 });

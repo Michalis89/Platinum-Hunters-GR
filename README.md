@@ -106,8 +106,8 @@ The `media_items` table supports these categories:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Michalis89/Platinum-Hunters-GR.git
-cd Platinum-Hunters-GR
+git clone https://github.com/Michalis89/hobbistas-hub.git
+cd hobbistas-hub
 
 # Install dependencies
 npm install
@@ -244,25 +244,26 @@ docs/private/                  # Review/Audit/Architecture playbooks
 
 ### Vercel (Recommended)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Michalis89/Platinum-Hunters-GR)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Michalis89/Michalis89/hobbistas-hub)
 
 Key environment variables:
 
-| Variable                        | Required | Notes                                |
-| ------------------------------- | -------- | ------------------------------------ |
-| `NEXT_PUBLIC_SUPABASE_URL`      | ✅       | Public Supabase URL                   |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅       | Public anon key                        |
-| `SUPABASE_SERVICE_ROLE_KEY`     | ✅       | Server-only service role key          |
-| `SITE_URL`                      | ✅       | Canonical domain                      |
-| `RESEND_API_KEY`                | ✅       | Email provider (notifications)       |
-| `RAWG_API_KEY`                  | ✳️       | Game metadata                         |
-| `MAL_CLIENT_ID`                 | ✳️       | Anime/manga data                      |
-| `MAL_CLIENT_SECRET`             | ✳️       | Anime/manga data                      |
-| `GOOGLE_BOOKS_API_KEY`          | ✳️       | Book metadata                         |
+| Variable                        | Required | Notes                          |
+| ------------------------------- | -------- | ------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`      | ✅       | Public Supabase URL            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅       | Public anon key                |
+| `SUPABASE_SERVICE_ROLE_KEY`     | ✅       | Server-only service role key   |
+| `SITE_URL`                      | ✅       | Canonical domain               |
+| `RESEND_API_KEY`                | ✅       | Email provider (notifications) |
+| `RAWG_API_KEY`                  | ✳️       | Game metadata                  |
+| `MAL_CLIENT_ID`                 | ✳️       | Anime/manga data               |
+| `MAL_CLIENT_SECRET`             | ✳️       | Anime/manga data               |
+| `GOOGLE_BOOKS_API_KEY`          | ✳️       | Book metadata                  |
 
 Security posture:
-1. Supabase RLS policies live under `supabase-migrations/05-create-rls-policies.sql`; service role key is exclusively used in `src/lib/supabase-server.ts` & the sitemap seed (`next-sitemap.config.js`). Never commit this key or expose it client-side.  
-2. API gatekeeping uses `src/lib/api/auth.ts` + `src/lib/rate-limit.ts` (applied in `/api/auth/login` & `/api/auth/signup`) and explicit role checks for admin/uploads.  
+
+1. Supabase RLS policies live under `supabase-migrations/05-create-rls-policies.sql`; service role key is exclusively used in `src/lib/supabase-server.ts` & the sitemap seed (`next-sitemap.config.js`). Never commit this key or expose it client-side.
+2. API gatekeeping uses `src/lib/api/auth.ts` + `src/lib/rate-limit.ts` (applied in `/api/auth/login` & `/api/auth/signup`) and explicit role checks for admin/uploads.
 3. File uploads leverage Supabase storage and sanitize inputs before writing. Harden stale tokens via `src/app/components/AuthInit.tsx` + `HeartbeatPing.tsx`.
 
 ### Database Setup
@@ -281,9 +282,9 @@ Run migrations sequentially from `supabase-migrations/` in the Supabase SQL edit
 
 ### How to Use the Docs
 
-- `docs/private/REVIEW.md`: snapshot of prior production audit findings and Vercel hardening notes.  
-- `docs/private/codex/ARCHITECTURE.md`: architecture map + state/data strategy.  
-- `docs/private/codex/AUDIT_REPORT.md`: cleaned audit findings with severity tiers.  
+- `docs/private/REVIEW.md`: snapshot of prior production audit findings and Vercel hardening notes.
+- `docs/private/codex/ARCHITECTURE.md`: architecture map + state/data strategy.
+- `docs/private/codex/AUDIT_REPORT.md`: cleaned audit findings with severity tiers.
 - `docs/private/codex/ROADMAP.md`: 30/60/90 engineering + marketing plan and monetization tiers.
 
 ---
@@ -296,8 +297,8 @@ Distributed under the MIT License. See [LICENSE.txt](LICENSE.txt) for more infor
 
 <div align="center">
   <p>
-    <a href="https://github.com/Michalis89/Platinum-Hunters-GR/issues">Report Bug</a> &bull;
-    <a href="https://github.com/Michalis89/Platinum-Hunters-GR/issues">Request Feature</a>
+    <a href="https://github.com/Michalis89/hobbistas-hub/issues">Report Bug</a> &bull;
+    <a href="https://github.com/Michalis89/hobbistas-hub/issues">Request Feature</a>
   </p>
   <p>Made with care for the Greek hobby community</p>
 </div>

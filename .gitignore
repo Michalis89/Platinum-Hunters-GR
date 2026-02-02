@@ -46,3 +46,5 @@ jest-results.json
 
 docs/private
 supabase/.temp
+
+/ai

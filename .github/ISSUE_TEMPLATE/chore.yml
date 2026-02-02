@@ -1,0 +1,19 @@
+name: Chore
+description: Maintenance, dependency bumps, tooling
+title: "[Chore]: "
+labels: ["chore"]
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: Task
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      placeholder: |
+        - [ ] ...
+        - [ ] ...

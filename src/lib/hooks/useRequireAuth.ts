@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
 
-export const RETURN_URL_KEY = 'platinum-hunters-return-url';
+export const RETURN_URL_KEY = 'hobbistas-hub-return-url';
 
 type UseRequireAuthOptions = {
   redirectPath?: string;
@@ -27,8 +27,7 @@ export function useRequireAuth({ redirectPath }: UseRequireAuthOptions = {}) {
         // Ignore storage errors
       }
 
-      const target =
-        redirectPath ?? `/pages/auth/login?redirect=${encodeURIComponent(currentUrl)}`;
+      const target = redirectPath ?? `/pages/auth/login?redirect=${encodeURIComponent(currentUrl)}`;
       router.push(target);
     }
   }, [isAuthenticated, isLoading, redirectPath, router]);

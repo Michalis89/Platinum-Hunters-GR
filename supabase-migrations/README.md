@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-Αυτά τα migration scripts δημιουργούν ολόκληρη τη database structure για το Platinum Hunters GR.
+Αυτά τα migration scripts δημιουργούν ολόκληρη τη database structure για το Hobbistas Hub.
 
 ## 🗂️ Migration Files
 
@@ -50,6 +50,7 @@ psql postgresql://postgres:[PASSWORD]@[HOST]:[PORT]/postgres < 01-create-tables.
 ## 📊 Database Schema Overview
 
 ### Core Tables
+
 - **users** - User accounts & profiles
 - **games** - Game information
 - **guides** - Trophy guides
@@ -57,18 +58,21 @@ psql postgresql://postgres:[PASSWORD]@[HOST]:[PORT]/postgres < 01-create-tables.
 - **trophies** - Individual trophies
 
 ### Reference Tables
+
 - **platforms** - PS4, PS5, etc
 - **genres** - Game genres
 - **developers** - Game developers
 - **publishers** - Game publishers
 
 ### User Features
+
 - **user_backlog** - User's game backlog
 - **user_completed_games** - Completed games with reviews
 - **comments** - Comments system
 - **user_guide_likes** - Guide likes
 
 ### Admin
+
 - **admin_logs** - Audit trail
 
 ## 🔐 Row Level Security (RLS)
@@ -180,16 +184,21 @@ ORDER BY tablename;
 ## 🐛 Troubleshooting
 
 ### "relation already exists"
+
 - Το table υπάρχει ήδη. Κάνε drop ή skip το migration.
 
 ### "permission denied"
+
 - Έλεγξε ότι έχεις admin rights στο Supabase project.
 
 ### "function does not exist"
+
 - Ίσως δεν τρέχουν τα migrations με τη σειρά. Τρέξε πρώτα τα προηγούμενα.
 
 ### RLS blocks queries
+
 - Αν κάνεις queries μέσω SQL Editor, χρησιμοποίησε το postgres role:
+
 ```sql
 SET ROLE postgres;
 -- your query here
@@ -198,6 +207,7 @@ SET ROLE postgres;
 ## 📞 Support
 
 Αν έχεις πρόβλημα, check:
+
 1. Supabase project logs
 2. Console για SQL errors
 3. RLS policies (μήπως μπλοκάρουν το query)

@@ -6,8 +6,8 @@ import { fetchSession, setUser, logout, selectUser } from '@/store/slices/authSl
 import { supabase } from '@/lib/supabase-client';
 import type { AppDispatch } from '@/store/store';
 
-const AUTH_STORAGE_KEY = 'platinum-hunters-auth';
-const RETURN_URL_KEY = 'platinum-hunters-return-url';
+const AUTH_STORAGE_KEY = 'hobbistas-hub-auth';
+const RETURN_URL_KEY = 'hobbistas-hub-return-url';
 const SESSION_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
 function scheduleIdleCallback(callback: () => void, timeout = 5000): number {
@@ -292,7 +292,7 @@ export default function AuthInit() {
         if (!data.session) {
           await dispatch(logout());
           dispatch(setUser(null));
-          localStorage.removeItem('platinum-hunters-auth');
+          localStorage.removeItem('hobbistas-hub-auth');
         }
       }, IDLE_LIMIT_MS);
     };
