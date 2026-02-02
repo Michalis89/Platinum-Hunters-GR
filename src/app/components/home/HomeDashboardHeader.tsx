@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { User, LogOut, Settings } from 'lucide-react';
 import { useDispatch } from 'react-redux';
@@ -11,17 +12,28 @@ type HomeDashboardHeaderProps = {
   displayName?: string | null;
 };
 
+// Hydration-safe greeting hook
+function useGreeting() {
+  const [greeting, setGreeting] = useState<string>('Γεια σου');
+
+  useEffect(() => {
+    setGreeting(getGreeting());
+  }, []);
+
+  return greeting;
+}
+
 export function HomeDashboardHeader({
   username,
   displayName,
 }: HomeDashboardHeaderProps) {
   const dispatch = useDispatch<AppDispatch>();
+  const greeting = useGreeting();
 
   const handleLogout = async () => {
     await dispatch(logout());
   };
 
-  const greeting = getGreeting();
   const name = displayName || username;
 
   return (

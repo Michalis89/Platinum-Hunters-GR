@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, createContext, useContext } from 'react';
+import { memo, useState, useEffect, createContext, useContext } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
@@ -79,6 +79,29 @@ function timeAgo(date: string) {
   if (diffH < 24) return `${diffH}h πριν`;
   const diffD = Math.floor(diffH / 24);
   return `${diffD}d πριν`;
+}
+
+// Hydration-safe relative time component
+function RelativeTime({ date }: { date: string }) {
+  const [relativeTime, setRelativeTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Calculate immediately on mount
+    setRelativeTime(timeAgo(date));
+
+    // Update every minute
+    const interval = setInterval(() => {
+      setRelativeTime(timeAgo(date));
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [date]);
+
+  return (
+    <span suppressHydrationWarning>
+      {relativeTime ?? '...'}
+    </span>
+  );
 }
 
 function renderText(item: ActivityItem) {
@@ -347,7 +370,9 @@ function ActivityFeedComponent({
               <div className="mt-0.5">{iconFor(item)}</div>
               <div className="flex-1">
                 <FeedText item={item} />
-                <p className="text-xs text-[var(--hb-muted)]">{timeAgo(item.created_at)}</p>
+                <p className="text-xs text-[var(--hb-muted)]">
+                  <RelativeTime date={item.created_at} />
+                </p>
               </div>
             </div>
           ))}

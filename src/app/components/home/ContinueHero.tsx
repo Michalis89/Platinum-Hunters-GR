@@ -139,6 +139,21 @@ const formatTimeAgo = (value: string) => {
   return `${years} ${years === 1 ? 'χρόνος' : 'χρόνια'}`;
 };
 
+// Hydration-safe relative time display component
+function RelativeTimeDisplay({ date }: { date: string }) {
+  const [formattedTime, setFormattedTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFormattedTime(formatTimeAgo(date));
+  }, [date]);
+
+  return (
+    <span suppressHydrationWarning>
+      {formattedTime ?? '...'}
+    </span>
+  );
+}
+
 const getSlideImage = (slide: ContinueSlide) =>
   slide.cover_image_large ?? slide.cover_image_medium ?? null;
 
@@ -240,7 +255,7 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
             {item.slide.title ?? 'Χωρίς τίτλο'}
           </p>
           <p className="mt-1 text-sm text-[var(--hb-muted)]">
-            Τελευταία ενημέρωση: πριν {formatTimeAgo(item.slide.updated_at)}
+            Τελευταία ενημέρωση: πριν <RelativeTimeDisplay date={item.slide.updated_at} />
           </p>
         </div>
         {progressLabel && (
