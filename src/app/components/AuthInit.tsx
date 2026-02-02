@@ -61,14 +61,15 @@ function clearAuthStorage() {
 /**
  * Sync session tokens to httpOnly cookies via API
  * This ensures the backend can read the latest tokens
+ * Returns true if sync succeeded, false if it failed (e.g., 401 = cookies expired)
  */
 async function syncCookies(session: {
   access_token: string;
   refresh_token: string;
   expires_in?: number;
-}) {
+}): Promise<boolean> {
   try {
-    await fetch('/api/auth/refresh', {
+    const response = await fetch('/api/auth/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -77,8 +78,14 @@ async function syncCookies(session: {
         expires_in: session.expires_in || 3600,
       }),
     });
+    // If server returns 401, cookies have expired - session is invalid
+    if (response.status === 401) {
+      return false;
+    }
+    return response.ok;
   } catch {
-    // ignore sync errors - not critical
+    // Network errors - not critical, don't force logout
+    return true;
   }
 }
 
@@ -163,7 +170,12 @@ export default function AuthInit() {
         // Valid session - sync cookies and fetch profile
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session) {
-          await syncCookies(sessionData.session);
+          const syncOk = await syncCookies(sessionData.session);
+          if (!syncOk) {
+            // Cookies expired but localStorage had session - force logout
+            await forceLogout();
+            return;
+          }
         }
         await dispatch(fetchSession());
       }
@@ -185,14 +197,26 @@ export default function AuthInit() {
           return;
         }
         // Sync cookies on sign in
-        await syncCookies(session);
+        const syncOk = await syncCookies(session);
+        if (!syncOk) {
+          // Failed to sync - clear auth state
+          dispatch(setUser(null));
+          clearAuthStorage();
+          return;
+        }
         dispatch(fetchSession());
         return;
       }
 
       if (event === 'TOKEN_REFRESHED' && session) {
         // Sync cookies when token is refreshed
-        await syncCookies(session);
+        const syncOk = await syncCookies(session);
+        if (!syncOk) {
+          // Cookies expired - localStorage session is orphaned, force logout
+          dispatch(setUser(null));
+          clearAuthStorage();
+          await supabase.auth.signOut();
+        }
       }
       // USER_UPDATED, PASSWORD_RECOVERY etc. will keep existing state
     });

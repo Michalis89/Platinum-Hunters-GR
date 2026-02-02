@@ -23,18 +23,18 @@ The Hobbistas codebase demonstrates solid security fundamentals including parame
 
 ## Findings Summary
 
-| # | Severity | Title | Score |
-|---|----------|-------|-------|
-| 1 | CRITICAL | Token Refresh Accepts Arbitrary JWTs | 80 |
-| 2 | CRITICAL | Support Ticket IDOR - Missing Ownership Check | 72 |
-| 3 | HIGH | In-Memory Rate Limiting Ineffective | 63 |
-| 4 | HIGH | Account Deletion Without Confirmation | 42 |
-| 5 | HIGH | Password Reset Has No Rate Limiting | 40 |
-| 6 | MEDIUM | Empty Refresh Token in Session Setup | 30 |
-| 7 | MEDIUM | Pagination Without Bounds | 28 |
-| 8 | MEDIUM | content_rich Field Not Sanitized | 24 |
-| 9 | MEDIUM | Comment Operations Ignore Article Context | 20 |
-| 10 | LOW | IP Header Spoofing Possible | 15 |
+| # | Severity | Title | Score | Status |
+|---|----------|-------|-------|--------|
+| 1 | CRITICAL | Token Refresh Accepts Arbitrary JWTs | 80 | ✅ DONE |
+| 2 | CRITICAL | Support Ticket IDOR - Missing Ownership Check | 72 | |
+| 3 | HIGH | In-Memory Rate Limiting Ineffective | 63 | |
+| 4 | HIGH | Account Deletion Without Confirmation | 42 | |
+| 5 | HIGH | Password Reset Has No Rate Limiting | 40 | |
+| 6 | MEDIUM | Empty Refresh Token in Session Setup | 30 | |
+| 7 | MEDIUM | Pagination Without Bounds | 28 | |
+| 8 | MEDIUM | content_rich Field Not Sanitized | 24 | |
+| 9 | MEDIUM | Comment Operations Ignore Article Context | 20 | |
+| 10 | LOW | IP Header Spoofing Possible | 15 | |
 
 **Scoring:** Impact (1-10) × Likelihood (1-10)
 
