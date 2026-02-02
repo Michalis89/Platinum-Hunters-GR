@@ -57,6 +57,12 @@ export default function CategoryLibrary({
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [alert, setAlert] = useState<AlertState>(null);
+  const [alertKey, setAlertKey] = useState(0);
+
+  const showAlert = (payload: AlertState) => {
+    setAlert(payload);
+    setAlertKey(prev => prev + 1);
+  };
 
   const [selectedEntry, setSelectedEntry] = useState<(MediaEntry & Partial<SearchResult>) | null>(
     null,
@@ -331,14 +337,14 @@ export default function CategoryLibrary({
         }
         await loadLibraryEntries();
         await mutate('/api/user/continue');
-        setAlert({
+        showAlert({
           type: 'success',
           title: 'Αποθηκεύτηκε',
           message: 'Οι αλλαγές αποθηκεύτηκαν επιτυχώς.',
         });
       } catch (error) {
         console.warn('Update entry failed:', error);
-        setAlert({
+        showAlert({
           type: 'error',
           title: 'Σφάλμα',
           message: 'Αποτυχία αποθήκευσης. Δοκίμασε ξανά.',
@@ -367,14 +373,14 @@ export default function CategoryLibrary({
         }
         await loadLibraryEntries();
         await mutate('/api/user/continue');
-        setAlert({
+        showAlert({
           type: 'success',
           title: 'Επιτυχής προσθήκη',
           message: `Το "${selectedEntry.title}" προστέθηκε στη βιβλιοθήκη σου.`,
         });
       } catch (error) {
         console.warn('Add entry failed:', error);
-        setAlert({
+        showAlert({
           type: 'error',
           title: 'Σφάλμα',
           message: 'Αποτυχία προσθήκης. Δοκίμασε ξανά.',
@@ -395,7 +401,7 @@ export default function CategoryLibrary({
             : entry,
         ),
       );
-      setAlert({
+      showAlert({
         type: 'success',
         title: 'Αποθηκεύτηκε',
         message: 'Οι αλλαγές αποθηκεύτηκαν επιτυχώς.',
@@ -432,7 +438,7 @@ export default function CategoryLibrary({
         if (selectedEntry?.id === entry.id) {
           setSelectedEntry(null);
         }
-        setAlert({
+        showAlert({
           type: 'success',
           title: 'Διαγράφηκε',
           message: `Το "${entry.title}" αφαιρέθηκε από τη βιβλιοθήκη.`,
@@ -440,7 +446,7 @@ export default function CategoryLibrary({
         return;
       } catch (error) {
         console.warn('Delete entry failed:', error);
-        setAlert({
+        showAlert({
           type: 'error',
           title: 'Σφάλμα',
           message: 'Αποτυχία διαγραφής. Δοκίμασε ξανά.',
@@ -458,7 +464,7 @@ export default function CategoryLibrary({
     <div className="min-h-screen bg-[var(--hb-bg)] px-4 py-20 text-[var(--hb-text)]">
       {alert && (
         <AlertMessage
-          key={`${alert.type}-${alert.message}-${Date.now()}`}
+          key={alertKey}
           type={alert.type}
           title={alert.title}
           message={alert.message}

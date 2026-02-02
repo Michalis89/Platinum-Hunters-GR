@@ -16,6 +16,7 @@ import Button from '@/app/components/ui/Button';
 import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
 import { Select } from '@/app/components/ui/Select';
 import Feedback from '@/app/components/ui/Feedback';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
 
 const statusLabels: Record<string, string> = {
@@ -46,6 +47,14 @@ const severityLabels: Record<string, string> = {
   medium: 'Μεσαία',
   high: 'Υψηλή',
   critical: 'Κρίσιμη',
+};
+
+const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
 };
 
 type TicketItem = {
@@ -259,8 +268,14 @@ export default function SupportTicketsList() {
                     Σοβαρότητα: {severityLabels[ticket.severity] || ticket.severity}
                   </span>
                 ) : null}
-                <span>
-                  Τελευταία ενημέρωση: {new Date(ticket.updated_at).toLocaleString('el-GR')}
+                <span className="flex items-center gap-1 text-[var(--hb-muted)]">
+                  <span>Τελευταία ενημέρωση:</span>
+                  <FormattedDate
+                    date={ticket.updated_at}
+                    options={DATE_TIME_OPTIONS}
+                    fallback=""
+                    className="text-xs"
+                  />
                 </span>
               </div>
               <div className="flex flex-wrap gap-2 pt-2">

@@ -25,6 +25,7 @@ import {
 import { normalizeSlug } from '@/utils/slugify';
 import FilterBar from '@/app/components/shared/FilterBar';
 import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
 import {
   CONTENT_PUBLISHED_EVENT,
   ContentPublishedEventDetail,
@@ -125,7 +126,11 @@ const ArticleCard = memo(function ArticleCard({ article }: { article: ArticleWit
           {article.published_at && (
             <div className="flex items-center gap-1">
               <Calendar size={12} />
-              <span>{new Date(article.published_at).toLocaleDateString('el-GR')}</span>
+              <FormattedDate
+                date={article.published_at}
+                className="text-[11px]"
+                fallback=""
+              />
             </div>
           )}
 

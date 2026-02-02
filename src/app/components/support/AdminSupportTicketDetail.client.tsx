@@ -21,6 +21,7 @@ import AttachmentDropzone, {
 } from '@/app/components/support/AttachmentDropzone.client';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
 
 const STATUS_OPTIONS = ['open', 'in_progress', 'waiting_user', 'resolved', 'closed'];
 const statusLabels: Record<string, string> = {
@@ -51,6 +52,14 @@ const severityLabels: Record<string, string> = {
   medium: 'Μεσαία',
   high: 'Υψηλή',
   critical: 'Κρίσιμη',
+};
+
+const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
 };
 
 type TicketDetail = {
@@ -386,7 +395,12 @@ export default function AdminSupportTicketDetail() {
                             ? 'Διαχειριστής'
                             : 'Χρήστης'}
                       </span>
-                      <span>{new Date(message.created_at).toLocaleString('el-GR')}</span>
+                      <FormattedDate
+                        date={message.created_at}
+                        options={DATE_TIME_OPTIONS}
+                        fallback=""
+                        className="text-xs"
+                      />
                     </div>
                     <p className="whitespace-pre-line text-sm text-[var(--hb-text)]">
                       {message.message}
@@ -534,7 +548,12 @@ export default function AdminSupportTicketDetail() {
                       >
                         <div className="text-xs uppercase text-[var(--hb-muted)]">{event.type}</div>
                         <div className="text-xs text-[var(--hb-muted)]">
-                          {new Date(event.created_at).toLocaleString('el-GR')}
+                          <FormattedDate
+                            date={event.created_at}
+                            options={DATE_TIME_OPTIONS}
+                            fallback=""
+                            className="text-xs"
+                          />
                         </div>
                       </div>
                     ))

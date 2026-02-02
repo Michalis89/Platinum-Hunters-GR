@@ -23,6 +23,7 @@ import { normalizeSlug } from '@/utils/slugify';
 import ArticleComments from '@/app/components/article/ArticleComments.client';
 import ArticleAuthHint from '@/app/components/article/ArticleAuthHint.client';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -288,13 +289,11 @@ export default async function ArticleDetailPage({
     }
   }
 
-  const publishedDate = article.published_at
-    ? new Date(article.published_at).toLocaleDateString('el-GR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
+  const ARTICLE_HEADER_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
 
   const readTime = article.reading_time_minutes ? `${article.reading_time_minutes} λεπτά` : null;
   const articleSlug = normalizeSlug(article.slug);
@@ -406,10 +405,15 @@ export default async function ArticleDetailPage({
                 <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-[var(--hb-muted)]">
                   {TOPIC_LABELS[article.topic]}
                 </span>
-                {publishedDate && (
+                {article.published_at && (
                   <span className="flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1">
                     <Calendar size={12} />
-                    <span className="text-[10px]">{publishedDate}</span>
+                    <FormattedDate
+                      date={article.published_at}
+                      options={ARTICLE_HEADER_DATE_OPTIONS}
+                      fallback=""
+                      className="text-[10px]"
+                    />
                   </span>
                 )}
                 {readTime && (
@@ -553,9 +557,11 @@ export default async function ArticleDetailPage({
                           {related.published_at && (
                             <div className="flex items-center gap-1">
                               <Calendar size={12} />
-                              <span>
-                                {new Date(related.published_at).toLocaleDateString('el-GR')}
-                              </span>
+                              <FormattedDate
+                                date={related.published_at}
+                                className="text-[10px]"
+                                fallback=""
+                              />
                             </div>
                           )}
                           <div className="flex items-center gap-1">

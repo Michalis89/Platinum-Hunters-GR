@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import EmptyState from '@/app/components/ui/EmptyState';
 import type { User as UserType } from '@/types/user';
+import { useEffect, useState } from 'react';
 
 type ProfilePersonalInfoProps = {
   user: UserType;
@@ -37,6 +38,15 @@ const socialPlatforms = [
   { key: 'website', label: 'Website', icon: <Globe2 className="h-4 w-4" /> },
 ];
 
+function calculateAge(dateOfBirth?: string | null) {
+  if (!dateOfBirth) return null;
+  const dob = new Date(dateOfBirth);
+  if (Number.isNaN(dob.getTime())) return null;
+  const diff = Date.now() - dob.getTime();
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
+
 export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>) {
   const privacy = (user.privacy_settings as unknown as Record<string, unknown>) || {};
   const showAge = (privacy.show_age as boolean) ?? false;
@@ -44,17 +54,11 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
   const showLocation = (privacy.show_location as boolean) ?? true;
   const socialLinks = (user.social_links as Record<string, unknown>) || {};
   const locationCity = (socialLinks.location_city as string) || '';
+  const [age, setAge] = useState<number | null>(() => calculateAge(user.date_of_birth));
 
-  const ageFromDob = () => {
-    if (!user.date_of_birth) return null;
-    const dob = new Date(user.date_of_birth);
-    if (Number.isNaN(dob.getTime())) return null;
-    const diff = Date.now() - dob.getTime();
-    const ageDate = new Date(diff);
-    return Math.abs(ageDate.getUTCFullYear() - 1970);
-  };
-
-  const age = ageFromDob();
+  useEffect(() => {
+    setAge(calculateAge(user.date_of_birth));
+  }, [user.date_of_birth]);
   const visibleSocialLinks = socialPlatforms.filter(p =>
     (socialLinks[p.key] as string | undefined)?.trim(),
   );

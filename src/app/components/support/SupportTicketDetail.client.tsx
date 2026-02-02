@@ -15,6 +15,7 @@ import { Textarea } from '@/app/components/ui/Textarea';
 import Feedback from '@/app/components/ui/Feedback';
 import AttachmentDropzone, { type AttachmentItem } from '@/app/components/support/AttachmentDropzone.client';
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
 
 const statusLabels: Record<string, string> = {
   open: 'Ανοικτό',
@@ -44,6 +45,14 @@ const severityLabels: Record<string, string> = {
   medium: 'Μεσαία',
   high: 'Υψηλή',
   critical: 'Κρίσιμη',
+};
+
+const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
 };
 
 type TicketDetail = {
@@ -262,7 +271,12 @@ export default function SupportTicketDetail() {
                       ) : null}
                       {message.author_role === 'admin' ? 'Ομάδα υποστήριξης' : 'Εσύ'}
                     </span>
-                    <span>{new Date(message.created_at).toLocaleString('el-GR')}</span>
+                    <FormattedDate
+                      date={message.created_at}
+                      options={DATE_TIME_OPTIONS}
+                      fallback=""
+                      className="text-xs"
+                    />
                   </div>
                   <p className="whitespace-pre-line text-sm text-[var(--hb-text)]">
                     {message.message}

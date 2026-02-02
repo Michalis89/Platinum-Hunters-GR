@@ -79,7 +79,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[var(--hb-border)] pt-6 text-xs text-[var(--hb-muted)] sm:flex-row">
-          <p>&copy; {currentYear} Hobbistas. Με επιφύλαξη παντός δικαιώματος.</p>
+          <p suppressHydrationWarning>&copy; {currentYear} Hobbistas. Με επιφύλαξη παντός δικαιώματος.</p>
           <p>Δεν είμαστε συνδεδεμένοι με Sony Interactive Entertainment ή άλλες εταιρείες.</p>
         </div>
       </PageContainer>

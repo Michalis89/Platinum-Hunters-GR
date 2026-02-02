@@ -18,6 +18,7 @@ import Feedback from '@/app/components/ui/Feedback';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
 
 const STATUS_OPTIONS = ['open', 'in_progress', 'waiting_user', 'resolved', 'closed'];
 const CATEGORY_OPTIONS = ['bug', 'feature', 'author_rights', 'general'];
@@ -51,6 +52,14 @@ const severityLabels: Record<string, string> = {
   medium: 'Μεσαία',
   high: 'Υψηλή',
   critical: 'Κρίσιμη',
+};
+
+const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
 };
 
 type AdminTicket = {
@@ -296,7 +305,12 @@ export default function AdminSupportInbox() {
                             Σοβαρότητα: {severityLabels[ticket.severity] || ticket.severity}
                           </span>
                         ) : null}
-                        <span>{new Date(ticket.updated_at).toLocaleString('el-GR')}</span>
+                        <FormattedDate
+                          date={ticket.updated_at}
+                          options={DATE_TIME_OPTIONS}
+                          fallback=""
+                          className="text-xs"
+                        />
                       </div>
                       <div className="text-xs text-[var(--hb-muted)]">
                         Από:{' '}

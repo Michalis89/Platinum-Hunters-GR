@@ -2,19 +2,17 @@
 
 import { Calendar, Clock, CheckCircle2 } from 'lucide-react';
 import type { User } from '@/types/user';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
+
+const LONG_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
 
 type ProfileAccountInfoProps = {
   user: User;
 };
-
-function formatDate(dateString: string | null) {
-  if (!dateString) return 'Μη καθορισμένο';
-  return new Date(dateString).toLocaleDateString('el-GR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
 
 export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) {
   return (
@@ -39,7 +37,11 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
               <div>
                 <p className="text-xs text-[var(--hb-muted)]">Μέλος από</p>
                 <p className="text-sm font-medium text-[var(--hb-headline)]">
-                  {formatDate(user.created_at)}
+                  <FormattedDate
+                    date={user.created_at}
+                    options={LONG_DATE_OPTIONS}
+                    fallback="Μη καθορισμένο"
+                  />
                 </p>
               </div>
             </div>
@@ -53,7 +55,11 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
                 <div>
                   <p className="text-xs text-[var(--hb-muted)]">Τελευταία σύνδεση</p>
                   <p className="text-sm font-medium text-[var(--hb-headline)]">
-                    {formatDate(user.last_login)}
+                    <FormattedDate
+                      date={user.last_login}
+                      options={LONG_DATE_OPTIONS}
+                      fallback="Μη καθορισμένο"
+                    />
                   </p>
                 </div>
               </div>

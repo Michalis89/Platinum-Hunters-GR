@@ -8,6 +8,7 @@ import { Textarea } from '@/app/components/ui/Textarea';
 import { useSelector } from 'react-redux';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
+import { FormattedDate } from '@/app/components/ui/FormattedDate';
 
 type Comment = {
   id: number;
@@ -23,6 +24,12 @@ type Comment = {
 type CommentsResponse = {
   data: Comment[];
   meta?: { total?: number };
+};
+
+const COMMENT_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
 };
 
 type ArticleCommentsProps = {
@@ -183,13 +190,12 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                   <span>
                     {comment.users?.display_name || comment.users?.username || 'Ανώνυμος'}
                   </span>
-                  <span>
-                    {new Date(comment.created_at).toLocaleDateString('el-GR', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
+                  <FormattedDate
+                    date={comment.created_at}
+                    options={COMMENT_DATE_OPTIONS}
+                    fallback="—"
+                    className="text-xs"
+                  />
                 </div>
                 {editingCommentId === comment.id ? (
                   <div className="mt-4 space-y-3">
