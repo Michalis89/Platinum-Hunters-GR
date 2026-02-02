@@ -15,6 +15,7 @@ type NextConfigWithInstrumentation = NextConfig & {
 };
 
 const nextConfig: NextConfigWithInstrumentation = {
+  productionBrowserSourceMaps: true,
   outputFileTracingRoot: join(process.cwd()),
   images: {
     remotePatterns: [

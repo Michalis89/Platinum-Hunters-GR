@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 
 type Theme = 'dark' | 'light';
 
@@ -8,6 +8,7 @@ interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
+  hasMounted: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -15,7 +16,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = 'hobbistas-hub-theme';
 const THEME_COOKIE_NAME = 'theme';
 
-// Set cookie that server can read
 function setThemeCookie(theme: Theme) {
   document.cookie = `${THEME_COOKIE_NAME}=${theme}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
 }
@@ -26,42 +26,51 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProviderProps) {
+  // ✅ First client render matches SSR
   const [theme, setThemeState] = useState<Theme>(initialTheme);
+  const [hasMounted, setHasMounted] = useState(false);
 
-  // Sync with localStorage/system preference on mount (client-side only)
   useEffect(() => {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-    if (stored && (stored === 'dark' || stored === 'light')) {
-      if (stored !== theme) {
-        setThemeState(stored);
-        document.documentElement.setAttribute('data-theme', stored);
-        setThemeCookie(stored);
-      }
-    } else {
-      // Check system preference if no stored preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const systemTheme = prefersDark ? 'dark' : 'light';
-      if (systemTheme !== theme) {
-        setThemeState(systemTheme);
-        document.documentElement.setAttribute('data-theme', systemTheme);
-        setThemeCookie(systemTheme);
-      }
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setHasMounted(true);
 
-  // Listen for system preference changes
+    // On mount, make storage/cookie consistent with *current* theme
+    // (do not flip theme immediately — avoids hydration mismatch)
+    try {
+      const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+
+      if (!stored) {
+        // if nothing stored, store the SSR theme so next load is consistent
+        localStorage.setItem(THEME_STORAGE_KEY, theme);
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      document.documentElement.setAttribute('data-theme', theme);
+      setThemeCookie(theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
+
+  // Optional: listen to system changes, but ONLY if user hasn't manually set preference
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleChange = (e: MediaQueryListEvent) => {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY);
-      // Only auto-switch if user hasn't manually set a preference
-      if (!stored) {
-        const newTheme = e.matches ? 'dark' : 'light';
-        setThemeState(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
-        setThemeCookie(newTheme);
+      try {
+        const stored = localStorage.getItem(THEME_STORAGE_KEY);
+        if (stored) return; // user preference exists, don't auto-switch
+      } catch {
+        // if storage blocked, just don't auto switch
+        return;
       }
+
+      const newTheme = e.matches ? 'dark' : 'light';
+      setThemeState(newTheme);
+      document.documentElement.setAttribute('data-theme', newTheme);
+      setThemeCookie(newTheme);
     };
 
     mediaQuery.addEventListener('change', handleChange);
@@ -71,7 +80,9 @@ export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProvider
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    } catch {}
     setThemeCookie(newTheme);
   }, []);
 
@@ -79,11 +90,12 @@ export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProvider
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
+  const value = useMemo(
+    () => ({ theme, toggleTheme, setTheme, hasMounted }),
+    [theme, toggleTheme, setTheme, hasMounted],
   );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

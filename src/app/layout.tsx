@@ -32,20 +32,28 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get('theme')?.value;
   const initialTheme: Theme = themeCookie === 'light' ? 'light' : 'dark';
+  const isVercelProd = process.env.NODE_ENV === 'production' && !!process.env.VERCEL;
 
   return (
-    <html lang="el" data-theme={initialTheme}>
+    <html lang="el" data-theme={initialTheme} suppressHydrationWarning>
       <head>
         <StructuredData data={organizationStructuredData} />
         <StructuredData data={websiteStructuredData} />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
         <Providers initialTheme={initialTheme}>
           <AuthInit />
           <HeartbeatPing />
           {children}
-          <Analytics />
-          <SpeedInsights />
+          {isVercelProd ? (
+            <>
+              <Analytics />
+              <SpeedInsights />
+            </>
+          ) : null}
         </Providers>
       </body>
     </html>
