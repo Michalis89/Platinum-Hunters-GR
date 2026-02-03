@@ -3,6 +3,7 @@ import { withApiRoute } from '@/lib/observability/withApiRoute';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
+import { validateTipTapContent } from '@/utils/validation/tiptap';
 import { normalizeSlug } from '@/utils/slugify';
 import { insertActivity } from '@/lib/services/activityService';
 import { getArticlesWithFilters } from '@/lib/supabase/queries';
@@ -23,8 +24,9 @@ async function GETHandler(req: Request) {
     const status = searchParams.get('status') || 'published';
     const authorId = searchParams.get('author_id');
     const featured = searchParams.get('featured');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const MAX_LIMIT = 100;
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), MAX_LIMIT);
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0);
 
     const { data: articles, error, count } = await getArticlesWithFilters(supabase, {
       category,
@@ -106,6 +108,13 @@ async function POSTHandler(req: Request) {
     if (!tagsValidation.isValid) {
       return fail({ error: tagsValidation.error || 'Μη έγκυρα tags' }, 400);
     }
+
+    // Validate content_rich JSON structure (TipTap format)
+    const contentRichValidation = validateTipTapContent(content_rich);
+    if (!contentRichValidation.isValid) {
+      return fail({ error: contentRichValidation.error || 'Μη έγκυρη μορφή περιεχομένου' }, 400);
+    }
+
     const sanitizedContentHtml = sanitizeHtmlContent(content_html).trim() || null;
 
     // Validate required fields

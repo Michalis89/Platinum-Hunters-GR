@@ -7,8 +7,21 @@ import { fail } from '@/lib/api/response';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { sendResetPasswordEmail } from '@/lib/email/send';
 import { validateEmail } from '@/utils/validation/auth';
+import { rateLimit, getClientIp, rateLimitHeaders } from '@/lib/rate-limit';
 
 async function POSTHandler(req: Request) {
+  // Rate limit: 3 requests per hour per IP (Redis-backed, serverless-safe)
+  const clientIp = getClientIp(req);
+  const rateLimitResult = await rateLimit('forgotIp', clientIp);
+
+  if (!rateLimitResult.success) {
+    return fail(
+      { error: 'Πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα.' },
+      429,
+      { headers: rateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   const siteUrl = process.env.SITE_URL;
   if (!siteUrl) {
     console.error('Missing SITE_URL environment variable for forgot-password flow');

@@ -4,19 +4,32 @@ import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { API_ERRORS } from '@/lib/api/errors';
 import { ok, fail } from '@/lib/api/response';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { hasAnyRole } from '@/lib/roles';
 
 async function GETHandler(_req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createRouteHandlerClient();
-    await requireAuth(supabase);
+    const session = await requireAuth(supabase);
 
     const { id: ticketId } = await context.params;
 
-    const { data: ticket, error: ticketError } = await supabase
-      .from('support_tickets')
-      .select('*')
-      .eq('id', ticketId)
+    // Check if user is admin (can view all tickets)
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role, roles')
+      .eq('id', session.user.id)
       .single();
+
+    const isAdmin = hasAnyRole(userData, ['admin', 'owner']);
+
+    // Build query with ownership check (unless admin)
+    let query = supabase.from('support_tickets').select('*').eq('id', ticketId);
+
+    if (!isAdmin) {
+      query = query.eq('user_id', session.user.id);
+    }
+
+    const { data: ticket, error: ticketError } = await query.single();
 
     if (ticketError || !ticket) {
       return fail(API_ERRORS.NOT_FOUND, API_ERRORS.NOT_FOUND.status);

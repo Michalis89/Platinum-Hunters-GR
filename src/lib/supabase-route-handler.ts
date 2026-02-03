@@ -49,13 +49,16 @@ export async function createRouteHandlerClient(
     },
   });
 
-  // If we have tokens, set the session (access only is OK for short-lived calls)
-  if (accessToken) {
+  // If we have both tokens, set the full session
+  // Only call setSession when we have a valid refresh token to avoid unexpected behavior
+  if (accessToken && refreshToken) {
     await supabase.auth.setSession({
       access_token: accessToken,
-      refresh_token: refreshToken || '',
+      refresh_token: refreshToken,
     });
   }
+  // If we only have access token, the Authorization header is already set above
+  // and we skip setSession to avoid passing empty refresh token
 
   return supabase;
 }

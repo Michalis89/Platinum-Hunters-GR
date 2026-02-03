@@ -17,8 +17,9 @@ async function GETHandler(
     const supabase = await createRouteHandlerClient();
     const { searchParams } = new URL(req.url);
 
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const MAX_LIMIT = 100;
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), MAX_LIMIT);
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0);
 
     const { data: comments, error, count } = await supabase
       .from('article_comments')
@@ -121,8 +122,12 @@ async function POSTHandler(
 }
 
 // DELETE - Delete a comment (own comments only or admin)
-async function DELETEHandler(req: Request) {
+async function DELETEHandler(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id: articleId } = await params;
     const supabase = await createRouteHandlerClient();
     const { searchParams } = new URL(req.url);
     const commentId = searchParams.get('commentId');
@@ -133,11 +138,12 @@ async function DELETEHandler(req: Request) {
 
     const session = await requireAuth(supabase);
 
-    // Get the comment to check ownership
+    // Get the comment and verify it belongs to this article
     const { data: comment, error: fetchError } = await supabase
       .from('article_comments')
       .select('*')
       .eq('id', Number.parseInt(commentId, 10))
+      .eq('article_id', Number.parseInt(articleId, 10))
       .single();
 
     if (fetchError || !comment) {
@@ -183,8 +189,12 @@ async function DELETEHandler(req: Request) {
 }
 
 // PATCH - Update a comment (own or admin)
-async function PATCHHandler(req: Request) {
+async function PATCHHandler(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id: articleId } = await params;
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
     const body = await req.json();
@@ -199,10 +209,12 @@ async function PATCHHandler(req: Request) {
       return fail({ error: 'Το σχόλιο είναι πολύ μεγάλο (μέχρι 2000 χαρακτήρες)' }, 400);
     }
 
+    // Get the comment and verify it belongs to this article
     const { data: comment, error: fetchError } = await supabase
       .from('article_comments')
       .select('*')
       .eq('id', commentId)
+      .eq('article_id', Number.parseInt(articleId, 10))
       .single();
 
     if (fetchError || !comment) {

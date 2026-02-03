@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail } from '@/lib/api/response';
-import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
+import { rateLimit, getClientIp, rateLimitHeaders } from '@/lib/rate-limit';
 import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { sendConfirmEmail } from '@/lib/email/send';
@@ -29,8 +29,9 @@ async function POSTHandler(req: Request) {
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 
+  // Rate limit: 5 registrations per hour per IP (Redis-backed, serverless-safe)
   const clientIp = getClientIp(req);
-  const rateLimitResult = rateLimit(`register:${clientIp}`, RATE_LIMITS.register);
+  const rateLimitResult = await rateLimit('registerIp', clientIp);
   if (!rateLimitResult.success) {
     return fail({ error: 'Πολλές προσπάθειες εγγραφής. Δοκιμάστε ξανά αργότερα.' }, 429, {
       headers: rateLimitHeaders(rateLimitResult),

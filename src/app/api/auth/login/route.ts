@@ -11,13 +11,13 @@ import { validateEmail, validatePassword } from '@/utils/validation/auth';
 import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
-import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
+import { rateLimit, getClientIp, rateLimitHeaders } from '@/lib/rate-limit';
 import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
 
 async function POSTHandler(req: Request) {
-  // Rate limiting: 5 login attempts per 15 minutes per IP
+  // Rate limiting: 10 login attempts per 10 minutes per IP (Redis-backed, serverless-safe)
   const clientIp = getClientIp(req);
-  const rateLimitResult = rateLimit(`login:${clientIp}`, RATE_LIMITS.login);
+  const rateLimitResult = await rateLimit('loginIp', clientIp);
 
   if (!rateLimitResult.success) {
     return fail(

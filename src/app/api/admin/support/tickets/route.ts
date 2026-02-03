@@ -37,8 +37,9 @@ async function GETHandler(req: Request) {
     const query = searchParams.get('q');
     const dateFrom = searchParams.get('date_from');
     const dateTo = searchParams.get('date_to');
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    const MAX_LIMIT = 100;
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10), 1), MAX_LIMIT);
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0);
 
     let request = supabase
       .from('support_tickets')
