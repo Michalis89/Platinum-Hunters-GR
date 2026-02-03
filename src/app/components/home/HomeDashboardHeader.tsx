@@ -12,7 +12,8 @@ type HomeDashboardHeaderProps = {
   displayName?: string | null;
 };
 
-// Hydration-safe greeting hook
+// Hydration-safe greeting hook - uses suppressHydrationWarning
+// to prevent CLS from greeting text changes
 function useGreeting() {
   const [greeting, setGreeting] = useState<string>('Γεια σου');
 
@@ -41,7 +42,10 @@ export function HomeDashboardHeader({
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="mb-1 text-sm text-[var(--hb-muted)]">{greeting}</p>
+            {/* suppressHydrationWarning prevents CLS from greeting text change */}
+            <p className="mb-1 min-h-[1.25rem] text-sm text-[var(--hb-muted)]" suppressHydrationWarning>
+              {greeting}
+            </p>
             <h1 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
               Καλωσόρισες,{' '}
               <span className="bg-gradient-to-r from-[var(--hb-primary-strong)] to-[var(--hb-accent)] bg-clip-text text-transparent">

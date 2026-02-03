@@ -30,6 +30,19 @@ import {
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 const noStoreFetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(res => res.json());
 
+/**
+ * Schedules a callback to run after first paint using requestIdleCallback
+ * with a fallback to setTimeout for browsers that don't support it.
+ */
+function scheduleAfterPaint(callback: () => void): () => void {
+  if (typeof requestIdleCallback !== 'undefined') {
+    const id = requestIdleCallback(callback, { timeout: 2000 });
+    return () => cancelIdleCallback(id);
+  }
+  const id = setTimeout(callback, 50);
+  return () => clearTimeout(id);
+}
+
 export default function HomePageClient() {
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -39,17 +52,32 @@ export default function HomePageClient() {
   // Prevent hydration mismatch by waiting for client mount
   const [hasMounted, setHasMounted] = useState(false);
 
+  // Defer data fetching until after first paint to improve INP
+  const [canFetch, setCanFetch] = useState(false);
+
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
-  const { data: personalStats } = useSWR(isAuthenticated ? '/api/user/stats' : null, fetcher, {
-    refreshInterval: 120000,
-    revalidateOnFocus: false,
-  });
+  // Defer SWR fetches until after first paint using requestIdleCallback
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const cancel = scheduleAfterPaint(() => setCanFetch(true));
+    return cancel;
+  }, [isAuthenticated]);
+
+  // Deferred data fetching - only starts after first paint
+  const { data: personalStats } = useSWR(
+    canFetch ? '/api/user/stats' : null,
+    fetcher,
+    {
+      refreshInterval: 120000,
+      revalidateOnFocus: false,
+    }
+  );
 
   const { data: continueData } = useSWR(
-    isAuthenticated ? '/api/user/continue' : null,
+    canFetch ? '/api/user/continue' : null,
     noStoreFetcher,
     {
       refreshInterval: 120000,
@@ -57,9 +85,9 @@ export default function HomePageClient() {
     },
   );
 
-  // Heartbeat for authenticated users
+  // Heartbeat for authenticated users - also deferred
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!canFetch) return;
 
     supabase.auth.getSession().then(({ data }) => {
       const token = data.session?.access_token;
@@ -80,10 +108,10 @@ export default function HomePageClient() {
         })
         .catch(() => {});
     });
-  }, [isAuthenticated, dispatch]);
+  }, [canFetch, dispatch]);
 
-  // GuestView includes the full landing markup, so it differs wildly between SSR and the authenticated dashboard.
-  // Render a minimal placeholder shell here so the initial HTML stays stable until auth settles.
+  // Render a stable shell while auth is loading to prevent CLS.
+  // The shell has min-height to reserve space and prevent layout shift.
   if (!hasMounted || isAuthLoading) {
     return <HomeShellLoading />;
   }
@@ -126,21 +154,53 @@ function GuestView() {
 }
 
 // Minimal shell rendered during hydration before auth resolves.
+// Uses min-height to reserve space and prevent CLS when content loads.
 function HomeShellLoading() {
   return (
-    <div className="pb-12">
+    <div className="min-h-[80vh] pb-12">
+      {/* Header skeleton - matches HomeDashboardHeader height */}
+      <section className="px-4 py-8 md:px-6 md:py-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="animate-pulse space-y-2">
+              <div className="h-4 w-20 rounded bg-[var(--hb-card)]/60" />
+              <div className="h-8 w-64 rounded bg-[var(--hb-card)]/70" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-24 animate-pulse rounded-full bg-[var(--hb-card)]/50" />
+              <div className="h-10 w-10 animate-pulse rounded-full bg-[var(--hb-card)]/50" />
+              <div className="h-10 w-10 animate-pulse rounded-full bg-[var(--hb-card)]/50" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ContinueHero skeleton - matches min-h-[300px] + padding */}
+      <section className="px-4 py-10 md:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="min-h-[300px] animate-pulse rounded-[28px] border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6">
+            <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
+              <div className="space-y-4">
+                <div className="h-4 w-24 rounded bg-[var(--hb-card)]/60" />
+                <div className="h-8 w-3/4 rounded bg-[var(--hb-card)]/70" />
+                <div className="h-4 w-1/2 rounded bg-[var(--hb-card)]/50" />
+                <div className="flex gap-3 pt-4">
+                  <div className="h-12 w-32 rounded-full bg-[var(--hb-card)]/60" />
+                  <div className="h-12 w-48 rounded-full bg-[var(--hb-card)]/40" />
+                </div>
+              </div>
+              <div className="aspect-[4/5] w-full rounded-2xl bg-[var(--hb-card)]/30 md:w-[340px]" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats skeleton */}
       <PageContainer size="xl">
-        <div className="animate-pulse space-y-6 rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-8 shadow-[var(--hb-shadow-md)]">
-          <div className="h-8 w-1/2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)]/70" />
-          <div className="space-y-3">
-            <div className="h-4 w-3/4 rounded-full bg-[var(--hb-card)]/60" />
-            <div className="h-4 w-2/3 rounded-full bg-[var(--hb-card)]/60" />
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="h-24 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
-            <div className="h-24 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
-            <div className="h-24 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
-          </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="h-24 animate-pulse rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
+          <div className="h-24 animate-pulse rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
+          <div className="h-24 animate-pulse rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]/40" />
         </div>
       </PageContainer>
     </div>

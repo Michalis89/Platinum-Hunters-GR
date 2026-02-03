@@ -14,15 +14,17 @@ import Providers from '@/store/Providers';
 import HeartbeatPing from './components/HeartbeatPing';
 export { metadata } from '@/utils/seo/metadata/metadata';
 
+// Font optimization: removed 'latin-ext' subset (~10KB savings)
+// 'swap' ensures text is visible immediately with fallback font
 const geistSans = Geist({
   variable: '--font-geist-sans',
-  subsets: ['latin', 'latin-ext'],
+  subsets: ['latin'],
   display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
-  subsets: ['latin', 'latin-ext'],
+  subsets: ['latin'],
   display: 'swap',
 });
 

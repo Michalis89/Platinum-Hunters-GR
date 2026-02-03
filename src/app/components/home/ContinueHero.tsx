@@ -160,41 +160,6 @@ const getSlideImage = (slide: ContinueSlide) =>
 const isLandscapeUrl = (url: string) =>
   /screenshots|rawg|screenshot/i.test(url) || /widescreen/i.test(url);
 
-const useLandscapeDetection = (url?: string) => {
-  const [isLandscape, setIsLandscape] = useState(false);
-
-  useEffect(() => {
-    if (!url) {
-      setIsLandscape(false);
-      return;
-    }
-    if (isLandscapeUrl(url)) {
-      setIsLandscape(true);
-      return;
-    }
-
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    let cancelled = false;
-    const detector = new window.Image();
-    detector.src = url;
-    detector.onload = () => {
-      if (!cancelled) {
-        setIsLandscape(detector.width > detector.height);
-      }
-    };
-
-    return () => {
-      cancelled = true;
-      detector.onload = null;
-    };
-  }, [url]);
-
-  return isLandscape;
-};
-
 const getCategoryRoute = (category: string, search?: string | null) =>
   appendSearchParam(
     CATEGORY_ROUTES[category as keyof typeof CATEGORY_ROUTES] ?? '/pages/backlog',
@@ -221,9 +186,13 @@ const getProgressLabel = (category: string, progress: number | null) => {
 const SlideCard = ({ item }: { item: SlideItem }) => {
   const imageUrl = getSlideImage(item.slide);
   const progressLabel = getProgressLabel(item.slide.category, item.slide.progress);
-  const isLandscape = useLandscapeDetection(imageUrl ?? undefined);
+  // Determine layout based on category ONLY (not image detection) to prevent CLS
   const needsLandscapeLayout = item.slide.category === 'games';
-  const useBlurBackdrop = needsLandscapeLayout || (!needsLandscapeLayout && isLandscape);
+  // Use blur backdrop for games (landscape) or detect via URL pattern (no async detection)
+  const useBlurBackdrop = needsLandscapeLayout || (imageUrl ? isLandscapeUrl(imageUrl) : false);
+
+  // STABLE grid and frame classes - no dynamic changes after mount
+  // Games use 16:9 landscape, others use 4:5 portrait
   const gridColumnClass = needsLandscapeLayout
     ? 'md:grid-cols-[minmax(0,1fr)_minmax(480px,560px)]'
     : 'md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]';

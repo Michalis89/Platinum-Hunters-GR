@@ -243,7 +243,7 @@ function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) 
   return (
     <Link
       href={addPath}
-      className="group relative overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
+      className="group relative overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
       style={{
         transform: `translateY(${parallaxOffset}px)`,
       }}
