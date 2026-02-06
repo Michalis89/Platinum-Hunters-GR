@@ -1,5 +1,7 @@
 import HomeGuestPageClient from '@/app/components/home/HomeGuestPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
+import { redirect } from 'next/navigation';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 export const metadata = buildMetadata({
   title: 'Το No1 Hobby Hub',
@@ -8,7 +10,15 @@ export const metadata = buildMetadata({
   path: '/home',
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createRouteHandlerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/dashboard');
+  }
+
   return <HomeGuestPageClient />;
 }
-

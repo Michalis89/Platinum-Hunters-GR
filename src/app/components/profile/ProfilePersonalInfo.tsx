@@ -54,7 +54,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
   const showLocation = (privacy.show_location as boolean) ?? true;
   const socialLinks = (user.social_links as Record<string, unknown>) || {};
   const locationCity = (socialLinks.location_city as string) || '';
-  const [age, setAge] = useState<number | null>(() => calculateAge(user.date_of_birth));
+  const [age, setAge] = useState<number | null>(null);
 
   useEffect(() => {
     setAge(calculateAge(user.date_of_birth));
@@ -112,7 +112,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
                 </div>
                 <div>
                   <p className="text-xs text-[var(--hb-muted)]">Ηλικία</p>
-                  <p className="text-sm font-medium text-[var(--hb-headline)]">
+                  <p className="text-sm font-medium text-[var(--hb-headline)]" suppressHydrationWarning>
                     {age ? `${age} ετών` : '—'}
                   </p>
                 </div>

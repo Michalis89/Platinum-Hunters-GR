@@ -86,6 +86,9 @@ export default function RichTextEditor({
           levels: [1, 2, 3],
         },
         codeBlock: false, // We use CodeBlockLowlight instead
+        // Avoid duplicate extension registration with custom extensions below.
+        link: false,
+        underline: false,
       }),
       Underline,
       Link.configure({

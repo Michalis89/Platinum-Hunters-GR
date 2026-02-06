@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { Eye, EyeOff, LogIn, AlertCircle, Mail } from 'lucide-react';
@@ -48,6 +48,29 @@ export default function LoginForm() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const [captchaVisible, setCaptchaVisible] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let idleId: number | null = null;
+
+    const revealCaptcha = () => setCaptchaVisible(true);
+
+    if (typeof requestIdleCallback !== 'undefined') {
+      idleId = requestIdleCallback(revealCaptcha, { timeout: 2500 });
+    } else {
+      timeoutId = setTimeout(revealCaptcha, 1200);
+    }
+
+    return () => {
+      if (idleId !== null && typeof cancelIdleCallback !== 'undefined') {
+        cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -141,6 +164,12 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAlert(null);
+
+    if (!captchaVisible) {
+      setCaptchaVisible(true);
+      setCaptchaError('Load CAPTCHA first and try again.');
+      return;
+    }
 
     if (!validateForm()) {
       return;
@@ -319,16 +348,22 @@ export default function LoginForm() {
           </div>
 
           <div>
-            <CaptchaWidget
-              helperText="Ολοκλήρωσε το CAPTCHA για την προστασία του λογαριασμού σου."
-              onTokenChange={token => {
-                setCaptchaToken(token);
-                if (token) {
-                  setCaptchaError(null);
-                }
-              }}
-              resetSignal={captchaResetKey}
-            />
+            {captchaVisible ? (
+              <CaptchaWidget
+                helperText="Complete the CAPTCHA to protect your account."
+                onTokenChange={token => {
+                  setCaptchaToken(token);
+                  if (token) {
+                    setCaptchaError(null);
+                  }
+                }}
+                resetSignal={captchaResetKey}
+              />
+            ) : (
+              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 text-xs text-[var(--hb-muted)]">
+                Loading CAPTCHA...
+              </div>
+            )}
             <FormErrorMessage message={captchaError ?? undefined} />
           </div>
 
@@ -338,7 +373,7 @@ export default function LoginForm() {
             variant="primary"
             icon={!loading ? <LogIn className="h-5 w-5" /> : undefined}
             className="flex w-full items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[var(--hb-shadow-md)] transition hover:shadow-[var(--hb-shadow-md-hover)]"
-            disabled={loading || !captchaToken}
+            disabled={loading || (captchaVisible && !captchaToken)}
           >
             {loading ? 'Σύνδεση...' : 'Σύνδεση'}
           </Button>
