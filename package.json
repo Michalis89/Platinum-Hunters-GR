@@ -15,7 +15,12 @@
     "test:coverage": "npm test -- --coverage --coverageReporters=text-lcov > lcov.info",
     "sitemap": "next-sitemap",
     "cypress:open": "concurrently \"npm run build && npm run start\" \"cypress open\" ",
-    "db:types": "supabase gen types typescript --project-id jolfksxuhyktpwncniks > src/lib/supabase/database.types.ts"
+    "db:types": "supabase gen types typescript --project-id jolfksxuhyktpwncniks > src/lib/supabase/database.types.ts",
+    "issues:multi:split": "powershell -ExecutionPolicy Bypass -File scripts/split-issues-from-chat.ps1 generated_issues.txt",
+    "issues:check": "powershell -ExecutionPolicy Bypass -File scripts/validate-issues.ps1",
+    "issues:sync": "powershell -ExecutionPolicy Bypass -File scripts/create-missing-issues.ps1",
+    "issues:create": "powershell -ExecutionPolicy Bypass -File scripts/create-issues.ps1",
+    "issues:labels": "powershell -ExecutionPolicy Bypass -File scripts/create-labels.ps1"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",

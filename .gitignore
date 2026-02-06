@@ -48,3 +48,5 @@ docs/private
 supabase/.temp
 
 /ai
+/issues
+/generated_issues.txt
