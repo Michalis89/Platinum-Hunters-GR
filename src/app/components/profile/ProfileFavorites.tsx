@@ -67,7 +67,7 @@ function ProfileFavoritesComponent({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5 sm:space-y-3">
       {favorites.map((fav, idx) => (
         <div
           key={fav.id}
@@ -78,25 +78,25 @@ function ProfileFavoritesComponent({
             onReorder(dragIndex, idx);
             setDragIndex(null);
           }}
-          className={`group flex cursor-grab items-center gap-4 rounded-2xl border bg-[var(--hb-card)] p-4 transition-all duration-200 active:cursor-grabbing ${
+          className={`group flex min-w-0 cursor-grab items-center gap-3 rounded-2xl border bg-[var(--hb-card)] p-3 transition-all duration-200 active:cursor-grabbing sm:gap-4 sm:p-4 ${
             dragIndex === idx
               ? 'border-[var(--hb-primary-strong)]/70 bg-[var(--hb-primary-strong)]/5 shadow-[var(--hb-shadow-md)]'
               : 'hover:border-[var(--hb-primary-strong)]/40 border-[var(--hb-border)] hover:-translate-y-0.5 hover:shadow-[var(--hb-shadow-md-hover)]'
           }`}
         >
           {/* Drag handle + Rank */}
-          <div className="flex items-center gap-2 text-[var(--hb-muted)]">
-            <GripVertical className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100" />
-            <span className="w-6 text-center text-sm font-semibold">#{idx + 1}</span>
+          <div className="flex items-center gap-1.5 text-[var(--hb-muted)] sm:gap-2">
+            <GripVertical className="hidden h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100 sm:block" />
+            <span className="w-5 text-center text-xs font-semibold sm:w-6 sm:text-sm">#{idx + 1}</span>
           </div>
 
           {/* Cover image */}
-          <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-[var(--hb-panel)]">
+          <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-[var(--hb-panel)] sm:h-14 sm:w-14">
             <Image
               src={fav.game?.cover_image || fav.game?.background_image || '/og-image.png'}
               alt={fav.game?.title || 'Item'}
-              width={56}
-              height={56}
+              width={48}
+              height={48}
               className="h-full w-full object-cover"
             />
             {/* Favorite heart overlay */}

@@ -406,7 +406,7 @@ export default function ProfilePage() {
 
         {/* Favorites + Category Info Section */}
         {activeCategory && favoriteCategories.includes(activeCategory) && (
-          <section className="px-4 py-12 md:px-6 md:py-16">
+          <section className="px-4 py-10 md:px-6 md:py-16">
             <div className="mx-auto max-w-6xl">
               <div className="mb-8 text-center">
                 <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
@@ -417,9 +417,9 @@ export default function ProfilePage() {
                 </h2>
               </div>
 
-              <div className="grid gap-8 lg:grid-cols-2">
+              <div className="flex flex-col gap-4 sm:gap-6 lg:grid lg:grid-cols-2">
                 {/* Favorites List */}
-                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
+                <div className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] sm:p-6">
                   <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
                     Top {categoryLabels[activeCategory]}
                   </h3>
@@ -440,7 +440,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Category Info */}
-                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
+                <div className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] sm:p-6">
                   <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
                     Πληροφορίες Κατηγορίας
                   </h3>

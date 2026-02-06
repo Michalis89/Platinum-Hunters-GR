@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Eye, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useSelector } from 'react-redux';
+import { Button } from '@/components/ui/button';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
-import Button from '../ui/Button';
 import ErrorState from '../ui/ErrorState';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import type { ArticleCategory, ArticleTopic, ArticleStatus } from '@/types/database';
@@ -58,39 +58,27 @@ const REVIEW_CATEGORIES: ArticleCategory[] = [
 const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
   games: {
     label: 'Games',
-    topics: [
-      { value: 'articles', label: 'Άρθρα' },
-    ],
+    topics: [{ value: 'articles', label: 'Άρθρα' }],
   },
   anime: {
     label: 'Anime',
-    topics: [
-      { value: 'articles', label: 'Άρθρα' },
-    ],
+    topics: [{ value: 'articles', label: 'Άρθρα' }],
   },
   manga: {
     label: 'Manga',
-    topics: [
-      { value: 'articles', label: 'Άρθρα' },
-    ],
+    topics: [{ value: 'articles', label: 'Άρθρα' }],
   },
   books: {
     label: 'Βιβλία',
-    topics: [
-      { value: 'articles', label: 'Άρθρα' },
-    ],
+    topics: [{ value: 'articles', label: 'Άρθρα' }],
   },
   movies: {
     label: 'Movies',
-    topics: [
-      { value: 'articles', label: 'Άρθρα' },
-    ],
+    topics: [{ value: 'articles', label: 'Άρθρα' }],
   },
   tv: {
     label: 'TV Series',
-    topics: [
-      { value: 'articles', label: 'Άρθρα' },
-    ],
+    topics: [{ value: 'articles', label: 'Άρθρα' }],
   },
   coding: {
     label: 'Coding',
@@ -395,12 +383,9 @@ export default function AddArticleDialog({
               {/* Header */}
               <div className="flex items-center justify-between border-b border-[var(--hb-border)] px-6 py-4">
                 <h2 className="text-xl font-semibold text-[var(--hb-headline)]">{dialogTitle}</h2>
-                <button
-                  onClick={onClose}
-                  className="rounded-lg p-2 text-[var(--hb-muted)] transition hover:bg-white/5 hover:text-white"
-                >
+                <Button variant="secondary" onClick={onClose}>
                   <X size={20} />
-                </button>
+                </Button>
               </div>
 
               {/* Content */}
@@ -506,7 +491,7 @@ export default function AddArticleDialog({
                       Εικόνα εξωφύλλου
                     </label>
                     <div className="flex flex-wrap gap-3">
-                      <div className="flex flex-1 min-w-[220px] flex-col gap-2">
+                      <div className="flex min-w-[220px] flex-1 flex-col gap-2">
                         <Input
                           placeholder="URL εικόνας"
                           value={coverImage}
@@ -590,15 +575,12 @@ export default function AddArticleDialog({
 
               {/* Footer */}
               <div className="flex items-center justify-between border-t border-[var(--hb-border)] px-6 py-4">
-                <button
-                  onClick={onClose}
-                  className="rounded-lg px-4 py-2 text-sm text-[var(--hb-muted)] transition hover:text-white"
-                >
+                <Button variant="secondary" onClick={onClose}>
                   Ακύρωση
-                </button>
+                </Button>
                 <div className="flex gap-3">
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Save size={16} />}
                     onClick={() => handleSubmit('draft')}
                     disabled={isSubmitting || hasPlainTextError || noPermission}

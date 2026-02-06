@@ -23,7 +23,7 @@ export default function PageHero({
   subtitleClassName,
 }: PageHeroProps) {
   return (
-    <section className={cn('relative px-4 md:px-6', sectionClassName)}>
+    <section className={cn('relative px-4 py-2 md:px-6', sectionClassName)}>
       <div className="mx-auto max-w-4xl text-center">
         {eyebrow ? (
           <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[var(--hb-primary-strong)]">
@@ -36,7 +36,7 @@ export default function PageHero({
         {subtitle ? (
           <p
             className={cn(
-              'mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-[var(--hb-muted)] md:text-xl',
+              'mx-auto mb-8 max-w-2xl text-base leading-relaxed text-[var(--hb-muted)] md:mb-10 md:text-xl',
               subtitleClassName,
             )}
           >

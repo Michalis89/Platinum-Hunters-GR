@@ -27,6 +27,39 @@ function normalizeSocialUrl(value: string) {
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
 }
+function decodePathname(pathname: string) {
+  if (!pathname || pathname === '/') return '';
+  const segments = pathname
+    .split('/')
+    .map(segment => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    })
+    .filter(Boolean);
+  return segments.join('/');
+}
+
+function getSocialDisplayValue(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  const normalized = normalizeSocialUrl(trimmed);
+  try {
+    const url = new URL(normalized);
+    const host = url.hostname.replace(/^www\./i, '');
+    const decodedPath = decodePathname(url.pathname);
+    return decodedPath ? `${host}/${decodedPath}` : host;
+  } catch {
+    try {
+      return decodeURIComponent(trimmed);
+    } catch {
+      return trimmed;
+    }
+  }
+}
 
 const socialPlatforms = [
   { key: 'discord', label: 'Discord', icon: <MessageCircle className="h-4 w-4" /> },
@@ -64,7 +97,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
   );
 
   return (
-    <section className="px-4 py-12 md:px-6 md:py-16">
+    <section className="px-4 py-10 md:px-6 md:py-16">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 text-center">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
@@ -75,30 +108,30 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
+        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] sm:p-6">
           {/* Info Grid */}
           <div className="mb-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {/* Full name */}
-            <div className="flex items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
               <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <User className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
                 <p className="text-xs text-[var(--hb-muted)]">Ονοματεπώνυμο</p>
-                <p className="text-sm font-medium text-[var(--hb-headline)]">
+                <p className="break-words text-sm font-medium text-[var(--hb-headline)]">
                   {user.full_name || '—'}
                 </p>
               </div>
             </div>
 
             {/* Display name */}
-            <div className="flex items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
               <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <Mail className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
                 <p className="text-xs text-[var(--hb-muted)]">Display / Username</p>
-                <p className="text-sm font-medium text-[var(--hb-headline)]">
+                <p className="break-words text-sm font-medium text-[var(--hb-headline)]">
                   {user.display_name || user.username}
                 </p>
               </div>
@@ -106,13 +139,13 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
             {/* Age (if visible) */}
             {showAge && (
-              <div className="flex items-start gap-3">
+              <div className="flex min-w-0 items-start gap-3">
                 <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                   <Calendar className="h-5 w-5 text-[var(--hb-primary-strong)]" />
                 </div>
                 <div>
                   <p className="text-xs text-[var(--hb-muted)]">Ηλικία</p>
-                  <p className="text-sm font-medium text-[var(--hb-headline)]" suppressHydrationWarning>
+                  <p className="break-words text-sm font-medium text-[var(--hb-headline)]" suppressHydrationWarning>
                     {age ? `${age} ετών` : '—'}
                   </p>
                 </div>
@@ -120,13 +153,13 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             )}
 
             {/* Location */}
-            <div className="flex items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
               <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <MapPin className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
                 <p className="text-xs text-[var(--hb-muted)]">Τοποθεσία</p>
-                <p className="text-sm font-medium text-[var(--hb-headline)]">
+                <p className="break-words text-sm font-medium text-[var(--hb-headline)]">
                   {showLocation
                     ? [locationCity, user.country].filter(Boolean).join(', ') || '—'
                     : 'Κρυφό'}
@@ -135,13 +168,13 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             </div>
 
             {/* Timezone */}
-            <div className="flex items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
               <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
                 <Globe2 className="h-5 w-5 text-[var(--hb-primary-strong)]" />
               </div>
               <div>
                 <p className="text-xs text-[var(--hb-muted)]">Ζώνη Ώρας</p>
-                <p className="text-sm font-medium text-[var(--hb-headline)]">
+                <p className="break-words text-sm font-medium text-[var(--hb-headline)]">
                   {showLocation ? user.timezone || '—' : 'Κρυφό'}
                 </p>
               </div>
@@ -172,8 +205,8 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
                         </span>
                         <div className="min-w-0 flex-1">
                           <p className="text-xs text-[var(--hb-muted)]">{platform.label}</p>
-                          <p className="truncate text-sm text-[var(--hb-headline)] transition-colors group-hover:text-[var(--hb-primary-strong)]">
-                            {value}
+                          <p className="break-all text-sm text-[var(--hb-headline)] transition-colors group-hover:text-[var(--hb-primary-strong)] sm:truncate">
+                            {getSocialDisplayValue(value)}
                           </p>
                         </div>
                       </a>

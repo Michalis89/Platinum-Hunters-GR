@@ -10,10 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Ca
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Badge from '@/app/components/ui/Badge';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/app/components/ui/Textarea';
 import Feedback from '@/app/components/ui/Feedback';
-import AttachmentDropzone, { type AttachmentItem } from '@/app/components/support/AttachmentDropzone.client';
+import AttachmentDropzone, {
+  type AttachmentItem,
+} from '@/app/components/support/AttachmentDropzone.client';
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
 import { FormattedDate } from '@/app/components/ui/FormattedDate';
 import {
@@ -77,7 +79,10 @@ export default function SupportTicketDetail() {
   const [replyText, setReplyText] = useState('');
   const [replyAttachments, setReplyAttachments] = useState<AttachmentItem[]>([]);
   const [replyLoading, setReplyLoading] = useState(false);
-  const [replyResult, setReplyResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [replyResult, setReplyResult] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -207,11 +212,16 @@ export default function SupportTicketDetail() {
       <div className="relative">
         <PageHero
           eyebrow="Υποστήριξη"
-          title={<span className="text-3xl text-[var(--hb-headline)] md:text-5xl">{ticket.subject}</span>}
+          title={
+            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">{ticket.subject}</span>
+          }
           subtitle={`Κατηγορία: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
           badges={
             <>
-              <Badge text={statusLabels[ticket.status] || ticket.status} color={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'} />
+              <Badge
+                text={statusLabels[ticket.status] || ticket.status}
+                color={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
+              />
               {ticket.severity ? (
                 <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs">
                   Σοβαρότητα: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
@@ -276,8 +286,13 @@ export default function SupportTicketDetail() {
                 </div>
               ))}
 
-              <form onSubmit={handleReplySubmit} className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                <div className="text-sm font-semibold text-[var(--hb-headline)]">Απάντησε στο ticket</div>
+              <form
+                onSubmit={handleReplySubmit}
+                className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4"
+              >
+                <div className="text-sm font-semibold text-[var(--hb-headline)]">
+                  Απάντησε στο ticket
+                </div>
                 {replyResult ? (
                   <Feedback
                     variant={replyResult.type === 'success' ? 'success' : 'error'}
@@ -298,12 +313,7 @@ export default function SupportTicketDetail() {
                   onChange={setReplyAttachments}
                   disabled={replyLoading}
                 />
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={replyLoading}
-                  className="bg-[var(--hb-primary-strong)] text-white"
-                >
+                <Button type="submit" variant="primary" disabled={replyLoading}>
                   {replyLoading ? 'Αποστολή...' : 'Αποστολή απάντησης'}
                 </Button>
               </form>

@@ -25,6 +25,7 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import { selectUser } from '@/store/slices/authSlice';
+import { Button } from '@/components/ui/button';
 
 // Context to pass down category alert state to FeedText
 type CategoryAlertState = {
@@ -97,11 +98,7 @@ function RelativeTime({ date }: { date: string }) {
     return () => clearInterval(interval);
   }, [date]);
 
-  return (
-    <span suppressHydrationWarning>
-      {relativeTime ?? '...'}
-    </span>
-  );
+  return <span suppressHydrationWarning>{relativeTime ?? '...'}</span>;
 }
 
 function renderText(item: ActivityItem) {
@@ -418,12 +415,9 @@ function FeedText({ item }: { item: ActivityItem }) {
 
     if (category && !hasCategory && alertContext?.showCategoryAlert) {
       return (
-        <button
-          onClick={() => alertContext.showCategoryAlert(category)}
-          className="text-left text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
-        >
+        <Button variant={'primary'} onClick={() => alertContext.showCategoryAlert(category)}>
           {text}
-        </button>
+        </Button>
       );
     }
 
@@ -452,12 +446,9 @@ function FeedText({ item }: { item: ActivityItem }) {
     // If user doesn't have this category, show alert on click instead of navigating
     if (!hasCategory && alertContext) {
       return (
-        <button
-          onClick={() => alertContext.showCategoryAlert(category)}
-          className="text-left text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
-        >
+        <Button variant={'primary'} onClick={() => alertContext.showCategoryAlert(category)}>
           {text}
-        </button>
+        </Button>
       );
     }
 

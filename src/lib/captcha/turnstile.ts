@@ -6,6 +6,11 @@ type TurnstileVerifyResponse = {
 };
 
 export async function verifyCaptchaToken(token?: string) {
+  // Dev-only bypass so local `npm run dev` works without external CAPTCHA setup.
+  if (process.env.NODE_ENV === 'development') {
+    return { success: true, errors: [] as string[] };
+  }
+
   if (!token) {
     return { success: false, errors: ['missing-token'] };
   }

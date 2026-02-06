@@ -580,7 +580,7 @@ export default function CategoryLibrary({
   };
 
   return (
-    <div className="min-h-screen bg-[var(--hb-bg)] px-4 py-20 text-[var(--hb-text)]">
+    <div className="min-h-screen bg-[var(--hb-bg)] px-3 py-20 text-[var(--hb-text)] sm:px-4">
       {alert && (
         <AlertMessage
           key={alertKey}
@@ -598,7 +598,7 @@ export default function CategoryLibrary({
           <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_20%,var(--hb-accent),transparent_55%)]" />
         </div>
 
-        <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)] backdrop-blur">
+        <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur sm:p-6">
           <CategoryHeader
             category={category}
             username={username}

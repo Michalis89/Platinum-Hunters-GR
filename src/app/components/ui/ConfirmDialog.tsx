@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
-import Button from './Button';
+import { Button } from '@/components/ui/button';
 import Portal from './Portal';
 
 interface ConfirmDialogProps {
@@ -11,16 +11,16 @@ interface ConfirmDialogProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  variant?: 'danger' | 'warning' | 'default';
+  variant?: 'destructive' | 'warning' | 'default';
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 const variantConfig = {
-  danger: {
+  destructive: {
     iconBg: 'bg-[var(--hb-primary-strong)]/20',
     iconColor: 'text-[var(--hb-accent)]',
-    confirmVariant: 'danger' as const,
+    confirmVariant: 'destructive' as const,
   },
   warning: {
     iconBg: 'bg-amber-500/20',
@@ -40,7 +40,7 @@ export default function ConfirmDialog({
   message,
   confirmLabel = 'Επιβεβαίωση',
   cancelLabel = 'Άκυρο',
-  variant = 'danger',
+  variant = 'destructive',
   onConfirm,
   onCancel,
 }: Readonly<ConfirmDialogProps>) {
@@ -68,13 +68,16 @@ export default function ConfirmDialog({
               className="relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]"
             >
               {/* Close button */}
-              <button
-                onClick={onCancel}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--hb-muted)] transition-colors hover:bg-[var(--hb-border)] hover:text-[var(--hb-text)]"
-                aria-label="Κλείσιμο"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex justify-end p-4 pb-0">
+                <Button
+                  variant="ghost"
+                  onClick={onCancel}
+                  aria-label="Close"
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
 
               <div className="p-6">
                 {/* Icon */}
@@ -95,18 +98,14 @@ export default function ConfirmDialog({
                 {/* Actions */}
                 <div className="mt-6 flex gap-3">
                   <Button
-                    variant="outline"
-                    className="flex-1 rounded-xl border-[var(--hb-border)] bg-transparent text-[var(--hb-text)] hover:border-[var(--hb-muted)]"
-                    onClick={onCancel}
-                  >
-                    {cancelLabel}
-                  </Button>
-                  <Button
                     variant={config.confirmVariant}
                     className="flex-1 rounded-xl"
                     onClick={onConfirm}
                   >
                     {confirmLabel}
+                  </Button>
+                  <Button variant="outline" className="flex-1 rounded-xl" onClick={onCancel}>
+                    {cancelLabel}
                   </Button>
                 </div>
               </div>

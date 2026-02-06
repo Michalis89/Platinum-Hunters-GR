@@ -40,7 +40,7 @@ import {
   getPasswordStrength,
 } from '@/utils/validation/auth';
 import type { RegisterData } from '@/types/auth';
-import Button from '../ui/Button';
+import { Button } from '@/components/ui/button';
 import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
 import {
   ANIME_GENRES,
@@ -63,6 +63,8 @@ const HOBBIES = [
   { id: 'pet', label: 'Κατοικίδια', icon: 'Cat' },
   { id: 'vape', label: 'Vape', icon: 'Wind' },
 ];
+
+const isCaptchaDisabled = process.env.NODE_ENV === 'development';
 
 type PreferenceSectionProps = {
   title: string;
@@ -91,10 +93,11 @@ const PreferenceSection = ({
         <Icon className="h-4 w-4" />
         {title}
       </p>
-      <button
+      <Button
         type="button"
+        variant={'secondary'}
         onClick={onToggle}
-        className="flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
+        className="flex items-center gap-1"
       >
         {isOpen ? (
           <>
@@ -107,7 +110,7 @@ const PreferenceSection = ({
             <ChevronDown className="h-3 w-3" />
           </>
         )}
-      </button>
+      </Button>
     </div>
     <AnimatePresence initial={false}>
       {isOpen && (
@@ -315,7 +318,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const handleSubmit = async () => {
     setAlert(null);
 
-    if (!captchaToken) {
+    if (!isCaptchaDisabled && !captchaToken) {
       setCaptchaError('Ολοκλήρωσε το CAPTCHA για να συνεχίσεις.');
       return;
     }
@@ -346,7 +349,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           pet_types: formData.pet_types || null,
           vape_device: formData.vape_device || null,
           vape_flavor: formData.vape_flavor || null,
-          captchaToken,
+          captchaToken: isCaptchaDisabled ? 'dev-bypass' : captchaToken,
         }),
       });
 
@@ -394,7 +397,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       <CardHeader className="flex-none border-[var(--hb-border)]">
         <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
           <span className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-card)] text-white shadow-[var(--hb-shadow-md)] dark:bg-[var(--hb-card)]">
+            <div className="text--[var(--hb-text)] flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-card)] shadow-[var(--hb-shadow-md)] dark:bg-[var(--hb-card)]">
               <UserPlus className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
@@ -473,13 +476,14 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                       className={inputClasses}
                       required
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant={'ghost'}
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-9 text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                      className="absolute right-3 top-9"
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
+                    </Button>
                   </div>
                   {passwordStrength && (
                     <div className="mt-2">
@@ -522,17 +526,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                       className={inputClasses}
                       required
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant={'ghost'}
                       onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                      className="absolute right-3 top-9 text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                      className="absolute right-3 top-9"
                     >
                       {showPasswordConfirm ? (
                         <EyeOff className="h-5 w-5" />
                       ) : (
                         <Eye className="h-5 w-5" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                   <FormErrorMessage message={errors.password_confirm} />
                 </div>
@@ -662,7 +667,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         }[hobby.icon] || Gamepad2;
 
                       return (
-                        <button
+                        <Button
                           key={hobby.id}
                           type="button"
                           onClick={() => {
@@ -687,7 +692,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         >
                           <IconComponent className="h-4 w-4" />
                           {hobby.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -1045,27 +1050,29 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           {/* Εμφάνιση CAPTCHA μόνο στο τελευταίο βήμα */}
           {currentStep === 3 && (
             <div className="flex min-h-[80px] w-full justify-center">
-              <CaptchaWidget
-                onTokenChange={token => {
-                  setCaptchaToken(token);
-                  if (token) setCaptchaError(null);
-                }}
-                resetSignal={captchaResetKey}
-              />
-              <FormErrorMessage message={captchaError ?? undefined} />
+              {isCaptchaDisabled ? (
+                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 text-xs text-[var(--hb-muted)]">
+                  CAPTCHA is disabled in development mode.
+                </div>
+              ) : (
+                <>
+                  <CaptchaWidget
+                    onTokenChange={token => {
+                      setCaptchaToken(token);
+                      if (token) setCaptchaError(null);
+                    }}
+                    resetSignal={captchaResetKey}
+                  />
+                  <FormErrorMessage message={captchaError ?? undefined} />
+                </>
+              )}
             </div>
           )}
 
           <div className="flex flex-row gap-3">
             {' '}
             {currentStep > 1 && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                disabled={loading}
-                className="hover:border-[var(--hb-primary-strong)]/60 border-[var(--hb-border)] text-[var(--hb-headline)]"
-              >
+              <Button type="button" variant="secondary" onClick={handleBack} disabled={loading}>
                 <ArrowLeft className="h-5 w-5" />
                 Πίσω
               </Button>
@@ -1074,8 +1081,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               type="button"
               variant="primary"
               onClick={handleNext}
-              disabled={loading || (currentStep === 3 && !captchaToken)}
-              className="flex-[2] items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white"
+              disabled={loading || (!isCaptchaDisabled && currentStep === 3 && !captchaToken)}
+              className="flex-[2] items-center justify-center gap-2"
             >
               {loading ? (
                 'Εγγραφή...'

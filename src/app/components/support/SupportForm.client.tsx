@@ -13,7 +13,7 @@ import { Select } from '@/app/components/ui/Select';
 import { Checkbox } from '@/app/components/ui/Checkbox';
 import { Switch } from '@/app/components/ui/Switch';
 import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import Feedback from '@/app/components/ui/Feedback';
 import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
 import { InfoHint } from '@/app/components/ui/InfoHint';
@@ -741,7 +741,7 @@ export default function SupportForm({}: Readonly<{
                     type="submit"
                     variant="primary"
                     disabled={submitting}
-                    className="flex items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[var(--hb-shadow-md)]"
+                    className="flex items-center justify-center gap-2"
                   >
                     {submitting ? 'Αποστολή...' : 'Υποβολή αιτήματος'}
                   </Button>

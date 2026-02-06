@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type FAQItem = {
   question: string;
@@ -69,7 +70,7 @@ export function AboutFAQ() {
               key={index}
               className="hover:border-[var(--hb-primary-strong)]/30 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] transition-colors"
             >
-              <button
+              <Button
                 onClick={() => toggleFAQ(index)}
                 className="flex w-full items-center justify-between gap-4 p-5 text-left"
                 aria-expanded={openIndex === index}
@@ -80,7 +81,7 @@ export function AboutFAQ() {
                     openIndex === index ? 'rotate-180' : ''
                   }`}
                 />
-              </button>
+              </Button>
               <div
                 className={`grid transition-all duration-200 ease-in-out ${
                   openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'

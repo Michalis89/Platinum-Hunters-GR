@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Save,
-  X,
   Trash2,
   AlertTriangle,
   Camera,
@@ -41,7 +40,7 @@ import {
 import type { AppDispatch } from '@/store/store';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import {
   ANIME_GENRES,
   BOOK_GENRES,
@@ -914,11 +913,7 @@ export default function EditProfilePage() {
                           <Button type="button" variant="outline" onClick={handleAvatarRemove}>
                             Κατάργηση
                           </Button>
-                          <Button
-                            type="button"
-                            className="border border-dashed border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)]"
-                            disabled
-                          >
+                          <Button type="button" variant={'primary'} disabled>
                             Auto-avatar (soon)
                           </Button>
                         </div>
@@ -939,7 +934,7 @@ export default function EditProfilePage() {
                       ].map(setting => {
                         const active = (privacySettings as Record<string, boolean>)[setting.key];
                         return (
-                          <button
+                          <Button
                             type="button"
                             key={setting.key}
                             onClick={() =>
@@ -957,7 +952,7 @@ export default function EditProfilePage() {
                             ) : (
                               <EyeOff className="h-4 w-4 text-[var(--hb-muted)]" />
                             )}
-                          </button>
+                          </Button>
                         );
                       })}
                       <p className="text-[11px] text-[var(--hb-muted)]">
@@ -1002,7 +997,7 @@ export default function EditProfilePage() {
                       vape: 'Vape',
                     };
                     return (
-                      <button
+                      <Button
                         type="button"
                         key={cat}
                         onClick={() => toggleCategory(cat)}
@@ -1013,7 +1008,7 @@ export default function EditProfilePage() {
                         }`}
                       >
                         {labels[cat] || cat}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -1088,7 +1083,7 @@ export default function EditProfilePage() {
                       {GENRES.map(genre => {
                         const active = formData.favorite_genres?.includes(genre);
                         return (
-                          <button
+                          <Button
                             type="button"
                             key={genre}
                             onClick={() => handleGenreToggle(genre)}
@@ -1099,7 +1094,7 @@ export default function EditProfilePage() {
                             }`}
                           >
                             {genre}
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>
@@ -1158,7 +1153,7 @@ export default function EditProfilePage() {
                             {ANIME_GENRES.map(genre => {
                               const active = animeGenres.includes(genre);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={genre}
                                   onClick={() => handleCategoryGenreToggle('anime', genre)}
@@ -1169,7 +1164,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {genre}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1183,7 +1178,7 @@ export default function EditProfilePage() {
                             {ANIME_FORMATS.map(format => {
                               const active = note.format === format;
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={format}
                                   onClick={() => handleCategoryNoteField('anime', 'format')(format)}
@@ -1194,7 +1189,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {format}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1208,7 +1203,7 @@ export default function EditProfilePage() {
                             {ANIME_PLATFORMS.map(platform => {
                               const active = platformsList.includes(platform);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={platform}
                                   onClick={() =>
@@ -1221,7 +1216,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {platform}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1301,7 +1296,7 @@ export default function EditProfilePage() {
                             {MANGA_GENRES.map(genre => {
                               const active = mangaGenres.includes(genre);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={genre}
                                   onClick={() => handleCategoryGenreToggle('manga', genre)}
@@ -1312,7 +1307,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {genre}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1326,7 +1321,7 @@ export default function EditProfilePage() {
                             {MANGA_FORMATS.map(format => {
                               const active = note.format === format;
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={format}
                                   onClick={() => handleCategoryNoteField('manga', 'format')(format)}
@@ -1337,7 +1332,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {format}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1411,7 +1406,7 @@ export default function EditProfilePage() {
                             {serviceOptions.map(service => {
                               const active = servicesList.includes(service);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={service}
                                   onClick={() =>
@@ -1424,7 +1419,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {service}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1451,7 +1446,7 @@ export default function EditProfilePage() {
                             {MOVIE_GENRES.map(genre => {
                               const active = movieGenres.includes(genre);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={genre}
                                   onClick={() => handleCategoryGenreToggle('movies', genre)}
@@ -1462,7 +1457,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {genre}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1476,7 +1471,7 @@ export default function EditProfilePage() {
                             {MOVIE_STYLES.map(style => {
                               const active = note.style === style;
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={style}
                                   onClick={() => handleCategoryNoteField('movies', 'style')(style)}
@@ -1487,7 +1482,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {style}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1564,7 +1559,7 @@ export default function EditProfilePage() {
                                   : [];
                               const active = list.includes(service);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={service}
                                   onClick={() =>
@@ -1577,7 +1572,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {service}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1604,7 +1599,7 @@ export default function EditProfilePage() {
                             {TV_GENRES.map(genre => {
                               const active = tvGenres.includes(genre);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={genre}
                                   onClick={() => handleCategoryGenreToggle('tv', genre)}
@@ -1615,7 +1610,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {genre}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1629,7 +1624,7 @@ export default function EditProfilePage() {
                             {TV_STYLES.map(style => {
                               const active = note.style === style;
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={style}
                                   onClick={() => handleCategoryNoteField('tv', 'style')(style)}
@@ -1640,7 +1635,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {style}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1709,7 +1704,7 @@ export default function EditProfilePage() {
                             {BOOK_GENRES.map(genre => {
                               const active = bookGenres.includes(genre);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={genre}
                                   onClick={() => handleCategoryGenreToggle('books', genre)}
@@ -1720,7 +1715,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {genre}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1734,7 +1729,7 @@ export default function EditProfilePage() {
                             {BOOK_FORMATS.map(format => {
                               const active = note.format === format;
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={format}
                                   onClick={() => handleCategoryNoteField('books', 'format')(format)}
@@ -1745,7 +1740,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {format}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1816,7 +1811,7 @@ export default function EditProfilePage() {
                             {CODING_LANGUAGES.map(lang => {
                               const active = codingLanguages.includes(lang);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={lang}
                                   onClick={() =>
@@ -1829,7 +1824,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {lang}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1847,7 +1842,7 @@ export default function EditProfilePage() {
                                   : [];
                               const active = list.includes(focus);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={focus}
                                   onClick={() => handleCategoryListToggle('coding', 'focus', focus)}
@@ -1858,7 +1853,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {focus}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -1973,7 +1968,7 @@ export default function EditProfilePage() {
                             {PET_TYPES.map(type => {
                               const active = petSelection.includes(type);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={`pet-type-${type}`}
                                   onClick={() => togglePetType(type)}
@@ -1984,7 +1979,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {type}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -2121,7 +2116,7 @@ export default function EditProfilePage() {
                             {VAPE_FLAVORS.map(flavor => {
                               const active = vapeFlavors.includes(flavor);
                               return (
-                                <button
+                                <Button
                                   type="button"
                                   key={flavor}
                                   onClick={() =>
@@ -2134,7 +2129,7 @@ export default function EditProfilePage() {
                                   }`}
                                 >
                                   {flavor}
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
@@ -2161,8 +2156,9 @@ export default function EditProfilePage() {
               {/* Primary Button */}
               <Button
                 type="submit"
+                variant={'primary'}
                 disabled={saving || !isDirty}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-6 py-2.5 font-semibold text-[var(--hb-bg)] shadow-[var(--hb-shadow-md)] transition-all duration-300 hover:shadow-[var(--hb-shadow-md-hover)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                className="flex items-center gap-2"
               >
                 <Save className="h-4 w-4" />
                 <span>{saving ? 'Αποθήκευση...' : 'Αποθήκευση'}</span>
@@ -2171,9 +2167,9 @@ export default function EditProfilePage() {
               <Button
                 onClick={handleCancel}
                 disabled={saving}
-                className="flex items-center gap-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-6 py-2.5 font-medium text-[var(--hb-text)] shadow-[var(--hb-shadow-md)] backdrop-blur-lg transition-all duration-300 hover:border-[var(--hb-border)] hover:bg-[var(--hb-card)] active:scale-[0.97]"
+                variant={'secondary'}
+                className="flex items-center gap-2"
               >
-                <X className="h-4 w-4 text-[var(--hb-muted)]" />
                 Ακύρωση
               </Button>
             </div>
@@ -2259,12 +2255,13 @@ export default function EditProfilePage() {
 
       {/* Floating quick actions */}
       {isDirty && (
-        <div className="pointer-events-none fixed bottom-6 right-6 z-30 flex flex-col gap-2">
+        <div className="pointer-events-none fixed inset-x-4 bottom-4 z-30 flex flex-col gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6">
           <Button
             type="submit"
             form="edit-profile-form"
             disabled={saving}
-            className="pointer-events-auto flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] px-4 py-2 text-sm font-semibold text-[var(--hb-bg)] shadow-[var(--hb-shadow-md)] transition hover:shadow-[var(--hb-shadow-md-hover)]"
+            variant={'primary'}
+            className="pointer-events-auto flex w-full items-center justify-center gap-2 sm:w-auto"
           >
             <Save className="h-4 w-4" />
             {saving ? 'Αποθήκευση...' : 'Αποθήκευση'}
@@ -2272,7 +2269,8 @@ export default function EditProfilePage() {
           <Button
             onClick={handleCancel}
             disabled={saving}
-            className="pointer-events-auto rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-sm font-medium text-[var(--hb-text)] shadow-[var(--hb-shadow-md)] transition hover:border-[var(--hb-border)] hover:bg-[var(--hb-card)]"
+            variant={'secondary'}
+            className="pointer-events-auto w-full rounded-full sm:w-auto"
           >
             Ακύρωση
           </Button>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -13,9 +13,11 @@ import { validateEmail, validatePassword } from '@/utils/validation/auth';
 import { fetchSession } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import { supabase } from '@/lib/supabase-client';
-import Button from '../ui/Button';
+import { Button } from '@/components/ui/button';
 import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
 import { RETURN_URL_KEY } from '@/lib/hooks/useRequireAuth';
+
+const isCaptchaDisabled = process.env.NODE_ENV === 'development';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -51,6 +53,10 @@ export default function LoginForm() {
   const [captchaVisible, setCaptchaVisible] = useState(false);
 
   useEffect(() => {
+    if (isCaptchaDisabled) {
+      return;
+    }
+
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let idleId: number | null = null;
 
@@ -165,7 +171,7 @@ export default function LoginForm() {
     e.preventDefault();
     setAlert(null);
 
-    if (!captchaVisible) {
+    if (!isCaptchaDisabled && !captchaVisible) {
       setCaptchaVisible(true);
       setCaptchaError('Load CAPTCHA first and try again.');
       return;
@@ -175,7 +181,7 @@ export default function LoginForm() {
       return;
     }
 
-    if (!captchaToken) {
+    if (!isCaptchaDisabled && !captchaToken) {
       setCaptchaError('Ολοκλήρωσε το CAPTCHA για να συνεχίσεις.');
       return;
     }
@@ -192,7 +198,7 @@ export default function LoginForm() {
         body: JSON.stringify({
           identifier: formData.identifier,
           password: formData.password,
-          captchaToken,
+          captchaToken: isCaptchaDisabled ? 'dev-bypass' : captchaToken,
         }),
       });
 
@@ -244,7 +250,7 @@ export default function LoginForm() {
         setCaptchaToken(null);
       }
       const errorMessage =
-        error instanceof Error ? error.message : '❌ Σφάλμα σύνδεσης. Ελέγξτε τα στοιχεία σας.';
+        error instanceof Error ? error.message : 'Σφάλμα σύνδεσης. Ελέγξτε τα στοιχεία σας.';
       setAlert({
         type: 'error',
         message: errorMessage,
@@ -263,7 +269,7 @@ export default function LoginForm() {
               <LogIn className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
-              <span className="font-semibold">Σύνδεση στον Χομπίστα</span>
+              <span className="font-semibold">Σύνδεση στον Hobbista</span>
             </span>
           </span>
         </CardTitle>
@@ -288,7 +294,7 @@ export default function LoginForm() {
               name="identifier"
               value={formData.identifier}
               onChange={handleChange}
-              placeholder="you@hobistas.app ή username"
+              placeholder="you@domain.com ή username"
               error={!!errors.identifier}
               disabled={loading}
               required
@@ -312,14 +318,15 @@ export default function LoginForm() {
                 required
                 className={`${inputClasses} pr-11`}
               />
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-[var(--hb-muted)] transition hover:text-[var(--hb-headline)]"
+                className="absolute right-3 top-9"
+                variant={'ghost'}
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
+              </Button>
             </div>
             <FormErrorMessage message={errors.password} />
           </div>
@@ -338,17 +345,17 @@ export default function LoginForm() {
               Να με θυμάσαι
             </label>
 
-            <button
-              type="button"
-              onClick={handleForgotPasswordClick}
-              className="text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
-            >
+            <Button type="button" onClick={handleForgotPasswordClick} variant={'secondary'}>
               Ξέχασες τον κωδικό;
-            </button>
+            </Button>
           </div>
 
           <div>
-            {captchaVisible ? (
+            {isCaptchaDisabled ? (
+              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 text-xs text-[var(--hb-muted)]">
+                CAPTCHA is disabled in development mode.
+              </div>
+            ) : captchaVisible ? (
               <CaptchaWidget
                 helperText="Complete the CAPTCHA to protect your account."
                 onTokenChange={token => {
@@ -364,7 +371,7 @@ export default function LoginForm() {
                 Loading CAPTCHA...
               </div>
             )}
-            <FormErrorMessage message={captchaError ?? undefined} />
+            {!isCaptchaDisabled && <FormErrorMessage message={captchaError ?? undefined} />}
           </div>
 
           {/* Submit Button */}
@@ -372,8 +379,8 @@ export default function LoginForm() {
             type="submit"
             variant="primary"
             icon={!loading ? <LogIn className="h-5 w-5" /> : undefined}
-            className="flex w-full items-center justify-center gap-2 bg-[var(--hb-primary-strong)] text-white shadow-[var(--hb-shadow-md)] transition hover:shadow-[var(--hb-shadow-md-hover)]"
-            disabled={loading || (captchaVisible && !captchaToken)}
+            className="flex w-full items-center justify-center gap-2"
+            disabled={loading || (!isCaptchaDisabled && captchaVisible && !captchaToken)}
           >
             {loading ? 'Σύνδεση...' : 'Σύνδεση'}
           </Button>
@@ -401,8 +408,7 @@ export default function LoginForm() {
               Ανάκτηση κωδικού
             </div>
             <p className="text-sm text-[var(--hb-muted)]">
-              Θα σταλεί email ανάκτησης στον λογαριασμό σου. Χρησιμοποιείται το template που έχεις
-              ρυθμίσει στο Supabase.
+              Θα σταλεί email ανάκτησης στον λογαριασμό σου.
             </p>
             {resetAlert && (
               <div
@@ -422,7 +428,7 @@ export default function LoginForm() {
               name="resetEmail"
               value={resetEmail}
               onChange={e => setResetEmail(e.target.value)}
-              placeholder="you@hobistas.app"
+              placeholder="you@domain.com"
               disabled={resetLoading}
               required
               className={inputClasses}
@@ -433,17 +439,12 @@ export default function LoginForm() {
                 variant="primary"
                 onClick={handleSendResetEmail}
                 disabled={resetLoading}
-                className="bg-[var(--hb-primary-strong)] text-white shadow-[var(--hb-shadow-md)]"
               >
                 {resetLoading ? 'Αποστολή...' : 'Στείλε email ανάκτησης'}
               </Button>
-              <button
-                type="button"
-                onClick={() => setShowResetPanel(false)}
-                className="text-sm text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
-              >
+              <Button type="button" variant={'secondary'} onClick={() => setShowResetPanel(false)}>
                 Κλείσιμο
-              </button>
+              </Button>
             </div>
           </div>
         )}

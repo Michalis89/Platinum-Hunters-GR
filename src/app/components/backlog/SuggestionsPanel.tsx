@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import EmptyState from '@/app/components/ui/EmptyState';
 import MediaSearchResultCard from './MediaSearchResultCard';
 import { MediaEntry, SearchResult } from './types';
+import { Button } from '@/components/ui/button';
 
 interface SuggestionsPanelProps {
   suggestions: SearchResult[];
@@ -34,14 +35,17 @@ export default function SuggestionsPanel({
   return (
     <div className="mt-5 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-[var(--hb-headline)]">Προτάσεις από την κοινότητα</p>
-        <button
+        <p className="text-sm font-semibold text-[var(--hb-headline)]">
+          Προτάσεις από την κοινότητα
+        </p>
+        <Button
           type="button"
+          variant={'secondary'}
           onClick={onClose}
-          className="rounded-full border border-[var(--hb-border)] px-3 py-1 text-xs text-[var(--hb-muted)] transition hover:text-[var(--hb-text)]"
+          className="w-full rounded-full sm:w-auto"
         >
           Κλείσιμο
-        </button>
+        </Button>
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {suggestions.map(entry => (

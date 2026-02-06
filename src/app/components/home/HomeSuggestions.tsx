@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { apiClient } from '@/lib/api/client';
+import { Button } from '@/components/ui/button';
 
 const fetcher = apiClient.swrFetcher;
 
@@ -197,18 +198,15 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
             {visibleConfigs.map(config => {
               const isActiveTab = activeTab === config.key;
               return (
-                <button
+                <Button
+                  variant={isActiveTab ? 'primary' : 'secondary'}
                   key={config.key}
                   onClick={() => setActiveTab(config.key)}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                    isActiveTab
-                      ? 'bg-[var(--hb-primary-strong)] text-white'
-                      : 'border border-[var(--hb-border)] bg-transparent text-[var(--hb-muted)] hover:bg-white/10 hover:text-[var(--hb-text)]'
-                  }`}
+                  className={`flex items-center gap-1.5`}
                 >
                   {config.icon}
                   <span>{config.label}</span>
-                </button>
+                </Button>
               );
             })}
           </div>

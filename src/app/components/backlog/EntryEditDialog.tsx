@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Trash2 } from 'lucide-react';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/app/components/ui/ConfirmDialog';
 import {
   MediaCategory,
@@ -145,17 +145,17 @@ export default function EntryEditDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur"
+      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/70 px-0 py-0 backdrop-blur sm:items-center sm:px-4 sm:py-8"
       onClick={event => {
         if (event.target === event.currentTarget) {
           onClose();
         }
       }}
     >
-      <div className="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
-        <div className="overflow-y-auto p-6">
+      <div className="flex h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] sm:h-auto sm:max-h-[80vh] sm:rounded-3xl">
+        <div className="overflow-y-auto p-4 sm:p-6">
           <div className="flex flex-col gap-6 md:flex-row">
-            <div className="relative hidden h-52 w-36 overflow-hidden rounded-2xl bg-[var(--hb-card)] sm:block">
+            <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--hb-card)] sm:h-52 sm:w-36 sm:rounded-2xl">
               <Image
                 src={entry.cover}
                 alt={entry.title}
@@ -169,7 +169,7 @@ export default function EntryEditDialog({
                 <p className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">
                   {category.toUpperCase()}
                 </p>
-                <h2 className="text-2xl font-semibold text-[var(--hb-headline)]">{entry.title}</h2>
+                <h2 className="text-xl font-semibold text-[var(--hb-headline)] sm:text-2xl">{entry.title}</h2>
                 <p className="text-sm text-[var(--hb-muted)]">
                   {entry.subtitle}
                   {entry.year ? ` • ${entry.year}` : ''}
@@ -188,13 +188,13 @@ export default function EntryEditDialog({
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--hb-panel)] to-transparent" />
                     )}
                   </div>
-                  <button
+                  <Button
                     type="button"
+                    variant={'secondary'}
                     onClick={() => setDescriptionExpanded(v => !v)}
-                    className="text-xs font-semibold text-[var(--hb-primary-strong)] hover:brightness-110"
                   >
                     {descriptionExpanded ? 'Show less' : 'Show more'}
-                  </button>
+                  </Button>
                 </div>
               )}
               <div className="flex flex-wrap gap-2">
@@ -247,8 +247,8 @@ export default function EntryEditDialog({
             {category !== 'movies' ? (
               <div>
                 <label className="text-xs text-[var(--hb-muted)]">Πρόοδος ({progressLabel})</label>
-                <div className="mt-2 flex items-center gap-3">
-                  <div className="flex h-10 w-44 items-center overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)]">
+                <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex h-10 w-full items-center overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] sm:w-44">
                     <input
                       value={editState.progress}
                       onChange={event => handleProgressInputChange(event.target.value)}
@@ -267,22 +267,22 @@ export default function EntryEditDialog({
                     )}
                   </div>
                   {category !== 'games' && (
-                    <div className="flex flex-1 items-center justify-end gap-2">
-                      <button
+                    <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-1 sm:items-center sm:justify-end">
+                      <Button
                         type="button"
                         onClick={() => setProgress((hasNumeric ? safeValue : 0) - 1)}
                         className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
                       >
                         −1
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
                         onClick={() => setProgress((hasNumeric ? safeValue : 0) + 1)}
                         className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
                       >
                         +1
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
                         disabled={!total}
                         onClick={() => total && setProgress(total)}
@@ -290,7 +290,7 @@ export default function EntryEditDialog({
                         title="Complete"
                       >
                         Max
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -315,13 +315,14 @@ export default function EntryEditDialog({
                   {total ? `${total} min` : '—'}
                 </div>
                 {editState.status !== 'completed' && (
-                  <button
+                  <Button
                     type="button"
+                    variant={'secondary'}
                     onClick={() => setEditState(prev => ({ ...prev, status: 'completed' }))}
-                    className="border-[var(--hb-primary-strong)]/40 bg-[var(--hb-primary-strong)]/10 mt-3 w-full rounded-xl border px-4 py-3 text-sm font-semibold text-[var(--hb-primary-strong)] hover:brightness-110"
+                    className="mt-3 w-full"
                   >
                     Mark as Watched
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -344,44 +345,42 @@ export default function EntryEditDialog({
                 className="mt-3 w-full accent-[var(--hb-primary-strong)]"
                 aria-label="Βαθμολογία slider"
               />
-              <div className="mt-3 flex items-center gap-3">
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                 <input
                   value={editState.score}
                   inputMode="decimal"
                   placeholder="0–10"
                   onChange={e => handleScoreChange(e.target.value)}
-                  className="w-24 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-2 text-sm text-[var(--hb-text)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
+                  className="w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-2 text-sm text-[var(--hb-text)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:outline-none sm:w-24"
                 />
                 <div className="flex-1 text-xs text-[var(--hb-muted)]">
                   Tip: σύρε την μπάρα ή γράψε τιμή (δέχεται και{' '}
                   <span className="font-semibold">0,5</span>).
                 </div>
-                <button
+                <Button
                   type="button"
+                  variant={'secondary'}
                   onClick={() => setEditState(prev => ({ ...prev, score: '' }))}
-                  className="rounded-full border border-[var(--hb-border)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
+                  className="w-full sm:w-auto"
                   title="Καθάρισμα"
                 >
                   Reset
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* Favorite */}
             <div>
               <label className="text-xs text-[var(--hb-muted)]">Favorite</label>
-              <button
+              <Button
                 type="button"
+                variant={editState?.isFavorite ? 'primary' : 'secondary'}
                 onClick={() => setEditState(prev => ({ ...prev, isFavorite: !prev.isFavorite }))}
-                className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                  editState.isFavorite
-                    ? 'bg-[var(--hb-primary-strong)]/15 border-[var(--hb-primary-strong)] text-[var(--hb-primary-strong)]'
-                    : 'border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
-                }`}
+                className={'mt-2 flex w-full items-center justify-center gap-2'}
               >
                 <span className="text-lg">{editState.isFavorite ? '♥' : '♡'}</span>
                 {editState.isFavorite ? 'Στα αγαπημένα' : 'Προσθήκη στα αγαπημένα'}
-              </button>
+              </Button>
             </div>
 
             {/* Notes */}
@@ -400,31 +399,23 @@ export default function EntryEditDialog({
         {/* Sticky footer */}
         <div className="bg-[var(--hb-panel)]/80 border-t border-[var(--hb-border)] backdrop-blur">
           <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               {entry.mediaId && (
                 <Button
-                  variant="danger"
-                  className="rounded-full"
+                  variant="destructive"
                   onClick={() => setShowDeleteConfirm(true)}
                   icon={<Trash2 className="h-4 w-4" />}
+                  className="w-full sm:w-auto"
                 >
                   Διαγραφή
                 </Button>
               )}
             </div>
-            <div className="flex items-center justify-end gap-2">
-              <Button
-                variant="outline"
-                className="hover:border-[var(--hb-primary-strong)]/50 rounded-full border-[var(--hb-border)] bg-transparent text-[var(--hb-text)]"
-                onClick={onClose}
-              >
-                Άκυρο
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
+              <Button variant="outline" onClick={onClose} className="w-full">
+                Ακύρωση
               </Button>
-              <Button
-                variant="primary"
-                className="rounded-full bg-[var(--hb-primary-strong)] px-6 text-[var(--hb-bg)] hover:brightness-110"
-                onClick={() => onSave(editState)}
-              >
+              <Button variant="primary" onClick={() => onSave(editState)} className="w-full">
                 Αποθήκευση
               </Button>
             </div>
@@ -438,7 +429,7 @@ export default function EntryEditDialog({
         message={`Θες σίγουρα να αφαιρέσεις το "${entry.title}" από τη βιβλιοθήκη σου;`}
         confirmLabel="Διαγραφή"
         cancelLabel="Άκυρο"
-        variant="danger"
+        variant="destructive"
         onConfirm={() => {
           setShowDeleteConfirm(false);
           onDelete(entry);
@@ -448,3 +439,4 @@ export default function EntryEditDialog({
     </div>
   );
 }
+

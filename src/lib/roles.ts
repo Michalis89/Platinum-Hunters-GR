@@ -12,8 +12,18 @@ type RoleCarrier =
   | null
   | undefined;
 
+const normalizeRole = (role: string | null | undefined): UserRole | null => {
+  if (!role) return null;
+  const normalized = role.toLowerCase();
+  if (normalized === 'mod') return 'moderator';
+  if (VALID_ROLE_SET.has(normalized as UserRole)) return normalized as UserRole;
+  return null;
+};
+
 const normalizeRoles = (roles: (string | null | undefined)[]) =>
-  roles.filter((role): role is UserRole => !!role && VALID_ROLE_SET.has(role as UserRole));
+  roles
+    .map(normalizeRole)
+    .filter((role): role is UserRole => role !== null);
 
 export const getUserRoles = (user: RoleCarrier): UserRole[] => {
   if (!user) return [];

@@ -36,7 +36,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const isVercelProd = process.env.NODE_ENV === 'production' && !!process.env.VERCEL;
 
   return (
-    <html lang="el" data-theme={initialTheme} suppressHydrationWarning>
+    <html
+      lang="el"
+      data-theme={initialTheme}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <StructuredData data={organizationStructuredData} />
         <StructuredData data={websiteStructuredData} />

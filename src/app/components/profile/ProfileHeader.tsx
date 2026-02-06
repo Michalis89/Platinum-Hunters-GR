@@ -2,7 +2,7 @@
 
 import { Edit, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import type { User } from '@/types/user';
 import { hasAnyRole } from '@/lib/roles';
 
@@ -17,7 +17,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
   const showShield = hasAnyRole(user, ['admin', 'owner', 'moderator', 'author', 'reviewer']);
 
   return (
-    <section className="relative px-4 pb-12 pt-8 md:px-6 md:pb-16 md:pt-12">
+    <section className="relative px-4 pb-10 pt-8 md:px-6 md:pb-16 md:pt-12">
       <div className="mx-auto max-w-4xl">
         {/* Eyebrow */}
         <p className="mb-6 text-center text-xs uppercase tracking-[0.3em] text-[var(--hb-primary-strong)]">
@@ -43,14 +43,14 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
           )}
 
           {/* Name with gradient */}
-          <h1 className="mb-2 text-3xl font-extrabold leading-tight md:text-4xl lg:text-5xl">
-            <span className="bg-gradient-to-r from-[var(--hb-headline)] via-[var(--hb-text)] to-[var(--hb-muted)] bg-clip-text text-transparent">
+          <h1 className="mb-2 w-full text-2xl font-extrabold leading-tight sm:text-3xl md:text-4xl lg:text-5xl">
+            <span className="inline-block break-words bg-gradient-to-r from-[var(--hb-headline)] via-[var(--hb-text)] to-[var(--hb-muted)] bg-clip-text text-transparent">
               {displayName}
             </span>
           </h1>
 
           {/* Username */}
-          <p className="mb-4 text-base text-[var(--hb-muted)]">@{user.username}</p>
+          <p className="mb-4 break-all text-base text-[var(--hb-muted)]">@{user.username}</p>
 
           {/* Badges */}
           <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
@@ -72,7 +72,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
 
           {/* Bio */}
           {user.bio && (
-            <p className="mx-auto mb-8 max-w-xl text-base leading-relaxed text-[var(--hb-muted)]">
+            <p className="mx-auto mb-8 max-w-xl break-words text-base leading-relaxed text-[var(--hb-muted)]">
               {user.bio}
             </p>
           )}
@@ -82,6 +82,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
             onClick={() => router.push('/pages/profile/edit')}
             variant="primary"
             icon={<Edit className="h-4 w-4" />}
+            className="w-full sm:w-auto"
           >
             Επεξεργασία Προφίλ
           </Button>

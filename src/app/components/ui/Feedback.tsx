@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Info, Sparkles, X, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type Variant = 'success' | 'info' | 'warning' | 'error' | 'neutral';
 type Tone = 'soft' | 'solid';
@@ -170,7 +171,7 @@ export default function Feedback({
             {(actionLabel && onAction) || (secondaryActionLabel && onSecondaryAction) ? (
               <div className="flex flex-wrap gap-2 pt-1">
                 {actionLabel && onAction && (
-                  <button
+                  <Button
                     type="button"
                     onClick={onAction}
                     className={cn(
@@ -182,10 +183,10 @@ export default function Feedback({
                     )}
                   >
                     {actionLabel}
-                  </button>
+                  </Button>
                 )}
                 {secondaryActionLabel && onSecondaryAction && (
-                  <button
+                  <Button
                     type="button"
                     onClick={onSecondaryAction}
                     className={cn(
@@ -197,7 +198,7 @@ export default function Feedback({
                     )}
                   >
                     {secondaryActionLabel}
-                  </button>
+                  </Button>
                 )}
               </div>
             ) : null}
@@ -205,7 +206,7 @@ export default function Feedback({
         </div>
 
         {dismissible && onDismiss && (
-          <button
+          <Button
             type="button"
             onClick={onDismiss}
             className={cn(
@@ -218,7 +219,7 @@ export default function Feedback({
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" strokeWidth={2} />
-          </button>
+          </Button>
         )}
       </motion.section>
     </AnimatePresence>

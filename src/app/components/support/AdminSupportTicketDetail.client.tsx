@@ -15,7 +15,7 @@ import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Feedback from '@/app/components/ui/Feedback';
 import Badge from '@/app/components/ui/Badge';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
@@ -253,7 +253,9 @@ export default function AdminSupportTicketDetail() {
       <PageContainer size="md" className="py-20">
         <ErrorState error="Δεν έχεις πρόσβαση σε αυτή τη σελίδα." />
         <div className="mt-6 flex justify-center">
-          <Button onClick={() => router.push('/')}>Επιστροφή στην αρχική</Button>
+          <Button variant={'link'} onClick={() => router.push('/')}>
+            Επιστροφή στην αρχική
+          </Button>
         </div>
       </PageContainer>
     );
@@ -304,7 +306,7 @@ export default function AdminSupportTicketDetail() {
               Πίσω
             </Button>
             <Button
-              variant="danger"
+              variant="destructive"
               onClick={async () => {
                 if (deleteLoading) return;
                 const confirmed = window.confirm('Οριστική διαγραφή αυτού του ticket;');
@@ -427,12 +429,7 @@ export default function AdminSupportTicketDetail() {
                     onChange={setReplyAttachments}
                     disabled={replyLoading}
                   />
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={replyLoading}
-                    className="bg-[var(--hb-primary-strong)] text-white"
-                  >
+                  <Button type="submit" variant="primary" disabled={replyLoading}>
                     {replyLoading
                       ? 'Αποστολή...'
                       : replyInternal
@@ -487,13 +484,7 @@ export default function AdminSupportTicketDetail() {
                     />
                     <div className="mt-2 text-xs text-[var(--hb-muted)]">Χώρισε με κόμμα.</div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    className="bg-[var(--hb-primary-strong)] text-white"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
+                  <Button type="button" variant="primary" onClick={handleSave} disabled={saving}>
                     {saving ? 'Αποθήκευση...' : 'Αποθήκευση αλλαγών'}
                   </Button>
                 </CardContent>

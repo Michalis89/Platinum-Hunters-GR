@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { Heart, Star } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import ErrorState from '@/app/components/ui/ErrorState';
 import EmptyState from '@/app/components/ui/EmptyState';
@@ -426,19 +426,16 @@ export default function MediaDetailPageClient({
                   <Star className="h-3.5 w-3.5 text-[var(--hb-primary-strong)]" />
                   {ratingLabel}
                 </span>
-                <button
+                <Button
                   type="button"
                   onClick={handleFavoriteToggle}
                   disabled={actionLoading}
-                  className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                    entryState?.favorite
-                      ? 'border-[var(--hb-primary-strong)]/50 bg-[var(--hb-primary-strong)]/15 text-[var(--hb-primary-strong)]'
-                      : 'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
-                  }`}
+                  variant={entryState?.favorite ? 'primary' : 'secondary'}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold`}
                 >
                   <Heart className="h-3.5 w-3.5" />
-                  {entryState?.favorite ? 'Favorite' : 'Add favorite'}
-                </button>
+                  {entryState?.favorite ? 'Αγαπημένο' : 'Προσθήκη στα Αγαπημένα'}
+                </Button>
               </div>
 
               <div className="flex flex-wrap gap-3">

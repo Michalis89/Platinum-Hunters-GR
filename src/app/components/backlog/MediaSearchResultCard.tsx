@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Library } from 'lucide-react';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { SearchResult } from './types';
 
 interface MediaSearchResultCardProps {
@@ -37,9 +37,7 @@ export default function MediaSearchResultCard({
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-[var(--hb-headline)]">
-          {entry.title}
-        </p>
+        <p className="truncate text-sm font-semibold text-[var(--hb-headline)]">{entry.title}</p>
         <p className="truncate text-xs text-[var(--hb-muted)]">
           {entry.subtitle} {entry.year ? `• ${entry.year}` : ''}
         </p>
@@ -51,11 +49,7 @@ export default function MediaSearchResultCard({
           <span>Στη βιβλιοθήκη</span>
         </div>
       ) : (
-        <Button
-          variant="outline"
-          className="border-[var(--hb-primary-strong)]/40 text-[var(--hb-primary-strong)] transition hover:text-[var(--hb-primary-strong)]"
-          onClick={handleOpenDialog}
-        >
+        <Button variant="outline" onClick={handleOpenDialog}>
           Προσθήκη
         </Button>
       )}

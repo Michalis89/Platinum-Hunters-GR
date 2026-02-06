@@ -1,6 +1,6 @@
 'use client';
 
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { MediaCategory, CATEGORY_CONFIG } from './types';
 
 interface CategoryHeaderProps {
@@ -20,35 +20,27 @@ export default function CategoryHeader({
   const Icon = config.icon;
 
   return (
-    <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-      <div className="flex items-center gap-4">
-        <div className="bg-[var(--hb-primary-strong)]/20 flex h-14 w-14 items-center justify-center rounded-2xl text-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)]">
-          <Icon className="h-6 w-6" />
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div className="bg-[var(--hb-primary-strong)]/20 flex h-12 w-12 items-center justify-center rounded-2xl text-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)] sm:h-14 sm:w-14">
+          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-[var(--hb-muted)]">
+          <p className="text-[10px] uppercase tracking-[0.28em] text-[var(--hb-muted)] sm:text-xs sm:tracking-[0.35em]">
             {username ? `${username} • ` : ''}
             {category.toUpperCase()}
           </p>
-          <h1 className="text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
+          <h1 className="text-2xl font-bold text-[var(--hb-headline)] sm:text-3xl md:text-4xl">
             {config.title}
           </h1>
           <p className="text-sm text-[var(--hb-muted)]">{config.subtitle}</p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          className="border-[var(--hb-primary-strong)]/40 text-[var(--hb-primary-strong)] hover:border-[var(--hb-primary-strong)]"
-          onClick={onCreateClick}
-        >
+      <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+        <Button variant="primary" onClick={onCreateClick} className="w-full sm:w-auto">
           Νέα καταχώρηση
         </Button>
-        <Button
-          variant="primary"
-          className="dark: bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] hover:brightness-110 dark:bg-[var(--hb-primary-strong)] dark:text-[var(--hb-bg)]"
-          onClick={onSuggestionsClick}
-        >
+        <Button variant="secondary" onClick={onSuggestionsClick} className="w-full sm:w-auto">
           Προτάσεις
         </Button>
       </div>

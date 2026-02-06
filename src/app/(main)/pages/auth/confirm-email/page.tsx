@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 export default function ConfirmEmailPage() {
   return (
@@ -32,7 +32,7 @@ export default function ConfirmEmailPage() {
 
         <div className="flex flex-col gap-4">
           <Link href="/pages/auth/login" passHref>
-            <Button className="shadow-[var(--hb-primary)]/20 h-14 w-full rounded-[var(--hb-radius)] border-none bg-[var(--hb-primary)] text-lg font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[var(--hb-primary-strong)] active:scale-[0.98]">
+            <Button variant={'primary'} size={'xl'}>
               <span className="flex items-center justify-center gap-2">
                 Σύνδεση στο Hobbistas
                 <ArrowRight className="h-5 w-5" />
