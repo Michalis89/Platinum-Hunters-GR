@@ -1,0 +1,1 @@
+export const EXTERNAL_API_REVALIDATE_SECONDS = 60 * 60;

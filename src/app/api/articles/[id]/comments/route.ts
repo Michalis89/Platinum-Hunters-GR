@@ -2,6 +2,7 @@ import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { insertActivity } from '@/lib/services/activityService';
+import { getUserBasicInfo, getUserFullInfo } from '@/lib/services/userService';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
@@ -74,11 +75,7 @@ async function POSTHandler(
     }
 
     // Get user info for activity log
-    const { data: userData } = await supabase
-      .from('users')
-      .select('username, display_name, avatar_url')
-      .eq('id', session.user.id)
-      .single();
+    const userData = await getUserBasicInfo(supabase, session.user.id);
 
     // Insert comment
     const { data: comment, error: insertError } = await supabase
@@ -151,11 +148,7 @@ async function DELETEHandler(
     }
 
     // Check permission (owner or admin)
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role, roles')
-      .eq('id', session.user.id)
-      .single();
+    const userData = await getUserFullInfo(supabase, session.user.id);
 
     const isOwner = comment.user_id === session.user.id;
     const isAdmin = hasAnyRole(userData, ['admin', 'owner']);
@@ -221,11 +214,7 @@ async function PATCHHandler(
       return fail({ error: 'Το σχόλιο δεν βρέθηκε' }, 404);
     }
 
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role, roles')
-      .eq('id', session.user.id)
-      .single();
+    const userData = await getUserFullInfo(supabase, session.user.id);
 
     const isOwner = comment.user_id === session.user.id;
     const isAdmin = hasAnyRole(userData, ['admin', 'owner']);

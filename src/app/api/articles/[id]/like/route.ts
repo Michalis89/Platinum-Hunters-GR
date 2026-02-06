@@ -2,6 +2,7 @@ import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { insertActivity } from '@/lib/services/activityService';
+import { getUserBasicInfo } from '@/lib/services/userService';
 import { API_ERRORS } from '@/lib/api/errors';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
@@ -83,11 +84,7 @@ async function POSTHandler(
     }
 
     // Get user info for activity log
-    const { data: userData } = await supabase
-      .from('users')
-      .select('username, display_name, avatar_url')
-      .eq('id', session.user.id)
-      .single();
+    const userData = await getUserBasicInfo(supabase, session.user.id);
 
     // Insert like
     const { error: insertError } = await supabase
@@ -158,11 +155,7 @@ async function DELETEHandler(
     }
 
     // Get user info for activity log
-    const { data: userData } = await supabase
-      .from('users')
-      .select('username, display_name, avatar_url')
-      .eq('id', session.user.id)
-      .single();
+    const userData = await getUserBasicInfo(supabase, session.user.id);
 
     // Delete like
     const { error: deleteError } = await supabase

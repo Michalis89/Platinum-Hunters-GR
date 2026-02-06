@@ -23,15 +23,24 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
+import {
+  SUPPORT_SEVERITY_OPTIONS,
+  SUPPORT_SEVERITY_LABELS,
+  SUPPORT_CATEGORY_LABELS,
+} from '@/lib/constants/support';
+import { UI_CLASSNAMES } from '@/lib/constants/ui';
 
 const CATEGORY_OPTIONS = [
-  { id: 'bug', label: 'Σφάλμα', description: 'Κάτι δεν δουλεύει' },
-  { id: 'feature', label: 'Πρόταση', description: 'Νέα λειτουργία' },
-  { id: 'author_rights', label: 'Δικαιώματα Author', description: 'Αίτημα ρόλου' },
-  { id: 'general', label: 'Γενικά', description: 'Σχόλια/Επικοινωνία' },
+  { id: 'bug', label: SUPPORT_CATEGORY_LABELS.bug, description: 'Κάτι δεν δουλεύει' },
+  { id: 'feature', label: SUPPORT_CATEGORY_LABELS.feature, description: 'Νέα λειτουργία' },
+  {
+    id: 'author_rights',
+    label: SUPPORT_CATEGORY_LABELS.author_rights,
+    description: 'Αίτημα ρόλου',
+  },
+  { id: 'general', label: SUPPORT_CATEGORY_LABELS.general, description: 'Σχόλια/Επικοινωνία' },
 ];
 
-const SEVERITY_OPTIONS = ['low', 'medium', 'high', 'critical'];
 const URGENCY_OPTIONS = ['nice_to_have', 'important', 'urgent'];
 const PERMISSIONS = ['Author (Αρθρογραφία)', 'Moderator (Moderation)', 'Reviewer', 'Admin'];
 const DEVICE_OPTIONS = ['desktop', 'mobile', 'tablet', 'console', 'other'];
@@ -62,13 +71,6 @@ const browserLabels: Record<string, string> = {
   edge: 'Edge',
   opera: 'Opera',
   other: 'Άλλο',
-};
-
-const severityLabels: Record<string, string> = {
-  low: 'Χαμηλή',
-  medium: 'Μεσαία',
-  high: 'Υψηλή',
-  critical: 'Κρίσιμη',
 };
 
 const urgencyLabels: Record<string, string> = {
@@ -342,9 +344,9 @@ export default function SupportForm({}: Readonly<{
   }
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+    <div className={UI_CLASSNAMES.pageShell}>
+      <div className={UI_CLASSNAMES.pageBackdrop}>
+        <div className={UI_CLASSNAMES.pageGradient} />
       </div>
 
       <div className="relative mt-10">
@@ -377,7 +379,7 @@ export default function SupportForm({}: Readonly<{
         />
 
         <PageContainer size="md" className="mt-10 pb-20">
-          <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
+          <Card className={UI_CLASSNAMES.panelCard}>
             <CardHeader className="border-[var(--hb-border)]">
               <CardTitle className="flex items-center gap-3 text-[var(--hb-headline)]">
                 <Mail className="h-5 w-5 text-[var(--hb-primary)]" />
@@ -517,8 +519,8 @@ export default function SupportForm({}: Readonly<{
                         label="Σοβαρότητα"
                         value={formData.severity}
                         onChange={handleSelect('severity')}
-                        options={SEVERITY_OPTIONS}
-                        optionLabels={severityLabels}
+                        options={SUPPORT_SEVERITY_OPTIONS}
+                        optionLabels={SUPPORT_SEVERITY_LABELS}
                         className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]"
                         labelClassName="text-[var(--hb-headline)]"
                         placeholder="Επίλεξε"

@@ -1,8 +1,3 @@
-/**
- * Hobbies Configuration
- * Single source of truth for all hobby categories and module availability
- */
-
 export type HobbyModule = 'backlog' | 'news' | 'reviews';
 
 export type HobbyCategory = {

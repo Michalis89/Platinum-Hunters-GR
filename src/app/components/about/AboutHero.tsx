@@ -1,13 +1,12 @@
-'use client';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import PageHero from '@/app/components/shared/PageHero';
-import { selectIsAuthenticated } from '@/store/slices/authSlice';
-import { useSelector } from 'react-redux';
 
-export function AboutHero() {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+type AboutHeroProps = {
+  isAuthenticated?: boolean;
+};
 
+export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
   return (
     <PageHero
       eyebrow="Το προσωπικό σου hobby hub"

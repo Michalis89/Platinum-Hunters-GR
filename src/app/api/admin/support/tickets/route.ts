@@ -3,33 +3,36 @@ import { withApiRoute } from '@/lib/observability/withApiRoute';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, okWithMeta } from '@/lib/api/response';
-import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
-import { hasAnyRole } from '@/lib/roles';
+import { UnauthorizedError } from '@/lib/api/auth';
+import { ForbiddenError } from '@/lib/api/permissions';
+import {
+  SUPPORT_STATUS_OPTIONS,
+  SUPPORT_CATEGORY_OPTIONS,
+  SUPPORT_SEVERITY_OPTIONS,
+  type SupportStatus,
+  type SupportCategory,
+  type SupportSeverity,
+} from '@/lib/constants/support';
 
-const STATUS_SET = new Set(['open', 'in_progress', 'waiting_user', 'resolved', 'closed']);
-const CATEGORY_SET = new Set(['bug', 'feature', 'author_rights', 'general']);
-const SEVERITY_SET = new Set(['low', 'medium', 'high', 'critical']);
+const STATUS_SET = new Set(SUPPORT_STATUS_OPTIONS);
+const CATEGORY_SET = new Set(SUPPORT_CATEGORY_OPTIONS);
+const SEVERITY_SET = new Set(SUPPORT_SEVERITY_OPTIONS);
 
-async function ensureAdmin(supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>) {
-  const session = await requireAuth(supabase);
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role, roles')
-    .eq('id', session.user.id)
-    .single();
+function isSupportStatus(value: string): value is SupportStatus {
+  return STATUS_SET.has(value as SupportStatus);
+}
 
-  if (!userData || !hasAnyRole(userData, ['admin', 'owner', 'moderator'])) {
-    throw new Error('FORBIDDEN');
-  }
+function isSupportCategory(value: string): value is SupportCategory {
+  return CATEGORY_SET.has(value as SupportCategory);
+}
 
-  return session;
+function isSupportSeverity(value: string): value is SupportSeverity {
+  return SEVERITY_SET.has(value as SupportSeverity);
 }
 
 async function GETHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
-    await ensureAdmin(supabase);
-
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
     const category = searchParams.get('category');
@@ -51,13 +54,13 @@ async function GETHandler(req: Request) {
       .order('updated_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (status && STATUS_SET.has(status)) {
+    if (status && isSupportStatus(status)) {
       request = request.eq('status', status);
     }
-    if (category && CATEGORY_SET.has(category)) {
+    if (category && isSupportCategory(category)) {
       request = request.eq('category', category);
     }
-    if (severity && SEVERITY_SET.has(severity)) {
+    if (severity && isSupportSeverity(severity)) {
       request = request.eq('severity', severity);
     }
     if (dateFrom) {
@@ -83,7 +86,7 @@ async function GETHandler(req: Request) {
     if (error instanceof UnauthorizedError) {
       return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
     }
-    if (error instanceof Error && error.message === 'FORBIDDEN') {
+    if (error instanceof ForbiddenError) {
       return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
     }
     console.error('Admin support list error:', error);

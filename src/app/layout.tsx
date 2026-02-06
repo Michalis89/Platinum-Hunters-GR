@@ -11,7 +11,6 @@ import {
   websiteStructuredData,
 } from '@/utils/seo/metadata/structuredData';
 import Providers from '@/store/Providers';
-import HeartbeatPing from './components/HeartbeatPing';
 export { metadata } from '@/utils/seo/metadata/metadata';
 
 // Font optimization: removed 'latin-ext' subset (~10KB savings)
@@ -48,7 +47,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       >
         <Providers initialTheme={initialTheme}>
           <AuthInit />
-          <HeartbeatPing />
           {children}
           {isVercelProd ? (
             <>

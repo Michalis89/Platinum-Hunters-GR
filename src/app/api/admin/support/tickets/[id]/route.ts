@@ -7,8 +7,13 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { hasAnyRole } from '@/lib/roles';
 import type { Database, Json } from '@/lib/supabase/database.types';
 import getSupabaseServer from '@/lib/supabase-server';
+import { SUPPORT_STATUS_OPTIONS, type SupportStatus } from '@/lib/constants/support';
 
-const STATUS_SET = new Set(['open', 'in_progress', 'waiting_user', 'resolved', 'closed']);
+const STATUS_SET = new Set(SUPPORT_STATUS_OPTIONS);
+
+function isSupportStatus(value: string): value is SupportStatus {
+  return STATUS_SET.has(value as SupportStatus);
+}
 
 async function ensureAdmin(supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>) {
   const session = await requireAuth(supabase);
@@ -133,7 +138,7 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
     const updates: Record<string, unknown> = {};
     const events: Array<{ type: string; payload: Record<string, unknown> }> = [];
 
-    if (status && STATUS_SET.has(status) && status !== currentTicket.status) {
+    if (status && isSupportStatus(status) && status !== currentTicket.status) {
       updates.status = status;
       events.push({
         type: 'status_change',

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Gamepad2, Sparkles, BookOpen, Film, Tv, BookText } from 'lucide-react';
-import type { CategoryStats, PersonalStats } from './HomePageClient';
+import type { CategoryStats, PersonalStats } from './types';
 import type { ReactNode } from 'react';
 
 type HeroCategoryKey = 'games' | 'anime' | 'manga' | 'movies' | 'tv' | 'books';

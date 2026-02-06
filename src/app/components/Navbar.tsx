@@ -40,11 +40,12 @@ import {
   selectIsAuthenticated,
   selectIsLoading,
   selectUser,
+  selectCanQuickAdd,
+  selectCanAccessAdminPanel,
 } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import Button from './ui/Button';
 import { useTheme } from '@/context/ThemeContext';
-import { hasAnyRole } from '@/lib/roles';
 
 type NavItem = {
   href: string;
@@ -242,8 +243,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
-  const canQuickAdd = !!user && hasAnyRole(user, ['admin', 'author', 'reviewer', 'owner']);
-  const canAccessAdminPanel = !!user && hasAnyRole(user, ['admin', 'moderator', 'owner']);
+  const canQuickAdd = useSelector(selectCanQuickAdd);
+  const canAccessAdminPanel = useSelector(selectCanAccessAdminPanel);
 
   useEffect(() => {
     setHasMounted(true);
@@ -257,6 +258,7 @@ export default function Navbar() {
   }, [pathname]);
 
   const authResolved = hasMounted && !isAuthLoading && (isAuthenticated ? Boolean(user) : true);
+  const logoHref = authResolved && isAuthenticated ? '/dashboard' : '/home';
 
   const handleLogout = async () => {
     await dispatch(logout());
@@ -331,7 +333,7 @@ export default function Navbar() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--hb-border)] bg-[var(--hb-surface)] backdrop-blur-xl">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href={logoHref} className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)]">
             <span className="text-xl font-black leading-none text-slate-950 drop-shadow-[var(--hb-shadow-md)]">
               Η

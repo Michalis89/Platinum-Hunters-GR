@@ -46,6 +46,12 @@ async function getTeam(): Promise<TeamMember[]> {
 
 export default async function AboutPage() {
   const team = await getTeam();
+
+  // Check auth status server-side
+  const supabase = getSupabaseServer();
+  const { data: { session } } = await supabase.auth.getSession();
+  const isAuthenticated = !!session;
+
   const breadcrumb = [
     { name: 'Αρχική', url: `${SITE_URL}/` },
     { name: 'Σχετικά', url: `${SITE_URL}/pages/about` },
@@ -62,7 +68,7 @@ export default async function AboutPage() {
 
         {/* Content */}
         <div className="relative">
-          <AboutHero />
+          <AboutHero isAuthenticated={isAuthenticated} />
 
           <div className="mx-auto max-w-7xl">
             <AboutFeatures />

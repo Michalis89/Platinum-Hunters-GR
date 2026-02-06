@@ -11,6 +11,7 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
 import { hasAnyRole } from '@/lib/roles';
+import { getUserFullInfo } from '@/lib/services/userService';
 
 // GET - Fetch single article by ID or slug
 async function GETHandler(
@@ -87,11 +88,7 @@ async function PUTHandler(
     }
 
     // Check permission (author or admin)
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role, roles, username, display_name, avatar_url')
-      .eq('id', session.user.id)
-      .single();
+    const userData = await getUserFullInfo(supabase, session.user.id);
 
     const isAuthor = existingArticle.author_id === session.user.id;
     const isAdmin = hasAnyRole(userData, ['admin', 'owner', 'reviewer']);
@@ -234,11 +231,7 @@ async function DELETEHandler(
     }
 
     // Check permission (author or admin)
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role, roles, username, display_name, avatar_url')
-      .eq('id', session.user.id)
-      .single();
+    const userData = await getUserFullInfo(supabase, session.user.id);
 
     const isAuthor = existingArticle.author_id === session.user.id;
     const isAdmin = hasAnyRole(userData, ['admin', 'owner', 'reviewer']);

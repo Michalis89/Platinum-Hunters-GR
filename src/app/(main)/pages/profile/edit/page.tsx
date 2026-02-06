@@ -21,7 +21,11 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/Card';
+import { Card, CardTitle } from '@/app/components/ui/Card';
+import {
+  CollapsibleCardHeader as CardHeader,
+  CollapsibleCardContent as CardContent,
+} from '@/app/components/ui/CollapsibleCard.client';
 import { Input } from '@/app/components/ui/Input';
 import { Select } from '@/app/components/ui/Select';
 import { Textarea } from '@/app/components/ui/Textarea';

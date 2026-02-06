@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useTickets } from '@/lib/hooks/useTickets';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { Search, ShieldCheck } from 'lucide-react';
@@ -12,55 +12,21 @@ import { Select } from '@/app/components/ui/Select';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
-import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
 import Feedback from '@/app/components/ui/Feedback';
-import { selectUser } from '@/store/slices/authSlice';
-import { hasAnyRole } from '@/lib/roles';
+import { selectIsAdminOrModerator } from '@/store/slices/authSlice';
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
-import { FormattedDate } from '@/app/components/ui/FormattedDate';
-
-const STATUS_OPTIONS = ['open', 'in_progress', 'waiting_user', 'resolved', 'closed'];
-const CATEGORY_OPTIONS = ['bug', 'feature', 'author_rights', 'general'];
-const SEVERITY_OPTIONS = ['low', 'medium', 'high', 'critical'];
-
-const statusLabels: Record<string, string> = {
-  open: 'Ανοικτό',
-  in_progress: 'Σε εξέλιξη',
-  waiting_user: 'Απάντηση από χρήστη',
-  resolved: 'Επιλύθηκε',
-  closed: 'Κλειστό',
-};
-
-const statusColors: Record<string, string> = {
-  open: 'blue',
-  in_progress: 'yellow',
-  waiting_user: 'yellow',
-  resolved: 'green',
-  closed: 'gray',
-};
-
-const categoryLabels: Record<string, string> = {
-  bug: 'Σφάλμα',
-  feature: 'Πρόταση',
-  author_rights: 'Δικαιώματα Author',
-  general: 'Γενικά',
-};
-
-const severityLabels: Record<string, string> = {
-  low: 'Χαμηλή',
-  medium: 'Μεσαία',
-  high: 'Υψηλή',
-  critical: 'Κρίσιμη',
-};
-
-const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-};
+import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
+import {
+  SUPPORT_STATUS_OPTIONS as STATUS_OPTIONS,
+  SUPPORT_CATEGORY_OPTIONS as CATEGORY_OPTIONS,
+  SUPPORT_SEVERITY_OPTIONS as SEVERITY_OPTIONS,
+  SUPPORT_STATUS_LABELS as statusLabels,
+  SUPPORT_STATUS_COLORS as statusColors,
+  SUPPORT_CATEGORY_LABELS as categoryLabels,
+  SUPPORT_SEVERITY_LABELS as severityLabels,
+} from '@/lib/constants/support';
+import { UI_CLASSNAMES } from '@/lib/constants/ui';
 
 type AdminTicket = {
   id: string;
@@ -82,72 +48,39 @@ type AdminTicket = {
 
 export default function AdminSupportInbox() {
   const { isAuthenticated, isLoading } = useRequireAuth();
-  const user = useSelector(selectUser);
-  const isAdmin = hasAnyRole(user, ['admin', 'owner', 'moderator']);
+  const isAdmin = useSelector(selectIsAdminOrModerator);
 
-  const [tickets, setTickets] = useState<AdminTicket[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({
-    status: '',
-    category: '',
-    severity: '',
-    q: '',
+  const {
+    tickets,
+    setTickets,
+    loading,
+    error,
+    filters,
+    setFilters,
+    meta,
+    actionLoading,
+    setActionLoading,
+    alert,
+    setAlert,
+  } = useTickets<
+    AdminTicket,
+    {
+      status: string;
+      category: string;
+      severity: string;
+      q: string;
+    }
+  >({
+    endpoint: '/api/admin/support/tickets',
+    enabled: isAuthenticated && isAdmin,
+    initialFilters: {
+      status: '',
+      category: '',
+      severity: '',
+      q: '',
+    },
+    errorMessage: 'Αποτυχία φόρτωσης',
   });
-  const [meta, setMeta] = useState<{ total: number; limit: number; offset: number } | null>(null);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [alert, setAlert] = useState<{
-    type: 'success' | 'error' | 'warning';
-    message: string;
-    onConfirm?: () => void;
-    onCancel?: () => void;
-  } | null>(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-
-    if (!isAdmin) {
-      setLoading(false);
-      return;
-    }
-
-    let ignore = false;
-
-    const loadTickets = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const params = new URLSearchParams();
-        if (filters.status) params.set('status', filters.status);
-        if (filters.category) params.set('category', filters.category);
-        if (filters.severity) params.set('severity', filters.severity);
-        if (filters.q) params.set('q', filters.q);
-
-        const response = await fetch(`/api/admin/support/tickets?${params.toString()}`);
-        const payload = await response.json();
-        if (!response.ok) {
-          throw new Error(payload.error || 'Αποτυχία φόρτωσης');
-        }
-        if (!ignore) {
-          setTickets(payload.data ?? []);
-          setMeta(payload.meta ?? null);
-        }
-      } catch (err) {
-        if (!ignore) {
-          setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
-        }
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
-
-    loadTickets();
-    return () => {
-      ignore = true;
-    };
-  }, [filters, isAdmin, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -170,9 +103,9 @@ export default function AdminSupportInbox() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+    <div className={UI_CLASSNAMES.pageShell}>
+      <div className={UI_CLASSNAMES.pageBackdrop}>
+        <div className={UI_CLASSNAMES.pageGradient} />
       </div>
       <div className="relative mt-10">
         <PageHero
@@ -209,7 +142,7 @@ export default function AdminSupportInbox() {
               />
             </div>
           )}
-          <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
+          <Card className={UI_CLASSNAMES.panelCard}>
             <CardHeader className="border-[var(--hb-border)]">
               <CardTitle className="text-[var(--hb-headline)]">Φίλτρα</CardTitle>
             </CardHeader>
@@ -282,46 +215,31 @@ export default function AdminSupportInbox() {
                   </div>
                 ) : null}
                 {tickets.map(ticket => (
-                  <Card
+                  <SupportTicketCard
                     key={ticket.id}
-                    className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]"
-                  >
-                    <CardHeader className="border-[var(--hb-border)]">
-                      <CardTitle className="flex flex-col gap-2 text-[var(--hb-headline)] md:flex-row md:items-center md:justify-between">
-                        <span>{ticket.subject}</span>
-                        <Badge
-                          text={statusLabels[ticket.status] || ticket.status}
-                          color={statusColors[ticket.status] || 'gray'}
-                        />
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2 text-sm text-[var(--hb-muted)]">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-xs text-[var(--hb-text)]">
-                          {categoryLabels[ticket.category] || ticket.category}
-                        </span>
-                        {ticket.severity ? (
-                          <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-xs text-[var(--hb-text)]">
-                            Σοβαρότητα: {severityLabels[ticket.severity] || ticket.severity}
-                          </span>
-                        ) : null}
-                        <FormattedDate
-                          date={ticket.updated_at}
-                          options={DATE_TIME_OPTIONS}
-                          fallback=""
-                          className="text-xs"
-                        />
-                      </div>
+                    subject={ticket.subject}
+                    statusText={statusLabels[ticket.status] || ticket.status}
+                    statusColor={statusColors[ticket.status] || 'gray'}
+                    categoryText={categoryLabels[ticket.category] || ticket.category}
+                    severityText={
+                      ticket.severity
+                        ? `Σοβαρότητα: ${severityLabels[ticket.severity] || ticket.severity}`
+                        : null
+                    }
+                    updatedAt={ticket.updated_at}
+                    meta={
                       <div className="text-xs text-[var(--hb-muted)]">
                         Από:{' '}
                         {ticket.name || ticket.users?.display_name || ticket.users?.username || '—'}
                         {' • '}
                         {ticket.email || ticket.users?.email || '—'}
                       </div>
-                     <div className="pt-2">
-                       <Button href={`/admin/support/${ticket.id}`} variant="secondary">
-                         Άνοιγμα ticket
-                       </Button>
+                    }
+                    actions={
+                      <>
+                        <Button href={`/admin/support/${ticket.id}`} variant="secondary">
+                          Άνοιγμα ticket
+                        </Button>
                         <Button
                           variant="danger"
                           disabled={actionLoading === ticket.id}
@@ -333,23 +251,31 @@ export default function AdminSupportInbox() {
                                 setAlert(null);
                                 setActionLoading(ticket.id);
                                 try {
-                                  const res = await fetch(`/api/admin/support/tickets/${ticket.id}`, {
-                                    method: 'DELETE',
-                                  });
+                                  const res = await fetch(
+                                    `/api/admin/support/tickets/${ticket.id}`,
+                                    {
+                                      method: 'DELETE',
+                                    },
+                                  );
                                   const payload = await res.json().catch(() => null);
                                   if (!res.ok) {
                                     throw new Error(payload?.error || 'Αποτυχία διαγραφής');
                                   }
-                          setTickets(prev => prev.filter(t => t.id !== ticket.id));
-                          setAlert(null);
-                          setTimeout(
-                            () => setAlert({ type: 'success', message: 'Το ticket διαγράφηκε.' }),
-                            80,
-                          );
+                                  setTickets(prev => prev.filter(t => t.id !== ticket.id));
+                                  setAlert(null);
+                                  setTimeout(
+                                    () =>
+                                      setAlert({
+                                        type: 'success',
+                                        message: 'Το ticket διαγράφηκε.',
+                                      }),
+                                    80,
+                                  );
                                 } catch (err) {
                                   setAlert({
                                     type: 'error',
-                                    message: err instanceof Error ? err.message : 'Σφάλμα διαγραφής',
+                                    message:
+                                      err instanceof Error ? err.message : 'Σφάλμα διαγραφής',
                                   });
                                 } finally {
                                   setActionLoading(null);
@@ -361,9 +287,9 @@ export default function AdminSupportInbox() {
                         >
                           Διαγραφή
                         </Button>
-                     </div>
-                    </CardContent>
-                  </Card>
+                      </>
+                    }
+                  />
                 ))}
               </div>
             )}

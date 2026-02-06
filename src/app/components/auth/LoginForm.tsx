@@ -187,8 +187,8 @@ export default function LoginForm() {
       // Fetch session to update Redux state
       await dispatch(fetchSession());
 
-      // Get return URL: query param (priority) > sessionStorage (fallback) > home
-      let redirectUrl = '/';
+      // Get return URL: query param (priority) > sessionStorage (fallback) > dashboard
+      let redirectUrl = '/dashboard';
       if (redirectParam) {
         redirectUrl = decodeURIComponent(redirectParam);
       } else {

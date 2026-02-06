@@ -1,0 +1,227 @@
+import { NextResponse } from 'next/server';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import getSupabaseServer from '@/lib/supabase-server';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { insertActivity } from '@/lib/services/activityService';
+import { getUserBasicInfo } from '@/lib/services/userService';
+import {
+  AUTH_ERROR,
+  UNTITLED_FALLBACK,
+  MISSING_PAYLOAD,
+  FAILED_TO_RESOLVE_MEDIA_ID,
+  INTERNAL_SERVER_ERROR,
+} from '@/lib/constants/messages';
+import type { MediaCategoryConfig } from '../config';
+import type { AddMediaRequestBody, UserProfile } from '../types';
+import { resolveTitle } from '../utils/title-resolver';
+import { findExistingMedia } from '../utils/media-lookup';
+import '../handlers/enrichers'; // Import to initialize enricher functions in configs
+
+/**
+ * Generic handler for POST /api/{category}/add
+ * Handles both local (existing media) and external (new media) sources
+ *
+ * @param req - Next.js Request object
+ * @param config - Category configuration
+ * @returns Response with created entry
+ */
+export async function handleMediaAdd(
+  req: Request,
+  config: MediaCategoryConfig,
+): Promise<Response> {
+  try {
+    // 1. Auth check
+    const supabase = await createRouteHandlerClient();
+    const session = await requireAuth(supabase);
+
+    // 2. Parse request body
+    const body = (await req.json()) as AddMediaRequestBody;
+
+    // 3. Handle local source (existing media in database)
+    if (body.source === 'local' && body.mediaId) {
+      return handleLocalSource(supabase, session.user.id, body, config);
+    }
+
+    // 4. Handle external source (new media from API)
+    if (body.source !== 'external' || !body.payload) {
+      return NextResponse.json({ error: MISSING_PAYLOAD }, { status: 400 });
+    }
+
+    return handleExternalSource(supabase, session.user.id, body, config);
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: AUTH_ERROR }, { status: 401 });
+    }
+    console.error(`${config.logPrefix} add error:`, error);
+    return NextResponse.json({ error: INTERNAL_SERVER_ERROR }, { status: 500 });
+  }
+}
+
+/**
+ * Handles adding media from local database (media already exists)
+ */
+async function handleLocalSource(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+  body: AddMediaRequestBody,
+  config: MediaCategoryConfig,
+): Promise<Response> {
+  // Fetch user profile for activity logging
+  const profileData = await getUserBasicInfo(supabase, userId);
+
+  // Fetch media details for title and category
+  const { data: mediaRow, error: mediaError } = await supabase
+    .from('media_items')
+    .select(config.titlePriority.join(',') + ',category')
+    .eq('id', body.mediaId!)
+    .maybeSingle();
+
+  const mediaTitle = mediaRow && !mediaError ? resolveTitle(mediaRow as unknown as Record<string, unknown>, config.titlePriority) : UNTITLED_FALLBACK;
+  const mediaCategory = (mediaRow && !mediaError ? (mediaRow as unknown as Record<string, unknown>).category as string : null) ?? config.defaultCategory;
+
+  // Upsert user media entry
+  const updatedAt = new Date().toISOString();
+  const { data: entry, error: entryError } = await supabase
+    .from('user_media_entries')
+    .upsert(
+      {
+        user_id: userId,
+        media_id: body.mediaId!,
+        status: body.status ?? 'planned',
+        is_favorite: body.is_favorite ?? false,
+        progress: body.progress ?? null,
+        score: body.score ?? null,
+        notes: body.notes ?? null,
+        updated_at: updatedAt,
+      } as never,
+      { onConflict: 'user_id,media_id' },
+    )
+    .select('*')
+    .single();
+
+  if (entryError) {
+    throw entryError;
+  }
+
+  // Log activity
+  await insertActivity(supabase, userId, 'media_added', {
+    category: mediaCategory,
+    title: mediaTitle,
+    mediaId: body.mediaId!,
+    status: body.status ?? 'planned',
+    username: (profileData as UserProfile)?.username,
+    display_name: (profileData as UserProfile)?.display_name,
+    avatar_url: (profileData as UserProfile)?.avatar_url,
+  });
+
+  return NextResponse.json({ entry });
+}
+
+/**
+ * Handles adding media from external source (new media from API)
+ */
+async function handleExternalSource(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+  body: AddMediaRequestBody,
+  config: MediaCategoryConfig,
+): Promise<Response> {
+  const { payload } = body;
+
+  // Validate external ID exists
+  const externalIdField = config.externalId.field;
+  const externalIdValue = payload![externalIdField];
+  if (!externalIdValue || !payload!.category) {
+    return NextResponse.json({ error: MISSING_PAYLOAD }, { status: 400 });
+  }
+
+  // Fetch user profile for activity logging
+  const { data: profileData } = await supabase
+    .from('users')
+    .select('username, display_name, avatar_url')
+    .eq('id', userId)
+    .maybeSingle();
+
+  // Check if media already exists
+  let mediaId = await findExistingMedia(
+    supabase,
+    config,
+    externalIdValue as number | string,
+    payload!.category as string,
+  );
+
+  // Insert new media if doesn't exist
+  if (!mediaId) {
+    // Apply payload mapper if configured (e.g., for games)
+    let insertPayload = payload!;
+    if (config.payloadMapper) {
+      insertPayload = config.payloadMapper(payload!) as typeof insertPayload;
+    }
+
+    // Enrich payload if configured (e.g., for movies)
+    if (config.enricher && typeof externalIdValue === 'number') {
+      const enrichedData = await config.enricher(
+        payload!.category as string,
+        externalIdValue,
+      );
+      insertPayload = { ...insertPayload, ...enrichedData };
+    }
+
+    // Use service role client for catalog writes (RLS blocks user writes)
+    const supabaseAdmin = getSupabaseServer();
+    const { data: inserted, error: insertError } = await supabaseAdmin
+      .from('media_items')
+      .insert(insertPayload as never)
+      .select('id')
+      .single();
+
+    if (insertError) {
+      throw insertError;
+    }
+    mediaId = (inserted as { id?: number } | null)?.id ?? null;
+  }
+
+  if (!mediaId) {
+    return NextResponse.json({ error: FAILED_TO_RESOLVE_MEDIA_ID }, { status: 500 });
+  }
+
+  // Upsert user media entry
+  const updatedAt = new Date().toISOString();
+  const { data: entry, error: entryError } = await supabase
+    .from('user_media_entries')
+    .upsert(
+      {
+        user_id: userId,
+        media_id: mediaId,
+        status: body.status ?? 'planned',
+        is_favorite: body.is_favorite ?? false,
+        progress: body.progress ?? null,
+        score: body.score ?? null,
+        notes: body.notes ?? null,
+        updated_at: updatedAt,
+      } as never,
+      { onConflict: 'user_id,media_id' },
+    )
+    .select('*')
+    .single();
+
+  if (entryError) {
+    throw entryError;
+  }
+
+  // Resolve title from payload
+  const mediaTitle = resolveTitle(payload!, config.titlePriority);
+
+  // Log activity
+  await insertActivity(supabase, userId, 'media_added', {
+    category: payload!.category,
+    title: mediaTitle,
+    mediaId,
+    status: body.status ?? 'planned',
+    username: (profileData as UserProfile)?.username,
+    display_name: (profileData as UserProfile)?.display_name,
+    avatar_url: (profileData as UserProfile)?.avatar_url,
+  });
+
+  return NextResponse.json({ entry, mediaId });
+}

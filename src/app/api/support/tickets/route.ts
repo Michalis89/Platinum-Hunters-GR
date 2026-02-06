@@ -7,14 +7,28 @@ import type { Database, Json } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { ok, fail } from '@/lib/api/response';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import {
+  SUPPORT_CATEGORY_OPTIONS,
+  SUPPORT_SEVERITY_OPTIONS,
+  type SupportCategory,
+  type SupportSeverity,
+} from '@/lib/constants/support';
 
 const MAX_ATTACHMENTS = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'];
 
-const CATEGORY_SET = new Set(['bug', 'feature', 'author_rights', 'general']);
-const SEVERITY_SET = new Set(['low', 'medium', 'high', 'critical']);
+const CATEGORY_SET = new Set(SUPPORT_CATEGORY_OPTIONS);
+const SEVERITY_SET = new Set(SUPPORT_SEVERITY_OPTIONS);
 const URGENCY_SET = new Set(['nice_to_have', 'important', 'urgent']);
+
+function isSupportCategory(value: string): value is SupportCategory {
+  return CATEGORY_SET.has(value as SupportCategory);
+}
+
+function isSupportSeverity(value: string): value is SupportSeverity {
+  return SEVERITY_SET.has(value as SupportSeverity);
+}
 
 const sanitizeFilename = (name: string) =>
   name
@@ -103,7 +117,7 @@ async function POSTHandler(req: Request) {
     const consent = coerceBoolean(formData.get('consent'));
     const allowFollowUp = coerceBoolean(formData.get('allow_follow_up'));
 
-    if (!CATEGORY_SET.has(category)) {
+    if (!isSupportCategory(category)) {
       return fail({ error: 'Μη έγκυρη κατηγορία.' }, 400);
     }
     if (!subject || !description) {
@@ -152,7 +166,7 @@ async function POSTHandler(req: Request) {
       if (!steps || !expected || !actual) {
         return fail({ error: 'Συμπλήρωσε βήματα, αναμενόμενο και πραγματικό αποτέλεσμα.' }, 400);
       }
-      if (!SEVERITY_SET.has(severityValue)) {
+      if (!isSupportSeverity(severityValue)) {
         return fail({ error: 'Επίλεξε επίπεδο σοβαρότητας.' }, 400);
       }
 

@@ -22,45 +22,14 @@ import AttachmentDropzone, {
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 import { FormattedDate } from '@/app/components/ui/FormattedDate';
-
-const STATUS_OPTIONS = ['open', 'in_progress', 'waiting_user', 'resolved', 'closed'];
-const statusLabels: Record<string, string> = {
-  open: 'Ανοικτό',
-  in_progress: 'Σε εξέλιξη',
-  waiting_user: 'Αναμένει χρήστη',
-  resolved: 'Επιλύθηκε',
-  closed: 'Κλειστό',
-};
-
-const statusColors: Record<string, string> = {
-  open: 'blue',
-  in_progress: 'yellow',
-  waiting_user: 'yellow',
-  resolved: 'green',
-  closed: 'gray',
-};
-
-const categoryLabels: Record<string, string> = {
-  bug: 'Σφάλμα',
-  feature: 'Πρόταση',
-  author_rights: 'Δικαιώματα Author',
-  general: 'Γενικά',
-};
-
-const severityLabels: Record<string, string> = {
-  low: 'Χαμηλή',
-  medium: 'Μεσαία',
-  high: 'Υψηλή',
-  critical: 'Κρίσιμη',
-};
-
-const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-};
+import {
+  SUPPORT_STATUS_OPTIONS,
+  SUPPORT_STATUS_LABELS,
+  SUPPORT_STATUS_COLORS,
+  SUPPORT_CATEGORY_LABELS,
+  SUPPORT_SEVERITY_LABELS,
+} from '@/lib/constants/support';
+import { DATE_TIME_OPTIONS, UI_CLASSNAMES } from '@/lib/constants/ui';
 
 type TicketDetail = {
   id: string;
@@ -303,9 +272,9 @@ export default function AdminSupportTicketDetail() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+    <div className={UI_CLASSNAMES.pageShell}>
+      <div className={UI_CLASSNAMES.pageBackdrop}>
+        <div className={UI_CLASSNAMES.pageGradient} />
       </div>
       <div className="relative">
         <PageHero
@@ -313,16 +282,16 @@ export default function AdminSupportTicketDetail() {
           title={
             <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">{ticket.subject}</span>
           }
-          subtitle={`Κατηγορία: ${categoryLabels[ticket.category] || ticket.category}`}
+          subtitle={`Κατηγορία: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
           badges={
             <>
               <Badge
-                text={statusLabels[ticket.status] || ticket.status}
-                color={statusColors[ticket.status] || 'gray'}
+                text={SUPPORT_STATUS_LABELS[ticket.status] || ticket.status}
+                color={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
               />
               {ticket.severity ? (
                 <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs">
-                  Σοβαρότητα: {severityLabels[ticket.severity] || ticket.severity}
+                  Σοβαρότητα: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
                 </span>
               ) : null}
             </>
@@ -365,7 +334,7 @@ export default function AdminSupportTicketDetail() {
             </Button>
           </div>
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
+            <Card className={UI_CLASSNAMES.panelCard}>
               <CardHeader className="border-[var(--hb-border)]">
                 <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
                   <ClipboardList className="h-5 w-5 text-[var(--hb-primary)]" />
@@ -475,7 +444,7 @@ export default function AdminSupportTicketDetail() {
             </Card>
 
             <div className="mt-10 space-y-6">
-              <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
+              <Card className={UI_CLASSNAMES.panelCard}>
                 <CardHeader className="border-[var(--hb-border)]">
                   <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
                     <UserCheck className="h-5 w-5 text-[var(--hb-primary)]" />
@@ -495,8 +464,8 @@ export default function AdminSupportTicketDetail() {
                     label="Κατάσταση"
                     value={status}
                     onChange={value => setStatus(value)}
-                    options={STATUS_OPTIONS}
-                    optionLabels={statusLabels}
+                    options={SUPPORT_STATUS_OPTIONS}
+                    optionLabels={SUPPORT_STATUS_LABELS}
                     placeholder="Επίλεξε"
                     labelClassName="text-[var(--hb-headline)]"
                     className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]"
@@ -530,7 +499,7 @@ export default function AdminSupportTicketDetail() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]">
+              <Card className={UI_CLASSNAMES.panelCard}>
                 <CardHeader className="border-[var(--hb-border)]">
                   <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
                     <Tag className="h-5 w-5 text-[var(--hb-primary)]" />

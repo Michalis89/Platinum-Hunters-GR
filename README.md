@@ -192,7 +192,6 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 | Method | Endpoint                  | Description          |
 | ------ | ------------------------- | -------------------- |
 | GET    | `/api/activity`           | Get activity feed    |
-| POST   | `/api/activity/heartbeat` | Update user presence |
 | GET    | `/api/analytics/summary`  | Admin analytics      |
 | GET    | `/api/user/stats`         | User statistics      |
 
@@ -264,7 +263,7 @@ Security posture:
 
 1. Supabase RLS policies live under `supabase-migrations/05-create-rls-policies.sql`; service role key is exclusively used in `src/lib/supabase-server.ts` & the sitemap seed (`next-sitemap.config.js`). Never commit this key or expose it client-side.
 2. API gatekeeping uses `src/lib/api/auth.ts` + `src/lib/rate-limit.ts` (applied in `/api/auth/login` & `/api/auth/signup`) and explicit role checks for admin/uploads.
-3. File uploads leverage Supabase storage and sanitize inputs before writing. Harden stale tokens via `src/app/components/AuthInit.tsx` + `HeartbeatPing.tsx`.
+3. File uploads leverage Supabase storage and sanitize inputs before writing. Harden stale tokens via `src/app/components/AuthInit.tsx`.
 
 ### Database Setup
 

@@ -7,54 +7,28 @@ import { useSelector } from 'react-redux';
 import { Inbox, Ticket } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
-import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
 import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
 import { Select } from '@/app/components/ui/Select';
 import Feedback from '@/app/components/ui/Feedback';
-import { FormattedDate } from '@/app/components/ui/FormattedDate';
+import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
+import { useTickets } from '@/lib/hooks/useTickets';
+import {
+  SUPPORT_STATUS_LABELS,
+  SUPPORT_STATUS_COLORS,
+  SUPPORT_CATEGORY_LABELS,
+  SUPPORT_SEVERITY_LABELS,
+} from '@/lib/constants/support';
+import { UI_CLASSNAMES } from '@/lib/constants/ui';
 
+// User-facing override for "waiting_user" status
 const statusLabels: Record<string, string> = {
-  open: 'Ανοικτό',
-  in_progress: 'Σε εξέλιξη',
-  waiting_user: 'Απάντηση από εσένα',
-  resolved: 'Επιλύθηκε',
-  closed: 'Κλειστό',
-};
-
-const statusColors: Record<string, string> = {
-  open: 'blue',
-  in_progress: 'yellow',
-  waiting_user: 'yellow',
-  resolved: 'green',
-  closed: 'gray',
-};
-
-const categoryLabels: Record<string, string> = {
-  bug: 'Σφάλμα',
-  feature: 'Πρόταση',
-  author_rights: 'Δικαιώματα Author',
-  general: 'Γενικά',
-};
-
-const severityLabels: Record<string, string> = {
-  low: 'Χαμηλή',
-  medium: 'Μεσαία',
-  high: 'Υψηλή',
-  critical: 'Κρίσιμη',
-};
-
-const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
+  ...SUPPORT_STATUS_LABELS,
+  waiting_user: 'Απάντηση από εσένα', // User-friendly version
 };
 
 type TicketItem = {
@@ -73,56 +47,28 @@ export default function SupportTicketsList() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const authLoading = useSelector(selectIsLoading);
 
-  const [tickets, setTickets] = useState<TicketItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    tickets,
+    setTickets,
+    loading,
+    error,
+    actionLoading,
+    setActionLoading,
+    alert,
+    setAlert,
+    reload,
+  } = useTickets<TicketItem>({
+    endpoint: '/api/support/tickets',
+    enabled: isAuthenticated,
+  });
   const [view, setView] = useState<'active' | 'all' | 'archive'>('active');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [alert, setAlert] = useState<{
-    type: 'success' | 'error' | 'warning';
-    message: string;
-    onConfirm?: () => void;
-    onCancel?: () => void;
-  } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/pages/auth/login');
     }
   }, [authLoading, isAuthenticated, router]);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    let ignore = false;
-
-    const loadTickets = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/support/tickets');
-        const payload = await response.json();
-        if (!response.ok) {
-          throw new Error(payload.error || 'Αποτυχία φόρτωσης tickets');
-        }
-        if (!ignore) {
-          setTickets(payload.data ?? []);
-        }
-      } catch (err) {
-        if (!ignore) {
-          setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
-        }
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
-
-    loadTickets();
-    return () => {
-      ignore = true;
-    };
-  }, [isAuthenticated]);
 
   const handleArchiveToggle = async (id: string, archived: boolean) => {
     if (actionLoading) return;
@@ -213,7 +159,7 @@ export default function SupportTicketsList() {
     }
 
     if (error) {
-      return <ErrorState error={error} onRetry={() => window.location.reload()} />;
+      return <ErrorState error={error} onRetry={reload} />;
     }
 
     if (filteredTickets.length === 0) {
@@ -242,43 +188,22 @@ export default function SupportTicketsList() {
     return (
       <div className="space-y-4">
         {filteredTickets.map(ticket => (
-          <Card
+          <SupportTicketCard
             key={ticket.id}
-            className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]"
-          >
-            <CardHeader className="border-[var(--hb-border)]">
-              <CardTitle className="flex flex-col gap-2 text-[var(--hb-headline)] md:flex-row md:items-center md:justify-between">
-                <span className="flex items-center gap-2">
-                  <Ticket className="h-5 w-5 text-[var(--hb-primary)]" />
-                  {ticket.subject}
-                </span>
-                <Badge
-                  text={statusLabels[ticket.status] || ticket.status}
-                  color={statusColors[ticket.status] || 'gray'}
-                />
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-[var(--hb-muted)]">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-xs text-[var(--hb-text)]">
-                  {categoryLabels[ticket.category] || ticket.category}
-                </span>
-                {ticket.severity ? (
-                  <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-xs text-[var(--hb-text)]">
-                    Σοβαρότητα: {severityLabels[ticket.severity] || ticket.severity}
-                  </span>
-                ) : null}
-                <span className="flex items-center gap-1 text-[var(--hb-muted)]">
-                  <span>Τελευταία ενημέρωση:</span>
-                  <FormattedDate
-                    date={ticket.updated_at}
-                    options={DATE_TIME_OPTIONS}
-                    fallback=""
-                    className="text-xs"
-                  />
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2 pt-2">
+            subject={ticket.subject}
+            statusText={statusLabels[ticket.status] || ticket.status}
+            statusColor={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
+            categoryText={SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}
+            severityText={
+              ticket.severity
+                ? `Σοβαρότητα: ${SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}`
+                : null
+            }
+            updatedAt={ticket.updated_at}
+            updatedLabel="Τελευταία ενημέρωση:"
+            titleIcon={<Ticket className="h-5 w-5 text-[var(--hb-primary)]" />}
+            actions={
+              <>
                 <Button href={`/pages/support/tickets/${ticket.id}`} variant="secondary">
                   Δες λεπτομέρειες
                 </Button>
@@ -286,7 +211,7 @@ export default function SupportTicketsList() {
                   <Button
                     variant="ghost"
                     onClick={() => handleArchiveToggle(ticket.id, false)}
-                    className="text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                    className={UI_CLASSNAMES.mutedInteractive}
                     disabled={actionLoading === ticket.id}
                   >
                     Επαναφορά από αρχείο
@@ -295,7 +220,7 @@ export default function SupportTicketsList() {
                   <Button
                     variant="ghost"
                     onClick={() => handleArchiveToggle(ticket.id, true)}
-                    className="text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                    className={UI_CLASSNAMES.mutedInteractive}
                     disabled={actionLoading === ticket.id}
                   >
                     Μεταφορά στο αρχείο
@@ -311,9 +236,9 @@ export default function SupportTicketsList() {
                     Διαγραφή
                   </Button>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+              </>
+            }
+          />
         ))}
       </div>
     );
@@ -333,9 +258,9 @@ export default function SupportTicketsList() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+    <div className={UI_CLASSNAMES.pageShell}>
+      <div className={UI_CLASSNAMES.pageBackdrop}>
+        <div className={UI_CLASSNAMES.pageGradient} />
       </div>
       <div className="relative">
         <PageHero

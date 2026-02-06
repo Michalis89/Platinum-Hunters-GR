@@ -1,14 +1,13 @@
- 'use client';
+'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { ClipboardCopy, Heart, Pencil, Share2, Trash2 } from 'lucide-react';
 import type { ArticleRow } from '@/types/database';
-import { selectUser } from '@/store/slices/authSlice';
+import { selectCanEditArticles, selectIsAuthorOf } from '@/store/slices/authSlice';
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
-import { hasAnyRole } from '@/lib/roles';
 
 type ActionRowProps = {
   article: ArticleRow;
@@ -21,7 +20,8 @@ type LikeState = {
 
 export default function ActionRow({ article }: ActionRowProps) {
   const router = useRouter();
-  const currentUser = useSelector(selectUser);
+  const canEdit = useSelector(selectCanEditArticles);
+  const isAuthor = useSelector(selectIsAuthorOf(article.author_id));
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [likeState, setLikeState] = useState<LikeState>({
     liked: false,
@@ -31,9 +31,6 @@ export default function ActionRow({ article }: ActionRowProps) {
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const canEdit = !!currentUser && hasAnyRole(currentUser, ['admin', 'author', 'reviewer', 'owner']);
-  const isAuthor = Boolean(currentUser && article.author_id && currentUser.id === article.author_id);
   const fallbackBase = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
   const fallbackHref = `${fallbackBase}?category=${article.category}`;
 
@@ -184,7 +181,13 @@ export default function ActionRow({ article }: ActionRowProps) {
         <button
           type="button"
           onClick={toggleLike}
-          aria-label={isAuthor ? 'Δεν μπορείτε να κάνετε like στο δικό σας άρθρο' : likeState.liked ? 'Αφαίρεση like' : 'Like'}
+          aria-label={
+            isAuthor
+              ? 'Δεν μπορείτε να κάνετε like στο δικό σας άρθρο'
+              : likeState.liked
+                ? 'Αφαίρεση like'
+                : 'Like'
+          }
           title={
             isAuthor
               ? 'Δεν μπορείς να κάνεις like στο δικό σου άρθρο'

@@ -2,6 +2,8 @@ import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { AUTH_ERROR } from '@/lib/constants/messages';
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
@@ -17,21 +19,14 @@ async function GETHandler(request: Request) {
 
     const supabase = await createRouteHandlerClient();
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (scope === 'me' && !session) {
-      return NextResponse.json({ error: 'Μη εξουσιοδοτημένη πρόσβαση' }, { status: 401 });
-    }
-
     const query = supabase
       .from('activity_log')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    if (scope === 'me' && session?.user?.id) {
+    if (scope === 'me') {
+      const session = await requireAuth(supabase);
       query.eq('user_id', session.user.id);
     }
 
@@ -44,6 +39,9 @@ async function GETHandler(request: Request) {
 
     return NextResponse.json({ activities: data ?? [] });
   } catch (err) {
+    if (err instanceof UnauthorizedError) {
+      return NextResponse.json({ error: AUTH_ERROR }, { status: 401 });
+    }
     console.error('❌ Activity API error:', err);
     return NextResponse.json({ error: 'Σφάλμα φόρτωσης activity' }, { status: 500 });
   }

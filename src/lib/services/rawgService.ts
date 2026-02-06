@@ -3,6 +3,8 @@
  * Handles game search and data mapping for the games backlog
  */
 
+import { UNTITLED_FALLBACK, DEFAULT_COVER } from '@/lib/constants/messages';
+
 export type RawgGame = {
   id: number;
   slug: string;
@@ -102,7 +104,7 @@ export function mapRawgToSearchResult(game: RawgGame): GameSearchResult {
     status: 'planned',
     score: game.metacritic?.toString() ?? game.rating?.toFixed(1) ?? null,
     tags: game.genres?.map(g => g.name) ?? [],
-    cover: game.background_image ?? '/og-image.png',
+    cover: game.background_image ?? DEFAULT_COVER,
     payload: mapRawgToPayload(game),
   };
 }
@@ -132,7 +134,7 @@ export function mapRawgToPayload(game: RawgGame): GamePayload {
 }
 
 export function mapLocalGameItem(item: Record<string, unknown>): GameSearchResult {
-  const title = (item.title as string | undefined) || 'Untitled';
+  const title = (item.title as string | undefined) || UNTITLED_FALLBACK;
   const subtitle = (item.developer as string | undefined) || '';
   const rawgId = item.rawg_id as number | undefined;
 
@@ -150,6 +152,6 @@ export function mapLocalGameItem(item: Record<string, unknown>): GameSearchResul
     cover:
       (item.cover_image_large as string | undefined) ||
       (item.cover_image_medium as string | undefined) ||
-      '/og-image.png',
+      DEFAULT_COVER,
   };
 }

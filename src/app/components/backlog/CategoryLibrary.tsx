@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useReducer, useCallback } from 'react';
 import { mutate } from 'swr';
 import ErrorState from '@/app/components/ui/ErrorState';
 import AlertMessage from '@/app/components/ui/AlertMessage';
+import { apiClient } from '@/lib/api/client';
 
 import CategoryHeader from './CategoryHeader';
 import CategoryStats from './CategoryStats';
@@ -32,6 +33,127 @@ type AlertState = {
   title?: string;
 } | null;
 
+type SelectedEntry = (MediaEntry & Partial<SearchResult>) | null;
+
+type CategoryLibraryState = {
+  search: string;
+  activeStatus: MediaStatus | 'all';
+  ctaMode: 'create' | 'suggestions' | null;
+  libraryEntries: MediaEntry[];
+  libraryLoading: boolean;
+  libraryError: string | null;
+  createQuery: string;
+  createResults: SearchResult[];
+  createLoading: boolean;
+  suggestions: SearchResult[];
+  suggestionsLoading: boolean;
+  alert: AlertState;
+  alertKey: number;
+  selectedEntry: SelectedEntry;
+};
+
+type SelectedEntryDetails = {
+  runtime?: number | null;
+  number_of_episodes?: number | null;
+  cover_image_large?: string | null;
+  cover_image_medium?: string | null;
+  banner_image?: string | null;
+  genres?: string[] | null;
+};
+
+type CategoryLibraryAction =
+  | { type: 'patch'; payload: Partial<CategoryLibraryState> }
+  | {
+      type: 'resetForCategory';
+      payload: { search: string; activeStatus: MediaStatus | 'all' };
+    }
+  | { type: 'showAlert'; payload: AlertState }
+  | { type: 'clearAlert' }
+  | { type: 'applySelectedEntryDetails'; payload: SelectedEntryDetails };
+
+const buildInitialState = (
+  normalizedInitialSearch: string,
+  normalizedInitialStatus: MediaStatus | 'all',
+): CategoryLibraryState => ({
+  search: normalizedInitialSearch,
+  activeStatus: normalizedInitialStatus,
+  ctaMode: null,
+  libraryEntries: [],
+  libraryLoading: false,
+  libraryError: null,
+  createQuery: '',
+  createResults: [],
+  createLoading: false,
+  suggestions: [],
+  suggestionsLoading: false,
+  alert: null,
+  alertKey: 0,
+  selectedEntry: null,
+});
+
+function categoryLibraryReducer(
+  state: CategoryLibraryState,
+  action: CategoryLibraryAction,
+): CategoryLibraryState {
+  switch (action.type) {
+    case 'patch':
+      return { ...state, ...action.payload };
+    case 'resetForCategory':
+      return {
+        ...state,
+        search: action.payload.search,
+        activeStatus: action.payload.activeStatus,
+        ctaMode: null,
+        createQuery: '',
+        createResults: [],
+      };
+    case 'showAlert':
+      return {
+        ...state,
+        alert: action.payload,
+        alertKey: state.alertKey + 1,
+      };
+    case 'clearAlert':
+      return { ...state, alert: null };
+    case 'applySelectedEntryDetails': {
+      if (!state.selectedEntry) return state;
+      const details = action.payload;
+      const totalRuntime = state.selectedEntry.totalRuntime ?? details.runtime ?? undefined;
+      const totalEpisodes =
+        state.selectedEntry.totalEpisodes ?? details.number_of_episodes ?? undefined;
+
+      return {
+        ...state,
+        selectedEntry: {
+          ...state.selectedEntry,
+          totalRuntime,
+          totalEpisodes,
+          tags:
+            state.selectedEntry.tags.length > 0
+              ? state.selectedEntry.tags
+              : (details.genres ?? []),
+          cover:
+            state.selectedEntry.cover ||
+            details.cover_image_large ||
+            details.cover_image_medium ||
+            state.selectedEntry.cover,
+          payload: {
+            ...(state.selectedEntry.payload || {}),
+            runtime: totalRuntime ?? null,
+            number_of_episodes: totalEpisodes ?? null,
+            cover_image_large: details.cover_image_large ?? null,
+            cover_image_medium: details.cover_image_medium ?? null,
+            banner_image: details.banner_image ?? null,
+            genres: details.genres ?? [],
+          },
+        },
+      };
+    }
+    default:
+      return state;
+  }
+}
+
 export default function CategoryLibrary({
   category,
   username,
@@ -45,28 +167,30 @@ export default function CategoryLibrary({
 }>) {
   const normalizedInitialStatus = initialStatus ?? 'all';
   const normalizedInitialSearch = initialSearch?.trim() ?? '';
-  const [search, setSearch] = useState(normalizedInitialSearch);
-  const [activeStatus, setActiveStatus] = useState<MediaStatus | 'all'>(normalizedInitialStatus);
-  const [ctaMode, setCtaMode] = useState<'create' | 'suggestions' | null>(null);
-  const [libraryEntries, setLibraryEntries] = useState<MediaEntry[]>([]);
-  const [libraryLoading, setLibraryLoading] = useState(false);
-  const [libraryError, setLibraryError] = useState<string | null>(null);
-  const [createQuery, setCreateQuery] = useState('');
-  const [createResults, setCreateResults] = useState<SearchResult[]>([]);
-  const [createLoading, setCreateLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
-  const [alert, setAlert] = useState<AlertState>(null);
-  const [alertKey, setAlertKey] = useState(0);
+  const [state, dispatch] = useReducer(
+    categoryLibraryReducer,
+    buildInitialState(normalizedInitialSearch, normalizedInitialStatus),
+  );
 
   const showAlert = (payload: AlertState) => {
-    setAlert(payload);
-    setAlertKey(prev => prev + 1);
+    dispatch({ type: 'showAlert', payload });
   };
-
-  const [selectedEntry, setSelectedEntry] = useState<(MediaEntry & Partial<SearchResult>) | null>(
-    null,
-  );
+  const {
+    search,
+    activeStatus,
+    ctaMode,
+    libraryEntries,
+    libraryLoading,
+    libraryError,
+    createQuery,
+    createResults,
+    createLoading,
+    suggestions,
+    suggestionsLoading,
+    alert,
+    alertKey,
+    selectedEntry,
+  } = state;
 
   const supportsExternal = supportsExternalApi(category);
   const apiBase = getApiBase(category);
@@ -74,41 +198,49 @@ export default function CategoryLibrary({
   const loadLibraryEntries = useCallback(
     async (forceMocks = false) => {
       if (!supportsExternal || forceMocks) {
-        setLibraryEntries([]);
+        dispatch({ type: 'patch', payload: { libraryEntries: [] } });
         return;
       }
 
-      setLibraryLoading(true);
-      setLibraryError(null);
+      dispatch({ type: 'patch', payload: { libraryLoading: true, libraryError: null } });
       try {
         if (!apiBase) {
-          setLibraryEntries([]);
+          dispatch({ type: 'patch', payload: { libraryEntries: [] } });
           return;
         }
-        const response = await fetch(`${apiBase}/library?category=${category}`);
-        if (!response.ok) {
-          throw new Error('Library fetch failed');
-        }
-        const data = await response.json();
+        const data = await apiClient.getJsonOrThrow<{ items?: MediaEntry[] }>(
+          `${apiBase}/library?category=${category}`,
+        );
         const items = Array.isArray(data.items) ? data.items : [];
-        setLibraryEntries(items);
+        dispatch({ type: 'patch', payload: { libraryEntries: items } });
       } catch (error) {
         console.warn('Library fetch failed:', error);
-        setLibraryError('Αποτυχία φόρτωσης βιβλιοθήκης');
-        setLibraryEntries([]);
+        dispatch({
+          type: 'patch',
+          payload: {
+            libraryError: 'Αποτυχία φόρτωσης βιβλιοθήκης',
+            libraryEntries: [],
+          },
+        });
       } finally {
-        setLibraryLoading(false);
+        dispatch({ type: 'patch', payload: { libraryLoading: false } });
       }
     },
     [apiBase, category, supportsExternal],
   );
 
   useEffect(() => {
-    setActiveStatus(normalizedInitialStatus);
-    setSearch(normalizedInitialSearch);
-    setCreateQuery('');
-    setCreateResults([]);
-    setCtaMode(null);
+    dispatch({
+      type: 'resetForCategory',
+      payload: {
+        activeStatus: normalizedInitialStatus,
+        search: normalizedInitialSearch,
+      },
+    });
+    
+    
+    
+    
     loadLibraryEntries();
   }, [category, normalizedInitialStatus, normalizedInitialSearch, loadLibraryEntries]);
 
@@ -116,38 +248,38 @@ export default function CategoryLibrary({
     if (ctaMode !== 'create') return;
 
     if (!supportsExternal) {
-      setCreateResults([]);
+      dispatch({ type: 'patch', payload: { createResults: [] } });
       return;
     }
 
     const query = createQuery.trim();
     if (!query) {
-      setCreateResults([]);
+      dispatch({ type: 'patch', payload: { createResults: [] } });
       return;
     }
 
     const timeout = setTimeout(async () => {
-      setCreateLoading(true);
+      dispatch({ type: 'patch', payload: { createLoading: true } });
       try {
         if (!apiBase) {
-          setCreateResults([]);
+          dispatch({ type: 'patch', payload: { createResults: [] } });
           return;
         }
-        const response = await fetch(
+        const response = await apiClient.request(
           `${apiBase}/search?category=${category}&q=${encodeURIComponent(query)}`,
         );
         if (!response.ok) {
-          setCreateResults([]);
+          dispatch({ type: 'patch', payload: { createResults: [] } });
           return;
         }
-        const data = await response.json();
+        const data = (await response.json()) as { items?: SearchResult[] };
         const items = Array.isArray(data.items) ? data.items : [];
-        setCreateResults(items as SearchResult[]);
+        dispatch({ type: 'patch', payload: { createResults: items } });
       } catch (error) {
         console.warn('Create search failed:', error);
-        setCreateResults([]);
+        dispatch({ type: 'patch', payload: { createResults: [] } });
       } finally {
-        setCreateLoading(false);
+        dispatch({ type: 'patch', payload: { createLoading: false } });
       }
     }, 350);
 
@@ -158,34 +290,32 @@ export default function CategoryLibrary({
   useEffect(() => {
     if (ctaMode !== 'suggestions') return;
     if (!supportsExternal) {
-      setSuggestions([]);
+      dispatch({ type: 'patch', payload: { suggestions: [] } });
       return;
     }
     let ignore = false;
     const loadSuggestions = async () => {
-      setSuggestionsLoading(true);
+      dispatch({ type: 'patch', payload: { suggestionsLoading: true } });
       try {
         if (!apiBase) {
-          setSuggestions([]);
+          dispatch({ type: 'patch', payload: { suggestions: [] } });
           return;
         }
-        const response = await fetch(`${apiBase}/suggestions?category=${category}`);
-        if (!response.ok) {
-          throw new Error('Suggestions fetch failed');
-        }
-        const data = await response.json();
+        const data = await apiClient.getJsonOrThrow<{ items?: SearchResult[] }>(
+          `${apiBase}/suggestions?category=${category}`,
+        );
         const items = Array.isArray(data.items) ? data.items : [];
         if (!ignore) {
-          setSuggestions(items as SearchResult[]);
+          dispatch({ type: 'patch', payload: { suggestions: items } });
         }
       } catch (error) {
         console.warn('Suggestions fetch failed:', error);
         if (!ignore) {
-          setSuggestions([]);
+          dispatch({ type: 'patch', payload: { suggestions: [] } });
         }
       } finally {
         if (!ignore) {
-          setSuggestionsLoading(false);
+          dispatch({ type: 'patch', payload: { suggestionsLoading: false } });
         }
       }
     };
@@ -244,7 +374,7 @@ export default function CategoryLibrary({
       totalRuntime: entry.totalRuntime ?? payload?.runtime ?? undefined,
       totalPages: entry.totalPages ?? payload?.page_count ?? undefined,
     };
-    setSelectedEntry(nextEntry);
+    dispatch({ type: 'patch', payload: { selectedEntry: nextEntry } });
 
     if (
       (category === 'movies' || category === 'tv') &&
@@ -252,7 +382,8 @@ export default function CategoryLibrary({
       !nextEntry.totalRuntime &&
       !nextEntry.totalEpisodes
     ) {
-      fetch(`/api/movies/details?category=${category}&tmdb_id=${entry.externalId}`)
+      apiClient
+        .request(`/api/movies/details?category=${category}&tmdb_id=${entry.externalId}`)
         .then(async response => {
           if (!response.ok) {
             return null;
@@ -268,28 +399,7 @@ export default function CategoryLibrary({
         })
         .then(details => {
           if (!details) return;
-          setSelectedEntry(prev => {
-            if (!prev) return prev;
-            const totalRuntime = prev.totalRuntime ?? details.runtime ?? undefined;
-            const totalEpisodes = prev.totalEpisodes ?? details.number_of_episodes ?? undefined;
-            return {
-              ...prev,
-              totalRuntime,
-              totalEpisodes,
-              tags: prev.tags.length > 0 ? prev.tags : (details.genres ?? []),
-              cover:
-                prev.cover || details.cover_image_large || details.cover_image_medium || prev.cover,
-              payload: {
-                ...(prev.payload || {}),
-                runtime: totalRuntime ?? null,
-                number_of_episodes: totalEpisodes ?? null,
-                cover_image_large: details.cover_image_large ?? null,
-                cover_image_medium: details.cover_image_medium ?? null,
-                banner_image: details.banner_image ?? null,
-                genres: details.genres ?? [],
-              },
-            };
-          });
+          dispatch({ type: 'applySelectedEntryDetails', payload: details });
         })
         .catch(error => {
           console.warn('TMDB details fetch failed:', error);
@@ -320,7 +430,7 @@ export default function CategoryLibrary({
         if (!apiBase) {
           throw new Error('Missing API base');
         }
-        const response = await fetch(`${apiBase}/library`, {
+        const response = await apiClient.request(`${apiBase}/library`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -355,7 +465,7 @@ export default function CategoryLibrary({
         if (!apiBase) {
           throw new Error('Missing API base');
         }
-        const response = await fetch(`${apiBase}/add`, {
+        const response = await apiClient.request(`${apiBase}/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -387,8 +497,10 @@ export default function CategoryLibrary({
         });
       }
     } else {
-      setLibraryEntries(prev =>
-        prev.map(entry =>
+      dispatch({
+        type: 'patch',
+        payload: {
+          libraryEntries: libraryEntries.map(entry =>
           entry.id === selectedEntry.id
             ? {
                 ...entry,
@@ -399,8 +511,9 @@ export default function CategoryLibrary({
                 notes: editState.notes || undefined,
               }
             : entry,
-        ),
-      );
+          ),
+        },
+      });
       showAlert({
         type: 'success',
         title: 'Αποθηκεύτηκε',
@@ -408,14 +521,17 @@ export default function CategoryLibrary({
       });
     }
 
-    setSelectedEntry(null);
+    dispatch({ type: 'patch', payload: { selectedEntry: null } });
   };
 
   const handleDeleteEntry = async (entry: MediaEntry) => {
     if (!entry.mediaId) {
-      setLibraryEntries(prev => prev.filter(item => item.id !== entry.id));
+      dispatch({
+        type: 'patch',
+        payload: { libraryEntries: libraryEntries.filter(item => item.id !== entry.id) },
+      });
       if (selectedEntry?.id === entry.id) {
-        setSelectedEntry(null);
+        dispatch({ type: 'patch', payload: { selectedEntry: null } });
       }
       return;
     }
@@ -425,7 +541,7 @@ export default function CategoryLibrary({
         if (!apiBase) {
           throw new Error('Missing API base');
         }
-        const response = await fetch(`${apiBase}/library`, {
+        const response = await apiClient.request(`${apiBase}/library`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mediaId: entry.mediaId }),
@@ -436,7 +552,7 @@ export default function CategoryLibrary({
         await loadLibraryEntries();
         await mutate('/api/user/continue');
         if (selectedEntry?.id === entry.id) {
-          setSelectedEntry(null);
+          dispatch({ type: 'patch', payload: { selectedEntry: null } });
         }
         showAlert({
           type: 'success',
@@ -454,9 +570,12 @@ export default function CategoryLibrary({
       }
     }
 
-    setLibraryEntries(prev => prev.filter(item => item.id !== entry.id));
+    dispatch({
+      type: 'patch',
+      payload: { libraryEntries: libraryEntries.filter(item => item.id !== entry.id) },
+    });
     if (selectedEntry?.id === entry.id) {
-      setSelectedEntry(null);
+      dispatch({ type: 'patch', payload: { selectedEntry: null } });
     }
   };
 
@@ -469,7 +588,7 @@ export default function CategoryLibrary({
           title={alert.title}
           message={alert.message}
           duration={2000}
-          onClose={() => setAlert(null)}
+          onClose={() => dispatch({ type: 'clearAlert' })}
         />
       )}
 
@@ -483,19 +602,23 @@ export default function CategoryLibrary({
           <CategoryHeader
             category={category}
             username={username}
-            onCreateClick={() => setCtaMode('create')}
-            onSuggestionsClick={() => setCtaMode('suggestions')}
+            onCreateClick={() => dispatch({ type: 'patch', payload: { ctaMode: 'create' } })}
+            onSuggestionsClick={() =>
+              dispatch({ type: 'patch', payload: { ctaMode: 'suggestions' } })
+            }
           />
 
           {ctaMode === 'create' && (
             <CreateEntryPanel
               category={category}
               searchQuery={createQuery}
-              onSearchChange={setCreateQuery}
+              onSearchChange={value =>
+                dispatch({ type: 'patch', payload: { createQuery: value } })
+              }
               searchResults={createResults}
               isLoading={createLoading}
               onOpenDialog={openEntryDialog}
-              onClose={() => setCtaMode(null)}
+              onClose={() => dispatch({ type: 'patch', payload: { ctaMode: null } })}
               libraryEntries={libraryEntries}
             />
           )}
@@ -505,7 +628,7 @@ export default function CategoryLibrary({
               suggestions={suggestions}
               isLoading={suggestionsLoading}
               onOpenDialog={openEntryDialog}
-              onClose={() => setCtaMode(null)}
+              onClose={() => dispatch({ type: 'patch', payload: { ctaMode: null } })}
               libraryEntries={libraryEntries}
             />
           )}
@@ -516,9 +639,9 @@ export default function CategoryLibrary({
         <StatusFilterBar
           category={category}
           search={search}
-          onSearchChange={setSearch}
+          onSearchChange={value => dispatch({ type: 'patch', payload: { search: value } })}
           activeStatus={activeStatus}
-          onStatusChange={setActiveStatus}
+          onStatusChange={value => dispatch({ type: 'patch', payload: { activeStatus: value } })}
         />
 
         {libraryError && <ErrorState error={libraryError} />}
@@ -534,7 +657,7 @@ export default function CategoryLibrary({
         <EntryEditDialog
           entry={selectedEntry}
           category={category}
-          onClose={() => setSelectedEntry(null)}
+          onClose={() => dispatch({ type: 'patch', payload: { selectedEntry: null } })}
           onSave={handleSaveEntry}
           onDelete={handleDeleteEntry}
         />
@@ -542,3 +665,4 @@ export default function CategoryLibrary({
     </div>
   );
 }
+

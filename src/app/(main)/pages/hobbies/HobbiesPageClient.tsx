@@ -22,12 +22,10 @@ export default function HobbiesPageClient() {
 
   const hasAllAccess = hasAnyRole(user, ['admin', 'owner', 'moderator']);
 
-  // Filter sections based on user's selected categories (if logged in)
-  // Only apply filtering after client mount to prevent hydration mismatch
   const userCategories = (user?.categories as string[] | undefined) ?? [];
   const filteredSections =
     !hasMounted || isAuthLoading
-      ? HOBBY_SECTIONS // During SSR/hydration, show all sections
+      ? HOBBY_SECTIONS
       : hasAllAccess
         ? HOBBY_SECTIONS
         : isAuthenticated && userCategories.length > 0

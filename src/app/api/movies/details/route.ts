@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
+import { EXTERNAL_API_REVALIDATE_SECONDS } from '@/lib/constants/cache';
 
 import { NextResponse } from 'next/server';
 
@@ -32,7 +33,9 @@ async function GETHandler(req: Request) {
     const url = new URL(`https://api.themoviedb.org/3/${base}/${tmdbId}`);
     url.searchParams.set('api_key', apiKey);
 
-    const response = await fetch(url.toString(), { cache: 'no-store' });
+    const response = await fetch(url.toString(), {
+      next: { revalidate: EXTERNAL_API_REVALIDATE_SECONDS },
+    });
     if (!response.ok) {
       const errorBody = await response.text();
       return NextResponse.json({ error: errorBody || 'TMDB fetch failed' }, { status: 502 });

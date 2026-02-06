@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -16,8 +16,9 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { apiClient } from '@/lib/api/client';
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = apiClient.swrFetcher;
 
 type SuggestionItem = {
   id: string;
@@ -92,10 +93,14 @@ type HomeSuggestionsProps = {
 
 export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const [scrollY, setScrollY] = useState(0);
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  const visibleConfigs = categoryConfigs.filter(c => enabledCategories.includes(c.key));
+  const visibleConfigs = useMemo(
+    () => categoryConfigs.filter(c => enabledCategories.includes(c.key)),
+    [enabledCategories],
+  );
 
   useEffect(() => {
     if (visibleConfigs.length > 0 && !activeTab) {
@@ -103,29 +108,49 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
     }
   }, [visibleConfigs, activeTab]);
 
+  const updateScrollProgress = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const inViewRatio = Math.max(
+      0,
+      Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height)),
+    );
+    setScrollY(inViewRatio);
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    if (animationFrameRef.current !== null) return;
+
+    animationFrameRef.current = window.requestAnimationFrame(() => {
+      updateScrollProgress();
+      animationFrameRef.current = null;
+    });
+  }, [updateScrollProgress]);
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        const inViewRatio = Math.max(
-          0,
-          Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height)),
-        );
-        setScrollY(inViewRatio);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    updateScrollProgress();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [handleScroll, updateScrollProgress]);
 
   const activeConfig = visibleConfigs.find(c => c.key === activeTab);
 
-  const { data: suggestionsData } = useSWR(activeConfig ? activeConfig.apiPath : null, fetcher, {
-    revalidateOnFocus: false,
-  });
+  const { data: suggestionsData } = useSWR<{ items?: SuggestionItem[] }>(
+    activeConfig ? activeConfig.apiPath : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   const suggestions: SuggestionItem[] = suggestionsData?.items ?? [];
 

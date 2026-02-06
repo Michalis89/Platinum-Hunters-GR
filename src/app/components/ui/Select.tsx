@@ -3,7 +3,7 @@ import { cn } from '@/utils/utils';
 interface SelectProps {
   label?: string;
   labelClassName?: string;
-  options: string[];
+  options: readonly string[];
   optionLabels?: Record<string, string>;
   value?: string;
   onChange?: (value: string) => void;

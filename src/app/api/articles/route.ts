@@ -8,10 +8,53 @@ import { normalizeSlug } from '@/utils/slugify';
 import { insertActivity } from '@/lib/services/activityService';
 import { getArticlesWithFilters } from '@/lib/supabase/queries';
 import { API_ERRORS } from '@/lib/api/errors';
-import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { UnauthorizedError } from '@/lib/api/auth';
+import { requireAuthorRole, ForbiddenError } from '@/lib/api/permissions';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
-import { hasAnyRole } from '@/lib/roles';
+
+type ArticlePayloadValidationInput = {
+  title?: string | null;
+  description?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  tags?: string[] | null;
+};
+
+type ArticlePayloadValidationResult =
+  | { isValid: true }
+  | { isValid: false; error: string };
+
+function validateArticlePayload({
+  title,
+  description,
+  meta_title,
+  meta_description,
+  tags,
+}: ArticlePayloadValidationInput): ArticlePayloadValidationResult {
+  const plainTextFieldChecks = [
+    { validation: validatePlainText(title, 'Ο τίτλος'), fallbackError: 'Μη έγκυρος τίτλος' },
+    { validation: validatePlainText(description, 'Η περιγραφή'), fallbackError: 'Μη έγκυρη περιγραφή' },
+    { validation: validatePlainText(meta_title, 'Ο meta τίτλος'), fallbackError: 'Μη έγκυρος meta τίτλος' },
+    {
+      validation: validatePlainText(meta_description, 'Το meta description'),
+      fallbackError: 'Μη έγκυρο meta description',
+    },
+  ];
+
+  for (const check of plainTextFieldChecks) {
+    if (!check.validation.isValid) {
+      return { isValid: false, error: check.validation.error || check.fallbackError };
+    }
+  }
+
+  const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
+  if (!tagsValidation.isValid) {
+    return { isValid: false, error: tagsValidation.error || 'Μη έγκυρα tags' };
+  }
+
+  return { isValid: true };
+}
 
 // GET - Fetch articles with filtering
 async function GETHandler(req: Request) {
@@ -28,7 +71,11 @@ async function GETHandler(req: Request) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), MAX_LIMIT);
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0);
 
-    const { data: articles, error, count } = await getArticlesWithFilters(supabase, {
+    const {
+      data: articles,
+      error,
+      count,
+    } = await getArticlesWithFilters(supabase, {
       category,
       topic,
       status,
@@ -43,10 +90,7 @@ async function GETHandler(req: Request) {
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    return okWithMeta(
-      articles ?? [],
-      { total: count ?? articles?.length ?? 0, limit, offset },
-    );
+    return okWithMeta(articles ?? [], { total: count ?? articles?.length ?? 0, limit, offset });
   } catch (error) {
     console.error('Error:', error);
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
@@ -58,18 +102,8 @@ async function POSTHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
 
-    const session = await requireAuth(supabase);
-
-    // Check if user has permission (admin or author)
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role, roles, username, display_name, avatar_url')
-      .eq('id', session.user.id)
-      .single();
-
-    if (!userData || !hasAnyRole(userData, ['admin', 'owner', 'author', 'reviewer'])) {
-      return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
-    }
+    // Require author-level permissions (admin, owner, author, reviewer)
+    const { session, user: userData } = await requireAuthorRole(supabase);
 
     const body = await req.json();
     const {
@@ -88,25 +122,15 @@ async function POSTHandler(req: Request) {
       is_featured = false,
       published_at,
     } = body;
-    const titleValidation = validatePlainText(title, 'Ο τίτλος');
-    if (!titleValidation.isValid) {
-      return fail({ error: titleValidation.error || 'Μη έγκυρος τίτλος' }, 400);
-    }
-    const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
-    if (!descriptionValidation.isValid) {
-      return fail({ error: descriptionValidation.error || 'Μη έγκυρη περιγραφή' }, 400);
-    }
-    const metaTitleValidation = validatePlainText(meta_title, 'Ο meta τίτλος');
-    if (!metaTitleValidation.isValid) {
-      return fail({ error: metaTitleValidation.error || 'Μη έγκυρος meta τίτλος' }, 400);
-    }
-    const metaDescriptionValidation = validatePlainText(meta_description, 'Το meta description');
-    if (!metaDescriptionValidation.isValid) {
-      return fail({ error: metaDescriptionValidation.error || 'Μη έγκυρο meta description' }, 400);
-    }
-    const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
-    if (!tagsValidation.isValid) {
-      return fail({ error: tagsValidation.error || 'Μη έγκυρα tags' }, 400);
+    const articlePayloadValidation = validateArticlePayload({
+      title,
+      description,
+      meta_title,
+      meta_description,
+      tags,
+    });
+    if (!articlePayloadValidation.isValid) {
+      return fail({ error: articlePayloadValidation.error }, 400);
     }
 
     // Validate content_rich JSON structure (TipTap format)
@@ -185,9 +209,13 @@ async function POSTHandler(req: Request) {
     if (error instanceof UnauthorizedError) {
       return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
     }
+    if (error instanceof ForbiddenError) {
+      return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
+    }
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
   }
 }
 
 export const GET = withApiRoute(GETHandler);
 export const POST = withApiRoute(POSTHandler);
+

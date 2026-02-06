@@ -1,8 +1,3 @@
-﻿'use client';
-
-import { useMemo } from 'react';
-import { useMounted } from '@/lib/hooks/useMounted';
-
 const DEFAULT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
   month: 'numeric',
@@ -26,11 +21,9 @@ export function FormattedDate({
   className,
   as = 'span',
 }: FormattedDateProps) {
-  const mounted = useMounted();
-  const optionsKey = useMemo(() => JSON.stringify(options), [options]);
-
-  const formatted = useMemo(() => {
-    if (!mounted || !date) {
+  // Format date server-side
+  const formatted = (() => {
+    if (!date) {
       return fallback;
     }
     const parsed = new Date(date);
@@ -38,9 +31,9 @@ export function FormattedDate({
       return fallback;
     }
     return new Intl.DateTimeFormat(locale, options).format(parsed);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted, date, locale, optionsKey, fallback]);
+  })();
 
+  // suppressHydrationWarning handles potential timezone differences between server/client
   if (as === 'time') {
     return (
       <time className={className} dateTime={date ?? undefined} suppressHydrationWarning>

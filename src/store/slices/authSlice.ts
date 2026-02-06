@@ -207,3 +207,42 @@ export const selectUser = (state: { auth: AuthSession }) => state.auth.user;
 export const selectIsAuthenticated = (state: { auth: AuthSession }) => state.auth.isAuthenticated;
 export const selectIsLoading = (state: { auth: AuthSession }) => state.auth.isLoading;
 export const selectAuthError = (state: { auth: AuthSession }) => state.auth.error;
+
+// Computed/derived selectors for common role checks
+import { getUserRoles, hasAnyRole } from '@/lib/roles';
+
+export const selectUserRoles = (state: { auth: AuthSession }) => {
+  const user = state.auth.user;
+  return user ? getUserRoles(user) : [];
+};
+
+export const selectCanQuickAdd = (state: { auth: AuthSession }) => {
+  const user = state.auth.user;
+  return !!user && hasAnyRole(user, ['admin', 'author', 'reviewer', 'owner']);
+};
+
+export const selectCanAccessAdminPanel = (state: { auth: AuthSession }) => {
+  const user = state.auth.user;
+  return !!user && hasAnyRole(user, ['admin', 'moderator', 'owner']);
+};
+
+export const selectIsAdmin = (state: { auth: AuthSession }) => {
+  const user = state.auth.user;
+  return !!user && hasAnyRole(user, ['admin', 'owner']);
+};
+
+export const selectIsAdminOrModerator = (state: { auth: AuthSession }) => {
+  const user = state.auth.user;
+  return !!user && hasAnyRole(user, ['admin', 'owner', 'moderator']);
+};
+
+export const selectCanEditArticles = (state: { auth: AuthSession }) => {
+  const user = state.auth.user;
+  return !!user && hasAnyRole(user, ['admin', 'author', 'reviewer', 'owner']);
+};
+
+// Factory selector: Check if user is author of specific item
+export const selectIsAuthorOf = (authorId: string | null | undefined) => (state: { auth: AuthSession }) => {
+  const user = state.auth.user;
+  return Boolean(user && authorId && user.id === authorId);
+};

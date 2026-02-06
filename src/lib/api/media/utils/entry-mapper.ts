@@ -1,0 +1,130 @@
+import { DEFAULT_COVER } from '@/lib/constants/messages';
+import type { MediaCategoryConfig } from '../config';
+import type { LibraryRow } from '../types';
+import { resolveTitle } from './title-resolver';
+
+/**
+ * Mapped library entry returned to the client
+ */
+export type MappedLibraryEntry = {
+  id: string;
+  entryId: number;
+  mediaId: number;
+  status: string;
+  isFavorite: boolean;
+  priority: number;
+  score?: string;
+  progress?: number;
+  notes?: string;
+  title: string;
+  subtitle: string;
+  year?: string;
+  tags: string[];
+  cover: string;
+  description?: string;
+  // Category-specific fields
+  totalEpisodes?: number;
+  totalChapters?: number;
+  totalVolumes?: number;
+  totalRuntime?: number;
+  totalPages?: number;
+  format?: string;
+};
+
+/**
+ * Maps a database library row to client-friendly format
+ * Handles category-specific field differences (episodes, chapters, pages, etc.)
+ *
+ * @param row - Database row from user_media_entries join with media_items
+ * @param config - Category configuration
+ * @returns Mapped entry or null if media_items is missing
+ */
+export function mapLibraryEntry(
+  row: LibraryRow,
+  config: MediaCategoryConfig,
+): MappedLibraryEntry | null {
+  const media = row.media_items;
+  if (!media) {
+    return null;
+  }
+
+  // Resolve title based on category priority
+  const title = resolveTitle(media, config.titlePriority);
+
+  // Subtitle logic varies by category
+  let subtitle = '';
+  if (config.key === 'anime') {
+    subtitle = (media.title_romaji as string) || (media.title_english as string) || '';
+  } else if (config.key === 'books') {
+    const tagList = Array.isArray(media.tags) ? media.tags.map(String) : [];
+    subtitle = tagList.length > 0 ? tagList.join(', ') : '';
+  } else if (config.key === 'movies') {
+    const originalTitle = media.original_title as string | undefined;
+    subtitle = originalTitle && originalTitle !== title ? originalTitle : '';
+  }
+
+  // Year extraction
+  const year =
+    (media.season_year as number | undefined)?.toString() ||
+    (media.start_date as string | undefined)?.slice(0, 4) ||
+    (media.release_date as string | undefined)?.slice(0, 4) ||
+    (media.first_air_date as string | undefined)?.slice(0, 4) ||
+    undefined;
+
+  // Genres/tags
+  const tags = Array.isArray(media.genres) ? media.genres.map(String) : [];
+
+  // Cover image
+  const cover =
+    (media.cover_image_large as string) ||
+    (media.cover_image_medium as string) ||
+    DEFAULT_COVER;
+
+  // Base mapped entry
+  const baseEntry: MappedLibraryEntry = {
+    id: `entry-${row.id}`,
+    entryId: row.id,
+    mediaId: media.id as number,
+    status: row.status,
+    isFavorite: row.is_favorite ?? false,
+    priority: row.priority ?? 0,
+    score: row.score?.toString() ?? undefined,
+    progress: row.progress ?? undefined,
+    notes: row.notes ?? undefined,
+    title,
+    subtitle,
+    year,
+    tags,
+    cover,
+    description: (media.description as string) ?? undefined,
+  };
+
+  // Add category-specific fields
+  if (config.key === 'anime') {
+    return {
+      ...baseEntry,
+      totalEpisodes: (media.episodes as number) ?? undefined,
+      totalChapters: (media.chapters as number) ?? undefined,
+      totalVolumes: (media.volumes as number) ?? undefined,
+      format: (media.format as string) ?? undefined,
+    };
+  }
+
+  if (config.key === 'books') {
+    return {
+      ...baseEntry,
+      totalPages: (media.page_count as number) ?? undefined,
+    };
+  }
+
+  if (config.key === 'movies') {
+    return {
+      ...baseEntry,
+      totalRuntime: (media.runtime as number) ?? undefined,
+      totalEpisodes: (media.number_of_episodes as number) ?? undefined,
+    };
+  }
+
+  // Games and other categories
+  return baseEntry;
+}
