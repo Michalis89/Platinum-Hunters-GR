@@ -17,12 +17,12 @@ const LEGAL_LINKS = [
   { label: 'Πολιτική απορρήτου', href: '/pages/privacy' },
 ];
 
-const SOCIAL_LINKS = [
-  { label: 'GitHub', href: 'https://github.com/Michalis89/hobbistas-hub', icon: Github },
-  { label: 'Email', href: 'mailto:mouzakitis.m89+supporthobbistas-hub@gmail.com', icon: Mail },
+const CONTACT = [
+  { label: 'GitHub', href: 'https://github.com/', icon: Github },
+  { label: 'Email', href: 'mailto:support@hobbistas-hub.com', icon: Mail },
 ];
 
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+function FooterTextLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
@@ -38,10 +38,11 @@ export function Footer() {
 
   return (
     <footer className="relative mt-auto border-t border-[var(--hb-border)] bg-[var(--hb-bg)]">
-      <div className="from-[var(--hb-primary-strong)]/[0.03] pointer-events-none absolute inset-0 bg-gradient-to-t to-transparent" />
+      {/* subtle premium wash */}
+      <div className="from-[var(--hb-primary-strong)]/[0.035] pointer-events-none absolute inset-0 bg-gradient-to-t to-transparent" />
 
-      <PageContainer size="lg" className="relative py-12">
-        <div className="grid gap-10 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
+      <PageContainer size="lg" className="relative py-10">
+        <div className="grid gap-10 md:grid-cols-[1.6fr_1fr_1fr]">
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="group inline-flex items-center gap-3">
@@ -59,17 +60,35 @@ export function Footer() {
               Ο χώρος σου για gaming, anime, manga, ταινίες, σειρές και βιβλία. Όλα οργανωμένα,
               χωρίς θόρυβο.
             </p>
+
+            {/* contact pills */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {CONTACT.map(c => {
+                const Icon = c.icon;
+                return (
+                  <Link
+                    key={c.label}
+                    href={c.href}
+                    className="border-[var(--hb-border)]/70 bg-[var(--hb-surface)]/40 hover:bg-[var(--hb-surface)]/70 focus-visible:ring-[var(--hb-primary)]/40 group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium text-[var(--hb-muted)] transition hover:border-[var(--hb-border)] hover:text-[var(--hb-headline)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hb-bg)]"
+                  >
+                    <Icon className="h-4 w-4 opacity-70 transition group-hover:opacity-100" />
+                    {c.label}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
           {/* Nav */}
           <div>
-            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
               Πλοήγηση
             </h4>
-            <ul className="space-y-2.5">
+            <div className="bg-[var(--hb-border)]/80 mb-4 mt-3 h-px w-8" />
+            <ul className="space-y-1.5">
               {NAV_LINKS.map(l => (
                 <li key={l.href}>
-                  <FooterLink href={l.href}>{l.label}</FooterLink>
+                  <FooterTextLink href={l.href}>{l.label}</FooterTextLink>
                 </li>
               ))}
             </ul>
@@ -77,53 +96,35 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
               Νομικά
             </h4>
-            <ul className="space-y-2.5">
+            <div className="bg-[var(--hb-border)]/80 mb-4 mt-3 h-px w-8" />
+            <ul className="space-y-1.5">
               {LEGAL_LINKS.map(l => (
                 <li key={l.href}>
-                  <FooterLink href={l.href}>{l.label}</FooterLink>
+                  <FooterTextLink href={l.href}>{l.label}</FooterTextLink>
                 </li>
               ))}
-            </ul>
-          </div>
-
-          {/* Social */}
-          <div>
-            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--hb-headline)]">
-              Επικοινωνία
-            </h4>
-            <ul className="space-y-2.5">
-              {SOCIAL_LINKS.map(s => {
-                const Icon = s.icon;
-                return (
-                  <li key={s.label}>
-                    <Link
-                      href={s.href}
-                      className="focus-visible:ring-[var(--hb-primary)]/40 group inline-flex items-center gap-2 text-sm text-[var(--hb-muted)] transition hover:text-[var(--hb-headline)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hb-bg)]"
-                    >
-                      <Icon className="h-4 w-4 opacity-70 transition group-hover:opacity-100" />
-                      <span className="underline-offset-4 group-hover:underline">{s.label}</span>
-                    </Link>
-                  </li>
-                );
-              })}
             </ul>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex flex-col gap-4 border-t border-[var(--hb-border)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-[var(--hb-border)]/70 mt-8 flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-[var(--hb-muted)]" suppressHydrationWarning>
-            &copy; {currentYear} Hobbistas. Με επιφύλαξη παντός δικαιώματος.
+            © {currentYear} Hobbistas. Με επιφύλαξη παντός δικαιώματος.
           </p>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
             {LEGAL_LINKS.map(l => (
-              <FooterLink key={l.href} href={l.href}>
+              <Link
+                key={l.href}
+                href={l.href}
+                className="focus-visible:ring-[var(--hb-primary)]/40 text-[var(--hb-muted)] underline-offset-4 transition hover:text-[var(--hb-headline)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hb-bg)]"
+              >
                 {l.label}
-              </FooterLink>
+              </Link>
             ))}
           </div>
         </div>
