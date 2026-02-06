@@ -8,6 +8,7 @@ import type { ArticleRow } from '@/types/database';
 import { selectCanEditArticles, selectIsAuthorOf } from '@/store/slices/authSlice';
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import { Button } from '@/components/ui/button';
 
 type ActionRowProps = {
   article: ArticleRow;
@@ -158,17 +159,23 @@ export default function ActionRow({ article }: ActionRowProps) {
   return (
     <>
       <div className="flex min-h-[44px] items-center justify-center gap-3">
-        <button
+        <Button
           type="button"
+          iconOnly
+          size={'icon'}
+          variant={'secondary'}
           onClick={handleShare}
           aria-label="Κοινοποίηση"
           title="Κοινοποίηση"
-          className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-[var(--hb-text)] transition hover:text-[var(--hb-primary)]"
+          className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[16px] text-[var(--hb-text)] transition hover:text-[var(--hb-primary)]"
         >
           <Share2 size={14} />
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          iconOnly
+          size={'icon'}
+          variant={'secondary'}
           onClick={handleCopyLink}
           aria-label="Αντιγραφή συνδέσμου"
           title={copied ? 'Ο σύνδεσμος αντιγράφηκε' : 'Αντιγραφή συνδέσμου'}
@@ -177,9 +184,12 @@ export default function ActionRow({ article }: ActionRowProps) {
           }`}
         >
           <ClipboardCopy size={14} />
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          iconOnly
+          size={'icon'}
+          variant={'secondary'}
           onClick={toggleLike}
           aria-label={
             isAuthor
@@ -201,21 +211,27 @@ export default function ActionRow({ article }: ActionRowProps) {
           disabled={likeLoading || isAuthor}
         >
           <Heart size={14} />
-        </button>
+        </Button>
         {canEdit && (
-          <button
+          <Button
             type="button"
+            iconOnly
+            size={'icon'}
+            variant={'secondary'}
             onClick={() => setIsEditOpen(true)}
             aria-label="Επεξεργασία"
             title="Επεξεργασία"
             className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-[var(--hb-text)] transition hover:text-[var(--hb-primary)]"
           >
             <Pencil size={14} />
-          </button>
+          </Button>
         )}
         {canEdit && (
-          <button
+          <Button
             type="button"
+            variant={'secondary'}
+            iconOnly
+            size={'icon'}
             onClick={handleDelete}
             aria-label="Διαγραφή"
             title="Διαγραφή άρθρου"
@@ -227,7 +243,7 @@ export default function ActionRow({ article }: ActionRowProps) {
             ) : (
               <Trash2 size={14} />
             )}
-          </button>
+          </Button>
         )}
       </div>
       {canEdit && (

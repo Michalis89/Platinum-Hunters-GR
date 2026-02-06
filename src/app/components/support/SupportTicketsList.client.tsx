@@ -10,7 +10,7 @@ import PageHero from '@/app/components/shared/PageHero';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
 import { Select } from '@/app/components/ui/Select';
 import Feedback from '@/app/components/ui/Feedback';
@@ -228,7 +228,7 @@ export default function SupportTicketsList() {
                 )}
                 {view === 'archive' && (
                   <Button
-                    variant="danger"
+                    variant="destructive"
                     onClick={() => handleDelete(ticket.id)}
                     className="text-[var(--hb-headline)]"
                     disabled={actionLoading === ticket.id}

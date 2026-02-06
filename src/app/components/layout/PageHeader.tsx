@@ -43,8 +43,8 @@ export function PageHeader({
 
   return (
     <section className={`relative ${className}`}>
-      <div className={`grid gap-6 ${layoutClass}`}>
-        <div className={`flex flex-col gap-3 ${textAlign} ${contentClassName}`}>
+      <div className={`grid gap-4 md:gap-6 ${layoutClass}`}>
+        <div className={`flex flex-col gap-2.5 md:gap-3 ${textAlign} ${contentClassName}`}>
           {breadcrumbs ? <div className="text-xs text-[var(--hb-muted)]">{breadcrumbs}</div> : null}
           {eyebrow ? (
             <p
@@ -57,7 +57,7 @@ export function PageHeader({
           <div className={`flex gap-3 ${isCentered ? 'flex-col items-center' : 'items-center'}`}>
             {icon ? <div className="shrink-0">{icon}</div> : null}
             <h1
-              className={`text-3xl font-bold tracking-tight text-[var(--hb-headline)] md:text-4xl ${titleClassName}`}
+              className={`text-2xl font-bold tracking-tight text-[var(--hb-headline)] sm:text-3xl md:text-4xl ${titleClassName}`}
             >
               {title}
             </h1>

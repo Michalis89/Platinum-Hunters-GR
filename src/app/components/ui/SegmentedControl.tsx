@@ -1,4 +1,5 @@
 import { cn } from '@/utils/utils';
+import { Button } from '@/components/ui/button';
 
 export type SegmentedOption = {
   id: string;
@@ -30,18 +31,14 @@ export function SegmentedControl({
       {options.map(option => {
         const isActive = option.id === value;
         return (
-          <button
+          <Button
             key={option.id}
             role="tab"
             type="button"
+            variant={isActive ? 'primary' : 'secondary'}
             aria-selected={isActive}
             onClick={() => onChange(option.id)}
-            className={cn(
-              'flex flex-1 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition',
-              isActive
-                ? 'bg-[var(--hb-primary-strong)] text-[var(--hb-bg)] shadow-[var(--hb-shadow-md)]'
-                : 'text-[var(--hb-text)] hover:bg-[var(--hb-card)]',
-            )}
+            className={'flex flex-1 items-center justify-center rounded-xl px-4 py-2'}
           >
             <span className="flex flex-col">
               <span>{option.label}</span>
@@ -51,7 +48,7 @@ export function SegmentedControl({
                 </span>
               ) : null}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>

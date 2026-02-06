@@ -12,7 +12,7 @@ import { Select } from '@/app/components/ui/Select';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import EmptyState from '@/app/components/ui/EmptyState';
 import ErrorState from '@/app/components/ui/ErrorState';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import Feedback from '@/app/components/ui/Feedback';
 import { selectIsAdminOrModerator } from '@/store/slices/authSlice';
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
@@ -241,7 +241,7 @@ export default function AdminSupportInbox() {
                           Άνοιγμα ticket
                         </Button>
                         <Button
-                          variant="danger"
+                          variant="destructive"
                           disabled={actionLoading === ticket.id}
                           onClick={() => {
                             setAlert({

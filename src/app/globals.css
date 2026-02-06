@@ -6,6 +6,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 :root,
@@ -21,6 +22,7 @@ html {
   --hb-accent: #ff4d5a;
   --hb-muted: #a1a1b3;
   --hb-text: #f5f5f5;
+  --hb-button-primary-text: #f5f5f5;
   --hb-headline: #ffffff;
   --hb-shadow-md: 0 12px 30px rgba(3, 7, 18, 0.14);
   --hb-shadow-md-hover: 0 18px 45px rgba(3, 7, 18, 0.18);
@@ -64,6 +66,7 @@ html {
 
   --hb-muted: #5a5955;
   --hb-text: #1f1f1f;
+  --hb-button-primary-text: #f5f5f5;
   --hb-headline: #0f0f0f;
 
   --hb-shadow-md: 0 12px 30px rgba(3, 7, 18, 0.14);
@@ -92,6 +95,7 @@ body {
   min-height: 100vh;
   color: var(--hb-text);
   background: var(--hb-bg);
+  overflow-x: clip;
   font-family:
     var(--font-geist-sans),
     system-ui,
@@ -99,6 +103,13 @@ body {
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 /* Custom Scrollbar */
@@ -210,4 +221,44 @@ select:focus {
   background: var(--hb-popover-bg);
   border-color: var(--hb-popover-border);
   box-shadow: var(--hb-popover-shadow);
+}
+
+@layer base {
+  :root {
+    /* Shadcn tokens mapped to Hobbistas branding tokens */
+    --background: var(--hb-bg);
+    --foreground: var(--hb-text);
+    --card: var(--hb-card);
+    --card-foreground: var(--hb-text);
+    --popover: var(--hb-popover-bg);
+    --popover-foreground: var(--hb-text);
+    --primary: var(--hb-primary-strong);
+    --primary-foreground: var(--hb-bg);
+    --secondary: var(--hb-panel);
+    --secondary-foreground: var(--hb-text);
+    --muted: var(--hb-panel);
+    --muted-foreground: var(--hb-muted);
+    --accent: var(--hb-accent);
+    --accent-foreground: var(--hb-headline);
+    --destructive: var(--hb-accent);
+    --destructive-foreground: var(--hb-headline);
+    --border: var(--hb-border);
+    --input: var(--hb-input-border);
+    --ring: var(--hb-ring);
+    --chart-1: var(--hb-primary-strong);
+    --chart-2: var(--hb-primary);
+    --chart-3: var(--hb-accent);
+    --chart-4: var(--hb-muted);
+    --chart-5: var(--hb-headline);
+    --radius: var(--hb-radius);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

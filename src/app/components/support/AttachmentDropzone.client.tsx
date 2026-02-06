@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Image as ImageIcon, FileText, UploadCloud, X } from 'lucide-react';
 import { cn } from '@/utils/utils';
 import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
+import { Button } from '@/components/ui/button';
 
 export type AttachmentItem = {
   id: string;
@@ -150,14 +151,15 @@ export default function AttachmentDropzone({
           onChange={handleInputChange}
           disabled={disabled}
         />
-        <button
+        <Button
           type="button"
+          variant={'ghost'}
           onClick={() => inputRef.current?.click()}
-          className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-2 text-xs font-semibold text-[var(--hb-text)] transition hover:border-[var(--hb-primary-strong)]"
+          className="rounded-full px-4 py-2"
           disabled={disabled}
         >
           Επιλογή αρχείων
-        </button>
+        </Button>
       </div>
 
       {error ? <FormErrorMessage message={error} /> : null}
@@ -193,13 +195,14 @@ export default function AttachmentDropzone({
                   {(item.file.size / 1024 / 1024).toFixed(2)} MB
                 </div>
               </div>
-              <button
+              <Button
                 type="button"
+                variant={'ghost'}
                 onClick={() => handleRemove(item.id)}
-                className="rounded-full p-1 text-[var(--hb-muted)] transition hover:text-[var(--hb-headline)]"
+                className="p- rounded-full"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import EntryEditDialog, { type EditState } from '@/app/components/backlog/EntryEditDialog';
 import type { MediaCategory, MediaEntry, SearchResult } from '@/app/components/backlog/types';

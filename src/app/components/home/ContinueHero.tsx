@@ -8,6 +8,7 @@ import { BookOpen, BookText, Gamepad2, Sparkles, Tv } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import styles from './ContinueHero.module.css';
+import { Button } from '@/components/ui/button';
 
 type ContinueSlide = {
   category: string;
@@ -147,11 +148,7 @@ function RelativeTimeDisplay({ date }: { date: string }) {
     setFormattedTime(formatTimeAgo(date));
   }, [date]);
 
-  return (
-    <span suppressHydrationWarning>
-      {formattedTime ?? '...'}
-    </span>
-  );
+  return <span suppressHydrationWarning>{formattedTime ?? '...'}</span>;
 }
 
 const getSlideImage = (slide: ContinueSlide) =>
@@ -233,19 +230,16 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
           </div>
         )}
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <Link
+          <Button
+            variant={'primary'}
             href={getCategoryRoute(item.slide.category, item.slide.title)}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--hb-primary-strong)] px-7 py-3 text-sm font-semibold text-slate-950 transition duration-300 hover:shadow-[var(--hb-shadow-md-hover)] hover:brightness-110"
           >
             Συνέχεια
             <span aria-hidden="true">→</span>
-          </Link>
-          <Link
-            href={getCategoryRoute(item.slide.category)}
-            className="hover:border-[var(--hb-primary-strong)]/60 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] px-6 py-3 text-sm font-semibold text-[var(--hb-headline)] transition"
-          >
+          </Button>
+          <Button variant={'secondary'} href={getCategoryRoute(item.slide.category)}>
             Δες όλα τα {item.config.label} σε εξέλιξη
-          </Link>
+          </Button>
         </div>
       </div>
 
@@ -346,7 +340,12 @@ export function ContinueHero() {
       dotsClass: 'slick-dots continueHero-dots',
       appendDots: (dots: ReactNode) => <div className="mt-4 flex justify-center">{dots}</div>,
       customPaging: (i: number) => (
-        <button type="button" aria-label={`Go to slide ${i + 1}`} className="continueHero-dot" />
+        <Button
+          variant={'primary'}
+          type="button"
+          aria-label={`Go to slide ${i + 1}`}
+          className="continueHero-dot"
+        />
       ),
       beforeChange: () => releaseSlideFocus(),
     }),

@@ -21,6 +21,7 @@ import {
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@/store/slices/authSlice';
 import type { HobbyCategory } from '@/config/hobbies';
+import { Button } from '@/components/ui/button';
 
 const ICON_MAP: Record<string, typeof Gamepad2> = {
   Gamepad2,
@@ -76,15 +77,16 @@ function ModuleButton({
 
   if (isDisabled) {
     return (
-      <button
+      <Button
         type="button"
+        variant={'primary'}
         disabled
-        className="flex items-center gap-1.5 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1.5 text-xs font-medium text-[var(--hb-muted)] opacity-50"
+        className="flex items-center gap-1.5 rounded-full px-3 py-1.5"
         title={disabledTitle}
       >
         <Construction className="h-3 w-3" />
         <span>{label}</span>
-      </button>
+      </Button>
     );
   }
 

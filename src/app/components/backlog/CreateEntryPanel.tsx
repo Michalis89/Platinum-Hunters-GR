@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { SearchBar } from '@/app/components/ui/SearchBar';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import EmptyState from '@/app/components/ui/EmptyState';
 import MediaSearchResultCard from './MediaSearchResultCard';
 import { MediaCategory, MediaEntry, SearchResult, CATEGORY_CONFIG } from './types';
@@ -80,7 +80,7 @@ export default function CreateEntryPanel({
         )}
       </div>
       <div className="mt-4">
-        <Button variant="ghost" onClick={onClose}>
+        <Button variant="ghost" onClick={onClose} className="w-full sm:w-auto">
           Κλείσιμο
         </Button>
       </div>

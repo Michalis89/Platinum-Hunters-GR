@@ -24,10 +24,10 @@ export default function CategoryStats({
     <div
       className={`mt-6 grid gap-4 ${
         category === 'movies'
-          ? 'md:grid-cols-3'
+          ? 'grid-cols-2 md:grid-cols-3'
           : category === 'books'
-            ? 'md:grid-cols-5'
-            : 'md:grid-cols-4'
+            ? 'grid-cols-2 md:grid-cols-5'
+            : 'grid-cols-2 md:grid-cols-4'
       }`}
     >
       <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">

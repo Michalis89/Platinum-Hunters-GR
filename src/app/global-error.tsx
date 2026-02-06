@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { captureException } from '@sentry/nextjs';
+import { Button } from '@/components/ui/button';
 
 type GlobalErrorProps = {
   error: Error;
@@ -24,22 +25,18 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         στην αρχική σελίδα.
       </p>
       <div className="flex gap-3">
-        <button
+        <Button
           type="button"
+          variant={'primary'}
           onClick={() => {
             reset();
           }}
-          className="rounded-full bg-[var(--hb-primary)] px-6 py-2 text-sm font-semibold text-white transition hover:bg-[var(--hb-primary-strong)]"
         >
           Δοκίμασε ξανά
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="rounded-full border border-[var(--hb-border)] px-6 py-2 text-sm font-semibold text-[var(--hb-text)] transition hover:bg-white/10"
-        >
+        </Button>
+        <Button type="button" variant={'secondary'} onClick={() => router.push('/')}>
           Αρχική
-        </button>
+        </Button>
       </div>
     </div>
   );

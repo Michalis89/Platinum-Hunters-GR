@@ -1,18 +1,20 @@
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function InfoHint({ tip }: { tip: string }) {
   return (
     <Tooltip.Provider delayDuration={150}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
-          <button
+          <Button
             type="button"
+            variant={'secondary'}
             aria-label="Πληροφορίες υπολογισμού"
             className="hover:bg-[var(--hb-primary-strong)]/10 grid h-7 w-7 place-items-center rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-primary-strong)] transition hover:border-[var(--hb-primary-strong)]"
           >
             <Info className="h-4 w-4" />
-          </button>
+          </Button>
         </Tooltip.Trigger>
 
         <Tooltip.Portal>

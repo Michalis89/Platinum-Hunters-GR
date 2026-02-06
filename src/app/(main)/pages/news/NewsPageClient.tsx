@@ -306,7 +306,7 @@ function NewsPageContent() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative mb-10 overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-8 shadow-xl backdrop-blur-xl md:px-10"
+        className="relative mb-8 overflow-hidden rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-6 shadow-xl backdrop-blur-xl sm:px-6 sm:py-8 md:px-10"
       >
         <PageHeader
           eyebrow="Αίθουσα Τύπου"

@@ -7,6 +7,7 @@ import { selectIsAuthenticated, selectUser, selectIsLoading } from '@/store/slic
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Skeleton from '@/app/components/ui/Skeleton';
 import CategoryLibrary from '@/app/components/backlog/CategoryLibrary';
+import { Button } from '@/components/ui/button';
 import {
   isMediaCategory,
   type MediaCategory,
@@ -69,8 +70,7 @@ function BacklogPageContent() {
 
   // Check if user has access to this category
   const userCategories = (user?.categories as string[] | undefined) ?? [];
-  const hasAccessToCategory =
-    userCategories.length === 0 || userCategories.includes(category);
+  const hasAccessToCategory = userCategories.length === 0 || userCategories.includes(category);
 
   // Show skeleton while auth initializes or before client mount (prevents hydration mismatch)
   if (!hasMounted || isAuthLoading) {
@@ -91,23 +91,16 @@ function BacklogPageContent() {
             Δεν έχεις πρόσβαση σε αυτή την κατηγορία
           </h2>
           <p className="mb-6 text-[var(--hb-muted)]">
-            Για να δεις το{' '}
-            <strong className="text-[var(--hb-headline)]">{category}</strong> backlog, πρέπει
-            πρώτα να ενεργοποιήσεις αυτή την κατηγορία στο προφίλ σου.
+            Για να δεις το <strong className="text-[var(--hb-headline)]">{category}</strong>{' '}
+            backlog, πρέπει πρώτα να ενεργοποιήσεις αυτή την κατηγορία στο προφίλ σου.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <button
-              onClick={() => router.push('/pages/profile/edit')}
-              className="rounded-full bg-[var(--hb-primary-strong)] px-6 py-2 font-medium text-white transition hover:bg-[var(--hb-primary)]"
-            >
+            <Button variant={'primary'} onClick={() => router.push('/pages/profile/edit')}>
               Ρυθμίσεις Προφίλ
-            </button>
-            <button
-              onClick={() => router.push('/pages/hobbies')}
-              className="rounded-full border border-[var(--hb-border)] px-6 py-2 font-medium text-[var(--hb-text)] transition hover:bg-white/5"
-            >
+            </Button>
+            <Button variant={'secondary'} onClick={() => router.push('/pages/hobbies')}>
               Πίσω στο Dashboard
-            </button>
+            </Button>
           </div>
         </div>
       </div>

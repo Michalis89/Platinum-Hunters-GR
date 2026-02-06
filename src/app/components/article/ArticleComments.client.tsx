@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { Textarea } from '@/app/components/ui/Textarea';
 import { useSelector } from 'react-redux';
@@ -209,18 +209,18 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                     {editError && <p className="text-xs text-red-400">{editError}</p>}
                     <div className="flex flex-wrap gap-2">
                       <Button
-                        variant="secondary"
-                        onClick={() => setEditingCommentId(null)}
-                        disabled={editLoading}
-                      >
-                        Ακύρωση
-                      </Button>
-                      <Button
                         onClick={() => handleUpdate(comment.id)}
                         disabled={editLoading}
                         variant="primary"
                       >
                         {editLoading ? 'Αποθήκευση...' : 'Αποθήκευση'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setEditingCommentId(null)}
+                        disabled={editLoading}
+                      >
+                        Ακύρωση
                       </Button>
                     </div>
                   </div>
@@ -229,25 +229,25 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                     <p className="mt-2 text-sm leading-relaxed">{comment.content}</p>
                     {user && canManageComment(comment) && (
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <button
+                        <Button
                           type="button"
+                          variant={'primary'}
                           onClick={() => {
                             setEditingCommentId(comment.id);
                             setEditContent(comment.content);
                             setEditError(null);
                           }}
-                          className="rounded-full border border-[var(--hb-border)] px-3 py-1 text-xs text-[var(--hb-muted)] transition hover:border-[var(--hb-primary)] hover:text-[var(--hb-primary)]"
                         >
                           Επεξεργασία
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant={'secondary'}
                           type="button"
                           onClick={() => handleDelete(comment.id)}
                           disabled={deleteLoading === comment.id}
-                          className="rounded-full border border-red-400 px-3 py-1 text-xs text-red-400 transition hover:border-red-500 hover:text-red-500"
                         >
                           {deleteLoading === comment.id ? 'Διαγραφή...' : 'Διαγραφή'}
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </>

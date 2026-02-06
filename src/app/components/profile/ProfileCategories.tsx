@@ -2,6 +2,7 @@
 
 import { Gamepad2, Sparkles, BookOpen, Film, Tv, Code, PawPrint, Cloud } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
 
 type CategoryMeta = {
   title: string;
@@ -101,27 +102,24 @@ export function ProfileCategories({
             const isActive = activeCategory === cat;
 
             return (
-              <button
+              <Button
                 key={cat}
+                variant={isActive ? 'primary' : 'secondary'}
                 onClick={() => onCategoryChange(cat)}
-                className={`group inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                  isActive
-                    ? 'bg-[var(--hb-primary-strong)]/15 border-[var(--hb-primary-strong)] text-[var(--hb-primary-strong)]'
-                    : 'hover:border-[var(--hb-primary-strong)]/50 border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
-                }`}
+                className={`group inline-flex items-center gap-2`}
                 aria-pressed={isActive}
               >
                 <span
                   className={`transition-colors ${
                     isActive
-                      ? 'text-[var(--hb-primary-strong)]'
+                      ? 'text-[var(--hb-text)]'
                       : 'text-[var(--hb-muted)] group-hover:text-[var(--hb-primary-strong)]'
                   }`}
                 >
                   {meta.icon}
                 </span>
                 <span>{meta.title}</span>
-              </button>
+              </Button>
             );
           })}
         </div>

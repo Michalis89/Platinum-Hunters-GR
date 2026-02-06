@@ -2,6 +2,7 @@
 
 import { SearchBar } from '@/app/components/ui/SearchBar';
 import { MediaCategory, MediaStatus, CATEGORY_CONFIG } from './types';
+import { Button } from '@/components/ui/button';
 
 interface StatusFilterBarProps {
   category: MediaCategory;
@@ -20,15 +21,12 @@ export default function StatusFilterBar({
 }: Readonly<StatusFilterBarProps>) {
   const config = CATEGORY_CONFIG[category];
 
-  const getButtonClass = (status: MediaStatus | 'all') =>
-    `rounded-full px-4 py-2 text-xs font-semibold transition ${
-      activeStatus === status
-        ? 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)]'
-        : 'border border-[var(--hb-border)] text-[var(--hb-muted)] hover:text-[var(--hb-text)]'
-    }`;
+  const getButtonVariant = (status: MediaStatus | 'all') =>
+    activeStatus === status ? 'primary' : 'secondary';
+  const baseButtonClass = 'shrink-0 rounded-full px-4 py-2 text-xs font-semibold';
 
   return (
-    <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)] backdrop-blur">
+    <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur sm:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex-1">
           <SearchBar
@@ -37,27 +35,46 @@ export default function StatusFilterBar({
             placeholder={config.searchPlaceholder}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button onClick={() => onStatusChange('all')} className={getButtonClass('all')}>
+        <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+          <div className="flex min-w-max items-center gap-2">
+          <Button
+            variant={getButtonVariant('all')}
+            onClick={() => onStatusChange('all')}
+            className={baseButtonClass}
+          >
             Όλα
-          </button>
+          </Button>
           {category !== 'movies' && (
-            <button onClick={() => onStatusChange('current')} className={getButtonClass('current')}>
+            <Button
+              variant={getButtonVariant('current')}
+              onClick={() => onStatusChange('current')}
+              className={baseButtonClass}
+            >
               {config.currentLabel}
-            </button>
+            </Button>
           )}
-          <button onClick={() => onStatusChange('planned')} className={getButtonClass('planned')}>
+          <Button
+            variant={getButtonVariant('planned')}
+            onClick={() => onStatusChange('planned')}
+            className={baseButtonClass}
+          >
             {config.plannedLabel}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={getButtonVariant('completed')}
             onClick={() => onStatusChange('completed')}
-            className={getButtonClass('completed')}
+            className={baseButtonClass}
           >
             {config.completedLabel}
-          </button>
-          <button onClick={() => onStatusChange('dropped')} className={getButtonClass('dropped')}>
+          </Button>
+          <Button
+            variant={getButtonVariant('dropped')}
+            onClick={() => onStatusChange('dropped')}
+            className={baseButtonClass}
+          >
             {config.droppedLabel}
-          </button>
+          </Button>
+          </div>
         </div>
       </div>
     </section>

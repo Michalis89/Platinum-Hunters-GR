@@ -2,6 +2,7 @@
 
 import { type ReactNode, createContext, useContext, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type CollapsibleCardContextValue = {
   isCollapsed: boolean;
@@ -64,7 +65,7 @@ export function CollapsibleCardHeader({
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={context.toggle}
       className={`flex w-full items-center justify-between border-b border-slate-200 bg-white/80 p-4 text-left text-slate-900 transition-colors hover:bg-slate-100 dark:border-[var(--hb-border)] dark:bg-[var(--hb-card)] dark:text-[var(--hb-text)] ${context.isCollapsed ? 'border-b-0' : ''} ${className}`}
@@ -73,7 +74,7 @@ export function CollapsibleCardHeader({
       <ChevronDown
         className={`ml-2 h-5 w-5 text-slate-500 transition-transform duration-200 ${context.isCollapsed ? '' : 'rotate-180'} dark:text-[var(--hb-muted)]`}
       />
-    </button>
+    </Button>
   );
 }
 

@@ -6,7 +6,7 @@ import { ArrowLeft, Calendar, Clock, Eye, FileText, Heart, Tag, User } from 'luc
 import type { ArticleRow, ArticleTopic } from '@/types/database';
 import ActionRow from '@/app/components/article/ActionRow.client';
 import { Card, CardContent, CardDescription, CardTitle } from '@/app/components/ui/Card';
-import Button from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import ReadingProgress from '@/app/components/article/ReadingProgress.client';
 import EmptyState from '@/app/components/ui/EmptyState';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
@@ -143,8 +143,8 @@ async function fetchRelatedArticles(
       query = query.eq('category', filters.category);
     }
 
-        return query;
-      };
+    return query;
+  };
 
   const execute = async (filters: { topic?: ArticleTopic | null; category?: string | null }) => {
     const { data, error } = await buildQuery(filters);
@@ -273,15 +273,19 @@ export default async function ArticleDetailPage({
   const host = headersList.get('host');
   const referer = headersList.get('referer');
   const baseUrl = host ? `${protocol}://${host}` : '';
+  const listBasePath = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
   const hasCategory = Boolean(article.category);
-  const fallbackHref = hasCategory ? `${basePath}?category=${article.category}` : basePath;
+  const fallbackHref = hasCategory
+    ? `${listBasePath}?category=${article.category}`
+    : listBasePath;
   let backHref = fallbackHref;
 
   if (referer && baseUrl && referer.startsWith(baseUrl)) {
     try {
       const url = new URL(referer);
       const path = `${url.pathname}${url.search}`;
-      if (path.startsWith(basePath)) {
+      const isListPath = url.pathname === listBasePath || url.pathname === `${listBasePath}/`;
+      if (isListPath) {
         backHref = path;
       }
     } catch {
@@ -363,20 +367,15 @@ export default async function ArticleDetailPage({
         <div className="via-[var(--hb-bg)]/60 absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] to-transparent" />
 
         <div className="absolute left-4 top-4 z-10">
-          <Button
-            href={backHref}
-            variant="secondary"
-            icon={<ArrowLeft size={16} />}
-            className="bg-[var(--hb-panel)]/80 border-[var(--hb-border)] text-[var(--hb-headline)] backdrop-blur-sm"
-          >
+          <Button href={backHref} variant="secondary" icon={<ArrowLeft size={16} />}>
             Πίσω
           </Button>
         </div>
       </div>
 
       {/* Masthead + Body */}
-      <div className="relative mx-auto -mt-16 max-w-5xl px-4 pb-16 md:-mt-20">
-        <article className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-2xl backdrop-blur-xl md:p-10">
+      <div className="relative mx-auto -mt-14 max-w-5xl px-3 pb-16 sm:px-4 md:-mt-20">
+        <article className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-2xl backdrop-blur-xl sm:p-6 md:p-10">
           <header className="mx-auto max-w-[760px]">
             <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
               <span className="bg-[var(--hb-panel)]/80 rounded-full border border-[var(--hb-border)] px-3 py-1">
@@ -387,7 +386,7 @@ export default async function ArticleDetailPage({
               </span>
             </div>
 
-            <h1 className="mt-4 text-[28px] font-bold leading-[1.15] tracking-tight text-[var(--hb-headline)] md:text-[38px]">
+            <h1 className="mt-4 text-[24px] font-bold leading-[1.15] tracking-tight text-[var(--hb-headline)] sm:text-[28px] md:text-[38px]">
               {article.title}
             </h1>
 
@@ -497,7 +496,7 @@ export default async function ArticleDetailPage({
           )}
           {contentWithHeadingIds && (
             <section
-              className="article-content [&_blockquote]:bg-[var(--hb-primary)]/5 mx-auto max-w-[760px] pt-8 text-[17px] leading-[1.8] text-[var(--hb-text)] [&_a]:text-[var(--hb-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-[var(--hb-primary)] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--hb-primary)] [&_blockquote]:px-4 [&_blockquote]:py-2 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-[var(--hb-panel)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-[var(--hb-primary)] [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-[var(--hb-headline)] [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-xl [&_h3]:font-semibold [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:bg-[var(--hb-panel)] [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
+              className="article-content [&_blockquote]:bg-[var(--hb-primary)]/5 mx-auto max-w-[760px] pt-8 text-base leading-[1.8] text-[var(--hb-text)] sm:text-[17px] [&_a]:text-[var(--hb-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-[var(--hb-primary)] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--hb-primary)] [&_blockquote]:px-4 [&_blockquote]:py-2 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-[var(--hb-panel)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-[var(--hb-primary)] [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[var(--hb-headline)] sm:[&_h1]:text-3xl [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-xl [&_h2]:font-semibold sm:[&_h2]:text-2xl [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-lg [&_h3]:font-semibold sm:[&_h3]:text-xl [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:bg-[var(--hb-panel)] [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
               dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
             />
           )}

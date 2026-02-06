@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, X, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type AlertType = 'success' | 'error' | 'warning' | 'info';
 
@@ -135,13 +136,14 @@ export default function AlertMessage({
               </div>
 
               {/* Close button */}
-              <button
+              <Button
+                variant={'outline'}
                 onClick={handleClose}
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[var(--hb-muted)] transition-colors hover:bg-[var(--hb-border)] hover:text-[var(--hb-text)] focus:outline-none"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center"
                 aria-label="Κλείσιμο"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             {/* Progress bar */}

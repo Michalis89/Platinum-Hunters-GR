@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
-import Button from '../ui/Button';
 import ErrorState from '../ui/ErrorState';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import type { ArticleCategory, ArticleTopic, ArticleStatus, ArticleRow } from '@/types/database';
@@ -342,12 +342,9 @@ export default function EditArticleDialog({
                 <h2 className="text-xl font-semibold text-[var(--hb-headline)]">
                   Επεξεργασία Άρθρου
                 </h2>
-                <button
-                  onClick={onClose}
-                  className="rounded-lg p-2 text-[var(--hb-muted)] transition hover:bg-white/5 hover:text-white"
-                >
+                <Button variant={'ghost'} onClick={onClose}>
                   <X size={20} />
-                </button>
+                </Button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-6">
@@ -440,7 +437,7 @@ export default function EditArticleDialog({
                       Εικόνα εξωφύλλου
                     </label>
                     <div className="flex flex-wrap gap-3">
-                      <div className="flex flex-1 min-w-[220px] flex-col gap-2">
+                      <div className="flex min-w-[220px] flex-1 flex-col gap-2">
                         <Input
                           placeholder="URL εικόνας"
                           value={coverImage}
@@ -522,14 +519,11 @@ export default function EditArticleDialog({
 
               <div className="flex items-center justify-between border-t border-[var(--hb-border)] px-6 py-4">
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={onClose}
-                    className="rounded-lg px-4 py-2 text-sm text-[var(--hb-muted)] transition hover:text-white"
-                  >
+                  <Button variant={'secondary'} onClick={onClose}>
                     Ακύρωση
-                  </button>
+                  </Button>
                   <Button
-                    variant="danger"
+                    variant="destructive"
                     onClick={handleDelete}
                     disabled={isSubmitting || isDeleting}
                   >

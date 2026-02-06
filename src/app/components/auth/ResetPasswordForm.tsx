@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Lock, Eye, EyeOff } from 'lucide-react'; // Προσθήκη για καλύτερο UX
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Feedback from '@/app/components/ui/Feedback';
 import { validatePassword } from '@/utils/validation/auth';
@@ -111,13 +111,14 @@ export default function ResetPasswordForm() {
                     disabled={submitting}
                     className="pr-10"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant={'ghost'}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[38px] text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
+                    className="absolute right-3 top-[38px]"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -131,11 +132,7 @@ export default function ResetPasswordForm() {
                 disabled={submitting}
               />
 
-              <Button
-                type="submit"
-                disabled={submitting}
-                className="shadow-[var(--hb-primary)]/20 h-12 w-full border-none bg-[var(--hb-primary)] text-base font-semibold text-white shadow-lg transition-all duration-300 hover:scale-[1.01] hover:bg-[var(--hb-primary-strong)] active:scale-[0.98]"
-              >
+              <Button variant={'primary'} size={'xl'} type="submit" disabled={submitting}>
                 {submitting ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

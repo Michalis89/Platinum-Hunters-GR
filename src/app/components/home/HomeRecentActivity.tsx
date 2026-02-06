@@ -1,8 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { ArrowRight, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 // Lazy load ActivityFeed with skeleton fallback
 const ActivityFeed = dynamic(
@@ -10,7 +9,7 @@ const ActivityFeed = dynamic(
   {
     loading: () => <ActivityFeedSkeleton />,
     ssr: false, // Don't SSR since it fetches user-specific data
-  }
+  },
 );
 
 // Skeleton that matches ActivityFeed layout
@@ -56,13 +55,6 @@ export function HomeRecentActivity({ scope = 'global' }: HomeRecentActivityProps
             <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
               {scope === 'me' ? 'Η δραστηριότητά μου' : 'Πρόσφατη δραστηριότητα'}
             </h2>
-            <Link
-              href="/pages/profile"
-              className="group flex items-center gap-1 text-sm text-[var(--hb-primary-strong)] transition hover:text-[var(--hb-accent)]"
-            >
-              Δες περισσότερα
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
           </div>
           <div className="px-6 pb-6 pt-4">
             <ActivityFeed scope={scope} limit={15} height={380} compact />
