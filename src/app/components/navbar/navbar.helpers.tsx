@@ -22,11 +22,11 @@ export function NavItemContent({
 
 export const desktopLinkClass = (isActive: boolean) =>
   cn(
-    'h-9 rounded-full border px-3 text-sm',
+    'h-8 rounded-md border border-transparent px-2.5 text-sm',
     'focus-visible:ring-2 focus-visible:ring-[var(--hb-ring)] focus-visible:ring-offset-0',
     isActive
-      ? 'border-[var(--hb-border)] bg-white/5 text-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)]'
-      : 'border-transparent text-[var(--hb-muted)] hover:border-[var(--hb-border)] hover:bg-white/5 hover:text-[var(--hb-primary-strong)]',
+      ? 'bg-white/5 text-[var(--hb-primary-strong)]'
+      : 'text-[var(--hb-muted)] hover:bg-white/5 hover:text-[var(--hb-primary-strong)]',
   );
 
 export const mobileChipClass = (isActive: boolean, fullWidth = false) =>

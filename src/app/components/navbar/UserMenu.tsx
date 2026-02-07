@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LogOut, Moon, PenLine, Plus, ShieldCheck, Sun, Ticket, User } from 'lucide-react';
+import { ChevronDown, LogOut, Moon, PenLine, Plus, ShieldCheck, Sun, Ticket, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,8 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getUserInitials } from './navbar.helpers';
+import { cn } from '@/lib/utils';
 import type { User as UserEntity } from '@/types/user';
+import { desktopLinkClass, getUserInitials } from './navbar.helpers';
 
 type Theme = 'dark' | 'light';
 
@@ -46,7 +47,10 @@ export function UserMenu({
         <Button
           type="button"
           variant="secondary"
-          className="h-9 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-2 text-[var(--hb-text)] hover:text-[var(--hb-primary-strong)]"
+          className={cn(
+            desktopLinkClass(false),
+            'h-8 gap-2 rounded-md border-transparent bg-transparent pl-1.5 pr-2 text-[var(--hb-text)]',
+          )}
         >
           <Avatar className="h-7 w-7 border border-[var(--hb-border)]">
             <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
@@ -55,6 +59,7 @@ export function UserMenu({
             </AvatarFallback>
           </Avatar>
           <span className="max-w-[130px] truncate text-sm">{user.username ?? 'Hobbistas User'}</span>
+          <ChevronDown className="size-4 text-[var(--hb-muted)]" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -74,9 +79,7 @@ export function UserMenu({
               <p className="truncate text-sm font-semibold text-[var(--hb-headline)]">
                 {user.username ?? 'Hobbistas User'}
               </p>
-              <p className="truncate text-xs text-[var(--hb-muted)]">
-                {user.email ?? 'Μέλος της κοινότητας'}
-              </p>
+              <p className="truncate text-xs text-[var(--hb-muted)]">{user.email ?? 'Μέλος της κοινότητας'}</p>
             </div>
           </div>
         </DropdownMenuLabel>

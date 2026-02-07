@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import type { User as UserEntity } from '@/types/user';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
 import { AuthButtons } from './AuthButtons';
 import { LibraryMenu } from './LibraryMenu';
 import { NavItemContent, desktopLinkClass } from './navbar.helpers';
@@ -41,26 +40,20 @@ export function DesktopNav({
 }: DesktopNavProps) {
   return (
     <div className="hidden flex-1 items-center justify-between gap-4 md:flex">
-      <ul className="ml-8 flex items-center gap-2">
-        <li>
-          <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} />
-        </li>
+      <Menubar className="ml-8 h-10 items-center gap-1 rounded-lg border-[var(--hb-border)] bg-[var(--hb-panel)] px-1 py-1 shadow-none">
+        <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} />
         {navItems.map(item => (
-          <li key={item.href}>
-            <Button
-              asChild
-              variant="secondary"
-              className={cn(desktopLinkClass(isHrefActive(pathname, item.href)))}
-            >
+          <MenubarMenu key={item.href}>
+            <MenubarTrigger asChild className={desktopLinkClass(isHrefActive(pathname, item.href))}>
               <Link href={item.href}>
                 <NavItemContent icon={item.icon} label={item.label} />
               </Link>
-            </Button>
-          </li>
+            </MenubarTrigger>
+          </MenubarMenu>
         ))}
-      </ul>
+      </Menubar>
 
-      <div className="flex h-11 items-center rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-2">
+      <div className="flex h-10 items-center rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-1.5">
         {!authResolved ? (
           <NavbarAuthSkeleton />
         ) : isAuthenticated && user ? (
@@ -90,4 +83,3 @@ function NavbarAuthSkeleton() {
     </div>
   );
 }
-

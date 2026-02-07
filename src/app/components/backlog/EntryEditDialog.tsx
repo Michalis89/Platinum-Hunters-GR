@@ -1,11 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Trash2 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
-import ConfirmDialog from '@/app/components/ui/ConfirmDialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
 import { apiClient } from '@/lib/api/client';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
@@ -37,6 +53,8 @@ interface EntryEditDialogProps {
   onRefreshEntry?: () => Promise<void> | void;
 }
 
+const NO_PLATFORM_VALUE = '__none';
+
 export default function EntryEditDialog({
   entry,
   category,
@@ -53,10 +71,7 @@ export default function EntryEditDialog({
   const [descriptionValue, setDescriptionValue] = useState('');
   const [isSavingDescription, setIsSavingDescription] = useState(false);
   const [isSyncingRawgMetadata, setIsSyncingRawgMetadata] = useState(false);
-  const [catalogMessage, setCatalogMessage] = useState<{
-    type: 'success' | 'error';
-    message: string;
-  } | null>(null);
+  const [catalogMessage, setCatalogMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editState, setEditState] = useState<EditState>({
     status: 'planned',
@@ -71,85 +86,66 @@ export default function EntryEditDialog({
   const progressLabel = getProgressLabel(category);
 
   useEffect(() => {
-    if (entry) {
-      setDescriptionExpanded(false);
-      setIsDescriptionEditing(false);
-      setCatalogMessage(null);
-      const nextDescription = entry.description ?? '';
-      setDescriptionValue(nextDescription);
-      setDescriptionDraft(nextDescription);
-      setEditState({
-        status: entry.status ?? 'planned',
-        progress: entry.progress ? String(entry.progress) : '',
-        score: entry.entryId ? (entry.score ?? '') : '',
-        notes: entry.notes ?? '',
-        isFavorite: entry.isFavorite ?? false,
-        selectedPlatform:
-          entry.selectedPlatform ??
-          (category === 'games' && (entry.platforms ?? []).includes('PC') ? 'PC' : ''),
-      });
-    }
+    if (!entry) return;
+    setDescriptionExpanded(false);
+    setIsDescriptionEditing(false);
+    setCatalogMessage(null);
+    const nextDescription = entry.description ?? '';
+    setDescriptionValue(nextDescription);
+    setDescriptionDraft(nextDescription);
+    setEditState({
+      status: entry.status ?? 'planned',
+      progress: entry.progress ? String(entry.progress) : '',
+      score: entry.entryId ? (entry.score ?? '') : '',
+      notes: entry.notes ?? '',
+      isFavorite: entry.isFavorite ?? false,
+      selectedPlatform:
+        entry.selectedPlatform ??
+        (category === 'games' && (entry.platforms ?? []).includes('PC') ? 'PC' : ''),
+    });
   }, [category, entry]);
 
-  if (!entry) return null;
-
-  const total = getTotalCount(entry, category);
+  const total = entry ? getTotalCount(entry, category) : undefined;
   const shouldAutoCompleteProgress = category !== 'games';
-  const descriptionText = descriptionValue || entry.description || '';
-  const showDescriptionTools = canManageCatalog && Boolean(entry.mediaId);
+  const descriptionText = entry ? descriptionValue || entry.description || '' : '';
+  const showDescriptionTools = canManageCatalog && Boolean(entry?.mediaId);
 
   const handleSaveDescription = async () => {
-    if (!entry.mediaId || !showDescriptionTools) return;
+    if (!entry?.mediaId || !showDescriptionTools) return;
     try {
       setIsSavingDescription(true);
       setCatalogMessage(null);
       const response = await apiClient.request('/api/media/entry', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update_description',
-          category,
-          mediaId: entry.mediaId,
-          description: descriptionDraft,
-        }),
+        body: JSON.stringify({ action: 'update_description', category, mediaId: entry.mediaId, description: descriptionDraft }),
       });
       const data = (await response.json()) as { error?: string; description?: string };
-      if (!response.ok) {
-        throw new Error(data.error || 'Description update failed');
-      }
+      if (!response.ok) throw new Error(data.error || 'Description update failed');
       setDescriptionValue(data.description ?? descriptionDraft);
       setIsDescriptionEditing(false);
       await onRefreshEntry?.();
       setCatalogMessage({ type: 'success', message: 'Η περιγραφή ενημερώθηκε.' });
     } catch (error) {
       console.warn('Description update failed:', error);
-      setCatalogMessage({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Αποτυχία ενημέρωσης περιγραφής.',
-      });
+      setCatalogMessage({ type: 'error', message: error instanceof Error ? error.message : 'Αποτυχία ενημέρωσης περιγραφής.' });
     } finally {
       setIsSavingDescription(false);
     }
   };
 
   const handleSyncRawgMetadata = async () => {
-    if (!entry.mediaId || category !== 'games' || !showDescriptionTools) return;
+    if (!entry?.mediaId || category !== 'games' || !showDescriptionTools) return;
     try {
       setIsSyncingRawgMetadata(true);
       setCatalogMessage(null);
       const response = await apiClient.request('/api/media/entry', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'sync_rawg_metadata',
-          category,
-          mediaId: entry.mediaId,
-        }),
+        body: JSON.stringify({ action: 'sync_rawg_metadata', category, mediaId: entry.mediaId }),
       });
       const data = (await response.json()) as { error?: string; description?: string };
-      if (!response.ok) {
-        throw new Error(data.error || 'RAWG metadata sync failed');
-      }
+      if (!response.ok) throw new Error(data.error || 'RAWG metadata sync failed');
       if (typeof data.description === 'string') {
         setDescriptionValue(data.description);
         setDescriptionDraft(data.description);
@@ -158,10 +154,7 @@ export default function EntryEditDialog({
       setCatalogMessage({ type: 'success', message: 'Το metadata sync από RAWG ολοκληρώθηκε.' });
     } catch (error) {
       console.warn('RAWG metadata sync failed:', error);
-      setCatalogMessage({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Αποτυχία sync metadata από RAWG.',
-      });
+      setCatalogMessage({ type: 'error', message: error instanceof Error ? error.message : 'Αποτυχία sync metadata από RAWG.' });
     } finally {
       setIsSyncingRawgMetadata(false);
     }
@@ -169,15 +162,12 @@ export default function EntryEditDialog({
 
   const handleStatusChange = (nextStatus: MediaStatus) => {
     setEditState(prev => {
-      // If changing TO completed, set progress to total
       if (nextStatus === 'completed' && total !== undefined && shouldAutoCompleteProgress) {
         return { ...prev, status: nextStatus, progress: String(total) };
       }
-      // If changing FROM completed to something else, reset progress
       if (prev.status === 'completed' && nextStatus !== 'completed') {
         return { ...prev, status: nextStatus, progress: '' };
       }
-      // Otherwise just change status
       return { ...prev, status: nextStatus };
     });
   };
@@ -187,12 +177,7 @@ export default function EntryEditDialog({
     const nextValue = Math.max(0, next);
     const nextClamped = clampProgress && total ? Math.min(nextValue, total) : nextValue;
     const shouldComplete = clampProgress && total !== undefined && nextClamped >= total;
-
-    setEditState(prev => ({
-      ...prev,
-      progress: String(nextClamped),
-      status: shouldComplete ? 'completed' : prev.status,
-    }));
+    setEditState(prev => ({ ...prev, progress: String(nextClamped), status: shouldComplete ? 'completed' : prev.status }));
   };
 
   const handleProgressInputChange = (value: string) => {
@@ -200,21 +185,10 @@ export default function EntryEditDialog({
       setEditState(prev => ({ ...prev, progress: '' }));
       return;
     }
-
     if (!/^\d+$/.test(value)) return;
-
     const numericProgress = Number.parseInt(value, 10);
-    const shouldComplete =
-      clampProgress &&
-      total !== undefined &&
-      Number.isFinite(numericProgress) &&
-      numericProgress >= total;
-
-    setEditState(prev => ({
-      ...prev,
-      progress: value,
-      status: shouldComplete ? 'completed' : prev.status,
-    }));
+    const shouldComplete = clampProgress && total !== undefined && Number.isFinite(numericProgress) && numericProgress >= total;
+    setEditState(prev => ({ ...prev, progress: value, status: shouldComplete ? 'completed' : prev.status }));
   };
 
   const handleScoreChange = (raw: string) => {
@@ -222,14 +196,11 @@ export default function EntryEditDialog({
       setEditState(prev => ({ ...prev, score: '' }));
       return;
     }
-
     raw = raw.replace(',', '.');
     if (!/^\d*\.?\d*$/.test(raw)) return;
-    if (raw.startsWith('.')) raw = '0' + raw;
-
+    if (raw.startsWith('.')) raw = `0${raw}`;
     const num = Number(raw);
     if (!Number.isNaN(num) && num > 10) raw = '10';
-
     setEditState(prev => ({ ...prev, score: raw }));
   };
 
@@ -238,399 +209,322 @@ export default function EntryEditDialog({
   const hasNumeric = Number.isFinite(numeric);
   const safeValue = hasNumeric ? Math.max(0, numeric) : 0;
   const clampedValue = total ? Math.min(safeValue, total) : safeValue;
-  const percent =
-    total && total > 0 ? Math.min(100, Math.round((clampedValue / total) * 100)) : null;
+  const percent = total && total > 0 ? Math.min(100, Math.round((clampedValue / total) * 100)) : null;
+
+  const platformValue = editState.selectedPlatform || NO_PLATFORM_VALUE;
+  const scoreNumber = editState.score === '' ? 0 : Number(editState.score);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/70 px-0 py-0 backdrop-blur sm:items-center sm:px-4 sm:py-8"
-      onClick={event => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <div className="flex h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] sm:h-auto sm:max-h-[80vh] sm:rounded-3xl">
-        <div className="overflow-y-auto p-4 sm:p-6">
-          <div className="flex flex-col gap-6 md:flex-row">
-            <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--hb-card)] sm:h-52 sm:w-36 sm:rounded-2xl">
-              <Image
-                src={entry.cover}
-                alt={entry.title}
-                width={144}
-                height={208}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="flex-1 space-y-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">
-                  {category.toUpperCase()}
-                </p>
-                <h2 className="text-xl font-semibold text-[var(--hb-headline)] sm:text-2xl">{entry.title}</h2>
-                <p className="text-sm text-[var(--hb-muted)]">
-                  {entry.subtitle}
-                  {entry.year ? ` • ${entry.year}` : ''}
-                </p>
-              </div>
-              {(descriptionText || showDescriptionTools) && (
-                <div className="space-y-2">
-                  <div
-                    className={[
-                      'text-[var(--hb-text)]/90 relative text-sm leading-relaxed',
-                      descriptionExpanded || isDescriptionEditing ? '' : 'max-h-24 overflow-hidden',
-                    ].join(' ')}
-                  >
-                    {isDescriptionEditing ? (
-                      <textarea
-                        value={descriptionDraft}
-                        onChange={event => setDescriptionDraft(event.target.value)}
-                        className="min-h-[120px] w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-2 text-sm text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
-                        placeholder="Περιγραφή..."
-                      />
-                    ) : (
-                      <p className="whitespace-pre-line">
-                        {descriptionText || 'Δεν υπάρχει περιγραφή.'}
+    <>
+      <Dialog open={!!entry} onOpenChange={open => !open && onClose()}>
+        {entry && (
+          <DialogContent className="max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:slide-in-from-bottom fixed left-1/2 top-1/2 z-50 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 gap-0 overflow-hidden border border-[var(--hb-border)] bg-[var(--hb-panel)] p-0 shadow-[var(--hb-shadow-md)] duration-200 sm:max-h-[80vh] sm:rounded-3xl max-sm:bottom-0 max-sm:left-0 max-sm:top-auto max-sm:h-[92dvh] max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:border-x-0 max-sm:border-b-0">
+            <div className="flex max-h-[92dvh] flex-col sm:max-h-[80vh]">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+                  <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--hb-card)] sm:h-52 sm:w-36 sm:rounded-2xl">
+                    <Image src={entry.cover} alt={entry.title} width={144} height={208} className="h-full w-full object-cover" />
+                  </div>
+                  <DialogHeader className="flex-1 space-y-3 text-left sm:pr-8">
+                    <div className="space-y-1.5">
+                      <p className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">{category.toUpperCase()}</p>
+                      <DialogTitle className="text-xl font-semibold text-[var(--hb-headline)] sm:text-2xl">{entry.title}</DialogTitle>
+                      <DialogDescription className="text-sm text-[var(--hb-muted)]">
+                        {entry.subtitle}
+                        {entry.year ? ` • ${entry.year}` : ''}
+                      </DialogDescription>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {entry.tags.slice(0, 6).map(tag => (
+                        <span key={tag} className="rounded-full border border-[var(--hb-border)] px-2 py-0.5 text-xs font-medium text-[var(--hb-muted)]">{tag}</span>
+                      ))}
+                    </div>
+                    {category === 'games' && entry.platforms && entry.platforms.length > 0 && (
+                      <p className="text-xs text-[var(--hb-muted)]">
+                        <span className="font-semibold text-[var(--hb-text)]">Platforms:</span>{' '}
+                        {entry.platforms.slice(0, 4).join(', ')}
+                        {entry.platforms.length > 4 && ` +${entry.platforms.length - 4}`}
                       </p>
                     )}
-                    {!descriptionExpanded && !isDescriptionEditing && (
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--hb-panel)] to-transparent" />
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      variant={'secondary'}
-                      onClick={() => setDescriptionExpanded(v => !v)}
-                    >
-                      {descriptionExpanded ? 'Show less' : 'Show more'}
-                    </Button>
-                    {showDescriptionTools && (
-                      <>
-                        {!isDescriptionEditing ? (
-                          <Button
-                            type="button"
-                            variant={'secondary'}
-                            onClick={() => {
-                              setDescriptionDraft(descriptionText);
-                              setIsDescriptionEditing(true);
-                              setDescriptionExpanded(true);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        ) : (
-                          <>
-                            <Button
-                              type="button"
-                              variant={'primary'}
-                              onClick={handleSaveDescription}
-                              disabled={isSavingDescription}
-                            >
-                              {isSavingDescription ? 'Saving...' : 'Save'}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant={'outline'}
-                              onClick={() => {
-                                setIsDescriptionEditing(false);
-                                setDescriptionDraft(descriptionText);
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                          </>
-                        )}
-                        {category === 'games' && (
-                          <Button
-                            type="button"
-                            variant={'outline'}
-                            onClick={handleSyncRawgMetadata}
-                            disabled={isSyncingRawgMetadata}
-                          >
-                            {isSyncingRawgMetadata ? 'Syncing...' : 'Sync RAWG metadata'}
-                          </Button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {catalogMessage && (
-                    <p
-                      className={[
-                        'text-xs',
-                        catalogMessage.type === 'success'
-                          ? 'text-emerald-400'
-                          : 'text-rose-400',
-                      ].join(' ')}
-                    >
-                      {catalogMessage.message}
-                    </p>
-                  )}
-                </div>
-              )}
-              <div className="flex flex-wrap gap-2">
-                {entry.tags.slice(0, 6).map(tag => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-[var(--hb-border)] px-2 py-0.5 text-xs text-[var(--hb-muted)]"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              {/* Game-specific: Platforms */}
-              {category === 'games' && entry.platforms && (
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--hb-muted)]">
-                  {entry.platforms && entry.platforms.length > 0 && (
-                    <span className="flex items-center gap-1.5">
-                      <span className="font-medium text-[var(--hb-text)]">Platforms:</span>
-                      {entry.platforms.slice(0, 4).join(', ')}
-                      {entry.platforms.length > 4 && ` +${entry.platforms.length - 4}`}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 md:grid-cols-2">
-            {category === 'games' && (
-              <div className="md:col-span-2">
-                <label className="text-xs text-[var(--hb-muted)]">Platform που παίζεις</label>
-                <div className="relative mt-2">
-                  <select
-                    value={editState.selectedPlatform}
-                    onChange={event =>
-                      setEditState(prev => ({ ...prev, selectedPlatform: event.target.value }))
-                    }
-                    className="h-10 w-full appearance-none rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 pr-10 text-sm text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
-                  >
-                    <option value="">Δεν έχω επιλέξει</option>
-                    {(entry.platforms ?? []).map(platform => (
-                      <option key={platform} value={platform}>
-                        {platform}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--hb-muted)]">
-                    ▾
-                  </span>
+                  </DialogHeader>
                 </div>
               </div>
-            )}
-            {/* Status */}
-            <div>
-              <label className="text-xs text-[var(--hb-muted)]">Status</label>
-              <div className="relative mt-2">
-                <select
-                  value={editState.status}
-                  onChange={event => handleStatusChange(event.target.value as MediaStatus)}
-                  className="h-10 w-full appearance-none rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 pr-10 text-sm text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
-                >
-                  <option value="planned">{config.plannedLabel}</option>
-                  {category !== 'movies' && <option value="current">{config.currentLabel}</option>}
-                  <option value="completed">{config.completedLabel}</option>
-                  <option value="dropped">{config.droppedLabel}</option>
-                </select>
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--hb-muted)]">
-                  ▾
-                </span>
-              </div>
-            </div>
 
-            {/* Progress (non-movies) or Duration (movies) */}
-            {category !== 'movies' ? (
-              <div>
-                <label className="text-xs text-[var(--hb-muted)]">Πρόοδος ({progressLabel})</label>
-                <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <div className="flex h-10 w-full items-center overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] sm:w-44">
-                    <input
-                      value={editState.progress}
-                      onChange={event => handleProgressInputChange(event.target.value)}
-                      className="h-full w-20 bg-transparent px-3 text-sm text-[var(--hb-text)] focus:outline-none"
-                      inputMode="numeric"
-                      placeholder="0"
-                    />
-                    {category !== 'games' && (
-                      <>
-                        <div className="h-5 w-px bg-[var(--hb-border)] opacity-80" />
+              <Separator className="bg-[var(--hb-border)]" />
 
-                        <div className="flex h-full flex-1 items-center justify-center whitespace-nowrap px-3 text-sm text-[var(--hb-muted)]">
-                          {total ?? '—'}
+              <ScrollArea className="flex-1">
+                <div className="space-y-6 p-4 sm:p-6">
+                  {(descriptionText || showDescriptionTools) && (
+                    <section className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
+                      <div className="space-y-3">
+                        <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--hb-muted)]">Description</h3>
+                        <div className={['text-[var(--hb-text)]/90 relative text-sm leading-relaxed', descriptionExpanded || isDescriptionEditing ? '' : 'max-h-24 overflow-hidden'].join(' ')}>
+                          {isDescriptionEditing ? (
+                            <Textarea
+                              value={descriptionDraft}
+                              onChange={event => setDescriptionDraft(event.target.value)}
+                              className="min-h-[120px]"
+                              placeholder="Περιγραφή..."
+                              aria-label="Description editor"
+                            />
+                          ) : (
+                            <p className="whitespace-pre-line">{descriptionText || 'Δεν υπάρχει περιγραφή.'}</p>
+                          )}
+                          {!descriptionExpanded && !isDescriptionEditing && (
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--hb-card)] to-transparent" />
+                          )}
                         </div>
-                      </>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button type="button" variant="secondary" onClick={() => setDescriptionExpanded(v => !v)}>
+                            {descriptionExpanded ? 'Show less' : 'Show more'}
+                          </Button>
+                          {showDescriptionTools && (
+                            <>
+                              {!isDescriptionEditing ? (
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  onClick={() => {
+                                    setDescriptionDraft(descriptionText);
+                                    setIsDescriptionEditing(true);
+                                    setDescriptionExpanded(true);
+                                  }}
+                                >
+                                  Edit
+                                </Button>
+                              ) : (
+                                <>
+                                  <Button type="button" variant="primary" onClick={handleSaveDescription} disabled={isSavingDescription}>
+                                    {isSavingDescription ? 'Saving...' : 'Save'}
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setIsDescriptionEditing(false);
+                                      setDescriptionDraft(descriptionText);
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </>
+                              )}
+                              {category === 'games' && (
+                                <Button type="button" variant="outline" onClick={handleSyncRawgMetadata} disabled={isSyncingRawgMetadata}>
+                                  {isSyncingRawgMetadata ? 'Syncing...' : 'Sync RAWG metadata'}
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        {catalogMessage && (
+                          <p className={['text-xs font-medium', catalogMessage.type === 'success' ? 'text-emerald-400' : 'text-rose-400'].join(' ')}>
+                            {catalogMessage.message}
+                          </p>
+                        )}
+                      </div>
+                    </section>
+                  )}
+
+                  <section className="grid gap-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 md:grid-cols-2">
+                    {category === 'games' && (
+                      <div className="md:col-span-2">
+                        <label htmlFor="entry-platform-trigger" className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hb-muted)]">Platform που παίζεις</label>
+                        <Select
+                          value={platformValue}
+                          onValueChange={value => setEditState(prev => ({ ...prev, selectedPlatform: value === NO_PLATFORM_VALUE ? '' : value }))}
+                        >
+                          <SelectTrigger id="entry-platform-trigger" className="mt-2 h-10">
+                            <SelectValue placeholder="Δεν έχω επιλέξει" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={NO_PLATFORM_VALUE}>Δεν έχω επιλέξει</SelectItem>
+                            {(entry.platforms ?? []).map(platform => (
+                              <SelectItem key={platform} value={platform}>{platform}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label htmlFor="entry-status-trigger" className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hb-muted)]">Status</label>
+                      <Select value={editState.status} onValueChange={value => handleStatusChange(value as MediaStatus)}>
+                        <SelectTrigger id="entry-status-trigger" className="mt-2 h-10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="planned">{config.plannedLabel}</SelectItem>
+                          {category !== 'movies' && <SelectItem value="current">{config.currentLabel}</SelectItem>}
+                          <SelectItem value="completed">{config.completedLabel}</SelectItem>
+                          <SelectItem value="dropped">{config.droppedLabel}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {category !== 'movies' ? (
+                      <div>
+                        <label htmlFor="entry-progress" className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hb-muted)]">
+                          Πρόοδος ({progressLabel})
+                        </label>
+                        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                          <div className="flex h-10 w-full items-center overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] sm:w-48">
+                            <Input
+                              id="entry-progress"
+                              value={editState.progress}
+                              onChange={event => handleProgressInputChange(event.target.value)}
+                              className="h-full w-20 rounded-none border-0 bg-transparent px-3 py-0 text-sm focus-visible:ring-0"
+                              inputMode="numeric"
+                              placeholder="0"
+                              aria-label="Progress value"
+                            />
+                            {category !== 'games' && (
+                              <>
+                                <div className="h-5 w-px bg-[var(--hb-border)] opacity-80" />
+                                <div className="flex h-full flex-1 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold text-[var(--hb-muted)]">{total ?? '—'}</div>
+                              </>
+                            )}
+                          </div>
+
+                          {category !== 'games' && (
+                            <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-1 sm:items-center sm:justify-end">
+                              <Button type="button" variant="secondary" onClick={() => setProgress((hasNumeric ? safeValue : 0) - 1)} className="h-9 rounded-full px-3">−1</Button>
+                              <Button type="button" variant="secondary" onClick={() => setProgress((hasNumeric ? safeValue : 0) + 1)} className="h-9 rounded-full px-3">+1</Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                disabled={!total}
+                                onClick={() => total && setProgress(total)}
+                                className="h-9 rounded-full border-[var(--hb-primary-strong)]/40 bg-[var(--hb-primary-strong)]/10 px-3 font-semibold text-[var(--hb-primary-strong)] disabled:opacity-40"
+                                title="Complete"
+                              >
+                                Max
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+
+                        {total && hasNumeric && category !== 'games' && (
+                          <div className="mt-3 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] p-1">
+                            <div className="relative h-3 w-full overflow-hidden rounded-full bg-[var(--hb-card)]">
+                              <div className="h-full rounded-full bg-[var(--hb-primary-strong)] transition-[width] duration-300" style={{ width: `${percent ?? 0}%` }} />
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-white/90">{percent !== null ? `${percent}%` : '—'}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hb-muted)]">Διάρκεια</label>
+                        <div className="mt-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-3 text-sm font-semibold text-[var(--hb-text)]">{total ? `${total} min` : '—'}</div>
+                        {editState.status !== 'completed' && (
+                          <Button type="button" variant="secondary" onClick={() => setEditState(prev => ({ ...prev, status: 'completed' }))} className="mt-3 w-full">
+                            Mark as Watched
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="entry-score" className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hb-muted)]">Βαθμολογία</label>
+                        <span className="text-xs font-semibold text-[var(--hb-headline)]">{editState.score === '' ? '—' : editState.score}</span>
+                      </div>
+
+                      <Slider
+                        value={[Number.isFinite(scoreNumber) ? scoreNumber : 0]}
+                        min={0}
+                        max={10}
+                        step={0.5}
+                        onValueChange={value =>
+                          setEditState(prev => ({
+                            ...prev,
+                            score: String(value[0] ?? 0),
+                          }))
+                        }
+                        className="mt-3 [&_[data-slot=slider-range]]:bg-[var(--hb-primary-strong)] [&_[data-slot=slider-thumb]]:border-[var(--hb-primary-strong)]/50 [&_[data-slot=slider-track]]:bg-[var(--hb-border)]"
+                        aria-label="Βαθμολογία slider"
+                      />
+
+                      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                        <Input id="entry-score" value={editState.score} inputMode="decimal" placeholder="0–10" onChange={event => handleScoreChange(event.target.value)} className="sm:w-24" />
+                        <p className="flex-1 text-xs text-[var(--hb-muted)]">Tip: σύρε την μπάρα ή γράψε τιμή (δέχεται και <span className="font-semibold">0,5</span>).</p>
+                        <Button type="button" variant="secondary" onClick={() => setEditState(prev => ({ ...prev, score: '' }))} className="w-full sm:w-auto" title="Καθάρισμα">Reset</Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hb-muted)]">Favorite</label>
+                      <Button
+                        type="button"
+                        variant={editState.isFavorite ? 'primary' : 'secondary'}
+                        onClick={() => setEditState(prev => ({ ...prev, isFavorite: !prev.isFavorite }))}
+                        className="mt-2 flex w-full items-center justify-center gap-2"
+                        aria-pressed={editState.isFavorite}
+                      >
+                        <span className="text-lg">{editState.isFavorite ? '♥' : '♡'}</span>
+                        {editState.isFavorite ? 'Στα αγαπημένα' : 'Προσθήκη στα αγαπημένα'}
+                      </Button>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label htmlFor="entry-notes" className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hb-muted)]">Σημειώσεις</label>
+                      <Textarea
+                        id="entry-notes"
+                        value={editState.notes}
+                        onChange={event => setEditState(prev => ({ ...prev, notes: event.target.value }))}
+                        className="mt-2 min-h-[80px]"
+                        placeholder="Προσωπικές σημειώσεις..."
+                      />
+                    </div>
+                  </section>
+                </div>
+                <ScrollBar />
+              </ScrollArea>
+
+              <div className="sticky bottom-0 border-t border-[var(--hb-border)] bg-[var(--hb-panel)]/80 backdrop-blur">
+                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                  <div className="flex w-full items-center gap-2 sm:w-auto">
+                    {entry.mediaId && (
+                      <Button type="button" variant="destructive" onClick={() => setShowDeleteConfirm(true)} icon={<Trash2 className="h-4 w-4" />} className="w-full sm:w-auto">
+                        Διαγραφή
+                      </Button>
                     )}
                   </div>
-                  {category !== 'games' && (
-                    <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-1 sm:items-center sm:justify-end">
-                      <Button
-                        type="button"
-                        onClick={() => setProgress((hasNumeric ? safeValue : 0) - 1)}
-                        className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
-                      >
-                        −1
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={() => setProgress((hasNumeric ? safeValue : 0) + 1)}
-                        className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs text-[var(--hb-muted)] hover:text-[var(--hb-text)]"
-                      >
-                        +1
-                      </Button>
-                      <Button
-                        type="button"
-                        disabled={!total}
-                        onClick={() => total && setProgress(total)}
-                        className="border-[var(--hb-primary-strong)]/40 bg-[var(--hb-primary-strong)]/10 text-s rounded-full border px-3 py-1 font-semibold text-[var(--hb-primary-strong)] disabled:opacity-40"
-                        title="Complete"
-                      >
-                        Max
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                {total && hasNumeric && category !== 'games' && (
-                  <div className="mt-3 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] p-1">
-                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-[var(--hb-card)]">
-                      <div
-                        className="h-full rounded-full bg-[var(--hb-primary-strong)] transition-[width] duration-300"
-                        style={{ width: `${percent ?? 0}%` }}
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-white/90">
-                        {percent !== null ? `${percent}%` : '—'}
-                      </span>
-                    </div>
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
+                    <Button type="button" variant="outline" onClick={onClose} className="w-full">Ακύρωση</Button>
+                    <Button type="button" variant="primary" onClick={() => onSave(editState)} className="w-full">Αποθήκευση</Button>
                   </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <label className="text-xs text-[var(--hb-muted)]">Διάρκεια</label>
-                <div className="mt-2 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-3 text-sm text-[var(--hb-text)]">
-                  {total ? `${total} min` : '—'}
                 </div>
-                {editState.status !== 'completed' && (
-                  <Button
-                    type="button"
-                    variant={'secondary'}
-                    onClick={() => setEditState(prev => ({ ...prev, status: 'completed' }))}
-                    className="mt-3 w-full"
-                  >
-                    Mark as Watched
-                  </Button>
-                )}
-              </div>
-            )}
-
-            {/* Score */}
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="text-xs text-[var(--hb-muted)]">Βαθμολογία</label>
-                <span className="text-xs font-semibold text-[var(--hb-headline)]">
-                  {editState.score === '' ? '—' : editState.score}
-                </span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={10}
-                step={0.5}
-                value={editState.score === '' ? 0 : Number(editState.score)}
-                onChange={e => setEditState(prev => ({ ...prev, score: e.target.value }))}
-                className="mt-3 w-full accent-[var(--hb-primary-strong)]"
-                aria-label="Βαθμολογία slider"
-              />
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <input
-                  value={editState.score}
-                  inputMode="decimal"
-                  placeholder="0–10"
-                  onChange={e => handleScoreChange(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-2 text-sm text-[var(--hb-text)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:outline-none sm:w-24"
-                />
-                <div className="flex-1 text-xs text-[var(--hb-muted)]">
-                  Tip: σύρε την μπάρα ή γράψε τιμή (δέχεται και{' '}
-                  <span className="font-semibold">0,5</span>).
-                </div>
-                <Button
-                  type="button"
-                  variant={'secondary'}
-                  onClick={() => setEditState(prev => ({ ...prev, score: '' }))}
-                  className="w-full sm:w-auto"
-                  title="Καθάρισμα"
-                >
-                  Reset
-                </Button>
               </div>
             </div>
+          </DialogContent>
+        )}
+      </Dialog>
 
-            {/* Favorite */}
-            <div>
-              <label className="text-xs text-[var(--hb-muted)]">Favorite</label>
-              <Button
-                type="button"
-                variant={editState?.isFavorite ? 'primary' : 'secondary'}
-                onClick={() => setEditState(prev => ({ ...prev, isFavorite: !prev.isFavorite }))}
-                className={'mt-2 flex w-full items-center justify-center gap-2'}
+      {entry?.mediaId && (
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-[var(--hb-headline)]">Διαγραφή καταχώρησης</AlertDialogTitle>
+              <AlertDialogDescription className="text-[var(--hb-muted)]">
+                {`Θες σίγουρα να αφαιρέσεις το "${entry.title}" από τη βιβλιοθήκη σου;`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-[var(--hb-border)] bg-transparent text-[var(--hb-text)]">Άκυρο</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-[var(--hb-accent)] text-[var(--hb-button-primary-text)] hover:brightness-110"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  onDelete(entry);
+                }}
               >
-                <span className="text-lg">{editState.isFavorite ? '♥' : '♡'}</span>
-                {editState.isFavorite ? 'Στα αγαπημένα' : 'Προσθήκη στα αγαπημένα'}
-              </Button>
-            </div>
-
-            {/* Notes */}
-            <div className="md:col-span-2">
-              <label className="text-xs text-[var(--hb-muted)]">Σημειώσεις</label>
-              <textarea
-                value={editState.notes}
-                onChange={event => setEditState(prev => ({ ...prev, notes: event.target.value }))}
-                className="mt-2 min-h-[60px] w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-2 text-sm text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
-                placeholder="Προσωπικές σημειώσεις..."
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Sticky footer */}
-        <div className="bg-[var(--hb-panel)]/80 border-t border-[var(--hb-border)] backdrop-blur">
-          <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <div className="flex w-full items-center gap-2 sm:w-auto">
-              {entry.mediaId && (
-                <Button
-                  variant="destructive"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  icon={<Trash2 className="h-4 w-4" />}
-                  className="w-full sm:w-auto"
-                >
-                  Διαγραφή
-                </Button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
-              <Button variant="outline" onClick={onClose} className="w-full">
-                Ακύρωση
-              </Button>
-              <Button variant="primary" onClick={() => onSave(editState)} className="w-full">
-                Αποθήκευση
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <ConfirmDialog
-        isOpen={showDeleteConfirm}
-        title="Διαγραφή καταχώρησης"
-        message={`Θες σίγουρα να αφαιρέσεις το "${entry.title}" από τη βιβλιοθήκη σου;`}
-        confirmLabel="Διαγραφή"
-        cancelLabel="Άκυρο"
-        variant="destructive"
-        onConfirm={() => {
-          setShowDeleteConfirm(false);
-          onDelete(entry);
-        }}
-        onCancel={() => setShowDeleteConfirm(false)}
-      />
-    </div>
+                Διαγραφή
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </>
   );
 }
