@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import { ArrowRight, Mail } from 'lucide-react';
 
-export function AboutFinalCTA() {
+type AboutFinalCTAProps = {
+  isAuthenticated?: boolean;
+};
+
+export function AboutFinalCTA({ isAuthenticated = false }: AboutFinalCTAProps) {
+  const primaryHref = isAuthenticated ? '/dashboard' : '/pages/auth/register';
+  const primaryLabel = isAuthenticated ? 'Πήγαινε στο Dashboard' : 'Δημιούργησε λογαριασμό';
+
   return (
     <section className="relative px-4 py-20 md:px-6 md:py-28">
       <div className="from-[var(--hb-primary-strong)]/[0.04] pointer-events-none absolute inset-0 bg-gradient-to-t to-transparent" />
@@ -17,10 +24,10 @@ export function AboutFinalCTA() {
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
-            href="/pages/auth/register"
+            href={primaryHref}
             className="group inline-flex items-center gap-2 rounded-full bg-[var(--hb-primary-strong)] px-8 py-3.5 text-base font-semibold text-white transition hover:brightness-110"
           >
-            Δημιούργησε λογαριασμό
+            {primaryLabel}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
 

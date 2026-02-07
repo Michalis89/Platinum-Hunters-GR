@@ -37,6 +37,10 @@ const nextConfig: NextConfigWithInstrumentation = {
       },
       {
         protocol: 'https',
+        hostname: 'cdn.cloudflare.steamstatic.com',
+      },
+      {
+        protocol: 'https',
         hostname: 's4.anilist.co',
       },
       {

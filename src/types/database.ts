@@ -226,7 +226,8 @@ export interface MediaItemRow {
   tmdb_id: number | null;
   imdb_id: string | null;
   google_books_id: string | null;
-  category: 'anime' | 'manga' | 'movies' | 'tv' | 'books';
+  steam_app_id: number | null;
+  category: 'anime' | 'manga' | 'movies' | 'tv' | 'books' | 'games';
   source: string | null;
   title: string | null;
   original_title: string | null;
@@ -272,7 +273,8 @@ export interface MediaItemInsert {
   tmdb_id?: number | null;
   imdb_id?: string | null;
   google_books_id?: string | null;
-  category: 'anime' | 'manga' | 'movies' | 'tv' | 'books';
+  steam_app_id?: number | null;
+  category: 'anime' | 'manga' | 'movies' | 'tv' | 'books' | 'games';
   source?: string | null;
   title?: string | null;
   original_title?: string | null;
@@ -326,6 +328,8 @@ export interface UserMediaEntryRow {
   score: number | null;
   progress: number | null;
   notes: string | null;
+  import_source: string | null;
+  selected_platform: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -342,6 +346,8 @@ export interface UserMediaEntryInsert {
   score?: number | null;
   progress?: number | null;
   notes?: string | null;
+  import_source?: string | null;
+  selected_platform?: string | null;
 }
 
 /**
@@ -354,6 +360,8 @@ export interface UserMediaEntryUpdate {
   score?: number | null;
   progress?: number | null;
   notes?: string | null;
+  import_source?: string | null;
+  selected_platform?: string | null;
 }
 
 /**

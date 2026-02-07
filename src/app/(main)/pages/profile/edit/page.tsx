@@ -19,6 +19,7 @@ import {
   Youtube,
   Eye,
   EyeOff,
+  CircleHelp,
 } from 'lucide-react';
 import { Card, CardTitle } from '@/app/components/ui/Card';
 import {
@@ -41,6 +42,7 @@ import type { AppDispatch } from '@/store/store';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   ANIME_GENRES,
   BOOK_GENRES,
@@ -1049,14 +1051,37 @@ export default function EditProfilePage() {
                       placeholder="YourGamertag"
                     />
 
-                    <Input
-                      label="Steam ID"
-                      type="text"
-                      name="steam_id"
-                      value={formData.steam_id || ''}
-                      onChange={handleChange}
-                      placeholder="YourSteamID"
-                    />
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-[var(--hb-headline)]">Steam ID</label>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                                aria-label="Steam ID help"
+                              >
+                                <CircleHelp className="h-4 w-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs text-left leading-relaxed">
+                              Βρες το Steam ID από το προφίλ σου. Προτίμησε το 17-ψηφιο SteamID64
+                              (π.χ. 7656119...). Δεκτό και vanity name ή URL από
+                              steamcommunity.com/id/... καθώς και steamcommunity.com/profiles/...
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <input
+                        type="text"
+                        name="steam_id"
+                        value={formData.steam_id || ''}
+                        onChange={handleChange}
+                        placeholder="76561198083126936 ή steamcommunity.com/id/yourname"
+                        className="w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 text-[var(--hb-text)] placeholder:text-[var(--hb-muted)] placeholder:opacity-80 transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--hb-primary)] focus:placeholder-transparent"
+                      />
+                    </div>
 
                     <Input
                       label="Nintendo ID"

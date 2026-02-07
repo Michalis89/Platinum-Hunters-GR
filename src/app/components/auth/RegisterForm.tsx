@@ -375,9 +375,15 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     } catch (error) {
       console.error('Registration error:', error);
       if (error instanceof Error && error.message.toLowerCase().includes('captcha')) {
-        setCaptchaError('CAPTCHA validation failed, please retry.');
+        setCaptchaError('CAPTCHA failed. Retry it, and refresh the page if it persists.');
         setCaptchaResetKey(prev => prev + 1);
         setCaptchaToken(null);
+        setAlert({
+          type: 'error',
+          message:
+            'CAPTCHA verification failed. Please retry. If it keeps failing, refresh and try again.',
+        });
+        return;
       }
       const errorMessage =
         error instanceof Error ? error.message : 'Σφάλμα εγγραφής. Δοκιμάστε ξανά.';

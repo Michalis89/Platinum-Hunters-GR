@@ -46,6 +46,7 @@ export type MediaEntryState = {
   favorite: boolean | null;
   progress: number | null;
   notes: string | null;
+  selectedPlatform: string | null;
   startedAt: string | null;
   completedAt: string | null;
 };

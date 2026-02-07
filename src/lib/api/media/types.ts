@@ -44,6 +44,7 @@ export type UpdateLibraryRequestBody = {
   mediaId: number;
   status?: 'planned' | 'current' | 'completed' | 'dropped';
   is_favorite?: boolean | null;
+  selected_platform?: string | null;
   priority?: number | null;
   score?: number | null;
   progress?: number | null;
@@ -57,6 +58,8 @@ export type LibraryRow = {
   id: number;
   status: string;
   is_favorite: boolean | null;
+  import_source?: string | null;
+  selected_platform?: string | null;
   priority: number | null;
   score: number | null;
   progress: number | null;

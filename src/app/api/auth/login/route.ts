@@ -33,6 +33,7 @@ async function POSTHandler(req: Request) {
 
     const captchaResult = await verifyCaptchaToken(captchaToken);
     if (!captchaResult.success) {
+      console.warn('Login captcha verification failed', captchaResult.errors);
       return fail({ error: 'CAPTCHA validation failed, please retry' }, 403);
     }
 

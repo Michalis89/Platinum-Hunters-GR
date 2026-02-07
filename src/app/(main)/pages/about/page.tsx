@@ -1,4 +1,5 @@
 import getSupabaseServer from '@/lib/supabase-server';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import {
   AboutHero,
   AboutFeatures,
@@ -48,8 +49,10 @@ export default async function AboutPage() {
   const team = await getTeam();
 
   // Check auth status server-side
-  const supabase = getSupabaseServer();
-  const { data: { session } } = await supabase.auth.getSession();
+  const supabase = await createRouteHandlerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const isAuthenticated = !!session;
 
   const breadcrumb = [
@@ -90,7 +93,7 @@ export default async function AboutPage() {
 
           <AboutFAQ />
 
-          <AboutFinalCTA />
+          <AboutFinalCTA isAuthenticated={isAuthenticated} />
         </div>
       </div>
     </>

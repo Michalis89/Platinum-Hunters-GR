@@ -24,17 +24,22 @@ export async function verifyCaptchaToken(token?: string) {
     response: token,
   });
 
-  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
-  });
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
 
-  if (!response.ok) {
-    console.error('Turnstile verification failed', await response.text());
-    return { success: false, errors: ['verification-failed'] };
+    if (!response.ok) {
+      console.error('Turnstile verification failed', await response.text());
+      return { success: false, errors: ['verification-failed'] };
+    }
+
+    const payload = (await response.json()) as TurnstileVerifyResponse;
+    return { success: payload.success, errors: payload['error-codes'] ?? [] };
+  } catch (error) {
+    console.error('Turnstile verify request error', error);
+    return { success: false, errors: ['verification-request-failed'] };
   }
-
-  const payload = (await response.json()) as TurnstileVerifyResponse;
-  return { success: payload.success, errors: payload['error-codes'] ?? [] };
 }

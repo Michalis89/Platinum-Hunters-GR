@@ -338,6 +338,7 @@ export type Database = {
           rawg_id: number | null
           release_date: string | null
           runtime: number | null
+          steam_app_id: number | null
           season: string | null
           season_year: number | null
           source: string | null
@@ -387,6 +388,7 @@ export type Database = {
           rawg_id?: number | null
           release_date?: string | null
           runtime?: number | null
+          steam_app_id?: number | null
           season?: string | null
           season_year?: number | null
           source?: string | null
@@ -436,6 +438,7 @@ export type Database = {
           rawg_id?: number | null
           release_date?: string | null
           runtime?: number | null
+          steam_app_id?: number | null
           season?: string | null
           season_year?: number | null
           source?: string | null
@@ -672,12 +675,14 @@ export type Database = {
         Row: {
           created_at: string | null
           id: number
+          import_source: string | null
           is_favorite: boolean | null
           media_id: number
           notes: string | null
           priority: number | null
           progress: number | null
           score: number | null
+          selected_platform: string | null
           status: string
           updated_at: string | null
           user_id: string
@@ -685,12 +690,14 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: number
+          import_source?: string | null
           is_favorite?: boolean | null
           media_id: number
           notes?: string | null
           priority?: number | null
           progress?: number | null
           score?: number | null
+          selected_platform?: string | null
           status: string
           updated_at?: string | null
           user_id: string
@@ -698,12 +705,14 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: number
+          import_source?: string | null
           is_favorite?: boolean | null
           media_id?: number
           notes?: string | null
           priority?: number | null
           progress?: number | null
           score?: number | null
+          selected_platform?: string | null
           status?: string
           updated_at?: string | null
           user_id?: string

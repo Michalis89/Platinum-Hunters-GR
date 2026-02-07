@@ -74,6 +74,11 @@ export default function LibraryEntryRow({
                 {entry.subtitle}
                 {entry.year ? ` - ${entry.year}` : ''}
               </p>
+              {category === 'games' && entry.selectedPlatform ? (
+                <p className="text-xs font-medium text-[var(--hb-muted)]">
+                  Platform: {entry.selectedPlatform}
+                </p>
+              ) : null}
               <div className="flex flex-wrap gap-2">
                 {entry.tags.slice(0, 3).map(tag => (
                   <span
@@ -98,7 +103,9 @@ export default function LibraryEntryRow({
             </div>
             <div className="rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-2 py-1.5 text-center">
               <p className="text-[10px] uppercase tracking-wide text-[var(--hb-muted)]">Score</p>
-              <p className="text-xs font-semibold text-[var(--hb-headline)]">{entry.score ?? '-'}</p>
+              <p className="text-xs font-semibold text-[var(--hb-headline)]">
+                {entry.score ?? '-'}
+              </p>
             </div>
           </div>
 
@@ -139,11 +146,18 @@ export default function LibraryEntryRow({
             />
           </div>
           <div className="space-y-1">
-            <p className="text-left text-base font-semibold text-[var(--hb-headline)]">{entry.title}</p>
+            <p className="text-left text-base font-semibold text-[var(--hb-headline)]">
+              {entry.title}
+            </p>
             <p className="text-sm text-[var(--hb-muted)]">
               {entry.subtitle}
               {entry.year ? ` - ${entry.year}` : ''}
             </p>
+            {category === 'games' && entry.selectedPlatform ? (
+              <p className="text-xs font-medium text-[var(--hb-muted)]">
+                Platform: {entry.selectedPlatform}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               {entry.tags.slice(0, 3).map(tag => (
                 <span

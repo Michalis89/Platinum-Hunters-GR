@@ -101,6 +101,7 @@ export async function handleLibraryPatch(
     const updateData: Database['public']['Tables']['user_media_entries']['Update'] = {};
     if (body.status !== undefined) updateData.status = body.status;
     if (body.is_favorite !== undefined) updateData.is_favorite = body.is_favorite;
+    if (body.selected_platform !== undefined) updateData.selected_platform = body.selected_platform;
     if (body.priority !== undefined) updateData.priority = body.priority;
     if (body.score !== undefined) updateData.score = body.score;
     if (body.progress !== undefined) updateData.progress = body.progress;
@@ -130,6 +131,7 @@ export async function handleLibraryPatch(
           media_id: body.mediaId,
           status: body.status ?? (existingEntry?.status as string) ?? 'planned',
           is_favorite: updateData.is_favorite,
+          selected_platform: updateData.selected_platform,
           priority: updateData.priority,
           score: updateData.score,
           progress: updateData.progress,

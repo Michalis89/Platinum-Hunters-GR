@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { selectIsAuthenticated, selectUser, selectIsLoading } from '@/store/slices/authSlice';
@@ -36,9 +36,12 @@ function BacklogPageContent() {
   const categoryParam = searchParams.get('category');
   const statusParam = searchParams.get('status');
   const searchParam = searchParams.get('search');
+  const malParam = searchParams.get('mal');
 
   // Prevent hydration mismatch by tracking client mount
   const [hasMounted, setHasMounted] = useState(false);
+  const [libraryReloadKey, setLibraryReloadKey] = useState(0);
+  const hasTriggeredMalSyncRef = useRef(false);
 
   useEffect(() => {
     setHasMounted(true);
@@ -67,6 +70,50 @@ function BacklogPageContent() {
       router.push('/pages/auth/login');
     }
   }, [isAuthenticated, isAuthLoading, router]);
+
+  useEffect(() => {
+    if (hasTriggeredMalSyncRef.current) {
+      return;
+    }
+    if (!hasMounted || isAuthLoading || !isAuthenticated) {
+      return;
+    }
+    if ((category !== 'anime' && category !== 'manga') || malParam !== 'success') {
+      return;
+    }
+
+    hasTriggeredMalSyncRef.current = true;
+
+    let isCancelled = false;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('mal');
+    params.delete('mal_reason');
+    params.delete('mal_token_error');
+    const nextPath = params.toString() ? `/pages/backlog?${params.toString()}` : '/pages/backlog';
+
+    const runSync = async () => {
+      try {
+        const response = await fetch(`/api/integrations/mal/sync?category=${category}`, {
+          method: 'POST',
+        });
+        if (response.ok) {
+          setLibraryReloadKey(prev => prev + 1);
+        }
+      } catch (error) {
+        console.error('Auto MAL sync failed:', error);
+      } finally {
+        if (!isCancelled) {
+          router.replace(nextPath);
+        }
+      }
+    };
+
+    void runSync();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [category, hasMounted, isAuthLoading, isAuthenticated, malParam, router, searchParams]);
 
   // Check if user has access to this category
   const userCategories = (user?.categories as string[] | undefined) ?? [];
@@ -109,8 +156,10 @@ function BacklogPageContent() {
 
   return (
     <CategoryLibrary
+      key={`${category}-${libraryReloadKey}`}
       category={category}
       username={user?.username}
+      steamId={user?.steam_id}
       initialStatus={statusFromParams}
       initialSearch={searchFromParams}
     />

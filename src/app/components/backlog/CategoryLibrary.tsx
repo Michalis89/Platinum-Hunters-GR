@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useReducer, useCallback } from 'react';
+import { useEffect, useMemo, useReducer, useCallback, useState } from 'react';
 import { mutate } from 'swr';
 import ErrorState from '@/app/components/ui/ErrorState';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import { apiClient } from '@/lib/api/client';
+import { Progress } from '@/components/ui/progress';
 
 import CategoryHeader from './CategoryHeader';
 import CategoryStats from './CategoryStats';
@@ -26,6 +27,29 @@ import {
 
 export { isMediaCategory };
 export type { MediaCategory };
+
+type SteamSyncStatus = 'running' | 'completed' | 'failed';
+
+type SteamSyncJobSnapshot = {
+  id: string;
+  status: SteamSyncStatus;
+  message: string;
+  percent: number;
+  completedSteps: number;
+  totalSteps: number;
+  error?: string;
+  result?: {
+    totalFetched: number;
+    mediaInserted: number;
+    mediaUpdated: number;
+    mediaInsertFailed?: number;
+    mediaUpdateFailed?: number;
+    entriesInserted: number;
+    entriesUpdated: number;
+    entriesUpsertFailed?: number;
+    warnings?: string[];
+  };
+};
 
 type AlertState = {
   type: 'success' | 'error';
@@ -157,14 +181,18 @@ function categoryLibraryReducer(
 export default function CategoryLibrary({
   category,
   username,
+  steamId,
   initialStatus = 'all',
   initialSearch,
 }: Readonly<{
   category: MediaCategory;
   username?: string | null;
+  steamId?: string | null;
   initialStatus?: MediaStatus | 'all';
   initialSearch?: string;
 }>) {
+  const [steamSyncing, setSteamSyncing] = useState(false);
+  const [steamSyncProgress, setSteamSyncProgress] = useState<SteamSyncJobSnapshot | null>(null);
   const normalizedInitialStatus = initialStatus ?? 'all';
   const normalizedInitialSearch = initialSearch?.trim() ?? '';
   const [state, dispatch] = useReducer(
@@ -437,6 +465,8 @@ export default function CategoryLibrary({
             mediaId: selectedEntry.mediaId,
             status: nextStatus,
             is_favorite: nextFavorite,
+            selected_platform:
+              category === 'games' ? (editState.selectedPlatform || null) : undefined,
             progress: nextProgressValue,
             score: nextScore,
             notes: editState.notes || null,
@@ -506,6 +536,7 @@ export default function CategoryLibrary({
                 ...entry,
                 status: nextStatus,
                 isFavorite: nextFavorite,
+                selectedPlatform: editState.selectedPlatform || undefined,
                 progress: nextProgressValue ?? undefined,
                 score: editState.score || undefined,
                 notes: editState.notes || undefined,
@@ -579,6 +610,131 @@ export default function CategoryLibrary({
     }
   };
 
+  const handleSteamSync = async () => {
+    try {
+      setSteamSyncing(true);
+      setSteamSyncProgress({
+        id: 'starting',
+        status: 'running',
+        message: 'Ξεκινά ο συγχρονισμός Steam...',
+        percent: 0,
+        completedSteps: 0,
+        totalSteps: 1,
+      });
+
+      const response = await apiClient.request('/api/integrations/steam/sync?async=1', {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data.error || 'Steam sync failed');
+      }
+
+      const startData = (await response.json()) as { jobId?: string };
+      if (!startData.jobId) {
+        throw new Error('Steam sync job did not start');
+      }
+
+      let finalSnapshot: SteamSyncJobSnapshot | null = null;
+      while (true) {
+        const jobResponse = await apiClient.request(
+          `/api/integrations/steam/sync?jobId=${encodeURIComponent(startData.jobId)}`,
+          { cache: 'no-store' },
+        );
+        if (!jobResponse.ok) {
+          throw new Error('Steam sync progress failed');
+        }
+
+        const snapshot = (await jobResponse.json()) as SteamSyncJobSnapshot;
+        setSteamSyncProgress(snapshot);
+        if (snapshot.status === 'completed' || snapshot.status === 'failed') {
+          finalSnapshot = snapshot;
+          break;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 900));
+      }
+
+      if (!finalSnapshot || finalSnapshot.status !== 'completed') {
+        throw new Error(finalSnapshot?.error || 'Steam sync failed');
+      }
+
+      await loadLibraryEntries();
+      await mutate('/api/user/continue');
+      showAlert({
+        type: 'success',
+        title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
+        message:
+          (finalSnapshot.result?.warnings?.length ?? 0) > 0
+            ? `Ολοκληρώθηκε με προειδοποιήσεις: ${finalSnapshot.result?.warnings?.join(' | ')}`
+            : `Έγινε enrich σε ${finalSnapshot.result?.totalFetched ?? 0} παιχνίδια από RAWG/Steam.`,
+      });
+    } catch (error) {
+      console.warn('Steam sync failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Άγνωστο σφάλμα';
+      showAlert({
+        type: 'error',
+        title: 'Σφάλμα',
+        message: `Ο συγχρονισμός Steam απέτυχε. ${errorMessage}`,
+      });
+    } finally {
+      setSteamSyncing(false);
+      setSteamSyncProgress(null);
+    }
+  };
+
+  if (steamSyncing) {
+    return (
+      <div className="min-h-screen bg-[var(--hb-bg)] px-3 py-20 text-[var(--hb-text)] sm:px-4">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
+          <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur sm:p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 w-56 rounded-lg bg-[var(--hb-card)]" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
+              </div>
+            </div>
+          </section>
+          <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur sm:p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-12 rounded-xl bg-[var(--hb-card)]" />
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="h-24 rounded-xl bg-[var(--hb-card)]" />
+              ))}
+            </div>
+          </section>
+
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-[var(--hb-bg)]/70 p-3 backdrop-blur-sm sm:p-6">
+            <div className="w-full max-w-xl rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] sm:p-6">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-[var(--hb-headline)]">
+                  Συγχρονισμός Steam με RAWG metadata
+                </p>
+                <span className="text-xs font-semibold text-[var(--hb-muted)]">
+                  {steamSyncProgress?.percent ?? 0}%
+                </span>
+              </div>
+              <Progress
+                value={steamSyncProgress?.percent ?? 0}
+                className="h-2.5 bg-[var(--hb-card)]"
+              />
+              <p className="mt-3 text-xs text-[var(--hb-muted)]">
+                {steamSyncProgress?.message ??
+                  'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
+              </p>
+              <p className="mt-1 text-xs text-[var(--hb-muted)]/80">
+                {steamSyncProgress?.completedSteps ?? 0} / {steamSyncProgress?.totalSteps ?? 0}{' '}
+                βήματα
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--hb-bg)] px-3 py-20 text-[var(--hb-text)] sm:px-4">
       {alert && (
@@ -602,6 +758,9 @@ export default function CategoryLibrary({
           <CategoryHeader
             category={category}
             username={username}
+            steamId={steamId}
+            isSteamSyncing={steamSyncing}
+            onSteamSyncClick={handleSteamSync}
             onCreateClick={() => dispatch({ type: 'patch', payload: { ctaMode: 'create' } })}
             onSuggestionsClick={() =>
               dispatch({ type: 'patch', payload: { ctaMode: 'suggestions' } })
@@ -660,9 +819,9 @@ export default function CategoryLibrary({
           onClose={() => dispatch({ type: 'patch', payload: { selectedEntry: null } })}
           onSave={handleSaveEntry}
           onDelete={handleDeleteEntry}
+          onRefreshEntry={loadLibraryEntries}
         />
       </div>
     </div>
   );
 }
-

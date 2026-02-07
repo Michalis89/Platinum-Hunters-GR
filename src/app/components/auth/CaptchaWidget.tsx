@@ -6,22 +6,57 @@ import type { TurnstileWindow } from '@/types/turnstile';
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 const SCRIPT_ID = 'cf-turnstile-script';
+const SCRIPT_LOAD_TIMEOUT_MS = 12000;
 let turnstileLoader: Promise<void> | null = null;
 
 const ensureTurnstileScript = () => {
   if (turnstileLoader) return turnstileLoader;
-  turnstileLoader = new Promise(resolve => {
+
+  turnstileLoader = new Promise((resolve, reject) => {
     if (typeof window === 'undefined') {
       resolve();
       return;
     }
 
+    let settled = false;
+    const finalizeResolve = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    const finalizeReject = (error: Error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    };
+    const scheduleTimeout = () =>
+      window.setTimeout(
+        () => finalizeReject(new Error('turnstile-script-timeout')),
+        SCRIPT_LOAD_TIMEOUT_MS,
+      );
+
     const existingScript = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
     if (existingScript) {
       if ((window as Window & { turnstile?: unknown }).turnstile) {
-        resolve();
+        finalizeResolve();
       } else {
-        existingScript.addEventListener('load', () => resolve());
+        const timeoutId = scheduleTimeout();
+        existingScript.addEventListener(
+          'load',
+          () => {
+            clearTimeout(timeoutId);
+            finalizeResolve();
+          },
+          { once: true },
+        );
+        existingScript.addEventListener(
+          'error',
+          () => {
+            clearTimeout(timeoutId);
+            finalizeReject(new Error('turnstile-script-error'));
+          },
+          { once: true },
+        );
       }
       return;
     }
@@ -31,10 +66,24 @@ const ensureTurnstileScript = () => {
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve();
+
+    const timeoutId = scheduleTimeout();
+    script.onload = () => {
+      clearTimeout(timeoutId);
+      finalizeResolve();
+    };
+    script.onerror = () => {
+      clearTimeout(timeoutId);
+      finalizeReject(new Error('turnstile-script-error'));
+    };
+
     document.body.appendChild(script);
   });
-  return turnstileLoader;
+
+  return turnstileLoader.catch(error => {
+    turnstileLoader = null;
+    throw error;
+  });
 };
 
 type CaptchaWidgetProps = {
@@ -50,6 +99,7 @@ export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }
   const hasRenderedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   useEffect(() => {
     onTokenRef.current = onTokenChange;
@@ -58,18 +108,20 @@ export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }
   useEffect(() => {
     if (!containerRef.current) return;
     if (hasRenderedRef.current) return;
+
     if (!SITE_KEY) {
-      setError('Το CAPTCHA δεν έχει ρυθμιστεί σωστά.');
+      setError('CAPTCHA is not configured correctly.');
       onTokenRef.current(null);
       return;
     }
-    hasRenderedRef.current = true;
 
+    hasRenderedRef.current = true;
     let cancelled = false;
 
     const renderWidget = () => {
       if (!containerRef.current) return;
-      if (typeof window === 'undefined' || !(window as Window & { turnstile?: unknown }).turnstile) return;
+      if (typeof window === 'undefined' || !(window as Window & { turnstile?: unknown }).turnstile)
+        return;
 
       const loaderWindow = window as Window & { turnstile: TurnstileWindow };
       if (!loaderWindow.turnstile) return;
@@ -87,7 +139,7 @@ export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }
           onTokenRef.current(null);
         },
         'error-callback': () => {
-          setError('Το CAPTCHA δεν φορτώθηκε. Δοκίμασε ξανά.');
+          setError('CAPTCHA failed to load. Please retry.');
           setReady(false);
           onTokenRef.current(null);
         },
@@ -103,14 +155,14 @@ export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }
       })
       .catch(() => {
         if (cancelled) return;
-        setError('Το CAPTCHA δεν φορτώθηκε. Δοκίμασε ξανά.');
+        setError('CAPTCHA failed to load. Please retry.');
         onTokenRef.current(null);
       });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryNonce]);
 
   useEffect(() => {
     if (resetSignal === undefined) return;
@@ -127,14 +179,39 @@ export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }
     onTokenRef.current(null);
   }, [resetSignal]);
 
+  const retryCaptcha = () => {
+    if (typeof document !== 'undefined') {
+      document.getElementById(SCRIPT_ID)?.remove();
+    }
+    turnstileLoader = null;
+    widgetIdRef.current = null;
+    hasRenderedRef.current = false;
+    setError(null);
+    setReady(false);
+    onTokenRef.current(null);
+    setRetryNonce(prev => prev + 1);
+  };
+
   return (
     <div className="space-y-2 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 shadow-[var(--hb-shadow-sm)]">
       <div ref={containerRef} />
       {helperText && <p className="text-xs text-[var(--hb-muted)]">{helperText}</p>}
-      {error && <p className="text-xs text-rose-300">{error}</p>}
-      {!error && !ready && (
-        <p className="text-xs text-[var(--hb-muted)]">Φόρτωση CAPTCHA...</p>
+      {error && (
+        <div className="space-y-2">
+          <p className="text-xs text-rose-300">{error}</p>
+          <p className="text-xs text-[var(--hb-muted)]">
+            If this keeps happening, retry CAPTCHA and then refresh the page.
+          </p>
+          <button
+            type="button"
+            onClick={retryCaptcha}
+            className="rounded-lg border border-[var(--hb-border)] px-2 py-1 text-xs text-[var(--hb-headline)] transition hover:border-[var(--hb-primary-strong)]/60"
+          >
+            Retry CAPTCHA
+          </button>
+        </div>
       )}
+      {!error && !ready && <p className="text-xs text-[var(--hb-muted)]">Loading CAPTCHA...</p>}
     </div>
   );
 }

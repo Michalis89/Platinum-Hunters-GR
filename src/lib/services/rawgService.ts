@@ -90,6 +90,33 @@ export async function searchRawgGames(query: string, limit = 12): Promise<RawgGa
   }
 }
 
+export async function fetchRawgGameDetails(rawgId: number): Promise<RawgGame | null> {
+  if (!RAWG_API_KEY || !Number.isFinite(rawgId) || rawgId <= 0) {
+    return null;
+  }
+
+  try {
+    const url = new URL(`https://api.rawg.io/api/games/${rawgId}`);
+    url.searchParams.set('key', RAWG_API_KEY);
+
+    const response = await fetch(url.toString(), {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.warn('RAWG details error:', errorBody);
+      return null;
+    }
+
+    return (await response.json()) as RawgGame;
+  } catch (error) {
+    console.error('RAWG details fetch error:', error);
+    return null;
+  }
+}
+
 export function mapRawgToSearchResult(game: RawgGame): GameSearchResult {
   const year = game.released?.slice(0, 4);
   const developer = game.developers?.[0]?.name ?? '';

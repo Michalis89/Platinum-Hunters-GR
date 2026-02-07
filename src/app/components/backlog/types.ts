@@ -14,8 +14,11 @@ export type MediaEntry = {
   score?: string;
   tags: string[];
   cover: string;
+  importSource?: string;
+  catalogSource?: string;
   progress?: number;
   notes?: string;
+  selectedPlatform?: string;
   format?: string;
   description?: string;
   totalEpisodes?: number;

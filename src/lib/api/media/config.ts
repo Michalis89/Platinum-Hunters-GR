@@ -52,7 +52,7 @@ export const MEDIA_CATEGORY_CONFIGS: Record<MediaCategoryKey, MediaCategoryConfi
     logPrefix: 'Anime',
     defaultCategory: 'anime',
     librarySelectFields:
-      'id,status,is_favorite,priority,score,progress,notes,media_items!inner(id,category,title_english,title_romaji,title_native,description,format,season_year,episodes,chapters,volumes,start_date,cover_image_large,cover_image_medium,genres)',
+      'id,status,is_favorite,import_source,priority,score,progress,notes,media_items!inner(id,category,source,title_english,title_romaji,title_native,description,format,season_year,episodes,chapters,volumes,start_date,cover_image_large,cover_image_medium,genres)',
     suggestionsSelectFields:
       'media_id,score,media_items!inner(id,category,title_english,title_romaji,title_native,description,format,season_year,episodes,chapters,volumes,start_date,cover_image_large,cover_image_medium,genres)',
   },
@@ -65,7 +65,7 @@ export const MEDIA_CATEGORY_CONFIGS: Record<MediaCategoryKey, MediaCategoryConfi
     logPrefix: 'Books',
     defaultCategory: 'books',
     librarySelectFields:
-      'id,status,is_favorite,priority,score,progress,notes,media_items!inner(id,category,title,original_title,description,release_date,page_count,cover_image_large,cover_image_medium,genres,tags)',
+      'id,status,is_favorite,import_source,priority,score,progress,notes,media_items!inner(id,category,source,title,original_title,description,release_date,page_count,cover_image_large,cover_image_medium,genres,tags)',
     suggestionsSelectFields:
       'media_id,score,media_items!inner(id,category,title,original_title,description,release_date,page_count,cover_image_large,cover_image_medium,genres,tags)',
   },
@@ -78,7 +78,7 @@ export const MEDIA_CATEGORY_CONFIGS: Record<MediaCategoryKey, MediaCategoryConfi
     logPrefix: 'Games',
     defaultCategory: 'games',
     librarySelectFields:
-      'id,status,is_favorite,priority,score,progress,notes,media_items!inner(id,category,title,title_english,description,release_date,cover_image_large,cover_image_medium,genres)',
+      'id,status,is_favorite,import_source,selected_platform,priority,score,progress,notes,media_items!inner(id,category,source,steam_app_id,rawg_id,title,title_english,description,release_date,cover_image_large,cover_image_medium,genres,platforms,developer,publisher,metacritic,runtime)',
     suggestionsSelectFields:
       'media_id,score,media_items!inner(id,category,title,title_english,description,season_year,release_date,cover_image_large,cover_image_medium,genres)',
     // payloadMapper will be set in enrichers.ts to avoid circular dependency
@@ -98,7 +98,7 @@ export const MEDIA_CATEGORY_CONFIGS: Record<MediaCategoryKey, MediaCategoryConfi
     logPrefix: 'Movies',
     defaultCategory: 'movies',
     librarySelectFields:
-      'id,status,is_favorite,priority,score,progress,notes,media_items!inner(id,category,title,original_title,title_english,title_romaji,title_native,description,release_date,first_air_date,runtime,number_of_episodes,cover_image_large,cover_image_medium,banner_image,genres)',
+      'id,status,is_favorite,import_source,priority,score,progress,notes,media_items!inner(id,category,source,title,original_title,title_english,title_romaji,title_native,description,release_date,first_air_date,runtime,number_of_episodes,cover_image_large,cover_image_medium,banner_image,genres)',
     suggestionsSelectFields:
       'media_id,score,media_items!inner(id,category,title,original_title,title_english,title_romaji,title_native,description,release_date,first_air_date,runtime,number_of_episodes,cover_image_large,cover_image_medium,genres)',
     // enricher will be set in enrichers.ts to avoid circular dependency

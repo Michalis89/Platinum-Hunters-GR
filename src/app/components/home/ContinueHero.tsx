@@ -286,7 +286,7 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
 };
 
 export function ContinueHero() {
-  const { data: response } = useSWR<ContinuePayload | { data: ContinuePayload }>(
+  const { data: response, isLoading } = useSWR<ContinuePayload | { data: ContinuePayload }>(
     '/api/user/continue',
     fetcher,
     {
@@ -298,6 +298,7 @@ export function ContinueHero() {
   const payload = (response && 'data' in response ? response.data : response) as
     | ContinuePayload
     | undefined;
+  const isInitialLoading = isLoading && !response;
 
   const enabledCategories = payload?.enabledCategories ?? [];
   const slides = useMemo(() => payload?.slides ?? [], [payload]);
@@ -351,6 +352,29 @@ export function ContinueHero() {
     }),
     [slideItems.length, releaseSlideFocus],
   );
+
+  if (isInitialLoading) {
+    return (
+      <section className="px-4 py-10 md:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="min-h-[300px] animate-pulse rounded-[28px] border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6">
+            <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
+              <div className="space-y-4">
+                <div className="h-4 w-24 rounded bg-[var(--hb-card)]/60" />
+                <div className="h-8 w-3/4 rounded bg-[var(--hb-card)]/70" />
+                <div className="h-4 w-1/2 rounded bg-[var(--hb-card)]/50" />
+                <div className="flex gap-3 pt-4">
+                  <div className="h-12 w-32 rounded-full bg-[var(--hb-card)]/60" />
+                  <div className="h-12 w-48 rounded-full bg-[var(--hb-card)]/40" />
+                </div>
+              </div>
+              <div className="aspect-[4/5] w-full rounded-2xl bg-[var(--hb-card)]/30 md:w-[340px]" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (slideItems.length === 0) {
     return (

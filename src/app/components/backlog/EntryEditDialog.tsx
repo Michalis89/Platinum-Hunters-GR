@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Trash2 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/app/components/ui/ConfirmDialog';
+import { apiClient } from '@/lib/api/client';
+import { selectUser } from '@/store/slices/authSlice';
+import { hasAnyRole } from '@/lib/roles';
 import {
   MediaCategory,
   MediaEntry,
@@ -21,6 +25,7 @@ export type EditState = {
   score: string;
   notes: string;
   isFavorite: boolean;
+  selectedPlatform: string;
 };
 
 interface EntryEditDialogProps {
@@ -29,6 +34,7 @@ interface EntryEditDialogProps {
   onClose: () => void;
   onSave: (editState: EditState) => Promise<void>;
   onDelete: (entry: MediaEntry) => void;
+  onRefreshEntry?: () => Promise<void> | void;
 }
 
 export default function EntryEditDialog({
@@ -37,8 +43,20 @@ export default function EntryEditDialog({
   onClose,
   onSave,
   onDelete,
+  onRefreshEntry,
 }: Readonly<EntryEditDialogProps>) {
+  const user = useSelector(selectUser);
+  const canManageCatalog = hasAnyRole(user, ['admin', 'owner', 'moderator']);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
+  const [descriptionDraft, setDescriptionDraft] = useState('');
+  const [descriptionValue, setDescriptionValue] = useState('');
+  const [isSavingDescription, setIsSavingDescription] = useState(false);
+  const [isSyncingRawgMetadata, setIsSyncingRawgMetadata] = useState(false);
+  const [catalogMessage, setCatalogMessage] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editState, setEditState] = useState<EditState>({
     status: 'planned',
@@ -46,6 +64,7 @@ export default function EntryEditDialog({
     score: '',
     notes: '',
     isFavorite: false,
+    selectedPlatform: '',
   });
 
   const config = CATEGORY_CONFIG[category];
@@ -54,20 +73,99 @@ export default function EntryEditDialog({
   useEffect(() => {
     if (entry) {
       setDescriptionExpanded(false);
+      setIsDescriptionEditing(false);
+      setCatalogMessage(null);
+      const nextDescription = entry.description ?? '';
+      setDescriptionValue(nextDescription);
+      setDescriptionDraft(nextDescription);
       setEditState({
         status: entry.status ?? 'planned',
         progress: entry.progress ? String(entry.progress) : '',
         score: entry.entryId ? (entry.score ?? '') : '',
         notes: entry.notes ?? '',
         isFavorite: entry.isFavorite ?? false,
+        selectedPlatform:
+          entry.selectedPlatform ??
+          (category === 'games' && (entry.platforms ?? []).includes('PC') ? 'PC' : ''),
       });
     }
-  }, [entry]);
+  }, [category, entry]);
 
   if (!entry) return null;
 
   const total = getTotalCount(entry, category);
   const shouldAutoCompleteProgress = category !== 'games';
+  const descriptionText = descriptionValue || entry.description || '';
+  const showDescriptionTools = canManageCatalog && Boolean(entry.mediaId);
+
+  const handleSaveDescription = async () => {
+    if (!entry.mediaId || !showDescriptionTools) return;
+    try {
+      setIsSavingDescription(true);
+      setCatalogMessage(null);
+      const response = await apiClient.request('/api/media/entry', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_description',
+          category,
+          mediaId: entry.mediaId,
+          description: descriptionDraft,
+        }),
+      });
+      const data = (await response.json()) as { error?: string; description?: string };
+      if (!response.ok) {
+        throw new Error(data.error || 'Description update failed');
+      }
+      setDescriptionValue(data.description ?? descriptionDraft);
+      setIsDescriptionEditing(false);
+      await onRefreshEntry?.();
+      setCatalogMessage({ type: 'success', message: 'Η περιγραφή ενημερώθηκε.' });
+    } catch (error) {
+      console.warn('Description update failed:', error);
+      setCatalogMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Αποτυχία ενημέρωσης περιγραφής.',
+      });
+    } finally {
+      setIsSavingDescription(false);
+    }
+  };
+
+  const handleSyncRawgMetadata = async () => {
+    if (!entry.mediaId || category !== 'games' || !showDescriptionTools) return;
+    try {
+      setIsSyncingRawgMetadata(true);
+      setCatalogMessage(null);
+      const response = await apiClient.request('/api/media/entry', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync_rawg_metadata',
+          category,
+          mediaId: entry.mediaId,
+        }),
+      });
+      const data = (await response.json()) as { error?: string; description?: string };
+      if (!response.ok) {
+        throw new Error(data.error || 'RAWG metadata sync failed');
+      }
+      if (typeof data.description === 'string') {
+        setDescriptionValue(data.description);
+        setDescriptionDraft(data.description);
+      }
+      await onRefreshEntry?.();
+      setCatalogMessage({ type: 'success', message: 'Το metadata sync από RAWG ολοκληρώθηκε.' });
+    } catch (error) {
+      console.warn('RAWG metadata sync failed:', error);
+      setCatalogMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Αποτυχία sync metadata από RAWG.',
+      });
+    } finally {
+      setIsSyncingRawgMetadata(false);
+    }
+  };
 
   const handleStatusChange = (nextStatus: MediaStatus) => {
     setEditState(prev => {
@@ -175,26 +273,99 @@ export default function EntryEditDialog({
                   {entry.year ? ` • ${entry.year}` : ''}
                 </p>
               </div>
-              {entry.description && (
+              {(descriptionText || showDescriptionTools) && (
                 <div className="space-y-2">
                   <div
                     className={[
                       'text-[var(--hb-text)]/90 relative text-sm leading-relaxed',
-                      descriptionExpanded ? '' : 'max-h-24 overflow-hidden',
+                      descriptionExpanded || isDescriptionEditing ? '' : 'max-h-24 overflow-hidden',
                     ].join(' ')}
                   >
-                    <p className="whitespace-pre-line">{entry.description}</p>
-                    {!descriptionExpanded && (
+                    {isDescriptionEditing ? (
+                      <textarea
+                        value={descriptionDraft}
+                        onChange={event => setDescriptionDraft(event.target.value)}
+                        className="min-h-[120px] w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-2 text-sm text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
+                        placeholder="Περιγραφή..."
+                      />
+                    ) : (
+                      <p className="whitespace-pre-line">
+                        {descriptionText || 'Δεν υπάρχει περιγραφή.'}
+                      </p>
+                    )}
+                    {!descriptionExpanded && !isDescriptionEditing && (
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--hb-panel)] to-transparent" />
                     )}
                   </div>
-                  <Button
-                    type="button"
-                    variant={'secondary'}
-                    onClick={() => setDescriptionExpanded(v => !v)}
-                  >
-                    {descriptionExpanded ? 'Show less' : 'Show more'}
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant={'secondary'}
+                      onClick={() => setDescriptionExpanded(v => !v)}
+                    >
+                      {descriptionExpanded ? 'Show less' : 'Show more'}
+                    </Button>
+                    {showDescriptionTools && (
+                      <>
+                        {!isDescriptionEditing ? (
+                          <Button
+                            type="button"
+                            variant={'secondary'}
+                            onClick={() => {
+                              setDescriptionDraft(descriptionText);
+                              setIsDescriptionEditing(true);
+                              setDescriptionExpanded(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        ) : (
+                          <>
+                            <Button
+                              type="button"
+                              variant={'primary'}
+                              onClick={handleSaveDescription}
+                              disabled={isSavingDescription}
+                            >
+                              {isSavingDescription ? 'Saving...' : 'Save'}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={'outline'}
+                              onClick={() => {
+                                setIsDescriptionEditing(false);
+                                setDescriptionDraft(descriptionText);
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                        {category === 'games' && (
+                          <Button
+                            type="button"
+                            variant={'outline'}
+                            onClick={handleSyncRawgMetadata}
+                            disabled={isSyncingRawgMetadata}
+                          >
+                            {isSyncingRawgMetadata ? 'Syncing...' : 'Sync RAWG metadata'}
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  {catalogMessage && (
+                    <p
+                      className={[
+                        'text-xs',
+                        catalogMessage.type === 'success'
+                          ? 'text-emerald-400'
+                          : 'text-rose-400',
+                      ].join(' ')}
+                    >
+                      {catalogMessage.message}
+                    </p>
+                  )}
                 </div>
               )}
               <div className="flex flex-wrap gap-2">
@@ -223,6 +394,30 @@ export default function EntryEditDialog({
           </div>
 
           <div className="mt-6 grid gap-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 md:grid-cols-2">
+            {category === 'games' && (
+              <div className="md:col-span-2">
+                <label className="text-xs text-[var(--hb-muted)]">Platform που παίζεις</label>
+                <div className="relative mt-2">
+                  <select
+                    value={editState.selectedPlatform}
+                    onChange={event =>
+                      setEditState(prev => ({ ...prev, selectedPlatform: event.target.value }))
+                    }
+                    className="h-10 w-full appearance-none rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 pr-10 text-sm text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:outline-none"
+                  >
+                    <option value="">Δεν έχω επιλέξει</option>
+                    {(entry.platforms ?? []).map(platform => (
+                      <option key={platform} value={platform}>
+                        {platform}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--hb-muted)]">
+                    ▾
+                  </span>
+                </div>
+              </div>
+            )}
             {/* Status */}
             <div>
               <label className="text-xs text-[var(--hb-muted)]">Status</label>
@@ -439,4 +634,3 @@ export default function EntryEditDialog({
     </div>
   );
 }
-

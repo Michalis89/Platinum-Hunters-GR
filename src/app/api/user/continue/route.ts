@@ -39,6 +39,8 @@ type CountBucket = {
 
 type MediaPreview = {
   category: string | null;
+  source: string | null;
+  steam_app_id: number | null;
   title: string | null;
   title_english: string | null;
   title_romaji: string | null;
@@ -85,6 +87,30 @@ const resolveTitle = (media: MediaPreview | null) =>
   media?.title_native ??
   media?.original_title ??
   null;
+
+const normalizeSteamCoverForContinue = (
+  url: string | null | undefined,
+  steamAppId: number | null | undefined,
+) => {
+  if (!url) return null;
+
+  if (
+    steamAppId &&
+    url === `https://cdn.cloudflare.steamstatic.com/steam/apps/${steamAppId}/header.jpg`
+  ) {
+    return null;
+  }
+
+  if (
+    url.includes('cdn.cloudflare.steamstatic.com/steam/apps/') &&
+    !url.includes('/steamcommunity/public/images/apps/') &&
+    !url.endsWith('/header.jpg')
+  ) {
+    return url.replace('/steam/apps/', '/steamcommunity/public/images/apps/');
+  }
+
+  return url;
+};
 
 const normalizeEnabledCategories = (categories: string[]) =>
   categories.filter(category => DASHBOARD_CATEGORIES.includes(category as DashboardCategory));
@@ -165,6 +191,8 @@ async function GETHandler() {
           created_at,
           media_items!inner (
             category,
+            source,
+            steam_app_id,
             title,
             title_english,
             title_romaji,
@@ -213,8 +241,14 @@ async function GETHandler() {
         title: resolveTitle(media),
         season_year: media?.season_year ?? null,
         release_date: media?.release_date ?? null,
-        cover_image_large: media?.cover_image_large ?? null,
-        cover_image_medium: media?.cover_image_medium ?? null,
+        cover_image_large:
+          media?.source === 'steam'
+            ? normalizeSteamCoverForContinue(media?.cover_image_large, media?.steam_app_id)
+            : (media?.cover_image_large ?? null),
+        cover_image_medium:
+          media?.source === 'steam'
+            ? normalizeSteamCoverForContinue(media?.cover_image_medium, media?.steam_app_id)
+            : (media?.cover_image_medium ?? null),
       });
     }
 
