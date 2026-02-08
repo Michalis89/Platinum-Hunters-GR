@@ -35,7 +35,7 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
   const safeLink = escapeHtml(config.actionLink);
 
   return `<!DOCTYPE html>
-<html lang="el">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -79,7 +79,9 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
                 <p style="margin:0;font-size:12px;line-height:1.6;color:${palette.secondaryText};">
                   <a href="https://www.hobbistas-hub.com/" style="color:${palette.brandBlueSoft};font-weight:600;text-decoration:none;">© 2026 Hobbistas</a>
                 </p>
-                <p style="margin:6px 0 0;font-size:12px;line-height:1.6;color:${palette.mutedText};">Για ερωτήσεις, απάντησε σε αυτό το email.</p>
+                <p style="margin:6px 0 0;font-size:12px;line-height:1.6;color:${palette.mutedText};">
+                  For questions, simply reply to this email.
+                </p>
               </td>
             </tr>
           </table>
@@ -94,15 +96,15 @@ export function renderConfirmEmail(actionLink: string): string {
   if (!actionLink) throw new Error('Missing actionLink for confirm email');
 
   return renderEmailTemplate({
-    preheader: 'Επιβεβαίωσε το email σου στο Hobbistas.',
-    title: 'Επιβεβαίωση Email',
-    subtitle: 'Το hub των hobbies σου',
+    preheader: 'Confirm your email address on Hobbistas.',
+    title: 'Confirm Your Email',
+    subtitle: 'Your personal hobby hub',
     intro:
-      'Καλώς ήρθες στο <strong style="color: rgba(255,255,255,0.95);">Hobbistas</strong>. Πάτα το κουμπί για να ολοκληρώσεις την εγγραφή σου.',
-    actionLabel: 'Επιβεβαίωση Λογαριασμού',
+      'Welcome to <strong style="color: rgba(255,255,255,0.95);">Hobbistas</strong>. Click the button below to complete your registration.',
+    actionLabel: 'Confirm Account',
     actionLink,
-    outro: 'Αν δεν ζήτησες εσύ αυτή την ενέργεια, μπορείς να αγνοήσεις με ασφάλεια αυτό το email.',
-    helper: 'Αν το κουμπί δεν λειτουργεί, αντέγραψε και άνοιξε το παρακάτω link:',
+    outro: 'If you did not request this action, you can safely ignore this email.',
+    helper: 'If the button does not work, copy and open the link below:',
   });
 }
 
@@ -110,14 +112,14 @@ export function renderResetPasswordEmail(actionLink: string): string {
   if (!actionLink) throw new Error('Missing actionLink for reset password email');
 
   return renderEmailTemplate({
-    preheader: 'Επαναφορά κωδικού πρόσβασης στο Hobbistas.',
-    title: 'Επαναφορά Κωδικού Πρόσβασης',
-    subtitle: 'Ασφαλής ανάκτηση πρόσβασης',
+    preheader: 'Reset your Hobbistas account password.',
+    title: 'Reset Your Password',
+    subtitle: 'Secure access recovery',
     intro:
-      'Ζήτησες επαναφορά κωδικού στο <strong style="color: rgba(255,255,255,0.95);">Hobbistas</strong>. Πάτα το κουμπί για να δημιουργήσεις νέο κωδικό πρόσβασης.',
-    actionLabel: 'Επαναφορά Κωδικού',
+      'You requested a password reset for your <strong style="color: rgba(255,255,255,0.95);">Hobbistas</strong> account. Click the button below to create a new password.',
+    actionLabel: 'Reset Password',
     actionLink,
-    outro: 'Αν δεν έκανες εσύ το αίτημα, δεν χρειάζεται να κάνεις κάποια ενέργεια.',
-    helper: 'Αν το κουμπί δεν λειτουργεί, άνοιξε απευθείας το παρακάτω link:',
+    outro: 'If you did not make this request, no further action is required.',
+    helper: 'If the button does not work, open the link below directly:',
   });
 }

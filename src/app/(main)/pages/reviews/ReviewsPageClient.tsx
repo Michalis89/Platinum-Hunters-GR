@@ -61,7 +61,7 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
               alt={article.title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.015]"
+              className="object-cover transition duration-300 [transition-timing-function:cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.015]"
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-[var(--apple-tertiary-fill)]">
@@ -82,7 +82,7 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
 
       <CardHeader className="p-4 pb-1">
         <Link href={`/pages/reviews/${normalizedSlug}`}>
-          <CardTitle className="apple-title-tracking text-[19px] leading-tight text-[var(--apple-label)] transition-colors duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:text-[var(--apple-system-blue)] hover:text-[var(--apple-system-blue)]">
+          <CardTitle className="apple-title-tracking text-[19px] leading-tight text-[var(--apple-label)] transition-colors duration-300 [transition-timing-function:cubic-bezier(0.2,0.8,0.2,1)] group-hover:text-[var(--apple-system-blue)] hover:text-[var(--apple-system-blue)]">
             {article.title}
           </CardTitle>
         </Link>
