@@ -1,139 +1,88 @@
-export function renderConfirmEmail(actionLink: string): string {
-  if (!actionLink) throw new Error('Missing actionLink for confirm email');
+type EmailTemplateConfig = {
+  preheader: string;
+  title: string;
+  subtitle: string;
+  intro: string;
+  actionLabel: string;
+  actionLink: string;
+  outro: string;
+  helper: string;
+};
+
+const palette = {
+  bg: '#000000',
+  surface: 'rgba(28, 28, 30, 0.92)',
+  border: 'rgba(255, 255, 255, 0.1)',
+  text: 'rgba(255, 255, 255, 0.95)',
+  secondaryText: 'rgba(235, 235, 245, 0.6)',
+  mutedText: 'rgba(235, 235, 245, 0.45)',
+  brandBlue: '#007aff',
+  brandBlueSoft: '#5ac8fa',
+  brandGreen: '#34c759',
+  white: '#ffffff',
+};
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function renderEmailTemplate(config: EmailTemplateConfig): string {
+  const safeLink = escapeHtml(config.actionLink);
+
   return `<!DOCTYPE html>
 <html lang="el">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Επιβεβαίωση Λογαριασμού</title>
+    <title>${config.title}</title>
   </head>
-
-  <body
-    style="
-      margin: 0;
-      padding: 0;
-      background: #0b0b0f;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: #f5f5f5;
-    "
-  >
-    <table
-      align="center"
-      width="100%"
-      cellpadding="0"
-      cellspacing="0"
-      style="max-width: 560px; margin: 0 auto; padding: 28px 18px;"
-    >
+  <body style="margin:0;padding:0;background:${palette.bg};font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:${palette.text};">
+    <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;mso-hide:all;">
+      ${config.preheader}
+    </span>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:radial-gradient(circle at 8% -10%, rgba(0,122,255,0.24), transparent 46%), radial-gradient(circle at 88% 0%, rgba(52,199,89,0.12), transparent 44%), ${palette.bg};">
       <tr>
-        <td style="text-align: center; padding: 8px 0 18px;">
-          <div style="display: inline-block; text-align: center;">
-            <div
-              style="
-                font-size: 22px;
-                font-weight: 800;
-                letter-spacing: 0.6px;
-                color: #ffffff;
-              "
-            >
-              Hobbistas
-            </div>
-            <div style="font-size: 12px; color: #a1a1b3; margin-top: 6px;">
-              Το hub των hobbies σου
-            </div>
-          </div>
-        </td>
-      </tr>
-
-      <tr>
-        <td
-          style="
-            background: rgba(16, 16, 22, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 34px 26px;
-            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.7);
-          "
-        >
-          <div
-            style="
-              height: 4px;
-              width: 100%;
-              border-radius: 999px;
-              background: linear-gradient(90deg, #e50914, #ff4d5a);
-              margin: -8px 0 18px;
-            "
-          ></div>
-
-          <h2
-            style="
-              margin: 0 0 10px;
-              font-size: 22px;
-              line-height: 1.25;
-              font-weight: 800;
-              color: #ffffff;
-            "
-          >
-            Επιβεβαίωση Email
-          </h2>
-
-          <p style="margin: 0 0 18px; font-size: 15px; line-height: 1.7; color: #a1a1b3;">
-            Καλώς ήρθες στο <strong style="color: #f5f5f5;">Hobbistas</strong>!
-            Για να ολοκληρώσεις την εγγραφή σου, κάνε κλικ στο κουμπί:
-          </p>
-
-          <div style="text-align: center; margin: 24px 0 18px;">
-            <a
-              href="${actionLink}"
-              style="
-                display: inline-block;
-                background: linear-gradient(90deg, #e50914, #ff4d5a);
-                color: #ffffff;
-                padding: 14px 26px;
-                border-radius: 14px;
-                font-weight: 800;
-                text-decoration: none;
-                box-shadow: 0 10px 26px rgba(229, 9, 20, 0.35);
-              "
-            >
-              Επιβεβαίωση Λογαριασμού
-            </a>
-          </div>
-
-          <p style="margin: 0; font-size: 12.5px; line-height: 1.7; color: #a1a1b3;">
-            Αν δεν ζήτησες εσύ αυτή την ενέργεια, απλά αγνόησε αυτό το email.
-          </p>
-
-          <div
-            style="
-              margin-top: 18px;
-              padding-top: 16px;
-              border-top: 1px solid rgba(255, 255, 255, 0.08);
-              color: #a1a1b3;
-              font-size: 12px;
-              line-height: 1.6;
-            "
-          >
-            Αν το κουμπί δεν δουλεύει, αντέγραψε και άνοιξε αυτό το link:
-            <div style="word-break: break-all; margin-top: 8px;">
-              <a href="${actionLink}" style="color: #ff4d5a; text-decoration: none;">
-                ${actionLink}
-              </a>
-            </div>
-          </div>
-        </td>
-      </tr>
-
-      <tr>
-        <td style="text-align: center; padding: 18px 6px 0; color: #a1a1b3; font-size: 12px;">
-          <a
-            href="https://www.hobbistas-hub.com/"
-            style="color: #ff4d5a; text-decoration: none; font-weight: 700;"
-          >
-            © 2026 Hobbistas
-          </a>
-          <div style="margin-top: 6px; color: #6f6f86;">
-            Αν έχεις απορίες, απάντησε σε αυτό το email.
-          </div>
+        <td align="center" style="padding:28px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;border-collapse:collapse;">
+            <tr>
+              <td style="padding:0 0 18px;text-align:center;">
+                <p style="margin:0;font-size:22px;line-height:1.15;font-weight:700;letter-spacing:-0.02em;color:${palette.white};">Hobbistas</p>
+                <p style="margin:6px 0 0;font-size:12px;line-height:1.4;color:${palette.secondaryText};">${config.subtitle}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="border-radius:24px;background:${palette.surface};border:1px solid ${palette.border};box-shadow:0 2px 8px rgba(0,0,0,0.45),0 18px 54px rgba(0,0,0,0.62);padding:32px 24px;">
+                <div style="height:4px;border-radius:999px;background:linear-gradient(135deg, ${palette.brandBlue} 0%, ${palette.brandBlueSoft} 52%, ${palette.brandGreen} 100%);margin:0 0 20px;"></div>
+                <h1 style="margin:0 0 12px;font-size:24px;line-height:1.2;font-weight:700;letter-spacing:-0.022em;color:${palette.text};">${config.title}</h1>
+                <p style="margin:0 0 22px;font-size:15px;line-height:1.65;color:${palette.secondaryText};">${config.intro}</p>
+                <div style="margin:0 0 20px;text-align:center;">
+                  <a href="${safeLink}" style="display:inline-block;padding:14px 26px;border-radius:14px;background:linear-gradient(145deg, ${palette.brandBlue} 0%, ${palette.brandGreen} 100%);color:${palette.white};font-size:15px;font-weight:700;letter-spacing:-0.011em;text-decoration:none;box-shadow:0 10px 28px rgba(0,122,255,0.35);">
+                    ${config.actionLabel}
+                  </a>
+                </div>
+                <p style="margin:0;font-size:12.5px;line-height:1.65;color:${palette.secondaryText};">${config.outro}</p>
+                <div style="margin-top:18px;padding-top:16px;border-top:1px solid ${palette.border};">
+                  <p style="margin:0;font-size:12px;line-height:1.65;color:${palette.mutedText};">${config.helper}</p>
+                  <p style="margin:8px 0 0;font-size:12px;line-height:1.55;word-break:break-all;">
+                    <a href="${safeLink}" style="color:${palette.brandBlueSoft};text-decoration:none;">${safeLink}</a>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 8px 0;text-align:center;">
+                <p style="margin:0;font-size:12px;line-height:1.6;color:${palette.secondaryText};">
+                  <a href="https://www.hobbistas-hub.com/" style="color:${palette.brandBlueSoft};font-weight:600;text-decoration:none;">© 2026 Hobbistas</a>
+                </p>
+                <p style="margin:6px 0 0;font-size:12px;line-height:1.6;color:${palette.mutedText};">Για ερωτήσεις, απάντησε σε αυτό το email.</p>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>
@@ -141,159 +90,34 @@ export function renderConfirmEmail(actionLink: string): string {
 </html>`;
 }
 
+export function renderConfirmEmail(actionLink: string): string {
+  if (!actionLink) throw new Error('Missing actionLink for confirm email');
+
+  return renderEmailTemplate({
+    preheader: 'Επιβεβαίωσε το email σου στο Hobbistas.',
+    title: 'Επιβεβαίωση Email',
+    subtitle: 'Το hub των hobbies σου',
+    intro:
+      'Καλώς ήρθες στο <strong style="color: rgba(255,255,255,0.95);">Hobbistas</strong>. Πάτα το κουμπί για να ολοκληρώσεις την εγγραφή σου.',
+    actionLabel: 'Επιβεβαίωση Λογαριασμού',
+    actionLink,
+    outro: 'Αν δεν ζήτησες εσύ αυτή την ενέργεια, μπορείς να αγνοήσεις με ασφάλεια αυτό το email.',
+    helper: 'Αν το κουμπί δεν λειτουργεί, αντέγραψε και άνοιξε το παρακάτω link:',
+  });
+}
+
 export function renderResetPasswordEmail(actionLink: string): string {
   if (!actionLink) throw new Error('Missing actionLink for reset password email');
-  return `<!DOCTYPE html>
-<html lang="el">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Επαναφορά Κωδικού</title>
-  </head>
 
-  <body
-    style="
-      margin: 0;
-      padding: 0;
-      background: #0b0b0f;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: #f5f5f5;
-    "
-  >
-    <table
-      align="center"
-      width="100%"
-      cellpadding="0"
-      cellspacing="0"
-      style="max-width: 560px; margin: 0 auto; padding: 28px 18px;"
-    >
-      <tr>
-        <td style="text-align: center; padding: 8px 0 18px;">
-          <div style="display: inline-block; text-align: center;">
-            <div
-              style="
-                font-size: 22px;
-                font-weight: 800;
-                letter-spacing: 0.6px;
-                color: #ffffff;
-              "
-            >
-              Hobbistas
-            </div>
-            <div style="font-size: 12px; color: #a1a1b3; margin-top: 6px;">
-              Επαναφορά πρόσβασης
-            </div>
-          </div>
-        </td>
-      </tr>
-
-      <tr>
-        <td
-          style="
-            background: rgba(16, 16, 22, 0.92);
-            padding: 34px 26px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.7);
-          "
-        >
-          <div
-            style="
-              height: 4px;
-              width: 100%;
-              border-radius: 999px;
-              background: linear-gradient(90deg, #e50914, #ff4d5a);
-              margin: -8px 0 18px;
-            "
-          ></div>
-
-          <h2
-            style="
-              margin: 0 0 12px;
-              font-size: 22px;
-              font-weight: 800;
-              color: #ffffff;
-            "
-          >
-            Επαναφορά Κωδικού Πρόσβασης
-          </h2>
-
-          <p style="font-size: 15px; line-height: 1.7; color: #a1a1b3; margin: 0 0 20px;">
-            Ζήτησες επαναφορά του κωδικού σου στο
-            <strong style="color: #f5f5f5;">Hobbistas</strong>.
-            Πάτα το κουμπί παρακάτω για να δημιουργήσεις νέο κωδικό:
-          </p>
-
-          <div style="text-align: center; margin: 24px 0 18px;">
-            <a
-              href="${actionLink}"
-              style="
-                display: inline-block;
-                background: linear-gradient(90deg, #e50914, #ff4d5a);
-                color: #ffffff;
-                padding: 14px 26px;
-                border-radius: 14px;
-                font-weight: 800;
-                text-decoration: none;
-                box-shadow: 0 10px 26px rgba(229, 9, 20, 0.35);
-              "
-            >
-              Επαναφορά Κωδικού
-            </a>
-          </div>
-
-          <p style="font-size: 12.5px; line-height: 1.7; color: #a1a1b3; margin: 0;">
-            Αν δεν ζήτησες εσύ επαναφορά, μπορείς απλά να αγνοήσεις αυτό το email.
-          </p>
-
-          <div
-            style="
-              margin-top: 18px;
-              padding-top: 16px;
-              border-top: 1px solid rgba(255, 255, 255, 0.08);
-              color: #a1a1b3;
-              font-size: 12px;
-              line-height: 1.6;
-            "
-          >
-            Αν το κουμπί δεν δουλεύει, άνοιξε αυτό το link:
-            <div style="word-break: break-all; margin-top: 8px;">
-              <a
-                href="${actionLink}"
-                style="color: #ff4d5a; text-decoration: none;"
-              >
-                ${actionLink}
-              </a>
-            </div>
-          </div>
-
-          <div style="margin-top: 14px; color: #6f6f86; font-size: 12px; line-height: 1.6;">
-            Tip: Για καλύτερη ασφάλεια, διάλεξε έναν ισχυρό κωδικό που δεν χρησιμοποιείς αλλού.
-          </div>
-        </td>
-      </tr>
-
-      <tr>
-        <td
-          style="
-            text-align: center;
-            padding-top: 18px;
-            color: #6f6f86;
-            font-size: 12px;
-          "
-        >
-          <a
-            href="https://www.hobbistas-hub.com/"
-            style="color: #ff4d5a; text-decoration: none; font-weight: 700;"
-          >
-            © 2026 Hobbistas
-          </a>
-          <div style="margin-top: 6px; color: #a1a1b3;">
-            Αν δεν αναγνώρισες το αίτημα, δεν χρειάζεται να κάνεις κάτι.
-          </div>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>`;
+  return renderEmailTemplate({
+    preheader: 'Επαναφορά κωδικού πρόσβασης στο Hobbistas.',
+    title: 'Επαναφορά Κωδικού Πρόσβασης',
+    subtitle: 'Ασφαλής ανάκτηση πρόσβασης',
+    intro:
+      'Ζήτησες επαναφορά κωδικού στο <strong style="color: rgba(255,255,255,0.95);">Hobbistas</strong>. Πάτα το κουμπί για να δημιουργήσεις νέο κωδικό πρόσβασης.',
+    actionLabel: 'Επαναφορά Κωδικού',
+    actionLink,
+    outro: 'Αν δεν έκανες εσύ το αίτημα, δεν χρειάζεται να κάνεις κάποια ενέργεια.',
+    helper: 'Αν το κουμπί δεν λειτουργεί, άνοιξε απευθείας το παρακάτω link:',
+  });
 }

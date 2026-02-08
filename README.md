@@ -281,13 +281,6 @@ Run migrations sequentially from `supabase-migrations/` in the Supabase SQL edit
 4. Run tests: `npm test`
 5. Submit a pull request
 
-### How to Use the Docs
-
-- `docs/private/REVIEW.md`: snapshot of prior production audit findings and Vercel hardening notes.
-- `docs/private/codex/ARCHITECTURE.md`: architecture map + state/data strategy.
-- `docs/private/codex/AUDIT_REPORT.md`: cleaned audit findings with severity tiers.
-- `docs/private/codex/ROADMAP.md`: 30/60/90 engineering + marketing plan and monetization tiers.
-
 ---
 
 ## License

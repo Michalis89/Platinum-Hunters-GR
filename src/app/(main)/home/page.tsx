@@ -4,9 +4,9 @@ import { redirect } from 'next/navigation';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 export const metadata = buildMetadata({
-  title: 'Το No1 Hobby Hub',
+  title: 'Your Hobby Hub',
   description:
-    'Οργάνωσε το backlog σου, παρακολούθησε την πρόοδό σου και ανακάλυψε νέα χόμπι με τον Hobbistas.',
+    'Organize your backlog, track your progress, and keep all your hobbies in one place.',
   path: '/home',
 });
 
