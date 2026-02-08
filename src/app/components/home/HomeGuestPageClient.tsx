@@ -9,21 +9,29 @@ import {
 
 export default function HomeGuestPageClient() {
   return (
-    <>
+    <main className="apple-page-background pb-12 md:pb-20">
       <HomeHero />
 
       <PageContainer size="xl">
         <HomeFeatures />
       </PageContainer>
 
+      <PageContainer size="xl">
+        <div className="apple-section-divider mx-auto w-full max-w-5xl" />
+      </PageContainer>
+
       <HomeHowItWorks />
+
+      <PageContainer size="xl">
+        <div className="apple-section-divider mx-auto w-full max-w-5xl" />
+      </PageContainer>
 
       <PageContainer size="xl">
         <HomeRoadmapPreview />
       </PageContainer>
 
       <HomeFinalCTA />
-    </>
+    </main>
   );
 }
 

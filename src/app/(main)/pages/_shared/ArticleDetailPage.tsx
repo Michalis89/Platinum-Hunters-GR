@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -39,6 +39,7 @@ export interface ArticleDetailPageOptions {
   basePath: `/pages/${string}`;
   breadcrumbLabel: string;
   topicFilter?: ArticleTopic;
+  designVariant?: 'default' | 'apple';
 }
 
 export interface ArticleDetailPageProps extends ArticleDetailPageOptions {
@@ -249,6 +250,7 @@ export default async function ArticleDetailPage({
   basePath,
   breadcrumbLabel,
   topicFilter,
+  designVariant = 'default',
 }: ArticleDetailPageProps) {
   const { slug } = await params;
   const sessionClient = await createRouteHandlerClient();
@@ -275,9 +277,7 @@ export default async function ArticleDetailPage({
   const baseUrl = host ? `${protocol}://${host}` : '';
   const listBasePath = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
   const hasCategory = Boolean(article.category);
-  const fallbackHref = hasCategory
-    ? `${listBasePath}?category=${article.category}`
-    : listBasePath;
+  const fallbackHref = hasCategory ? `${listBasePath}?category=${article.category}` : listBasePath;
   let backHref = fallbackHref;
 
   if (referer && baseUrl && referer.startsWith(baseUrl)) {
@@ -316,26 +316,79 @@ export default async function ArticleDetailPage({
   const { html: contentWithHeadingIds, headings } = enrichContentHeadings(sanitizedContentHtml);
   const shouldShowTOC = headings.length >= TOC_MIN_HEADINGS;
   const relatedArticles = await fetchRelatedArticles(article);
-  const tocItems = headings.map(heading => (
-    <li key={heading.id}>
-      <a
-        href={`#${heading.id}`}
-        className="inline-flex w-full rounded-md px-2 py-1 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hb-primary)]"
-      >
-        {heading.title}
-      </a>
-    </li>
-  ));
   const categoryLabel = CATEGORY_LABELS[article.category] ?? article.category;
+  const isAppleVariant = designVariant === 'apple';
   const breadcrumbItems = [
     { name: 'Αρχική', url: `${SITE_URL}/` },
     { name: breadcrumbLabel, url: `${SITE_URL}${basePath}` },
     { name: categoryLabel, url: `${SITE_URL}${basePath}?category=${article.category}` },
     { name: article.title, url: articleUrl },
   ];
+  const pageShellClass = isAppleVariant
+    ? 'apple-page-background relative min-h-screen text-[var(--apple-label)]'
+    : 'relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]';
+  const heroOverlayClass = isAppleVariant
+    ? 'absolute inset-0 bg-gradient-to-t from-[var(--apple-bg)]/95 via-[var(--apple-bg)]/58 to-transparent'
+    : 'via-[var(--hb-bg)]/60 absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] to-transparent';
+  const articleShellClass = isAppleVariant
+    ? 'apple-material-surface rounded-[28px] p-5 sm:p-8 md:p-10'
+    : 'rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-2xl backdrop-blur-xl sm:p-6 md:p-10';
+  const badgeClass = isAppleVariant
+    ? 'apple-pill inline-flex items-center px-3 py-1 text-[11px] uppercase tracking-[0.2em] apple-secondary-label'
+    : 'bg-[var(--hb-panel)]/80 rounded-full border border-[var(--hb-border)] px-3 py-1';
+  const metaPanelClass = isAppleVariant
+    ? 'apple-card mt-6 rounded-[20px] p-4 apple-secondary-label'
+    : 'bg-[var(--hb-panel)]/60 mt-6 rounded-3xl border border-[var(--hb-border)] p-4 text-[var(--hb-muted)] shadow-[var(--hb-shadow-md)]';
+  const metaChipClass = isAppleVariant
+    ? 'apple-pill inline-flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-[0.2em] apple-secondary-label'
+    : 'flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1';
+  const statChipClass = isAppleVariant
+    ? 'apple-pill inline-flex items-center gap-1 rounded-[20px] px-3 py-2 text-xs apple-secondary-label'
+    : 'flex items-center gap-1 rounded-full border border-[var(--hb-border)] px-3 py-1';
+  const authorChipClass = isAppleVariant
+    ? 'inline-flex items-center gap-2 rounded-[20px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-3 py-2 text-xs apple-secondary-label'
+    : 'flex items-center gap-2 rounded-full border border-[var(--hb-border)] px-3 py-1 text-[var(--hb-muted)]';
+  const squircleControlClass = isAppleVariant
+    ? 'rounded-[20px] px-4 py-2.5 text-sm apple-label'
+    : '';
+  const tagsWrapClass = isAppleVariant
+    ? 'mt-4 flex flex-wrap gap-2.5'
+    : 'mt-4 flex flex-wrap gap-2';
+  const tagLinkClass = isAppleVariant
+    ? 'inline-flex items-center gap-2 rounded-[20px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-4 py-2 text-xs apple-label transition hover:border-[var(--apple-system-blue)] hover:text-[var(--apple-system-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--apple-system-blue)]'
+    : 'inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-[var(--hb-text)] transition hover:border-[var(--hb-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hb-primary)]';
+  const actionRowWrapClass = isAppleVariant
+    ? 'mt-4 flex justify-center [&_a]:rounded-[20px] [&_a]:px-4 [&_a]:py-2.5 [&_button]:rounded-[20px] [&_button]:px-4 [&_button]:py-2.5'
+    : 'mt-4 flex justify-center';
+  const tocSummaryClass = isAppleVariant
+    ? 'cursor-pointer rounded-[20px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-4 py-2.5 text-sm font-semibold apple-label transition hover:border-[var(--apple-system-blue)]'
+    : 'cursor-pointer rounded-2xl border border-[var(--hb-border)] px-3 py-2 text-sm font-semibold text-[var(--hb-headline)] transition hover:border-[var(--hb-primary)]';
+  const detailGridClass = 'mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]';
+  const asideStackClass = isAppleVariant
+    ? 'space-y-4 lg:sticky lg:top-24 lg:self-start'
+    : 'space-y-4';
+  const tocShellClass = isAppleVariant
+    ? 'apple-card w-full rounded-[20px] shadow-[var(--apple-shadow)]'
+    : 'w-full rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-[var(--hb-shadow-md)]';
+  const tocHeaderClass = isAppleVariant
+    ? 'apple-secondary-label flex flex-wrap items-center justify-between gap-2 border-b border-[var(--apple-separator)] px-5 py-3 text-[10px] uppercase tracking-[0.3em]'
+    : 'flex flex-wrap items-center justify-between gap-2 border-b border-[var(--hb-border)] px-5 py-3 text-[10px] uppercase tracking-[0.3em] text-[var(--hb-muted)]';
+  const tocLinkClass = isAppleVariant
+    ? 'inline-flex w-full rounded-[20px] px-4 py-2 text-sm apple-secondary-label transition hover:text-[var(--apple-system-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--apple-system-blue)]'
+    : 'inline-flex w-full rounded-md px-2 py-1 text-sm text-[var(--hb-text)] transition hover:text-[var(--hb-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hb-primary)]';
+  const contentClass = isAppleVariant
+    ? 'article-content apple-body-tracking mx-auto max-w-[760px] pt-8 text-base leading-[1.8] apple-label sm:text-[17px] [&_a]:apple-system-blue [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-[var(--apple-system-blue)] [&_blockquote]:my-6 [&_blockquote]:rounded-2xl [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--apple-system-blue)] [&_blockquote]:bg-[var(--apple-tertiary-fill)] [&_blockquote]:px-4 [&_blockquote]:py-3 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-[var(--apple-tertiary-fill)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:apple-system-blue [&_h1]:apple-title-tracking [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:apple-label sm:[&_h1]:text-3xl [&_h2]:apple-title-tracking [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-xl [&_h2]:font-semibold sm:[&_h2]:text-2xl [&_h3]:apple-title-tracking [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-lg [&_h3]:font-semibold sm:[&_h3]:text-xl [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-[20px] [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-[20px] [&_pre]:bg-[var(--apple-group-bg)] [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6'
+    : 'article-content [&_blockquote]:bg-[var(--hb-primary)]/5 mx-auto max-w-[760px] pt-8 text-base leading-[1.8] text-[var(--hb-text)] sm:text-[17px] [&_a]:text-[var(--hb-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-[var(--hb-primary)] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--hb-primary)] [&_blockquote]:px-4 [&_blockquote]:py-2 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-[var(--hb-panel)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-[var(--hb-primary)] [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[var(--hb-headline)] sm:[&_h1]:text-3xl [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-xl [&_h2]:font-semibold sm:[&_h2]:text-2xl [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-lg [&_h3]:font-semibold sm:[&_h3]:text-xl [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:bg-[var(--hb-panel)] [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6';
+  const tocItems = headings.map(heading => (
+    <li key={heading.id}>
+      <a href={`#${heading.id}`} className={tocLinkClass}>
+        {heading.title}
+      </a>
+    </li>
+  ));
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
+    <div className={pageShellClass}>
       <StructuredData
         data={getArticleStructuredData({
           title: article.title,
@@ -364,10 +417,15 @@ export default async function ArticleDetailPage({
         ) : (
           <div className="h-full w-full bg-[var(--hb-panel)]" />
         )}
-        <div className="via-[var(--hb-bg)]/60 absolute inset-0 bg-gradient-to-t from-[var(--hb-bg)] to-transparent" />
+        <div className={heroOverlayClass} />
 
         <div className="absolute left-4 top-4 z-10">
-          <Button href={backHref} variant="secondary" icon={<ArrowLeft size={16} />}>
+          <Button
+            href={backHref}
+            variant="secondary"
+            icon={<ArrowLeft size={16} />}
+            className={squircleControlClass}
+          >
             Πίσω
           </Button>
         </div>
@@ -375,132 +433,224 @@ export default async function ArticleDetailPage({
 
       {/* Masthead + Body */}
       <div className="relative mx-auto -mt-14 max-w-5xl px-3 pb-16 sm:px-4 md:-mt-20">
-        <article className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-2xl backdrop-blur-xl sm:p-6 md:p-10">
+        <article className={articleShellClass}>
           <header className="mx-auto max-w-[760px]">
             <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-              <span className="bg-[var(--hb-panel)]/80 rounded-full border border-[var(--hb-border)] px-3 py-1">
-                {categoryLabel}
-              </span>
-              <span className="bg-[var(--hb-panel)]/80 rounded-full border border-[var(--hb-border)] px-3 py-1">
-                {TOPIC_LABELS[article.topic]}
-              </span>
+              <span className={badgeClass}>{categoryLabel}</span>
+              <span className={badgeClass}>{TOPIC_LABELS[article.topic]}</span>
             </div>
 
-            <h1 className="mt-4 text-[24px] font-bold leading-[1.15] tracking-tight text-[var(--hb-headline)] sm:text-[28px] md:text-[38px]">
+            <h1
+              className={`mt-4 text-[24px] leading-[1.15] sm:text-[28px] md:text-[38px] ${
+                isAppleVariant
+                  ? 'apple-title-tracking apple-label font-semibold'
+                  : 'font-bold tracking-tight text-[var(--hb-headline)]'
+              }`}
+            >
               {article.title}
             </h1>
 
             {article.description && (
-              <p className="mt-4 text-base leading-relaxed text-[var(--hb-muted)] md:text-lg">
+              <p
+                className={`mt-4 text-base leading-relaxed md:text-lg ${
+                  isAppleVariant
+                    ? 'apple-body-tracking apple-secondary-label'
+                    : 'text-[var(--hb-muted)]'
+                }`}
+              >
                 {article.description}
               </p>
             )}
-
-            <div className="bg-[var(--hb-panel)]/60 mt-6 rounded-3xl border border-[var(--hb-border)] p-4 text-[var(--hb-muted)] shadow-[var(--hb-shadow-md)]">
-              <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.2em]">
-                <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-[var(--hb-muted)]">
-                  {categoryLabel}
-                </span>
-                <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-[var(--hb-muted)]">
-                  {TOPIC_LABELS[article.topic]}
-                </span>
-                {article.published_at && (
-                  <span className="flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1">
-                    <Calendar size={12} />
-                    <FormattedDate
-                      date={article.published_at}
-                      options={ARTICLE_HEADER_DATE_OPTIONS}
-                      fallback=""
-                      className="text-[10px]"
-                    />
-                  </span>
-                )}
-                {readTime && (
-                  <span className="flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1">
-                    <Clock size={12} />
-                    <span className="text-[10px]">{readTime}</span>
-                  </span>
-                )}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {article.users && (
-                  <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] px-3 py-1 text-[var(--hb-muted)]">
-                    {article.users.avatar_url ? (
-                      <div className="relative h-5 w-5 overflow-hidden rounded-full">
-                        <Image
-                          src={article.users.avatar_url}
-                          alt={article.users.username}
-                          fill
-                          sizes="20px"
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <User size={12} />
-                    )}
-                    <span>{article.users.display_name || article.users.username}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-1 rounded-full border border-[var(--hb-border)] px-3 py-1">
-                  <Eye size={12} />
-                  <span>{article.views ?? 0} προβολές</span>
-                </div>
-                <div className="flex items-center gap-1 rounded-full border border-[var(--hb-border)] px-3 py-1">
-                  <Heart size={12} />
-                  <span>{article.likes ?? 0} likes</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 flex justify-center">
-              <ActionRow article={article} />
-            </div>
-            <ArticleAuthHint />
-
-            {article.tags && article.tags.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {article.tags.map(tag => (
-                  <Link
-                    key={tag}
-                    href={buildTagUrl(tag)}
-                    className="inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-[var(--hb-text)] transition hover:border-[var(--hb-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hb-primary)]"
-                  >
-                    <Tag size={10} />
-                    {tag}
-                  </Link>
-                ))}
-              </div>
-            )}
           </header>
 
-          {shouldShowTOC && (
-            <section className="mt-8 w-full">
-              <div className="w-full rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-card)] shadow-[var(--hb-shadow-md)]">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--hb-border)] px-5 py-3 text-[10px] uppercase tracking-[0.3em] text-[var(--hb-muted)]">
-                  <span>Πίνακας περιεχομένων</span>
-                  <span>{headings.length} ενότητες</span>
-                </div>
-                <div className="px-5 py-4">
-                  <details className="md:hidden">
-                    <summary className="cursor-pointer rounded-2xl border border-[var(--hb-border)] px-3 py-2 text-sm font-semibold text-[var(--hb-headline)] transition hover:border-[var(--hb-primary)]">
-                      Εμφάνιση
-                    </summary>
-                    <ul className="mt-3 space-y-2">{tocItems}</ul>
-                  </details>
-                  <div className="hidden md:block">
-                    <ul className="grid gap-3 md:grid-cols-2">{tocItems}</ul>
+          {isAppleVariant ? (
+            <>
+              <div className="mx-auto max-w-[760px]">
+                <div className={metaPanelClass}>
+                  <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.2em]">
+                    <span className={metaChipClass}>{categoryLabel}</span>
+                    <span className={metaChipClass}>{TOPIC_LABELS[article.topic]}</span>
+                    {article.published_at && (
+                      <span className={metaChipClass}>
+                        <Calendar size={12} />
+                        <FormattedDate
+                          date={article.published_at}
+                          options={ARTICLE_HEADER_DATE_OPTIONS}
+                          fallback=""
+                          className="text-[10px]"
+                        />
+                      </span>
+                    )}
+                    {readTime && (
+                      <span className={metaChipClass}>
+                        <Clock size={12} />
+                        <span className="text-[10px]">{readTime}</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    {article.users && (
+                      <div className={authorChipClass}>
+                        {article.users.avatar_url ? (
+                          <div className="relative h-5 w-5 overflow-hidden rounded-full">
+                            <Image
+                              src={article.users.avatar_url}
+                              alt={article.users.username}
+                              fill
+                              sizes="20px"
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <User size={12} />
+                        )}
+                        <span>{article.users.display_name || article.users.username}</span>
+                      </div>
+                    )}
+                    <div className={statChipClass}>
+                      <Eye size={12} />
+                      <span>{article.views ?? 0} προβολές</span>
+                    </div>
+                    <div className={statChipClass}>
+                      <Heart size={12} />
+                      <span>{article.likes ?? 0} likes</span>
+                    </div>
                   </div>
                 </div>
+
+                <div className={`${asideStackClass} mt-4`}>
+                  <div className={actionRowWrapClass}>
+                    <ActionRow article={article} />
+                  </div>
+                  <ArticleAuthHint />
+
+                  {shouldShowTOC && (
+                    <section>
+                      <div className={tocShellClass}>
+                        <div className={tocHeaderClass}>
+                          <span>Πίνακας περιεχομένων</span>
+                          <span>{headings.length} ενότητες</span>
+                        </div>
+                        <div className="px-4 py-4">
+                          <ul className="space-y-2">{tocItems}</ul>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+
+                  {article.tags && article.tags.length > 0 && (
+                    <div className={tagsWrapClass}>
+                      {article.tags.map(tag => (
+                        <Link key={tag} href={buildTagUrl(tag)} className={tagLinkClass}>
+                          <Tag size={10} />
+                          {tag}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </section>
+
+              {contentWithHeadingIds && (
+                <section
+                  className={contentClass}
+                  dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
+                />
+              )}
+              <ArticleComments articleId={article.id} />
+            </>
+          ) : (
+            <div className={detailGridClass}>
+              <div>
+                <div className={metaPanelClass}>
+                  <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.2em]">
+                    <span className={metaChipClass}>{categoryLabel}</span>
+                    <span className={metaChipClass}>{TOPIC_LABELS[article.topic]}</span>
+                    {article.published_at && (
+                      <span className={metaChipClass}>
+                        <Calendar size={12} />
+                        <FormattedDate
+                          date={article.published_at}
+                          options={ARTICLE_HEADER_DATE_OPTIONS}
+                          fallback=""
+                          className="text-[10px]"
+                        />
+                      </span>
+                    )}
+                    {readTime && (
+                      <span className={metaChipClass}>
+                        <Clock size={12} />
+                        <span className="text-[10px]">{readTime}</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    {article.users && (
+                      <div className={authorChipClass}>
+                        {article.users.avatar_url ? (
+                          <div className="relative h-5 w-5 overflow-hidden rounded-full">
+                            <Image
+                              src={article.users.avatar_url}
+                              alt={article.users.username}
+                              fill
+                              sizes="20px"
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <User size={12} />
+                        )}
+                        <span>{article.users.display_name || article.users.username}</span>
+                      </div>
+                    )}
+                    <div className={statChipClass}>
+                      <Eye size={12} />
+                      <span>{article.views ?? 0} προβολές</span>
+                    </div>
+                    <div className={statChipClass}>
+                      <Heart size={12} />
+                      <span>{article.likes ?? 0} likes</span>
+                    </div>
+                  </div>
+                </div>
+
+                {shouldShowTOC && (
+                  <section className="mt-8 w-full">
+                    <div className={tocShellClass}>
+                      <div className={tocHeaderClass}>
+                        <span>Πίνακας περιεχομένων</span>
+                        <span>{headings.length} ενότητες</span>
+                      </div>
+                      <div className="px-5 py-4">
+                        <details className="md:hidden">
+                          <summary className={tocSummaryClass}>Εμφάνιση</summary>
+                          <ul className="mt-3 space-y-2">{tocItems}</ul>
+                        </details>
+                        <div className="hidden md:block">
+                          <ul className="grid gap-3 md:grid-cols-2">{tocItems}</ul>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {contentWithHeadingIds && (
+                  <section
+                    className={contentClass}
+                    dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
+                  />
+                )}
+                <ArticleComments articleId={article.id} />
+              </div>
+
+              <aside className={asideStackClass}>
+                <div className={actionRowWrapClass}>
+                  <ActionRow article={article} />
+                </div>
+                <ArticleAuthHint />
+              </aside>
+            </div>
           )}
-          {contentWithHeadingIds && (
-            <section
-              className="article-content [&_blockquote]:bg-[var(--hb-primary)]/5 mx-auto max-w-[760px] pt-8 text-base leading-[1.8] text-[var(--hb-text)] sm:text-[17px] [&_a]:text-[var(--hb-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-[var(--hb-primary)] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--hb-primary)] [&_blockquote]:px-4 [&_blockquote]:py-2 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-[var(--hb-panel)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-[var(--hb-primary)] [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[var(--hb-headline)] sm:[&_h1]:text-3xl [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-xl [&_h2]:font-semibold sm:[&_h2]:text-2xl [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-lg [&_h3]:font-semibold sm:[&_h3]:text-xl [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:bg-[var(--hb-panel)] [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
-              dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
-            />
-          )}
-          <ArticleComments articleId={article.id} />
 
           <div className="mt-12 border-t border-[var(--hb-border)] pt-10">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -543,7 +693,7 @@ export default async function ArticleDetailPage({
                       </Link>
                       <CardContent className="px-4 pb-4 pt-3">
                         <Link href={relatedHref}>
-                          <CardTitle className="text-[16px] leading-snug text-[var(--hb-headline)]">
+                          <CardTitle className="text-[16px] leading-snug text-[var(--hb-headline)] transition-colors group-hover:text-[var(--hb-primary)]">
                             {related.title}
                           </CardTitle>
                         </Link>

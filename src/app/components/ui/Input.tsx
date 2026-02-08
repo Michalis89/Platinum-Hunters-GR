@@ -9,12 +9,18 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export function Input({ label, error, className = '', ...props }: Readonly<InputProps>) {
   const baseClasses =
-    'w-full rounded-lg border bg-[var(--hb-panel)] p-3 text-[var(--hb-text)] dark:text-[var(--hb-text)] placeholder:text-[var(--hb-muted)] placeholder:opacity-80 focus:placeholder-transparent transition focus:outline-none focus:ring-2 focus:ring-[var(--hb-primary)] focus:border-[var(--hb-primary-strong)] dark:focus:ring-[var(--hb-primary)] dark:focus:border-[var(--hb-primary-strong)]';
-  const errorClasses = error ? 'border-red-500' : 'border-[var(--hb-border)]';
+    'w-full rounded-[var(--apple-radius-control)] border-[var(--apple-hairline)] bg-[var(--hb-input-bg)] px-3 py-2.5 text-[var(--hb-text)] placeholder:text-[var(--hb-input-placeholder)] transition focus:outline-none focus:ring-2 focus:ring-[var(--hb-ring)] focus:border-[var(--hb-primary)]';
+  const errorClasses = error
+    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/30'
+    : 'border-[var(--hb-input-border)]';
 
   return (
-    <div className="space-y-1">
-      {label && <label className="text-sm font-medium text-[var(--hb-headline)]">{label}</label>}
+    <div className="space-y-1.5">
+      {label && (
+        <label className="apple-body-tracking text-sm font-medium text-[var(--apple-label)]">
+          {label}
+        </label>
+      )}
       <input {...props} className={cn(baseClasses, errorClasses, className)} />
     </div>
   );

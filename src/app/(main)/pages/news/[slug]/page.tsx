@@ -6,6 +6,7 @@ import ArticleDetailPage, {
 const NEWS_DETAIL_OPTIONS: ArticleDetailPageOptions = {
   basePath: '/pages/news',
   breadcrumbLabel: 'Άρθρα',
+  designVariant: 'apple',
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -21,6 +22,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
       params={params}
       basePath={NEWS_DETAIL_OPTIONS.basePath}
       breadcrumbLabel={NEWS_DETAIL_OPTIONS.breadcrumbLabel}
+      designVariant={NEWS_DETAIL_OPTIONS.designVariant}
     />
   );
 }

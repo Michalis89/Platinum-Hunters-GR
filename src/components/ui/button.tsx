@@ -6,30 +6,30 @@ import Link, { type LinkProps } from 'next/link';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--apple-radius-control)] text-sm font-medium leading-none transition duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hb-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hb-bg)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         primary:
-          'bg-[var(--hb-primary-strong)] text-[var(--hb-button-primary-text)] font-semibold shadow hover:brightness-110',
+          'bg-[var(--hb-primary-strong)] text-[var(--hb-button-primary-text)] font-semibold shadow-[var(--hb-shadow-sm)] hover:brightness-105 active:brightness-95',
         secondary:
-          'border border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] shadow-sm hover:border-[var(--hb-primary-strong)] hover:text-[var(--hb-headline)] font-semibold',
+          'border-[var(--apple-hairline)] border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] shadow-[var(--hb-shadow-sm)] hover:bg-[var(--apple-tertiary-fill)]',
         outline:
-          'border border-[var(--hb-border)] font-semibold bg-transparent shadow-sm hover:bg-white/5 hover:text-[var(--hb-headline)]',
+          'border-[var(--apple-hairline)] border-[var(--hb-border)] font-semibold bg-transparent shadow-[var(--hb-shadow-sm)] hover:bg-[var(--apple-tertiary-fill)]',
         ghost:
-          'text-[var(--hb-text)] hover:bg-white/5 hover:text-[var(--hb-headline)] font-semibold',
-        link: 'text-[var(--hb-primary-strong)] underline-offset-4 hover:underline font-semibold',
-        success: 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 font-semibold',
-        warning: 'bg-amber-500 text-black shadow-sm hover:bg-amber-400 font-semibold',
+          'text-[var(--hb-text)] hover:bg-[var(--apple-tertiary-fill)] font-semibold',
+        link: 'h-auto rounded-none p-0 text-[var(--hb-primary-strong)] underline-offset-4 hover:underline font-semibold',
+        success: 'bg-[#34c759] text-white shadow-[var(--hb-shadow-sm)] hover:brightness-105 font-semibold',
+        warning: 'bg-[#ff9f0a] text-black shadow-[var(--hb-shadow-sm)] hover:brightness-105 font-semibold',
         destructive:
-          'bg-[var(--hb-accent)] text-[var(--hb-button-primary-text)] shadow-sm hover:brightness-110 font-semibold',
+          'bg-[#ff3b30] text-[var(--hb-button-primary-text)] shadow-[var(--hb-shadow-sm)] hover:brightness-105 active:brightness-95 font-semibold',
       },
       size: {
-        default: 'h-9 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-10 rounded-md px-8',
-        xl: 'h-12 text-lg font-bold rounded--md  w-full',
-        icon: 'h-9 w-9',
+        default: 'h-10 px-4 py-2',
+        sm: 'h-8 px-3 text-xs',
+        lg: 'h-11 px-6',
+        xl: 'h-12 w-full px-6 text-lg font-bold',
+        icon: 'h-9 w-9 p-0',
       },
     },
     defaultVariants: {
@@ -72,7 +72,7 @@ const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPro
     },
     ref,
   ) => {
-    const classes = cn(buttonVariants({ variant, size, className }), iconOnly && 'p-2');
+    const classes = cn(buttonVariants({ variant, size, className }), iconOnly && 'px-0 py-0');
     const accessibleLabel = ariaLabel || props['aria-label'];
 
     if (href) {

@@ -685,46 +685,46 @@ export default function CategoryLibrary({
 
   if (steamSyncing) {
     return (
-      <div className="min-h-screen bg-[var(--hb-bg)] px-3 py-20 text-[var(--hb-text)] sm:px-4">
-        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
-          <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur sm:p-6">
+      <div className="apple-page-background min-h-screen px-3 py-16 text-[var(--hb-text)] sm:px-4 sm:py-20">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
+          <section className="apple-material-surface p-4 sm:p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-8 w-56 rounded-lg bg-[var(--hb-card)]" />
+              <div className="h-8 w-56 rounded-[12px] bg-[var(--hb-card)]" />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
-                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
-                <div className="h-10 rounded-xl bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-[12px] bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-[12px] bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-[12px] bg-[var(--hb-card)]" />
               </div>
             </div>
           </section>
-          <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur sm:p-6">
+          <section className="apple-material-surface p-4 sm:p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-12 rounded-xl bg-[var(--hb-card)]" />
+              <div className="h-12 rounded-[12px] bg-[var(--hb-card)]" />
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="h-24 rounded-xl bg-[var(--hb-card)]" />
+                <div key={index} className="h-24 rounded-[12px] bg-[var(--hb-card)]" />
               ))}
             </div>
           </section>
 
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-[var(--hb-bg)]/70 p-3 backdrop-blur-sm sm:p-6">
-            <div className="w-full max-w-xl rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] sm:p-6">
+          <div className="hb-dialog-overlay absolute inset-0 z-10 flex items-center justify-center rounded-[28px] p-3 sm:p-6">
+            <div className="hb-dialog-surface w-full max-w-xl rounded-[20px] border border-[var(--hb-dialog-border)] p-4 sm:p-6">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-[var(--hb-headline)]">
+                <p className="apple-body-tracking text-sm font-semibold text-[var(--apple-label)]">
                   Συγχρονισμός Steam με RAWG metadata
                 </p>
-                <span className="text-xs font-semibold text-[var(--hb-muted)]">
+                <span className="text-xs font-semibold text-[var(--apple-secondary-label)]">
                   {steamSyncProgress?.percent ?? 0}%
                 </span>
               </div>
               <Progress
                 value={steamSyncProgress?.percent ?? 0}
-                className="h-2.5 bg-[var(--hb-card)]"
+                className="apple-progress-track h-2.5 rounded-full"
               />
-              <p className="mt-3 text-xs text-[var(--hb-muted)]">
+              <p className="mt-3 text-xs text-[var(--apple-secondary-label)]">
                 {steamSyncProgress?.message ??
                   'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
               </p>
-              <p className="mt-1 text-xs text-[var(--hb-muted)]/80">
+              <p className="mt-1 text-xs text-[var(--apple-secondary-label)]/80">
                 {steamSyncProgress?.completedSteps ?? 0} / {steamSyncProgress?.totalSteps ?? 0}{' '}
                 βήματα
               </p>
@@ -736,7 +736,7 @@ export default function CategoryLibrary({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--hb-bg)] px-3 py-20 text-[var(--hb-text)] sm:px-4">
+    <div className="apple-page-background min-h-screen px-3 py-16 text-[var(--hb-text)] sm:px-4 sm:py-20">
       {alert && (
         <AlertMessage
           key={alertKey}
@@ -748,13 +748,13 @@ export default function CategoryLibrary({
         />
       )}
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
-        <div className="absolute inset-0 -z-10 opacity-30 blur-[120px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,var(--hb-primary-strong),transparent_50%)]" />
-          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_20%,var(--hb-accent),transparent_55%)]" />
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-40 blur-[110px]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,color-mix(in_srgb,var(--apple-system-blue)_20%,transparent),transparent_52%)]" />
+          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,color-mix(in_srgb,var(--apple-system-blue)_14%,#34c759),transparent_58%)]" />
         </div>
 
-        <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur sm:p-6">
+        <section className="apple-material-surface p-4 sm:p-6">
           <CategoryHeader
             category={category}
             username={username}
@@ -803,7 +803,11 @@ export default function CategoryLibrary({
           onStatusChange={value => dispatch({ type: 'patch', payload: { activeStatus: value } })}
         />
 
-        {libraryError && <ErrorState error={libraryError} />}
+        {libraryError && (
+          <div className="apple-card rounded-[20px] border-[var(--apple-separator)] p-4">
+            <ErrorState error={libraryError} />
+          </div>
+        )}
 
         <LibraryEntryList
           category={category}
@@ -825,3 +829,4 @@ export default function CategoryLibrary({
     </div>
   );
 }
+

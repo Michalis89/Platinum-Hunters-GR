@@ -1,14 +1,22 @@
-'use client';
+﻿'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import Slider from 'react-slick';
 import useSWR from 'swr';
-import { BookOpen, BookText, Gamepad2, Sparkles, Tv } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  BookOpen,
+  BookText,
+  ChevronLeft,
+  ChevronRight,
+  Gamepad2,
+  Sparkles,
+  Tv,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import styles from './ContinueHero.module.css';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
+import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 type ContinueSlide = {
   category: string;
@@ -44,7 +52,6 @@ type CategoryConfig = {
   label: string;
   icon: ReactNode;
   verb: (count: number) => string;
-  placeholder: string;
   route: string;
 };
 
@@ -61,35 +68,30 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     label: 'Games',
     icon: <Gamepad2 className="h-4 w-4" />,
     verb: count => `Σε εξέλιξη: ${count} παιχνίδια`,
-    placeholder: 'from-rose-500/30 via-transparent to-transparent',
     route: '/pages/backlog?category=games',
   },
   anime: {
     label: 'Anime',
     icon: <Sparkles className="h-4 w-4" />,
     verb: count => `Σε εξέλιξη: ${count} anime`,
-    placeholder: 'from-fuchsia-500/30 via-transparent to-transparent',
     route: '/pages/backlog?category=anime',
   },
   manga: {
     label: 'Manga',
     icon: <BookOpen className="h-4 w-4" />,
     verb: count => `Σε εξέλιξη: ${count} manga`,
-    placeholder: 'from-amber-500/30 via-transparent to-transparent',
     route: '/pages/backlog?category=manga',
   },
   tv: {
     label: 'Σειρές',
     icon: <Tv className="h-4 w-4" />,
     verb: count => `Σε εξέλιξη: ${count} σειρές`,
-    placeholder: 'from-sky-500/30 via-transparent to-transparent',
     route: '/pages/backlog?category=tv',
   },
   books: {
     label: 'Βιβλία',
     icon: <BookText className="h-4 w-4" />,
     verb: count => `Σε εξέλιξη: ${count} βιβλία`,
-    placeholder: 'from-emerald-500/30 via-transparent to-transparent',
     route: '/pages/backlog?category=books',
   },
 };
@@ -140,7 +142,6 @@ const formatTimeAgo = (value: string) => {
   return `${years} ${years === 1 ? 'χρόνος' : 'χρόνια'}`;
 };
 
-// Hydration-safe relative time display component
 function RelativeTimeDisplay({ date }: { date: string }) {
   const [formattedTime, setFormattedTime] = useState<string | null>(null);
 
@@ -153,9 +154,6 @@ function RelativeTimeDisplay({ date }: { date: string }) {
 
 const getSlideImage = (slide: ContinueSlide) =>
   slide.cover_image_large ?? slide.cover_image_medium ?? null;
-
-const isLandscapeUrl = (url: string) =>
-  /screenshots|rawg|screenshot/i.test(url) || /widescreen/i.test(url);
 
 const getCategoryRoute = (category: string, search?: string | null) =>
   appendSearchParam(
@@ -183,103 +181,84 @@ const getProgressLabel = (category: string, progress: number | null) => {
 const SlideCard = ({ item }: { item: SlideItem }) => {
   const imageUrl = getSlideImage(item.slide);
   const progressLabel = getProgressLabel(item.slide.category, item.slide.progress);
-  // Determine layout based on category ONLY (not image detection) to prevent CLS
-  const needsLandscapeLayout = item.slide.category === 'games';
-  // Use blur backdrop for games (landscape) or detect via URL pattern (no async detection)
-  const useBlurBackdrop = needsLandscapeLayout || (imageUrl ? isLandscapeUrl(imageUrl) : false);
-
-  // STABLE grid and frame classes - no dynamic changes after mount
-  // Games use 16:9 landscape, others use 4:5 portrait
-  const gridColumnClass = needsLandscapeLayout
-    ? 'md:grid-cols-[minmax(0,1fr)_minmax(480px,560px)]'
-    : 'md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]';
-  const thumbnailFrameClass = needsLandscapeLayout
-    ? 'aspect-[16/9] w-full md:w-[520px] md:min-w-[480px] md:max-w-[520px]'
-    : 'aspect-[4/5] w-full md:w-[340px] md:min-w-[320px] md:max-w-[340px]';
-  const thumbnailSizes = needsLandscapeLayout
-    ? '(max-width: 768px) 90vw, 520px'
-    : '(max-width: 768px) 90vw, 340px';
-  const imageScaleClass = needsLandscapeLayout ? 'scale-[1.042] lg:scale-[1.04]' : 'scale-[1.02]';
 
   return (
-    <div className={`grid min-h-[300px] items-center gap-6 ${gridColumnClass}`}>
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--hb-muted)]">
-          <span className="text-[var(--hb-primary-strong)]">{item.config.icon}</span>
+    <div className="grid min-h-[304px] items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
+      <div className="space-y-5">
+        <div className="apple-secondary-label inline-flex items-center gap-2 text-xs font-medium tracking-[0.06em]">
+          <span>{item.config.icon}</span>
           {item.config.label}
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
+
+        <div className="space-y-2">
+          <h2 className="apple-label text-3xl font-semibold leading-[1.08] tracking-[-0.03em] md:text-4xl">
             Συνέχισε από εκεί που σταμάτησες
           </h2>
-          <p className="mt-2 text-sm text-[var(--hb-muted)]">
+          <p className="apple-secondary-label text-sm leading-relaxed">
             {item.config.verb(item.currentCount)}
           </p>
         </div>
-        <div>
-          <p className="text-lg font-semibold text-[var(--hb-headline)]">
+
+        <div className="space-y-1.5">
+          <p className="apple-label text-lg font-semibold tracking-[-0.02em]">
             {item.slide.title ?? 'Χωρίς τίτλο'}
           </p>
-          <p className="mt-1 text-sm text-[var(--hb-muted)]">
+          <p className="apple-secondary-label text-sm">
             Τελευταία ενημέρωση: πριν <RelativeTimeDisplay date={item.slide.updated_at} />
           </p>
         </div>
+
         {progressLabel && (
-          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] px-3 py-1 text-xs font-medium text-[var(--hb-muted)]">
+          <div className="apple-pill apple-secondary-label inline-flex items-center px-3 py-1 text-xs">
             {progressLabel}
           </div>
         )}
-        <div className="flex flex-wrap items-center gap-3 pt-2">
+
+        <div className="flex flex-wrap items-center gap-3 pt-1">
           <Button
-            variant={'primary'}
+            variant="primary"
             href={getCategoryRoute(item.slide.category, item.slide.title)}
+            className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
           >
             Συνέχεια
             <span aria-hidden="true">→</span>
           </Button>
-          <Button variant={'secondary'} href={getCategoryRoute(item.slide.category)}>
-            Δες όλα τα {item.config.label} σε εξέλιξη
+          <Button
+            variant="secondary"
+            href={getCategoryRoute(item.slide.category)}
+            className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
+          >
+            Όλα τα {item.config.label} σε εξέλιξη
           </Button>
         </div>
       </div>
 
-      <div
-        className={`relative overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] dark:border-white/10 dark:bg-white/5 ${thumbnailFrameClass}`}
-      >
-        {imageUrl ? (
-          <>
-            {useBlurBackdrop && (
-              <>
-                <Image
-                  src={imageUrl}
-                  alt={item.slide.title ?? 'Τίτλος'}
-                  fill
-                  sizes={thumbnailSizes}
-                  className="absolute inset-0 object-cover opacity-20 blur-3xl"
-                  priority
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              </>
-            )}
-            <Image
-              src={imageUrl}
-              alt={item.slide.title ?? 'Τίτλος'}
-              fill
-              sizes={thumbnailSizes}
-              className={`absolute inset-0 object-cover object-center transition-transform duration-700 ${imageScaleClass}`}
-              priority
-            />
-          </>
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-3 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[var(--hb-primary-strong)]">
-              {item.config.icon}
-            </span>
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/60">
-              Χωρίς εικόνα
-            </p>
-          </div>
-        )}
+      <div className="w-full md:w-[260px] md:min-w-[240px] md:max-w-[260px]">
+        <AspectRatio
+          ratio={4 / 5}
+          className="apple-card relative overflow-hidden"
+        >
+          {imageUrl ? (
+            <>
+              <Image
+                src={imageUrl}
+                alt={item.slide.title ?? 'Τίτλος'}
+                fill
+                sizes="(max-width: 768px) 88vw, 300px"
+                className="absolute inset-0 object-contain p-2"
+                priority
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+            </>
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-3 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]">
+              <span className="apple-system-blue flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                {item.config.icon}
+              </span>
+              <p className="text-xs font-medium tracking-[0.06em] text-white/65">Χωρίς εικόνα</p>
+            </div>
+          )}
+        </AspectRatio>
       </div>
     </div>
   );
@@ -299,6 +278,9 @@ export function ContinueHero() {
     | ContinuePayload
     | undefined;
   const isInitialLoading = isLoading && !response;
+
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const enabledCategories = payload?.enabledCategories ?? [];
   const slides = useMemo(() => payload?.slides ?? [], [payload]);
@@ -320,55 +302,49 @@ export function ContinueHero() {
     [slides, countsByCategory],
   );
 
-  const releaseSlideFocus = useCallback(() => {
-    if (typeof document === 'undefined') return;
-    const active = document.activeElement as HTMLElement | null;
-    active?.blur();
-  }, []);
+  useEffect(() => {
+    if (!carouselApi) return;
 
-  const sliderSettings = useMemo(
-    () => ({
-      dots: slideItems.length > 1,
-      infinite: slideItems.length > 1,
-      speed: 600,
-      slidesToShow: 1,
-      slidesToScroll: 1,
-      autoplay: slideItems.length > 1,
-      autoplaySpeed: 8000,
-      pauseOnHover: true,
-      arrows: false,
-      className: 'continue-slider',
-      dotsClass: 'slick-dots continueHero-dots',
-      appendDots: (dots: ReactNode) => <div className="mt-4 flex justify-center">{dots}</div>,
-      customPaging: (i: number) => (
-        <Button
-          variant={'primary'}
-          type="button"
-          aria-label={`Go to slide ${i + 1}`}
-          className="continueHero-dot"
-        />
-      ),
-      beforeChange: () => releaseSlideFocus(),
-    }),
-    [slideItems.length, releaseSlideFocus],
-  );
+    const onSelect = () => {
+      setSelectedIndex(carouselApi.selectedScrollSnap());
+    };
+
+    onSelect();
+    carouselApi.on('select', onSelect);
+    carouselApi.on('reInit', onSelect);
+
+    return () => {
+      carouselApi.off('select', onSelect);
+      carouselApi.off('reInit', onSelect);
+    };
+  }, [carouselApi]);
+
+  useEffect(() => {
+    if (!carouselApi || slideItems.length <= 1) return;
+
+    const intervalId = window.setInterval(() => {
+      carouselApi.scrollNext();
+    }, 8500);
+
+    return () => window.clearInterval(intervalId);
+  }, [carouselApi, slideItems.length]);
 
   if (isInitialLoading) {
     return (
-      <section className="px-4 py-10 md:px-6">
+      <section className="px-4 py-6 md:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="min-h-[300px] animate-pulse rounded-[28px] border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6">
+          <div className="apple-material-surface min-h-[304px] animate-pulse p-6">
             <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">
-                <div className="h-4 w-24 rounded bg-[var(--hb-card)]/60" />
-                <div className="h-8 w-3/4 rounded bg-[var(--hb-card)]/70" />
-                <div className="h-4 w-1/2 rounded bg-[var(--hb-card)]/50" />
+                <div className="bg-[var(--hb-card)]/60 h-4 w-24 rounded" />
+                <div className="bg-[var(--hb-card)]/70 h-8 w-3/4 rounded" />
+                <div className="bg-[var(--hb-card)]/50 h-4 w-1/2 rounded" />
                 <div className="flex gap-3 pt-4">
-                  <div className="h-12 w-32 rounded-full bg-[var(--hb-card)]/60" />
-                  <div className="h-12 w-48 rounded-full bg-[var(--hb-card)]/40" />
+                  <div className="bg-[var(--hb-card)]/60 h-12 w-32 rounded-full" />
+                  <div className="bg-[var(--hb-card)]/40 h-12 w-48 rounded-full" />
                 </div>
               </div>
-              <div className="aspect-[4/5] w-full rounded-2xl bg-[var(--hb-card)]/30 md:w-[340px]" />
+              <div className="bg-[var(--hb-card)]/30 aspect-[4/5] w-full rounded-2xl md:w-[340px]" />
             </div>
           </div>
         </div>
@@ -378,17 +354,17 @@ export function ContinueHero() {
 
   if (slideItems.length === 0) {
     return (
-      <section className="px-4 py-10 md:px-6">
+      <section className="px-4 py-6 md:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="rounded-[28px] border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-[var(--hb-headline)]">
+          <div className="apple-material-surface p-7">
+            <h2 className="apple-label text-3xl font-semibold tracking-[-0.03em]">
               Συνέχισε από εκεί που σταμάτησες
             </h2>
-            <p className="mt-2 text-sm text-[var(--hb-muted)]">Δεν έχεις κάτι σε εξέλιξη ακόμα.</p>
+            <p className="apple-secondary-label mt-2 text-sm">Δεν έχεις κάτι σε εξέλιξη ακόμα.</p>
             <div className="mt-6">
               <Link
                 href={getFallbackRoute(enabledCategories)}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--hb-primary-strong)] px-6 py-3 text-sm font-semibold text-slate-950 transition duration-300 hover:shadow-[var(--hb-shadow-md-hover)] hover:brightness-110"
+                className="apple-pill apple-label inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition hover:brightness-95"
               >
                 Δες το backlog
                 <span aria-hidden="true">→</span>
@@ -401,16 +377,68 @@ export function ContinueHero() {
   }
 
   return (
-    <section className="px-4 py-10 md:px-6">
+    <section className="px-4 py-6 md:px-6">
       <div className="mx-auto max-w-7xl">
-        <div
-          className={`overflow-hidden rounded-[28px] border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-sm ${styles.continueHero}`}
-        >
-          <Slider {...sliderSettings}>
-            {slideItems.map(item => (
-              <SlideCard key={`slide-${item.slide.entry_id}`} item={item} />
-            ))}
-          </Slider>
+        <div className="apple-material-surface overflow-hidden p-7">
+          <Carousel
+            setApi={setCarouselApi}
+            opts={{
+              align: 'start',
+              loop: slideItems.length > 1,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-0">
+              {slideItems.map(item => (
+                <CarouselItem key={`slide-${item.slide.entry_id}`} className="basis-full pl-0">
+                  <SlideCard item={item} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+
+          {slideItems.length > 1 && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                type="button"
+                aria-label="Previous slide"
+                className="h-8 w-8 rounded-full"
+                onClick={() => carouselApi?.scrollPrev()}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              {slideItems.map((_, index) => {
+                const isActive = index === selectedIndex;
+                return (
+                  <button
+                    key={`dot-${index}`}
+                    type="button"
+                    onClick={() => carouselApi?.scrollTo(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                    className={`h-2.5 w-2.5 rounded-full border transition ${
+                      isActive
+                        ? 'border-[var(--apple-label)] bg-[var(--apple-label)]'
+                        : 'border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]'
+                    }`}
+                  />
+                );
+              })}
+
+              <Button
+                variant="secondary"
+                size="icon"
+                type="button"
+                aria-label="Next slide"
+                className="h-8 w-8 rounded-full"
+                onClick={() => carouselApi?.scrollNext()}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </section>

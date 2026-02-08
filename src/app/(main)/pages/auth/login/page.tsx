@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Gamepad2, Film, BookOpen, Tv, Sparkles } from 'lucide-react';
+import { Sparkles, ListChecks, Clock3, ShieldCheck } from 'lucide-react';
 import LoginForm from '@/app/components/auth/LoginForm';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
@@ -11,92 +11,97 @@ export const metadata = buildMetadata({
   noindex: true,
 });
 
+const highlights = [
+  {
+    title: 'Η πρόοδος σου σε περιμένει',
+    description: 'Backlogs, λίστες και ενημερώσεις σε ένα dashboard.',
+    icon: ListChecks,
+  },
+  {
+    title: 'Άμεση συνέχεια',
+    description: 'Επιστρέφεις εκεί που σταμάτησες, χωρίς χαμένες λίστες.',
+    icon: Clock3,
+  },
+  {
+    title: 'Ασφαλής πρόσβαση',
+    description: 'Προστασία με CAPTCHA και ασφαλή ροή σύνδεσης.',
+    icon: ShieldCheck,
+  },
+];
+
 export default function LoginPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      <div className="pointer-events-none absolute inset-0 bg-[var(--hb-gradient)] opacity-60" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_25%,rgba(229,9,20,0.22),transparent_32%),radial-gradient(circle_at_85%_10%,rgba(255,77,90,0.18),transparent_28%),radial-gradient(circle_at_65%_85%,rgba(229,9,20,0.12),transparent_32%)]" />
-      <PageWrapper className="relative py-6 md:py-16">
-        <div className="bg-[var(--hb-surface)]/95 relative isolate overflow-hidden rounded-[var(--hb-radius-lg)] border border-[var(--hb-border)] px-4 py-6 shadow-[var(--hb-shadow-md)] backdrop-blur-2xl md:px-12 md:py-10">
-          <div className="bg-[var(--hb-primary-strong)]/15 pointer-events-none absolute -left-10 top-10 h-64 w-64 rounded-full blur-3xl" />
-          <div className="bg-[var(--hb-primary)]/12 pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full blur-3xl" />
+    <div className="apple-auth-shell min-h-screen text-[var(--apple-label)]">
+      <PageWrapper className="py-5 md:py-12">
+        <section className="apple-auth-card relative isolate overflow-hidden px-4 py-5 md:px-8 md:py-8">
+          <div className="pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full bg-[var(--apple-system-blue)]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full bg-[var(--apple-system-blue)]/8 blur-3xl" />
 
-          <div className="relative grid items-center gap-6 md:gap-12 lg:grid-cols-[1.05fr_0.95fr]">
-            {/* Hero content - hidden on mobile */}
-            <div className="hidden space-y-6 lg:block">
-              <div className="space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--hb-primary)]">
+          <div className="relative grid items-start gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8">
+            <aside className="hidden space-y-6 lg:block">
+              <div className="space-y-3">
+                <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
                   Καλώς ήρθες πίσω
                 </p>
-                <h1 className="bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-4xl font-black leading-tight text-transparent md:text-5xl">
+                <h1 className="apple-title-tracking text-4xl font-semibold leading-tight text-[var(--apple-label)]">
                   Συνέχισε το ταξίδι σου
                 </h1>
-                <p className="max-w-xl text-lg text-[var(--hb-muted)]">
-                  Τα backlogs σου, οι οδηγοί σου, η πρόοδος σου. Όλα εκεί που τα άφησες.
+                <p className="apple-body-tracking max-w-xl text-base text-[var(--apple-secondary-label)]">
+                  Τα backlogs σου, οι οδηγοί σου και η πρόοδος σου. Όλα διαθέσιμα με μία σύνδεση.
                 </p>
               </div>
 
-              {/* Hobby Icons */}
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400">
-                  <Gamepad2 className="h-5 w-5" />
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500/20 text-pink-400">
+              <div className="apple-auth-section flex items-center gap-3 px-4 py-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-[var(--apple-radius-control)] bg-[var(--apple-system-blue)]/12 text-[var(--apple-system-blue)]">
                   <Sparkles className="h-5 w-5" />
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
-                  <Film className="h-5 w-5" />
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400">
-                  <Tv className="h-5 w-5" />
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
-                  <BookOpen className="h-5 w-5" />
+                <div>
+                  <p className="text-sm font-semibold text-[var(--apple-label)]">Hobbista Hub</p>
+                  <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
+                    Σταθερό, καθαρό και συνεπές περιβάλλον εργασίας.
+                  </p>
                 </div>
               </div>
 
-              <div className="grid gap-3 text-sm text-[var(--hb-headline)] md:grid-cols-2">
-                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[var(--hb-shadow-md)]">
-                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--hb-primary)]" />
-                  <div>
-                    <p className="font-semibold">Η πρόοδος σου σε σε περιμένει</p>
-                    <p className="text-[var(--hb-muted)]">
-                      Games, anime, ταινίες, σειρές και βιβλία - όλα συγχρονισμένα.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-2xl border border-[var(--hb-border)] bg-white/5 px-4 py-3 shadow-[var(--hb-shadow-md)]">
-                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--hb-accent)]" />
-                  <div>
-                    <p className="font-semibold">Χωρίς χαμένες λίστες</p>
-                    <p className="text-[var(--hb-muted)]">
-                      Όλα τα χόμπι σου, οργανωμένα σε ένα καθαρό dashboard.
-                    </p>
-                  </div>
-                </div>
+              <div className="space-y-3">
+                {highlights.map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <article key={item.title} className="apple-auth-section flex gap-3 px-4 py-3">
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-[var(--apple-system-blue)]/12 text-[var(--apple-system-blue)]">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--apple-label)]">{item.title}</p>
+                        <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">
+                          {item.description}
+                        </p>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
-            </div>
+            </aside>
 
-            {/* Mobile header */}
-            <div className="text-center lg:hidden">
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--hb-primary)]">
-                Καλώς ήρθες πίσω
-              </p>
-              <h1 className="mt-2 bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-2xl font-black leading-tight text-transparent">
-                Συνέχισε το ταξίδι σου
-              </h1>
-            </div>
+            <div className="space-y-4">
+              <header className="text-center lg:hidden">
+                <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
+                  Καλώς ήρθες πίσω
+                </p>
+                <h1 className="apple-title-tracking mt-2 text-2xl font-semibold text-[var(--apple-label)]">
+                  Συνέχισε το ταξίδι σου
+                </h1>
+                <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
+                  Συνδέσου για να συνεχίσεις με τα χόμπι και τα backlogs σου.
+                </p>
+              </header>
 
-            <div className="relative">
-              <div className="bg-[var(--hb-primary-strong)]/30 absolute -right-6 bottom-6 h-16 w-16 rounded-full blur-2xl" />
-              <div className="relative">
-                <Suspense fallback={<div className="h-[420px]" />}>
-                  <LoginForm />
-                </Suspense>
-              </div>
+              <Suspense fallback={<div className="h-[560px] w-full" />}>
+                <LoginForm />
+              </Suspense>
             </div>
           </div>
-        </div>
+        </section>
       </PageWrapper>
     </div>
   );

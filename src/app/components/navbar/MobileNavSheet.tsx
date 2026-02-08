@@ -55,17 +55,17 @@ export function MobileNavSheet({
             variant="secondary"
             size="icon"
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className="h-9 w-9 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]"
+            className="h-10 w-10 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[var(--apple-label)] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
           >
             <Menu className="size-5" />
           </Button>
         </SheetTrigger>
         <SheetContent
           side="right"
-          className="w-[92vw] max-w-sm border-[var(--hb-border)] bg-[var(--hb-surface)] p-0 text-[var(--hb-text)]"
+          className="hb-dialog-surface w-[92vw] max-w-sm border-[var(--hb-dialog-border)] p-0 text-[var(--apple-label)]"
         >
-          <SheetHeader className="border-b border-[var(--hb-border)] px-5 py-4">
-            <SheetTitle className="text-left text-sm font-semibold tracking-tight text-[var(--hb-headline)]">
+          <SheetHeader className="border-b border-[var(--apple-nav-pill-border)] px-5 py-4">
+            <SheetTitle className="text-left text-sm font-semibold tracking-[-0.015em] text-[var(--apple-label)]">
               Hobbistas Menu
             </SheetTitle>
           </SheetHeader>
@@ -73,7 +73,7 @@ export function MobileNavSheet({
           <div className="h-[calc(100vh-72px)] overflow-y-auto px-5 py-4 [scrollbar-width:thin]">
             <div className="space-y-4 pr-1">
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
                   Βιβλιοθήκη
                 </h3>
                 <div className="-mx-1 overflow-x-auto px-1 pb-2 [scrollbar-width:thin] touch-pan-x">
@@ -94,10 +94,10 @@ export function MobileNavSheet({
                 </div>
               </section>
 
-              <Separator className="bg-[var(--hb-border)]" />
+              <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
                   Γρήγοροι σύνδεσμοι
                 </h3>
                 <div className="grid gap-2">
@@ -116,30 +116,30 @@ export function MobileNavSheet({
                 </div>
               </section>
 
-              <Separator className="bg-[var(--hb-border)]" />
+              <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-muted)]">Θέμα</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Θέμα</h3>
                 <ThemeToggleButton
                   theme={theme}
                   onToggle={onToggleTheme}
                   iconOnly={false}
-                  className="w-full justify-start border border-[var(--hb-border)] bg-[var(--hb-card)] px-3"
+                  className="w-full justify-start border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3"
                 />
               </section>
 
-              <Separator className="bg-[var(--hb-border)]" />
+              <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-muted)]">Λογαριασμός</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Λογαριασμός</h3>
                 {!authResolved ? (
                   <NavbarAuthSkeletonMobile />
                 ) : isAuthenticated && user ? (
                   <div className="grid gap-2">
-                    <div className="flex h-11 items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3">
-                      <Avatar className="h-7 w-7 border border-[var(--hb-border)]">
+                    <div className="flex h-11 items-center gap-2 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3">
+                      <Avatar className="h-7 w-7 border border-[var(--apple-nav-pill-border)]">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
-                        <AvatarFallback className="bg-white/5 text-xs font-semibold text-[var(--hb-headline)]">
+                        <AvatarFallback className="bg-[var(--apple-nav-pill-hover)] text-xs font-semibold text-[var(--apple-label)]">
                           {getUserInitials(user.username)}
                         </AvatarFallback>
                       </Avatar>
@@ -149,7 +149,7 @@ export function MobileNavSheet({
                       <Button
                         type="button"
                         variant="secondary"
-                        className="h-9 justify-start rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3"
+                        className="h-10 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
                         onClick={() => {
                           closeSheet();
                           onAdd();
@@ -188,7 +188,7 @@ export function MobileNavSheet({
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-9 justify-start rounded-full px-3"
+                      className="h-10 justify-start rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
                       onClick={() => {
                         closeSheet();
                         void onLogout();
@@ -200,13 +200,21 @@ export function MobileNavSheet({
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
-                    <Button asChild variant="outline" className="h-9 rounded-full">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-10 rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+                    >
                       <Link href="/pages/auth/login" onClick={closeSheet}>
                         <LogIn className="size-4" />
                         <span>Σύνδεση</span>
                       </Link>
                     </Button>
-                    <Button asChild variant="primary" className="h-9 rounded-full">
+                    <Button
+                      asChild
+                      variant="primary"
+                      className="h-10 rounded-[var(--apple-radius-control)] border border-transparent bg-[var(--apple-system-blue)] text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:brightness-110 active:scale-[0.98]"
+                    >
                       <Link href="/pages/auth/register" onClick={closeSheet}>
                         <UserPlus className="size-4" />
                         <span>Εγγραφή</span>
@@ -226,10 +234,10 @@ export function MobileNavSheet({
 function NavbarAuthSkeletonMobile() {
   return (
     <div className="grid gap-2">
-      <div className="h-11 animate-pulse rounded-full bg-white/10" />
+      <div className="h-11 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
       <div className="grid grid-cols-2 gap-2">
-        <div className="h-9 animate-pulse rounded-full bg-white/10" />
-        <div className="h-9 animate-pulse rounded-full bg-white/10" />
+        <div className="h-10 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
+        <div className="h-10 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
       </div>
     </div>
   );

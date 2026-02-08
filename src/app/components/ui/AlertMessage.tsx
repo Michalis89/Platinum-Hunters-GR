@@ -28,31 +28,31 @@ const alertConfig: Record<
 > = {
   success: {
     icon: CheckCircle,
-    gradient: 'from-emerald-500/20 via-emerald-500/10 to-transparent',
-    border: 'border-emerald-500/30',
-    iconBg: 'bg-emerald-500/20 text-emerald-400',
-    progressColor: 'bg-emerald-400',
+    gradient: 'from-[#34c759]/24 via-[#34c759]/12 to-transparent',
+    border: 'border-[#34c759]/30',
+    iconBg: 'bg-[#34c759]/18 text-[#34c759]',
+    progressColor: 'bg-[#34c759]',
   },
   error: {
     icon: XCircle,
-    gradient: 'from-[var(--hb-primary-strong)]/20 via-[var(--hb-primary-strong)]/10 to-transparent',
-    border: 'border-[var(--hb-primary-strong)]/30',
-    iconBg: 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-accent)]',
-    progressColor: 'bg-[var(--hb-primary-strong)]',
+    gradient: 'from-[#ff3b30]/24 via-[#ff3b30]/12 to-transparent',
+    border: 'border-[#ff3b30]/30',
+    iconBg: 'bg-[#ff3b30]/18 text-[#ff3b30]',
+    progressColor: 'bg-[#ff3b30]',
   },
   warning: {
     icon: AlertTriangle,
-    gradient: 'from-amber-500/20 via-amber-500/10 to-transparent',
-    border: 'border-amber-500/30',
-    iconBg: 'bg-amber-500/20 text-amber-400',
-    progressColor: 'bg-amber-400',
+    gradient: 'from-[#ff9f0a]/24 via-[#ff9f0a]/12 to-transparent',
+    border: 'border-[#ff9f0a]/30',
+    iconBg: 'bg-[#ff9f0a]/18 text-[#ff9f0a]',
+    progressColor: 'bg-[#ff9f0a]',
   },
   info: {
     icon: Info,
-    gradient: 'from-sky-500/20 via-sky-500/10 to-transparent',
-    border: 'border-sky-500/30',
-    iconBg: 'bg-sky-500/20 text-sky-400',
-    progressColor: 'bg-sky-400',
+    gradient: 'from-[var(--apple-system-blue)]/24 via-[var(--apple-system-blue)]/12 to-transparent',
+    border: 'border-[var(--apple-system-blue)]/30',
+    iconBg: 'bg-[var(--apple-system-blue)]/18 text-[var(--apple-system-blue)]',
+    progressColor: 'bg-[var(--apple-system-blue)]',
   },
 };
 
@@ -111,7 +111,7 @@ export default function AlertMessage({
           className="fixed inset-x-0 top-6 z-50 mx-auto flex w-auto max-w-md px-4"
         >
           <div
-            className={`bg-[var(--hb-panel)]/95 relative w-full overflow-hidden rounded-2xl border shadow-[var(--hb-shadow-md)] backdrop-blur-xl ${config.border} `}
+            className={`relative w-full overflow-hidden rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] bg-[var(--hb-panel)]/95 shadow-[var(--hb-shadow-md)] backdrop-blur-xl ${config.border} `}
           >
             {/* Gradient overlay */}
             <div
@@ -137,9 +137,9 @@ export default function AlertMessage({
 
               {/* Close button */}
               <Button
-                variant={'outline'}
+                variant={'ghost'}
                 onClick={handleClose}
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[10px]"
                 aria-label="Κλείσιμο"
               >
                 <X className="h-4 w-4" />

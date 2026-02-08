@@ -16,27 +16,27 @@ type ProfileAccountInfoProps = {
 
 export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) {
   return (
-    <section className="px-4 py-12 md:px-6 md:py-16">
+    <section className="px-4 py-12 md:px-6 md:py-14">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-8 text-center">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+        <div className="mb-8 text-center md:mb-10">
+          <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
             Λογαριασμός
           </p>
-          <h2 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
+          <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
             Πληροφορίες Λογαριασμού
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
+        <div className="apple-material-surface p-6">
           <div className="grid gap-6 sm:grid-cols-3">
             {/* Member since */}
             <div className="flex items-start gap-3">
-              <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
-                <Calendar className="h-5 w-5 text-[var(--hb-primary-strong)]" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)]">
+                <Calendar className="h-5 w-5 text-[var(--apple-system-blue)]" />
               </div>
               <div>
-                <p className="text-xs text-[var(--hb-muted)]">Μέλος από</p>
-                <p className="text-sm font-medium text-[var(--hb-headline)]">
+                <p className="apple-secondary-label text-xs">Μέλος από</p>
+                <p className="text-sm font-medium text-[var(--apple-label)]">
                   <FormattedDate
                     date={user.created_at}
                     options={LONG_DATE_OPTIONS}
@@ -49,12 +49,12 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
             {/* Last login */}
             {user.last_login && (
               <div className="flex items-start gap-3">
-                <div className="bg-[var(--hb-primary-strong)]/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
-                  <Clock className="h-5 w-5 text-[var(--hb-primary-strong)]" />
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)]">
+                  <Clock className="h-5 w-5 text-[var(--apple-system-blue)]" />
                 </div>
                 <div>
-                  <p className="text-xs text-[var(--hb-muted)]">Τελευταία σύνδεση</p>
-                  <p className="text-sm font-medium text-[var(--hb-headline)]">
+                  <p className="apple-secondary-label text-xs">Τελευταία σύνδεση</p>
+                  <p className="text-sm font-medium text-[var(--apple-label)]">
                     <FormattedDate
                       date={user.last_login}
                       options={LONG_DATE_OPTIONS}
@@ -71,7 +71,7 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
                 <CheckCircle2 className="h-5 w-5 text-emerald-400" />
               </div>
               <div>
-                <p className="text-xs text-[var(--hb-muted)]">Κατάσταση</p>
+                <p className="apple-secondary-label text-xs">Κατάσταση</p>
                 <p className="text-sm font-medium capitalize text-emerald-400">
                   {user.account_status || 'active'}
                 </p>
@@ -83,3 +83,4 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
     </section>
   );
 }
+

@@ -2,7 +2,6 @@
 
 import { type ReactNode, createContext, useContext, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 type CollapsibleCardContextValue = {
   isCollapsed: boolean;
@@ -40,7 +39,7 @@ export function CollapsibleCard({
     >
       <div
         id={id}
-        className={`rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-[var(--hb-shadow-md)] dark:border-[var(--hb-border)] dark:bg-[var(--hb-panel)] dark:text-[var(--hb-text)] dark:shadow-[var(--hb-shadow-md)] ${className}`}
+        className={`rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator)] bg-[var(--hb-panel)] text-[var(--apple-label)] shadow-[var(--apple-shadow)] backdrop-blur-[18px] ${className}`}
       >
         {children}
       </div>
@@ -57,7 +56,7 @@ export function CollapsibleCardHeader({
   if (!context) {
     return (
       <div
-        className={`border-b border-slate-200 bg-white/80 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:bg-[var(--hb-card)] dark:text-[var(--hb-text)] ${className}`}
+        className={`border-b border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/85 p-4 text-[var(--apple-label)] ${className}`}
       >
         {children}
       </div>
@@ -65,16 +64,16 @@ export function CollapsibleCardHeader({
   }
 
   return (
-    <Button
+    <button
       type="button"
       onClick={context.toggle}
-      className={`flex w-full items-center justify-between border-b border-slate-200 bg-white/80 p-4 text-left text-slate-900 transition-colors hover:bg-slate-100 dark:border-[var(--hb-border)] dark:bg-[var(--hb-card)] dark:text-[var(--hb-text)] ${context.isCollapsed ? 'border-b-0' : ''} ${className}`}
+      className={`flex w-full items-center justify-between border-b border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/85 p-4 text-left text-[var(--apple-label)] transition-colors duration-200 hover:bg-[var(--apple-tertiary-fill)]/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hb-ring)] ${context.isCollapsed ? 'border-b-0' : ''} ${className}`}
     >
       <div className="flex-1">{children}</div>
       <ChevronDown
-        className={`ml-2 h-5 w-5 text-slate-500 transition-transform duration-200 ${context.isCollapsed ? '' : 'rotate-180'} dark:text-[var(--hb-muted)]`}
+        className={`ml-2 h-5 w-5 text-[var(--apple-secondary-label)] transition-transform duration-200 ${context.isCollapsed ? '' : 'rotate-180'}`}
       />
-    </Button>
+    </button>
   );
 }
 
@@ -108,7 +107,7 @@ export function CollapsibleCardFooter({
   if (!context) {
     return (
       <div
-        className={`border-t border-slate-200 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] ${className}`}
+        className={`border-t border-[var(--apple-separator-soft)] p-4 text-[var(--apple-label)] ${className}`}
       >
         {children}
       </div>
@@ -121,7 +120,7 @@ export function CollapsibleCardFooter({
     >
       <div className="overflow-hidden">
         <div
-          className={`border-t border-slate-200 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] ${className}`}
+          className={`border-t border-[var(--apple-separator-soft)] p-4 text-[var(--apple-label)] ${className}`}
         >
           {children}
         </div>

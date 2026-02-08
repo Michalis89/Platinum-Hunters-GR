@@ -322,13 +322,13 @@ export default function EditArticleDialog({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="hb-dialog-overlay absolute inset-0"
             onClick={onClose}
           />
 
           <dialog
             ref={dialogRef}
-            className="fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-surface)] p-0 shadow-2xl backdrop:bg-transparent"
+            className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-[var(--hb-dialog-border)] p-0 backdrop:bg-transparent"
             onClose={onClose}
           >
             <motion.div

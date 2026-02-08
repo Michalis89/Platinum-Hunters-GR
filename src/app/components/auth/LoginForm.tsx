@@ -24,18 +24,15 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
 
-  // Get redirect URL from query param (priority) or sessionStorage (fallback)
   const redirectParam = searchParams.get('redirect');
-
   const inputClasses =
-    'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
+    'bg-[var(--hb-input-bg)] text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]';
 
   const [formData, setFormData] = useState({
     identifier: '',
     password: '',
     remember: false,
   });
-
   const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,9 +50,7 @@ export default function LoginForm() {
   const [captchaVisible, setCaptchaVisible] = useState(false);
 
   useEffect(() => {
-    if (isCaptchaDisabled) {
-      return;
-    }
+    if (isCaptchaDisabled) return;
 
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let idleId: number | null = null;
@@ -85,7 +80,6 @@ export default function LoginForm() {
       [name]: type === 'checkbox' ? checked : value,
     }));
 
-    // Clear error for this field
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
@@ -93,7 +87,6 @@ export default function LoginForm() {
 
   const handleForgotPasswordClick = () => {
     setShowResetPanel(true);
-    // Prefill email if the identifier looks like an email
     if (formData.identifier.includes('@')) {
       setResetEmail(formData.identifier);
     }
@@ -117,7 +110,6 @@ export default function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail }),
       });
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -145,11 +137,9 @@ export default function LoginForm() {
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
-    // Validate identifier (email or username)
     if (!formData.identifier || formData.identifier.trim() === '') {
       newErrors.identifier = 'Το email ή το username είναι υποχρεωτικό';
     } else if (formData.identifier.includes('@')) {
-      // If it contains @, validate as email
       const emailValidation = validateEmail(formData.identifier);
       if (!emailValidation.isValid) {
         newErrors.identifier = emailValidation.error;
@@ -177,9 +167,7 @@ export default function LoginForm() {
       return;
     }
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     if (!isCaptchaDisabled && !captchaToken) {
       setCaptchaError('Ολοκλήρωσε το CAPTCHA για να συνεχίσεις.');
@@ -190,7 +178,6 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      // Call API route with identifier (email or username)
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         credentials: 'include',
@@ -201,7 +188,6 @@ export default function LoginForm() {
           captchaToken: isCaptchaDisabled ? 'dev-bypass' : captchaToken,
         }),
       });
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -209,7 +195,6 @@ export default function LoginForm() {
       }
       const payload = data.data ?? data;
 
-      // Set session in client-side Supabase
       if (payload.session) {
         await supabase.auth.setSession({
           access_token: payload.session.access_token,
@@ -218,11 +203,8 @@ export default function LoginForm() {
       }
 
       setAlert({ type: 'success', message: '✅ Επιτυχής σύνδεση! Ανακατεύθυνση...' });
-
-      // Fetch session to update Redux state
       await dispatch(fetchSession());
 
-      // Get return URL: query param (priority) > sessionStorage (fallback) > dashboard
       let redirectUrl = '/dashboard';
       if (redirectParam) {
         redirectUrl = decodeURIComponent(redirectParam);
@@ -231,14 +213,13 @@ export default function LoginForm() {
           const savedUrl = sessionStorage.getItem(RETURN_URL_KEY);
           if (savedUrl) {
             redirectUrl = savedUrl;
-            sessionStorage.removeItem(RETURN_URL_KEY); // Clean up
+            sessionStorage.removeItem(RETURN_URL_KEY);
           }
         } catch {
           // ignore storage errors
         }
       }
 
-      // Redirect after short delay
       setTimeout(() => {
         router.push(redirectUrl);
       }, 1000);
@@ -267,32 +248,35 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
-      <CardHeader className="border-[var(--hb-border)]">
-        <CardTitle className="flex items-center justify-between text-xl text-[var(--hb-headline)]">
+    <Card className="apple-auth-card overflow-hidden">
+      <CardHeader className="border-[var(--apple-separator-soft)] bg-transparent px-6 pb-5 pt-6">
+        <CardTitle className="flex items-center justify-between text-xl text-[var(--apple-label)]">
           <span className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] text-white shadow-[var(--hb-shadow-md)]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_15%,transparent)] text-[var(--apple-system-blue)]">
               <LogIn className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
               <span className="font-semibold">Σύνδεση στον Hobbista</span>
+              <span className="apple-body-tracking mt-1 text-sm font-normal text-[var(--apple-secondary-label)]">
+                Συνέχισε στον λογαριασμό σου.
+              </span>
             </span>
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-5">
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+      <CardContent className="space-y-5 px-6 pb-6 pt-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {alert && (
             <Feedback
               layout="inline"
-              tone={alert.type === 'success' ? 'solid' : 'soft'}
+              tone="soft"
               variant={alert.type}
               title={alert.type === 'success' ? 'Επιτυχής σύνδεση' : 'Σφάλμα σύνδεσης'}
               description={alert.message}
             />
           )}
 
-          {/* Email or Username */}
           <div>
             <Input
               label="Email ή όνομα χρήστη"
@@ -309,7 +293,6 @@ export default function LoginForm() {
             <FormErrorMessage message={errors.identifier} />
           </div>
 
-          {/* Password */}
           <div>
             <div className="relative">
               <Input
@@ -327,38 +310,43 @@ export default function LoginForm() {
               <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9"
-                variant={'ghost'}
+                className="absolute right-2.5 top-[33px] h-8 w-8 rounded-[10px]"
+                variant="ghost"
                 tabIndex={-1}
+                ariaLabel={showPassword ? 'Απόκρυψη κωδικού' : 'Εμφάνιση κωδικού'}
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
             <FormErrorMessage message={errors.password} />
           </div>
 
-          {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-[var(--hb-headline)]">
+          <div className="apple-auth-section flex items-center justify-between px-4 py-3 text-sm">
+            <label className="apple-body-tracking flex items-center gap-2 text-[var(--apple-label)]">
               <input
                 type="checkbox"
                 name="remember"
                 checked={formData.remember}
                 onChange={handleChange}
-                className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-primary-strong)] focus:ring-2 focus:ring-[var(--hb-primary-strong)]"
+                className="apple-auth-checkbox h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                 disabled={loading}
               />
               Να με θυμάσαι
             </label>
 
-            <Button type="button" onClick={handleForgotPasswordClick} variant={'secondary'}>
+            <Button
+              type="button"
+              onClick={handleForgotPasswordClick}
+              variant="secondary"
+              className="h-9"
+            >
               Ξέχασες τον κωδικό;
             </Button>
           </div>
 
           <div>
             {isCaptchaDisabled ? (
-              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 text-xs text-[var(--hb-muted)]">
+              <div className="apple-auth-section px-4 py-4 text-xs text-[var(--apple-secondary-label)]">
                 CAPTCHA is disabled in development mode.
               </div>
             ) : captchaVisible ? (
@@ -373,26 +361,24 @@ export default function LoginForm() {
                 resetSignal={captchaResetKey}
               />
             ) : (
-              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 text-xs text-[var(--hb-muted)]">
+              <div className="apple-auth-section px-4 py-4 text-xs text-[var(--apple-secondary-label)]">
                 Loading CAPTCHA...
               </div>
             )}
             {!isCaptchaDisabled && <FormErrorMessage message={captchaError ?? undefined} />}
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
             variant="primary"
             icon={!loading ? <LogIn className="h-5 w-5" /> : undefined}
-            className="flex w-full items-center justify-center gap-2"
+            className="flex h-11 w-full items-center justify-center gap-2"
             disabled={loading || (!isCaptchaDisabled && captchaVisible && !captchaToken)}
           >
             {loading ? 'Σύνδεση...' : 'Σύνδεση'}
           </Button>
 
-          {/* Register Link */}
-          <div className="pt-1 text-center text-sm text-[var(--hb-muted)]">
+          <div className="apple-body-tracking border-t border-[var(--apple-separator-soft)] pt-4 text-center text-sm text-[var(--apple-secondary-label)]">
             Δεν έχεις λογαριασμό;{' '}
             <Link
               href={
@@ -400,7 +386,7 @@ export default function LoginForm() {
                   ? `/pages/auth/register?redirect=${encodeURIComponent(redirectParam)}`
                   : '/pages/auth/register'
               }
-              className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
+              className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
             >
               Δημιούργησε έναν
             </Link>
@@ -408,23 +394,23 @@ export default function LoginForm() {
         </form>
 
         {showResetPanel && (
-          <div className="bg-[var(--hb-card)]/80 space-y-3 rounded-xl border border-[var(--hb-border)] p-4 shadow-[var(--hb-shadow-md)]">
-            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-              <Mail className="h-4 w-4 text-[var(--hb-primary)]" />
+          <div className="apple-auth-section space-y-4 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--apple-label)]">
+              <Mail className="h-4 w-4 text-[var(--apple-system-blue)]" />
               Ανάκτηση κωδικού
             </div>
-            <p className="text-sm text-[var(--hb-muted)]">
+            <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">
               Θα σταλεί email ανάκτησης στον λογαριασμό σου.
             </p>
             {resetAlert && (
               <div
-                className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm ${
+                className={`flex items-start gap-2 rounded-[var(--apple-radius-control)] border px-3 py-2 text-sm ${
                   resetAlert.type === 'success'
-                    ? 'border-[var(--hb-primary)]/60 bg-[var(--hb-primary)]/10 text-[var(--hb-headline)]'
-                    : 'border-red-500/60 bg-red-500/10 text-red-100'
+                    ? 'border-[var(--apple-system-blue)]/35 bg-[var(--apple-system-blue)]/10 text-[var(--apple-label)]'
+                    : 'border-[#ff3b30]/35 bg-[#ff3b30]/10 text-[var(--apple-label)]'
                 }`}
               >
-                <AlertCircle className="mt-0.5 h-4 w-4" />
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{resetAlert.message}</span>
               </div>
             )}
@@ -439,7 +425,7 @@ export default function LoginForm() {
               required
               className={inputClasses}
             />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
                 variant="primary"
@@ -448,7 +434,7 @@ export default function LoginForm() {
               >
                 {resetLoading ? 'Αποστολή...' : 'Στείλε email ανάκτησης'}
               </Button>
-              <Button type="button" variant={'secondary'} onClick={() => setShowResetPanel(false)}>
+              <Button type="button" variant="secondary" onClick={() => setShowResetPanel(false)}>
                 Κλείσιμο
               </Button>
             </div>

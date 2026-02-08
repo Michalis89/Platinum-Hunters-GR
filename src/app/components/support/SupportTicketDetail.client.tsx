@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
-import { MessageSquare, Paperclip, ShieldCheck } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
@@ -213,9 +212,13 @@ export default function SupportTicketDetail() {
         <PageHero
           eyebrow="Υποστήριξη"
           title={
-            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">{ticket.subject}</span>
+            <span className="apple-title-tracking text-3xl font-semibold text-[var(--apple-label)] md:text-5xl">
+              {ticket.subject}
+            </span>
           }
           subtitle={`Κατηγορία: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
+          sectionClassName="apple-hero pt-4"
+          subtitleClassName="apple-body-tracking text-[var(--apple-secondary-label)]"
           badges={
             <>
               <Badge
@@ -223,7 +226,7 @@ export default function SupportTicketDetail() {
                 color={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
               />
               {ticket.severity ? (
-                <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs">
+                <span className="apple-pill rounded-full px-3 py-1 text-xs text-[var(--apple-secondary-label)]">
                   Σοβαρότητα: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
                 </span>
               ) : null}
@@ -232,28 +235,33 @@ export default function SupportTicketDetail() {
         />
 
         <PageContainer size="md" className="pb-20">
-          <Card className={UI_CLASSNAMES.panelCard}>
-            <CardHeader className="border-[var(--hb-border)]">
-              <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
-                <MessageSquare className="h-5 w-5 text-[var(--hb-primary)]" />
+          <Card className={`${UI_CLASSNAMES.panelCard} apple-card overflow-hidden`}>
+            <CardHeader className="border-[var(--apple-separator-soft)] bg-transparent">
+              <CardTitle className="apple-title-tracking flex items-center gap-2 text-[var(--apple-label)]">
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]" aria-hidden />
                 Ιστορικό συνομιλίας
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-4">
               {messages.map(message => (
                 <div
                   key={message.id}
-                  className={`rounded-2xl border p-4 ${
+                  className={`rounded-[var(--apple-radius-card)] border p-4 ${
                     message.author_role === 'admin'
-                      ? 'border-[var(--hb-primary-strong)]/40 bg-[var(--hb-card)]'
-                      : 'border-[var(--hb-border)] bg-[var(--hb-panel)]'
+                      ? 'border-[color-mix(in_srgb,var(--apple-system-blue)_35%,transparent)] bg-[color-mix(in_srgb,var(--apple-system-blue)_8%,var(--apple-surface))]'
+                      : 'border-[var(--apple-separator-soft)] bg-[var(--apple-surface)]'
                   }`}
                 >
-                  <div className="mb-2 flex items-center justify-between text-xs text-[var(--hb-muted)]">
+                  <div className="mb-2 flex items-center justify-between text-xs text-[var(--apple-secondary-label)]">
                     <span className="flex items-center gap-2">
-                      {message.author_role === 'admin' ? (
-                        <ShieldCheck className="h-4 w-4 text-[var(--hb-primary)]" />
-                      ) : null}
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          message.author_role === 'admin'
+                            ? 'bg-[var(--apple-system-blue)]'
+                            : 'bg-[var(--apple-secondary-label)]'
+                        }`}
+                        aria-hidden
+                      />
                       {message.author_role === 'admin' ? 'Ομάδα υποστήριξης' : 'Εσύ'}
                     </span>
                     <FormattedDate
@@ -273,11 +281,11 @@ export default function SupportTicketDetail() {
                         <a
                           key={attachment.id}
                           href={attachment.signed_url ?? '#'}
-                          className="flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-xs text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]"
+                          className="apple-pill flex items-center gap-2 rounded-[var(--apple-radius-control)] px-3 py-2 text-xs text-[var(--apple-label)] transition hover:border-[var(--apple-system-blue)]"
                           target="_blank"
                           rel="noreferrer"
                         >
-                          <Paperclip className="h-4 w-4 text-[var(--hb-muted)]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--apple-secondary-label)]" aria-hidden />
                           {attachment.file_name || 'Συνημμένο'}
                         </a>
                       ))}
@@ -288,9 +296,9 @@ export default function SupportTicketDetail() {
 
               <form
                 onSubmit={handleReplySubmit}
-                className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4"
+                className="apple-material-surface space-y-4 rounded-[var(--apple-radius-card)] border-[var(--apple-separator-soft)] p-4"
               >
-                <div className="text-sm font-semibold text-[var(--hb-headline)]">
+                <div className="apple-title-tracking text-sm font-semibold text-[var(--apple-label)]">
                   Απάντησε στο ticket
                 </div>
                 {replyResult ? (

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -162,86 +162,74 @@ export default function ActionRow({ article }: ActionRowProps) {
         <Button
           type="button"
           iconOnly
-          size={'icon'}
-          variant={'secondary'}
+          size="icon"
+          variant="secondary"
           onClick={handleShare}
           aria-label="Κοινοποίηση"
           title="Κοινοποίηση"
-          className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[16px] text-[var(--hb-text)] transition hover:text-[var(--hb-primary)]"
+          className="h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)] shadow-sm transition-all hover:scale-110 hover:text-[var(--hb-primary)] active:scale-95"
         >
-          <Share2 size={14} />
+          <Share2 size={28} strokeWidth={2.2} /> {/* Μεγαλύτερο εικονίδιο & πιο παχύ stroke */}
         </Button>
+
         <Button
           type="button"
           iconOnly
-          size={'icon'}
-          variant={'secondary'}
+          size="icon"
+          variant="secondary"
           onClick={handleCopyLink}
           aria-label="Αντιγραφή συνδέσμου"
           title={copied ? 'Ο σύνδεσμος αντιγράφηκε' : 'Αντιγραφή συνδέσμου'}
-          className={`rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] transition ${
-            copied ? 'text-[var(--hb-primary)]' : 'text-[var(--hb-text)]'
+          className={`h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-all active:scale-95 ${
+            copied
+              ? 'text-[var(--hb-primary)]'
+              : 'text-[var(--hb-text)] hover:text-[var(--hb-primary)]'
           }`}
         >
-          <ClipboardCopy size={14} />
+          <ClipboardCopy size={28} strokeWidth={2.2} />
         </Button>
+
         <Button
           type="button"
           iconOnly
-          size={'icon'}
-          variant={'secondary'}
+          size="icon"
+          variant="secondary"
           onClick={toggleLike}
-          aria-label={
-            isAuthor
-              ? 'Δεν μπορείτε να κάνετε like στο δικό σας άρθρο'
-              : likeState.liked
-                ? 'Αφαίρεση like'
-                : 'Like'
-          }
-          title={
-            isAuthor
-              ? 'Δεν μπορείς να κάνεις like στο δικό σου άρθρο'
-              : likeState.liked
-                ? 'Αφαίρεση like'
-                : 'Like'
-          }
-          className={`rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] transition ${
-            likeState.liked ? 'text-[var(--hb-primary)]' : 'text-[var(--hb-text)]'
-          } ${isAuthor ? 'cursor-not-allowed opacity-70' : 'hover:text-[var(--hb-primary)]'}`}
           disabled={likeLoading || isAuthor}
+          className={`h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-all active:scale-90 ${
+            likeState.liked ? 'text-[var(--hb-primary)]' : 'text-[var(--hb-text)]'
+          } ${isAuthor ? 'cursor-not-allowed opacity-40' : 'hover:text-[var(--hb-primary)]'}`}
         >
-          <Heart size={14} />
+          <Heart size={28} fill={likeState.liked ? 'currentColor' : 'none'} strokeWidth={2.2} />
         </Button>
+
         {canEdit && (
           <Button
             type="button"
             iconOnly
-            size={'icon'}
-            variant={'secondary'}
+            size="icon"
+            variant="secondary"
             onClick={() => setIsEditOpen(true)}
-            aria-label="Επεξεργασία"
-            title="Επεξεργασία"
-            className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-[var(--hb-text)] transition hover:text-[var(--hb-primary)]"
+            className="h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)] shadow-sm transition-all hover:text-[var(--hb-primary)] active:scale-95"
           >
-            <Pencil size={14} />
+            <Pencil size={28} strokeWidth={2.2} />
           </Button>
         )}
+
         {canEdit && (
           <Button
             type="button"
-            variant={'secondary'}
+            variant="secondary"
             iconOnly
-            size={'icon'}
+            size="icon"
             onClick={handleDelete}
-            aria-label="Διαγραφή"
-            title="Διαγραφή άρθρου"
-            className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-[11px] text-red-400 transition hover:text-red-500 disabled:text-red-400/40"
             disabled={isDeleteLoading}
+            className="h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-red-500 shadow-sm transition-all hover:bg-red-500/10 active:scale-95"
           >
             {isDeleteLoading ? (
-              <LoadingSpinner size="sm" inline className="text-red-400" />
+              <LoadingSpinner size="sm" inline className="text-red-500" />
             ) : (
-              <Trash2 size={14} />
+              <Trash2 size={28} strokeWidth={2.2} />
             )}
           </Button>
         )}

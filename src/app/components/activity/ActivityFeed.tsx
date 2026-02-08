@@ -239,44 +239,45 @@ function renderText(item: ActivityItem) {
 }
 
 function iconFor(item: ActivityItem) {
-  if (item.type === 'backlog_added') return <Gamepad2 className="h-4 w-4 text-sky-300" />;
+  if (item.type === 'backlog_added')
+    return <Gamepad2 className="h-4 w-4 text-[var(--apple-system-blue)]" />;
   if (item.type === 'backlog_status') {
     const status = (item.payload?.status || '').toString();
-    if (status === 'platinumed') return <TrophyIcon className="h-4 w-4 text-blue-300" />;
-    if (status === 'dropped') return <Flag className="h-4 w-4 text-red-300" />;
-    if (status === 'playing') return <Gamepad2 className="h-4 w-4 text-emerald-300" />;
-    if (item.payload?.favoriteAction === 'added') return <Heart className="h-4 w-4 text-red-300" />;
+    if (status === 'platinumed') return <TrophyIcon className="h-4 w-4 text-amber-500" />;
+    if (status === 'dropped') return <Flag className="h-4 w-4 text-red-500" />;
+    if (status === 'playing') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
+    if (item.payload?.favoriteAction === 'added') return <Heart className="h-4 w-4 text-rose-500" />;
     if (item.payload?.favoriteAction === 'removed')
-      return <Heart className="h-4 w-4 text-slate-500" />;
-    return <Gamepad2 className="h-4 w-4 text-amber-300" />;
+      return <Heart className="h-4 w-4 text-[var(--apple-secondary-label)]" />;
+    return <Gamepad2 className="h-4 w-4 text-[var(--apple-system-blue)]" />;
   }
-  if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-sky-300" />;
-  if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-300" />;
-  if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-300" />;
+  if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-[var(--apple-system-blue)]" />;
+  if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
+  if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-500" />;
   // Article/Review icons - use Star for reviews
   const isReview = item.payload?.topic === 'reviews';
   if (item.type === 'article_created') {
     return isReview ? (
-      <Star className="h-4 w-4 text-amber-300" />
+      <Star className="h-4 w-4 text-amber-500" />
     ) : (
-      <FileText className="h-4 w-4 text-emerald-300" />
+      <FileText className="h-4 w-4 text-[var(--apple-system-blue)]" />
     );
   }
   if (item.type === 'article_updated') {
     return isReview ? (
-      <Star className="h-4 w-4 text-amber-300" />
+      <Star className="h-4 w-4 text-amber-500" />
     ) : (
-      <Pencil className="h-4 w-4 text-blue-300" />
+      <Pencil className="h-4 w-4 text-[var(--apple-system-blue)]" />
     );
   }
-  if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-red-300" />;
-  if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-300" />;
-  if (item.type === 'article_unliked') return <Heart className="h-4 w-4 text-slate-500" />;
-  if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-cyan-300" />;
-  if (item.type === 'article_commented') return <MessageSquare className="h-4 w-4 text-cyan-300" />;
+  if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-red-500" />;
+  if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-500" />;
+  if (item.type === 'article_unliked') return <Heart className="h-4 w-4 text-[var(--apple-secondary-label)]" />;
+  if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-[var(--apple-system-blue)]" />;
+  if (item.type === 'article_commented') return <MessageSquare className="h-4 w-4 text-[var(--apple-system-blue)]" />;
   if (item.type === 'article_comment_deleted')
-    return <MessageSquare className="h-4 w-4 text-slate-500" />;
-  return <UserIcon className="h-4 w-4 text-slate-300" />;
+    return <MessageSquare className="h-4 w-4 text-[var(--apple-secondary-label)]" />;
+  return <UserIcon className="h-4 w-4 text-[var(--apple-secondary-label)]" />;
 }
 
 // Category labels for alerts
@@ -313,9 +314,11 @@ function ActivityFeedComponent({
   };
 
   const activities: ActivityItem[] = data?.activities ?? [];
+  const feedTextClass =
+    'apple-label apple-body-tracking font-medium transition-colors hover:text-[var(--apple-system-blue)]';
 
   return (
-    <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)]">
+    <div className="apple-material-surface p-4 sm:p-5">
       {/* Category access alert */}
       {alertCategory && (
         <AlertMessage
@@ -327,7 +330,7 @@ function ActivityFeedComponent({
               <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
               <Link
                 href="/pages/profile/edit#categories"
-                className="font-semibold text-[var(--hb-primary)] underline hover:text-[var(--hb-accent)]"
+                className="font-semibold text-[var(--apple-system-blue)] underline hover:opacity-85"
               >
                 Πρόσθεσέ την εδώ
               </Link>
@@ -339,11 +342,11 @@ function ActivityFeedComponent({
         />
       )}
 
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-base font-semibold text-[var(--hb-headline)]">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="apple-title-tracking apple-label text-base font-semibold">
           {title || 'Τελευταίες ενέργειες'}
         </h3>
-        <div className="flex items-center gap-1 text-xs text-[var(--hb-muted)]">
+        <div className="apple-pill apple-secondary-label flex items-center gap-1 px-2.5 py-1 text-xs font-medium">
           <Clock className="h-3.5 w-3.5" />
           <span>Live</span>
         </div>
@@ -356,18 +359,20 @@ function ActivityFeedComponent({
       )}
 
       <CategoryAlertContext.Provider value={{ showCategoryAlert, userCategories }}>
-        <div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: `${height ?? 360}px` }}>
+        <div className="space-y-2.5 overflow-y-auto pr-1" style={{ maxHeight: `${height ?? 360}px` }}>
           {activities.map(item => (
             <div
               key={item.id}
-              className={`flex items-start gap-3 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 ${
+              className={`group flex items-start gap-3 rounded-[16px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]/80 p-3 backdrop-blur-sm ${
                 compact ? 'text-sm' : 'text-base'
               }`}
             >
-              <div className="mt-0.5">{iconFor(item)}</div>
-              <div className="flex-1">
-                <FeedText item={item} />
-                <p className="text-xs text-[var(--hb-muted)]">
+              <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[var(--apple-surface)]">
+                {iconFor(item)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <FeedText item={item} textClass={feedTextClass} />
+                <p className="apple-secondary-label text-xs">
                   <RelativeTime date={item.created_at} />
                 </p>
               </div>
@@ -381,7 +386,7 @@ function ActivityFeedComponent({
 
 export const ActivityFeed = memo(ActivityFeedComponent);
 
-function FeedText({ item }: { item: ActivityItem }) {
+function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }) {
   const text = renderText(item);
   const payload = item.payload || {};
   const alertContext = useContext(CategoryAlertContext);
@@ -401,7 +406,7 @@ function FeedText({ item }: { item: ActivityItem }) {
     return (
       <Link
         href={`/pages/news/${articleSlug}`}
-        className="text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
+        className={textClass}
       >
         {text}
       </Link>
@@ -425,7 +430,7 @@ function FeedText({ item }: { item: ActivityItem }) {
     return (
       <Link
         href={backlogUrl}
-        className="text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
+        className={textClass}
       >
         {text}
       </Link>
@@ -454,17 +459,17 @@ function FeedText({ item }: { item: ActivityItem }) {
 
     const href = getActivityHref(item);
     if (!href) {
-      return <p className="text-[var(--hb-headline)]">{text}</p>;
+      return <p className="apple-label apple-body-tracking font-medium">{text}</p>;
     }
 
     return (
       <Link
         href={href}
-        className="text-[var(--hb-headline)] transition-colors hover:text-[var(--hb-primary-strong)]"
+        className={textClass}
       >
         {text}
       </Link>
     );
   }
-  return <p className="text-[var(--hb-headline)]">{text}</p>;
+  return <p className="apple-label apple-body-tracking font-medium">{text}</p>;
 }

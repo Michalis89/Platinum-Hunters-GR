@@ -40,7 +40,7 @@ export default function LibraryEntryRow({
         ? `${progressValue}${total ? ` / ${total}` : ''}`
         : '-'
       : progressValue !== null
-        ? `${progressValue}${total ? ` ` : ''}`
+        ? `${progressValue}${total ? ' ' : ''}`
         : '-';
 
   const handleDeleteClick = () => {
@@ -54,10 +54,10 @@ export default function LibraryEntryRow({
 
   return (
     <>
-      <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3">
+      <div className="apple-card rounded-[20px] border-[var(--apple-separator)] p-3 sm:p-4">
         <div className="space-y-3 md:hidden">
           <div className="flex items-start gap-3">
-            <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--hb-panel)]">
+            <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--apple-tertiary-fill)]">
               <Image
                 src={entry.cover}
                 alt={entry.title}
@@ -67,15 +67,15 @@ export default function LibraryEntryRow({
               />
             </div>
             <div className="min-w-0 flex-1 space-y-1">
-              <p className="line-clamp-2 text-left text-base font-semibold leading-tight text-[var(--hb-headline)]">
+              <p className="apple-title-tracking line-clamp-2 text-left text-base font-semibold leading-tight text-[var(--apple-label)]">
                 {entry.title}
               </p>
-              <p className="text-sm text-[var(--hb-muted)]">
+              <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">
                 {entry.subtitle}
-                {entry.year ? ` - ${entry.year}` : ''}
+                {entry.year ? ` · ${entry.year}` : ''}
               </p>
               {category === 'games' && entry.selectedPlatform ? (
-                <p className="text-xs font-medium text-[var(--hb-muted)]">
+                <p className="text-xs font-medium text-[var(--apple-secondary-label)]">
                   Platform: {entry.selectedPlatform}
                 </p>
               ) : null}
@@ -83,7 +83,7 @@ export default function LibraryEntryRow({
                 {entry.tags.slice(0, 3).map(tag => (
                   <span
                     key={tag}
-                    className="rounded-full border border-[var(--hb-border)] px-2 py-0.5 text-[11px] text-[var(--hb-muted)]"
+                    className="apple-pill px-2 py-0.5 text-[11px] text-[var(--apple-secondary-label)]"
                   >
                     {tag}
                   </span>
@@ -93,19 +93,17 @@ export default function LibraryEntryRow({
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-2 py-1.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-[var(--hb-muted)]">Status</p>
-              <p className="text-xs font-semibold text-[var(--hb-primary-strong)]">{statusLabel}</p>
+            <div className="apple-card rounded-[14px] border-[var(--apple-separator)] px-2 py-1.5 text-center">
+              <p className="text-[10px] uppercase tracking-wide text-[var(--apple-secondary-label)]">Status</p>
+              <p className="text-xs font-semibold text-[var(--apple-system-blue)]">{statusLabel}</p>
             </div>
-            <div className="rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-2 py-1.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-[var(--hb-muted)]">Progress</p>
-              <p className="text-xs font-semibold text-[var(--hb-text)]">{progressDisplay}</p>
+            <div className="apple-card rounded-[14px] border-[var(--apple-separator)] px-2 py-1.5 text-center">
+              <p className="text-[10px] uppercase tracking-wide text-[var(--apple-secondary-label)]">Progress</p>
+              <p className="text-xs font-semibold text-[var(--apple-label)]">{progressDisplay}</p>
             </div>
-            <div className="rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-2 py-1.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-[var(--hb-muted)]">Score</p>
-              <p className="text-xs font-semibold text-[var(--hb-headline)]">
-                {entry.score ?? '-'}
-              </p>
+            <div className="apple-card rounded-[14px] border-[var(--apple-separator)] px-2 py-1.5 text-center">
+              <p className="text-[10px] uppercase tracking-wide text-[var(--apple-secondary-label)]">Score</p>
+              <p className="text-xs font-semibold text-[var(--apple-label)]">{entry.score ?? '-'}</p>
             </div>
           </div>
 
@@ -117,7 +115,7 @@ export default function LibraryEntryRow({
               onClick={() => onOpenDialog(entry)}
               title="Edit"
               aria-label="Edit"
-              className="h-9 w-9 rounded-xl"
+              className="h-9 w-9 rounded-[12px]"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -128,7 +126,7 @@ export default function LibraryEntryRow({
               onClick={handleDeleteClick}
               title="Delete"
               aria-label="Delete"
-              className="h-9 w-9 rounded-xl"
+              className="h-9 w-9 rounded-[12px]"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -136,7 +134,7 @@ export default function LibraryEntryRow({
         </div>
 
         <div className="hidden items-center gap-4 md:grid md:grid-cols-[72px,1.5fr,0.7fr,0.7fr,0.5fr,112px]">
-          <div className="relative h-20 w-14 overflow-hidden rounded-xl bg-[var(--hb-panel)]">
+          <div className="relative h-20 w-14 overflow-hidden rounded-xl bg-[var(--apple-tertiary-fill)]">
             <Image
               src={entry.cover}
               alt={entry.title}
@@ -146,15 +144,15 @@ export default function LibraryEntryRow({
             />
           </div>
           <div className="space-y-1">
-            <p className="text-left text-base font-semibold text-[var(--hb-headline)]">
+            <p className="apple-title-tracking text-left text-base font-semibold text-[var(--apple-label)]">
               {entry.title}
             </p>
-            <p className="text-sm text-[var(--hb-muted)]">
+            <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">
               {entry.subtitle}
-              {entry.year ? ` - ${entry.year}` : ''}
+              {entry.year ? ` · ${entry.year}` : ''}
             </p>
             {category === 'games' && entry.selectedPlatform ? (
-              <p className="text-xs font-medium text-[var(--hb-muted)]">
+              <p className="text-xs font-medium text-[var(--apple-secondary-label)]">
                 Platform: {entry.selectedPlatform}
               </p>
             ) : null}
@@ -162,7 +160,7 @@ export default function LibraryEntryRow({
               {entry.tags.slice(0, 3).map(tag => (
                 <span
                   key={tag}
-                  className="rounded-full border border-[var(--hb-border)] px-2 py-0.5 text-[11px] text-[var(--hb-muted)]"
+                  className="apple-pill px-2 py-0.5 text-[11px] text-[var(--apple-secondary-label)]"
                 >
                   {tag}
                 </span>
@@ -170,14 +168,14 @@ export default function LibraryEntryRow({
             </div>
           </div>
           <div className="flex w-full items-center justify-center">
-            <span className="border-[var(--hb-primary-strong)]/40 bg-[var(--hb-primary-strong)]/10 rounded-full border px-3 py-1 text-xs font-semibold text-[var(--hb-primary-strong)]">
+            <span className="apple-choice-chip px-3 py-1 text-xs font-semibold" data-active="true">
               {statusLabel}
             </span>
           </div>
-          <div className="flex w-full items-center justify-center text-sm text-[var(--hb-muted)]">
+          <div className="flex w-full items-center justify-center text-sm text-[var(--apple-secondary-label)]">
             {progressDisplay}
           </div>
-          <div className="flex w-full items-center justify-center text-sm font-semibold text-[var(--hb-headline)]">
+          <div className="flex w-full items-center justify-center text-sm font-semibold text-[var(--apple-label)]">
             {entry.score ?? '-'}
           </div>
           <div className="flex w-full items-center justify-center gap-2">
@@ -187,6 +185,7 @@ export default function LibraryEntryRow({
               onClick={() => onOpenDialog(entry)}
               title="Edit"
               aria-label="Edit"
+              className="rounded-[12px]"
             >
               <Pencil className="h-5 w-5" />
             </Button>
@@ -196,6 +195,7 @@ export default function LibraryEntryRow({
               onClick={handleDeleteClick}
               title="Delete"
               aria-label="Delete"
+              className="rounded-[12px]"
             >
               <Trash2 className="h-5 w-5" />
             </Button>

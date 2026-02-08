@@ -218,7 +218,7 @@ export default function EntryEditDialog({
     <>
       <Dialog open={!!entry} onOpenChange={open => !open && onClose()}>
         {entry && (
-          <DialogContent className="max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:slide-in-from-bottom fixed left-1/2 top-1/2 z-50 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 gap-0 overflow-hidden border border-[var(--hb-border)] bg-[var(--hb-panel)] p-0 shadow-[var(--hb-shadow-md)] duration-200 sm:max-h-[80vh] sm:rounded-3xl max-sm:bottom-0 max-sm:left-0 max-sm:top-auto max-sm:h-[92dvh] max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:border-x-0 max-sm:border-b-0">
+          <DialogContent className="max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:slide-in-from-bottom fixed left-1/2 top-1/2 z-50 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 gap-0 overflow-hidden border-[var(--hb-dialog-border)] p-0 duration-200 sm:max-h-[80vh] sm:rounded-3xl max-sm:bottom-0 max-sm:left-0 max-sm:top-auto max-sm:h-[92dvh] max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:border-x-0 max-sm:border-b-0">
             <div className="flex max-h-[92dvh] flex-col sm:max-h-[80vh]">
               <div className="p-4 sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
@@ -441,7 +441,7 @@ export default function EntryEditDialog({
                             score: String(value[0] ?? 0),
                           }))
                         }
-                        className="mt-3 [&_[data-slot=slider-range]]:bg-[var(--hb-primary-strong)] [&_[data-slot=slider-thumb]]:border-[var(--hb-primary-strong)]/50 [&_[data-slot=slider-track]]:bg-[var(--hb-border)]"
+                        className="mt-3 [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:bg-[var(--apple-tertiary-fill)] [&_[data-slot=slider-range]]:bg-[var(--apple-system-blue)] [&_[data-slot=slider-thumb]]:h-5 [&_[data-slot=slider-thumb]]:w-5 [&_[data-slot=slider-thumb]]:border-[var(--apple-system-blue)]/35 [&_[data-slot=slider-thumb]]:bg-[var(--apple-surface)] [&_[data-slot=slider-thumb]]:shadow-[0_2px_10px_rgba(0,122,255,0.35)]"
                         aria-label="Βαθμολογία slider"
                       />
 
@@ -503,7 +503,7 @@ export default function EntryEditDialog({
 
       {entry?.mediaId && (
         <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-          <AlertDialogContent className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]">
+          <AlertDialogContent className="border-[var(--hb-dialog-border)] text-[var(--hb-text)]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[var(--hb-headline)]">Διαγραφή καταχώρησης</AlertDialogTitle>
               <AlertDialogDescription className="text-[var(--hb-muted)]">

@@ -231,7 +231,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button
                           type="button"
-                          variant={'primary'}
+                          variant="primary"
                           onClick={() => {
                             setEditingCommentId(comment.id);
                             setEditContent(comment.content);
@@ -241,7 +241,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                           Επεξεργασία
                         </Button>
                         <Button
-                          variant={'secondary'}
+                          variant="secondary"
                           type="button"
                           onClick={() => handleDelete(comment.id)}
                           disabled={deleteLoading === comment.id}

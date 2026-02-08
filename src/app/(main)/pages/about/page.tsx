@@ -16,6 +16,20 @@ import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
+import type { ReactNode } from 'react';
+
+type AboutSectionShellProps = {
+  children: ReactNode;
+  maxWidthClass?: string;
+};
+
+function AboutSectionShell({ children, maxWidthClass = 'max-w-7xl' }: AboutSectionShellProps) {
+  return (
+    <div className={`mx-auto w-full px-3 md:px-6 ${maxWidthClass}`}>
+      <div className="apple-material-surface overflow-hidden">{children}</div>
+    </div>
+  );
+}
 
 export const metadata = buildMetadata({
   title: 'Σχετικά με τον Hobbista',
@@ -63,39 +77,57 @@ export default async function AboutPage() {
   return (
     <>
       <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
-      <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-        {/* Background gradient */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-          <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+      <main className="apple-page-background relative min-h-screen text-[var(--hb-text)]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-[var(--hb-gradient)] opacity-80 blur-[96px]" />
+          <div className="absolute left-[-10%] top-[-20%] h-[45vh] w-[45vh] rounded-full bg-[var(--apple-system-blue)]/10 blur-[120px]" />
+          <div className="absolute bottom-[-22%] right-[-8%] h-[40vh] w-[40vh] rounded-full bg-[var(--apple-system-blue)]/8 blur-[120px]" />
         </div>
 
-        {/* Content */}
-        <div className="relative">
+        <div className="relative pb-14 md:pb-20">
           <AboutHero isAuthenticated={isAuthenticated} />
 
-          <div className="mx-auto max-w-7xl">
+          <AboutSectionShell>
             <AboutFeatures />
+          </AboutSectionShell>
+
+          <div className="my-4 md:my-6">
+            <AboutSectionShell maxWidthClass="max-w-6xl">
+              <AboutHowItWorks />
+            </AboutSectionShell>
           </div>
 
-          <AboutHowItWorks />
-
-          <div className="mx-auto max-w-7xl">
+          <AboutSectionShell maxWidthClass="max-w-6xl">
             <AboutPhilosophy />
+          </AboutSectionShell>
+
+          <div className="my-4 md:my-6">
+            <AboutSectionShell>
+              <AboutStatsLoader />
+            </AboutSectionShell>
           </div>
 
-          <AboutStatsLoader />
-
-          <div className="mx-auto max-w-7xl">
+          <AboutSectionShell maxWidthClass="max-w-6xl">
             <AboutRoadmap />
+          </AboutSectionShell>
+
+          <div className="my-4 md:my-6">
+            <AboutSectionShell maxWidthClass="max-w-6xl">
+              <AboutPeople team={team} />
+            </AboutSectionShell>
           </div>
 
-          <AboutPeople team={team} />
+          <AboutSectionShell maxWidthClass="max-w-4xl">
+            <AboutFAQ />
+          </AboutSectionShell>
 
-          <AboutFAQ />
-
-          <AboutFinalCTA isAuthenticated={isAuthenticated} />
+          <div className="mt-4 md:mt-6">
+            <AboutSectionShell maxWidthClass="max-w-5xl">
+              <AboutFinalCTA isAuthenticated={isAuthenticated} />
+            </AboutSectionShell>
+          </div>
         </div>
-      </div>
+      </main>
     </>
   );
 }

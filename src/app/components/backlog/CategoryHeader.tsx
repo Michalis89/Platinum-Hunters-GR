@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -53,79 +53,92 @@ export default function CategoryHeader({
     (routeCategory === 'anime' || routeCategory === 'manga' || routeCategory === 'games');
 
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div className="flex items-center gap-3 sm:gap-4">
-        <div className="bg-[var(--hb-primary-strong)]/20 flex h-12 w-12 items-center justify-center rounded-2xl text-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)] sm:h-14 sm:w-14">
-          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex items-start gap-4">
+          <div className="apple-card flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-[var(--apple-system-blue)] sm:h-16 sm:w-16">
+            <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
+          </div>
+          <div className="space-y-1">
+            <p className="apple-body-tracking text-[11px] uppercase tracking-[0.26em] text-[var(--apple-secondary-label)] sm:text-xs">
+              {username ? `${username} · ` : ''}
+              {category.toUpperCase()}
+            </p>
+            <h1 className="apple-title-tracking text-3xl font-semibold leading-tight text-[var(--apple-label)] sm:text-4xl">
+              {config.title}
+            </h1>
+            <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)] sm:text-[15px]">
+              {config.subtitle}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.28em] text-[var(--hb-muted)] sm:text-xs sm:tracking-[0.35em]">
-            {username ? `${username} \u2022 ` : ''}
-            {category.toUpperCase()}
-          </p>
-          <h1 className="text-2xl font-bold text-[var(--hb-headline)] sm:text-3xl md:text-4xl">
-            {config.title}
-          </h1>
-          <p className="text-sm text-[var(--hb-muted)]">{config.subtitle}</p>
-        </div>
-      </div>
 
-      <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap">
-        <Button variant="primary" onClick={onCreateClick} className="w-full sm:w-auto">
-          {'\u039d\u03ad\u03b1 \u03ba\u03b1\u03c4\u03b1\u03c7\u03ce\u03c1\u03b7\u03c3\u03b7'}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="primary" onClick={onCreateClick} className="h-10 rounded-[12px] px-4">
+            Νέα καταχώρηση
+          </Button>
 
-        {showIntegrationMenu ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" className="w-full sm:w-auto">
-                {'\u03a3\u03c5\u03b3\u03c7\u03c1\u03bf\u03bd\u03b9\u03c3\u03bc\u03cc\u03c2 \u03bc\u03b5..'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {routeCategory === 'anime' || routeCategory === 'manga' ? (
-                <>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      (window.location.href = `/api/integrations/mal/start?category=${routeCategory}`)
-                    }
-                  >
-                    MyAnimeList
-                  </DropdownMenuItem>
-                  <DropdownMenuItem disabled>AniList (soon)</DropdownMenuItem>
-                </>
-              ) : null}
-
-              {routeCategory === 'games' ? (
-                <>
-                  {hasSteamId ? (
+          {showIntegrationMenu ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" className="h-10 rounded-[12px] px-4">
+                  Συγχρονισμός
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="apple-nav-popover min-w-56 border-[var(--apple-separator)]"
+              >
+                {routeCategory === 'anime' || routeCategory === 'manga' ? (
+                  <>
                     <DropdownMenuItem
-                      onClick={() => setSteamConfirmOpen(true)}
-                      disabled={isSteamSyncing}
+                      className="cursor-pointer"
+                      onClick={() =>
+                        (window.location.href = `/api/integrations/mal/start?category=${routeCategory}`)
+                      }
                     >
-                      Steam
+                      MyAnimeList
                     </DropdownMenuItem>
-                  ) : null}
-                  <DropdownMenuItem disabled>PlayStation Network (soon)</DropdownMenuItem>
-                  <DropdownMenuItem disabled>Xbox (soon)</DropdownMenuItem>
-                  <DropdownMenuItem disabled>Epic Games (soon)</DropdownMenuItem>
-                  <DropdownMenuItem disabled>GOG (soon)</DropdownMenuItem>
-                </>
-              ) : null}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : null}
+                    <DropdownMenuItem disabled>AniList (soon)</DropdownMenuItem>
+                  </>
+                ) : null}
 
-        <Button variant="secondary" onClick={onSuggestionsClick} className="w-full sm:w-auto">
-          {'\u03a0\u03c1\u03bf\u03c4\u03ac\u03c3\u03b5\u03b9\u03c2'}
-        </Button>
+                {routeCategory === 'games' ? (
+                  <>
+                    {hasSteamId ? (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => setSteamConfirmOpen(true)}
+                        disabled={isSteamSyncing}
+                      >
+                        Steam
+                      </DropdownMenuItem>
+                    ) : null}
+                    <DropdownMenuItem disabled>PlayStation Network (soon)</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Xbox (soon)</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Epic Games (soon)</DropdownMenuItem>
+                    <DropdownMenuItem disabled>GOG (soon)</DropdownMenuItem>
+                  </>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
+
+          <Button
+            variant="secondary"
+            onClick={onSuggestionsClick}
+            className="h-10 rounded-[12px] px-4"
+          >
+            Προτάσεις
+          </Button>
+        </div>
       </div>
 
       <AlertDialog open={steamConfirmOpen} onOpenChange={setSteamConfirmOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="hb-dialog-surface border-[var(--hb-dialog-border)] text-[var(--hb-text)]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Steam συγχρονισμός</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-[var(--apple-label)]">Steam συγχρονισμός</AlertDialogTitle>
+            <AlertDialogDescription className="text-[var(--apple-secondary-label)]">
               Ο αυτόματος συγχρονισμός από Steam ορίζει μόνο status `Planned` ή `Current`.
               Τα `Completed` και `Dropped` τα ορίζεις χειροκίνητα.
             </AlertDialogDescription>

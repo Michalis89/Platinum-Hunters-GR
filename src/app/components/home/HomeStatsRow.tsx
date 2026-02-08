@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import {
   ListTodo,
@@ -46,14 +46,12 @@ type SummaryStatItem = {
   label: string;
   value: string | number;
   icon: ReactNode;
-  color: string;
 };
 
 type CategoryConfig = {
   key: keyof Pick<PersonalStats, 'games' | 'anime' | 'manga' | 'movies' | 'tv' | 'books'>;
   label: string;
   icon: ReactNode;
-  color: string;
   metric: 'hours' | 'chapters' | 'pages';
   metricLabel: string;
 };
@@ -94,7 +92,6 @@ const categoryConfig: CategoryConfig[] = [
     key: 'games',
     label: 'Games',
     icon: <Gamepad2 className="h-4 w-4" />,
-    color: 'text-violet-400',
     metric: 'hours',
     metricLabel: 'ώρες',
   },
@@ -102,7 +99,6 @@ const categoryConfig: CategoryConfig[] = [
     key: 'anime',
     label: 'Anime',
     icon: <Sparkles className="h-4 w-4" />,
-    color: 'text-pink-400',
     metric: 'hours',
     metricLabel: 'ώρες',
   },
@@ -110,15 +106,13 @@ const categoryConfig: CategoryConfig[] = [
     key: 'manga',
     label: 'Manga',
     icon: <BookMarked className="h-4 w-4" />,
-    color: 'text-orange-400',
     metric: 'chapters',
-    metricLabel: 'Volumes',
+    metricLabel: 'volumes',
   },
   {
     key: 'movies',
     label: 'Ταινίες',
     icon: <Film className="h-4 w-4" />,
-    color: 'text-red-400',
     metric: 'hours',
     metricLabel: 'ώρες',
   },
@@ -126,7 +120,6 @@ const categoryConfig: CategoryConfig[] = [
     key: 'tv',
     label: 'Σειρές',
     icon: <Tv className="h-4 w-4" />,
-    color: 'text-blue-400',
     metric: 'hours',
     metricLabel: 'ώρες',
   },
@@ -134,7 +127,6 @@ const categoryConfig: CategoryConfig[] = [
     key: 'books',
     label: 'Βιβλία',
     icon: <BookText className="h-4 w-4" />,
-    color: 'text-emerald-400',
     metric: 'pages',
     metricLabel: 'σελίδες',
   },
@@ -143,84 +135,60 @@ const categoryConfig: CategoryConfig[] = [
 export function HomeStatsRow({ stats, enabledCategories }: HomeStatsRowProps) {
   const summaryStats: SummaryStatItem[] = [
     {
-      label: 'Στο Backlog',
+      label: 'Στο backlog',
       value: stats?.total_backlog ?? '–',
-      icon: <ListTodo className="h-5 w-5" />,
-      color: 'text-violet-400',
+      icon: <ListTodo className="h-4 w-4" />,
     },
     {
       label: 'Σε εξέλιξη',
       value: stats?.in_progress ?? '–',
-      icon: <Play className="h-5 w-5" />,
-      color: 'text-emerald-400',
+      icon: <Play className="h-4 w-4" />,
     },
     {
       label: 'Ολοκληρωμένα',
       value: stats?.completed ?? '–',
-      icon: <CheckCircle2 className="h-5 w-5" />,
-      color: 'text-amber-400',
+      icon: <CheckCircle2 className="h-4 w-4" />,
     },
     {
-      label: 'Συνολικές Ώρες',
+      label: 'Συνολικές ώρες',
       value: stats?.total_hours ?? '–',
-      icon: <Clock className="h-5 w-5" />,
-      color: 'text-sky-400',
+      icon: <Clock className="h-4 w-4" />,
     },
   ];
 
   const totalHoursDescription =
     typeof stats?.total_hours === 'number' ? describeTotalHours(stats.total_hours) : null;
 
-  // Filter to only show active categories
   const activeCategories = stats?.active_categories ?? [];
   const categoryFilter =
     enabledCategories && enabledCategories.length > 0 ? enabledCategories : activeCategories;
   const visibleCategories = categoryConfig.filter(cat => categoryFilter.includes(cat.key));
 
   return (
-    <section className="space-y-6 px-4 md:px-6">
-      <div className="mx-auto max-w-7xl">
-        {/* Summary Stats Row */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {summaryStats.map(stat => {
-            const isPrimary = stat.label === 'Στο Backlog';
-            return (
-              <div
-                key={stat.label}
-                className={`rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 shadow-sm transition ${
-                  isPrimary ? 'shadow-[var(--hb-shadow-md)] ring-1 ring-red-500/20' : ''
-                }`}
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-[0.4em] text-[var(--hb-muted)]">
-                    {stat.label}
-                  </span>
-                  <span className={stat.color}>{stat.icon}</span>
-                </div>
-                <p
-                  className={`font-bold text-[var(--hb-headline)] ${
-                    isPrimary ? 'text-4xl md:text-5xl' : 'text-3xl md:text-4xl'
-                  }`}
-                >
-                  {stat.value === '–' || stat.value === undefined ? '–' : stat.value}
-                </p>
-                {stat.label === 'Συνολικές Ώρες' && totalHoursDescription && (
-                  <div className="bg-[var(--hb-card)]/70 mt-2 inline-flex cursor-default items-center gap-1.5 rounded-full border border-[var(--hb-border)] px-3 py-1 text-[11px] font-medium leading-none text-[var(--hb-muted)] transition hover:border-emerald-500/30 hover:bg-emerald-500/5 hover:text-[var(--hb-text)]">
-                    <Clock className="h-3 w-3 opacity-70" />
-                    {totalHoursDescription}
-                  </div>
-                )}
+    <section className="space-y-8 px-4 md:px-6">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+          {summaryStats.map(stat => (
+            <article key={stat.label} className="apple-card p-5">
+              <div className="apple-secondary-label flex items-center justify-between">
+                <span className="apple-body-tracking text-xs font-medium">{stat.label}</span>
+                {stat.icon}
               </div>
-            );
-          })}
+              <p className="apple-label mt-3 text-3xl font-semibold tracking-[-0.02em] md:text-4xl">
+                {stat.value === '–' || stat.value === undefined ? '–' : stat.value}
+              </p>
+              {stat.label === 'Συνολικές ώρες' && totalHoursDescription && (
+                <p className="apple-secondary-label apple-body-tracking mt-2 text-xs leading-relaxed">{totalHoursDescription}</p>
+              )}
+            </article>
+          ))}
         </div>
 
-        {/* Category Breakdown - only show if user has categories */}
         {visibleCategories.length > 0 && (
-          <div className="mt-6">
-            <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-[var(--hb-muted)]">
-              Ανά Κατηγορία
-            </h3>
+          <div className="space-y-4">
+            <h2 className="apple-secondary-label apple-body-tracking text-sm font-medium uppercase opacity-60">
+              Ανά κατηγορία
+            </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {visibleCategories.map(cat => {
                 const catStats = stats?.[cat.key];
@@ -244,72 +212,45 @@ export function HomeStatsRow({ stats, enabledCategories }: HomeStatsRowProps) {
                 const completionPercent = Math.round(completionRatio);
 
                 return (
-                  <div
-                    key={cat.key}
-                    className="hover:border-[var(--hb-primary-strong)]/40 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-5 shadow-sm transition"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                        <span
-                          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 ${cat.color}`}
-                        >
-                          {cat.icon}
-                        </span>
-                        {cat.label}
+                  <article key={cat.key} className="apple-card p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="apple-label flex items-center gap-2 text-sm font-semibold">
+                          <span className="apple-secondary-label">{cat.icon}</span>
+                          {cat.label}
+                        </div>
+                        <p className="apple-secondary-label text-xs">Σύνολο: {catStats.total}</p>
                       </div>
                       {metricValue > 0 && (
-                        <div className="text-right text-xs text-[var(--hb-muted)]">
-                          <p className="text-base font-semibold text-[var(--hb-headline)]">
+                        <div className="text-right">
+                          <p className="apple-label text-lg font-semibold tracking-[-0.02em]">
                             {metricValue}
                           </p>
-                          <p>{cat.metricLabel}</p>
+                          <p className="apple-secondary-label text-xs">{cat.metricLabel}</p>
                         </div>
                       )}
                     </div>
-                    <div className="mt-2 space-y-1 text-sm text-slate-500 dark:text-[var(--hb-muted)]">
-                      {/* Total */}
-                      <p className="text-slate-500 dark:text-[var(--hb-muted)]">
-                        Σύνολο: {catStats.total}
-                      </p>
 
-                      {/* In Progress (softer red) */}
-                      <p className="text-rose-500 dark:text-[var(--hb-primary-strong)]">
-                        Σε εξέλιξη: {catStats.in_progress}
-                      </p>
-
-                      {/* Completed (premium emerald) */}
-                      <p className="text-emerald-500 dark:text-emerald-400">
-                        Ολοκληρωμένα: {catStats.completed}
-                      </p>
-
-                      {/* Planned (lighter + quieter) */}
-                      <p className="text-slate-500 dark:text-slate-400">
-                        Προγραμματισμένα: {planned}
-                      </p>
-
-                      {/* Dropped (amber instead of red) */}
-                      <p className="text-amber-500 dark:text-rose-400">Παρατημένα: {dropped}</p>
+                    <div className="apple-secondary-label mt-4 grid grid-cols-2 gap-2 text-xs">
+                      <p>Σε εξέλιξη: {catStats.in_progress}</p>
+                      <p>Ολοκληρωμένα: {catStats.completed}</p>
+                      <p>Προγραμματισμένα: {planned}</p>
+                      <p>Παρατημένα: {dropped}</p>
                     </div>
 
-                    <div className="mt-3 flex items-center gap-3 text-xs text-[var(--hb-muted)]">
-                      <div className="flex-1">
-                        <div className="h-2.5 rounded-full bg-gradient-to-r from-slate-200/70 via-slate-200/50 to-slate-200/60 dark:from-white/10 dark:to-white/10">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-[#ef4444] via-[#f87171] to-[#b91c1c] transition-all dark:bg-gradient-to-r dark:from-[var(--hb-primary-strong)] dark:to-[var(--hb-primary-strong)]"
-                            style={{
-                              width: `${Math.min(completionRatio, 100)}%`,
-                            }}
-                          />
-                        </div>
+                    <div className="apple-secondary-label mt-4 flex items-center gap-2 text-xs">
+                      <div className="apple-progress-track h-2 flex-1 overflow-hidden rounded-full">
+                        <div
+                          className="apple-progress-fill h-full rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min(completionRatio, 100)}%`,
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center gap-1 whitespace-nowrap">
-                        <span className="font-semibold text-[var(--hb-headline)]">
-                          {completionPercent}% σε ολοκληρωμένα
-                        </span>
-                        <InfoHint tip="Η μπάρα δείχνει το ποσοστό ολοκληρωμένων εγγραφών σε σχέση με το σύνολο (συνολικά μείον dropped)." />
-                      </div>
+                      <span className="apple-label font-medium">{completionPercent}%</span>
+                      <InfoHint tip="Ποσοστό ολοκληρωμένων εγγραφών σε σχέση με το σύνολο χωρίς dropped." />
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>

@@ -9,11 +9,13 @@ export default function ErrorState({ error, onRetry }: ErrorStateProps) {
   const message = typeof error === 'string' ? error : error.message;
 
   return (
-    <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-6 py-16 text-center">
-      <h2 className="mb-2 text-xl font-semibold text-[var(--hb-headline)]">Σφάλμα</h2>
-      <p className="text-[var(--hb-muted)]">{message}</p>
+    <div className="apple-destructive-surface px-5 py-5 text-left">
+      <h2 className="apple-title-tracking mb-2 text-base font-semibold text-[var(--apple-label)]">
+        Σφάλμα
+      </h2>
+      <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">{message}</p>
       {onRetry ? (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-4 flex">
           <Button onClick={onRetry} variant="secondary">
             Δοκίμασε ξανά
           </Button>

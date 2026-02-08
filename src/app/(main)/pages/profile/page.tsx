@@ -354,8 +354,8 @@ export default function ProfilePage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--hb-bg)]">
-        <div className="mx-auto max-w-4xl px-4 py-16">
+      <div className="apple-page-background min-h-screen">
+        <div className="mx-auto max-w-4xl px-4 py-16 md:px-6">
           <Skeleton type="profile" />
         </div>
       </div>
@@ -368,13 +368,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      {/* Background gradient (like About page) */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
-      </div>
-
-      {/* Content */}
+    <div className="apple-page-background min-h-screen text-[var(--apple-label)]">
       <div className="relative">
         {/* Profile Header (Hero-style) */}
         <ProfileHeader user={user} />
@@ -406,21 +400,21 @@ export default function ProfilePage() {
 
         {/* Favorites + Category Info Section */}
         {activeCategory && favoriteCategories.includes(activeCategory) && (
-          <section className="px-4 py-10 md:px-6 md:py-16">
+          <section className="px-4 py-10 md:px-6 md:py-14">
             <div className="mx-auto max-w-6xl">
-              <div className="mb-8 text-center">
-                <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+              <div className="mb-8 text-center md:mb-10">
+                <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
                   {categoryMeta[activeCategory]?.title || 'Κατηγορία'}
                 </p>
-                <h2 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
+                <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
                   {categoryLabels[activeCategory] || 'Favorites'}
                 </h2>
               </div>
 
-              <div className="flex flex-col gap-4 sm:gap-6 lg:grid lg:grid-cols-2">
+              <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
                 {/* Favorites List */}
-                <div className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] sm:p-6">
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
+                <div className="apple-material-surface overflow-hidden p-4 sm:p-6">
+                  <h3 className="apple-secondary-label mb-4 text-xs font-semibold uppercase tracking-[0.18em]">
                     Top {categoryLabels[activeCategory]}
                   </h3>
                   <ProfileFavorites
@@ -440,8 +434,8 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Category Info */}
-                <div className="overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 shadow-[var(--hb-shadow-md)] sm:p-6">
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
+                <div className="apple-material-surface overflow-hidden p-4 sm:p-6">
+                  <h3 className="apple-secondary-label mb-4 text-xs font-semibold uppercase tracking-[0.18em]">
                     Πληροφορίες Κατηγορίας
                   </h3>
                   <ProfileCategoryInfo
@@ -456,13 +450,13 @@ export default function ProfilePage() {
         )}
 
         {/* Activity Feed */}
-        <section className="px-4 py-12 md:px-6 md:py-16">
+        <section className="px-4 py-12 md:px-6 md:py-14">
           <div className="mx-auto max-w-4xl">
-            <div className="mb-8 text-center">
-              <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+            <div className="mb-8 text-center md:mb-10">
+              <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
                 Δραστηριότητα
               </p>
-              <h2 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
+              <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
                 Οι ενέργειές μου
               </h2>
             </div>

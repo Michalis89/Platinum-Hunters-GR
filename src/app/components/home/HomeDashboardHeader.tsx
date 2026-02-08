@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -19,27 +19,27 @@ function useGreeting() {
 
 export function HomeDashboardHeader({ username, displayName }: HomeDashboardHeaderProps) {
   const greeting = useGreeting();
-
   const name = displayName || username;
 
   return (
-    <section className="px-4 py-8 md:px-6 md:py-12">
+    <section className="px-4 pb-8 pt-12 md:px-6 md:pb-8 md:pt-16">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p
-              className="mb-1 min-h-[1.25rem] text-sm text-[var(--hb-muted)]"
-              suppressHydrationWarning
-            >
-              {greeting}
-            </p>
-            <h1 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
-              Καλωσόρισες,{' '}
-              <span className="bg-gradient-to-r from-[var(--hb-primary-strong)] to-[var(--hb-accent)] bg-clip-text text-transparent">
-                {name}
-              </span>
-            </h1>
-          </div>
+        <div className="max-w-3xl space-y-4">
+          <p
+            className="apple-secondary-label apple-body-tracking min-h-[1.25rem] text-sm font-medium"
+            suppressHydrationWarning
+          >
+            {greeting}
+          </p>
+          <h1 className="apple-label apple-title-tracking text-4xl font-semibold leading-[1.05] md:text-5xl">
+            Καλωσόρισες,{' '}
+            <span className="bg-gradient-to-r from-[var(--apple-label)] via-[var(--apple-label)] to-[var(--apple-secondary-label)] bg-clip-text text-transparent">
+              {name}
+            </span>
+          </h1>
+          <p className="apple-secondary-label apple-body-tracking max-w-2xl text-base leading-relaxed">
+            Οργάνωσε το backlog σου, συνέχισε ό,τι έχεις ξεκινήσει και δες τι προτείνει η κοινότητα.
+          </p>
         </div>
       </div>
     </section>

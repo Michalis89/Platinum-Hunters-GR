@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Eye, EyeOff } from 'lucide-react'; // Προσθήκη για καλύτερο UX
+import { Lock, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,6 @@ export default function ResetPasswordForm() {
           setError('Το session έληξε. Παρακαλούμε ζητήστε νέο σύνδεσμο ανάκτησης.');
         }
       } catch {
-        // Διόρθωση: Αφαιρέσαμε το (err) γιατί δεν χρησιμοποιούνταν
         setError('Αποτυχία ελέγχου σύνδεσης.');
       } finally {
         setLoading(false);
@@ -61,7 +60,6 @@ export default function ResetPasswordForm() {
       setSuccess('Ο κωδικός ενημερώθηκε! Μεταφέρεστε στη σύνδεση...');
       setTimeout(() => router.push('/pages/auth/login'), 2000);
     } catch (err) {
-      // Διόρθωση: Type safety αντί για any
       const errorMessage = err instanceof Error ? err.message : 'Κάτι πήγε στραβά.';
       setError(errorMessage);
     } finally {
@@ -71,55 +69,55 @@ export default function ResetPasswordForm() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--hb-primary)] border-t-transparent" />
+      <div className="apple-auth-shell flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--apple-system-blue)] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    // Χρήση του νέου hb-gradient για το background
-    <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)] bg-[image:var(--hb-gradient)] px-4 py-12">
+    <div className="apple-auth-shell flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <Card className="overflow-hidden rounded-[var(--hb-radius-lg)] border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur-md">
-          <CardHeader className="pb-4 pt-8 text-center">
-            <div className="bg-[var(--hb-primary)]/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-[var(--hb-primary)]">
+        <Card className="apple-auth-card overflow-hidden">
+          <CardHeader className="border-[var(--apple-separator-soft)] bg-transparent pb-4 pt-7 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_14%,transparent)] text-[var(--apple-system-blue)]">
               <Lock className="h-6 w-6" />
             </div>
-            <CardTitle className="text-2xl font-bold text-[var(--hb-headline)]">
+            <CardTitle className="text-2xl font-semibold text-[var(--apple-label)]">
               Νέος Κωδικός
             </CardTitle>
-            <p className="mt-2 text-sm text-[var(--hb-muted)]">
+            <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
               Ορίστε τον νέο κωδικό πρόσβασης για το λογαριασμό σας.
             </p>
           </CardHeader>
 
-          <CardContent className="space-y-6 pb-8">
+          <CardContent className="space-y-5 px-6 pb-7 pt-5">
             {error && <ErrorState error={error} />}
-            {success && <Feedback variant="success" description={success} />}
+            {success && (
+              <Feedback variant="success" tone="soft" title="Έτοιμο" description={success} />
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <div className="relative">
-                  <Input
-                    label="Νέος κωδικός"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    disabled={submitting}
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant={'ghost'}
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[38px]"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </Button>
-                </div>
+              <div className="relative">
+                <Input
+                  label="Νέος κωδικός"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  disabled={submitting}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-[33px] h-8 w-8 rounded-[10px]"
+                  ariaLabel={showPassword ? 'Απόκρυψη κωδικού' : 'Εμφάνιση κωδικού'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </Button>
               </div>
 
               <Input
@@ -132,7 +130,7 @@ export default function ResetPasswordForm() {
                 disabled={submitting}
               />
 
-              <Button variant={'primary'} size={'xl'} type="submit" disabled={submitting}>
+              <Button variant="primary" size="xl" type="submit" disabled={submitting}>
                 {submitting ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

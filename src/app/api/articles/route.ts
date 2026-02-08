@@ -59,7 +59,6 @@ function validateArticlePayload({
 // GET - Fetch articles with filtering
 async function GETHandler(req: Request) {
   try {
-    const supabase = await createRouteHandlerClient();
     const { searchParams } = new URL(req.url);
 
     const category = searchParams.get('category');
@@ -71,19 +70,27 @@ async function GETHandler(req: Request) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), MAX_LIMIT);
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0);
 
-    const {
-      data: articles,
-      error,
-      count,
-    } = await getArticlesWithFilters(supabase, {
-      category,
-      topic,
-      status,
-      authorId,
-      featured: featured === 'true',
-      limit,
-      offset,
-    });
+    const runQuery = async (ignoreCookies = false) => {
+      const supabase = await createRouteHandlerClient(undefined, { ignoreCookies });
+      return getArticlesWithFilters(supabase, {
+        category,
+        topic,
+        status,
+        authorId,
+        featured: featured === 'true',
+        limit,
+        offset,
+      });
+    };
+
+    const shouldUsePublicContext = status === 'published';
+    let { data: articles, error, count } = await runQuery(shouldUsePublicContext);
+    if (error && error.code === 'PGRST303') {
+      const retry = await runQuery(true);
+      articles = retry.data;
+      error = retry.error;
+      count = retry.count;
+    }
 
     if (error) {
       console.error('Error fetching articles:', error);

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ShieldAlert } from 'lucide-react';
 import { selectIsAuthenticated, selectUser, selectIsLoading } from '@/store/slices/authSlice';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Skeleton from '@/app/components/ui/Skeleton';
@@ -16,7 +17,7 @@ import {
 
 function BacklogFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
+    <div className="apple-page-background flex min-h-screen items-center justify-center">
       <LoadingSpinner size="lg" />
     </div>
   );
@@ -131,21 +132,31 @@ function BacklogPageContent() {
   // Show access denied if user doesn't have this category enabled
   if (!hasAccessToCategory) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--hb-bg)] px-4 text-center">
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-8 shadow-lg">
-          <div className="mb-4 text-6xl">🚫</div>
-          <h2 className="mb-2 text-xl font-bold text-[var(--hb-headline)]">
+      <div className="apple-page-background flex min-h-screen flex-col items-center justify-center px-4">
+        <div className="apple-material-surface w-full max-w-xl p-8 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#ff3b30]/15 text-[#ff3b30]">
+            <ShieldAlert className="h-8 w-8" />
+          </div>
+          <h2 className="apple-title-tracking mb-2 text-2xl font-semibold text-[var(--apple-label)]">
             Δεν έχεις πρόσβαση σε αυτή την κατηγορία
           </h2>
-          <p className="mb-6 text-[var(--hb-muted)]">
-            Για να δεις το <strong className="text-[var(--hb-headline)]">{category}</strong>{' '}
-            backlog, πρέπει πρώτα να ενεργοποιήσεις αυτή την κατηγορία στο προφίλ σου.
+          <p className="apple-body-tracking mb-6 text-[15px] text-[var(--apple-secondary-label)]">
+            Για να δεις το <strong className="text-[var(--apple-label)]">{category}</strong> backlog,
+            πρέπει πρώτα να ενεργοποιήσεις αυτή την κατηγορία στο προφίλ σου.
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button variant={'primary'} onClick={() => router.push('/pages/profile/edit')}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Button
+              variant={'primary'}
+              onClick={() => router.push('/pages/profile/edit')}
+              className="h-11 rounded-[12px]"
+            >
               Ρυθμίσεις Προφίλ
             </Button>
-            <Button variant={'secondary'} onClick={() => router.push('/pages/hobbies')}>
+            <Button
+              variant={'secondary'}
+              onClick={() => router.push('/pages/hobbies')}
+              className="h-11 rounded-[12px]"
+            >
               Πίσω στο Dashboard
             </Button>
           </div>

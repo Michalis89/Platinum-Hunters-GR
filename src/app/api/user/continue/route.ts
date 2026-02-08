@@ -135,12 +135,9 @@ async function GETHandler() {
       throw userError;
     }
 
-    const preferredCategories = Array.isArray(userPrefs?.categories)
-      ? userPrefs?.categories
-      : [];
+    const preferredCategories = Array.isArray(userPrefs?.categories) ? userPrefs?.categories : [];
 
-    let enabledCategories =
-      preferredCategories.length > 0 ? preferredCategories : ([] as string[]);
+    let enabledCategories = preferredCategories.length > 0 ? preferredCategories : ([] as string[]);
 
     if (enabledCategories.length === 0) {
       const { data: categoryRows, error: categoryError } = await supabase

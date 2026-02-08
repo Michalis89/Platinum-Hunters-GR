@@ -1,5 +1,15 @@
 import Link from 'next/link';
-import { ChevronDown, LogOut, Moon, PenLine, Plus, ShieldCheck, Sun, Ticket, User } from 'lucide-react';
+import {
+  ChevronDown,
+  LogOut,
+  Moon,
+  PenLine,
+  Plus,
+  ShieldCheck,
+  Sun,
+  Ticket,
+  User,
+} from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +38,7 @@ type UserMenuProps = {
 };
 
 const itemClassName =
-  'rounded-lg px-2.5 py-2 focus:bg-white/5 focus:text-[var(--hb-primary-strong)]';
+  'rounded-[var(--apple-radius-control)] px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--hb-ease)] focus:bg-[var(--apple-nav-pill-hover)] focus:text-[var(--apple-label)]';
 
 export function UserMenu({
   user,
@@ -49,41 +59,45 @@ export function UserMenu({
           variant="secondary"
           className={cn(
             desktopLinkClass(false),
-            'h-8 gap-2 rounded-md border-transparent bg-transparent pl-1.5 pr-2 text-[var(--hb-text)]',
+            'h-9 gap-2 rounded-[var(--apple-radius-control)] border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-[var(--apple-label)]',
           )}
         >
-          <Avatar className="h-7 w-7 border border-[var(--hb-border)]">
+          <Avatar className="h-7 w-7 border border-[var(--apple-nav-pill-border)]">
             <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
-            <AvatarFallback className="bg-white/5 text-xs font-semibold text-[var(--hb-headline)]">
+            <AvatarFallback className="bg-[var(--apple-nav-pill-hover)] text-xs font-semibold text-[var(--apple-label)]">
               {fallbackInitial}
             </AvatarFallback>
           </Avatar>
-          <span className="max-w-[130px] truncate text-sm">{user.username ?? 'Hobbistas User'}</span>
-          <ChevronDown className="size-4 text-[var(--hb-muted)]" />
+          <span className="max-w-[130px] truncate text-[13px] font-medium tracking-[-0.01em]">
+            {user.username ?? 'Hobbistas User'}
+          </span>
+          <ChevronDown className="size-4 text-[var(--apple-secondary-label)]" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="w-72 rounded-2xl border-[var(--hb-border)] bg-[var(--hb-panel)] p-1.5 text-[var(--hb-text)]"
+        className="apple-nav-popover w-72 p-1.5 text-[var(--apple-label)]"
       >
-        <DropdownMenuLabel className="rounded-xl px-2.5 py-2 font-normal">
+        <DropdownMenuLabel className="rounded-[var(--apple-radius-card)] px-2.5 py-2 font-normal">
           <div className="flex items-center gap-2.5">
-            <Avatar className="h-9 w-9 border border-[var(--hb-border)]">
+            <Avatar className="h-9 w-9 border border-[var(--apple-nav-pill-border)]">
               <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
-              <AvatarFallback className="bg-white/5 text-sm font-semibold text-[var(--hb-headline)]">
+              <AvatarFallback className="bg-[var(--apple-nav-pill-hover)] text-sm font-semibold text-[var(--apple-label)]">
                 {fallbackInitial}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[var(--hb-headline)]">
+              <p className="truncate text-sm font-semibold text-[var(--apple-label)]">
                 {user.username ?? 'Hobbistas User'}
               </p>
-              <p className="truncate text-xs text-[var(--hb-muted)]">{user.email ?? 'Μέλος της κοινότητας'}</p>
+              <p className="truncate text-xs text-[var(--apple-secondary-label)]">
+                {user.email ?? 'Μέλος της κοινότητας'}
+              </p>
             </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-[var(--hb-border)]" />
+        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
         <DropdownMenuGroup>
           {canQuickAdd ? (
             <DropdownMenuItem onSelect={onAdd} className={itemClassName}>
@@ -118,17 +132,17 @@ export function UserMenu({
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuGroup>
-        <DropdownMenuSeparator className="bg-[var(--hb-border)]" />
+        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
         <DropdownMenuItem onSelect={onToggleTheme} className={itemClassName}>
           {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
           <span>Θέμα</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-[var(--hb-border)]" />
+        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
         <DropdownMenuItem
           onSelect={() => {
             void onLogout();
           }}
-          className="rounded-lg px-2.5 py-2 focus:bg-white/5 focus:text-[var(--hb-accent)]"
+          className={itemClassName}
         >
           <LogOut className="size-4" />
           <span>Έξοδος</span>

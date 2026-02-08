@@ -41,25 +41,27 @@ export default function CreateEntryPanel({
     return false;
   };
 
-  const getApiSourceName = () => {
-    if (category === 'anime' || category === 'manga') return 'MAL';
-    if (category === 'movies' || category === 'tv') return 'TMDB';
-    return 'Google Books';
-  };
-
   return (
-    <div className="mt-5 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-      <p className="text-sm font-semibold text-[var(--hb-headline)]">
-        Αναζήτηση στη βάση μας, αν δεν υπάρχει κάνουμε αναζήτηση σε εξωτερικό API:{' '}
-        {getApiSourceName()}
-      </p>
-      <div className="mt-4 flex flex-col gap-3">
+    <section className="apple-card mt-6 rounded-[20px] border-[var(--apple-separator)] p-4 sm:p-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          className="h-9 rounded-[12px] px-3 text-[var(--apple-secondary-label)]"
+        >
+          Κλείσιμο
+        </Button>
+      </div>
+
+      <div className="mt-4">
         <SearchBar
           value={searchQuery}
           onChange={onSearchChange}
           placeholder={config.searchPlaceholder}
         />
       </div>
+
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {searchResults.map(entry => (
           <MediaSearchResultCard
@@ -71,7 +73,7 @@ export default function CreateEntryPanel({
           />
         ))}
         {isLoading && (
-          <div className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-4 text-center text-xs text-[var(--hb-muted)] md:col-span-2">
+          <div className="apple-card rounded-[16px] border-[var(--apple-separator)] px-4 py-5 text-center text-xs text-[var(--apple-secondary-label)] md:col-span-2">
             Αναζήτηση στη βάση μας...
           </div>
         )}
@@ -79,11 +81,6 @@ export default function CreateEntryPanel({
           <EmptyState title="Δεν βρέθηκαν αποτελέσματα." size="sm" className="md:col-span-2" />
         )}
       </div>
-      <div className="mt-4">
-        <Button variant="ghost" onClick={onClose} className="w-full sm:w-auto">
-          Κλείσιμο
-        </Button>
-      </div>
-    </div>
+    </section>
   );
 }

@@ -57,8 +57,8 @@ export default function Navbar() {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--hb-border)] bg-[var(--hb-surface)]/95 backdrop-blur-xl">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
+    <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 md:px-4 md:pt-4">
+      <nav className="apple-nav-shell relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-2 px-2 md:px-4">
         <LogoBrand href={logoHref} />
 
         <DesktopNav

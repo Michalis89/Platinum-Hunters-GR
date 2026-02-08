@@ -13,6 +13,14 @@ interface CategoryStatsProps {
   };
 }
 
+type StatCard = {
+  key: string;
+  label: string;
+  value: number;
+  caption: string;
+  accent?: boolean;
+};
+
 export default function CategoryStats({
   category,
   totalEntries,
@@ -20,67 +28,88 @@ export default function CategoryStats({
 }: Readonly<CategoryStatsProps>) {
   const config = CATEGORY_CONFIG[category];
 
+  const cards: StatCard[] = [
+    {
+      key: 'entries',
+      label: 'Entries',
+      value: totalEntries,
+      caption: 'Συνολικές καταχωρήσεις',
+      accent: true,
+    },
+    ...(category === 'games'
+      ? [
+          {
+            key: 'games-backlog',
+            label: 'Backlog',
+            value: counts.planned,
+            caption: 'Σε κατάσταση backlog',
+          },
+        ]
+      : []),
+    {
+      key: category === 'movies' ? 'dropped-alt' : 'current',
+      label: category === 'movies' ? config.droppedLabel : config.currentLabel,
+      value: category === 'movies' ? counts.dropped : counts.current,
+      caption: category === 'movies' ? 'Παρατημένα' : 'Σε εξέλιξη',
+    },
+    ...(category === 'books'
+      ? [
+          {
+            key: 'planned',
+            label: config.plannedLabel,
+            value: counts.planned,
+            caption: 'Προς ανάγνωση',
+          },
+        ]
+      : []),
+    {
+      key: 'completed',
+      label: config.completedLabel,
+      value: counts.completed,
+      caption: 'Ολοκληρωμένα',
+    },
+    ...(category !== 'movies'
+      ? [
+          {
+            key: 'dropped',
+            label: config.droppedLabel,
+            value: counts.dropped,
+            caption: 'Παρατημένα',
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div
-      className={`mt-6 grid gap-4 ${
+      className={`mt-6 grid gap-3 sm:gap-4 ${
         category === 'movies'
           ? 'grid-cols-2 md:grid-cols-3'
           : category === 'books'
             ? 'grid-cols-2 md:grid-cols-5'
-            : 'grid-cols-2 md:grid-cols-4'
+            : category === 'games'
+              ? 'grid-cols-2 md:grid-cols-5'
+              : 'grid-cols-2 md:grid-cols-4'
       }`}
     >
-      <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)]">Entries</p>
-        <p className="mt-2 text-3xl font-bold text-[var(--hb-primary-strong)]">{totalEntries}</p>
-        <p className="text-xs text-[var(--hb-muted)]">Συνολικές καταχωρήσεις</p>
-      </div>
-
-      {category !== 'movies' ? (
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-            {config.currentLabel}
+      {cards.map(card => (
+        <article
+          key={card.key}
+          className="apple-card rounded-[20px] border-[var(--apple-separator)] p-4 sm:p-5"
+        >
+          <p className="apple-body-tracking text-[11px] uppercase tracking-[0.2em] text-[var(--apple-secondary-label)]">
+            {card.label}
           </p>
-          <p className="mt-2 text-3xl font-bold text-[var(--hb-headline)]">{counts.current}</p>
-          <p className="text-xs text-[var(--hb-muted)]">Σε εξέλιξη</p>
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-            {config.droppedLabel}
+          <p
+            className={`apple-title-tracking mt-2 text-3xl font-semibold ${
+              card.accent ? 'text-[var(--apple-system-blue)]' : 'text-[var(--apple-label)]'
+            }`}
+          >
+            {card.value}
           </p>
-          <p className="mt-2 text-3xl font-bold text-[var(--hb-headline)]">{counts.dropped}</p>
-          <p className="text-xs text-[var(--hb-muted)]">Παρατημένα</p>
-        </div>
-      )}
-
-      {category === 'books' && (
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-            {config.plannedLabel}
-          </p>
-          <p className="mt-2 text-3xl font-bold text-[var(--hb-headline)]">{counts.planned}</p>
-          <p className="text-xs text-[var(--hb-muted)]">Προς ανάγνωση</p>
-        </div>
-      )}
-
-      <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-          {config.completedLabel}
-        </p>
-        <p className="mt-2 text-3xl font-bold text-[var(--hb-headline)]">{counts.completed}</p>
-        <p className="text-xs text-[var(--hb-muted)]">Ολοκληρωμένα</p>
-      </div>
-
-      {category !== 'movies' && (
-        <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)]">
-            {config.droppedLabel}
-          </p>
-          <p className="mt-2 text-3xl font-bold text-[var(--hb-headline)]">{counts.dropped}</p>
-          <p className="text-xs text-[var(--hb-muted)]">Παρατημένα</p>
-        </div>
-      )}
+          <p className="mt-1 text-xs text-[var(--apple-secondary-label)]">{card.caption}</p>
+        </article>
+      ))}
     </div>
   );
 }

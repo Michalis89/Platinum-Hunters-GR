@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
-import { Inbox, Ticket } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
@@ -165,7 +163,11 @@ export default function SupportTicketsList() {
     if (filteredTickets.length === 0) {
       return (
         <EmptyState
-          icon={<Inbox className="h-10 w-10 text-[var(--hb-primary)]" />}
+          icon={
+            <span className="apple-pill flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-[var(--apple-system-blue)]">
+              0
+            </span>
+          }
           title={
             view === 'archive'
               ? 'Δεν υπάρχουν αρχειοθετημένα tickets'
@@ -201,7 +203,9 @@ export default function SupportTicketsList() {
             }
             updatedAt={ticket.updated_at}
             updatedLabel="Τελευταία ενημέρωση:"
-            titleIcon={<Ticket className="h-5 w-5 text-[var(--hb-primary)]" />}
+            titleIcon={
+              <span className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]" aria-hidden />
+            }
             actions={
               <>
                 <Button href={`/pages/support/tickets/${ticket.id}`} variant="secondary">
@@ -266,9 +270,13 @@ export default function SupportTicketsList() {
         <PageHero
           eyebrow="Υποστήριξη"
           title={
-            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">Τα tickets μου</span>
+            <span className="apple-title-tracking text-3xl font-semibold text-[var(--apple-label)] md:text-5xl">
+              Τα tickets μου
+            </span>
           }
           subtitle="Δες όλα τα αιτήματα υποστήριξης και την εξέλιξή τους."
+          sectionClassName="apple-hero pt-4"
+          subtitleClassName="apple-body-tracking text-[var(--apple-secondary-label)]"
         />
         <PageContainer size="md" className="pb-20">
           {alert && (
@@ -281,17 +289,17 @@ export default function SupportTicketsList() {
                 actionLabel={alert.onConfirm ? 'Διαγραφή' : undefined}
                 onAction={alert.onConfirm}
                 secondaryActionLabel={alert.onCancel ? 'Άκυρο' : undefined}
-              onSecondaryAction={() => {
-                alert.onCancel?.();
-                setAlert(null);
-              }}
-              onDismiss={() => {
-                setAlert(null);
-              }}
-            />
-          </div>
-        )}
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                onSecondaryAction={() => {
+                  alert.onCancel?.();
+                  setAlert(null);
+                }}
+                onDismiss={() => {
+                  setAlert(null);
+                }}
+              />
+            </div>
+          )}
+          <div className="apple-material-surface mb-6 grid gap-4 p-4 md:grid-cols-[1fr_auto] md:items-end">
             <SegmentedControl
               options={[
                 { id: 'active', label: 'Ενεργά' },
@@ -300,6 +308,7 @@ export default function SupportTicketsList() {
               ]}
               value={view}
               onChange={value => setView(value as typeof view)}
+              className="rounded-[var(--apple-radius-card)] border-[var(--apple-separator-soft)] bg-[var(--apple-material)]"
             />
             <div className="md:w-64">
               <Select
@@ -319,12 +328,9 @@ export default function SupportTicketsList() {
           </div>
           {content}
           <div className="mt-8 flex justify-center">
-            <Link
-              href="/pages/support"
-              className="text-sm font-semibold text-[var(--hb-primary)] hover:text-[var(--hb-accent)]"
-            >
+            <Button href="/pages/support" variant="ghost" className="apple-body-tracking rounded-full px-4">
               Δημιούργησε νέο αίτημα
-            </Link>
+            </Button>
           </div>
         </PageContainer>
       </div>

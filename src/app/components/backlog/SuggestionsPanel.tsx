@@ -33,16 +33,16 @@ export default function SuggestionsPanel({
   };
 
   return (
-    <div className="mt-5 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
+    <section className="apple-card mt-6 rounded-[20px] border-[var(--apple-separator)] p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-[var(--hb-headline)]">
+        <p className="apple-body-tracking text-sm font-medium text-[var(--apple-label)]">
           Προτάσεις από την κοινότητα
         </p>
         <Button
           type="button"
-          variant={'secondary'}
+          variant="ghost"
           onClick={onClose}
-          className="w-full rounded-full sm:w-auto"
+          className="h-9 rounded-[12px] px-3 text-[var(--apple-secondary-label)]"
         >
           Κλείσιμο
         </Button>
@@ -57,7 +57,7 @@ export default function SuggestionsPanel({
           />
         ))}
         {isLoading && (
-          <div className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-4 text-center text-xs text-[var(--hb-muted)] md:col-span-2">
+          <div className="apple-card md:col-span-2 rounded-[16px] border-[var(--apple-separator)] px-4 py-5 text-center text-xs text-[var(--apple-secondary-label)]">
             Φόρτωση προτάσεων...
           </div>
         )}
@@ -65,6 +65,6 @@ export default function SuggestionsPanel({
           <EmptyState title="Δεν υπάρχουν προτάσεις ακόμα." size="sm" className="md:col-span-2" />
         )}
       </div>
-    </div>
+    </section>
   );
 }

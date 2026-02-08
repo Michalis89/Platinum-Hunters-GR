@@ -29,12 +29,16 @@ export function ThemeToggleButton({
       size={iconOnly ? 'icon' : 'default'}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={cn(
-        'h-9 rounded-full text-[var(--hb-muted)] hover:text-[var(--hb-primary-strong)]',
+        'h-9 rounded-[var(--apple-radius-control)] border border-transparent text-[13px] font-medium tracking-[-0.01em] text-[var(--apple-secondary-label)] transition-[background-color,color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] hover:text-[var(--apple-label)] active:scale-[0.98]',
         className,
       )}
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-      {!iconOnly ? <span className={cn('text-sm', labelClassName)}>{isDark ? 'Light Mode' : 'Dark Mode'}</span> : null}
+      {!iconOnly ? (
+        <span className={cn('text-[13px] font-medium tracking-[-0.01em]', labelClassName)}>
+          {isDark ? 'Light Mode' : 'Dark Mode'}
+        </span>
+      ) : null}
     </Button>
   );
 }

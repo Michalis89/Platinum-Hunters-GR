@@ -124,46 +124,43 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
   const secondaryStats = stats.slice(4);
 
   return (
-    <section className="relative px-4 py-16 md:px-6 md:py-20">
-      {/* Subtle gradient background like AboutStats */}
-      <div className="via-[var(--hb-primary-strong)]/[0.03] absolute inset-0 bg-gradient-to-b from-[var(--hb-bg)] to-[var(--hb-bg)]" />
-
-      <div className="relative mx-auto max-w-5xl">
-        <div className="mb-10 text-center">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+    <section className="px-4 py-12 md:px-6 md:py-14">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8 text-center md:mb-10">
+          <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
             {titles.eyebrow}
           </p>
-          <h2 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
+          <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
             {titles.title}
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {primaryStats.map(stat => (
             <div
               key={stat.label}
-              className="hover:border-[var(--hb-primary-strong)]/40 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[var(--hb-shadow-md)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]"
+              className="group rounded-[18px] border border-[var(--apple-separator)] bg-[var(--apple-surface)] p-4 text-center"
             >
               {/* Icon */}
-              <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)] text-[var(--apple-system-blue)]">
                 {stat.icon}
               </div>
 
-              {/* Value with gradient */}
-              <p className="mb-1 bg-gradient-to-r from-[var(--hb-primary-strong)] to-[var(--hb-accent)] bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
+              {/* Value */}
+              <p className="mb-1 text-2xl font-semibold text-[var(--apple-label)] md:text-[28px]">
                 {stat.value}
               </p>
 
               {/* Label */}
-              <p className="text-sm font-medium text-[var(--hb-headline)]">{stat.label}</p>
+              <p className="text-sm font-medium text-[var(--apple-label)]">{stat.label}</p>
 
               {/* Note */}
-              {stat.note && <p className="mt-1 text-xs text-[var(--hb-muted)]">{stat.note}</p>}
+              {stat.note && <p className="mt-1 text-xs text-[var(--apple-secondary-label)]">{stat.note}</p>}
             </div>
           ))}
         </div>
         {secondaryStats.length > 0 && (
-          <div className="mx-auto mt-6 w-full max-w-4xl">
+          <div className="mx-auto mt-4 w-full max-w-4xl">
             <div className="grid grid-cols-2 justify-items-center gap-4 md:grid-cols-3">
               {secondaryStats.map(stat => {
                 const showTip = stat.label === 'Συνολικές ώρες' && Boolean(readingTips[category]);
@@ -171,20 +168,20 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
                 return (
                   <div
                     key={stat.label}
-                    className="hover:border-[var(--hb-primary-strong)]/40 group w-full rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 text-center shadow-[var(--hb-shadow-md)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]"
+                    className="group w-full rounded-[18px] border border-[var(--apple-separator)] bg-[var(--apple-surface)] p-4 text-center"
                   >
-                    <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
+                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)] text-[var(--apple-system-blue)]">
                       {stat.icon}
                     </div>
-                    <p className="mb-1 bg-gradient-to-r from-[var(--hb-primary-strong)] to-[var(--hb-accent)] bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
+                    <p className="mb-1 text-2xl font-semibold text-[var(--apple-label)] md:text-[28px]">
                       {stat.value}
                     </p>
-                    <p className="flex items-center justify-center gap-2 text-sm font-medium text-[var(--hb-headline)]">
+                    <p className="flex items-center justify-center gap-2 text-sm font-medium text-[var(--apple-label)]">
                       {stat.label}
                       {tipText && <InfoHint tip={tipText} />}
                     </p>
                     {stat.note && (
-                      <p className="mt-1 text-xs text-[var(--hb-muted)]">{stat.note}</p>
+                      <p className="mt-1 text-xs text-[var(--apple-secondary-label)]">{stat.note}</p>
                     )}
                   </div>
                 );
@@ -198,3 +195,4 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
 }
 
 export const ProfileStats = memo(ProfileStatsComponent);
+

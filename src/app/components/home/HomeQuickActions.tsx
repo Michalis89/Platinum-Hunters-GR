@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { Plus, ArrowRight, Star, Sparkles } from 'lucide-react';
+﻿import Link from 'next/link';
+import { ArrowRight, Plus, Sparkles, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { selectUser } from '@/store/slices/authSlice';
@@ -9,27 +9,25 @@ type QuickAction = {
   description: string;
   href: string;
   icon: ReactNode;
-  primary?: boolean;
   requires?: string[];
 };
 
 const actions: QuickAction[] = [
   {
     title: 'Πρόσθεσε στο backlog',
-    description: 'Οργάνωσε έναν νέο τίτλο στη λίστα σου',
+    description: 'Οργάνωσε έναν νέο τίτλο στη λίστα σου.',
     href: '/pages/backlog',
     icon: <Plus className="h-5 w-5" />,
-    primary: true,
   },
   {
-    title: 'Κριτικές της κοινότητας',
-    description: 'Δες τι προτείνει η κοινότητα',
+    title: 'Κριτικές κοινότητας',
+    description: 'Δες τι προτείνει η κοινότητα.',
     href: '/pages/reviews',
     icon: <Star className="h-5 w-5" />,
   },
   {
     title: 'Ανακάλυψε κάτι νέο',
-    description: 'Βρες νέους τίτλους και ιδέες για το επόμενο hobby σου',
+    description: 'Βρες νέες ιδέες για το επόμενο hobby σου.',
     href: '/pages/news',
     icon: <Sparkles className="h-5 w-5" />,
   },
@@ -46,37 +44,23 @@ export function HomeQuickActions() {
 
   return (
     <section className="px-4 py-8 md:px-6">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[var(--hb-headline)]">Σήμερα θέλεις να…</h2>
-        </div>
+      <div className="mx-auto max-w-7xl space-y-4">
+        <h2 className="apple-label text-xl font-semibold tracking-[-0.02em]">Γρήγορες κινήσεις</h2>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           {visibleActions.map(action => (
             <Link
               key={action.title}
               href={action.href}
-              className={`group flex items-start gap-4 rounded-2xl border bg-[var(--hb-panel)] p-5 transition ${
-                action.primary
-                  ? 'border-[var(--hb-primary-strong)]/30 bg-[var(--hb-primary-strong)]/10 hover:border-[var(--hb-primary-strong)]/60'
-                  : 'hover:border-[var(--hb-primary-strong)]/40 border-[var(--hb-border)]'
-              }`}
+              className="apple-card group flex items-start gap-4 p-5 transition duration-200 hover:brightness-[1.02]"
             >
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition ${
-                  action.primary
-                    ? 'bg-[var(--hb-primary-strong)]/20 text-[var(--hb-primary-strong)]'
-                    : 'bg-white/5 text-[var(--hb-muted)] group-hover:text-[var(--hb-primary-strong)]'
-                }`}
-              >
-                {action.icon}
-              </div>
-              <div className="flex-1">
+              <div className="apple-secondary-label mt-0.5">{action.icon}</div>
+              <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-[var(--hb-headline)]">{action.title}</h3>
-                  <ArrowRight className="h-3 w-3 text-[var(--hb-muted)] opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
+                  <h3 className="apple-label text-sm font-semibold">{action.title}</h3>
+                  <ArrowRight className="apple-secondary-label h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
                 </div>
-                <p className="mt-0.5 text-sm text-[var(--hb-muted)]">{action.description}</p>
+                <p className="apple-secondary-label apple-body-tracking text-sm leading-relaxed">{action.description}</p>
               </div>
             </Link>
           ))}

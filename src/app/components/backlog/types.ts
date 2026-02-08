@@ -119,7 +119,7 @@ export const CATEGORY_CONFIG: Record<MediaCategory, CategoryConfig> = {
   },
   games: {
     title: 'Games Library',
-    subtitle: 'Track your gaming backlog and platinum progress.',
+    subtitle: 'Track your gaming backlog.',
     searchPlaceholder: 'Αναζήτηση παιχνιδιών...',
     currentLabel: 'Playing',
     plannedLabel: 'Backlog',

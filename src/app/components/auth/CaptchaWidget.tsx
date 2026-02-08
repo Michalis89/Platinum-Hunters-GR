@@ -193,25 +193,31 @@ export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }
   };
 
   return (
-    <div className="space-y-2 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 shadow-[var(--hb-shadow-sm)]">
+    <div className="apple-auth-section space-y-2 px-4 py-4">
       <div ref={containerRef} />
-      {helperText && <p className="text-xs text-[var(--hb-muted)]">{helperText}</p>}
+      {helperText && (
+        <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">{helperText}</p>
+      )}
       {error && (
         <div className="space-y-2">
-          <p className="text-xs text-rose-300">{error}</p>
-          <p className="text-xs text-[var(--hb-muted)]">
+          <p className="text-xs text-[#ff3b30]">{error}</p>
+          <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
             If this keeps happening, retry CAPTCHA and then refresh the page.
           </p>
           <button
             type="button"
             onClick={retryCaptcha}
-            className="rounded-lg border border-[var(--hb-border)] px-2 py-1 text-xs text-[var(--hb-headline)] transition hover:border-[var(--hb-primary-strong)]/60"
+            className="rounded-[var(--apple-radius-control)] border border-[var(--apple-separator)] px-2.5 py-1 text-xs text-[var(--apple-label)] transition hover:border-[var(--apple-system-blue)]/55"
           >
             Retry CAPTCHA
           </button>
         </div>
       )}
-      {!error && !ready && <p className="text-xs text-[var(--hb-muted)]">Loading CAPTCHA...</p>}
+      {!error && !ready && (
+        <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
+          Loading CAPTCHA...
+        </p>
+      )}
     </div>
   );
 }

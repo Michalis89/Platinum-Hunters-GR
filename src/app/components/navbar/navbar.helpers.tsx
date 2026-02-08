@@ -13,30 +13,32 @@ export function NavItemContent({
   className?: string;
 }) {
   return (
-    <span className={cn('inline-flex items-center gap-2', className)}>
-      <Icon className={cn('size-4', iconClassName)} />
-      <span>{label}</span>
+    <span className={cn('inline-flex items-center gap-2 leading-none', className)}>
+      <Icon className={cn('size-4 shrink-0', iconClassName)} />
+      <span className="leading-none">{label}</span>
     </span>
   );
 }
 
 export const desktopLinkClass = (isActive: boolean) =>
   cn(
-    'h-8 rounded-md border border-transparent px-2.5 text-sm',
-    'focus-visible:ring-2 focus-visible:ring-[var(--hb-ring)] focus-visible:ring-offset-0',
+    'h-9 rounded-[var(--apple-radius-control)] border border-transparent px-3 text-[13px] font-medium tracking-[-0.01em]',
+    'transition-[background-color,color,box-shadow,transform] duration-200 [transition-timing-function:var(--hb-ease)] active:scale-[0.98]',
+    'focus-visible:ring-2 focus-visible:ring-[var(--apple-system-blue)]/40 focus-visible:ring-offset-0',
     isActive
-      ? 'bg-white/5 text-[var(--hb-primary-strong)]'
-      : 'text-[var(--hb-muted)] hover:bg-white/5 hover:text-[var(--hb-primary-strong)]',
+      ? 'bg-[var(--apple-nav-pill-active)] text-[var(--apple-label)] shadow-[inset_0_0_0_var(--apple-hairline)_var(--apple-nav-pill-border)]'
+      : 'text-[var(--apple-secondary-label)] hover:bg-[var(--apple-nav-pill-hover)] hover:text-[var(--apple-label)]',
   );
 
 export const mobileChipClass = (isActive: boolean, fullWidth = false) =>
   cn(
-    'h-9 shrink-0 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 text-sm',
+    'h-10 shrink-0 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em]',
     fullWidth && 'w-full justify-start',
-    'focus-visible:ring-2 focus-visible:ring-[var(--hb-ring)] focus-visible:ring-offset-0',
+    'transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] active:scale-[0.98]',
+    'focus-visible:ring-2 focus-visible:ring-[var(--apple-system-blue)]/40 focus-visible:ring-offset-0',
     isActive
-      ? 'text-[var(--hb-primary-strong)] shadow-[var(--hb-shadow-md)]'
-      : 'text-[var(--hb-text)] hover:text-[var(--hb-primary-strong)]',
+      ? 'bg-[var(--apple-nav-pill-active)] text-[var(--apple-label)]'
+      : 'text-[var(--apple-label)] hover:bg-[var(--apple-nav-pill-hover)]',
   );
 
 export const getUserInitials = (username: string | null | undefined) => {

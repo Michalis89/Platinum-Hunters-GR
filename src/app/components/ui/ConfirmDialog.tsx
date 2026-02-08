@@ -55,7 +55,7 @@ export default function ConfirmDialog({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+            className="hb-dialog-overlay fixed inset-0 z-[60] flex items-center justify-center px-4"
             onClick={e => {
               if (e.target === e.currentTarget) onCancel();
             }}
@@ -65,7 +65,7 @@ export default function ConfirmDialog({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]"
+              className="hb-dialog-surface relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--hb-dialog-border)]"
             >
               {/* Close button */}
               <div className="flex justify-end p-4 pb-0">

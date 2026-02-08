@@ -15,9 +15,19 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'hobbistas-hub-theme';
 const THEME_COOKIE_NAME = 'theme';
+const THEME_TRANSITION_CLASS = 'theme-animating';
+const THEME_TRANSITION_MS = 320;
 
 function setThemeCookie(theme: Theme) {
   document.cookie = `${THEME_COOKIE_NAME}=${theme}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+}
+
+function applyThemeTransitionClass() {
+  const htmlEl = document.documentElement;
+  htmlEl.classList.add(THEME_TRANSITION_CLASS);
+  window.setTimeout(() => {
+    htmlEl.classList.remove(THEME_TRANSITION_CLASS);
+  }, THEME_TRANSITION_MS);
 }
 
 interface ThemeProviderProps {
@@ -78,6 +88,7 @@ export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProvider
   }, []);
 
   const setTheme = useCallback((newTheme: Theme) => {
+    applyThemeTransitionClass();
     setThemeState(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
     try {

@@ -39,8 +39,8 @@ export function DesktopNav({
   onToggleTheme,
 }: DesktopNavProps) {
   return (
-    <div className="hidden flex-1 items-center justify-between gap-4 md:flex">
-      <Menubar className="ml-8 h-10 items-center gap-1 rounded-lg border-[var(--hb-border)] bg-[var(--hb-panel)] px-1 py-1 shadow-none">
+    <div className="hidden flex-1 items-center justify-end md:flex">
+      <Menubar className="pointer-events-auto absolute left-1/2 h-11 -translate-x-1/2 items-center gap-1 rounded-[20px] border-[var(--apple-nav-border)] bg-[var(--apple-nav-pill-bg)] px-1.5 py-1 text-[var(--apple-label)] shadow-none backdrop-blur-xl">
         <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} />
         {navItems.map(item => (
           <MenubarMenu key={item.href}>
@@ -53,7 +53,7 @@ export function DesktopNav({
         ))}
       </Menubar>
 
-      <div className="flex h-10 items-center rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] px-1.5">
+      <div className="flex h-11 items-center rounded-[20px] border border-[var(--apple-nav-border)] bg-[var(--apple-nav-pill-bg)] px-1.5 text-[var(--apple-label)] backdrop-blur-xl">
         {!authResolved ? (
           <NavbarAuthSkeleton />
         ) : isAuthenticated && user ? (
@@ -77,9 +77,9 @@ export function DesktopNav({
 function NavbarAuthSkeleton() {
   return (
     <div className="flex h-9 items-center gap-2 px-1">
-      <div className="h-7 w-7 animate-pulse rounded-full bg-white/10" />
-      <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
-      <div className="h-9 w-9 animate-pulse rounded-full bg-white/10" />
+      <div className="h-7 w-7 animate-pulse rounded-full bg-[var(--apple-nav-pill-hover)]" />
+      <div className="h-4 w-24 animate-pulse rounded bg-[var(--apple-nav-pill-hover)]" />
+      <div className="h-9 w-9 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
     </div>
   );
 }

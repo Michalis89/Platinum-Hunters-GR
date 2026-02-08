@@ -85,11 +85,9 @@ const PreferenceSection = ({
   className = '',
   children,
 }: PreferenceSectionProps) => (
-  <div
-    className={`space-y-4 rounded-xl border px-4 py-4 shadow-[var(--hb-shadow-sm)] ${className}`}
-  >
+  <div className={`apple-auth-section space-y-4 px-4 py-4 ${className}`}>
     <div className="flex items-center justify-between">
-      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--hb-headline)]">
+      <p className="apple-body-tracking flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
         <Icon className="h-4 w-4" />
         {title}
       </p>
@@ -97,7 +95,7 @@ const PreferenceSection = ({
         type="button"
         variant={'secondary'}
         onClick={onToggle}
-        className="flex items-center gap-1"
+        className="h-8 gap-1"
       >
         {isOpen ? (
           <>
@@ -156,9 +154,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     setOpenPreferences(prev => ({ ...prev, [key]: !prev[key] }));
   };
   const inputClasses =
-    'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
+    'bg-[var(--hb-input-bg)] text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]';
   const selectClasses =
-    'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-headline)] hover:border-[var(--hb-primary-strong)]/70 focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]';
+    'bg-[var(--hb-input-bg)] text-[var(--apple-label)]';
 
   const [formData, setFormData] = useState<
     Partial<RegisterData> & {
@@ -399,11 +397,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const progress = (currentStep / 3) * 100;
 
   return (
-    <Card className="flex h-[800px] flex-col overflow-hidden bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)] backdrop-blur">
-      <CardHeader className="flex-none border-[var(--hb-border)]">
-        <CardTitle className="flex items-center justify-between text-[var(--hb-headline)]">
+    <Card className="apple-auth-card flex h-[min(90vh,820px)] min-h-[700px] flex-col overflow-hidden">
+      <CardHeader className="flex-none border-[var(--apple-separator-soft)] bg-transparent px-6 pb-5 pt-6">
+        <CardTitle className="flex items-center justify-between text-[var(--apple-label)]">
           <span className="flex items-center gap-3">
-            <div className="text--[var(--hb-text)] flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--hb-card)] shadow-[var(--hb-shadow-md)] dark:bg-[var(--hb-card)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_15%,transparent)] text-[var(--apple-system-blue)]">
               <UserPlus className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
@@ -412,13 +410,15 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 {currentStep === 2 && 'Προσωπικά Στοιχεία'}
                 {currentStep === 3 && 'Τα Χόμπι σου'}
               </span>
-              <span className="text-xs text-[var(--hb-muted)]">Βήμα {currentStep} από 3</span>
+              <span className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
+                Βήμα {currentStep} από 3
+              </span>
             </span>
           </span>
         </CardTitle>
-        <div className="mt-4 h-2 w-full rounded-full bg-white/5">
+        <div className="apple-progress-track mt-4 h-2 w-full rounded-full">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)]"
+            className="apple-progress-fill h-full rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
@@ -426,7 +426,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-1 flex-col overflow-hidden px-5 pb-0 pt-6 sm:px-6">
+      <CardContent className="flex flex-1 flex-col overflow-hidden px-6 pb-0 pt-5">
         <div className="flex-1 overflow-y-auto pr-1">
           {alert && <AlertMessage type={alert.type} message={alert.message} />}
 
@@ -486,15 +486,16 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                       type="button"
                       variant={'ghost'}
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-9"
+                      className="absolute right-2.5 top-[33px] h-8 w-8 rounded-[10px]"
+                      ariaLabel={showPassword ? 'Απόκρυψη κωδικού' : 'Εμφάνιση κωδικού'}
                     >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   {passwordStrength && (
                     <div className="mt-2">
                       <div className="flex items-center gap-2 text-sm">
-                        <div className="h-2 flex-1 rounded-full bg-gray-700">
+                        <div className="apple-progress-track h-2 flex-1 rounded-full">
                           <div
                             className="h-full rounded-full transition-all"
                             style={{
@@ -508,7 +509,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         </span>
                       </div>
                       {passwordStrength.errors.length > 0 && (
-                        <ul className="mt-1 text-xs text-gray-400">
+                        <ul className="apple-body-tracking mt-1 text-xs text-[var(--apple-secondary-label)]">
                           {passwordStrength.errors.map((err, i) => (
                             <li key={i}>• {err}</li>
                           ))}
@@ -536,12 +537,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                       type="button"
                       variant={'ghost'}
                       onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                      className="absolute right-3 top-9"
+                      className="absolute right-2.5 top-[33px] h-8 w-8 rounded-[10px]"
+                      ariaLabel={showPasswordConfirm ? 'Απόκρυψη κωδικού' : 'Εμφάνιση κωδικού'}
                     >
                       {showPasswordConfirm ? (
-                        <EyeOff className="h-5 w-5" />
+                        <EyeOff className="h-4 w-4" />
                       ) : (
-                        <Eye className="h-5 w-5" />
+                        <Eye className="h-4 w-4" />
                       )}
                     </Button>
                   </div>
@@ -549,26 +551,26 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 </div>
 
                 <div>
-                  <label className="mt-2 flex items-start gap-2 text-sm text-[var(--hb-headline)]">
+                  <label className="apple-body-tracking mt-2 flex items-start gap-2 text-sm text-[var(--apple-label)]">
                     <input
                       type="checkbox"
                       name="agree_to_terms"
                       checked={formData.agree_to_terms}
                       onChange={handleChange}
-                      className="mt-1 rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-primary-strong)] focus:ring-2 focus:ring-[var(--hb-primary-strong)]"
+                      className="apple-auth-checkbox mt-1 h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                     />
                     <span>
                       Αποδέχομαι τους{' '}
                       <Link
                         href="/pages/terms"
-                        className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
+                        className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
                       >
                         όρους χρήσης
                       </Link>{' '}
                       και την{' '}
                       <Link
                         href="/pages/privacy"
-                        className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
+                        className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
                       >
                         πολιτική απορρήτου
                       </Link>
@@ -637,7 +639,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     rows={3}
                     className={`${inputClasses} min-h-[120px]`}
                   />
-                  <div className="mt-1 text-xs text-[var(--hb-muted)]">
+                  <div className="apple-body-tracking mt-1 text-xs text-[var(--apple-secondary-label)]">
                     {formData.bio?.length || 0} / 500
                   </div>
                   <FormErrorMessage message={errors.bio} />
@@ -654,7 +656,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 className="space-y-4"
               >
                 <div>
-                  <p className="mb-2 text-sm font-medium text-[var(--hb-headline)]">
+                  <p className="mb-2 text-sm font-medium text-[var(--apple-label)]">
                     Ποια χόμπι σε ενδιαφέρουν;
                   </p>
                   <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
@@ -690,10 +692,10 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                               }));
                             }
                           }}
-                          className={`flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm ${
+                          className={`apple-auth-chip flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium transition sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm ${
                             isSelected
-                              ? 'bg-[var(--hb-primary-strong)]/20 border-[var(--hb-primary-strong)] text-[var(--hb-headline)]'
-                              : 'hover:border-[var(--hb-primary-strong)]/50 border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:text-[var(--hb-headline)]'
+                              ? 'border-[var(--apple-system-blue)]/45 bg-[var(--apple-system-blue)]/14 text-[var(--apple-system-blue)]'
+                              : 'text-[var(--apple-secondary-label)] hover:border-[var(--apple-system-blue)]/45 hover:text-[var(--apple-label)]'
                           }`}
                         >
                           <IconComponent className="h-4 w-4" />
@@ -712,7 +714,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     sectionKey="gaming"
                     isOpen={openPreferences.gaming}
                     onToggle={() => togglePreference('gaming')}
-                    className="border-sky-500/30 bg-sky-500/5"
+                    className=""
                   >
                     <>
                       <div>
@@ -738,12 +740,14 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         />
                       </div>
                       <div className="text-sm">
-                        <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                        <p className="apple-body-tracking mb-2 text-xs text-[var(--apple-secondary-label)]">
+                          Αγαπημένα Genres:
+                        </p>
                         <div className="grid grid-cols-2 gap-2">
                           {GENRES.map(genre => (
                             <label
                               key={genre}
-                              className="flex items-center gap-2 text-[var(--hb-muted)]"
+                              className="apple-body-tracking flex items-center gap-2 text-[var(--apple-secondary-label)]"
                             >
                               <input
                                 type="checkbox"
@@ -762,7 +766,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                     }));
                                   }
                                 }}
-                                className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-sky-500 focus:ring-1 focus:ring-sky-500"
+                                className="apple-auth-checkbox h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                               />
                               {genre}
                             </label>
@@ -782,16 +786,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     sectionKey="anime"
                     isOpen={openPreferences.anime}
                     onToggle={() => togglePreference('anime')}
-                    className="border-pink-500/30 bg-pink-500/5"
+                    className=""
                   >
                     <>
                       <div className="text-sm">
-                        <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                        <p className="apple-body-tracking mb-2 text-xs text-[var(--apple-secondary-label)]">
+                          Αγαπημένα Genres:
+                        </p>
                         <div className="grid grid-cols-2 gap-2">
                           {ANIME_GENRES.map(genre => (
                             <label
                               key={genre}
-                              className="flex items-center gap-2 text-[var(--hb-muted)]"
+                              className="apple-body-tracking flex items-center gap-2 text-[var(--apple-secondary-label)]"
                             >
                               <input
                                 type="checkbox"
@@ -810,7 +816,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                     }));
                                   }
                                 }}
-                                className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-pink-500 focus:ring-1 focus:ring-pink-500"
+                                className="apple-auth-checkbox h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                               />
                               {genre}
                             </label>
@@ -830,16 +836,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     sectionKey="movies"
                     isOpen={openPreferences.movies}
                     onToggle={() => togglePreference('movies')}
-                    className="border-amber-500/30 bg-amber-500/5"
+                    className=""
                   >
                     <>
                       <div className="text-sm">
-                        <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                        <p className="apple-body-tracking mb-2 text-xs text-[var(--apple-secondary-label)]">
+                          Αγαπημένα Genres:
+                        </p>
                         <div className="grid grid-cols-2 gap-2">
                           {MOVIE_GENRES.map(genre => (
                             <label
                               key={genre}
-                              className="flex items-center gap-2 text-[var(--hb-muted)]"
+                              className="apple-body-tracking flex items-center gap-2 text-[var(--apple-secondary-label)]"
                             >
                               <input
                                 type="checkbox"
@@ -858,7 +866,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                     }));
                                   }
                                 }}
-                                className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-amber-500 focus:ring-1 focus:ring-amber-500"
+                                className="apple-auth-checkbox h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                               />
                               {genre}
                             </label>
@@ -877,16 +885,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     sectionKey="books"
                     isOpen={openPreferences.books}
                     onToggle={() => togglePreference('books')}
-                    className="border-emerald-500/30 bg-emerald-500/5"
+                    className=""
                   >
                     <>
                       <div className="text-sm">
-                        <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένα Genres:</p>
+                        <p className="apple-body-tracking mb-2 text-xs text-[var(--apple-secondary-label)]">
+                          Αγαπημένα Genres:
+                        </p>
                         <div className="grid grid-cols-2 gap-2">
                           {BOOK_GENRES.map(genre => (
                             <label
                               key={genre}
-                              className="flex items-center gap-2 text-[var(--hb-muted)]"
+                              className="apple-body-tracking flex items-center gap-2 text-[var(--apple-secondary-label)]"
                             >
                               <input
                                 type="checkbox"
@@ -905,7 +915,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                     }));
                                   }
                                 }}
-                                className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                                className="apple-auth-checkbox h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                               />
                               {genre}
                             </label>
@@ -924,16 +934,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     sectionKey="coding"
                     isOpen={openPreferences.coding}
                     onToggle={() => togglePreference('coding')}
-                    className="border-cyan-500/30 bg-cyan-500/5"
+                    className=""
                   >
                     <>
                       <div className="text-sm">
-                        <p className="mb-2 text-xs text-[var(--hb-muted)]">Αγαπημένες Γλώσσες:</p>
+                        <p className="apple-body-tracking mb-2 text-xs text-[var(--apple-secondary-label)]">
+                          Αγαπημένες Γλώσσες:
+                        </p>
                         <div className="grid grid-cols-2 gap-2">
                           {CODING_LANGUAGES.map(lang => (
                             <label
                               key={lang}
-                              className="flex items-center gap-2 text-[var(--hb-muted)]"
+                              className="apple-body-tracking flex items-center gap-2 text-[var(--apple-secondary-label)]"
                             >
                               <input
                                 type="checkbox"
@@ -952,7 +964,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                     }));
                                   }
                                 }}
-                                className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                className="apple-auth-checkbox h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                               />
                               {lang}
                             </label>
@@ -971,16 +983,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     sectionKey="pet"
                     isOpen={openPreferences.pet}
                     onToggle={() => togglePreference('pet')}
-                    className="border-orange-500/30 bg-orange-500/5"
+                    className=""
                   >
                     <>
                       <div className="text-sm">
-                        <p className="mb-2 text-xs text-[var(--hb-muted)]">Τι κατοικίδια έχεις;</p>
+                        <p className="apple-body-tracking mb-2 text-xs text-[var(--apple-secondary-label)]">
+                          Τι κατοικίδια έχεις;
+                        </p>
                         <div className="grid grid-cols-2 gap-2">
                           {PET_TYPES.map(pet => (
                             <label
                               key={pet}
-                              className="flex items-center gap-2 text-[var(--hb-muted)]"
+                              className="apple-body-tracking flex items-center gap-2 text-[var(--apple-secondary-label)]"
                             >
                               <input
                                 type="checkbox"
@@ -996,7 +1010,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                     }));
                                   }
                                 }}
-                                className="rounded border-[var(--hb-border)] bg-[var(--hb-card)] text-orange-500 focus:ring-1 focus:ring-orange-500"
+                                className="apple-auth-checkbox h-4 w-4 rounded-[7px] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]"
                               />
                               {pet}
                             </label>
@@ -1015,7 +1029,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     sectionKey="vape"
                     isOpen={openPreferences.vape}
                     onToggle={() => togglePreference('vape')}
-                    className="border-violet-500/30 bg-violet-500/5"
+                    className=""
                   >
                     <>
                       <div>
@@ -1044,7 +1058,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   </PreferenceSection>
                 )}
 
-                <p className="text-center text-xs text-[var(--hb-muted)]">
+                <p className="apple-body-tracking text-center text-xs text-[var(--apple-secondary-label)]">
                   Μπορείς να αλλάξεις αυτές τις επιλογές αργότερα από τις ρυθμίσεις.
                 </p>
               </motion.div>
@@ -1052,12 +1066,12 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           </AnimatePresence>
         </div>
 
-        <div className="flex-none space-y-4 border-t border-[var(--hb-border)] bg-[var(--hb-panel)] py-4">
+        <div className="flex-none space-y-4 border-t border-[var(--apple-separator-soft)] bg-transparent py-4">
           {/* Εμφάνιση CAPTCHA μόνο στο τελευταίο βήμα */}
           {currentStep === 3 && (
             <div className="flex min-h-[80px] w-full justify-center">
               {isCaptchaDisabled ? (
-                <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-4 text-xs text-[var(--hb-muted)]">
+                <div className="apple-auth-section px-3 py-4 text-xs text-[var(--apple-secondary-label)]">
                   CAPTCHA is disabled in development mode.
                 </div>
               ) : (
@@ -1076,7 +1090,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
           )}
 
           <div className="flex flex-row gap-3">
-            {' '}
             {currentStep > 1 && (
               <Button type="button" variant="secondary" onClick={handleBack} disabled={loading}>
                 <ArrowLeft className="h-5 w-5" />
@@ -1088,7 +1101,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               variant="primary"
               onClick={handleNext}
               disabled={loading || (!isCaptchaDisabled && currentStep === 3 && !captchaToken)}
-              className="flex-[2] items-center justify-center gap-2"
+              className="flex-[2] h-11 items-center justify-center gap-2"
             >
               {loading ? (
                 'Εγγραφή...'
@@ -1106,7 +1119,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             </Button>
           </div>
 
-          <div className="text-center text-sm text-[var(--hb-muted)]">
+          <div className="apple-body-tracking border-t border-[var(--apple-separator-soft)] pt-4 text-center text-sm text-[var(--apple-secondary-label)]">
             Έχεις ήδη λογαριασμό;{' '}
             <Link
               href={
@@ -1114,7 +1127,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                   ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}`
                   : '/pages/auth/login'
               }
-              className="font-semibold text-[var(--hb-primary)] transition hover:text-[var(--hb-accent)]"
+              className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
             >
               Σύνδεση
             </Link>

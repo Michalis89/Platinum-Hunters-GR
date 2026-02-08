@@ -13,8 +13,8 @@ function InfoRow({ label, children }: Readonly<{ label: string; children: React.
   if (!children) return null;
   return (
     <div className="flex flex-col gap-1">
-      <p className="text-xs text-[var(--hb-muted)]">{label}</p>
-      <p className="text-sm text-[var(--hb-text)]">{children}</p>
+      <p className="apple-secondary-label text-xs">{label}</p>
+      <p className="text-sm text-[var(--apple-label)]">{children}</p>
     </div>
   );
 }
@@ -23,12 +23,12 @@ function ChipList({ items, label }: Readonly<{ items: string[]; label: string }>
   if (!items?.length) return null;
   return (
     <div>
-      <p className="mb-2 text-xs text-[var(--hb-muted)]">{label}</p>
+      <p className="mb-2 apple-secondary-label text-xs">{label}</p>
       <div className="flex flex-wrap gap-2">
         {items.map(item => (
           <span
             key={item}
-            className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1.5 text-xs font-medium text-[var(--hb-text)]"
+            className="rounded-full border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-3 py-1.5 text-xs font-medium text-[var(--apple-label)]"
           >
             {item}
           </span>
@@ -74,7 +74,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -115,7 +115,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {tvNotes.services?.length && (
@@ -152,7 +152,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {moviesNotes.services?.length && (
@@ -194,7 +194,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {animeNotes.platforms?.length && (
@@ -234,7 +234,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {booksNotes.genres?.length && (
@@ -266,7 +266,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {mangaNotes.genres?.length && (
@@ -298,7 +298,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {codingNotes.languages?.length && (
@@ -330,7 +330,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {petNotes.type && <InfoRow label="Είδος">{petNotes.type}</InfoRow>}
@@ -360,7 +360,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-primary-strong)]">
+        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
           {sectionTitle[category]}
         </p>
         {vapeNotes.device && <InfoRow label="Συσκευή">{vapeNotes.device}</InfoRow>}
@@ -374,3 +374,4 @@ export function ProfileCategoryInfo({
 
   return null;
 }
+

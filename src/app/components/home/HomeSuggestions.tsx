@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -13,7 +13,6 @@ import {
   Gamepad2,
   ChevronRight,
   Star,
-  Lightbulb,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { apiClient } from '@/lib/api/client';
@@ -93,9 +92,6 @@ type HomeSuggestionsProps = {
 };
 
 export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const [scrollY, setScrollY] = useState(0);
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
   const visibleConfigs = useMemo(
@@ -108,40 +104,6 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
       setActiveTab(visibleConfigs[0].key);
     }
   }, [visibleConfigs, activeTab]);
-
-  const updateScrollProgress = useCallback(() => {
-    if (!containerRef.current) return;
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    const inViewRatio = Math.max(
-      0,
-      Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height)),
-    );
-    setScrollY(inViewRatio);
-  }, []);
-
-  const handleScroll = useCallback(() => {
-    if (animationFrameRef.current !== null) return;
-
-    animationFrameRef.current = window.requestAnimationFrame(() => {
-      updateScrollProgress();
-      animationFrameRef.current = null;
-    });
-  }, [updateScrollProgress]);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    updateScrollProgress();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (animationFrameRef.current !== null) {
-        window.cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-    };
-  }, [handleScroll, updateScrollProgress]);
 
   const activeConfig = visibleConfigs.find(c => c.key === activeTab);
 
@@ -160,49 +122,29 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
   }
 
   return (
-    <section ref={containerRef} className="relative overflow-hidden px-4 py-12 md:px-6">
-      {/* Parallax Background - Brand gradient */}
-      <div
-        className="from-[var(--hb-primary-strong)]/10 to-[var(--hb-accent)]/5 absolute inset-0 bg-gradient-to-br via-transparent transition-all duration-500"
-        style={{
-          transform: `translateY(${scrollY * -20}px)`,
-        }}
-      />
-      {/* Subtle glow effect */}
-      <div
-        className="absolute inset-0 opacity-40"
-        style={{
-          background: `radial-gradient(circle at ${30 + scrollY * 40}% ${40 - scrollY * 10}%, rgba(229, 9, 20, 0.15) 0%, transparent 50%)`,
-        }}
-      />
-
-      <div className="relative mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-[var(--hb-primary-strong)]/20 flex h-10 w-10 items-center justify-center rounded-xl text-[var(--hb-primary-strong)]">
-              <Lightbulb className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
-                Προτάσεις από την κοινότητα
-              </h2>
-              <p className="text-s text-[var(--hb-muted)]">
-                Βασισμένες στις βαθμολογίες της κοινότητας
-              </p>
-            </div>
+    <section className="px-4 py-10 md:px-6">
+      <div className="mx-auto max-w-7xl space-y-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-1.5">
+            <h2 className="apple-label apple-title-tracking text-2xl font-semibold">Προτάσεις κοινότητας</h2>
+            <p className="apple-secondary-label apple-body-tracking text-sm leading-relaxed">
+              Επιλεγμένες προτάσεις με βάση τις βαθμολογίες της κοινότητας.
+            </p>
           </div>
 
-          {/* Category Tabs */}
           <div className="flex flex-wrap gap-2">
             {visibleConfigs.map(config => {
               const isActiveTab = activeTab === config.key;
               return (
                 <Button
-                  variant={isActiveTab ? 'primary' : 'secondary'}
+                  variant="secondary"
                   key={config.key}
                   onClick={() => setActiveTab(config.key)}
-                  className={`flex items-center gap-1.5`}
+                  className={`h-9 rounded-full px-4 text-sm transition ${
+                    isActiveTab
+                      ? 'apple-pill apple-label'
+                      : 'border-[var(--apple-separator)] bg-transparent text-[var(--apple-secondary-label)]'
+                  }`}
                 >
                   {config.icon}
                   <span>{config.label}</span>
@@ -212,35 +154,30 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
           </div>
         </div>
 
-        {/* Suggestions Grid with Parallax Cards */}
         {suggestions.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {suggestions.map((item, index) => (
+            {suggestions.map(item => (
               <SuggestionCard
                 key={item.id}
                 item={item}
-                index={index}
-                scrollY={scrollY}
                 addPath={activeConfig?.addPath ?? '/pages/backlog'}
               />
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] py-12 text-center">
-            <div className="bg-[var(--hb-primary-strong)]/20 mb-3 flex h-12 w-12 items-center justify-center rounded-full text-[var(--hb-primary-strong)]">
-              {activeConfig?.icon ?? <Sparkles className="h-6 w-6" />}
+          <div className="apple-card p-8 text-center">
+            <div className="apple-pill apple-secondary-label mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full">
+              {activeConfig?.icon ?? <Sparkles className="h-5 w-5" />}
             </div>
-            <p className="mb-2 font-medium text-[var(--hb-headline)]">
-              Δεν υπάρχουν προτάσεις ακόμα
-            </p>
-            <p className="mb-4 max-w-xs text-sm text-[var(--hb-muted)]">
-              Όταν η κοινότητα προσθέσει περισσότερες βαθμολογίες στα{' '}
-              {activeConfig?.label.toLowerCase()}, θα ξεκλειδώσουν οι προτάσεις της κοινότητας.
+            <p className="apple-label text-base font-medium">Δεν υπάρχουν προτάσεις ακόμα</p>
+            <p className="apple-secondary-label mx-auto mt-2 max-w-md text-sm leading-relaxed">
+              Όταν προστεθούν περισσότερες βαθμολογίες στην κατηγορία {activeConfig?.label.toLowerCase()},
+              θα εμφανιστούν εδώ.
             </p>
 
             <Link
               href={activeConfig?.addPath ?? '/pages/backlog'}
-              className="inline-flex items-center gap-1 rounded-full bg-[var(--hb-primary-strong)] px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
+              className="apple-label mt-5 inline-flex items-center gap-1 text-sm font-medium transition hover:text-[var(--apple-system-blue)]"
             >
               Εξερεύνηση
               <ChevronRight className="h-4 w-4" />
@@ -254,49 +191,38 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
 
 type SuggestionCardProps = {
   item: SuggestionItem;
-  index: number;
-  scrollY: number;
   addPath: string;
 };
 
-function SuggestionCard({ item, index, scrollY, addPath }: SuggestionCardProps) {
-  // Staggered parallax effect based on card index
-  const parallaxOffset = (index % 2 === 0 ? 1 : -1) * scrollY * 10;
-
+function SuggestionCard({ item, addPath }: SuggestionCardProps) {
   return (
     <Link
       href={addPath}
-      className="group relative overflow-hidden rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
-      style={{
-        transform: `translateY(${parallaxOffset}px)`,
-      }}
+      className="apple-card group overflow-hidden transition duration-200 hover:border-[var(--apple-system-blue)]/55"
     >
-      {/* Cover Image */}
       <div className="relative aspect-[2/3] overflow-hidden">
         <Image
           src={item.cover}
           alt={item.title}
           width={200}
           height={300}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.01]"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PC9zdmc+"
         />
-        {/* Score Badge */}
+
         {item.score && (
-          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+          <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/30 bg-black/35 px-2 py-1 text-xs text-white backdrop-blur-sm">
             <Star className="h-3 w-3 fill-current" />
             {item.score}
           </div>
         )}
+      </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-        <div className="absolute inset-x-0 bottom-0 p-3">
-          <h3 className="line-clamp-2 text-sm font-semibold text-white">{item.title}</h3>
-          {item.year && <p className="mt-0.5 text-xs text-white/80">{item.year}</p>}
-        </div>
+      <div className="space-y-1 p-3">
+        <h3 className="apple-label line-clamp-2 text-sm font-semibold">{item.title}</h3>
+        {item.year && <p className="apple-secondary-label text-xs">{item.year}</p>}
       </div>
     </Link>
   );

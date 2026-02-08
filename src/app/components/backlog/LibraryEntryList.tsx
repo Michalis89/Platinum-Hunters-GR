@@ -23,11 +23,10 @@ export default function LibraryEntryList({
   const progressLabel = getProgressLabel(category);
 
   return (
-    <section className="max-h-none overflow-y-auto rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 backdrop-blur [scrollbar-gutter:stable] sm:p-4 md:max-h-[70vh]">
-      <div className="hidden gap-4 px-3 pb-2 text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)] md:grid md:grid-cols-[72px,1.5fr,0.7fr,0.7fr,0.5fr,112px]">
+    <section className="apple-material-surface max-h-none overflow-y-auto p-3 [scrollbar-gutter:stable] sm:p-4 md:max-h-[70vh]">
+      <div className="hidden gap-4 px-3 pb-2 text-[11px] uppercase tracking-[0.2em] text-[var(--apple-secondary-label)] md:grid md:grid-cols-[72px,1.5fr,0.7fr,0.7fr,0.5fr,112px]">
         <span>Cover</span>
         <span>Title</span>
-
         <span className="flex items-center justify-center">Status</span>
         <span className="flex items-center justify-center">{progressLabel} / Total</span>
         <span className="flex items-center justify-center">Score</span>
@@ -36,7 +35,7 @@ export default function LibraryEntryList({
 
       <div className="mt-2 space-y-3">
         {isLoading && (
-          <div className="rounded-2xl border border-dashed border-[var(--hb-border)] bg-[var(--hb-card)] px-4 py-6">
+          <div className="apple-card rounded-[18px] border-[var(--apple-separator)] px-4 py-7">
             <LoadingSpinner label="Φόρτωση βιβλιοθήκης..." />
           </div>
         )}

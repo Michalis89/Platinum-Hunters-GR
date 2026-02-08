@@ -82,19 +82,19 @@ export function ProfileCategories({
   if (categories.length === 0) return null;
 
   return (
-    <section className="px-4 py-12 md:px-6 md:py-16">
+    <section className="px-4 py-12 md:px-6 md:py-14">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-8 text-center">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+        <div className="mb-8 text-center md:mb-10">
+          <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
             Οι κατηγορίες μου
           </p>
-          <h2 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
+          <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
             Τα hobbies που παρακολουθώ
           </h2>
         </div>
 
         {/* Category chips grid */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="apple-material-surface flex flex-wrap items-center justify-center gap-3 p-4 sm:p-5">
           {categories.map(cat => {
             const meta = categoryMeta[cat];
             if (!meta) return null;
@@ -106,14 +106,18 @@ export function ProfileCategories({
                 key={cat}
                 variant={isActive ? 'primary' : 'secondary'}
                 onClick={() => onCategoryChange(cat)}
-                className={`group inline-flex items-center gap-2`}
+                className={`group inline-flex items-center gap-2 ${
+                  isActive
+                    ? ''
+                    : 'bg-[var(--apple-tertiary-fill)] text-[var(--apple-secondary-label)] hover:text-[var(--apple-label)]'
+                }`}
                 aria-pressed={isActive}
               >
                 <span
                   className={`transition-colors ${
                     isActive
-                      ? 'text-[var(--hb-text)]'
-                      : 'text-[var(--hb-muted)] group-hover:text-[var(--hb-primary-strong)]'
+                      ? 'text-[var(--apple-label)]'
+                      : 'text-[var(--apple-secondary-label)] group-hover:text-[var(--apple-system-blue)]'
                   }`}
                 >
                   {meta.icon}
@@ -126,17 +130,17 @@ export function ProfileCategories({
 
         {/* Quick links for active category */}
         {activeCategory && categoryMeta[activeCategory] && (
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 apple-material-surface flex flex-wrap items-center justify-center gap-3 p-4 sm:p-5">
             <a
               href={categoryMeta[activeCategory].href}
-              className="hover:border-[var(--hb-primary-strong)]/50 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-5 py-2 text-sm font-medium text-[var(--hb-headline)] transition"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-5 py-2 text-sm font-medium text-[var(--apple-label)] transition-colors hover:border-[var(--apple-system-blue)]/40 hover:text-[var(--apple-system-blue)]"
             >
               Άνοιγμα Library
             </a>
             {['anime', 'manga', 'books', 'movies', 'tv', 'vape'].includes(activeCategory) && (
               <a
                 href={`/pages/reviews?category=${activeCategory}`}
-                className="hover:border-[var(--hb-primary-strong)]/50 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-5 py-2 text-sm font-medium text-[var(--hb-headline)] transition"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-5 py-2 text-sm font-medium text-[var(--apple-label)] transition-colors hover:border-[var(--apple-system-blue)]/40 hover:text-[var(--apple-system-blue)]"
               >
                 Δες Reviews
               </a>
@@ -149,3 +153,4 @@ export function ProfileCategories({
 }
 
 export { categoryMeta };
+

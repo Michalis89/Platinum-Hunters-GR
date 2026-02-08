@@ -28,7 +28,7 @@ export function Select({
       {label && (
         <label
           className={cn(
-            'text-sm font-medium text-slate-700 dark:text-white',
+            'apple-body-tracking text-sm font-medium text-[var(--apple-label)]',
             labelClassName,
           )}
         >
@@ -41,17 +41,9 @@ export function Select({
           value={value}
           onChange={e => onChange?.(e.target.value)}
           className={cn(
-            // Base
-            'w-full appearance-none rounded-xl border p-3 pr-10 text-sm shadow-inner transition',
-
-            'border-slate-200 bg-white text-slate-900 shadow-slate-200/40',
-            'hover:border-emerald-400/70 hover:bg-slate-50',
-            'focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/40',
-
-            'dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-100 dark:shadow-slate-950/40',
-            'dark:hover:border-emerald-400/70 dark:hover:bg-slate-900/90',
-            'dark:focus:border-emerald-300 dark:focus:ring-emerald-400/50',
-            error && 'border-red-500 focus:border-red-500 focus:ring-red-500/40',
+            'w-full appearance-none rounded-[var(--apple-radius-control)] border-[var(--apple-hairline)] border-[var(--hb-input-border)] bg-[var(--hb-input-bg)] px-3 py-2.5 pr-10 text-sm text-[var(--apple-label)] transition',
+            'focus:border-[var(--hb-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--hb-ring)]',
+            error && 'border-red-500 focus:border-red-500 focus:ring-red-500/30',
 
             className,
           )}
@@ -59,7 +51,7 @@ export function Select({
           {/* Placeholder */}
           <option
             value=""
-            className="bg-white text-slate-400 dark:bg-slate-950 dark:text-slate-400"
+            className="bg-[var(--hb-panel)] text-[var(--apple-secondary-label)]"
           >
             {placeholder}
           </option>
@@ -69,7 +61,7 @@ export function Select({
             <option
               key={opt}
               value={opt}
-              className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+              className="bg-[var(--hb-panel)] text-[var(--apple-label)]"
             >
               {optionLabels?.[opt] ?? opt}
             </option>
@@ -80,7 +72,7 @@ export function Select({
         <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 text-slate-500 dark:text-slate-400"
+            className="h-4 w-4 text-[var(--apple-secondary-label)]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

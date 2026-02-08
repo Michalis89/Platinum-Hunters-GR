@@ -30,7 +30,7 @@ export function Card({
   return (
     <div
       id={id}
-      className={`rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-[var(--hb-shadow-md)] dark:border-[var(--hb-border)] dark:bg-[var(--hb-panel)] dark:text-[var(--hb-text)] dark:shadow-[var(--hb-shadow-md)] ${className}`}
+      className={`rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator)] bg-[var(--hb-panel)] text-[var(--apple-label)] shadow-[var(--apple-shadow)] backdrop-blur-[18px] ${className}`}
     >
       {children}
     </div>
@@ -44,7 +44,7 @@ export function CardContent({ children, className = '' }: Readonly<CardContentPr
 export function CardHeader({ children, className = '' }: Readonly<CardContentProps>) {
   return (
     <div
-      className={`border-b border-slate-200 bg-white/80 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:bg-[var(--hb-card)] dark:text-[var(--hb-text)] ${className}`}
+      className={`border-b border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/85 p-4 text-[var(--apple-label)] ${className}`}
     >
       {children}
     </div>
@@ -54,7 +54,7 @@ export function CardHeader({ children, className = '' }: Readonly<CardContentPro
 export function CardFooter({ children, className = '' }: Readonly<CardContentProps>) {
   return (
     <div
-      className={`border-t border-slate-200 p-4 text-slate-900 dark:border-[var(--hb-border)] dark:text-[var(--hb-text)] ${className}`}
+      className={`border-t border-[var(--apple-separator-soft)] p-4 text-[var(--apple-label)] ${className}`}
     >
       {children}
     </div>
@@ -64,7 +64,7 @@ export function CardFooter({ children, className = '' }: Readonly<CardContentPro
 export function CardTitle({ children, className = '' }: Readonly<CardContentProps>) {
   return (
     <h3
-      className={`text-lg font-semibold text-slate-900 dark:text-[var(--hb-headline)] ${className}`}
+      className={`apple-title-tracking text-lg font-semibold text-[var(--apple-label)] ${className}`}
     >
       {children}
     </h3>
@@ -73,6 +73,8 @@ export function CardTitle({ children, className = '' }: Readonly<CardContentProp
 
 export function CardDescription({ children, className = '' }: Readonly<CardContentProps>) {
   return (
-    <p className={`text-sm text-slate-600 dark:text-[var(--hb-muted)] ${className}`}>{children}</p>
+    <p className={`apple-body-tracking text-sm text-[var(--apple-secondary-label)] ${className}`}>
+      {children}
+    </p>
   );
 }
