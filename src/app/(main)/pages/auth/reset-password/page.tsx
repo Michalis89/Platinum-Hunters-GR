@@ -9,5 +9,6 @@ export const metadata = buildMetadata({
 });
 
 export default function ResetPasswordPage() {
-  return <ResetPasswordForm />;
+  const allowDevPreview = process.env.NODE_ENV === 'development';
+  return <ResetPasswordForm allowDevPreview={allowDevPreview} />;
 }

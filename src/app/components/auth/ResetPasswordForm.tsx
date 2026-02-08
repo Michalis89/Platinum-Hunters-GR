@@ -2,18 +2,27 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Eye, EyeOff } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
-import { Input } from '@/app/components/ui/Input';
+import { CircleAlert, Eye, EyeOff, CheckCircle2, Lock } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import ErrorState from '@/app/components/ui/ErrorState';
-import Feedback from '@/app/components/ui/Feedback';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { validatePassword } from '@/utils/validation/auth';
 import { supabase } from '@/lib/supabase-client';
 
 const EXPIRED_REDIRECT = '/forgot-password?expired=true';
 
-export default function ResetPasswordForm() {
+type ResetPasswordFormProps = {
+  allowDevPreview?: boolean;
+};
+
+export default function ResetPasswordForm({ allowDevPreview = false }: ResetPasswordFormProps) {
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,6 +33,22 @@ export default function ResetPasswordForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const passwordRequirements = [
+    { label: 'At least 8 characters', valid: password.length >= 8 },
+    { label: 'Includes uppercase letter', valid: /[A-Z]/.test(password) },
+    { label: 'Includes lowercase letter', valid: /[a-z]/.test(password) },
+    { label: 'Includes number', valid: /[0-9]/.test(password) },
+    {
+      label: 'Includes special character',
+      valid: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
+    },
+  ];
+
+  const passedRequirementCount = passwordRequirements.filter(requirement => requirement.valid).length;
+  const passwordStrengthProgress = (passedRequirementCount / passwordRequirements.length) * 100;
+  const passwordsMatch = password.length > 0 && password === confirmPassword;
+  const canSubmit = passedRequirementCount === passwordRequirements.length && passwordsMatch && !submitting;
 
   const establishRecoverySessionFromUrl = async (): Promise<boolean> => {
     if (typeof window === 'undefined') return false;
@@ -100,6 +125,12 @@ export default function ResetPasswordForm() {
 
   useEffect(() => {
     const ensureSession = async () => {
+      if (allowDevPreview) {
+        setHasValidSession(true);
+        setLoading(false);
+        return;
+      }
+
       try {
         const hasRecoveryParams = hasRecoveryParamsInUrl();
 
@@ -141,7 +172,7 @@ export default function ResetPasswordForm() {
     };
 
     ensureSession();
-  }, [router]);
+  }, [allowDevPreview, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,111 +214,202 @@ export default function ResetPasswordForm() {
     }
   };
 
-  if (loading || !hasValidSession) {
+  if (loading) {
     return (
-      <div className="apple-auth-shell flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--apple-system-blue)] border-t-transparent" />
+      <div className="apple-auth-shell flex min-h-screen items-center justify-center px-4 py-12">
+        <Card className="apple-auth-card w-full max-w-md">
+          <CardHeader className="space-y-3 px-6 pt-7">
+            <Skeleton className="mx-auto h-12 w-12 rounded-[var(--apple-radius-control)]" />
+            <Skeleton className="mx-auto h-6 w-52" />
+            <Skeleton className="mx-auto h-4 w-64" />
+          </CardHeader>
+          <CardContent className="space-y-4 px-6 pb-7">
+            <Skeleton className="h-10 w-full rounded-[var(--apple-radius-control)]" />
+            <Skeleton className="h-10 w-full rounded-[var(--apple-radius-control)]" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-[var(--apple-radius-control)]" />
+            <div className="flex justify-center pt-1">
+              <Spinner className="h-5 w-5 text-[var(--apple-system-blue)]" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  if (!hasValidSession) return null;
+
   return (
-    <div className="apple-auth-shell flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <Card className="apple-auth-card overflow-hidden">
-          <CardHeader className="border-[var(--apple-separator-soft)] bg-transparent pb-4 pt-7 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_14%,transparent)] text-[var(--apple-system-blue)]">
-              <Lock className="h-6 w-6" />
-            </div>
-            <CardTitle className="text-2xl font-semibold text-[var(--apple-label)]">
-              Set New Password
-            </CardTitle>
-            <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
-              Choose a new password for your account.
-            </p>
-          </CardHeader>
+    <div className="apple-auth-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
+      <div className="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--apple-system-blue)_22%,transparent)] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--apple-system-green)_18%,transparent)] blur-3xl" />
 
-          <CardContent className="space-y-5 px-6 pb-7 pt-5">
-            {error && <ErrorState error={error} />}
-            {success && (
-              <Feedback variant="success" tone="soft" title="Done" description={success} />
-            )}
+      <TooltipProvider delayDuration={120}>
+        <div className="w-full max-w-md">
+          <Card className="apple-auth-card overflow-hidden border-[var(--apple-separator-soft)] bg-[color-mix(in_srgb,var(--apple-surface)_84%,transparent)] backdrop-blur-xl">
+            <CardHeader className="bg-transparent pb-4 pt-7 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_14%,transparent)] text-[var(--apple-system-blue)]">
+                <Lock className="h-6 w-6" />
+              </div>
+              <CardTitle className="text-2xl font-semibold text-[var(--apple-label)]">
+                Set New Password
+              </CardTitle>
+              <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
+                Choose a secure password for your account.
+              </p>
+            </CardHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
-                <Input
-                  label="New password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="********"
-                  required
-                  disabled={submitting}
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute right-2.5 top-[33px] z-20 h-8 w-8 rounded-[10px] border shadow-sm ${
-                    showPassword
-                      ? 'border-[var(--apple-system-blue)] bg-[var(--apple-system-blue)] text-white'
-                      : 'border-[var(--apple-separator)] bg-[var(--apple-surface)] text-[var(--apple-system-blue)] hover:bg-[var(--apple-tertiary-fill)]'
-                  }`}
-                  ariaLabel={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-white" />
+            <CardContent className="space-y-5 px-6 pb-7 pt-5">
+              {error && (
+                <Alert variant="destructive" className="border-[#ff3b30]/40 bg-[#ff3b30]/8">
+                  <CircleAlert className="h-4 w-4" />
+                  <AlertTitle>Password update failed</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {success && (
+                <Alert className="border-[#34c759]/40 bg-[#34c759]/10 text-[var(--apple-label)]">
+                  <CheckCircle2 className="h-4 w-4 text-[#34c759]" />
+                  <AlertTitle>Password updated</AlertTitle>
+                  <AlertDescription>{success}</AlertDescription>
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="relative">
+                  <div className="mb-2 flex items-center justify-between">
+                    <Label
+                      htmlFor="new-password"
+                      className="apple-body-tracking text-sm text-[var(--apple-label)]"
+                    >
+                      New password
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full text-[var(--apple-secondary-label)]"
+                          ariaLabel="Password requirements info"
+                        >
+                          <CircleAlert className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Use 8+ chars with uppercase, lowercase, number, and symbol.
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Input
+                    id="new-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Enter your new password"
+                    required
+                    disabled={submitting}
+                    className="h-11 pr-11"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-1.5 top-[31px] h-8 w-8 rounded-[10px] text-[var(--apple-secondary-label)] hover:text-[var(--apple-label)]"
+                    ariaLabel={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+
+                <div className="relative">
+                  <Label
+                    htmlFor="confirm-password"
+                    className="apple-body-tracking mb-2 block text-sm text-[var(--apple-label)]"
+                  >
+                    Confirm password
+                  </Label>
+                  <Input
+                    id="confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your password"
+                    required
+                    disabled={submitting}
+                    className="h-11 pr-11"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-1.5 top-[31px] h-8 w-8 rounded-[10px] text-[var(--apple-secondary-label)] hover:text-[var(--apple-label)]"
+                    ariaLabel={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+
+                <Separator className="bg-[var(--apple-separator-soft)]" />
+
+                <div className="rounded-xl border border-[var(--apple-separator-soft)] bg-[var(--apple-surface)]/60 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-medium tracking-wide text-[var(--apple-secondary-label)] uppercase">
+                      Password strength
+                    </p>
+                    <p className="text-xs font-medium text-[var(--apple-label)]">
+                      {passedRequirementCount}/{passwordRequirements.length}
+                    </p>
+                  </div>
+                  <Progress value={passwordStrengthProgress} className="h-1.5" />
+                  <div className="mt-3 space-y-2">
+                    {passwordRequirements.map(requirement => (
+                      <div
+                        key={requirement.label}
+                        className="flex items-center gap-2 text-xs text-[var(--apple-secondary-label)]"
+                      >
+                        <CheckCircle2
+                          className={`h-3.5 w-3.5 ${
+                            requirement.valid
+                              ? 'text-[#34c759]'
+                              : 'text-[var(--apple-tertiary-label)]'
+                          }`}
+                        />
+                        <span>{requirement.label}</span>
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-2 text-xs text-[var(--apple-secondary-label)]">
+                      <CheckCircle2
+                        className={`h-3.5 w-3.5 ${
+                          passwordsMatch ? 'text-[#34c759]' : 'text-[var(--apple-tertiary-label)]'
+                        }`}
+                      />
+                      <span>Passwords match</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Button variant="primary" size="xl" type="submit" disabled={!canSubmit}>
+                  {submitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Spinner className="h-4 w-4 text-white" />
+                      Updating...
+                    </span>
                   ) : (
-                    <Eye className="h-4 w-4 text-[var(--apple-system-blue)]" />
+                    'Update password'
                   )}
                 </Button>
-              </div>
-
-              <div className="relative">
-                <Input
-                  label="Confirm password"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="********"
-                  required
-                  disabled={submitting}
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className={`absolute right-2.5 top-[33px] z-20 h-8 w-8 rounded-[10px] border shadow-sm ${
-                    showConfirmPassword
-                      ? 'border-[var(--apple-system-blue)] bg-[var(--apple-system-blue)] text-white'
-                      : 'border-[var(--apple-separator)] bg-[var(--apple-surface)] text-[var(--apple-system-blue)] hover:bg-[var(--apple-tertiary-fill)]'
-                  }`}
-                  ariaLabel={showConfirmPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-white" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-[var(--apple-system-blue)]" />
-                  )}
-                </Button>
-              </div>
-
-              <Button variant="primary" size="xl" type="submit" disabled={submitting}>
-                {submitting ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Updating...
-                  </span>
-                ) : (
-                  'Update password'
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </TooltipProvider>
     </div>
   );
 }
