@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -11,31 +11,50 @@ import Feedback from '@/app/components/ui/Feedback';
 import { validatePassword } from '@/utils/validation/auth';
 import { supabase } from '@/lib/supabase-client';
 
+const EXPIRED_REDIRECT = '/forgot-password?expired=true';
+const EXPIRED_RESET_MESSAGE =
+  '🔒 Το link αλλαγής κωδικού έχει λήξει ή δεν είναι έγκυρο. Ζήτησε νέο link για να συνεχίσεις με ασφάλεια.';
+
 export default function ResetPasswordForm() {
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasValidSession, setHasValidSession] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const isSessionError = (message: string) => {
+    const normalized = message.toLowerCase();
+    return (
+      normalized.includes('auth session missing') ||
+      normalized.includes('invalid session') ||
+      normalized.includes('jwt') ||
+      normalized.includes('session expired')
+    );
+  };
 
   useEffect(() => {
     const ensureSession = async () => {
       try {
         const { data, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !data.session) {
-          setError('Το session έληξε. Παρακαλούμε ζητήστε νέο σύνδεσμο ανάκτησης.');
+          router.replace(EXPIRED_REDIRECT);
+          return;
         }
+        setHasValidSession(true);
       } catch {
-        setError('Αποτυχία ελέγχου σύνδεσης.');
+        router.replace(EXPIRED_REDIRECT);
+        return;
       } finally {
         setLoading(false);
       }
     };
+
     ensureSession();
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,20 +73,32 @@ export default function ResetPasswordForm() {
     setSubmitting(true);
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
-      if (updateError) throw updateError;
+      if (updateError) {
+        if (isSessionError(updateError.message)) {
+          setError(EXPIRED_RESET_MESSAGE);
+          router.replace(EXPIRED_REDIRECT);
+          return;
+        }
+        throw updateError;
+      }
 
       await supabase.auth.signOut();
       setSuccess('Ο κωδικός ενημερώθηκε! Μεταφέρεστε στη σύνδεση...');
       setTimeout(() => router.push('/pages/auth/login'), 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Κάτι πήγε στραβά.';
-      setError(errorMessage);
+      if (isSessionError(errorMessage)) {
+        setError(EXPIRED_RESET_MESSAGE);
+        router.replace(EXPIRED_REDIRECT);
+        return;
+      }
+      setError('Δεν καταφέραμε να ολοκληρώσουμε την αλλαγή κωδικού. Δοκιμάστε ξανά.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (loading || !hasValidSession) {
     return (
       <div className="apple-auth-shell flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--apple-system-blue)] border-t-transparent" />

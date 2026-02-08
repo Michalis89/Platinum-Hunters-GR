@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -25,6 +25,8 @@ export default function LoginForm() {
   const dispatch = useDispatch<AppDispatch>();
 
   const redirectParam = searchParams.get('redirect');
+  const forgotMode = searchParams.get('forgot') === 'true';
+  const expiredResetLink = searchParams.get('expired') === 'true';
   const inputClasses =
     'bg-[var(--hb-input-bg)] text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]';
 
@@ -87,10 +89,24 @@ export default function LoginForm() {
 
   const handleForgotPasswordClick = () => {
     setShowResetPanel(true);
+    setResetAlert(null);
     if (formData.identifier.includes('@')) {
       setResetEmail(formData.identifier);
     }
   };
+
+  useEffect(() => {
+    if (!forgotMode && !expiredResetLink) return;
+
+    setShowResetPanel(true);
+    if (expiredResetLink) {
+      setResetAlert({
+        type: 'error',
+        message:
+          '🔒 Το link αλλαγής κωδικού έχει λήξει ή δεν είναι έγκυρο. Ζήτησε νέο link για να συνεχίσεις με ασφάλεια.',
+      });
+    }
+  }, [forgotMode, expiredResetLink]);
 
   const handleSendResetEmail = async () => {
     setResetAlert(null);
@@ -256,7 +272,7 @@ export default function LoginForm() {
               <LogIn className="h-5 w-5" />
             </div>
             <span className="flex flex-col leading-tight">
-              <span className="font-semibold">Σύνδεση στον Hobbista</span>
+              <span className="font-semibold">Îύνδεση στον Hobbista</span>
               <span className="apple-body-tracking mt-1 text-sm font-normal text-[var(--apple-secondary-label)]">
                 Συνέχισε στον λογαριασμό σου.
               </span>
@@ -432,7 +448,7 @@ export default function LoginForm() {
                 onClick={handleSendResetEmail}
                 disabled={resetLoading}
               >
-                {resetLoading ? 'Αποστολή...' : 'Στείλε email ανάκτησης'}
+                {resetLoading ? 'Αποστολή...' : 'Αποστολή νέου link'}
               </Button>
               <Button type="button" variant="secondary" onClick={() => setShowResetPanel(false)}>
                 Κλείσιμο
