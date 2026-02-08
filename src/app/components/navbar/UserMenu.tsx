@@ -50,6 +50,7 @@ export function UserMenu({
   onToggleTheme,
 }: UserMenuProps) {
   const fallbackInitial = getUserInitials(user.username);
+  const handleThemeSelect = () => window.setTimeout(onToggleTheme, 0);
 
   return (
     <DropdownMenu modal={false}>
@@ -133,7 +134,7 @@ export function UserMenu({
           ) : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
-        <DropdownMenuItem onSelect={onToggleTheme} className={itemClassName}>
+        <DropdownMenuItem onSelect={handleThemeSelect} className={itemClassName}>
           {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
           <span>Θέμα</span>
         </DropdownMenuItem>

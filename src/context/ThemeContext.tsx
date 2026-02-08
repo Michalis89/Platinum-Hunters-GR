@@ -17,6 +17,7 @@ const THEME_STORAGE_KEY = 'hobbistas-hub-theme';
 const THEME_COOKIE_NAME = 'theme';
 const THEME_TRANSITION_CLASS = 'theme-animating';
 const THEME_TRANSITION_MS = 320;
+let themeTransitionTimeout: number | null = null;
 
 function setThemeCookie(theme: Theme) {
   document.cookie = `${THEME_COOKIE_NAME}=${theme}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
@@ -24,10 +25,21 @@ function setThemeCookie(theme: Theme) {
 
 function applyThemeTransitionClass() {
   const htmlEl = document.documentElement;
+
+  if (themeTransitionTimeout !== null) {
+    window.clearTimeout(themeTransitionTimeout);
+  }
+
   htmlEl.classList.add(THEME_TRANSITION_CLASS);
-  window.setTimeout(() => {
+  themeTransitionTimeout = window.setTimeout(() => {
     htmlEl.classList.remove(THEME_TRANSITION_CLASS);
+    themeTransitionTimeout = null;
   }, THEME_TRANSITION_MS);
+}
+
+function applyThemeToDom(theme: Theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  setThemeCookie(theme);
 }
 
 interface ThemeProviderProps {
@@ -36,66 +48,74 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProviderProps) {
-  // ✅ First client render matches SSR
+  // Keep first client render aligned with SSR value.
   const [theme, setThemeState] = useState<Theme>(initialTheme);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
 
-    // On mount, make storage/cookie consistent with *current* theme
-    // (do not flip theme immediately — avoids hydration mismatch)
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
 
       if (!stored) {
-        // if nothing stored, store the SSR theme so next load is consistent
-        localStorage.setItem(THEME_STORAGE_KEY, theme);
+        localStorage.setItem(THEME_STORAGE_KEY, initialTheme);
       }
     } catch {
-      // ignore
+      // ignore storage failures
     }
 
     try {
-      document.documentElement.setAttribute('data-theme', theme);
-      setThemeCookie(theme);
+      applyThemeToDom(initialTheme);
     } catch {
-      // ignore
+      // ignore dom/cookie failures
     }
-  }, [theme]);
+  }, [initialTheme]);
 
-  // Optional: listen to system changes, but ONLY if user hasn't manually set preference
+  // Follow OS theme only until user explicitly picks one.
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleChange = (e: MediaQueryListEvent) => {
       try {
         const stored = localStorage.getItem(THEME_STORAGE_KEY);
-        if (stored) return; // user preference exists, don't auto-switch
+        if (stored) {
+          return;
+        }
       } catch {
-        // if storage blocked, just don't auto switch
         return;
       }
 
-      const newTheme = e.matches ? 'dark' : 'light';
+      const newTheme: Theme = e.matches ? 'dark' : 'light';
       setThemeState(newTheme);
-      document.documentElement.setAttribute('data-theme', newTheme);
-      setThemeCookie(newTheme);
+      applyThemeToDom(newTheme);
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const setTheme = useCallback((newTheme: Theme) => {
-    applyThemeTransitionClass();
-    setThemeState(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
-    } catch {}
-    setThemeCookie(newTheme);
-  }, []);
+  const setTheme = useCallback(
+    (newTheme: Theme) => {
+      if (newTheme === theme) {
+        return;
+      }
+
+      applyThemeTransitionClass();
+      setThemeState(newTheme);
+
+      window.setTimeout(() => {
+        applyThemeToDom(newTheme);
+      }, 0);
+
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+      } catch {
+        // ignore storage failures
+      }
+    },
+    [theme],
+  );
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
