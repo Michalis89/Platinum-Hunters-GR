@@ -493,3 +493,44 @@ html[data-theme='dark'] .apple-progress-fill {
     0 8px 24px color-mix(in srgb, var(--apple-system-blue) 32%, transparent);
 }
 
+/* =============================================================================
+   iOS Safari performance fallback (prevents black tiles on fast scroll)
+   Applies only on iOS (WebKit) and only in dark theme
+   ============================================================================= */
+@supports (-webkit-touch-callout: none) {
+  html[data-theme='dark'] .hb-glass,
+  html[data-theme='dark'] .hb-surface,
+  html[data-theme='dark'] .hb-dialog-overlay,
+  html[data-theme='dark'] .hb-dialog-surface,
+  html[data-theme='dark'] .apple-material-surface,
+  html[data-theme='dark'] .apple-nav-shell,
+  html[data-theme='dark'] .apple-nav-popover,
+  html[data-theme='dark'] .apple-card,
+  html[data-theme='dark'] .apple-auth-card,
+  html[data-theme='dark'] .apple-footer-shell {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Keep depth but reduce expensive shadow stacking */
+  html[data-theme='dark'] .apple-material-surface,
+  html[data-theme='dark'] .apple-nav-shell,
+  html[data-theme='dark'] .apple-nav-popover,
+  html[data-theme='dark'] .apple-auth-card,
+  html[data-theme='dark'] .apple-footer-shell {
+    box-shadow: none !important;
+  }
+
+  /* Replace “glass” with solid-ish premium surfaces (still looks Apple) */
+  html[data-theme='dark'] .hb-glass,
+  html[data-theme='dark'] .apple-material-surface,
+  html[data-theme='dark'] .apple-nav-shell,
+  html[data-theme='dark'] .apple-nav-popover,
+  html[data-theme='dark'] .apple-card,
+  html[data-theme='dark'] .apple-auth-card,
+  html[data-theme='dark'] .apple-footer-shell {
+    background: rgba(28, 28, 30, 0.92) !important; /* matches your dark surfaces */
+    border-color: rgba(255, 255, 255, 0.10) !important;
+  }
+}
+
