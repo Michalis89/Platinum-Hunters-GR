@@ -4,7 +4,7 @@
   <h1>Hobbistas</h1>
 
   <p>
-    <strong>A hobby tracking platform for managing entertainment libraries across games, anime, movies, books and more</strong>
+    <strong>A hobby tracking platform for managing entertainment libraries across games, anime, movies, books, and more</strong>
   </p>
 
   <p>
@@ -27,17 +27,17 @@
 
 ## Overview
 
-Hobbistas is a hobby hub that unifies games, anime, manga, movies, TV, and books under a single backlog, activity, and editorial experience.
+Hobbistas is a hobby hub that unifies games, anime, manga, movies, TV, and books into a single backlog, activity feed, and content platform.
 
 ### Key Features
 
-- **Multi-Hobby Libraries** - Track games, anime, manga, movies, TV shows, and books in one place
-- **Unified Media System** - All hobbies use the same intuitive interface for adding, tracking, and managing items
-- **External API Integration** - Auto-fetch metadata from RAWG (games), MAL (anime/manga), TMDB (movies/TV), and Google Books
-- **User Profiles** - Customizable profiles with statistics, favorites, and activity history
-- **Activity Feed** - Real-time personal progress tracking and status updates
-- **Article System** - News, reviews, and community content with categories and topics
-- **Rich Text Editor** - Create and edit articles with a full-featured Tiptap editor
+- **Multi-Hobby Libraries** — Track games, anime, manga, movies, TV shows, and books in one place
+- **Unified Media System** — A single interface for adding, tracking, and managing all media
+- **External API Integration** — Auto-fetch metadata from RAWG, MyAnimeList, TMDB, and Google Books
+- **User Profiles** — Customizable profiles with statistics, favorites, and activity history
+- **Activity Feed** — Real-time personal progress tracking and status updates
+- **Article System** — News, reviews, and community content with categories and tags
+- **Rich Text Editor** — Create and edit articles using a full-featured Tiptap editor
 
 ---
 
@@ -72,14 +72,14 @@ The application uses a unified media system:
 
 ### Core Tables
 
-| Table                | Purpose                                     |
-| -------------------- | ------------------------------------------- |
-| `users`              | User accounts and profiles                  |
-| `media_items`        | All media (games, anime, movies, books, tv) |
-| `user_media_entries` | User's library entries with status/progress |
-| `articles`           | News, reviews, community content            |
-| `article_*`          | Comments, likes, views for articles         |
-| `activity_log`       | User activity tracking                      |
+| Table                | Purpose                                         |
+| -------------------- | ----------------------------------------------- |
+| `users`              | User accounts and profiles                      |
+| `media_items`        | All media (games, anime, movies, books, TV)     |
+| `user_media_entries` | User's library entries with status/progress     |
+| `articles`           | News, reviews, community content                |
+| `article_*`          | Article-related tables (comments, likes, views) |
+| `activity_log`       | User activity tracking                          |
 
 ### Media Categories
 
@@ -111,6 +111,8 @@ cd hobbistas-hub
 
 # Install dependencies
 npm install
+# or
+yarn install
 ```
 
 ### Environment Setup
@@ -132,7 +134,7 @@ RAWG_API_KEY=rawg-api-key
 MAL_CLIENT_ID=mal-client-id
 MAL_CLIENT_SECRET=mal-client-secret
 GOOGLE_BOOKS_API_KEY=google-books-key
-RESEND_API_KEY=resend-api-key
+RESEND_API_KEY=resend-api-key # transactional email
 ```
 
 ### Development
@@ -164,7 +166,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 | GET    | `/api/auth/session`        | Get current session |
 | DELETE | `/api/auth/delete-account` | Delete account      |
 
-### Media Library (per category: anime, manga, games, movies, books)
+### Media Library (per category: anime, manga, games, movies, TV, books)
 
 | Method | Endpoint                  | Description                |
 | ------ | ------------------------- | -------------------------- |
@@ -203,7 +205,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 src/
 ├── app/                        # Next.js App Router (App Shell + routes)
 │   ├── (main)/                 # Primary user experience (home, backlog, profile)
-│   ├── (legal)/                # Privacy/terms pricing
+│   ├── (legal)/                # Privacy, terms
 │   ├── api/                    # Route handlers (auth, media, articles, support, activity)
 │   └── components/             # Shared UI atoms, modals, loaders, editors
 ├── store/                      # Redux toolkit (auth slice + store)
@@ -243,7 +245,7 @@ docs/private/                  # Review/Audit/Architecture playbooks
 
 ### Vercel (Recommended)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Michalis89/Michalis89/hobbistas-hub)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Michalis89/hobbistas-hub)
 
 Key environment variables:
 
@@ -299,5 +301,5 @@ Distributed under the MIT License. See [LICENSE.txt](LICENSE.txt) for more infor
     <a href="https://github.com/Michalis89/hobbistas-hub/issues">Report Bug</a> &bull;
     <a href="https://github.com/Michalis89/hobbistas-hub/issues">Request Feature</a>
   </p>
-  <p>Made with care for the Greek hobby community</p>
+  <p>Built with care for tracking what you love</p>
 </div>
