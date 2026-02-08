@@ -107,26 +107,26 @@ export function UserMenu({
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem asChild className={itemClassName}>
-            <Link href="/pages/profile">
+            <Link href="/pages/profile" prefetch={false}>
               <User className="size-4" />
               <span>Προφίλ</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={itemClassName}>
-            <Link href="/pages/profile/edit">
+            <Link href="/pages/profile/edit" prefetch={false}>
               <PenLine className="size-4" />
               <span>Επεξεργασία Προφίλ</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={itemClassName}>
-            <Link href="/pages/support/tickets">
+            <Link href="/pages/support/tickets" prefetch={false}>
               <Ticket className="size-4" />
               <span>Τα tickets μου</span>
             </Link>
           </DropdownMenuItem>
           {canAccessAdminPanel ? (
             <DropdownMenuItem asChild className={itemClassName}>
-              <Link href="/admin">
+              <Link href="/admin" prefetch={false}>
                 <ShieldCheck className="size-4" />
                 <span>Admin Panel</span>
               </Link>

@@ -17,8 +17,6 @@ const palette = {
   secondaryText: 'rgba(235, 235, 245, 0.6)',
   mutedText: 'rgba(235, 235, 245, 0.45)',
   brandBlue: '#007aff',
-  brandBlueSoft: '#5ac8fa',
-  brandGreen: '#34c759',
   white: '#ffffff',
 };
 
@@ -45,7 +43,7 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
     <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;mso-hide:all;">
       ${config.preheader}
     </span>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:radial-gradient(circle at 8% -10%, rgba(0,122,255,0.24), transparent 46%), radial-gradient(circle at 88% 0%, rgba(52,199,89,0.12), transparent 44%), ${palette.bg};">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:${palette.bg};">
       <tr>
         <td align="center" style="padding:28px 16px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;border-collapse:collapse;">
@@ -57,11 +55,11 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
             </tr>
             <tr>
               <td style="border-radius:24px;background:${palette.surface};border:1px solid ${palette.border};box-shadow:0 2px 8px rgba(0,0,0,0.45),0 18px 54px rgba(0,0,0,0.62);padding:32px 24px;">
-                <div style="height:4px;border-radius:999px;background:linear-gradient(135deg, ${palette.brandBlue} 0%, ${palette.brandBlueSoft} 52%, ${palette.brandGreen} 100%);margin:0 0 20px;"></div>
+                <div style="height:4px;border-radius:999px;background:${palette.brandBlue};margin:0 0 20px;"></div>
                 <h1 style="margin:0 0 12px;font-size:24px;line-height:1.2;font-weight:700;letter-spacing:-0.022em;color:${palette.text};">${config.title}</h1>
                 <p style="margin:0 0 22px;font-size:15px;line-height:1.65;color:${palette.secondaryText};">${config.intro}</p>
                 <div style="margin:0 0 20px;text-align:center;">
-                  <a href="${safeLink}" style="display:inline-block;padding:14px 26px;border-radius:14px;background:linear-gradient(145deg, ${palette.brandBlue} 0%, ${palette.brandGreen} 100%);color:${palette.white};font-size:15px;font-weight:700;letter-spacing:-0.011em;text-decoration:none;box-shadow:0 10px 28px rgba(0,122,255,0.35);">
+                  <a href="${safeLink}" style="display:inline-block;padding:14px 26px;border-radius:14px;background:${palette.brandBlue};color:${palette.white};font-size:15px;font-weight:700;letter-spacing:-0.011em;text-decoration:none;box-shadow:0 10px 28px rgba(0,122,255,0.35);">
                     ${config.actionLabel}
                   </a>
                 </div>
@@ -69,7 +67,7 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
                 <div style="margin-top:18px;padding-top:16px;border-top:1px solid ${palette.border};">
                   <p style="margin:0;font-size:12px;line-height:1.65;color:${palette.mutedText};">${config.helper}</p>
                   <p style="margin:8px 0 0;font-size:12px;line-height:1.55;word-break:break-all;">
-                    <a href="${safeLink}" style="color:${palette.brandBlueSoft};text-decoration:none;">${safeLink}</a>
+                    <a href="${safeLink}" style="color:${palette.brandBlue};text-decoration:none;">${safeLink}</a>
                   </p>
                 </div>
               </td>
@@ -77,7 +75,7 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
             <tr>
               <td style="padding:18px 8px 0;text-align:center;">
                 <p style="margin:0;font-size:12px;line-height:1.6;color:${palette.secondaryText};">
-                  <a href="https://www.hobbistas-hub.com/" style="color:${palette.brandBlueSoft};font-weight:600;text-decoration:none;">© 2026 Hobbistas</a>
+                  <a href="https://www.hobbistas-hub.com/" style="color:${palette.brandBlue};font-weight:600;text-decoration:none;">© 2026 Hobbistas</a>
                 </p>
                 <p style="margin:6px 0 0;font-size:12px;line-height:1.6;color:${palette.mutedText};">
                   For questions, simply reply to this email.
