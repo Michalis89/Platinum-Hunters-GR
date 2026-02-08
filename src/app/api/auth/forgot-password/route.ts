@@ -1,4 +1,4 @@
-import { withApiRoute } from '@/lib/observability/withApiRoute';
+﻿import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 import { NextResponse } from 'next/server';
 
@@ -8,32 +8,31 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { sendResetPasswordEmail } from '@/lib/email/send';
 import { validateEmail } from '@/utils/validation/auth';
 import { rateLimit, getClientIp, rateLimitHeaders } from '@/lib/rate-limit';
+import { resolveSiteUrl } from '@/lib/auth/site-url';
 
 async function POSTHandler(req: Request) {
   // Rate limit: 3 requests per hour per IP (Redis-backed, serverless-safe)
-  const clientIp = getClientIp(req);
-  const rateLimitResult = await rateLimit('forgotIp', clientIp);
+  if (process.env.NODE_ENV === 'production') {
+    const clientIp = getClientIp(req);
+    const rateLimitResult = await rateLimit('forgotIp', clientIp);
 
-  if (!rateLimitResult.success) {
-    return fail(
-      { error: 'Πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα.' },
-      429,
-      { headers: rateLimitHeaders(rateLimitResult) }
-    );
+    if (!rateLimitResult.success) {
+      return fail(
+        { error: 'Too many attempts. Please try again later.' },
+        429,
+        { headers: rateLimitHeaders(rateLimitResult) },
+      );
+    }
   }
 
-  const siteUrl = process.env.SITE_URL;
-  if (!siteUrl) {
-    console.error('Missing SITE_URL environment variable for forgot-password flow');
-    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
-  }
+  const siteUrl = resolveSiteUrl(req);
 
   try {
     const { email } = await req.json();
 
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      return fail({ error: emailValidation.error || 'Μη έγκυρο email' }, 400);
+      return fail({ error: emailValidation.error || 'Invalid email' }, 400);
     }
 
     const supabase = createSupabaseAdminClient();
@@ -46,13 +45,43 @@ async function POSTHandler(req: Request) {
     });
 
     const actionLink = linkData?.properties?.action_link;
-    if (linkError || !actionLink) {
+    const hashedToken = linkData?.properties?.hashed_token;
+    const recoveryLink = hashedToken
+      ? `${siteUrl}/pages/auth/reset-password?token_hash=${encodeURIComponent(hashedToken)}&type=recovery`
+      : actionLink;
+
+    if (linkError || !recoveryLink) {
       console.warn('Recovery link generation returned an error or no link', linkError);
-      return NextResponse.json({ ok: true });
+      if (linkError) {
+        const errorCode = (linkError as { code?: string }).code?.toLowerCase();
+        const errorMessage = linkError.message.toLowerCase();
+        if (
+          errorCode === 'user_not_found' ||
+          errorMessage.includes('user with this email not found') ||
+          errorMessage.includes('user not found')
+        ) {
+          return fail(
+            {
+              error:
+                "We couldn't find an account with that email address. Check for typos or create a new account.",
+            },
+            404,
+          );
+        }
+
+        return fail(
+          { error: 'Unable to process password recovery right now. Please try again shortly.' },
+          500,
+        );
+      }
+      return fail(
+        { error: 'Unable to process password recovery right now. Please try again shortly.' },
+        500,
+      );
     }
 
     try {
-      await sendResetPasswordEmail(email, actionLink);
+      await sendResetPasswordEmail(email, recoveryLink);
     } catch (error) {
       console.error('Failed to send reset password email:', error);
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);

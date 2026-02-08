@@ -21,7 +21,11 @@ export function Input({ label, error, className = '', ...props }: Readonly<Input
           {label}
         </label>
       )}
-      <input {...props} className={cn(baseClasses, errorClasses, className)} />
+      <input
+        {...props}
+        suppressHydrationWarning
+        className={cn(baseClasses, errorClasses, className)}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { rateLimit, getClientIp, rateLimitHeaders } from '@/lib/rate-limit';
 import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { sendConfirmEmail } from '@/lib/email/send';
+import { resolveSiteUrl } from '@/lib/auth/site-url';
 import {
   validateEmail,
   validateUsername,
@@ -23,11 +24,7 @@ import {
  * ships a Resend confirmation email with the Supabase action link.
  */
 async function POSTHandler(req: Request) {
-  const siteUrl = process.env.SITE_URL;
-  if (!siteUrl) {
-    console.error('Missing SITE_URL environment variable for signup flow');
-    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
-  }
+  const siteUrl = resolveSiteUrl(req);
 
   // Rate limit: 5 registrations per hour per IP (Redis-backed, serverless-safe)
   const clientIp = getClientIp(req);
@@ -122,7 +119,7 @@ async function POSTHandler(req: Request) {
 
     if (existingEmail) {
       console.info('Signup attempt for already registered email', email);
-      return NextResponse.json({ ok: true });
+      return fail({ error: 'Υπάρχει ήδη λογαριασμός με αυτό το email.' }, 409);
     }
 
     const { data: existingUsername } = await supabase
@@ -134,7 +131,7 @@ async function POSTHandler(req: Request) {
 
     if (existingUsername) {
       console.info('Signup attempt with existing username', username);
-      return NextResponse.json({ ok: true });
+      return fail({ error: 'Το username χρησιμοποιείται ήδη.' }, 409);
     }
 
     if (psn_id) {
@@ -146,7 +143,7 @@ async function POSTHandler(req: Request) {
 
       if (existingPSN) {
         console.info('Signup attempt with existing PSN ID', psn_id);
-        return NextResponse.json({ ok: true });
+        return fail({ error: 'Το PSN ID χρησιμοποιείται ήδη.' }, 409);
       }
     }
 
@@ -162,7 +159,10 @@ async function POSTHandler(req: Request) {
 
     if (authError) {
       console.error('Admin create user error:', authError);
-      return NextResponse.json({ ok: true });
+      if (authError.message.toLowerCase().includes('already')) {
+        return fail({ error: 'Υπάρχει ήδη λογαριασμός με αυτά τα στοιχεία.' }, 409);
+      }
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
     const createdUser = authData.user;
@@ -173,35 +173,40 @@ async function POSTHandler(req: Request) {
 
     const { error: updateError } = await supabase
       .from('users')
-      .update({
-        username,
-        full_name,
-        display_name: full_name,
-        date_of_birth,
-        country,
-        bio: bio || null,
-        psn_id: psn_id || null,
-        xbox_gamertag: xbox_gamertag || null,
-        steam_id: steam_id || null,
-        nintendo_id: nintendo_id || null,
-        favorite_platform: favorite_platform || null,
-        favorite_genres: favorite_genres || null,
-        gaming_since: gaming_since || null,
-        categories: categories || null,
-        favorite_anime_genres: favorite_anime_genres || null,
-        favorite_movie_genres: favorite_movie_genres || null,
-        favorite_book_genres: favorite_book_genres || null,
-        favorite_languages: favorite_languages || null,
-        pet_types: pet_types || null,
-        vape_device: vape_device || null,
-        vape_flavor: vape_flavor || null,
-      })
-      .eq('id', createdUser.id)
-      .select()
+      .upsert(
+        {
+          id: createdUser.id,
+          email,
+          username,
+          full_name,
+          display_name: full_name,
+          date_of_birth,
+          country,
+          bio: bio || null,
+          psn_id: psn_id || null,
+          xbox_gamertag: xbox_gamertag || null,
+          steam_id: steam_id || null,
+          nintendo_id: nintendo_id || null,
+          favorite_platform: favorite_platform || null,
+          favorite_genres: favorite_genres || null,
+          gaming_since: gaming_since || null,
+          categories: categories || null,
+          favorite_anime_genres: favorite_anime_genres || null,
+          favorite_movie_genres: favorite_movie_genres || null,
+          favorite_book_genres: favorite_book_genres || null,
+          favorite_languages: favorite_languages || null,
+          pet_types: pet_types || null,
+          vape_device: vape_device || null,
+          vape_flavor: vape_flavor || null,
+        },
+        { onConflict: 'id' },
+      )
+      .select('id')
       .single();
 
     if (updateError) {
-      console.error('Profile update error:', updateError);
+      console.error('Profile upsert error:', updateError);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
@@ -216,14 +221,20 @@ async function POSTHandler(req: Request) {
     const actionLink = linkData?.properties?.action_link;
     if (linkError || !actionLink) {
       console.error('Signup link generation failed:', linkError);
-      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+      return fail(
+        { error: 'Ο λογαριασμός δημιουργήθηκε, αλλά δεν στάλθηκε email επιβεβαίωσης. Προσπάθησε ξανά.' },
+        500,
+      );
     }
 
     try {
       await sendConfirmEmail(email, actionLink);
     } catch (error) {
       console.error('Failed to send confirmation email:', error);
-      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+      return fail(
+        { error: 'Δεν καταφέραμε να στείλουμε email επιβεβαίωσης. Προσπάθησε ξανά σε λίγο.' },
+        500,
+      );
     }
 
     return NextResponse.json({ ok: true });

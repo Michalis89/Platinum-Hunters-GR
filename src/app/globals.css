@@ -421,6 +421,46 @@ html[data-theme='dark'] .apple-progress-fill {
   background: color-mix(in srgb, var(--apple-material) 90%, transparent);
 }
 
+.apple-auth-form-frame {
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--apple-separator) 34%, transparent),
+    0 12px 34px color-mix(in srgb, var(--apple-system-blue) 9%, transparent);
+}
+
+.apple-auth-control {
+  transition:
+    border-color 180ms var(--hb-ease),
+    background-color 180ms var(--hb-ease),
+    color 180ms var(--hb-ease),
+    box-shadow 180ms var(--hb-ease),
+    transform 180ms var(--hb-ease);
+}
+
+.apple-auth-control:hover {
+  border-color: color-mix(in srgb, var(--apple-separator) 80%, var(--apple-system-blue) 20%);
+}
+
+.apple-auth-control:focus-visible {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--apple-system-blue) 24%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--apple-bg) 92%, transparent);
+}
+
+@keyframes appleAuthEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.apple-auth-enter {
+  animation: appleAuthEnter 360ms var(--hb-ease) both;
+}
+
 .apple-auth-chip {
   border: var(--apple-hairline) solid var(--apple-separator);
   border-radius: 999px;
@@ -446,6 +486,16 @@ html[data-theme='dark'] .apple-progress-fill {
     transition-property: color, background-color, border-color, box-shadow, fill, stroke;
     transition-duration: 320ms;
     transition-timing-function: var(--hb-ease);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apple-auth-enter {
+    animation: none;
+  }
+
+  .apple-auth-control {
+    transition: none;
   }
 }
 

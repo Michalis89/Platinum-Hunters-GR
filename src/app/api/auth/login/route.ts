@@ -1,4 +1,4 @@
-import { withApiRoute } from '@/lib/observability/withApiRoute';
+﻿import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 /**
  * Login API Route
@@ -14,6 +14,13 @@ import { fail, ok } from '@/lib/api/response';
 import { rateLimit, getClientIp, rateLimitHeaders } from '@/lib/rate-limit';
 import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
 
+const fallbackUsername = (email: string, userId: string) => {
+  const localPart = email.split('@')[0]?.toLowerCase() ?? 'user';
+  const base = localPart.replace(/[^a-z0-9_]/g, '').slice(0, 20);
+  const safeBase = base.length >= 3 ? base : 'user';
+  return `${safeBase}_${userId.slice(0, 6)}`;
+};
+
 async function POSTHandler(req: Request) {
   // Rate limiting: 10 login attempts per 10 minutes per IP (Redis-backed, serverless-safe)
   const clientIp = getClientIp(req);
@@ -21,7 +28,7 @@ async function POSTHandler(req: Request) {
 
   if (!rateLimitResult.success) {
     return fail(
-      { error: 'Πολλές προσπάθειες σύνδεσης. Δοκιμάστε ξανά αργότερα.' },
+      { error: 'Too many login attempts. Please try again later.' },
       429,
       { headers: rateLimitHeaders(rateLimitResult) },
     );
@@ -29,7 +36,8 @@ async function POSTHandler(req: Request) {
 
   try {
     const body = await req.json();
-    const { identifier, password, captchaToken } = body; // Accept email OR username
+    const { identifier, password, captchaToken, remember } = body; // Accept email OR username
+    const shouldRemember = remember === true;
 
     const captchaResult = await verifyCaptchaToken(captchaToken);
     if (!captchaResult.success) {
@@ -38,12 +46,12 @@ async function POSTHandler(req: Request) {
     }
 
     if (!identifier || identifier.trim() === '') {
-      return fail({ error: 'Το email ή το username είναι υποχρεωτικό' }, 400);
+      return fail({ error: 'Email or username is required' }, 400);
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      return fail({ error: passwordValidation.error || 'Μη έγκυρος κωδικός' }, 400);
+      return fail({ error: passwordValidation.error || 'Invalid password' }, 400);
     }
 
     const supabase = await createRouteHandlerClient(undefined, { ignoreCookies: true });
@@ -60,11 +68,11 @@ async function POSTHandler(req: Request) {
 
       if (userError) {
         console.error('Username lookup error:', userError);
-        return fail({ error: 'Σφάλμα σύνδεσης' }, 500);
+        return fail({ error: 'Login error' }, 500);
       }
 
       if (!userData) {
-        return fail({ error: 'Λάθος username ή κωδικός' }, 401);
+        return fail({ error: 'Wrong username or password' }, 401);
       }
 
       const typedUserData = userData as Pick<
@@ -74,23 +82,20 @@ async function POSTHandler(req: Request) {
 
       // Check if account is deleted, suspended, or banned
       if (typedUserData.account_status === 'deleted') {
-        return fail({ error: 'Ο λογαριασμός έχει διαγραφεί' }, 403);
+        return fail({ error: 'This account has been deleted' }, 403);
       }
       if (typedUserData.account_status === 'suspended') {
-        return fail(
-          { error: 'Ο λογαριασμός σας έχει ανασταλεί. Επικοινωνήστε με τη διαχείριση.' },
-          403,
-        );
+        return fail({ error: 'Your account is suspended. Contact support.' }, 403);
       }
       if (typedUserData.account_status === 'banned') {
-        return fail({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, 403);
+        return fail({ error: 'Your account has been banned.' }, 403);
       }
       email = typedUserData.email;
     } else {
       // Validate email format
       const emailValidation = validateEmail(identifier);
       if (!emailValidation.isValid) {
-        return fail({ error: emailValidation.error || 'Μη έγκυρο email' }, 400);
+        return fail({ error: emailValidation.error || 'Invalid email' }, 400);
       }
     }
 
@@ -107,18 +112,17 @@ async function POSTHandler(req: Request) {
       if (authError.message === 'Email not confirmed') {
         return fail(
           {
-            error:
-              'Το email σου δεν έχει επιβεβαιωθεί. Έλεγξε το email σου και κάνε κλικ στο link επιβεβαίωσης.',
+            error: 'Your email is not confirmed yet. Check your inbox and click the confirmation link.',
           },
           401,
         );
       }
 
-      return fail({ error: 'Λάθος email ή κωδικός' }, 401);
+      return fail({ error: 'Wrong email or password' }, 401);
     }
 
     if (!authData.user) {
-      return fail({ error: 'Αποτυχία σύνδεσης' }, 500);
+      return fail({ error: 'Login failed' }, 500);
     }
 
     const authedSupabase = await createRouteHandlerClient(authData.session?.access_token, {
@@ -128,26 +132,51 @@ async function POSTHandler(req: Request) {
       .from('users')
       .select('*')
       .eq('id', authData.user.id)
-      .single();
+      .maybeSingle();
 
-    if (profileError) {
+    if (profileError && profileError.code !== 'PGRST116') {
       console.error('Profile fetch error:', profileError);
-      return fail({ error: 'Σφάλμα φόρτωσης προφίλ' }, 500);
+      return fail({ error: 'Profile loading failed' }, 500);
+    }
+
+    let resolvedUserProfile = userProfile;
+    if (!resolvedUserProfile) {
+      const generatedUsername = fallbackUsername(email, authData.user.id);
+      const { data: createdProfile, error: createProfileError } = await authedSupabase
+        .from('users')
+        .upsert(
+          {
+            id: authData.user.id,
+            email: authData.user.email || email,
+            username: generatedUsername,
+            display_name:
+              (authData.user.user_metadata?.full_name as string | undefined) || generatedUsername,
+            full_name: (authData.user.user_metadata?.full_name as string | undefined) || null,
+          },
+          { onConflict: 'id' },
+        )
+        .select('*')
+        .single();
+
+      if (createProfileError) {
+        console.error('Profile upsert during login failed:', createProfileError);
+        return fail({ error: 'Failed to initialize account profile' }, 500);
+      }
+
+      resolvedUserProfile = createdProfile;
     }
 
     // Check if account is suspended or banned
-    if (userProfile.account_status === 'suspended') {
-      return fail(
-        { error: 'Ο λογαριασμός σας έχει ανασταλεί. Επικοινωνήστε με τη διαχείριση.' },
-        403,
-      );
+    if (resolvedUserProfile.account_status === 'suspended') {
+      return fail({ error: 'Your account is suspended. Contact support.' }, 403);
     }
-    if (userProfile.account_status === 'banned') {
-      return fail({ error: 'Ο λογαριασμός σας έχει αποκλειστεί.' }, 403);
+    if (resolvedUserProfile.account_status === 'banned') {
+      return fail({ error: 'Your account has been banned.' }, 403);
     }
 
     // UPDATE LAST LOGIN
     await authedSupabase.rpc('update_user_last_login', { user_id: authData.user.id } as never);
+
     // SET SESSION COOKIES
     if (authData.session) {
       const { cookies } = await import('next/headers');
@@ -157,19 +186,20 @@ async function POSTHandler(req: Request) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax' as const,
-        maxAge: authData.session.expires_in || 3600,
       };
+      const persistentCookieOptions = shouldRemember
+        ? { ...cookieOptions, maxAge: 60 * 60 * 24 * 30 } // 30 days
+        : cookieOptions;
 
-      // Set access token and refresh token cookies
-      cookieStore.set('sb-access-token', authData.session.access_token, cookieOptions);
-      cookieStore.set('sb-refresh-token', authData.session.refresh_token, cookieOptions);
+      cookieStore.set('sb-access-token', authData.session.access_token, persistentCookieOptions);
+      cookieStore.set('sb-refresh-token', authData.session.refresh_token, persistentCookieOptions);
     }
 
     // RETURN SUCCESS
     return ok({
-      user: userProfile,
+      user: resolvedUserProfile,
       session: authData.session,
-      message: 'Επιτυχής σύνδεση!',
+      message: 'Login successful!',
     });
   } catch (error) {
     console.error('Login error:', error);

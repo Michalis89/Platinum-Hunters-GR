@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSession, setUser, logout, selectUser } from '@/store/slices/authSlice';
-import { supabase } from '@/lib/supabase-client';
+import { isAuthPersistenceEnabled, supabase } from '@/lib/supabase-client';
 import type { AppDispatch } from '@/store/store';
 
 const AUTH_STORAGE_KEY = 'hobbistas-hub-auth';
@@ -43,6 +43,7 @@ function isTokenExpired(expiresAt: number | undefined | null): boolean {
 function clearAuthStorage() {
   try {
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    sessionStorage.removeItem(AUTH_STORAGE_KEY);
   } catch {
     // ignore storage errors (e.g., SSR, private browsing)
   }
@@ -76,6 +77,7 @@ async function syncCookies(session: {
         access_token: session.access_token,
         refresh_token: session.refresh_token,
         expires_in: session.expires_in || 3600,
+        remember: isAuthPersistenceEnabled(),
       }),
     });
     // If server returns 401, cookies have expired - session is invalid
@@ -316,7 +318,7 @@ export default function AuthInit() {
         if (!data.session) {
           await dispatch(logout());
           dispatch(setUser(null));
-          localStorage.removeItem('hobbistas-hub-auth');
+          clearAuthStorage();
         }
       }, IDLE_LIMIT_MS);
     };

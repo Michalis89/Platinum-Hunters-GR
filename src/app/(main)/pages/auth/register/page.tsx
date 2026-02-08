@@ -1,30 +1,30 @@
-import { Suspense } from 'react';
+﻿import { Suspense } from 'react';
 import { Sparkles, ListChecks, Trophy, Heart } from 'lucide-react';
 import RegisterForm from '@/app/components/auth/RegisterForm';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
-  title: 'Εγγραφή | Hobbistas',
-  description: 'Δημιούργησε λογαριασμό στον Hobbista για να οργανώσεις τα χόμπι σου.',
+  title: 'Register | Hobbistas',
+  description: 'Create your Hobbistas account and organize all your hobbies.',
   path: '/pages/auth/register',
   noindex: true,
 });
 
 const highlights = [
   {
-    title: 'Ενιαίο Backlog',
-    description: 'Games, anime, ταινίες, σειρές και βιβλία σε ένα σημείο.',
+    title: 'Unified backlog',
+    description: 'Games, anime, movies, TV, and books in one place.',
     icon: ListChecks,
   },
   {
-    title: 'Πρόοδος & Στατιστικά',
-    description: 'Ώρες, επεισόδια και σελίδες με καθαρή παρακολούθηση.',
+    title: 'Progress and stats',
+    description: 'Track hours, episodes, chapters, and pages with clarity.',
     icon: Trophy,
   },
   {
-    title: 'Προσωποποιημένες Προτάσεις',
-    description: 'Ανακάλυψε νέο περιεχόμενο βάσει των ενδιαφερόντων σου.',
+    title: 'Personalized discovery',
+    description: 'Find new content based on your interests.',
     icon: Heart,
   },
 ];
@@ -41,13 +41,13 @@ export default function RegisterPage() {
             <aside className="hidden space-y-6 lg:block">
               <div className="space-y-3">
                 <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
-                  Γίνε μέλος
+                  Join now
                 </p>
                 <h1 className="apple-title-tracking text-4xl font-semibold leading-tight text-[var(--apple-label)]">
-                  Ξεκίνα το ταξίδι σου
+                  Start your journey
                 </h1>
                 <p className="apple-body-tracking max-w-xl text-base text-[var(--apple-secondary-label)]">
-                  Ένα dashboard για όλα τα χόμπι σου, με λιτή οργάνωση και καθαρή εικόνα προόδου.
+                  One dashboard for all your hobbies, with clean organization and clear progress.
                 </p>
               </div>
 
@@ -58,7 +58,7 @@ export default function RegisterPage() {
                 <div>
                   <p className="text-sm font-semibold text-[var(--apple-label)]">Hobbista Hub</p>
                   <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
-                    Συνέπεια σε layout, controls και interactions.
+                    Consistent layout, controls, and interactions.
                   </p>
                 </div>
               </div>
@@ -86,13 +86,13 @@ export default function RegisterPage() {
             <div className="space-y-4">
               <header className="text-center lg:hidden">
                 <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
-                  Γίνε μέλος
+                  Join now
                 </p>
                 <h1 className="apple-title-tracking mt-2 text-2xl font-semibold text-[var(--apple-label)]">
-                  Ξεκίνα το ταξίδι σου
+                  Start your journey
                 </h1>
                 <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
-                  Δημιούργησε λογαριασμό και οργάνωσε όλα τα χόμπι σου σε ένα dashboard.
+                  Create your account and organize all your hobbies in one dashboard.
                 </p>
               </header>
 

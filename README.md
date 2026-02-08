@@ -4,7 +4,7 @@
   <h1>Hobbistas</h1>
 
   <p>
-    <strong>A Greek hobby tracking platform for managing entertainment libraries across games, anime, movies, books and more</strong>
+    <strong>A hobby tracking platform for managing entertainment libraries across games, anime, movies, books and more</strong>
   </p>
 
   <p>
@@ -27,7 +27,7 @@
 
 ## Overview
 
-Hobbistas is a Greek-first hobby hub that unifies games, anime, manga, movies, TV, and books under a single backlog, activity, and editorial experience.
+Hobbistas is a hobby hub that unifies games, anime, manga, movies, TV, and books under a single backlog, activity, and editorial experience.
 
 ### Key Features
 
@@ -119,12 +119,12 @@ Copy `.env.example` to `.env.local` and populate the keys below before running l
 
 ```bash
 # Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://XXX.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=anon-public-key
 SUPABASE_SERVICE_ROLE_KEY=service-role-key
 
 # Site metadata
-SITE_URL=https://platinumhunters.gr
+SITE_URL=https://hobbistas-hub.com/
 NEXT_PUBLIC_CONTACT_EMAIL=ops@example.com
 
 # External APIs (optional but recommended for metadata)
@@ -189,11 +189,11 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ### Other
 
-| Method | Endpoint                  | Description          |
-| ------ | ------------------------- | -------------------- |
-| GET    | `/api/activity`           | Get activity feed    |
-| GET    | `/api/analytics/summary`  | Admin analytics      |
-| GET    | `/api/user/stats`         | User statistics      |
+| Method | Endpoint                 | Description       |
+| ------ | ------------------------ | ----------------- |
+| GET    | `/api/activity`          | Get activity feed |
+| GET    | `/api/analytics/summary` | Admin analytics   |
+| GET    | `/api/user/stats`        | User statistics   |
 
 ---
 

@@ -15,7 +15,8 @@ async function POSTHandler(req: Request) {
     }
 
     const body = await req.json();
-    const { access_token, refresh_token, expires_in } = body;
+    const { access_token, refresh_token, remember } = body;
+    const shouldRemember = remember === true;
 
     if (!access_token || !refresh_token) {
       return fail({ error: 'Λείπουν τα tokens' }, 400);
@@ -49,11 +50,13 @@ async function POSTHandler(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax' as const,
-      maxAge: expires_in || 3600,
     };
+    const persistentCookieOptions = shouldRemember
+      ? { ...cookieOptions, maxAge: 60 * 60 * 24 * 30 } // 30 days
+      : cookieOptions;
 
-    cookieStore.set('sb-access-token', access_token, cookieOptions);
-    cookieStore.set('sb-refresh-token', refresh_token, cookieOptions);
+    cookieStore.set('sb-access-token', access_token, persistentCookieOptions);
+    cookieStore.set('sb-refresh-token', refresh_token, persistentCookieOptions);
 
     return ok({ success: true });
   } catch (error) {
