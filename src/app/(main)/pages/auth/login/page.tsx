@@ -1,6 +1,7 @@
-﻿import { Suspense } from 'react';
+import { Suspense } from 'react';
 import { Sparkles, ListChecks, Clock3, ShieldCheck } from 'lucide-react';
 import LoginForm from '@/app/components/auth/LoginForm';
+import { AuthIntroHeading } from '@/app/components/auth/shared/AuthIntroHeading';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
@@ -39,17 +40,12 @@ export default function LoginPage() {
 
           <div className="relative grid items-start gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8">
             <aside className="hidden space-y-6 lg:block">
-              <div className="space-y-3">
-                <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
-                  Welcome back
-                </p>
-                <h1 className="apple-title-tracking text-4xl font-semibold leading-tight text-[var(--apple-label)]">
-                  Continue your journey
-                </h1>
-                <p className="apple-body-tracking max-w-xl text-base text-[var(--apple-secondary-label)]">
-                  Pick up where you left off. Everything in one place with a single sign-in.
-                </p>
-              </div>
+              <AuthIntroHeading
+                variant="desktop"
+                eyebrow="Welcome back"
+                title="Continue your journey"
+                description="Pick up where you left off. Everything in one place with a single sign-in."
+              />
 
               <div className="apple-auth-section flex items-center gap-3 px-4 py-3">
                 <div className="bg-[var(--apple-system-blue)]/12 flex h-10 w-10 items-center justify-center rounded-[var(--apple-radius-control)] text-[var(--apple-system-blue)]">
@@ -86,17 +82,12 @@ export default function LoginPage() {
             </aside>
 
             <div className="space-y-4">
-              <header className="text-center lg:hidden">
-                <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
-                  Welcome back
-                </p>
-                <h1 className="apple-title-tracking mt-2 text-2xl font-semibold text-[var(--apple-label)]">
-                  Continue your journey
-                </h1>
-                <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
-                  Sign in to continue with your hobbies and backlogs.
-                </p>
-              </header>
+              <AuthIntroHeading
+                variant="mobile"
+                eyebrow="Welcome back"
+                title="Continue your journey"
+                description="Sign in to continue with your hobbies and backlogs."
+              />
 
               <Suspense fallback={<div className="h-[560px] w-full" />}>
                 <LoginForm />

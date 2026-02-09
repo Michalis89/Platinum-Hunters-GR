@@ -93,7 +93,7 @@ export function UserMenu({
                 {user.username ?? 'Hobbistas User'}
               </p>
               <p className="truncate text-xs text-[var(--apple-secondary-label)]">
-                {user.email ?? 'Μέλος της κοινότητας'}
+                {user.email ?? 'Community member'}
               </p>
             </div>
           </div>
@@ -103,25 +103,25 @@ export function UserMenu({
           {canQuickAdd ? (
             <DropdownMenuItem onSelect={onAdd} className={itemClassName}>
               <Plus className="size-4" />
-              <span>Προσθήκη</span>
+              <span>Quick add</span>
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem asChild className={itemClassName}>
             <Link href="/pages/profile" prefetch={false}>
               <User className="size-4" />
-              <span>Προφίλ</span>
+              <span>Profile</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={itemClassName}>
             <Link href="/pages/profile/edit" prefetch={false}>
               <PenLine className="size-4" />
-              <span>Επεξεργασία Προφίλ</span>
+              <span>Edit profile</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={itemClassName}>
             <Link href="/pages/support/tickets" prefetch={false}>
               <Ticket className="size-4" />
-              <span>Τα tickets μου</span>
+              <span>My tickets</span>
             </Link>
           </DropdownMenuItem>
           {canAccessAdminPanel ? (
@@ -136,7 +136,7 @@ export function UserMenu({
         <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
         <DropdownMenuItem onSelect={handleThemeSelect} className={itemClassName}>
           {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          <span>Θέμα</span>
+          <span>Appearance</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
         <DropdownMenuItem
@@ -146,7 +146,7 @@ export function UserMenu({
           className={itemClassName}
         >
           <LogOut className="size-4" />
-          <span>Έξοδος</span>
+          <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

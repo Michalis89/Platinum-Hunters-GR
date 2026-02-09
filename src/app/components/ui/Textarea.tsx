@@ -17,6 +17,7 @@ export function Textarea({ label, error, className = '', ...props }: Readonly<Te
       )}
       <textarea
         {...props}
+        suppressHydrationWarning
         className={cn(
           'w-full rounded-[var(--apple-radius-control)] border-[var(--apple-hairline)] bg-[var(--hb-input-bg)] px-3 py-2.5 text-[var(--hb-text)] placeholder:text-[var(--hb-input-placeholder)] transition focus:outline-none focus:ring-2 focus:ring-[var(--hb-ring)] focus:border-[var(--hb-primary)]',
           error

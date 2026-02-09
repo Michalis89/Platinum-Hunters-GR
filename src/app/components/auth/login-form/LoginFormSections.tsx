@@ -1,15 +1,15 @@
 import Link from 'next/link';
-import { AlertCircle, CheckCircle2, Eye, EyeOff, LogIn, Mail } from 'lucide-react';
+import { AlertCircle, CheckCircle2, LogIn, Mail } from 'lucide-react';
 import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { AuthPasswordField } from '@/app/components/auth/shared/AuthPasswordField';
+import { AuthSubmitButton } from '@/app/components/auth/shared/AuthSubmitButton';
+import { AuthTextField } from '@/app/components/auth/shared/AuthTextField';
 import { alertToneClass, isCaptchaDisabled } from './constants';
 import type { AlertState } from './useLoginForm';
 
@@ -59,33 +59,16 @@ export function IdentifierField({
   isRedirecting,
 }: IdentifierFieldProps) {
   return (
-    <div className="space-y-2.5">
-      <Label
-        htmlFor="identifier"
-        className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
-      >
-        Email or username
-      </Label>
-      <Input
-        id="identifier"
-        type="text"
-        name="identifier"
-        value={identifier}
-        onChange={e => onChange(e.target.value)}
-        placeholder="you@domain.com or username"
-        disabled={loading || isRedirecting}
-        required
-        suppressHydrationWarning
-        aria-invalid={!!error}
-        aria-describedby={error ? 'identifier-error' : undefined}
-        className="apple-auth-control h-11 border-[var(--apple-separator)] bg-[var(--hb-input-bg)] text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]"
-      />
-      {error && (
-        <p id="identifier-error" className="text-[13px] leading-relaxed text-[#ff3b30]">
-          {error}
-        </p>
-      )}
-    </div>
+    <AuthTextField
+      id="identifier"
+      name="identifier"
+      label="Email or username"
+      value={identifier}
+      onChange={onChange}
+      placeholder="you@domain.com or username"
+      error={error}
+      disabled={loading || isRedirecting}
+    />
   );
 }
 
@@ -107,58 +90,17 @@ export function PasswordField({
   isRedirecting,
 }: PasswordFieldProps) {
   return (
-    <div className="space-y-2.5">
-      <Label
-        htmlFor="password"
-        className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
-      >
-        Password
-      </Label>
-      <div className="relative">
-        <Input
-          id="password"
-          type={showPassword ? 'text' : 'password'}
-          name="password"
-          value={password}
-          onChange={e => onChange(e.target.value)}
-          placeholder="********"
-          disabled={loading || isRedirecting}
-          required
-          suppressHydrationWarning
-          aria-invalid={!!error}
-          aria-describedby={error ? 'password-error' : undefined}
-          className="apple-auth-control h-11 border-[var(--apple-separator)] bg-[var(--hb-input-bg)] pr-12 text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]"
-        />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onToggleVisibility}
-              className={`absolute right-1.5 top-1/2 z-20 h-8 w-8 -translate-y-1/2 rounded-[10px] border ${
-                showPassword
-                  ? 'border-[var(--apple-system-blue)] bg-[var(--apple-system-blue)] text-white hover:bg-[var(--apple-system-blue)]'
-                  : 'border-[var(--apple-separator)] bg-[var(--apple-surface)] text-[var(--apple-system-blue)] hover:bg-[var(--apple-tertiary-fill)]'
-              }`}
-              ariaLabel={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-white" />
-              ) : (
-                <Eye className="h-4 w-4 text-[var(--apple-system-blue)]" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{showPassword ? 'Hide password' : 'Show password'}</TooltipContent>
-        </Tooltip>
-      </div>
-      {error && (
-        <p id="password-error" className="text-[13px] leading-relaxed text-[#ff3b30]">
-          {error}
-        </p>
-      )}
-    </div>
+    <AuthPasswordField
+      id="password"
+      name="password"
+      label="Password"
+      value={password}
+      showPassword={showPassword}
+      error={error}
+      disabled={loading || isRedirecting}
+      onChange={onChange}
+      onToggleVisibility={onToggleVisibility}
+    />
   );
 }
 
@@ -185,12 +127,12 @@ export function RememberForgotRow({
           disabled={loading || isRedirecting}
           className="h-4 w-4 rounded-[7px] border-[var(--apple-separator)] data-[state=checked]:border-[var(--apple-system-blue)] data-[state=checked]:bg-[var(--apple-system-blue)]"
         />
-        <Label
+        <label
           htmlFor="remember"
           className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
         >
           Remember me
-        </Label>
+        </label>
       </div>
 
       <Button
@@ -251,14 +193,16 @@ type SubmitButtonProps = BaseProps & {
 };
 
 export function LoginSubmitButton({ loading, isRedirecting, canSubmit }: SubmitButtonProps) {
+  const isBusy = loading || isRedirecting;
+
   return (
-    <Button
+    <AuthSubmitButton
       type="submit"
       variant="primary"
       className="apple-auth-control flex h-11 w-full items-center justify-center gap-2 text-[0.95rem] font-semibold tracking-[-0.01em]"
       disabled={!canSubmit}
-    >
-      {loading || isRedirecting ? (
+      loading={isBusy}
+      loadingContent={
         isRedirecting ? (
           <>
             Redirecting...
@@ -270,13 +214,14 @@ export function LoginSubmitButton({ loading, isRedirecting, canSubmit }: SubmitB
             <Spinner data-icon="inline-start" className="h-4 w-4" />
           </>
         )
-      ) : (
+      }
+      idleContent={
         <>
           <LogIn className="h-5 w-5" />
           Sign in
         </>
-      )}
-    </Button>
+      }
+    />
   );
 }
 
@@ -352,26 +297,16 @@ export function ResetPanel({
         </Alert>
       )}
 
-      <div className="space-y-2.5">
-        <Label
-          htmlFor="resetEmail"
-          className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
-        >
-          Email
-        </Label>
-        <Input
-          id="resetEmail"
-          type="email"
-          name="resetEmail"
-          value={resetEmail}
-          onChange={e => onResetEmailChange(e.target.value)}
-          placeholder="you@domain.com"
-          disabled={resetLoading}
-          required
-          suppressHydrationWarning
-          className="apple-auth-control h-11 border-[var(--apple-separator)] bg-[var(--hb-input-bg)] text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]"
-        />
-      </div>
+      <AuthTextField
+        id="resetEmail"
+        type="email"
+        name="resetEmail"
+        label="Email"
+        value={resetEmail}
+        onChange={onResetEmailChange}
+        placeholder="you@domain.com"
+        disabled={resetLoading}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -382,8 +317,8 @@ export function ResetPanel({
         >
           {resetLoading ? (
             <>
-              <Spinner className="h-4 w-4" />
               Sending...
+              <Spinner className="h-4 w-4" />
             </>
           ) : (
             'Send recovery link'

@@ -72,33 +72,37 @@ export function MobileNavSheet({
 
           <div className="h-[calc(100vh-72px)] overflow-y-auto px-5 py-4 [scrollbar-width:thin]">
             <div className="space-y-4 pr-1">
+              {hobbyItems.length > 0 ? (
+                <>
+                  <section className="space-y-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
+                      Library
+                    </h3>
+                    <div className="-mx-1 overflow-x-auto px-1 pb-2 [scrollbar-width:thin] touch-pan-x">
+                      <div className="flex w-max min-w-max gap-2">
+                        {hobbyItems.map(item => (
+                          <Button
+                            key={item.href}
+                            asChild
+                            variant="secondary"
+                            className={mobileChipClass(isHrefActive(pathname, item.href))}
+                          >
+                            <Link href={item.href}>
+                              <NavItemContent icon={item.icon} label={item.label} />
+                            </Link>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
+                </>
+              ) : null}
+
               <section className="space-y-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
-                  Βιβλιοθήκη
-                </h3>
-                <div className="-mx-1 overflow-x-auto px-1 pb-2 [scrollbar-width:thin] touch-pan-x">
-                  <div className="flex w-max min-w-max gap-2">
-                    {hobbyItems.map(item => (
-                      <Button
-                        key={item.href}
-                        asChild
-                        variant="secondary"
-                        className={mobileChipClass(isHrefActive(pathname, item.href))}
-                      >
-                        <Link href={item.href} onClick={closeSheet}>
-                          <NavItemContent icon={item.icon} label={item.label} />
-                        </Link>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
-
-              <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
-                  Γρήγοροι σύνδεσμοι
+                  Quick links
                 </h3>
                 <div className="grid gap-2">
                   {navItems.map(item => (
@@ -108,7 +112,7 @@ export function MobileNavSheet({
                       variant="secondary"
                       className={mobileChipClass(isHrefActive(pathname, item.href), true)}
                     >
-                      <Link href={item.href} onClick={closeSheet}>
+                      <Link href={item.href}>
                         <NavItemContent icon={item.icon} label={item.label} />
                       </Link>
                     </Button>
@@ -119,7 +123,7 @@ export function MobileNavSheet({
               <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Θέμα</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Appearance</h3>
                 <ThemeToggleButton
                   theme={theme}
                   onToggle={onToggleTheme}
@@ -131,7 +135,7 @@ export function MobileNavSheet({
               <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Λογαριασμός</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Account</h3>
                 {!authResolved ? (
                   <NavbarAuthSkeletonMobile />
                 ) : isAuthenticated && user ? (
@@ -156,30 +160,30 @@ export function MobileNavSheet({
                         }}
                       >
                         <Plus className="size-4" />
-                        <span>Προσθήκη</span>
+                        <span>Quick add</span>
                       </Button>
                     ) : null}
                     <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
-                      <Link href="/pages/profile" onClick={closeSheet}>
+                      <Link href="/pages/profile">
                         <User className="size-4" />
-                        <span>Προφίλ</span>
+                        <span>Profile</span>
                       </Link>
                     </Button>
                     <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
-                      <Link href="/pages/profile/edit" onClick={closeSheet}>
+                      <Link href="/pages/profile/edit">
                         <PenLine className="size-4" />
-                        <span>Επεξεργασία Προφίλ</span>
+                        <span>Edit profile</span>
                       </Link>
                     </Button>
                     <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
-                      <Link href="/pages/support/tickets" onClick={closeSheet}>
+                      <Link href="/pages/support/tickets">
                         <Ticket className="size-4" />
-                        <span>Τα tickets μου</span>
+                        <span>My tickets</span>
                       </Link>
                     </Button>
                     {canAccessAdminPanel ? (
                       <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
-                        <Link href="/admin" onClick={closeSheet}>
+                        <Link href="/admin">
                           <ShieldCheck className="size-4" />
                           <span>Admin Panel</span>
                         </Link>
@@ -195,7 +199,7 @@ export function MobileNavSheet({
                       }}
                     >
                       <LogOut className="size-4" />
-                      <span>Έξοδος</span>
+                      <span>Sign out</span>
                     </Button>
                   </div>
                 ) : (
@@ -205,9 +209,9 @@ export function MobileNavSheet({
                       variant="outline"
                       className="h-10 rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
                     >
-                      <Link href="/pages/auth/login" onClick={closeSheet}>
+                      <Link href="/pages/auth/login">
                         <LogIn className="size-4" />
-                        <span>Σύνδεση</span>
+                        <span>Sign in</span>
                       </Link>
                     </Button>
                     <Button
@@ -215,9 +219,9 @@ export function MobileNavSheet({
                       variant="primary"
                       className="h-10 rounded-[var(--apple-radius-control)] border border-transparent bg-[var(--apple-system-blue)] text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:brightness-110 active:scale-[0.98]"
                     >
-                      <Link href="/pages/auth/register" onClick={closeSheet}>
+                      <Link href="/pages/auth/register">
                         <UserPlus className="size-4" />
-                        <span>Εγγραφή</span>
+                        <span>Create account</span>
                       </Link>
                     </Button>
                   </div>

@@ -41,7 +41,7 @@ export function DesktopNav({
   return (
     <div className="hidden flex-1 items-center justify-end md:flex">
       <Menubar className="pointer-events-auto absolute left-1/2 h-11 -translate-x-1/2 items-center gap-1 rounded-[20px] border-[var(--apple-nav-border)] bg-[var(--apple-nav-pill-bg)] px-1.5 py-1 text-[var(--apple-label)] shadow-none backdrop-blur-xl">
-        <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} />
+        {hobbyItems.length > 0 ? <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} /> : null}
         {navItems.map(item => (
           <MenubarMenu key={item.href}>
             <MenubarTrigger asChild className={desktopLinkClass(isHrefActive(pathname, item.href))}>

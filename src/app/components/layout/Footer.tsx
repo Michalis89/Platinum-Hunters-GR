@@ -3,17 +3,17 @@ import { PageContainer } from './PageContainer';
 import VersionBadge from '@/app/components/ui/VersionBadge';
 
 const NAV_LINKS = [
-  { label: 'Αρχική', href: '/' },
-  { label: 'Σχετικά', href: '/pages/about' },
-  { label: 'Χόμπι', href: '/pages/hobbies' },
-  { label: 'Άρθρα', href: '/pages/news' },
-  { label: 'Κριτικές', href: '/pages/reviews' },
-  { label: 'Επικοινωνία', href: '/pages/support' },
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/pages/about' },
+  { label: 'Hobbies', href: '/pages/hobbies' },
+  { label: 'Articles', href: '/pages/news' },
+  { label: 'Reviews', href: '/pages/reviews' },
+  { label: 'Support', href: '/pages/support' },
 ];
 
 const LEGAL_LINKS = [
-  { label: 'Όροι χρήσης', href: '/pages/terms' },
-  { label: 'Πολιτική απορρήτου', href: '/pages/privacy' },
+  { label: 'Terms of Service', href: '/pages/terms' },
+  { label: 'Privacy Policy', href: '/pages/privacy' },
 ];
 
 const CONTACT = [
@@ -59,8 +59,8 @@ export function Footer() {
               </Link>
 
               <p className="apple-body-tracking max-w-sm text-sm leading-6 text-[var(--apple-secondary-label)]">
-                Ο χώρος σου για gaming, anime, manga, ταινίες, σειρές και βιβλία. Όλα οργανωμένα,
-                χωρίς θόρυβο.
+                Your space for gaming, anime, manga, movies, TV series, and books. Everything
+                organized — without the noise.
               </p>
 
               <div className="flex flex-wrap gap-2">
@@ -78,7 +78,7 @@ export function Footer() {
 
             <section>
               <h2 className="apple-title-tracking mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--apple-label)]">
-                Πλοήγηση
+                Navigation
               </h2>
 
               <ul className="space-y-3">
@@ -92,7 +92,7 @@ export function Footer() {
 
             <section>
               <h2 className="apple-title-tracking mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--apple-label)]">
-                Νομικά
+                Legal
               </h2>
 
               <ul className="space-y-3">
@@ -108,12 +108,16 @@ export function Footer() {
           <div className="mt-8 border-t border-[var(--apple-separator)] pt-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-[var(--apple-secondary-label)]" suppressHydrationWarning>
-                © {currentYear} Hobbistas. Με επιφύλαξη παντός δικαιώματος.
+                © {currentYear} Hobbistas. All rights reserved.
               </p>
 
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
                 {LEGAL_LINKS.map(link => (
-                  <Link key={link.href} href={link.href} className="apple-footer-link apple-focus-ring">
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="apple-footer-link apple-focus-ring"
+                  >
                     {link.label}
                   </Link>
                 ))}

@@ -1,0 +1,279 @@
+import type { FormEvent } from 'react';
+import { CheckCircle2, CircleAlert, Lock } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { AuthPasswordField } from '@/app/components/auth/shared/AuthPasswordField';
+import { AuthSubmitButton } from '@/app/components/auth/shared/AuthSubmitButton';
+
+type PasswordRequirement = {
+  label: string;
+  valid: boolean;
+};
+
+type StatusAlertsProps = {
+  error: string | null;
+  success: string | null;
+};
+
+export function LoadingState() {
+  return (
+    <div className="apple-auth-shell flex min-h-screen items-center justify-center px-4 py-12">
+      <Card className="apple-auth-card w-full max-w-md">
+        <CardHeader className="space-y-3 px-6 pt-7">
+          <Skeleton className="mx-auto h-12 w-12 rounded-[var(--apple-radius-control)]" />
+          <Skeleton className="mx-auto h-6 w-52" />
+          <Skeleton className="mx-auto h-4 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-4 px-6 pb-7">
+          <Skeleton className="h-10 w-full rounded-[var(--apple-radius-control)]" />
+          <Skeleton className="h-10 w-full rounded-[var(--apple-radius-control)]" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-[var(--apple-radius-control)]" />
+          <div className="flex justify-center pt-1">
+            <Spinner className="h-5 w-5 text-[var(--apple-system-blue)]" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export function StatusAlerts({ error, success }: StatusAlertsProps) {
+  return (
+    <>
+      {error && (
+        <Alert variant="destructive" className="bg-[#ff3b30]/8 border-[#ff3b30]/40">
+          <CircleAlert className="h-4 w-4" />
+          <AlertTitle>Password update failed</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert className="border-[#34c759]/40 bg-[#34c759]/10 text-[var(--apple-label)]">
+          <CheckCircle2 className="h-4 w-4 text-[#34c759]" />
+          <AlertTitle>Password updated</AlertTitle>
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
+      )}
+    </>
+  );
+}
+
+type PasswordFieldProps = {
+  id: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  visible: boolean;
+  disabled: boolean;
+  onChange: (value: string) => void;
+  onToggleVisibility: () => void;
+  infoTooltip?: string;
+};
+
+export function PasswordField({
+  id,
+  label,
+  placeholder,
+  value,
+  visible,
+  disabled,
+  onChange,
+  onToggleVisibility,
+  infoTooltip,
+}: PasswordFieldProps) {
+  return (
+    <AuthPasswordField
+      id={id}
+      name={id}
+      label={label}
+      placeholder={placeholder}
+      value={value}
+      showPassword={visible}
+      disabled={disabled}
+      onChange={onChange}
+      onToggleVisibility={onToggleVisibility}
+      infoTooltip={infoTooltip}
+    />
+  );
+}
+
+type PasswordStrengthProps = {
+  requirements: PasswordRequirement[];
+  passwordsMatch: boolean;
+  passedRequirementCount: number;
+  passwordStrengthProgress: number;
+};
+
+export function PasswordStrengthCard({
+  requirements,
+  passwordsMatch,
+  passedRequirementCount,
+  passwordStrengthProgress,
+}: PasswordStrengthProps) {
+  return (
+    <div className="bg-[var(--apple-surface)]/60 rounded-xl border border-[var(--apple-separator-soft)] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs font-medium uppercase tracking-wide text-[var(--apple-secondary-label)]">
+          Password strength
+        </p>
+        <p className="text-xs font-medium text-[var(--apple-label)]">
+          {passedRequirementCount}/{requirements.length}
+        </p>
+      </div>
+      <Progress value={passwordStrengthProgress} className="h-1.5" />
+      <div className="mt-3 space-y-2">
+        {requirements.map(requirement => (
+          <div
+            key={requirement.label}
+            className="flex items-center gap-2 text-xs text-[var(--apple-secondary-label)]"
+          >
+            <CheckCircle2
+              className={`h-3.5 w-3.5 ${
+                requirement.valid ? 'text-[#34c759]' : 'text-[var(--apple-tertiary-label)]'
+              }`}
+            />
+            <span>{requirement.label}</span>
+          </div>
+        ))}
+        <div className="flex items-center gap-2 text-xs text-[var(--apple-secondary-label)]">
+          <CheckCircle2
+            className={`h-3.5 w-3.5 ${
+              passwordsMatch ? 'text-[#34c759]' : 'text-[var(--apple-tertiary-label)]'
+            }`}
+          />
+          <span>Passwords match</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type SubmitButtonProps = {
+  canSubmit: boolean;
+  submitting: boolean;
+};
+
+export function SubmitButton({ canSubmit, submitting }: SubmitButtonProps) {
+  return (
+    <AuthSubmitButton
+      variant="primary"
+      size="xl"
+      type="submit"
+      disabled={!canSubmit}
+      loading={submitting}
+      loadingContent={
+        <span className="flex items-center justify-center gap-2">
+          Updating...
+          <Spinner className="h-4 w-4 text-white" />
+        </span>
+      }
+      idleContent="Update password"
+    />
+  );
+}
+
+type ResetPasswordCardProps = {
+  error: string | null;
+  success: string | null;
+  submitting: boolean;
+  canSubmit: boolean;
+  password: string;
+  confirmPassword: string;
+  showPassword: boolean;
+  showConfirmPassword: boolean;
+  passwordRequirements: PasswordRequirement[];
+  passwordsMatch: boolean;
+  passedRequirementCount: number;
+  passwordStrengthProgress: number;
+  onPasswordChange: (value: string) => void;
+  onConfirmPasswordChange: (value: string) => void;
+  onTogglePassword: () => void;
+  onToggleConfirmPassword: () => void;
+  onSubmit: (e: FormEvent) => void;
+};
+
+export function ResetPasswordCard({
+  error,
+  success,
+  submitting,
+  canSubmit,
+  password,
+  confirmPassword,
+  showPassword,
+  showConfirmPassword,
+  passwordRequirements,
+  passwordsMatch,
+  passedRequirementCount,
+  passwordStrengthProgress,
+  onPasswordChange,
+  onConfirmPasswordChange,
+  onTogglePassword,
+  onToggleConfirmPassword,
+  onSubmit,
+}: ResetPasswordCardProps) {
+  return (
+    <TooltipProvider delayDuration={120}>
+      <div className="w-full max-w-md">
+        <Card className="apple-auth-card overflow-hidden border-[var(--apple-separator-soft)] bg-[color-mix(in_srgb,var(--apple-surface)_84%,transparent)] backdrop-blur-xl">
+          <CardHeader className="bg-transparent pb-4 pt-7 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_14%,transparent)] text-[var(--apple-system-blue)]">
+              <Lock className="h-6 w-6" />
+            </div>
+            <CardTitle className="text-2xl font-semibold text-[var(--apple-label)]">
+              Set New Password
+            </CardTitle>
+            <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
+              Choose a secure password for your account.
+            </p>
+          </CardHeader>
+
+          <CardContent className="space-y-5 px-6 pb-7 pt-5">
+            <StatusAlerts error={error} success={success} />
+
+            <form onSubmit={onSubmit} className="space-y-4">
+              <PasswordField
+                id="new-password"
+                label="New password"
+                placeholder="Enter your new password"
+                value={password}
+                visible={showPassword}
+                disabled={submitting}
+                onChange={onPasswordChange}
+                onToggleVisibility={onTogglePassword}
+                infoTooltip="Use 8+ chars with uppercase, lowercase, number, and symbol."
+              />
+
+              <PasswordField
+                id="confirm-password"
+                label="Confirm password"
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                visible={showConfirmPassword}
+                disabled={submitting}
+                onChange={onConfirmPasswordChange}
+                onToggleVisibility={onToggleConfirmPassword}
+              />
+
+              <Separator className="bg-[var(--apple-separator-soft)]" />
+
+              <PasswordStrengthCard
+                requirements={passwordRequirements}
+                passwordsMatch={passwordsMatch}
+                passedRequirementCount={passedRequirementCount}
+                passwordStrengthProgress={passwordStrengthProgress}
+              />
+
+              <SubmitButton canSubmit={canSubmit} submitting={submitting} />
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </TooltipProvider>
+  );
+}

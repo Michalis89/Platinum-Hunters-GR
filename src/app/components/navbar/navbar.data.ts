@@ -35,10 +35,10 @@ export type HobbyItem = NavbarLinkItem & {
 };
 
 export const NAV_ITEMS: NavbarLinkItem[] = [
-  { href: '/pages/news', label: 'Άρθρα', icon: FileText },
-  { href: '/pages/reviews', label: 'Κριτικές', icon: Star },
-  { href: '/pages/about', label: 'Σχετικά', icon: Book },
-  { href: '/pages/support', label: 'Επικοινωνία', icon: MessageCircle, requiresAuth: true },
+  { href: '/pages/news', label: 'Articles', icon: FileText },
+  { href: '/pages/reviews', label: 'Reviews', icon: Star },
+  { href: '/pages/about', label: 'About', icon: Book },
+  { href: '/pages/support', label: 'Support', icon: MessageCircle, requiresAuth: true },
 ];
 
 export const HOBBY_ITEMS: HobbyItem[] = [
@@ -48,7 +48,7 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: Gamepad2,
     category: 'games',
     children: [
-      { href: '/pages/news?category=games', label: 'Άρθρα', icon: FileText },
+      { href: '/pages/news?category=games', label: 'Articles', icon: FileText },
       { href: '/pages/backlog?category=games', label: 'Gaming Backlog', icon: ListChecks },
       { href: '/pages/reviews?category=games', label: 'Reviews', icon: Star },
     ],
@@ -59,7 +59,7 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: Sparkles,
     category: 'anime',
     children: [
-      { href: '/pages/news?category=anime', label: 'Άρθρα', icon: FileText },
+      { href: '/pages/news?category=anime', label: 'Articles', icon: FileText },
       { href: '/pages/backlog?category=anime', label: 'Anime Library', icon: ListChecks },
       { href: '/pages/reviews?category=anime', label: 'Reviews', icon: Star },
     ],
@@ -70,7 +70,7 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: BookOpen,
     category: 'manga',
     children: [
-      { href: '/pages/news?category=manga', label: 'Άρθρα', icon: FileText },
+      { href: '/pages/news?category=manga', label: 'Articles', icon: FileText },
       { href: '/pages/backlog?category=manga', label: 'Manga Library', icon: ListChecks },
       { href: '/pages/reviews?category=manga', label: 'Reviews', icon: Star },
     ],
@@ -81,8 +81,8 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: Film,
     category: 'movies',
     children: [
-      { href: '/pages/news?category=movies', label: 'Άρθρα', icon: FileText },
-      { href: '/pages/backlog?category=movies', label: 'Movies Library', icon: ListChecks },
+      { href: '/pages/news?category=movies', label: 'Articles', icon: FileText },
+      { href: '/pages/backlog?category=movies', label: 'Movie Library', icon: ListChecks },
       { href: '/pages/reviews?category=movies', label: 'Reviews', icon: Star },
     ],
   },
@@ -92,19 +92,19 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: Tv,
     category: 'tv',
     children: [
-      { href: '/pages/news?category=tv', label: 'Άρθρα', icon: FileText },
+      { href: '/pages/news?category=tv', label: 'Articles', icon: FileText },
       { href: '/pages/backlog?category=tv', label: 'TV Library', icon: ListChecks },
       { href: '/pages/reviews?category=tv', label: 'Reviews', icon: Star },
     ],
   },
   {
     href: '/pages/backlog?category=books',
-    label: 'Βιβλία',
+    label: 'Books',
     icon: BookOpen,
     category: 'books',
     children: [
-      { href: '/pages/news?category=books', label: 'Άρθρα', icon: FileText },
-      { href: '/pages/backlog?category=books', label: 'Books Library', icon: ListChecks },
+      { href: '/pages/news?category=books', label: 'Articles', icon: FileText },
+      { href: '/pages/backlog?category=books', label: 'Book Library', icon: ListChecks },
       { href: '/pages/reviews?category=books', label: 'Reviews', icon: Star },
     ],
   },
@@ -114,9 +114,9 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: Code,
     category: 'coding',
     children: [
-      { href: '/pages/news?category=coding', label: 'Άρθρα', icon: FileText },
+      { href: '/pages/news?category=coding', label: 'Articles', icon: FileText },
       { href: '/pages/news?category=coding&topic=tutorials', label: 'Tutorials', icon: BookOpen },
-      { href: '/pages/news?category=coding&topic=weird-cases', label: 'Weird Cases', icon: Sparkles },
+      { href: '/pages/news?category=coding&topic=weird-cases', label: 'Edge Cases', icon: Sparkles },
     ],
   },
   {
@@ -125,10 +125,10 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: PawPrint,
     category: 'pet',
     children: [
-      { href: '/pages/news?category=pet', label: 'Άρθρα', icon: FileText },
-      { href: '/pages/news?category=pet&topic=care', label: 'Φροντίδα', icon: BookOpen },
-      { href: '/pages/news?category=pet&topic=experiences', label: 'Εμπειρίες', icon: Sparkles },
-      { href: '/pages/news?category=pet&topic=health', label: 'Υγεία', icon: Star },
+      { href: '/pages/news?category=pet', label: 'Articles', icon: FileText },
+      { href: '/pages/news?category=pet&topic=care', label: 'Care', icon: BookOpen },
+      { href: '/pages/news?category=pet&topic=experiences', label: 'Stories', icon: Sparkles },
+      { href: '/pages/news?category=pet&topic=health', label: 'Health', icon: Star },
     ],
   },
   {
@@ -137,15 +137,15 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     icon: Cloud,
     category: 'vape',
     children: [
-      { href: '/pages/news?category=vape', label: 'Άρθρα', icon: FileText },
+      { href: '/pages/news?category=vape', label: 'Articles', icon: FileText },
       {
         href: '/pages/news?category=vape&topic=devices',
-        label: 'Ατμοποιητές/Συσκευές',
+        label: 'Devices & Atomizers',
         icon: ListChecks,
       },
-      { href: '/pages/news?category=vape&topic=liquids', label: 'Υγρά', icon: BookOpen },
-      { href: '/pages/news?category=vape&topic=experiences', label: 'Εμπειρίες', icon: Sparkles },
-      { href: '/pages/reviews?category=vape', label: 'Κριτικές', icon: Star },
+      { href: '/pages/news?category=vape&topic=liquids', label: 'E-liquids', icon: BookOpen },
+      { href: '/pages/news?category=vape&topic=experiences', label: 'Stories', icon: Sparkles },
+      { href: '/pages/reviews?category=vape', label: 'Reviews', icon: Star },
     ],
   },
 ];
@@ -173,9 +173,12 @@ export const getVisibleHobbyItems = (
   isAuthenticated: boolean,
   userCategories: string[],
 ) => {
-  if (!authResolved) return items;
-  if (isAuthenticated && userCategories.length > 0) {
-    return items.filter(item => !item.category || userCategories.includes(item.category));
-  }
-  return items;
+  if (!authResolved || !isAuthenticated) return items;
+
+  const normalizedCategories = userCategories.map(category => category.trim().toLowerCase()).filter(Boolean);
+
+  // Guard: authenticated users with no enabled categories should not see hobby/library items.
+  if (normalizedCategories.length === 0) return [];
+
+  return items.filter(item => !item.category || normalizedCategories.includes(item.category.toLowerCase()));
 };

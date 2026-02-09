@@ -21,7 +21,7 @@ export function AuthButtons({ theme, onToggleTheme }: AuthButtonsProps) {
       >
         <Link href="/pages/auth/login">
           <LogIn className="size-4" />
-          <span>Σύνδεση</span>
+          <span>Sign in</span>
         </Link>
       </Button>
       <Button
@@ -31,10 +31,9 @@ export function AuthButtons({ theme, onToggleTheme }: AuthButtonsProps) {
       >
         <Link href="/pages/auth/register">
           <UserPlus className="size-4" />
-          <span>Εγγραφή</span>
+          <span>Create account</span>
         </Link>
       </Button>
     </div>
   );
 }
-

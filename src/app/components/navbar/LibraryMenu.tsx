@@ -41,9 +41,9 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
 
   return (
     <MenubarMenu>
-      <MenubarTrigger className={`${desktopLinkClass(isLibraryActive)} gap-2`} aria-label="Άνοιγμα μενού βιβλιοθήκης">
+      <MenubarTrigger className={`${desktopLinkClass(isLibraryActive)} gap-2`} aria-label="Open library menu">
         <Layers className="size-4" />
-        <span>Βιβλιοθήκη</span>
+        <span>Library</span>
         <ChevronDown className="ml-0.5 size-4" />
       </MenubarTrigger>
       <MenubarContent className="apple-nav-popover w-64 p-1.5 text-[var(--apple-label)]">
@@ -53,7 +53,7 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
         >
           <Link href="/pages/hobbies" className="inline-flex items-center gap-2">
             <Layers className="size-4" />
-            <span>Όλες οι κατηγορίες</span>
+            <span>Explore all categories</span>
           </Link>
         </MenubarItem>
         <MenubarSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />

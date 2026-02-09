@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '@/store/store';
 import {
@@ -23,6 +23,8 @@ const AddArticleDialog = dynamic(() => import('./articles/AddArticleDialog'), { 
 
 export default function Navbar() {
   const pathname = usePathname() || '';
+  const searchParams = useSearchParams();
+  const queryKey = searchParams.toString();
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isAuthLoading = useSelector(selectIsLoading);
@@ -50,7 +52,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setMobileOpen(false);
-  }, [pathname]);
+  }, [pathname, queryKey]);
 
   const handleLogout = async () => {
     await dispatch(logout());

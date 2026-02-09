@@ -237,7 +237,7 @@ export function useLoginForm() {
       await dispatch(fetchSession());
       setIsRedirecting(true);
 
-      let redirectUrl = '/dashboard';
+      let redirectUrl = '/pages/profile/edit';
       if (redirectParam) {
         redirectUrl = decodeURIComponent(redirectParam);
       } else {

@@ -20,7 +20,7 @@ export function Select({
   value,
   onChange,
   className = '',
-  placeholder = '-- Επιλέξτε --',
+  placeholder = 'Select an option',
   error = false,
 }: Readonly<SelectProps>) {
   return (
@@ -40,8 +40,9 @@ export function Select({
         <select
           value={value}
           onChange={e => onChange?.(e.target.value)}
+          suppressHydrationWarning
           className={cn(
-            'w-full appearance-none rounded-[var(--apple-radius-control)] border-[var(--apple-hairline)] border-[var(--hb-input-border)] bg-[var(--hb-input-bg)] px-3 py-2.5 pr-10 text-sm text-[var(--apple-label)] transition',
+            'w-full appearance-none rounded-[var(--apple-radius-control)] border-[var(--hb-input-border)] bg-[var(--hb-input-bg)] px-3 py-2.5 pr-10 text-sm text-[var(--apple-label)] transition',
             'focus:border-[var(--hb-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--hb-ring)]',
             error && 'border-red-500 focus:border-red-500 focus:ring-red-500/30',
 
@@ -85,3 +86,4 @@ export function Select({
     </div>
   );
 }
+

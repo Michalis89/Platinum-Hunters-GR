@@ -1,6 +1,7 @@
-﻿import { Suspense } from 'react';
+import { Suspense } from 'react';
 import { Sparkles, ListChecks, Trophy, Heart } from 'lucide-react';
 import RegisterForm from '@/app/components/auth/RegisterForm';
+import { AuthIntroHeading } from '@/app/components/auth/shared/AuthIntroHeading';
 import { PageWrapper } from '@/app/components/layout/PageWrapper';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
@@ -39,17 +40,12 @@ export default function RegisterPage() {
 
           <div className="relative grid items-start gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8">
             <aside className="hidden space-y-6 lg:block">
-              <div className="space-y-3">
-                <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
-                  Join now
-                </p>
-                <h1 className="apple-title-tracking text-4xl font-semibold leading-tight text-[var(--apple-label)]">
-                  Start your journey
-                </h1>
-                <p className="apple-body-tracking max-w-xl text-base text-[var(--apple-secondary-label)]">
-                  One dashboard for all your hobbies, with clean organization and clear progress.
-                </p>
-              </div>
+              <AuthIntroHeading
+                variant="desktop"
+                eyebrow="Join now"
+                title="Start your journey"
+                description="One dashboard for all your hobbies, with clean organization and clear progress."
+              />
 
               <div className="apple-auth-section flex items-center gap-3 px-4 py-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-[var(--apple-radius-control)] bg-[var(--apple-system-blue)]/12 text-[var(--apple-system-blue)]">
@@ -84,17 +80,12 @@ export default function RegisterPage() {
             </aside>
 
             <div className="space-y-4">
-              <header className="text-center lg:hidden">
-                <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
-                  Join now
-                </p>
-                <h1 className="apple-title-tracking mt-2 text-2xl font-semibold text-[var(--apple-label)]">
-                  Start your journey
-                </h1>
-                <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
-                  Create your account and organize all your hobbies in one dashboard.
-                </p>
-              </header>
+              <AuthIntroHeading
+                variant="mobile"
+                eyebrow="Join now"
+                title="Start your journey"
+                description="Create your account and organize all your hobbies in one dashboard."
+              />
 
               <Suspense fallback={<div className="h-[min(90vh,820px)] min-h-[700px] w-full" />}>
                 <RegisterForm />
