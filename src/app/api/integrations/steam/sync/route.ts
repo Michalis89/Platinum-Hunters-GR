@@ -624,20 +624,23 @@ async function POSTHandler(req: Request) {
     const asyncMode = url.searchParams.get('async') === '1';
 
     if (asyncMode) {
-      const job = createSteamSyncJob();
+      const supabase = await createRouteHandlerClient();
+      const session = await requireAuth(supabase);
+
+      const job = await createSteamSyncJob(session.user.id);
       void syncSteamForUser({
         includeDebug,
-        onProgress: progress => {
-          updateSteamSyncJobProgress(job.id, progress);
+        onProgress: async progress => {
+          await updateSteamSyncJobProgress(job.id, progress);
         },
       })
-        .then(result => {
-          completeSteamSyncJob(job.id, result);
+        .then(async result => {
+          await completeSteamSyncJob(job.id, result);
         })
-        .catch(error => {
+        .catch(async error => {
           const message =
             error instanceof Error ? error.message : 'Αποτυχία συγχρονισμού βιβλιοθήκης Steam';
-          failSteamSyncJob(job.id, message);
+          await failSteamSyncJob(job.id, message);
         });
 
       return NextResponse.json({ jobId: job.id, status: 'running' }, { status: 202 });

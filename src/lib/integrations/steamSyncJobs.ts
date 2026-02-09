@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import type { Json } from '@/lib/supabase/database.types';
 
 export type SteamSyncJobStatus = 'running' | 'completed' | 'failed';
 
@@ -144,7 +145,7 @@ export async function completeSteamSyncJob(jobId: string, result: unknown): Prom
       completed_steps: existing.total_steps,
       percent: 100,
       message: 'Ο συγχρονισμός Steam ολοκληρώθηκε.',
-      result,
+      result: result as Json,
       finished_at: new Date().toISOString(),
     })
     .eq('id', jobId);
