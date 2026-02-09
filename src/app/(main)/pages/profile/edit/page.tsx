@@ -31,10 +31,9 @@ import { Select } from '@/app/components/ui/Select';
 import { Textarea } from '@/app/components/ui/Textarea';
 import Skeleton from '@/app/components/ui/Skeleton';
 import AlertMessage from '@/app/components/ui/AlertMessage';
+import Breadcrumbs from '@/app/components/ui/Breadcrumbs';
 import {
   selectUser,
-  selectIsAuthenticated,
-  selectIsLoading,
   updateUserProfile,
   logout,
 } from '@/store/slices/authSlice';
@@ -144,8 +143,7 @@ export default function EditProfilePage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(selectUser);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const loading = useSelector(selectIsLoading);
+  // Middleware ensures only authenticated users reach this page
 
   const [formData, setFormData] = useState<ProfileFormData>({
     favorite_anime_genres: [],
@@ -178,12 +176,6 @@ export default function EditProfilePage() {
       ?.category_notes;
     return (notes as CategoryNotes) || EMPTY_CATEGORY_NOTES;
   }, [user?.social_links]);
-
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/pages/auth/login');
-    }
-  }, [loading, isAuthenticated, router]);
 
   // Handle hash scroll after page load (for links like #categories)
   useEffect(() => {
@@ -296,7 +288,8 @@ export default function EditProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, initialCategoryNotes]);
 
-  if (loading) {
+  // Show loading skeleton while user data loads from Redux
+  if (!user) {
     return (
       <div className="min-h-screen bg-[var(--hb-bg)]">
         <div className="mx-auto max-w-4xl px-4 py-16">
@@ -304,10 +297,6 @@ export default function EditProfilePage() {
         </div>
       </div>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   const currentAvatar =
@@ -718,6 +707,15 @@ export default function EditProfilePage() {
 
       <div className="relative px-4 py-10 md:px-6">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+          <Breadcrumbs
+            items={[
+              { label: 'Home', href: '/dashboard' },
+              { label: 'Profile', href: '/pages/profile' },
+              { label: 'Edit Profile' },
+            ]}
+            className="mb-2"
+          />
+
           {/* Hero-style Header */}
           <section className="mb-4 text-center">
             <p className="mb-3 text-xs uppercase tracking-[0.3em] text-[var(--hb-primary-strong)]">
@@ -748,7 +746,7 @@ export default function EditProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
+                <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
                   <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
                     <ShieldCheck className="h-4 w-4 text-[var(--hb-primary)]" />
                     <span>Πληροφορίες Λογαριασμού</span>
@@ -785,7 +783,7 @@ export default function EditProfilePage() {
                   />
                 </div>
 
-                <div className="rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
+                <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
                   <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
                     <MapPin className="h-4 w-4 text-[var(--hb-primary)]" />
                     <span>Location Details</span>
@@ -828,7 +826,7 @@ export default function EditProfilePage() {
                   </div>
                 </div>
 
-                <div className="rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
+                <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
                       <Link2 className="h-4 w-4 text-[var(--hb-primary)]" />
@@ -844,9 +842,9 @@ export default function EditProfilePage() {
                       return (
                         <div
                           key={platform.key}
-                          className="flex items-center gap-3 rounded-[var(--apple-radius-control)] border-[var(--apple-hairline)] border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/80 p-3"
+                          className="flex items-center gap-3 rounded-[var(--apple-radius-control)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/80 p-3"
                         >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border-[var(--apple-hairline)] border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] text-[var(--hb-primary)]">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] text-[var(--hb-primary)]">
                             <Icon className="h-5 w-5" />
                           </div>
                           <div className="flex-1">
@@ -868,7 +866,7 @@ export default function EditProfilePage() {
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
+                  <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
                     <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
                       <Camera className="h-4 w-4 text-[var(--hb-primary)]" />
                       <span>Profile Photo</span>
@@ -923,7 +921,7 @@ export default function EditProfilePage() {
                     </div>
                   </div>
 
-                  <div className="rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
+                  <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
                     <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
                       <ShieldCheck className="h-4 w-4 text-[var(--hb-primary)]" />
                       <span>Privacy Settings</span>
@@ -2019,7 +2017,7 @@ export default function EditProfilePage() {
                             {activePetTypes.map(type => (
                               <div
                                 key={`pet-entry-${type}`}
-                                className="bg-[var(--hb-card)]/70 space-y-3 rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator-soft)] px-4 py-3"
+                                className="bg-[var(--hb-card)]/70 space-y-3 rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] px-4 py-3"
                               >
                                 <p className="text-sm font-semibold text-[var(--hb-headline)]">
                                   {type}
@@ -2177,7 +2175,7 @@ export default function EditProfilePage() {
             )}
 
             {/* Bottom Save Buttons */}
-            <div className="mt-6 flex flex-wrap items-center justify-end gap-3 rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator)] bg-[var(--hb-card)]/80 px-4 py-3 shadow-[var(--hb-shadow-sm)] backdrop-blur-xl">
+            <div className="mt-6 flex flex-wrap items-center justify-end gap-3 rounded-[var(--apple-radius-card)] border border-[var(--apple-separator)] bg-[var(--hb-card)]/80 px-4 py-3 shadow-[var(--hb-shadow-sm)] backdrop-blur-xl">
               {/* Primary Button */}
               <Button
                 type="submit"
@@ -2225,13 +2223,13 @@ export default function EditProfilePage() {
               {!showDeleteConfirm ? (
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-2 rounded-[var(--apple-radius-control)] border-[var(--apple-hairline)] border-[#ff3b30]/55 bg-[#ff3b30]/14 px-5 py-2.5 font-semibold text-[#ff453a] shadow-[var(--hb-shadow-sm)] transition hover:bg-[#ff3b30]/20"
+                  className="flex items-center gap-2 rounded-[var(--apple-radius-control)] border border-[#ff3b30]/55 bg-[#ff3b30]/14 px-5 py-2.5 font-semibold text-[#ff453a] shadow-[var(--hb-shadow-sm)] transition hover:bg-[#ff3b30]/20"
                 >
                   <Trash2 className="h-4 w-4" />
                   Διαγραφή Λογαριασμού
                 </Button>
               ) : (
-                <div className="space-y-4 rounded-[var(--apple-radius-control)] border-[var(--apple-hairline)] border-[#ff3b30]/45 bg-[#ff3b30]/12 p-4">
+                <div className="space-y-4 rounded-[var(--apple-radius-control)] border border-[#ff3b30]/45 bg-[#ff3b30]/12 p-4">
                   <p className="font-semibold text-[#ffb4ae]">
                     ⚠️ Είσαι σίγουρος; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί!
                   </p>

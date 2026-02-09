@@ -16,7 +16,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = 'hobbistas-hub-theme';
 const THEME_COOKIE_NAME = 'theme';
 const THEME_TRANSITION_CLASS = 'theme-animating';
-const THEME_TRANSITION_MS = 320;
+const THEME_TRANSITION_MS = 200; // Optimized for 60fps performance
 let themeTransitionTimeout: number | null = null;
 
 function setThemeCookie(theme: Theme) {

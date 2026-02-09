@@ -6,6 +6,7 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import { apiClient } from '@/lib/api/client';
 import { Progress } from '@/components/ui/progress';
+import { yieldToMain } from '@/lib/performance';
 
 import CategoryHeader from './CategoryHeader';
 import CategoryStats from './CategoryStats';
@@ -453,6 +454,12 @@ export default function CategoryLibrary({
         : nextProgress;
     const nextFavorite = editState.isFavorite;
 
+    // Close dialog immediately for instant feedback (improves INP)
+    dispatch({ type: 'patch', payload: { selectedEntry: null } });
+
+    // Yield to main thread to allow browser to paint the closed dialog
+    await yieldToMain();
+
     if (supportsExternal && selectedEntry.mediaId) {
       try {
         if (!apiBase) {
@@ -475,8 +482,13 @@ export default function CategoryLibrary({
         if (!response.ok) {
           throw new Error('Failed to update entry');
         }
+
+        // Defer expensive operations
+        await yieldToMain();
         await loadLibraryEntries();
+        await yieldToMain();
         await mutate('/api/user/continue');
+
         showAlert({
           type: 'success',
           title: 'Αποθηκεύτηκε',
@@ -511,8 +523,13 @@ export default function CategoryLibrary({
         if (!response.ok) {
           throw new Error('Failed to add entry');
         }
+
+        // Defer expensive operations
+        await yieldToMain();
         await loadLibraryEntries();
+        await yieldToMain();
         await mutate('/api/user/continue');
+
         showAlert({
           type: 'success',
           title: 'Επιτυχής προσθήκη',
@@ -551,8 +568,6 @@ export default function CategoryLibrary({
         message: 'Οι αλλαγές αποθηκεύτηκαν επιτυχώς.',
       });
     }
-
-    dispatch({ type: 'patch', payload: { selectedEntry: null } });
   };
 
   const handleDeleteEntry = async (entry: MediaEntry) => {

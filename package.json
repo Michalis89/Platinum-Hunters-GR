@@ -1,6 +1,6 @@
 {
   "name": "hobbistas",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -43,6 +43,7 @@
     "@radix-ui/themes": "^3.3.0",
     "@reduxjs/toolkit": "^2.6.1",
     "@sentry/nextjs": "^10.38.0",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.48.1",
     "@tiptap/extension-bubble-menu": "^3.17.0",
     "@tiptap/extension-code-block-lowlight": "^3.17.0",

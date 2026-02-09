@@ -104,9 +104,8 @@ export default function AlertMessage({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{
-            type: 'spring',
-            stiffness: 400,
-            damping: 25,
+            duration: 0.2,
+            ease: [0.2, 0.8, 0.2, 1],
           }}
           className="fixed inset-x-0 top-6 z-50 mx-auto flex w-auto max-w-md px-4"
         >

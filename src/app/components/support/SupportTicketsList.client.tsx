@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useMemo, useState } from 'react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
@@ -13,7 +11,7 @@ import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
 import { Select } from '@/app/components/ui/Select';
 import Feedback from '@/app/components/ui/Feedback';
 import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
-import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
+// Middleware ensures only authenticated users reach this page
 import { useTickets } from '@/lib/hooks/useTickets';
 import {
   SUPPORT_STATUS_LABELS,
@@ -41,10 +39,6 @@ type TicketItem = {
 };
 
 export default function SupportTicketsList() {
-  const router = useRouter();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const authLoading = useSelector(selectIsLoading);
-
   const {
     tickets,
     setTickets,
@@ -57,16 +51,10 @@ export default function SupportTicketsList() {
     reload,
   } = useTickets<TicketItem>({
     endpoint: '/api/support/tickets',
-    enabled: isAuthenticated,
+    enabled: true, // Middleware ensures auth
   });
   const [view, setView] = useState<'active' | 'all' | 'archive'>('active');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/pages/auth/login');
-    }
-  }, [authLoading, isAuthenticated, router]);
 
   const handleArchiveToggle = async (id: string, archived: boolean) => {
     if (actionLoading) return;
@@ -204,7 +192,10 @@ export default function SupportTicketsList() {
             updatedAt={ticket.updated_at}
             updatedLabel="Τελευταία ενημέρωση:"
             titleIcon={
-              <span className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]" aria-hidden />
+              <span
+                className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]"
+                aria-hidden
+              />
             }
             actions={
               <>
@@ -249,17 +240,7 @@ export default function SupportTicketsList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredTickets, loading, error, view]);
 
-  if (!isAuthenticated && authLoading) {
-    return (
-      <div className="py-20">
-        <LoadingSpinner label="Φορτώνουμε..." />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
+  // Middleware ensures only authenticated users reach this page
 
   return (
     <div className={UI_CLASSNAMES.pageShell}>
@@ -328,7 +309,11 @@ export default function SupportTicketsList() {
           </div>
           {content}
           <div className="mt-8 flex justify-center">
-            <Button href="/pages/support" variant="ghost" className="apple-body-tracking rounded-full px-4">
+            <Button
+              href="/pages/support"
+              variant="ghost"
+              className="apple-body-tracking rounded-full px-4"
+            >
               Δημιούργησε νέο αίτημα
             </Button>
           </div>

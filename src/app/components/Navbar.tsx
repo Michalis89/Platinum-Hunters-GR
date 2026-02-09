@@ -5,14 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '@/store/store';
-import {
-  logout,
-  selectCanAccessAdminPanel,
-  selectCanQuickAdd,
-  selectIsAuthenticated,
-  selectIsLoading,
-  selectUser,
-} from '@/store/slices/authSlice';
+import { logout, selectNavbarAuth } from '@/store/slices/authSlice';
 import { useTheme } from '@/context/ThemeContext';
 import { DesktopNav } from './navbar/DesktopNav';
 import { LogoBrand } from './navbar/LogoBrand';
@@ -26,11 +19,8 @@ export default function Navbar() {
   const searchParams = useSearchParams();
   const queryKey = searchParams.toString();
   const dispatch = useDispatch<AppDispatch>();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const isAuthLoading = useSelector(selectIsLoading);
-  const user = useSelector(selectUser);
-  const canQuickAdd = useSelector(selectCanQuickAdd);
-  const canAccessAdminPanel = useSelector(selectCanAccessAdminPanel);
+  const { isAuthenticated, isLoading: isAuthLoading, user, canQuickAdd, canAccessAdminPanel } =
+    useSelector(selectNavbarAuth);
   const { theme, toggleTheme } = useTheme();
 
   const [mobileOpen, setMobileOpen] = useState(false);

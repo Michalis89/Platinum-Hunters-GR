@@ -64,7 +64,7 @@ export default function ConfirmDialog({
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
               className="hb-dialog-surface relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--hb-dialog-border)]"
             >
               {/* Close button */}

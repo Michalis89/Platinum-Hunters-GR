@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldAlert } from 'lucide-react';
-import { selectIsAuthenticated, selectUser, selectIsLoading } from '@/store/slices/authSlice';
+import { selectUser } from '@/store/slices/authSlice';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Skeleton from '@/app/components/ui/Skeleton';
 import CategoryLibrary from '@/app/components/backlog/CategoryLibrary';
@@ -61,22 +61,14 @@ function BacklogPageContent() {
   const statusFromParams = normalizedStatus ? statusLookup[normalizedStatus] : undefined;
   const searchFromParams = searchParam?.trim() ?? undefined;
 
-  const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
-  const isAuthLoading = useSelector(selectIsLoading);
-
-  // Check authentication - wait for auth to initialize before redirecting
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.push('/pages/auth/login');
-    }
-  }, [isAuthenticated, isAuthLoading, router]);
+  // Middleware ensures only authenticated users reach this page
 
   useEffect(() => {
     if (hasTriggeredMalSyncRef.current) {
       return;
     }
-    if (!hasMounted || isAuthLoading || !isAuthenticated) {
+    if (!hasMounted || !user) {
       return;
     }
     if ((category !== 'anime' && category !== 'manga') || malParam !== 'success') {
@@ -114,19 +106,15 @@ function BacklogPageContent() {
     return () => {
       isCancelled = true;
     };
-  }, [category, hasMounted, isAuthLoading, isAuthenticated, malParam, router, searchParams]);
+  }, [category, hasMounted, user, malParam, router, searchParams]);
 
   // Check if user has access to this category
   const userCategories = (user?.categories as string[] | undefined) ?? [];
   const hasAccessToCategory = userCategories.length === 0 || userCategories.includes(category);
 
-  // Show skeleton while auth initializes or before client mount (prevents hydration mismatch)
-  if (!hasMounted || isAuthLoading) {
+  // Show skeleton before client mount (prevents hydration mismatch) or while user loads
+  if (!hasMounted || !user) {
     return <Skeleton type="backlog" />;
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect
   }
 
   // Show access denied if user doesn't have this category enabled

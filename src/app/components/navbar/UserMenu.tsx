@@ -1,3 +1,4 @@
+import React from 'react';
 import Link from 'next/link';
 import {
   ChevronDown,
@@ -40,7 +41,7 @@ type UserMenuProps = {
 const itemClassName =
   'rounded-[var(--apple-radius-control)] px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--hb-ease)] focus:bg-[var(--apple-nav-pill-hover)] focus:text-[var(--apple-label)]';
 
-export function UserMenu({
+export const UserMenu = React.memo(function UserMenu({
   user,
   theme,
   canQuickAdd,
@@ -151,4 +152,4 @@ export function UserMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+});

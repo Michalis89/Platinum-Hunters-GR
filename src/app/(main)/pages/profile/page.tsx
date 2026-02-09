@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import Skeleton from '@/app/components/ui/Skeleton';
 import { ActivityFeed } from '@/app/components/activity/ActivityFeed';
@@ -15,7 +14,7 @@ import {
   ProfilePersonalInfo,
   categoryMeta,
 } from '@/app/components/profile';
-import { selectUser, selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
+import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 
 type FavoriteItem = {
@@ -42,10 +41,8 @@ const categoryLabels: Record<string, string> = {
 const articleOnlyCategories = new Set(['coding', 'pet', 'vape']);
 
 export default function ProfilePage() {
-  const router = useRouter();
   const user = useSelector(selectUser);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const loading = useSelector(selectIsLoading);
+  // Middleware ensures only authenticated users reach this page
 
   const [reordering, setReordering] = useState(false);
   const [mediaFavorites, setMediaFavorites] = useState<Record<string, FavoriteItem[]>>({});
@@ -99,7 +96,6 @@ export default function ProfilePage() {
 
   // Fetch media favorites (including games)
   useEffect(() => {
-    if (!isAuthenticated) return;
     let ignore = false;
 
     const loadMediaFavorites = async (
@@ -209,10 +205,9 @@ export default function ProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isAuthenticated, startTransition]);
+  }, [startTransition]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
     let ignore = false;
 
     const loadCategoryTimes = async () => {
@@ -247,14 +242,7 @@ export default function ProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isAuthenticated, startTransition]);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/pages/auth/login');
-    }
-  }, [loading, isAuthenticated, router]);
+  }, [startTransition]);
 
   const getFavoritesForCategory = (cat: string): FavoriteItem[] => {
     return mediaFavorites[cat] ?? [];
@@ -351,8 +339,8 @@ export default function ProfilePage() {
     );
   }, [user]);
 
-  // Loading state
-  if (loading) {
+  // Show loading skeleton while user data loads from Redux
+  if (!user) {
     return (
       <div className="apple-page-background min-h-screen">
         <div className="mx-auto max-w-4xl px-4 py-16 md:px-6">
@@ -360,11 +348,6 @@ export default function ProfilePage() {
         </div>
       </div>
     );
-  }
-
-  // No user (will redirect)
-  if (!user) {
-    return null;
   }
 
   return (

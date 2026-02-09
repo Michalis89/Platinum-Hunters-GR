@@ -1,3 +1,4 @@
+import React from 'react';
 import Link from 'next/link';
 import type { User as UserEntity } from '@/types/user';
 import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
@@ -24,7 +25,7 @@ type DesktopNavProps = {
   onToggleTheme: () => void;
 };
 
-export function DesktopNav({
+export const DesktopNav = React.memo(function DesktopNav({
   pathname,
   navItems,
   hobbyItems,
@@ -72,7 +73,7 @@ export function DesktopNav({
       </div>
     </div>
   );
-}
+});
 
 function NavbarAuthSkeleton() {
   return (

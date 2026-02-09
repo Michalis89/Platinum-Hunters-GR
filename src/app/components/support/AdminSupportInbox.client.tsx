@@ -15,7 +15,6 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import { Button } from '@/components/ui/button';
 import Feedback from '@/app/components/ui/Feedback';
 import { selectIsAdminOrModerator } from '@/store/slices/authSlice';
-import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
 import {
   SUPPORT_STATUS_OPTIONS as STATUS_OPTIONS,
@@ -47,7 +46,7 @@ type AdminTicket = {
 };
 
 export default function AdminSupportInbox() {
-  const { isAuthenticated, isLoading } = useRequireAuth();
+  // Middleware ensures only authenticated users reach this page
   const isAdmin = useSelector(selectIsAdminOrModerator);
 
   const {
@@ -72,7 +71,7 @@ export default function AdminSupportInbox() {
     }
   >({
     endpoint: '/api/admin/support/tickets',
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAdmin,
     initialFilters: {
       status: '',
       category: '',
@@ -81,18 +80,6 @@ export default function AdminSupportInbox() {
     },
     errorMessage: 'Αποτυχία φόρτωσης',
   });
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-        <LoadingSpinner size="lg" label="Φόρτωση..." />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   if (!isAdmin) {
     return (

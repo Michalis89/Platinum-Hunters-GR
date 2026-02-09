@@ -30,7 +30,7 @@ export function Card({
   return (
     <div
       id={id}
-      className={`rounded-[var(--apple-radius-card)] border-[var(--apple-hairline)] border-[var(--apple-separator)] bg-[var(--hb-panel)] text-[var(--apple-label)] shadow-[var(--apple-shadow)] backdrop-blur-[18px] ${className}`}
+      className={`rounded-[var(--apple-radius-card)] border border-[var(--apple-separator)] bg-[var(--hb-panel)] text-[var(--apple-label)] shadow-[var(--apple-shadow)] backdrop-blur-[18px] ${className}`}
     >
       {children}
     </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import NavbarWrapper from './NavbarWrapper';
 import { Footer } from './layout/Footer';
+import MobileTabBar from './navbar/MobileTabBar';
 
 type Props = {
   children: React.ReactNode;
@@ -31,12 +32,14 @@ export default function AppShell({ children }: Props) {
       <div className="relative flex min-h-screen flex-col">
         <NavbarWrapper />
         <main
+          id="main-content"
           className="flex-1 pb-12 pt-4 scroll-smooth"
           style={{ scrollPaddingBlockStart: '6rem' }}
         >
           {children}
         </main>
         <Footer />
+        <MobileTabBar />
       </div>
     </div>
   );

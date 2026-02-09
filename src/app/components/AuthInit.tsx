@@ -8,7 +8,7 @@ import type { AppDispatch } from '@/store/store';
 
 const AUTH_STORAGE_KEY = 'hobbistas-hub-auth';
 const RETURN_URL_KEY = 'hobbistas-hub-return-url';
-const SESSION_CHECK_INTERVAL_MS = 5 * 60 * 1000;
+const SESSION_CHECK_INTERVAL_MS = 15 * 60 * 1000; // Reduced from 5min to 15min for mobile performance
 
 function scheduleIdleCallback(callback: () => void, timeout = 5000): number {
   if (typeof requestIdleCallback !== 'undefined') {
@@ -302,7 +302,13 @@ export default function AuthInit() {
   }, [dispatch, currentUser, forceLogout, validateSession]);
 
   // Idle logout after 1h of inactivity (only for authenticated users)
+  // Skip on mobile devices to reduce event listener overhead
   useEffect(() => {
+    // Skip idle timeout entirely on mobile (rely on server-side session expiry)
+    if (typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      return;
+    }
+
     const IDLE_LIMIT_MS = 60 * 60 * 1000; // 1 hour
     const ACTIVITY_DEBOUNCE_MS = 1000; // Only process activity once per second
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -335,7 +341,6 @@ export default function AuthInit() {
       'click',
       'keydown',
       'mousemove',
-      'touchstart',
       'focus',
       'visibilitychange',
     ];

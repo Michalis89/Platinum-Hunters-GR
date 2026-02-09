@@ -269,8 +269,8 @@ export function ContinueHero() {
     '/api/user/continue',
     fetcher,
     {
-      refreshInterval: 120000,
-      revalidateOnFocus: true,
+      refreshInterval: 0,
+      revalidateOnFocus: false,
     },
   );
 

@@ -209,6 +209,7 @@ export const selectIsLoading = (state: { auth: AuthSession }) => state.auth.isLo
 export const selectAuthError = (state: { auth: AuthSession }) => state.auth.error;
 
 // Computed/derived selectors for common role checks
+import { createSelector } from '@reduxjs/toolkit';
 import { getUserRoles, hasAnyRole } from '@/lib/roles';
 
 export const selectUserRoles = (state: { auth: AuthSession }) => {
@@ -246,3 +247,15 @@ export const selectIsAuthorOf = (authorId: string | null | undefined) => (state:
   const user = state.auth.user;
   return Boolean(user && authorId && user.id === authorId);
 };
+
+// Combined selector for Navbar - reduces re-renders by subscribing once
+export const selectNavbarAuth = createSelector(
+  [selectIsAuthenticated, selectIsLoading, selectUser, selectCanQuickAdd, selectCanAccessAdminPanel],
+  (isAuthenticated, isLoading, user, canQuickAdd, canAccessAdminPanel) => ({
+    isAuthenticated,
+    isLoading,
+    user,
+    canQuickAdd,
+    canAccessAdminPanel,
+  }),
+);

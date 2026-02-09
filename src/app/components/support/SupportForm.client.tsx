@@ -17,9 +17,7 @@ import { Button } from '@/components/ui/button';
 import Feedback from '@/app/components/ui/Feedback';
 import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
 import { InfoHint } from '@/app/components/ui/InfoHint';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { selectUser } from '@/store/slices/authSlice';
-import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
@@ -90,7 +88,7 @@ export default function SupportForm({}: Readonly<{
   securityEmail?: string | null;
   contactEmail?: string | null;
 }>) {
-  const { isAuthenticated, isLoading } = useRequireAuth();
+  // Middleware ensures only authenticated users reach this page
   const user = useSelector(selectUser);
 
   const [category, setCategory] = useState('bug');
@@ -216,8 +214,7 @@ export default function SupportForm({}: Readonly<{
     const nextErrors: Record<string, string> = {};
     if (!formData.subject.trim()) nextErrors.subject = 'Το θέμα είναι υποχρεωτικό.';
     if (!formData.description.trim()) nextErrors.description = 'Η περιγραφή είναι υποχρεωτική.';
-    if (!isAuthenticated && !formData.email.trim())
-      nextErrors.email = 'Το email είναι υποχρεωτικό.';
+    // Email is optional since user is authenticated (middleware ensures this)
     if (!formData.consent) nextErrors.consent = 'Χρειάζεται συναίνεση αποθήκευσης.';
 
     if (category === 'bug') {
@@ -331,18 +328,6 @@ export default function SupportForm({}: Readonly<{
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--hb-bg)]">
-        <LoadingSpinner size="lg" label="Φόρτωση..." />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
     <div className={UI_CLASSNAMES.pageShell}>
       <div className={UI_CLASSNAMES.pageBackdrop}>
@@ -363,11 +348,9 @@ export default function SupportForm({}: Readonly<{
             </span>
           }
           actions={
-            isAuthenticated ? (
-              <Button href="/pages/support/tickets" variant="secondary">
-                Τα tickets μου
-              </Button>
-            ) : undefined
+            <Button href="/pages/support/tickets" variant="secondary">
+              Τα tickets μου
+            </Button>
           }
           badges={
             <>
@@ -400,7 +383,7 @@ export default function SupportForm({}: Readonly<{
                     tone={result.type === 'success' ? 'solid' : 'soft'}
                     title={result.type === 'success' ? 'Επιτυχία' : 'Σφάλμα'}
                   >
-                    {result.type === 'success' && ticketId && isAuthenticated ? (
+                    {result.type === 'success' && ticketId ? (
                       <span>
                         {result.message}{' '}
                         <Link className="underline" href={`/pages/support/tickets/${ticketId}`}>
@@ -431,7 +414,6 @@ export default function SupportForm({}: Readonly<{
                       onChange={handleChange('email')}
                       placeholder="you@email.com"
                       disabled={submitting}
-                      required={!isAuthenticated}
                       error={!!errors.email}
                       className="border-[var(--hb-border)] bg-[var(--hb-card)]"
                     />

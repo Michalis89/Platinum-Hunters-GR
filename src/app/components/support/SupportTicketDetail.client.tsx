@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useParams } from 'next/navigation';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
@@ -15,7 +14,7 @@ import Feedback from '@/app/components/ui/Feedback';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
-import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice';
+// Middleware ensures only authenticated users reach this page
 import { FormattedDate } from '@/app/components/ui/FormattedDate';
 import {
   SUPPORT_STATUS_LABELS,
@@ -64,9 +63,6 @@ type TicketAttachment = {
 
 export default function SupportTicketDetail() {
   const params = useParams();
-  const router = useRouter();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const authLoading = useSelector(selectIsLoading);
   const ticketId = params?.id as string;
 
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
@@ -84,13 +80,7 @@ export default function SupportTicketDetail() {
   } | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/pages/auth/login');
-    }
-  }, [authLoading, isAuthenticated, router]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !ticketId) return;
+    if (!ticketId) return;
 
     let ignore = false;
 
@@ -121,7 +111,7 @@ export default function SupportTicketDetail() {
     return () => {
       ignore = true;
     };
-  }, [isAuthenticated, ticketId]);
+  }, [ticketId]);
 
   const attachmentsByMessage = useMemo(() => {
     const map: Record<string, TicketAttachment[]> = {};
@@ -179,17 +169,7 @@ export default function SupportTicketDetail() {
     }
   };
 
-  if (!isAuthenticated && authLoading) {
-    return (
-      <div className="py-20">
-        <LoadingSpinner label="Φορτώνουμε..." />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
+  // Middleware ensures only authenticated users reach this page
 
   if (loading) {
     return (
@@ -238,7 +218,10 @@ export default function SupportTicketDetail() {
           <Card className={`${UI_CLASSNAMES.panelCard} apple-card overflow-hidden`}>
             <CardHeader className="border-[var(--apple-separator-soft)] bg-transparent">
               <CardTitle className="apple-title-tracking flex items-center gap-2 text-[var(--apple-label)]">
-                <span className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]" aria-hidden />
+                <span
+                  className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]"
+                  aria-hidden
+                />
                 Ιστορικό συνομιλίας
               </CardTitle>
             </CardHeader>
@@ -285,7 +268,10 @@ export default function SupportTicketDetail() {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--apple-secondary-label)]" aria-hidden />
+                          <span
+                            className="h-1.5 w-1.5 rounded-full bg-[var(--apple-secondary-label)]"
+                            aria-hidden
+                          />
                           {attachment.file_name || 'Συνημμένο'}
                         </a>
                       ))}

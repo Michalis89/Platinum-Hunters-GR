@@ -1,3 +1,4 @@
+import React from 'react';
 import Link from 'next/link';
 import { LogIn, LogOut, Menu, PenLine, Plus, ShieldCheck, Ticket, User, UserPlus } from 'lucide-react';
 import type { User as UserEntity } from '@/types/user';
@@ -28,7 +29,7 @@ type MobileNavSheetProps = {
   onToggleTheme: () => void;
 };
 
-export function MobileNavSheet({
+export const MobileNavSheet = React.memo(function MobileNavSheet({
   open,
   onOpenChange,
   pathname,
@@ -55,7 +56,7 @@ export function MobileNavSheet({
             variant="secondary"
             size="icon"
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className="h-10 w-10 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[var(--apple-label)] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+            className="h-11 w-11 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[var(--apple-label)] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
           >
             <Menu className="size-5" />
           </Button>
@@ -153,7 +154,7 @@ export function MobileNavSheet({
                       <Button
                         type="button"
                         variant="secondary"
-                        className="h-10 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+                        className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
                         onClick={() => {
                           closeSheet();
                           onAdd();
@@ -163,26 +164,26 @@ export function MobileNavSheet({
                         <span>Quick add</span>
                       </Button>
                     ) : null}
-                    <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
+                    <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
                       <Link href="/pages/profile">
                         <User className="size-4" />
                         <span>Profile</span>
                       </Link>
                     </Button>
-                    <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
+                    <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
                       <Link href="/pages/profile/edit">
                         <PenLine className="size-4" />
                         <span>Edit profile</span>
                       </Link>
                     </Button>
-                    <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
+                    <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
                       <Link href="/pages/support/tickets">
                         <Ticket className="size-4" />
                         <span>My tickets</span>
                       </Link>
                     </Button>
                     {canAccessAdminPanel ? (
-                      <Button asChild variant="secondary" className={mobileChipClass(false, true)}>
+                      <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
                         <Link href="/admin">
                           <ShieldCheck className="size-4" />
                           <span>Admin Panel</span>
@@ -192,7 +193,7 @@ export function MobileNavSheet({
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-10 justify-start rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+                      className="h-11 justify-start rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
                       onClick={() => {
                         closeSheet();
                         void onLogout();
@@ -207,7 +208,7 @@ export function MobileNavSheet({
                     <Button
                       asChild
                       variant="outline"
-                      className="h-10 rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+                      className="h-11 rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
                     >
                       <Link href="/pages/auth/login">
                         <LogIn className="size-4" />
@@ -217,7 +218,7 @@ export function MobileNavSheet({
                     <Button
                       asChild
                       variant="primary"
-                      className="h-10 rounded-[var(--apple-radius-control)] border border-transparent bg-[var(--apple-system-blue)] text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:brightness-110 active:scale-[0.98]"
+                      className="h-11 rounded-[var(--apple-radius-control)] border border-transparent bg-[var(--apple-system-blue)] text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:brightness-110 active:scale-[0.98]"
                     >
                       <Link href="/pages/auth/register">
                         <UserPlus className="size-4" />
@@ -233,7 +234,7 @@ export function MobileNavSheet({
       </Sheet>
     </div>
   );
-}
+});
 
 function NavbarAuthSkeletonMobile() {
   return (

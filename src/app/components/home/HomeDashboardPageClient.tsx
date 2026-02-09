@@ -8,7 +8,6 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import { selectUser } from '@/store/slices/authSlice';
 import { PageContainer } from '@/app/components/layout';
 import { apiClient } from '@/lib/api/client';
-import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { PersonalStats } from './types';
@@ -49,7 +48,6 @@ const hasContinuePayload = (
   !!value && typeof value === 'object' && 'enabledCategories' in value;
 
 export default function HomeDashboardPageClient() {
-  const { isAuthenticated, isLoading: isAuthLoading } = useRequireAuth();
   const user = useSelector(selectUser);
   const [hasMounted, setHasMounted] = useState(false);
   const [canFetch, setCanFetch] = useState(false);
@@ -59,16 +57,16 @@ export default function HomeDashboardPageClient() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    // Middleware ensures only authenticated users reach this page
     const cancel = scheduleAfterPaint(() => setCanFetch(true));
     return cancel;
-  }, [isAuthenticated]);
+  }, []);
 
   const { data: personalStats } = useSWR<{ data?: PersonalStats }>(
     canFetch ? '/api/user/stats' : null,
     fetcher,
     {
-      refreshInterval: 120000,
+      refreshInterval: 0,
       revalidateOnFocus: false,
     },
   );
@@ -77,12 +75,12 @@ export default function HomeDashboardPageClient() {
     canFetch ? '/api/user/continue' : null,
     noStoreFetcher,
     {
-      refreshInterval: 120000,
-      revalidateOnFocus: true,
+      refreshInterval: 0,
+      revalidateOnFocus: false,
     },
   );
 
-  if (!hasMounted || isAuthLoading || !isAuthenticated) {
+  if (!hasMounted) {
     return <HomeDashboardLoadingShell />;
   }
 

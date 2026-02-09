@@ -10,7 +10,9 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import EmptyState from '@/app/components/ui/EmptyState';
 import AlertMessage from '@/app/components/ui/AlertMessage';
 import MediaEntryDialogController from '@/app/components/media/MediaEntryDialogController';
+import Breadcrumbs from '@/app/components/ui/Breadcrumbs';
 import type { EditState } from '@/app/components/backlog/EntryEditDialog';
+import { yieldToMain } from '@/lib/performance';
 import {
   CATEGORY_CONFIG,
   getApiBase,
@@ -205,7 +207,13 @@ export default function MediaDetailPageClient({
 
   const handleSaveEntry = async (editState: EditState) => {
     if (!apiBase) return;
+
+    // Close dialog immediately for instant feedback (improves INP)
+    setDialogEntry(null);
     setActionLoading(true);
+
+    // Yield to allow browser to paint the closed dialog
+    await yieldToMain();
 
     try {
       const progressValue = Number.parseInt(editState.progress, 10);
@@ -252,7 +260,10 @@ export default function MediaDetailPageClient({
         }
       }
 
+      // Defer expensive refresh operation
+      await yieldToMain();
       await refreshEntry();
+
       setAlert({
         type: 'success',
         title: 'Αποθηκεύτηκε',
@@ -267,7 +278,6 @@ export default function MediaDetailPageClient({
       });
     } finally {
       setActionLoading(false);
-      setDialogEntry(null);
     }
   };
 
@@ -316,6 +326,10 @@ export default function MediaDetailPageClient({
     }
 
     setActionLoading(true);
+
+    // Yield to allow browser to paint the loading state
+    await yieldToMain();
+
     try {
       const response = await fetch(`${apiBase}/library`, {
         method: 'PATCH',
@@ -330,6 +344,8 @@ export default function MediaDetailPageClient({
         throw new Error('Favorite toggle failed');
       }
 
+      // Defer expensive refresh operation
+      await yieldToMain();
       await refreshEntry();
     } catch (error) {
       console.warn('Favorite toggle failed:', error);
@@ -358,6 +374,14 @@ export default function MediaDetailPageClient({
       ? entryState.rating.toFixed(1)
       : '—';
 
+  const categoryLabel = CATEGORY_CONFIG[category]?.title || category;
+  const breadcrumbs = [
+    { label: 'Home', href: '/dashboard' },
+    { label: 'Library', href: '/pages/backlog' },
+    { label: categoryLabel, href: `/pages/backlog?category=${category}` },
+    { label: baseEntry.title },
+  ];
+
   return (
     <PageContainer size="xl" className="py-10">
       {alert && (
@@ -370,6 +394,8 @@ export default function MediaDetailPageClient({
           onClose={() => setAlert(null)}
         />
       )}
+
+      <Breadcrumbs items={breadcrumbs} className="mb-6" />
 
       <div className="relative">
         <div className="absolute inset-0 -z-10 opacity-30 blur-[120px]">

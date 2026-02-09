@@ -46,6 +46,7 @@ canvas {
   -webkit-backdrop-filter: blur(var(--hb-glass-blur)) saturate(var(--hb-glass-sat))
     brightness(var(--hb-glass-brightness));
   box-shadow: var(--hb-shadow-md);
+  contain: layout style paint;
 }
 
 .hb-surface {
@@ -73,15 +74,33 @@ canvas {
   background: var(--hb-card);
   border: var(--hb-hairline) solid var(--hb-border);
   box-shadow: var(--hb-shadow-md);
-  transition:
-    transform 240ms var(--hb-ease),
-    box-shadow 240ms var(--hb-ease),
-    background-color 240ms var(--hb-ease);
+  contain: layout style paint;
 }
 
-.hb-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--hb-shadow-md-hover);
+/* Desktop: hover effects with transform */
+@media (hover: hover) {
+  .hb-card {
+    transition:
+      transform 240ms var(--hb-ease),
+      box-shadow 240ms var(--hb-ease),
+      background-color 240ms var(--hb-ease);
+  }
+
+  .hb-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--hb-shadow-md-hover);
+  }
+}
+
+/* Mobile: only transition background color on tap (via :active) */
+@media (hover: none) {
+  .hb-card {
+    transition: background-color 200ms var(--hb-ease);
+  }
+
+  .hb-card:active {
+    background-color: color-mix(in srgb, var(--hb-card) 94%, var(--apple-system-blue) 6%);
+  }
 }
 
 /* 5) Scrollbar (complete + safe) */
@@ -156,7 +175,8 @@ canvas {
   --apple-separator: rgba(0, 0, 0, 0.1);
   --apple-separator-soft: rgba(60, 60, 67, 0.1);
   --apple-label: rgba(0, 0, 0, 0.92);
-  --apple-secondary-label: rgba(60, 60, 67, 0.65);
+  /* Increased from 0.65 to 0.75 for WCAG AA contrast compliance (4.5:1 on white background) */
+  --apple-secondary-label: rgba(60, 60, 67, 0.75);
   --apple-tertiary-fill: rgba(118, 118, 128, 0.12);
   --apple-material: rgba(255, 255, 255, 0.72);
   --apple-surface: rgba(255, 255, 255, 0.84);
@@ -321,6 +341,7 @@ html[data-theme='dark'] {
   border-radius: var(--apple-radius-card);
   backdrop-filter: blur(16px) saturate(130%);
   -webkit-backdrop-filter: blur(16px) saturate(130%);
+  contain: layout style paint;
 }
 
 .apple-pill {
@@ -458,7 +479,7 @@ html[data-theme='dark'] .apple-progress-fill {
 }
 
 .apple-auth-enter {
-  animation: appleAuthEnter 360ms var(--hb-ease) both;
+  animation: appleAuthEnter 220ms var(--hb-ease) both;
 }
 
 .apple-auth-chip {
@@ -480,22 +501,80 @@ html[data-theme='dark'] .apple-progress-fill {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html.theme-animating *,
-  html.theme-animating *::before,
-  html.theme-animating *::after {
-    transition-property: color, background-color, border-color, box-shadow, fill, stroke;
-    transition-duration: 320ms;
-    transition-timing-function: var(--hb-ease);
+  /* Optimized theme transition - only target containers to reduce paint workload */
+  html.theme-animating {
+    /* Target body for background color transition */
+    & body {
+      transition-property: background-color;
+      transition-duration: 200ms;
+      transition-timing-function: var(--hb-ease);
+    }
+
+    /* Target major surface containers only */
+    & .apple-nav-shell,
+    & .apple-material-surface,
+    & .apple-nav-popover,
+    & .hb-glass,
+    & .hb-surface {
+      transition-property: background-color, border-color;
+      transition-duration: 200ms;
+      transition-timing-function: var(--hb-ease);
+    }
+
+    /* Cards with lighter transition (no box-shadow - expensive) */
+    & .apple-card,
+    & .hb-card,
+    & .apple-auth-card,
+    & .apple-footer-shell {
+      transition-property: background-color, border-color;
+      transition-duration: 200ms;
+      transition-timing-function: var(--hb-ease);
+    }
   }
 }
 
+/* =============================================================================
+   Comprehensive Reduced Motion Support (WCAG 2.1 Level AA Compliance)
+   Disables all animations and transitions for users who prefer reduced motion
+   ============================================================================= */
 @media (prefers-reduced-motion: reduce) {
+  /* Disable all animations globally */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Specific animations to disable */
   .apple-auth-enter {
-    animation: none;
+    animation: none !important;
   }
 
   .apple-auth-control {
-    transition: none;
+    transition: none !important;
+  }
+
+  /* Disable card hover effects */
+  .hb-card,
+  .hb-card:hover,
+  .apple-card,
+  .apple-card:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Disable button scale effects */
+  button:active,
+  a:active {
+    transform: none !important;
+  }
+
+  /* Disable theme transitions */
+  html.theme-animating * {
+    transition: none !important;
   }
 }
 
@@ -544,6 +623,116 @@ html[data-theme='dark'] .apple-progress-fill {
 }
 
 /* =============================================================================
+   Mobile performance optimization (disable backdrop-filter on all mobile devices)
+   Eliminates primary GPU bottleneck on mobile devices
+   ============================================================================= */
+@media (max-width: 768px) {
+  .hb-glass,
+  .hb-surface,
+  .hb-dialog-overlay,
+  .hb-dialog-surface,
+  .apple-material-surface,
+  .apple-nav-shell,
+  .apple-nav-popover,
+  .apple-card,
+  .apple-auth-card,
+  .apple-footer-shell {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Light theme mobile - use layered gradients to preserve glass aesthetic */
+  html[data-theme='light'] .apple-nav-shell {
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.04) 100%
+      ),
+      rgba(255, 255, 255, 0.92) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 4px 16px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  html[data-theme='light'] .hb-glass,
+  html[data-theme='light'] .apple-material-surface,
+  html[data-theme='light'] .apple-card,
+  html[data-theme='light'] .apple-auth-card {
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      ),
+      rgba(255, 255, 255, 0.94) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.10) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  html[data-theme='light'] .apple-nav-popover,
+  html[data-theme='light'] .hb-dialog-surface {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
+  }
+
+  html[data-theme='light'] .apple-footer-shell {
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      ),
+      rgba(255, 255, 255, 0.90) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Dark theme mobile - use layered gradients to preserve glass aesthetic */
+  html[data-theme='dark'] .apple-nav-shell {
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      ),
+      rgba(28, 28, 30, 0.90) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  html[data-theme='dark'] .hb-glass,
+  html[data-theme='dark'] .apple-material-surface,
+  html[data-theme='dark'] .apple-card,
+  html[data-theme='dark'] .apple-auth-card {
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.01) 100%
+      ),
+      rgba(28, 28, 30, 0.92) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.10) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  html[data-theme='dark'] .apple-nav-popover,
+  html[data-theme='dark'] .hb-dialog-surface {
+    background: rgba(28, 28, 30, 0.94) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  html[data-theme='dark'] .apple-footer-shell {
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.03) 0%,
+        rgba(255, 255, 255, 0.01) 100%
+      ),
+      rgba(28, 28, 30, 0.88) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+/* =============================================================================
    iOS Safari performance fallback (prevents black tiles on fast scroll)
    Applies only on iOS (WebKit) and only in dark theme
    ============================================================================= */
@@ -571,7 +760,7 @@ html[data-theme='dark'] .apple-progress-fill {
     box-shadow: none !important;
   }
 
-  /* Replace “glass” with solid-ish premium surfaces (still looks Apple) */
+  /* Replace "glass" with solid-ish premium surfaces (still looks Apple) */
   html[data-theme='dark'] .hb-glass,
   html[data-theme='dark'] .apple-material-surface,
   html[data-theme='dark'] .apple-nav-shell,
