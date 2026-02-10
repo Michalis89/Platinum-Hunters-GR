@@ -70,7 +70,7 @@ function ModuleButton({
     if (needsLogin) {
       e.preventDefault();
       const redirectUrl = encodeURIComponent(href);
-      router.push(`/pages/auth/login?redirect=${redirectUrl}`);
+      router.push(`/auth/login?redirect=${redirectUrl}`);
       return;
     }
   };

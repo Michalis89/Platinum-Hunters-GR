@@ -4,7 +4,7 @@ export class ApiClient {
       // Session expired - redirect to login
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname + window.location.search;
-        const loginUrl = `/pages/auth/login?redirectTo=${encodeURIComponent(currentPath)}`;
+        const loginUrl = `/auth/login?redirectTo=${encodeURIComponent(currentPath)}`;
         window.location.href = loginUrl;
       }
     }

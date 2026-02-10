@@ -37,7 +37,7 @@ export async function createRouteHandlerClient(
   const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: false,
-      autoRefreshToken: false,
+      autoRefreshToken: true,
       detectSessionInUrl: false,
     },
     global: {

@@ -13,11 +13,11 @@ export default function ArticleAuthHint() {
   return (
     <p className="mt-2 text-xs text-[var(--hb-muted)]">
       Θες να κάνεις like ή σχόλιο; Χρειάζεται να έχεις λογαριασμό.{' '}
-      <Link href="/pages/auth/login" className="text-[var(--hb-primary)] underline-offset-4 hover:underline">
+      <Link href="/auth/login" className="text-[var(--hb-primary)] underline-offset-4 hover:underline">
         Σύνδεση
       </Link>{' '}
       ή{' '}
-      <Link href="/pages/auth/register" className="text-[var(--hb-primary)] underline-offset-4 hover:underline">
+      <Link href="/auth/register" className="text-[var(--hb-primary)] underline-offset-4 hover:underline">
         Εγγραφή
       </Link>
     </p>

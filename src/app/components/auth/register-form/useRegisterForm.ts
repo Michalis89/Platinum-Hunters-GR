@@ -166,7 +166,7 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
           onSuccess();
           return;
         }
-        const targetUrl = '/pages/auth/confirm-email?state=pending';
+        const targetUrl = '/auth/confirm-email?state=pending';
         router.push(targetUrl);
       }, 1200);
     } catch (error) {

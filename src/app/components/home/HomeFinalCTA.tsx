@@ -17,7 +17,7 @@ export function HomeFinalCTA() {
 
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <Link
-            href="/pages/auth/register"
+            href="/auth/register"
             className="apple-focus-ring group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--apple-system-blue)] px-8 py-3.5 text-sm font-semibold text-white shadow-[var(--hb-shadow-sm)] transition hover:brightness-110 sm:w-auto"
           >
             Δημιούργησε λογαριασμό
@@ -25,7 +25,7 @@ export function HomeFinalCTA() {
           </Link>
 
           <Link
-            href="/pages/auth/login"
+            href="/auth/login"
             className="apple-focus-ring inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-8 py-3.5 text-sm font-semibold text-[var(--apple-label)] transition hover:border-[color-mix(in_srgb,var(--apple-system-blue)_22%,var(--apple-separator))] hover:bg-[color-mix(in_srgb,var(--apple-tertiary-fill)_65%,var(--apple-material)_35%)] sm:w-auto"
           >
             <LogIn className="h-4 w-4" />

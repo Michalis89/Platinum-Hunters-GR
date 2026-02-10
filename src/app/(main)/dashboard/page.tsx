@@ -66,7 +66,7 @@ async function DashboardData() {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
-    redirect('/pages/auth/login');
+    redirect('/auth/login');
   }
 
   const userId = session.user.id;

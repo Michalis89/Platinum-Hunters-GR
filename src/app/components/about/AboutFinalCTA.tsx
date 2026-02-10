@@ -6,7 +6,7 @@ type AboutFinalCTAProps = {
 };
 
 export function AboutFinalCTA({ isAuthenticated = false }: AboutFinalCTAProps) {
-  const primaryHref = isAuthenticated ? '/dashboard' : '/pages/auth/register';
+  const primaryHref = isAuthenticated ? '/dashboard' : '/auth/register';
   const primaryLabel = isAuthenticated ? 'Πήγαινε στο Dashboard' : 'Δημιούργησε λογαριασμό';
 
   return (

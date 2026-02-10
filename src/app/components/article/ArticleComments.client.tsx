@@ -263,14 +263,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
           <p className="text-xs text-[var(--hb-muted)]">
             Για να κάνεις σχόλιο χρειάζεται λογαριασμός.{' '}
             <Link
-              href="/pages/auth/login"
+              href="/auth/login"
               className="text-[var(--hb-primary)] underline-offset-4 hover:underline"
             >
               Σύνδεση
             </Link>{' '}
             ή{' '}
             <Link
-              href="/pages/auth/register"
+              href="/auth/register"
               className="text-[var(--hb-primary)] underline-offset-4 hover:underline"
             >
               Εγγραφή
@@ -295,10 +295,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
           </form>
         ) : (
           <div className="flex flex-wrap gap-2">
-            <Button href="/pages/auth/login" variant="outline">
+            <Button href="/auth/login" variant="outline">
               Σύνδεση
             </Button>
-            <Button href="/pages/auth/register" variant="primary">
+            <Button href="/auth/register" variant="primary">
               Εγγραφή
             </Button>
           </div>

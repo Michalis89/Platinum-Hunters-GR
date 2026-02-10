@@ -30,7 +30,7 @@ export default async function ConfirmEmailPage({ searchParams }: ConfirmEmailPag
           alertTitle: 'Verification pending',
           alertDescription:
             'If you do not see the email, check your spam folder and try the registration flow again.',
-          ctaHref: '/pages/auth/login',
+          ctaHref: '/auth/login',
           ctaLabel: 'Go to sign in',
           Icon: MailCheck,
         }
@@ -41,7 +41,7 @@ export default async function ConfirmEmailPage({ searchParams }: ConfirmEmailPag
               'The verification link is invalid or expired. Repeat signup to get a fresh confirmation email.',
             alertTitle: 'Link issue detected',
             alertDescription: 'If this keeps happening, request a new account confirmation email.',
-            ctaHref: '/pages/auth/register',
+            ctaHref: '/auth/register',
             ctaLabel: 'Back to register',
             Icon: CircleAlert,
           }
@@ -50,7 +50,7 @@ export default async function ConfirmEmailPage({ searchParams }: ConfirmEmailPag
             description: 'Your email is confirmed and your account is ready. Sign in to continue.',
             alertTitle: 'Confirmation complete',
             alertDescription: 'You can now access all account features.',
-            ctaHref: '/pages/auth/login',
+            ctaHref: '/auth/login',
             ctaLabel: 'Continue to sign in',
             Icon: CheckCircle2,
           };

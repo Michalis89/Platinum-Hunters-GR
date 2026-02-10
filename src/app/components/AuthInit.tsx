@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSession, setUser, logout, selectUser } from '@/store/slices/authSlice';
 import { isAuthPersistenceEnabled, supabase } from '@/lib/supabase-client';
 import type { AppDispatch } from '@/store/store';
+import { getLoginUrl, shouldRedirectToLogin } from '@/lib/routes/authRoutes';
 
 const AUTH_STORAGE_KEY = 'hobbistas-hub-auth';
 const RETURN_URL_KEY = 'hobbistas-hub-return-url';
@@ -93,9 +95,22 @@ async function syncCookies(session: {
 
 export default function AuthInit() {
   const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
   const currentUser = useSelector(selectUser);
   const currentUserRef = useRef(currentUser);
-  const initialFetchInFlight = useRef(false);
+  const initialFetchInFlight = useRef(true);
+  const redirectInFlight = useRef<string | null>(null);
+
+  const redirectAfterLogout = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const { pathname, search } = window.location;
+    if (!shouldRedirectToLogin(pathname)) return;
+    const redirectTo = `${pathname}${search}`;
+    const target = getLoginUrl(redirectTo);
+    if (redirectInFlight.current === target) return;
+    redirectInFlight.current = target;
+    router.replace(target);
+  }, [router]);
   useEffect(() => {
     currentUserRef.current = currentUser;
   }, [currentUser]);
@@ -109,7 +124,7 @@ export default function AuthInit() {
     try {
       const currentPath = window.location.pathname + window.location.search;
       // Don't save auth pages as return URL
-      if (!currentPath.startsWith('/pages/auth')) {
+      if (!currentPath.startsWith('/auth')) {
         sessionStorage.setItem(RETURN_URL_KEY, currentPath);
       }
     } catch {
@@ -123,7 +138,8 @@ export default function AuthInit() {
       // signOut can fail if already signed out; ignore
     }
     dispatch(setUser(null));
-  }, [dispatch]);
+    redirectAfterLogout();
+  }, [dispatch, redirectAfterLogout]);
 
   /**
    * Validate session by checking with server (getUser makes an API call)
@@ -191,6 +207,7 @@ export default function AuthInit() {
       if (!session || event === 'SIGNED_OUT') {
         dispatch(setUser(null));
         clearAuthStorage();
+        redirectAfterLogout();
         return;
       }
 
@@ -226,7 +243,7 @@ export default function AuthInit() {
     return () => {
       subscription?.subscription?.unsubscribe();
     };
-  }, [dispatch, forceLogout, validateSession]);
+  }, [dispatch, forceLogout, validateSession, redirectAfterLogout]);
 
   // Keep session fresh on visibility change/interval to avoid stale "logged-in" UI after expiry
   useEffect(() => {
@@ -315,19 +332,20 @@ export default function AuthInit() {
     let lastActivityTime = 0;
     let cancelled = false;
 
-    const resetTimer = () => {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(async () => {
-        const { data } = await supabase.auth.getSession();
-        if (cancelled) return;
-        // If there is still a valid session, keep it; otherwise logout hard
-        if (!data.session) {
-          await dispatch(logout());
-          dispatch(setUser(null));
-          clearAuthStorage();
-        }
-      }, IDLE_LIMIT_MS);
-    };
+        const resetTimer = () => {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(async () => {
+            const { data } = await supabase.auth.getSession();
+            if (cancelled) return;
+            // If there is still a valid session, keep it; otherwise logout hard
+            if (!data.session) {
+              await dispatch(logout());
+              dispatch(setUser(null));
+              clearAuthStorage();
+              redirectAfterLogout();
+            }
+          }, IDLE_LIMIT_MS);
+        };
 
     // Debounced activity handler - prevents excessive calls from mousemove etc.
     const onActivity = () => {
@@ -353,7 +371,13 @@ export default function AuthInit() {
       if (timer) clearTimeout(timer);
       activityEvents.forEach(ev => window.removeEventListener(ev, onActivity));
     };
-  }, [dispatch]);
+  }, [dispatch, redirectAfterLogout]);
+
+  useEffect(() => {
+    if (initialFetchInFlight.current) return;
+    if (currentUser) return;
+    redirectAfterLogout();
+  }, [currentUser, redirectAfterLogout]);
 
   // This component doesn't render anything
   return null;

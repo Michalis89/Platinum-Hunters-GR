@@ -60,11 +60,11 @@ export default function MobileTabBar() {
 
   // Don't show tab bar on certain pages
   const hideOnPaths = [
-    '/pages/auth/login',
-    '/pages/auth/register',
-    '/pages/auth/reset-password',
+    '/auth/login',
+    '/auth/register',
+    '/auth/reset-password',
     '/forgot-password',
-    '/pages/auth/confirm-email',
+    '/auth/confirm-email',
   ];
 
   if (hideOnPaths.some(path => pathname?.startsWith(path))) {

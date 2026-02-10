@@ -44,7 +44,7 @@ export function useRequireAuth({ redirectPath }: UseRequireAuthOptions = {}) {
         // Ignore storage errors
       }
 
-      const target = redirectPath ?? `/pages/auth/login?redirect=${encodeURIComponent(currentUrl)}`;
+      const target = redirectPath ?? `/auth/login?redirect=${encodeURIComponent(currentUrl)}`;
       router.push(target);
     }
   }, [isAuthenticated, isLoading, redirectPath, router]);

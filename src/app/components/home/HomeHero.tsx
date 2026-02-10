@@ -22,7 +22,7 @@ export function HomeHero() {
       actions={
         <div className="apple-material-surface mx-auto flex w-full max-w-xl flex-col items-center justify-center gap-3 rounded-[28px] px-3 py-3 sm:flex-row sm:gap-4 sm:px-4 sm:py-4">
           <Link
-            href="/pages/auth/register"
+            href="/auth/register"
             className="apple-focus-ring group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--apple-system-blue)] px-8 py-3.5 text-sm font-semibold text-white shadow-[var(--hb-shadow-sm)] transition hover:brightness-110 sm:w-auto"
           >
             <Sparkles className="h-5 w-5" />

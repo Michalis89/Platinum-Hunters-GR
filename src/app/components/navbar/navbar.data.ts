@@ -173,7 +173,7 @@ export const getVisibleHobbyItems = (
   isAuthenticated: boolean,
   userCategories: string[],
 ) => {
-  if (!authResolved || !isAuthenticated) return items;
+  if (!authResolved || !isAuthenticated) return [];
 
   const normalizedCategories = userCategories.map(category => category.trim().toLowerCase()).filter(Boolean);
 

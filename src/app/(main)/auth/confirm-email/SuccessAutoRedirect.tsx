@@ -10,7 +10,7 @@ type SuccessAutoRedirectProps = {
 
 export default function SuccessAutoRedirect({
   seconds = 6,
-  to = '/pages/auth/login',
+  to = '/auth/login',
 }: SuccessAutoRedirectProps) {
   const router = useRouter();
   const [countdown, setCountdown] = useState(seconds);

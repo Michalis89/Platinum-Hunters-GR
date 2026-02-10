@@ -293,7 +293,7 @@ async function POSTHandler(req: Request) {
       email,
       password,
       options: {
-        redirectTo: `${siteUrl}/pages/auth/confirm-email?state=success`,
+        redirectTo: `${siteUrl}/auth/confirm-email?state=success`,
       },
     });
 

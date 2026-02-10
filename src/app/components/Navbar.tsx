@@ -2,10 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '@/store/store';
 import { logout, selectNavbarAuth } from '@/store/slices/authSlice';
+import { getLoginUrl, shouldRedirectToLogin } from '@/lib/routes/authRoutes';
 import { useTheme } from '@/context/ThemeContext';
 import { DesktopNav } from './navbar/DesktopNav';
 import { LogoBrand } from './navbar/LogoBrand';
@@ -15,9 +16,11 @@ import { getVisibleHobbyItems, getVisibleNavItems, HOBBY_ITEMS } from './navbar/
 const AddArticleDialog = dynamic(() => import('./articles/AddArticleDialog'), { ssr: false });
 
 export default function Navbar() {
+  const router = useRouter();
   const pathname = usePathname() || '';
   const searchParams = useSearchParams();
   const queryKey = searchParams.toString();
+  const currentFullPath = queryKey ? `${pathname}?${queryKey}` : pathname;
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, isLoading: isAuthLoading, user, canQuickAdd, canAccessAdminPanel } =
     useSelector(selectNavbarAuth);
@@ -46,6 +49,9 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await dispatch(logout());
+    if (shouldRedirectToLogin(pathname)) {
+      router.replace(getLoginUrl(currentFullPath));
+    }
   };
 
   return (

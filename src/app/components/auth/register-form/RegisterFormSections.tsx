@@ -299,8 +299,8 @@ export function LoginPrompt({ redirectParam }: LoginPromptProps) {
         <Link
           href={
             redirectParam
-              ? `/pages/auth/login?redirect=${encodeURIComponent(redirectParam)}`
-              : '/pages/auth/login'
+              ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}`
+              : '/auth/login'
           }
           className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
         >

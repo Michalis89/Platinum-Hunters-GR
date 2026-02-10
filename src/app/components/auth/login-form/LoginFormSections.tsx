@@ -239,8 +239,8 @@ export function SignUpPrompt({ redirectParam }: SignUpPromptProps) {
         <Link
           href={
             redirectParam
-              ? `/pages/auth/register?redirect=${encodeURIComponent(redirectParam)}`
-              : '/pages/auth/register'
+              ? `/auth/register?redirect=${encodeURIComponent(redirectParam)}`
+              : '/auth/register'
           }
           className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
         >

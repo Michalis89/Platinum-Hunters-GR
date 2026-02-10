@@ -77,6 +77,12 @@ export const login = createAsyncThunk(
 export const logout = createAsyncThunk('auth/logout', async () => {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } catch (hookError) {
+    console.warn('Failed to clear server auth cookies:', hookError);
+  }
 });
 
 /**

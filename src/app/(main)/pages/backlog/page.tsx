@@ -5,6 +5,7 @@ import { getCategoryBySlug } from '@/config/hobbies';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
+import { requireServerAuth } from '@/lib/auth/requireServerAuth';
 
 type BacklogPageProps = {
   searchParams: Promise<{ category?: string }>;
@@ -52,6 +53,11 @@ export default async function BacklogPage({ searchParams }: BacklogPageProps) {
       url: `${SITE_URL}/pages/backlog?category=${normalizedCategory}`,
     });
   }
+
+  const redirectPath = normalizedCategory
+    ? `/pages/backlog?category=${normalizedCategory}`
+    : '/pages/backlog';
+  await requireServerAuth(redirectPath);
 
   return (
     <>

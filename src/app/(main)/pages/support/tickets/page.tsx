@@ -1,5 +1,6 @@
 import SupportTicketsList from '@/app/components/support/SupportTicketsList.client';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
+import { requireServerAuth } from '@/lib/auth/requireServerAuth';
 
 export const metadata = buildMetadata({
   title: 'Τα tickets μου | Hobbistas',
@@ -7,7 +8,9 @@ export const metadata = buildMetadata({
   path: '/pages/support/tickets',
 });
 
-export default function SupportTicketsPage() {
+export default async function SupportTicketsPage() {
+  await requireServerAuth('/pages/support/tickets');
+
   return (
     <main className="apple-page-background">
       <SupportTicketsList />

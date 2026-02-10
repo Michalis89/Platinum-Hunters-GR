@@ -210,7 +210,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       variant="outline"
                       className="h-11 rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
                     >
-                      <Link href="/pages/auth/login">
+                      <Link href="/auth/login">
                         <LogIn className="size-4" />
                         <span>Sign in</span>
                       </Link>
@@ -220,7 +220,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       variant="primary"
                       className="h-11 rounded-[var(--apple-radius-control)] border border-transparent bg-[var(--apple-system-blue)] text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:brightness-110 active:scale-[0.98]"
                     >
-                      <Link href="/pages/auth/register">
+                      <Link href="/auth/register">
                         <UserPlus className="size-4" />
                         <span>Create account</span>
                       </Link>

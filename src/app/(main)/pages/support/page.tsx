@@ -1,6 +1,7 @@
 import SupportForm from '@/app/components/support/SupportForm.client';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { SITE_CONTACT_EMAIL } from '@/config/site';
+import { requireServerAuth } from '@/lib/auth/requireServerAuth';
 
 export const metadata = buildMetadata({
   title: 'Υποστήριξη | Hobbistas',
@@ -8,7 +9,8 @@ export const metadata = buildMetadata({
   path: '/pages/support',
 });
 
-export default function SupportPage() {
+export default async function SupportPage() {
+  await requireServerAuth('/pages/support');
   const securityEmail = process.env.SUPPORT_SECURITY_EMAIL ?? null;
 
   return <SupportForm securityEmail={securityEmail} contactEmail={SITE_CONTACT_EMAIL} />;

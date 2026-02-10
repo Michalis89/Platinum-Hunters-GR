@@ -7,7 +7,7 @@ type AboutHeroProps = {
 };
 
 export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
-  const primaryHref = isAuthenticated ? '/dashboard' : '/pages/auth/register';
+  const primaryHref = isAuthenticated ? '/dashboard' : '/auth/register';
   const primaryLabel = isAuthenticated ? 'Πήγαινε στο Dashboard' : 'Ξεκίνα δωρεάν';
 
   return (

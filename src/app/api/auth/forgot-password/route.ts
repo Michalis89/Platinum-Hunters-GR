@@ -40,14 +40,14 @@ async function POSTHandler(req: Request) {
       type: 'recovery',
       email,
       options: {
-        redirectTo: `${siteUrl}/pages/auth/reset-password`,
+        redirectTo: `${siteUrl}/auth/reset-password`,
       },
     });
 
     const actionLink = linkData?.properties?.action_link;
     const hashedToken = linkData?.properties?.hashed_token;
     const recoveryLink = hashedToken
-      ? `${siteUrl}/pages/auth/reset-password?token_hash=${encodeURIComponent(hashedToken)}&type=recovery`
+      ? `${siteUrl}/auth/reset-password?token_hash=${encodeURIComponent(hashedToken)}&type=recovery`
       : actionLink;
 
     if (linkError || !recoveryLink) {

@@ -5,7 +5,7 @@ import { buildMetadata } from '@/utils/seo/metadata/helpers';
 export const metadata = buildMetadata({
   title: 'Reset Password | Hobbistas',
   description: 'Set a new password for your account securely.',
-  path: '/pages/auth/reset-password',
+  path: '/auth/reset-password',
   noindex: true,
 });
 
@@ -31,7 +31,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
 
     // Redirect to forgot password page with error
     redirect(
-      `/pages/auth/login?reset_error=${encodeURIComponent(errorDescription)}`
+      `/auth/login?reset_error=${encodeURIComponent(errorDescription)}`
     );
   }
 

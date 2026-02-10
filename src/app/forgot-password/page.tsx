@@ -12,5 +12,5 @@ export default async function ForgotPasswordPage({ searchParams }: ForgotPasswor
     target.set('expired', 'true');
   }
 
-  redirect(`/pages/auth/login?${target.toString()}`);
+  redirect(`/auth/login?${target.toString()}`);
 }
