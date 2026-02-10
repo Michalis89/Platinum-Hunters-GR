@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase-client';
+import { isSessionError } from '@/lib/auth/session';
 
 export async function establishRecoverySessionFromUrl(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
@@ -60,13 +61,6 @@ export function clearRecoveryParamsFromUrl() {
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 
-export function isSessionError(message: string) {
-  const normalized = message.toLowerCase();
-  return (
-    normalized.includes('auth session missing') ||
-    normalized.includes('invalid session') ||
-    normalized.includes('jwt') ||
-    normalized.includes('session expired')
-  );
-}
+// Re-export isSessionError from shared utility for backwards compatibility
+export { isSessionError };
 

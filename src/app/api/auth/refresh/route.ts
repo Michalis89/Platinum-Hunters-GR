@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
+import { setAuthCookies } from '@/lib/auth';
 
 async function POSTHandler(req: Request) {
   try {
@@ -45,18 +46,8 @@ async function POSTHandler(req: Request) {
       return fail({ error: 'Μη έγκυρο access token' }, 401);
     }
 
-    const cookieOptions = {
-      path: '/',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-    };
-    const persistentCookieOptions = shouldRemember
-      ? { ...cookieOptions, maxAge: 60 * 60 * 24 * 30 } // 30 days
-      : cookieOptions;
-
-    cookieStore.set('sb-access-token', access_token, persistentCookieOptions);
-    cookieStore.set('sb-refresh-token', refresh_token, persistentCookieOptions);
+    // Set auth cookies using shared utility
+    await setAuthCookies(access_token, refresh_token, shouldRemember);
 
     return ok({ success: true });
   } catch (error) {

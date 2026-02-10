@@ -629,50 +629,27 @@ export default function CategoryLibrary({
     try {
       setSteamSyncing(true);
       setSteamSyncProgress({
-        id: 'starting',
+        id: 'syncing',
         status: 'running',
-        message: 'Ξεκινά ο συγχρονισμός Steam...',
-        percent: 0,
-        completedSteps: 0,
-        totalSteps: 1,
+        message: 'Συγχρονισμός Steam βιβλιοθήκης με RAWG metadata...',
+        percent: 50,
+        completedSteps: 1,
+        totalSteps: 2,
       });
 
-      const response = await apiClient.request('/api/integrations/steam/sync?async=1', {
+      const response = await apiClient.request('/api/integrations/steam/sync', {
         method: 'POST',
       });
+
       if (!response.ok) {
         const data = (await response.json()) as { error?: string };
         throw new Error(data.error || 'Steam sync failed');
       }
 
-      const startData = (await response.json()) as { jobId?: string };
-      if (!startData.jobId) {
-        throw new Error('Steam sync job did not start');
-      }
-
-      let finalSnapshot: SteamSyncJobSnapshot | null = null;
-      while (true) {
-        const jobResponse = await apiClient.request(
-          `/api/integrations/steam/sync?jobId=${encodeURIComponent(startData.jobId)}`,
-          { cache: 'no-store' },
-        );
-        if (!jobResponse.ok) {
-          throw new Error('Steam sync progress failed');
-        }
-
-        const snapshot = (await jobResponse.json()) as SteamSyncJobSnapshot;
-        setSteamSyncProgress(snapshot);
-        if (snapshot.status === 'completed' || snapshot.status === 'failed') {
-          finalSnapshot = snapshot;
-          break;
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 900));
-      }
-
-      if (!finalSnapshot || finalSnapshot.status !== 'completed') {
-        throw new Error(finalSnapshot?.error || 'Steam sync failed');
-      }
+      const result = (await response.json()) as {
+        totalFetched?: number;
+        warnings?: string[];
+      };
 
       await loadLibraryEntries();
       await mutate('/api/user/continue');
@@ -680,9 +657,9 @@ export default function CategoryLibrary({
         type: 'success',
         title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
         message:
-          (finalSnapshot.result?.warnings?.length ?? 0) > 0
-            ? `Ολοκληρώθηκε με προειδοποιήσεις: ${finalSnapshot.result?.warnings?.join(' | ')}`
-            : `Έγινε enrich σε ${finalSnapshot.result?.totalFetched ?? 0} παιχνίδια από RAWG/Steam.`,
+          (result.warnings?.length ?? 0) > 0
+            ? `Ολοκληρώθηκε με προειδοποιήσεις: ${result.warnings?.join(' | ')}`
+            : `Έγινε συγχρονισμός ${result.totalFetched ?? 0} παιχνιδιών από Steam με RAWG metadata.`,
       });
     } catch (error) {
       console.warn('Steam sync failed:', error);

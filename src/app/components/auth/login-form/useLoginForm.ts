@@ -29,6 +29,7 @@ export function useLoginForm() {
   const redirectParam = searchParams.get('redirect');
   const forgotMode = searchParams.get('forgot') === 'true';
   const expiredResetLink = searchParams.get('expired') === 'true';
+  const resetError = searchParams.get('reset_error');
 
   const [formData, setFormData] = useState<LoginFormData>({
     identifier: '',
@@ -73,9 +74,12 @@ export function useLoginForm() {
   }, []);
 
   useEffect(() => {
-    if (!forgotMode && !expiredResetLink) return;
+    if (!forgotMode && !expiredResetLink && !resetError) return;
 
-    setShowResetPanel(true);
+    if (forgotMode || expiredResetLink) {
+      setShowResetPanel(true);
+    }
+
     if (expiredResetLink) {
       setResetAlert({
         type: 'error',
@@ -83,15 +87,23 @@ export function useLoginForm() {
       });
     }
 
+    if (resetError) {
+      setAlert({
+        type: 'error',
+        message: decodeURIComponent(resetError),
+      });
+    }
+
     if (typeof window !== 'undefined') {
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.delete('forgot');
       currentUrl.searchParams.delete('expired');
+      currentUrl.searchParams.delete('reset_error');
       const nextSearch = currentUrl.searchParams.toString();
       const nextUrl = `${currentUrl.pathname}${nextSearch ? `?${nextSearch}` : ''}${currentUrl.hash}`;
       window.history.replaceState({}, '', nextUrl);
     }
-  }, [forgotMode, expiredResetLink]);
+  }, [forgotMode, expiredResetLink, resetError]);
 
   const clearFieldError = (field: keyof LoginFormErrors) => {
     if (!errors[field]) return;
@@ -237,7 +249,12 @@ export function useLoginForm() {
       await dispatch(fetchSession());
       setIsRedirecting(true);
 
-      let redirectUrl = '/pages/profile/edit';
+      // Determine redirect URL with priority:
+      // 1. Redirect parameter from URL
+      // 2. Saved URL from sessionStorage
+      // 3. Server-provided redirectUrl based on profile completeness
+      // 4. Default fallback
+      let redirectUrl = payload.redirectUrl || '/pages/profile/edit';
       if (redirectParam) {
         redirectUrl = decodeURIComponent(redirectParam);
       } else {

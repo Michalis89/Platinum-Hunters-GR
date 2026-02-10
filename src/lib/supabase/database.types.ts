@@ -338,12 +338,12 @@ export type Database = {
           rawg_id: number | null
           release_date: string | null
           runtime: number | null
-          steam_app_id: number | null
           season: string | null
           season_year: number | null
           source: string | null
           start_date: string | null
           status: string | null
+          steam_app_id: number | null
           studios: Json | null
           tags: Json | null
           title: string | null
@@ -388,12 +388,12 @@ export type Database = {
           rawg_id?: number | null
           release_date?: string | null
           runtime?: number | null
-          steam_app_id?: number | null
           season?: string | null
           season_year?: number | null
           source?: string | null
           start_date?: string | null
           status?: string | null
+          steam_app_id?: number | null
           studios?: Json | null
           tags?: Json | null
           title?: string | null
@@ -438,12 +438,12 @@ export type Database = {
           rawg_id?: number | null
           release_date?: string | null
           runtime?: number | null
-          steam_app_id?: number | null
           season?: string | null
           season_year?: number | null
           source?: string | null
           start_date?: string | null
           status?: string | null
+          steam_app_id?: number | null
           studios?: Json | null
           tags?: Json | null
           title?: string | null
@@ -454,6 +454,54 @@ export type Database = {
           updated_at?: string | null
           volumes?: number | null
           vote_count?: number | null
+        }
+        Relationships: []
+      }
+      steam_sync_jobs: {
+        Row: {
+          completed_steps: number
+          created_at: string
+          error: string | null
+          expires_at: string
+          finished_at: string | null
+          id: string
+          message: string
+          percent: number
+          result: Json | null
+          status: string
+          total_steps: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_steps?: number
+          created_at?: string
+          error?: string | null
+          expires_at?: string
+          finished_at?: string | null
+          id: string
+          message?: string
+          percent?: number
+          result?: Json | null
+          status?: string
+          total_steps?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_steps?: number
+          created_at?: string
+          error?: string | null
+          expires_at?: string
+          finished_at?: string | null
+          id?: string
+          message?: string
+          percent?: number
+          result?: Json | null
+          status?: string
+          total_steps?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -618,7 +666,9 @@ export type Database = {
           status: string
           subject: string
           updated_at: string | null
-          user_id: string | null
+          user_archived: boolean
+          user_deleted: boolean
+          user_id: string
         }
         Insert: {
           assigned_to?: string | null
@@ -635,7 +685,9 @@ export type Database = {
           status?: string
           subject: string
           updated_at?: string | null
-          user_id?: string | null
+          user_archived?: boolean
+          user_deleted?: boolean
+          user_id: string
         }
         Update: {
           assigned_to?: string | null
@@ -652,7 +704,9 @@ export type Database = {
           status?: string
           subject?: string
           updated_at?: string | null
-          user_id?: string | null
+          user_archived?: boolean
+          user_deleted?: boolean
+          user_id?: string
         }
         Relationships: [
           {
@@ -671,55 +725,43 @@ export type Database = {
           },
         ]
       }
-      steam_sync_jobs: {
+      user_integrations: {
         Row: {
-          completed_steps: number
+          access_token: string
           created_at: string
-          error: string | null
-          expires_at: string
-          finished_at: string | null
-          id: string
-          message: string
-          percent: number
-          result: Json | null
-          status: string
-          total_steps: number
+          expires_at: string | null
+          id: number
+          provider: string
+          refresh_token: string | null
+          scopes: string[]
           updated_at: string
           user_id: string
         }
         Insert: {
-          completed_steps?: number
+          access_token: string
           created_at?: string
-          error?: string | null
-          expires_at?: string
-          finished_at?: string | null
-          id: string
-          message?: string
-          percent?: number
-          result?: Json | null
-          status?: string
-          total_steps?: number
+          expires_at?: string | null
+          id?: number
+          provider: string
+          refresh_token?: string | null
+          scopes?: string[]
           updated_at?: string
           user_id: string
         }
         Update: {
-          completed_steps?: number
+          access_token?: string
           created_at?: string
-          error?: string | null
-          expires_at?: string
-          finished_at?: string | null
-          id?: string
-          message?: string
-          percent?: number
-          result?: Json | null
-          status?: string
-          total_steps?: number
+          expires_at?: string | null
+          id?: number
+          provider?: string
+          refresh_token?: string | null
+          scopes?: string[]
           updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "steam_sync_jobs_user_id_fkey"
+            foreignKeyName: "user_integrations_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -819,7 +861,7 @@ export type Database = {
           privacy_settings: Json | null
           psn_id: string | null
           role: string | null
-          roles: string[] | null
+          roles: string[]
           social_links: Json | null
           steam_id: string | null
           timezone: string | null
@@ -860,7 +902,7 @@ export type Database = {
           privacy_settings?: Json | null
           psn_id?: string | null
           role?: string | null
-          roles?: string[] | null
+          roles?: string[]
           social_links?: Json | null
           steam_id?: string | null
           timezone?: string | null
@@ -901,7 +943,7 @@ export type Database = {
           privacy_settings?: Json | null
           psn_id?: string | null
           role?: string | null
-          roles?: string[] | null
+          roles?: string[]
           social_links?: Json | null
           steam_id?: string | null
           timezone?: string | null
@@ -920,22 +962,43 @@ export type Database = {
     Views: {
       [_ in never]: never
     }
-      Functions: {
-        is_admin: { Args: never; Returns: boolean }
-        is_admin_or_moderator: { Args: never; Returns: boolean }
-        show_limit: { Args: never; Returns: number }
-        show_trgm: { Args: { "": string }; Returns: string[] }
-        update_user_last_login: { Args: { user_id: string }; Returns: undefined }
-        user_set_support_ticket_flags: {
-          Args: {
-            p_ticket_id: string
-            p_archived?: boolean | null
-            p_deleted?: boolean | null
-          }
-          Returns: Database['public']['Tables']['support_tickets']['Row']
+    Functions: {
+      cleanup_expired_steam_sync_jobs: { Args: never; Returns: undefined }
+      has_any_role: { Args: { required_roles: string[] }; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
+      is_admin_or_moderator: { Args: never; Returns: boolean }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
+      update_user_last_login: { Args: { user_id: string }; Returns: undefined }
+      user_set_support_ticket_flags: {
+        Args: { p_archived?: boolean; p_deleted?: boolean; p_ticket_id: string }
+        Returns: {
+          assigned_to: string | null
+          category: string
+          created_at: string | null
+          description: string
+          email: string | null
+          environment: Json | null
+          id: string
+          labels: string[] | null
+          meta: Json | null
+          name: string | null
+          severity: string | null
+          status: string
+          subject: string
+          updated_at: string | null
+          user_archived: boolean
+          user_deleted: boolean
+          user_id: string
         }
-        cleanup_expired_steam_sync_jobs: { Args: never; Returns: undefined }
+        SetofOptions: {
+          from: "*"
+          to: "support_tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
+    }
     Enums: {
       [_ in never]: never
     }

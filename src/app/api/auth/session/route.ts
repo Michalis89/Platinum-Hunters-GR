@@ -1,10 +1,10 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import { cookies } from 'next/headers';
 import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
+import { clearAuthCookies } from '@/lib/auth';
 
 async function GETHandler() {
   try {
@@ -43,11 +43,7 @@ async function GETHandler() {
     if (typedUserProfile.account_status === 'deleted') {
       // Sign out the user and clear cookies
       await supabase.auth.signOut();
-
-      // Clear session cookies
-      const cookieStore = await cookies();
-      cookieStore.delete('sb-access-token');
-      cookieStore.delete('sb-refresh-token');
+      await clearAuthCookies();
 
       return ok({ user: null, session: null });
     }
@@ -58,11 +54,7 @@ async function GETHandler() {
     ) {
       // Sign out suspended/banned users
       await supabase.auth.signOut();
-
-      // Clear session cookies
-      const cookieStore = await cookies();
-      cookieStore.delete('sb-access-token');
-      cookieStore.delete('sb-refresh-token');
+      await clearAuthCookies();
 
       return fail(
         {

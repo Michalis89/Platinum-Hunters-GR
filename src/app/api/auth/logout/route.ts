@@ -7,9 +7,9 @@ import { withApiRoute } from '@/lib/observability/withApiRoute';
  */
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import { cookies } from 'next/headers';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
+import { clearAuthCookies } from '@/lib/auth';
 
 async function POSTHandler() {
   try {
@@ -22,10 +22,8 @@ async function POSTHandler() {
       return fail({ error: 'Σφάλμα αποσύνδεσης' }, 500);
     }
 
-    // Clear session cookies
-    const cookieStore = await cookies();
-    cookieStore.delete('sb-access-token');
-    cookieStore.delete('sb-refresh-token');
+    // Clear session cookies using shared utility
+    await clearAuthCookies();
 
     return ok({
       message: 'Επιτυχής αποσύνδεση',

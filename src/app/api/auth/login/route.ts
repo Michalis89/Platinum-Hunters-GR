@@ -13,6 +13,7 @@ import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import { rateLimit, getClientIp, rateLimitHeaders } from '@/lib/rate-limit';
 import { verifyCaptchaToken } from '@/lib/captcha/turnstile';
+import { setAuthCookies } from '@/lib/auth';
 
 const fallbackUsername = (email: string, userId: string) => {
   const localPart = email.split('@')[0]?.toLowerCase() ?? 'user';
@@ -177,29 +178,25 @@ async function POSTHandler(req: Request) {
     // UPDATE LAST LOGIN
     await authedSupabase.rpc('update_user_last_login', { user_id: authData.user.id } as never);
 
-    // SET SESSION COOKIES
+    // SET SESSION COOKIES using shared utility
     if (authData.session) {
-      const { cookies } = await import('next/headers');
-      const cookieStore = await cookies();
-      const cookieOptions = {
-        path: '/',
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
-      };
-      const persistentCookieOptions = shouldRemember
-        ? { ...cookieOptions, maxAge: 60 * 60 * 24 * 30 } // 30 days
-        : cookieOptions;
-
-      cookieStore.set('sb-access-token', authData.session.access_token, persistentCookieOptions);
-      cookieStore.set('sb-refresh-token', authData.session.refresh_token, persistentCookieOptions);
+      await setAuthCookies(
+        authData.session.access_token,
+        authData.session.refresh_token,
+        shouldRemember,
+      );
     }
+
+    // DETERMINE REDIRECT URL based on profile completeness
+    const hasCategories = resolvedUserProfile.categories && resolvedUserProfile.categories.length > 0;
+    const redirectUrl = hasCategories ? '/dashboard' : '/pages/profile/edit';
 
     // RETURN SUCCESS
     return ok({
       user: resolvedUserProfile,
       session: authData.session,
       message: 'Login successful!',
+      redirectUrl,
     });
   } catch (error) {
     console.error('Login error:', error);

@@ -107,8 +107,8 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
 
     const { data, error } = await supabase.rpc('user_set_support_ticket_flags', {
       p_ticket_id: ticketId,
-      p_archived: archived,
-      p_deleted: deleted,
+      p_archived: archived ?? undefined,
+      p_deleted: deleted ?? undefined,
     });
 
     if (error) {

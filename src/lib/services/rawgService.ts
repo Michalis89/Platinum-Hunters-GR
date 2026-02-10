@@ -71,10 +71,16 @@ export async function searchRawgGames(query: string, limit = 12): Promise<RawgGa
     url.searchParams.set('search', query);
     url.searchParams.set('page_size', String(limit));
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000); // 3s timeout
+
     const response = await fetch(url.toString(), {
       cache: 'no-store',
       headers: { Accept: 'application/json' },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeout);
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -99,10 +105,16 @@ export async function fetchRawgGameDetails(rawgId: number): Promise<RawgGame | n
     const url = new URL(`https://api.rawg.io/api/games/${rawgId}`);
     url.searchParams.set('key', RAWG_API_KEY);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000); // 3s timeout
+
     const response = await fetch(url.toString(), {
       cache: 'no-store',
       headers: { Accept: 'application/json' },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeout);
 
     if (!response.ok) {
       const errorBody = await response.text();

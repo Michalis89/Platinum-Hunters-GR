@@ -7,14 +7,17 @@ import {
   clearRecoveryParamsFromUrl,
   establishRecoverySessionFromUrl,
   hasRecoveryParamsInUrl,
-  isSessionError,
 } from './recoverySession';
 
 type UseResetPasswordFormOptions = {
   allowDevPreview?: boolean;
+  hasRecoveryParams?: boolean;
 };
 
-export function useResetPasswordForm({ allowDevPreview = false }: UseResetPasswordFormOptions) {
+export function useResetPasswordForm({
+  allowDevPreview = false,
+  hasRecoveryParams = false,
+}: UseResetPasswordFormOptions) {
   const router = useRouter();
 
   const [password, setPassword] = useState('');
@@ -55,9 +58,12 @@ export function useResetPasswordForm({ allowDevPreview = false }: UseResetPasswo
       }
 
       try {
-        const hasRecoveryParams = hasRecoveryParamsInUrl();
+        // Check if we have recovery params (from URL hash or query)
+        const hasUrlRecoveryParams = hasRecoveryParamsInUrl();
+        const shouldEstablishRecovery = hasRecoveryParams || hasUrlRecoveryParams;
 
-        if (hasRecoveryParams) {
+        if (shouldEstablishRecovery) {
+          // Clear any existing session before establishing recovery session
           await supabase.auth.signOut({ scope: 'local' });
 
           const recovered = await establishRecoverySessionFromUrl();
@@ -78,6 +84,7 @@ export function useResetPasswordForm({ allowDevPreview = false }: UseResetPasswo
           return;
         }
 
+        // Check if we already have a valid session
         const { data, error: initialSessionError } = await supabase.auth.getSession();
         if (initialSessionError || !data.session) {
           router.replace(EXPIRED_REDIRECT);
@@ -94,7 +101,7 @@ export function useResetPasswordForm({ allowDevPreview = false }: UseResetPasswo
     };
 
     ensureSession();
-  }, [allowDevPreview, router]);
+  }, [allowDevPreview, hasRecoveryParams, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -112,25 +119,32 @@ export function useResetPasswordForm({ allowDevPreview = false }: UseResetPasswo
 
     setSubmitting(true);
     try {
-      const { error: updateError } = await supabase.auth.updateUser({ password });
-      if (updateError) {
-        if (isSessionError(updateError.message)) {
+      // Call the API route for password update (server-side)
+      const response = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle error responses
+        if (response.status === 401) {
           router.replace(EXPIRED_REDIRECT);
           return;
         }
-        throw updateError;
+        throw new Error(data.error || 'Failed to update password');
       }
 
-      await supabase.auth.signOut();
+      // Success - password updated
       setSuccess('Password updated successfully. Redirecting to sign in...');
       setTimeout(() => router.push(RESET_SUCCESS_REDIRECT), 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong.';
-      if (isSessionError(errorMessage)) {
-        router.replace(EXPIRED_REDIRECT);
-        return;
-      }
-      setError('We could not complete the password update. Please try again.');
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }

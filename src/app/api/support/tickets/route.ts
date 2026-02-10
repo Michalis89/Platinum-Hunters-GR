@@ -144,8 +144,13 @@ async function POSTHandler(req: Request) {
       resolvedName = resolvedName || userProfile?.display_name || userProfile?.username || '';
     }
 
-    if (!session && !resolvedEmail) {
-      return fail({ error: 'Το email είναι υποχρεωτικό για ανώνυμα αιτήματα.' }, 400);
+    // Support tickets now require authentication
+    if (!session) {
+      return fail({ error: 'Πρέπει να συνδεθείς για να υποβάλεις αίτημα υποστήριξης.' }, 401);
+    }
+
+    if (!resolvedEmail) {
+      return fail({ error: 'Το email είναι υποχρεωτικό.' }, 400);
     }
 
     const environment = parseOptionalJson(formData.get('environment'));
@@ -228,7 +233,7 @@ async function POSTHandler(req: Request) {
     }
 
     const insertPayload: Database['public']['Tables']['support_tickets']['Insert'] = {
-      user_id: session?.user.id ?? null,
+      user_id: session.user.id,
       email: resolvedEmail || null,
       name: resolvedName || null,
       category,

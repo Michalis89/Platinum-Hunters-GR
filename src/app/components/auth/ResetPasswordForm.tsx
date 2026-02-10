@@ -8,9 +8,13 @@ import { useResetPasswordForm } from '@/app/components/auth/reset-password-form/
 
 type ResetPasswordFormProps = {
   allowDevPreview?: boolean;
+  hasRecoveryParams?: boolean;
 };
 
-export default function ResetPasswordForm({ allowDevPreview = false }: ResetPasswordFormProps) {
+export default function ResetPasswordForm({
+  allowDevPreview = false,
+  hasRecoveryParams = false,
+}: ResetPasswordFormProps) {
   const {
     password,
     confirmPassword,
@@ -31,7 +35,7 @@ export default function ResetPasswordForm({ allowDevPreview = false }: ResetPass
     setShowPassword,
     setShowConfirmPassword,
     handleSubmit,
-  } = useResetPasswordForm({ allowDevPreview });
+  } = useResetPasswordForm({ allowDevPreview, hasRecoveryParams });
 
   if (loading) {
     return <LoadingState />;

@@ -1,6 +1,19 @@
 export class ApiClient {
+  private handleUnauthorized(response: Response): void {
+    if (response.status === 401) {
+      // Session expired - redirect to login
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname + window.location.search;
+        const loginUrl = `/pages/auth/login?redirectTo=${encodeURIComponent(currentPath)}`;
+        window.location.href = loginUrl;
+      }
+    }
+  }
+
   async request(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    return fetch(input, init);
+    const response = await fetch(input, init);
+    this.handleUnauthorized(response);
+    return response;
   }
 
   async getJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {

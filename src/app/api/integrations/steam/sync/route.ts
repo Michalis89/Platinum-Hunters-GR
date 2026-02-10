@@ -16,13 +16,12 @@ import {
   resolveSteamId64,
   type SteamOwnedGame,
 } from '@/lib/integrations/steam';
-import {
-  completeSteamSyncJob,
-  createSteamSyncJob,
-  failSteamSyncJob,
-  getSteamSyncJob,
-  updateSteamSyncJobProgress,
-} from '@/lib/integrations/steamSyncJobs';
+
+type SyncProgress = {
+  message: string;
+  completedSteps: number;
+  totalSteps: number;
+};
 
 type SyncResult = {
   totalFetched: number;
@@ -50,11 +49,6 @@ type SyncResult = {
   };
 };
 
-type SyncProgress = {
-  message: string;
-  completedSteps: number;
-  totalSteps: number;
-};
 
 function normalizeTitle(value?: string | null): string {
   return (value ?? '').trim().toLowerCase();
@@ -118,7 +112,7 @@ async function matchSteamGamesToRawg(
 
   const pairs = await mapWithConcurrency(
     games,
-    4,
+    3,
     async game => {
       const title = game.name ?? '';
       const key = normalizeForMatch(title);
@@ -130,11 +124,17 @@ async function matchSteamGamesToRawg(
         return [game.appid, cache.get(key) ?? null] as const;
       }
 
-      const candidates = await searchRawgGames(title, 8);
-      const matched = candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
+      try {
+        const candidates = await searchRawgGames(title, 8);
+        const matched = candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
 
-      cache.set(key, matched);
-      return [game.appid, matched] as const;
+        cache.set(key, matched);
+        return [game.appid, matched] as const;
+      } catch (error) {
+        console.warn(`RAWG search failed for "${title}":`, error);
+        cache.set(key, null);
+        return [game.appid, null] as const;
+      }
     },
     onItemComplete,
   );
@@ -161,11 +161,17 @@ async function enrichRawgMatches(
 
   await mapWithConcurrency(
     matchedRawgIds,
-    4,
+    3,
     async rawgId => {
-      const details = await fetchRawgGameDetails(rawgId);
-      detailsCache.set(rawgId, details);
-      return details;
+      try {
+        const details = await fetchRawgGameDetails(rawgId);
+        detailsCache.set(rawgId, details);
+        return details;
+      } catch (error) {
+        console.warn(`RAWG details fetch failed for ID ${rawgId}:`, error);
+        detailsCache.set(rawgId, null);
+        return null;
+      }
     },
     onItemComplete,
   );
@@ -621,30 +627,6 @@ async function POSTHandler(req: Request) {
   try {
     const url = new URL(req.url);
     const includeDebug = url.searchParams.get('debug') === '1';
-    const asyncMode = url.searchParams.get('async') === '1';
-
-    if (asyncMode) {
-      const supabase = await createRouteHandlerClient();
-      const session = await requireAuth(supabase);
-
-      const job = await createSteamSyncJob(session.user.id);
-      void syncSteamForUser({
-        includeDebug,
-        onProgress: async progress => {
-          await updateSteamSyncJobProgress(job.id, progress);
-        },
-      })
-        .then(async result => {
-          await completeSteamSyncJob(job.id, result);
-        })
-        .catch(async error => {
-          const message =
-            error instanceof Error ? error.message : 'Αποτυχία συγχρονισμού βιβλιοθήκης Steam';
-          await failSteamSyncJob(job.id, message);
-        });
-
-      return NextResponse.json({ jobId: job.id, status: 'running' }, { status: 202 });
-    }
 
     const result = await syncSteamForUser({ includeDebug });
     return NextResponse.json(result);
@@ -663,15 +645,6 @@ async function POSTHandler(req: Request) {
 async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const jobId = searchParams.get('jobId');
-    if (jobId) {
-      const job = getSteamSyncJob(jobId);
-      if (!job) {
-        return NextResponse.json({ error: 'Sync job not found' }, { status: 404 });
-      }
-      return NextResponse.json(job);
-    }
-
     const shouldRedirect = searchParams.get('redirect') === '1';
     const includeDebug = searchParams.get('debug') === '1';
 

@@ -1,4 +1,4 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareClient } from '@/lib/supabase-middleware';
 
 const PROTECTED_ROUTES = [
@@ -41,26 +41,39 @@ export async function middleware(request: NextRequest) {
     return;
   }
 
+  // Check if this is a protected route BEFORE trying to get user
+  const isProtectedRoute = PROTECTED_ROUTES.some(
+    route => pathname === route || pathname.startsWith(`${route}/`),
+  );
+  const isAuthRoute = AUTH_ROUTES.some(
+    route => pathname === route || pathname.startsWith(`${route}/`),
+  );
+
   try {
     const { user, response } = await createMiddlewareClient(request);
 
-    const isProtectedRoute = PROTECTED_ROUTES.some(
-      route => pathname === route || pathname.startsWith(`${route}/`),
-    );
-    const isAuthRoute = AUTH_ROUTES.some(
-      route => pathname === route || pathname.startsWith(`${route}/`),
-    );
-
+    // Redirect to login if not authenticated
     if (isProtectedRoute && !user) {
       const redirectUrl = new URL('/pages/auth/login', request.url);
       redirectUrl.searchParams.set('redirectTo', pathname);
       return Response.redirect(redirectUrl);
     }
 
-    if (isAuthRoute && user) {
-      const redirectTo = request.nextUrl.searchParams.get('redirectTo');
-      const redirectUrl = new URL(redirectTo || '/dashboard', request.url);
+    // Check email confirmation for protected routes
+    if (isProtectedRoute && user && !user.email_confirmed_at) {
+      const redirectUrl = new URL('/pages/auth/confirm-email', request.url);
+      redirectUrl.searchParams.set('state', 'pending');
       return Response.redirect(redirectUrl);
+    }
+
+    // Redirect authenticated users away from auth routes (only if email confirmed)
+    if (isAuthRoute && user) {
+      if (user.email_confirmed_at) {
+        const redirectTo = request.nextUrl.searchParams.get('redirectTo');
+        const redirectUrl = new URL(redirectTo || '/pages/profile', request.url);
+        return Response.redirect(redirectUrl);
+      }
+      // If email not confirmed, allow access to auth routes (like confirm-email)
     }
 
     // ✅ Apply CSP here (dev vs prod)
@@ -70,7 +83,25 @@ export async function middleware(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Middleware error:', error);
-    return;
+
+    // If error occurred on protected route (likely expired session), redirect to login
+    if (isProtectedRoute) {
+      const redirectUrl = new URL('/pages/auth/login', request.url);
+      redirectUrl.searchParams.set('redirectTo', pathname);
+      return Response.redirect(redirectUrl);
+    }
+
+    // For non-protected routes, continue with default response
+    const response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+
+    const isProd = process.env.NODE_ENV === 'production';
+    response.headers.set('Content-Security-Policy', buildCsp(isProd));
+
+    return response;
   }
 }
 
