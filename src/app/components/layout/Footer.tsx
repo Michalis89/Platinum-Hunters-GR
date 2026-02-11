@@ -60,7 +60,7 @@ export function Footer() {
 
               <p className="apple-body-tracking max-w-sm text-sm leading-6 text-[var(--apple-secondary-label)]">
                 Your space for gaming, anime, manga, movies, TV series, and books. Everything
-                organized — without the noise.
+                organized without the noise.
               </p>
 
               <div className="flex flex-wrap gap-2">

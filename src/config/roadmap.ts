@@ -1,19 +1,24 @@
 import {
+  BarChart3,
   Bell,
+  BookOpen,
   Download,
   FileText,
   Heart,
+  Layers,
+  ListTodo,
   MessageCircle,
   Palette,
   Plug,
   Scroll,
   Search,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type RoadmapStatus = 'done' | 'in-progress' | 'planned';
-export type RoadmapArea = 'core' | 'social' | 'dnd' | 'import' | 'ui';
+export type RoadmapArea = 'core' | 'community' | 'dnd' | 'import' | 'ui' | 'diary';
 
 export type RoadmapItem = {
   title: string;
@@ -25,86 +30,131 @@ export type RoadmapItem = {
 
 export const ROADMAP_ITEMS: RoadmapItem[] = [
   {
-    title: 'Light Mode',
-    description: 'Εναλλαγή light/dark theme σε όλη την εφαρμογή.',
+    title: 'Personal Library',
+    description: 'Unified personal library for tracking hobbies across media.',
     status: 'done',
-    area: 'ui',
-    icon: Palette,
+    area: 'core',
+    icon: Layers,
   },
   {
-    title: 'Comments & Likes',
-    description: 'Αλληλεπίδραση χρηστών με σχόλια και reactions σε περιεχόμενο.',
+    title: 'Progress & Status Tracking',
+    description: 'Track progress, statuses, favorites, and completion per entry.',
     status: 'done',
-    area: 'social',
-    icon: Heart,
+    area: 'core',
+    icon: ListTodo,
   },
   {
-    title: 'API Integrations',
-    description:
-      'Σύνδεση με εξωτερικά APIs (RAWG, TMDB, MAL, Google Books) για αυτόματο metadata και covers.',
+    title: 'Personal Statistics',
+    description: 'Personal stats for time invested, completions, and activity.',
+    status: 'done',
+    area: 'core',
+    icon: BarChart3,
+  },
+  {
+    title: 'External Metadata Enrichment',
+    description: 'Enrich entries with metadata and covers from external APIs when added.',
     status: 'done',
     area: 'core',
     icon: Plug,
   },
   {
-    title: 'Profiles & Social Graph',
-    description: 'Public προφίλ, follow system και βασικές social συνδέσεις.',
+    title: 'Personal Suggestions',
+    description: 'Optional, context-based suggestions inside library and import flows.',
     status: 'in-progress',
-    area: 'social',
+    area: 'core',
+    icon: Sparkles,
+  },
+  {
+    title: 'Light Mode',
+    description: 'Light/dark theme switch across the entire app.',
+    status: 'done',
+    area: 'ui',
+    icon: Palette,
+  },
+  {
+    title: 'External Metadata Enrichment',
+    description:
+      'Use external APIs to enrich entries with metadata and cover art when items are added.',
+    status: 'done',
+    area: 'core',
+    icon: Plug,
+  },
+  {
+    title: 'Import & Export',
+    description: 'Import lists from supported services and export personal data to common formats.',
+    status: 'in-progress',
+    area: 'import',
+    icon: Download,
+  },
+
+  {
+    title: 'Articles, Comments & Likes (Optional)',
+    description:
+      'Editorial and interaction features available only when the Community module is enabled.',
+    status: 'done',
+    area: 'community',
+    icon: Heart,
+  },
+  {
+    title: 'Profiles & Social Graph (Optional)',
+    description: 'Public profiles and follow relationships, available only with Community enabled.',
+    status: 'planned',
+    area: 'community',
     icon: Users,
   },
   {
-    title: 'Notifications',
-    description: 'Ειδοποιήσεις για σχόλια, replies, tickets και προσωπικά μηνύματα.',
+    title: 'Notifications (Optional)',
+    description: 'Activity notifications for community interactions when enabled.',
     status: 'in-progress',
-    area: 'core',
+    area: 'community',
     icon: Bell,
   },
   {
+    title: 'Direct Messages (Optional)',
+    description: 'Private messaging between users when Community features are enabled.',
+    status: 'planned',
+    area: 'community',
+    icon: MessageCircle,
+  },
+  {
     title: 'D&D Campaign Toolkit',
-    description: 'Εργαλεία για DMs: campaigns, sessions, NPCs, handouts και rule search.',
+    description: 'DM-focused tools for managing campaigns, sessions, and game material.',
     status: 'planned',
     area: 'dnd',
     icon: Scroll,
   },
   {
-    title: 'Direct Messages',
-    description: 'Ιδιωτικά μηνύματα μεταξύ χρηστών.',
-    status: 'planned',
-    area: 'social',
-    icon: MessageCircle,
-  },
-  {
-    title: 'Rulebook Search (SRD + PDFs)',
-    description: 'Αναζήτηση σε SRD κανόνες και προσωπικά PDFs (μόνο search, όχι ανάγνωση).',
+    title: 'Rulebook Search (SRD & PDFs)',
+    description: 'Search SRD content and personal PDFs without built-in reading tools.',
     status: 'planned',
     area: 'dnd',
     icon: Search,
   },
   {
     title: 'Character Sheets (Automation)',
-    description: 'Διαχείριση χαρακτήρων με αυτόματους υπολογισμούς (π.χ. level, proficiency).',
+    description: 'Automated character sheets with calculated stats and progression.',
     status: 'planned',
     area: 'dnd',
     icon: FileText,
   },
   {
-    title: 'Import / Export',
-    description: 'Εισαγωγή λιστών από MAL, Letterboxd, Steam και εξαγωγή σε CSV/JSON.',
+    title: 'Diary Module',
+    description:
+      'Private personal journal for notes and reflection. Optional and disabled by default.',
     status: 'planned',
-    area: 'import',
-    icon: Download,
+    area: 'diary',
+    icon: BookOpen,
   },
 ];
 
 const COMMON_STATUS_LABELS: Record<'done' | 'in-progress', string> = {
-  done: 'ΟΛΟΚΛΗΡΩΘΗΚΕ',
-  'in-progress': 'ΣΕ ΕΞΕΛΙΞΗ',
+  done: 'Done',
+  'in-progress': 'In development',
 };
 
 const PLANNED_LABELS: Record<'teaser' | 'full', string> = {
-  teaser: 'ΣΥΝΤΟΜΑ',
-  full: 'ΠΡΟΓΡΑΜΜΑΤΙΣΜΕΝΟ',
+  teaser: 'Upcoming',
+  full: 'In roadmap',
 };
 
 const TEASER_PLANNED_ITEMS = new Set(['Import / Export', 'Notifications']);

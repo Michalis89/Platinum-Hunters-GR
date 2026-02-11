@@ -16,18 +16,17 @@ export function AboutRoadmap() {
             Roadmap
           </p>
           <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Τι έρχεται
+            What is next
           </h2>
           <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
-            Συνεχίζουμε να βελτιώνουμε τον Χομπίστα. Εδώ είναι μερικά από τα features που
-            σχεδιάζουμε.
+            We keep improving Hobbista. Here are some of the features we plan next.
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {ROADMAP_ITEMS.map(item => (
+          {ROADMAP_ITEMS.map((item, index) => (
             <div
-              key={item.title}
+              key={`${item.title}-${index}`}
               className="hover:border-[var(--hb-primary-strong)]/40 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition"
             >
               <div className="mb-4 flex items-start justify-between">
@@ -47,7 +46,7 @@ export function AboutRoadmap() {
         </div>
 
         <p className="mt-6 text-center text-xs text-[var(--hb-muted)]">
-          * Το roadmap μπορεί να αλλάξει με βάση το feedback της κοινότητας
+          * The roadmap can change based on community feedback
         </p>
       </div>
     </section>

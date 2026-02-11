@@ -17,14 +17,12 @@ export function HomeRoadmapPreview() {
     <section className="px-4 py-12 md:px-6 md:py-16">
       <div className="mx-auto max-w-5xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">
-            Roadmap
-          </p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">Roadmap</p>
           <h2 className="apple-title-tracking mb-4 text-3xl font-semibold text-[var(--apple-label)] md:text-4xl">
-            Τι ετοιμάζουμε
+            What we are building
           </h2>
           <p className="apple-body-tracking mx-auto max-w-xl text-[var(--apple-secondary-label)]">
-            Συνεχίζουμε να βελτιώνουμε τον Χομπίστα με νέα features.
+            We continue improving Hobbistas with new tools and refinements.
           </p>
         </div>
 
@@ -44,9 +42,7 @@ export function HomeRoadmapPreview() {
                   {getStatusLabel(item.status, 'teaser')}
                 </span>
               </div>
-              <h3 className="mb-2 font-semibold tracking-[-0.01em] text-[var(--apple-label)]">
-                {item.title}
-              </h3>
+              <h3 className="mb-2 font-semibold tracking-[-0.01em] text-[var(--apple-label)]">{item.title}</h3>
               <p className="apple-body-tracking text-sm leading-relaxed text-[var(--apple-secondary-label)]">
                 {item.description}
               </p>
@@ -59,7 +55,7 @@ export function HomeRoadmapPreview() {
             href="/pages/about"
             className="apple-focus-ring group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-[var(--apple-system-blue)] transition hover:bg-[var(--apple-tertiary-fill)]"
           >
-            Δες το πλήρες roadmap
+            See the full roadmap
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>

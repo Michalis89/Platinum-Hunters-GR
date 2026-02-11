@@ -1,4 +1,13 @@
-import { Layers, ListTodo, BarChart3, Trophy, StickyNote, Gamepad2 } from 'lucide-react';
+import {
+  Layers,
+  ListTodo,
+  BarChart3,
+  Trophy,
+  StickyNote,
+  Film,
+  RefreshCw,
+  Star,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type Feature = {
@@ -6,39 +15,53 @@ type Feature = {
   description: string;
   icon: ReactNode;
 };
-
 const features: Feature[] = [
   {
-    title: 'Όλα τα hobbies, σε ένα σημείο',
+    title: 'Personal Library',
     description:
-      'Games, anime, manga, ταινίες, σειρές, βιβλία — ξεχωριστές λίστες με κοινή λογική και ίδιο “flow” καταγραφής.',
+      'Track games, anime, manga, books, movies, and TV shows. Add items manually or import from supported sources.',
     icon: <Layers className="h-6 w-6" />,
   },
-
   {
     title: 'Progress Tracking',
-    description: 'Ώρες, επεισόδια, κεφάλαια, σελίδες. Ενημέρωσε την πρόοδό σου με ένα click.',
+    description:
+      'Update hours played, episodes watched, chapters read, or pages finished as you go.',
     icon: <ListTodo className="h-6 w-6" />,
   },
   {
-    title: 'Στατιστικά',
-    description: 'Πόσο χρόνο αφιέρωσες, τι ολοκλήρωσες, ποια genres και platforms προτιμάς.',
+    title: 'Personal Statistics',
+    description: 'View time invested, completion status, and in-progress counts per category.',
     icon: <BarChart3 className="h-6 w-6" />,
   },
   {
-    title: 'Trophy Guides',
-    description: 'Αναλυτικοί οδηγοί για platinum trophies: difficulty, ώρες, missables, tips.',
-    icon: <Trophy className="h-6 w-6" />,
+    title: 'Ratings & Reflections',
+    description:
+      'Rate each entry on a 1–10 scale and add short reflections to capture your thoughts.',
+    icon: <Star className="h-6 w-6" />,
   },
   {
-    title: 'Σημειώσεις',
-    description: 'Quick notes για κάθε entry. Θυμήσου πού σταμάτησες ή τι ήθελες να δοκιμάσεις.',
+    title: 'Status Management',
+    description:
+      'Organize your library with statuses: Planned, Current, Completed, or Dropped. Mark favorites.',
     icon: <StickyNote className="h-6 w-6" />,
   },
   {
-    title: 'Gaming Focus',
-    description: 'Ειδική υποστήριξη για gamers: platforms, trophy stats, completion rate.',
-    icon: <Gamepad2 className="h-6 w-6" />,
+    title: 'Gaming Fields',
+    description:
+      'Select platforms, import playtime from Steam, and set personal difficulty ratings for games.',
+    icon: <Trophy className="h-6 w-6" />,
+  },
+  {
+    title: 'Articles & Reviews (Optional)',
+    description:
+      'Optional module enabled in Application Settings. Users with Author or Reviewer roles can publish content; likes and comments are available when the module is active. Role access is managed through Support.',
+    icon: <Film className="h-6 w-6" />,
+  },
+  {
+    title: 'External Library Sync',
+    description:
+      'Import your Steam library with playtime. Anime and manga sync from MyAnimeList is being finalized.',
+    icon: <RefreshCw className="h-6 w-6" />,
   },
 ];
 
@@ -48,13 +71,13 @@ export function HomeFeatures() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 text-center md:mb-12">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">
-            Δυνατότητες
+            Capabilities
           </p>
           <h2 className="apple-title-tracking mb-4 text-3xl font-semibold text-[var(--apple-label)] md:text-4xl">
-            Ό,τι χρειάζεσαι για τα hobbies σου
+            Everything you need only what you choose
           </h2>
           <p className="apple-body-tracking mx-auto max-w-xl text-[var(--apple-secondary-label)]">
-            Σχεδιασμένο για hobbyists που θέλουν οργάνωση χωρίς πολυπλοκότητα.
+            A personal hobby system that stays out of your way. No feeds. No noise. No assumptions.
           </p>
         </div>
 

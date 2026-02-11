@@ -49,8 +49,10 @@ export function AboutPeople({ team }: AboutPeopleProps) {
     const rankA = ROLE_PRIORITY.indexOf(roleA);
     const rankB = ROLE_PRIORITY.indexOf(roleB);
     if (rankA !== rankB) {
-      return (rankA === -1 ? ROLE_PRIORITY.length : rankA) -
-        (rankB === -1 ? ROLE_PRIORITY.length : rankB);
+      return (
+        (rankA === -1 ? ROLE_PRIORITY.length : rankA) -
+        (rankB === -1 ? ROLE_PRIORITY.length : rankB)
+      );
     }
     return (a.display_name || a.username).localeCompare(b.display_name || b.username, 'el');
   });
@@ -60,21 +62,21 @@ export function AboutPeople({ team }: AboutPeopleProps) {
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center md:mb-16">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-            Η ομάδα
+            The team
           </p>
           <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Οι άνθρωποι πίσω από τον Χομπίστα
+            People behind Hobbista
           </h2>
           <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
-            Μια μικρή ομάδα hobbyists που αγαπάει τα games, το anime, τις ταινίες — και θέλει να
-            φτιάξει το καλύτερο εργαλείο για τους υπόλοιπους.
+            A small team of hobbyists who love games, anime, and movies and want to build the best
+            tool for everyone else.
           </p>
         </div>
 
         {team.length === 0 ? (
           <EmptyState
-            title="Δεν βρέθηκαν μέλη ομάδας."
-            description="Τα admins και authors θα εμφανιστούν εδώ."
+            title="No team members found."
+            description="Admins and authors will appear here."
             size="sm"
           />
         ) : (

@@ -41,7 +41,7 @@ async function sendEmail(params: {
 export async function sendConfirmEmail(toEmail: string, actionLink: string) {
   await sendEmail({
     to: toEmail,
-    subject: 'Hobbistas — Επαλήθευση λογαριασμού',
+    subject: 'Hobbistas Επαλήθευση λογαριασμού',
     html: renderConfirmEmail(actionLink),
     type: 'confirm',
   });
@@ -50,7 +50,7 @@ export async function sendConfirmEmail(toEmail: string, actionLink: string) {
 export async function sendResetPasswordEmail(toEmail: string, actionLink: string) {
   await sendEmail({
     to: toEmail,
-    subject: 'Hobbistas — Επαναφορά κωδικού',
+    subject: 'Hobbistas Επαναφορά κωδικού',
     html: renderResetPasswordEmail(actionLink),
     type: 'reset',
   });

@@ -9,22 +9,22 @@ type Principle = {
 
 const principles: Principle[] = [
   {
-    title: 'Απλότητα',
+    title: 'Simplicity',
     description:
-      'Καθαρό interface και γρήγορη καταγραφή. Τα βασικά μπροστά — τα υπόλοιπα όταν τα χρειαστείς.',
+      'Clean interface and fast entry. The basics stay front and center extras remain hidden until you need them.',
     icon: <Zap className="h-5 w-5" />,
   },
 
   {
-    title: 'Προσωπικό by default',
+    title: 'Personal by default',
     description:
-      'Ξεκινάς για σένα: οργάνωση, πρόοδος και ιστορικό. Αν αργότερα θες να μοιραστείς κάτι, θα το επιλέγεις εσύ.',
+      'Starts with you: organization, progress, and history. If you want to share something later, you decide what to send.',
     icon: <Heart className="h-5 w-5" />,
   },
   {
     title: 'Privacy & Control',
     description:
-      'Δεν πουλάμε προσωπικά δεδομένα. Ο Hobbistas είναι φτιαγμένος πρώτα για προσωπική χρήση και καθαρή οργάνωση.',
+      'We do not sell personal data. Hobbistas is built first for private use and clear control.',
     icon: <Shield className="h-5 w-5" />,
   },
 ];
@@ -36,19 +36,19 @@ export function AboutPhilosophy() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-              Η φιλοσοφία μας
+              Our philosophy
             </p>
             <h2 className="mb-5 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-              Γιατί φτιάχτηκε ο Hobbistas
+              Why Hobbistas exists
             </h2>
             <p className="text-[var(--hb-text)]/90 mb-6 leading-relaxed">
-              Ο Hobbistas ξεκίνησε από μια απλή ανάγκη: να μη σκορπίζει το backlog μου σε 5
-              διαφορετικές εφαρμογές. Ήθελα έναν χώρο να γράφω γρήγορα τι είδα/τι διάβασα/τι έπαιξα
-              και να το βρίσκω μετά, χωρίς δράματα.
+              Hobbistas started from one simple need: keep my backlog from scattering across five
+              different apps. I wanted a place to quickly note what I watched, read, or played and
+              find it later without drama.
             </p>
             <p className="leading-relaxed text-[var(--hb-muted)]">
-              Είναι φτιαγμένος για καθαρή οργάνωση και ροή. Όχι “ένα ακόμα feed”, όχι άπειρα μενού.
-              Μπαίνεις, καταγράφεις, συνεχίζεις.
+              It is built for clear organization and flow. Not &ldquo;one more feed&rdquo;, not
+              endless menus. You sign in, record, and continue.
             </p>
           </div>
 

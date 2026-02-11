@@ -11,20 +11,20 @@ type Step = {
 const steps: Step[] = [
   {
     number: '01',
-    title: 'Δημιούργησε λογαριασμό',
-    description: 'Γρήγορη εγγραφή σε δευτερόλεπτα. Αμέσως πρόσβαση στο backlog και τους οδηγούς.',
+    title: 'Create your account',
+    description: 'Quick registration takes seconds. You get immediate access to your backlog and the guides.',
     icon: <UserPlus className="h-6 w-6" />,
   },
   {
     number: '02',
-    title: 'Πρόσθεσε τα hobbies σου',
-    description: 'Games, anime, ταινίες — προσθέτεις ό,τι παρακολουθείς με status και notes.',
+    title: 'Add your hobbies',
+    description: 'Add games, anime, movies, and more. Track each item with its status and a few notes.',
     icon: <Library className="h-6 w-6" />,
   },
   {
     number: '03',
-    title: 'Παρακολούθησε την πρόοδο',
-    description: 'Ενημερώνεις με ένα click. Βλέπεις στατιστικά και συνεχίζεις στο επόμενο.',
+    title: 'Track your progress',
+    description: 'Update progress with a click, review stats, and see the next steps for every hobby.',
     icon: <TrendingUp className="h-6 w-6" />,
   },
 ];
@@ -36,11 +36,9 @@ export function HomeHowItWorks() {
 
       <div className="relative mx-auto max-w-5xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">
-            Πώς λειτουργεί
-          </p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">How it works</p>
           <h2 className="apple-title-tracking mb-4 text-3xl font-semibold text-[var(--apple-label)] md:text-4xl">
-            Τρία απλά βήματα
+            Three simple steps
           </h2>
         </div>
 
@@ -61,12 +59,8 @@ export function HomeHowItWorks() {
                   </span>
                 </div>
 
-                <h3 className="mb-2 text-lg font-semibold tracking-[-0.01em] text-[var(--apple-label)]">
-                  {step.title}
-                </h3>
-                <p className="apple-body-tracking text-sm leading-relaxed text-[var(--apple-secondary-label)]">
-                  {step.description}
-                </p>
+                <h3 className="mb-2 text-lg font-semibold tracking-[-0.01em] text-[var(--apple-label)]">{step.title}</h3>
+                <p className="apple-body-tracking text-sm leading-relaxed text-[var(--apple-secondary-label)]">{step.description}</p>
               </div>
             </div>
           ))}

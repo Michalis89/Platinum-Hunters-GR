@@ -31,7 +31,7 @@ export function AboutStats({
   const stats: Stat[] = [
     {
       value: totalGames || '—',
-      label: 'Παιχνίδια',
+      label: 'Games',
       icon: <Gamepad2 className="h-5 w-5" />,
     },
     {
@@ -46,27 +46,27 @@ export function AboutStats({
     },
     {
       value: totalMovies || '—',
-      label: 'Ταινίες',
+      label: 'Movies',
       icon: <Film className="h-5 w-5" />,
     },
     {
       value: totalTv || '—',
-      label: 'Σειρές',
+      label: 'Series',
       icon: <Tv className="h-5 w-5" />,
     },
     {
       value: totalBooks || '—',
-      label: 'Βιβλία',
+      label: 'Books',
       icon: <BookText className="h-5 w-5" />,
     },
     {
       value: totalArticles || '—',
-      label: 'Άρθρα',
+      label: 'Articles',
       icon: <Newspaper className="h-5 w-5" />,
     },
     {
       value: totalUsers || '—',
-      label: 'Χρήστες',
+      label: 'Users',
       icon: <Users className="h-5 w-5" />,
     },
   ];
@@ -82,10 +82,10 @@ export function AboutStats({
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-12 text-center">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-            Η βιβλιοθήκη μας
+            Our library
           </p>
           <h2 className="text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Περιεχόμενο σε αριθμούς
+            Content in numbers
           </h2>
         </div>
 

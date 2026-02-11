@@ -32,8 +32,8 @@ function AboutSectionShell({ children, maxWidthClass = 'max-w-7xl' }: AboutSecti
 }
 
 export const metadata = buildMetadata({
-  title: 'Σχετικά με τον Hobbista',
-  description: 'Μάθε ποιοι είμαστε, πώς δουλεύουμε και γιατί ο Hobbistas φτιάχτηκε για κάθε χόμπι.',
+  title: 'About Hobbista',
+  description: 'Learn who we are, how we work, and why Hobbistas was created for every hobby.',
   path: '/pages/about',
 });
 
@@ -70,8 +70,8 @@ export default async function AboutPage() {
   const isAuthenticated = !!session;
 
   const breadcrumb = [
-    { name: 'Αρχική', url: `${SITE_URL}/` },
-    { name: 'Σχετικά', url: `${SITE_URL}/pages/about` },
+    { name: 'Home', url: `${SITE_URL}/` },
+    { name: 'About', url: `${SITE_URL}/pages/about` },
   ];
 
   return (

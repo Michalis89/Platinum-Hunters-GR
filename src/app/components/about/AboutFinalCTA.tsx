@@ -7,7 +7,7 @@ type AboutFinalCTAProps = {
 
 export function AboutFinalCTA({ isAuthenticated = false }: AboutFinalCTAProps) {
   const primaryHref = isAuthenticated ? '/dashboard' : '/auth/register';
-  const primaryLabel = isAuthenticated ? 'Πήγαινε στο Dashboard' : 'Δημιούργησε λογαριασμό';
+  const primaryLabel = isAuthenticated ? 'Go to Dashboard' : 'Create an account';
 
   return (
     <section className="relative px-4 py-20 md:px-6 md:py-28">
@@ -15,11 +15,11 @@ export function AboutFinalCTA({ isAuthenticated = false }: AboutFinalCTAProps) {
 
       <div className="relative mx-auto max-w-3xl text-center">
         <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-          Έτοιμος να οργανώσεις τα hobbies σου;
+          Ready to organize your hobbies?
         </h2>
         <p className="mx-auto mb-8 max-w-xl text-lg text-[var(--hb-muted)]">
-          Ξεκίνα δωρεάν, χωρίς δεσμεύσεις. Δημιούργησε το backlog σου, κράτα την πρόοδό σου, και
-          απόλαυσε τα αγαπημένα σου hobbies χωρίς χάος.
+          Start for free, no commitments. Build your backlog, track progress, and enjoy your
+          favorite hobbies without chaos.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -36,12 +36,12 @@ export function AboutFinalCTA({ isAuthenticated = false }: AboutFinalCTAProps) {
             className="hover:border-[var(--hb-primary-strong)]/60 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-8 py-3.5 text-base font-semibold text-[var(--hb-text)] transition hover:text-[var(--hb-headline)]"
           >
             <Mail className="h-4 w-4" />
-            Επικοινώνησε μαζί μας
+            Contact us
           </Link>
         </div>
 
         <p className="mt-8 text-sm text-[var(--hb-muted)]">
-          Χωρίς πιστωτική κάρτα. Χωρίς spam. Μόνο hobbies.
+          No credit card. No spam. Just hobbies.
         </p>
       </div>
     </section>

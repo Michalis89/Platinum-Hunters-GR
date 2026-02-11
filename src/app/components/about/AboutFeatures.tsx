@@ -5,8 +5,8 @@ import {
   Star,
   StickyNote,
   Trophy,
-  Gamepad2,
   Film,
+  RefreshCw,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -18,53 +18,51 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    title: 'Multi-hobby Backlog',
+    title: 'Personal Library',
     description:
-      'Games, anime, manga, ταινίες, σειρές, βιβλία μία λίστα για όλα. Κοινή δομή, διαφορετικά metadata ανά κατηγορία.',
+      'Track games, anime, manga, books, movies, and TV shows. Add items manually or import from supported sources.',
     icon: <Layers className="h-6 w-6" />,
   },
   {
     title: 'Progress Tracking',
     description:
-      'Παρακολούθησε την πρόοδό σου: ώρες, επεισόδια, τόμους, σελίδες. Quick update με ένα click.',
+      'Update hours played, episodes watched, chapters read, or pages finished as you go.',
     icon: <ListTodo className="h-6 w-6" />,
   },
   {
-    title: 'Στατιστικά προόδου',
-    description:
-      'Συγκεντρωτικά stats για να βλέπεις τι ολοκληρώνεις και πόσο χρόνο επενδύεις, ανά κατηγορία.',
+    title: 'Personal Statistics',
+    description: 'View time invested, completion status, and in-progress counts per category.',
     icon: <BarChart3 className="h-6 w-6" />,
   },
-
   {
-    title: 'Reviews & Βαθμολογίες',
+    title: 'Ratings & Reflections',
     description:
-      'Κράτα τις εντυπώσεις σου. Βαθμολόγησε, γράψε σύντομο review, θυμήσου γιατί σου άρεσε.',
+      'Rate each entry on a 1–10 scale and add short reflections to capture your thoughts.',
     icon: <Star className="h-6 w-6" />,
   },
   {
-    title: 'Σημειώσεις & Notes',
+    title: 'Status Management',
     description:
-      'Quick notes, tips, reminders για κάθε entry. Ποτέ μην ξεχάσεις πού σταμάτησες ή τι ήθελες να δοκιμάσεις.',
+      'Organize your library with statuses: Planned, Current, Completed, or Dropped. Mark favorites.',
     icon: <StickyNote className="h-6 w-6" />,
   },
   {
-    title: 'Trophy Tips',
+    title: 'Gaming Fields',
     description:
-      'Συμβουλές για platinum trophies και achievements. Difficulty, εκτιμώμενες ώρες, missables, tips.',
+      'Select platforms, import playtime from Steam, and set personal difficulty ratings for games.',
     icon: <Trophy className="h-6 w-6" />,
   },
   {
-    title: 'Gaming Focus',
+    title: 'Articles & Reviews (Optional)',
     description:
-      'Ειδική υποστήριξη για gamers: platforms, trophy stats, completion rate, backlog prioritization.',
-    icon: <Gamepad2 className="h-6 w-6" />,
+      'Optional module enabled in Application Settings. Users with Author or Reviewer roles can publish content; likes and comments are available when the module is active. Role access is managed through Support.',
+    icon: <Film className="h-6 w-6" />,
   },
   {
-    title: 'Πολυμέσα',
+    title: 'External Library Sync',
     description:
-      'Ταινίες, σειρές, ντοκιμαντέρ. Tracking για binge-watching, watchlist, και rewatch notes.',
-    icon: <Film className="h-6 w-6" />,
+      'Import your Steam library with playtime. Anime and manga sync from MyAnimeList is being finalized.',
+    icon: <RefreshCw className="h-6 w-6" />,
   },
 ];
 
@@ -74,13 +72,13 @@ export function AboutFeatures() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center md:mb-16">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-            Δυνατότητες
+            Capabilities
           </p>
           <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Όλα όσα χρειάζεσαι, τίποτα παραπάνω
+            Everything you need only what you choose
           </h2>
           <p className="mx-auto max-w-2xl text-[var(--hb-muted)]">
-            Σχεδιασμένο για hobbyists που θέλουν να οργανώνουν χωρίς περιττή πολυπλοκότητα.
+            A personal hobby system that stays out of your way. No feeds. No noise. No assumptions.
           </p>
         </div>
 

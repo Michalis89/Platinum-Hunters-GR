@@ -11,23 +11,21 @@ type Step = {
 const steps: Step[] = [
   {
     number: '01',
-    title: 'Δημιούργησε λογαριασμό',
-    description:
-      'Γρήγορη εγγραφή, χωρίς spam. Αποκτάς αμέσως πρόσβαση στο backlog και τους οδηγούς.',
+    title: 'Create an account',
+    description: 'Quick sign-up, no spam. Access your backlog and guides right away.',
     icon: <UserPlus className="h-6 w-6" />,
   },
   {
     number: '02',
-    title: 'Πρόσθεσε τα hobbies σου',
+    title: 'Add your hobbies',
     description:
-      'Games, anime, ταινίες — προσθέτεις ό,τι παρακολουθείς ή θες να ξεκινήσεις. Status, notes, progress.',
+      'Games, anime, movies add anything you follow or plan to start. Set status, notes, and progress.',
     icon: <Library className="h-6 w-6" />,
   },
   {
     number: '03',
-    title: 'Παρακολούθησε την πρόοδο',
-    description:
-      'Ενημερώνεις με ένα click. Βλέπεις στατιστικά, ολοκληρώνεις, μετακινείσαι στο επόμενο.',
+    title: 'Track progress',
+    description: 'Update with one click. See stats, completions, and plan the next item.',
     icon: <TrendingUp className="h-6 w-6" />,
   },
 ];
@@ -40,13 +38,13 @@ export function AboutHowItWorks() {
       <div className="relative mx-auto max-w-5xl">
         <div className="mb-12 text-center md:mb-16">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-            Πώς λειτουργεί
+            How it works
           </p>
           <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Τρία απλά βήματα
+            Three simple steps
           </h2>
           <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
-            Από την εγγραφή μέχρι την παρακολούθηση — σε λιγότερο από ένα λεπτό.
+            From sign-up to tracking set up everything in under a minute.
           </p>
         </div>
 

@@ -35,9 +35,9 @@ export type HobbyItem = NavbarLinkItem & {
 };
 
 export const NAV_ITEMS: NavbarLinkItem[] = [
+  { href: '/pages/about', label: 'About', icon: Book },
   { href: '/pages/news', label: 'Articles', icon: FileText },
   { href: '/pages/reviews', label: 'Reviews', icon: Star },
-  { href: '/pages/about', label: 'About', icon: Book },
   { href: '/pages/support', label: 'Support', icon: MessageCircle, requiresAuth: true },
 ];
 
@@ -116,7 +116,11 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     children: [
       { href: '/pages/news?category=coding', label: 'Articles', icon: FileText },
       { href: '/pages/news?category=coding&topic=tutorials', label: 'Tutorials', icon: BookOpen },
-      { href: '/pages/news?category=coding&topic=weird-cases', label: 'Edge Cases', icon: Sparkles },
+      {
+        href: '/pages/news?category=coding&topic=weird-cases',
+        label: 'Edge Cases',
+        icon: Sparkles,
+      },
     ],
   },
   {
@@ -160,7 +164,11 @@ export const isHrefActive = (pathname: string, href: string) => {
   return pathname.startsWith(targetPath);
 };
 
-export const getVisibleNavItems = (isDev: boolean, isAuthenticated: boolean, authResolved: boolean) =>
+export const getVisibleNavItems = (
+  isDev: boolean,
+  isAuthenticated: boolean,
+  authResolved: boolean,
+) =>
   NAV_ITEMS.filter(item => {
     if (item.devOnly && !isDev) return false;
     if (item.requiresAuth) return authResolved && isAuthenticated;
@@ -175,10 +183,14 @@ export const getVisibleHobbyItems = (
 ) => {
   if (!authResolved || !isAuthenticated) return [];
 
-  const normalizedCategories = userCategories.map(category => category.trim().toLowerCase()).filter(Boolean);
+  const normalizedCategories = userCategories
+    .map(category => category.trim().toLowerCase())
+    .filter(Boolean);
 
   // Guard: authenticated users with no enabled categories should not see hobby/library items.
   if (normalizedCategories.length === 0) return [];
 
-  return items.filter(item => !item.category || normalizedCategories.includes(item.category.toLowerCase()));
+  return items.filter(
+    item => !item.category || normalizedCategories.includes(item.category.toLowerCase()),
+  );
 };

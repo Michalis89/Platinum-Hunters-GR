@@ -11,36 +11,37 @@ type FAQItem = {
 
 const faqItems: FAQItem[] = [
   {
-    question: 'Είναι δωρεάν ο Hobbistas;',
+    question: 'Is Hobbistas free?',
     answer:
-      'Ναι, η βασική λειτουργικότητα είναι εντελώς δωρεάν. Backlog, progress tracking, notes, και πρόσβαση σε όλα τα άρθρα και reviews χωρίς κόστος. Μελλοντικά μπορεί να προστεθούν premium features για advanced χρήστες.',
+      'Yes, the core features are completely free. Backlog, progress tracking, notes, and access to all articles and reviews cost nothing. We may add premium features for advanced users in the future.',
   },
   {
-    question: 'Ποιες κατηγορίες hobbies υποστηρίζονται;',
+    question: 'Which hobby categories are supported?',
     answer:
-      'Αυτή τη στιγμή υποστηρίζουμε: Games, Anime, Manga, Ταινίες, Σειρές/TV Shows, και Βιβλία. Κάθε κατηγορία έχει τα δικά της metadata και πεδία πρόοδού.',
+      'We currently support Games, Anime, Manga, Movies, Series/TV Shows, and Books. Each category has its own metadata and progress fields.',
   },
   {
-    question: 'Μπορώ να κάνω import το backlog μου από άλλες υπηρεσίες;',
+    question: 'Can I import my backlog from other services?',
     answer:
-      'Δουλεύουμε σε integrations με δημοφιλείς υπηρεσίες όπως IGDB, TMDB, και MyAnimeList. Για τώρα, μπορείς να προσθέσεις entries χειροκίνητα με quick add.',
+      'We are working on integrations with popular services like IGDB, TMDB, and MyAnimeList. For now, you can add entries manually using quick add.',
   },
   {
-    question: 'Τα δεδομένα μου είναι ασφαλή;',
+    question: 'Is my data safe?',
     answer:
-      'Ναι. Τα δεδομένα αποθηκεύονται σε αξιόπιστη cloud υποδομή και η πρόσβαση γίνεται μόνο μέσω του λογαριασμού σου. Δεν πουλάμε προσωπικά δεδομένα. Μπορείς να εξάγεις ή να διαγράψεις τα δεδομένα σου όποτε θέλεις.',
+      'Yes. Data is stored on a trusted cloud infrastructure and is only accessible through your account. We do not sell personal data. You can export or delete your information at any time.',
   },
   {
-    question: 'Υπάρχει mobile app;',
+    question: 'Is there a mobile app?',
     answer:
-      'Όχι ακόμα, αλλά είναι στο roadmap. Η web εφαρμογή είναι πλήρως responsive και λειτουργεί άψογα σε mobile browsers.',
+      'Not yet, but it is on the roadmap. The web app is fully responsive and works smoothly in mobile browsers.',
   },
   {
-    question: 'Πώς μπορώ να συνεισφέρω ή να προτείνω features;',
+    question: 'How can I contribute or suggest features?',
     answer:
-      'Στείλε feature request ή bug report από τη φόρμα επικοινωνίας. Αν μπορείς, γράψε 2–3 γραμμές με το πρόβλημα/ιδέα, πώς το φαντάζεσαι και (ιδανικά) ένα screenshot. Τα διαβάζουμε όλα και μπαίνουν σε σειρά προτεραιότητας.',
+      'Send a feature request or bug report using the contact form. If you can, share 2–3 sentences describing the issue or idea, how you imagine it working, and ideally a screenshot. We read everything and queue items by priority.',
   },
 ];
+
 
 export function AboutFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -57,10 +58,10 @@ export function AboutFAQ() {
             FAQ
           </p>
           <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Συχνές ερωτήσεις
+            Frequently asked questions
           </h2>
           <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
-            Απαντήσεις στα πιο συνηθισμένα ερωτήματα για τον Χομπίστα.
+            Answers to the most common questions about Hobbista.
           </p>
         </div>
 
