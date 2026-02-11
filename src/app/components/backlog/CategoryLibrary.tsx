@@ -201,9 +201,12 @@ export default function CategoryLibrary({
     buildInitialState(normalizedInitialSearch, normalizedInitialStatus),
   );
 
-  const showAlert = (payload: AlertState) => {
-    dispatch({ type: 'showAlert', payload });
-  };
+  const showAlert = useCallback(
+    (payload: AlertState) => {
+      dispatch({ type: 'showAlert', payload });
+    },
+    [dispatch],
+  );
   const {
     search,
     activeStatus,
@@ -379,62 +382,65 @@ export default function CategoryLibrary({
     );
   }, [libraryEntries]);
 
-  const openEntryDialog = (entry: MediaEntry & Partial<SearchResult>) => {
-    const payload = entry.payload as
-      | {
-          episodes?: number | null;
-          chapters?: number | null;
-          volumes?: number | null;
-          runtime?: number | null;
-          number_of_episodes?: number | null;
-          page_count?: number | null;
-          cover_image_large?: string | null;
-          cover_image_medium?: string | null;
-          banner_image?: string | null;
-          genres?: string[] | null;
-        }
-      | undefined;
-    const nextEntry = {
-      ...entry,
-      totalEpisodes:
-        entry.totalEpisodes ?? payload?.episodes ?? payload?.number_of_episodes ?? undefined,
-      totalChapters: entry.totalChapters ?? payload?.chapters ?? undefined,
-      totalVolumes: entry.totalVolumes ?? payload?.volumes ?? undefined,
-      totalRuntime: entry.totalRuntime ?? payload?.runtime ?? undefined,
-      totalPages: entry.totalPages ?? payload?.page_count ?? undefined,
-    };
-    dispatch({ type: 'patch', payload: { selectedEntry: nextEntry } });
-
-    if (
-      (category === 'movies' || category === 'tv') &&
-      entry.externalId &&
-      !nextEntry.totalRuntime &&
-      !nextEntry.totalEpisodes
-    ) {
-      apiClient
-        .request(`/api/movies/details?category=${category}&tmdb_id=${entry.externalId}`)
-        .then(async response => {
-          if (!response.ok) {
-            return null;
-          }
-          return (await response.json()) as {
+  const openEntryDialog = useCallback(
+    (entry: MediaEntry & Partial<SearchResult>) => {
+      const payload = entry.payload as
+        | {
+            episodes?: number | null;
+            chapters?: number | null;
+            volumes?: number | null;
             runtime?: number | null;
             number_of_episodes?: number | null;
+            page_count?: number | null;
             cover_image_large?: string | null;
             cover_image_medium?: string | null;
             banner_image?: string | null;
             genres?: string[] | null;
-          };
-        })
-        .then(details => {
-          if (!details) return;
-          dispatch({ type: 'applySelectedEntryDetails', payload: details });
-        })
-        .catch(error => {
-          console.warn('TMDB details fetch failed:', error);
-        });
-    }
-  };
+          }
+        | undefined;
+      const nextEntry = {
+        ...entry,
+        totalEpisodes:
+          entry.totalEpisodes ?? payload?.episodes ?? payload?.number_of_episodes ?? undefined,
+        totalChapters: entry.totalChapters ?? payload?.chapters ?? undefined,
+        totalVolumes: entry.totalVolumes ?? payload?.volumes ?? undefined,
+        totalRuntime: entry.totalRuntime ?? payload?.runtime ?? undefined,
+        totalPages: entry.totalPages ?? payload?.page_count ?? undefined,
+      };
+      dispatch({ type: 'patch', payload: { selectedEntry: nextEntry } });
+
+      if (
+        (category === 'movies' || category === 'tv') &&
+        entry.externalId &&
+        !nextEntry.totalRuntime &&
+        !nextEntry.totalEpisodes
+      ) {
+        apiClient
+          .request(`/api/movies/details?category=${category}&tmdb_id=${entry.externalId}`)
+          .then(async response => {
+            if (!response.ok) {
+              return null;
+            }
+            return (await response.json()) as {
+              runtime?: number | null;
+              number_of_episodes?: number | null;
+              cover_image_large?: string | null;
+              cover_image_medium?: string | null;
+              banner_image?: string | null;
+              genres?: string[] | null;
+            };
+          })
+          .then(details => {
+            if (!details) return;
+            dispatch({ type: 'applySelectedEntryDetails', payload: details });
+          })
+          .catch(error => {
+            console.warn('TMDB details fetch failed:', error);
+          });
+      }
+    },
+    [category, dispatch],
+  );
 
   const handleSaveEntry = async (editState: EditState) => {
     if (!selectedEntry) return;
@@ -570,60 +576,61 @@ export default function CategoryLibrary({
     }
   };
 
-  const handleDeleteEntry = async (entry: MediaEntry) => {
-    if (!entry.mediaId) {
+  const handleDeleteEntry = useCallback(
+    async (entry: MediaEntry) => {
+      const clearSelection = () => {
+        dispatch({ type: 'patch', payload: { selectedEntry: null } });
+      };
+
+      if (!entry.mediaId) {
+        dispatch({
+          type: 'patch',
+          payload: { libraryEntries: libraryEntries.filter(item => item.id !== entry.id) },
+        });
+        clearSelection();
+        return;
+      }
+
+      if (supportsExternal) {
+        try {
+          if (!apiBase) {
+            throw new Error('Missing API base');
+          }
+          const response = await apiClient.request(`${apiBase}/library`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mediaId: entry.mediaId }),
+          });
+          if (!response.ok) {
+            throw new Error('Failed to delete entry');
+          }
+          await loadLibraryEntries();
+          await mutate('/api/user/continue');
+          clearSelection();
+          showAlert({
+            type: 'success',
+            title: 'Διαγράφηκε',
+            message: `Το "${entry.title}" αφαιρέθηκε από τη βιβλιοθήκη.`,
+          });
+          return;
+        } catch (error) {
+          console.warn('Delete entry failed:', error);
+          showAlert({
+            type: 'error',
+            title: 'Σφάλμα',
+            message: 'Αποτυχία διαγραφής. Δοκίμασε ξανά.',
+          });
+        }
+      }
+
       dispatch({
         type: 'patch',
         payload: { libraryEntries: libraryEntries.filter(item => item.id !== entry.id) },
       });
-      if (selectedEntry?.id === entry.id) {
-        dispatch({ type: 'patch', payload: { selectedEntry: null } });
-      }
-      return;
-    }
-
-    if (supportsExternal) {
-      try {
-        if (!apiBase) {
-          throw new Error('Missing API base');
-        }
-        const response = await apiClient.request(`${apiBase}/library`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mediaId: entry.mediaId }),
-        });
-        if (!response.ok) {
-          throw new Error('Failed to delete entry');
-        }
-        await loadLibraryEntries();
-        await mutate('/api/user/continue');
-        if (selectedEntry?.id === entry.id) {
-          dispatch({ type: 'patch', payload: { selectedEntry: null } });
-        }
-        showAlert({
-          type: 'success',
-          title: 'Διαγράφηκε',
-          message: `Το "${entry.title}" αφαιρέθηκε από τη βιβλιοθήκη.`,
-        });
-        return;
-      } catch (error) {
-        console.warn('Delete entry failed:', error);
-        showAlert({
-          type: 'error',
-          title: 'Σφάλμα',
-          message: 'Αποτυχία διαγραφής. Δοκίμασε ξανά.',
-        });
-      }
-    }
-
-    dispatch({
-      type: 'patch',
-      payload: { libraryEntries: libraryEntries.filter(item => item.id !== entry.id) },
-    });
-    if (selectedEntry?.id === entry.id) {
-      dispatch({ type: 'patch', payload: { selectedEntry: null } });
-    }
-  };
+      clearSelection();
+    },
+    [apiBase, dispatch, libraryEntries, loadLibraryEntries, showAlert, supportsExternal],
+  );
 
   const handleSteamSync = async () => {
     try {

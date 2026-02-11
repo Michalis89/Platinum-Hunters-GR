@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ interface LibraryEntryRowProps {
   onDelete: (entry: MediaEntry) => void;
 }
 
-export default function LibraryEntryRow({
+function LibraryEntryRow({
   entry,
   category,
   onOpenDialog,
@@ -216,3 +216,5 @@ export default function LibraryEntryRow({
     </>
   );
 }
+
+export default memo(LibraryEntryRow);

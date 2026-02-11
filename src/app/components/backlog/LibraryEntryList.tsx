@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import EmptyState from '@/app/components/ui/EmptyState';
 import LibraryEntryRow from './LibraryEntryRow';
@@ -13,7 +14,7 @@ interface LibraryEntryListProps {
   onDelete: (entry: MediaEntry) => void;
 }
 
-export default function LibraryEntryList({
+function LibraryEntryList({
   category,
   entries,
   isLoading,
@@ -56,3 +57,5 @@ export default function LibraryEntryList({
     </section>
   );
 }
+
+export default memo(LibraryEntryList);
