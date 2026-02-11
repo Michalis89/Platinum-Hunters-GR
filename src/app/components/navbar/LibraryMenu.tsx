@@ -22,7 +22,7 @@ type LibraryOnlyItem = {
 };
 
 export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
-  const isLibraryActive = pathname.startsWith('/pages/backlog') || pathname === '/pages/hobbies';
+  const isLibraryActive = pathname.startsWith('/pages/backlog');
 
   const libraryItems: LibraryOnlyItem[] = hobbyItems
     .map(item => {
@@ -51,9 +51,9 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
           asChild
           className="rounded-[var(--apple-radius-control)] px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--hb-ease)] focus:bg-[var(--apple-nav-pill-hover)] focus:text-[var(--apple-label)]"
         >
-          <Link href="/pages/hobbies" className="inline-flex items-center gap-2">
+          <Link href="/pages/backlog" className="inline-flex items-center gap-2">
             <Layers className="size-4" />
-            <span>Explore all categories</span>
+            <span>Browse backlog</span>
           </Link>
         </MenubarItem>
         <MenubarSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />

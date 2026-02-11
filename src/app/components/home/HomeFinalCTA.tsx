@@ -8,10 +8,10 @@ export function HomeFinalCTA() {
 
       <div className="apple-material-surface relative mx-auto max-w-3xl rounded-[var(--apple-radius-container)] p-7 text-center md:p-10">
         <h2 className="apple-title-tracking mb-4 text-3xl font-semibold text-[var(--apple-label)] md:text-4xl">
-          Ready to organize your hobbies?
+          Start tracking today
         </h2>
         <p className="apple-body-tracking mx-auto mb-8 max-w-xl text-base text-[var(--apple-secondary-label)] md:text-lg">
-          Create an account and start tracking your progress across games, anime, movies, and more.
+          Your personal hobby hub is ready. Create an account and add your first entry.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">

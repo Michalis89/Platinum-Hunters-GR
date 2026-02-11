@@ -72,13 +72,13 @@ export function AboutFeatures() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center md:mb-16">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-            Capabilities
+            What&apos;s implemented
           </p>
           <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-            Everything you need only what you choose
+            Core features available today
           </h2>
           <p className="mx-auto max-w-2xl text-[var(--hb-muted)]">
-            A personal hobby system that stays out of your way. No feeds. No noise. No assumptions.
+            These are the features that exist and work right now. Not a roadmap—actual functionality.
           </p>
         </div>
 

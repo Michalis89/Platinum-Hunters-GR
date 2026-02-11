@@ -15,11 +15,10 @@ export function AboutFinalCTA({ isAuthenticated = false }: AboutFinalCTAProps) {
 
       <div className="relative mx-auto max-w-3xl text-center">
         <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
-          Ready to organize your hobbies?
+          Try it yourself
         </h2>
         <p className="mx-auto mb-8 max-w-xl text-lg text-[var(--hb-muted)]">
-          Start for free, no commitments. Build your backlog, track progress, and enjoy your
-          favorite hobbies without chaos.
+          If this sounds like the kind of tool you&apos;ve been looking for, create an account and see if it fits.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

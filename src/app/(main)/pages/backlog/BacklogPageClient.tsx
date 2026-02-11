@@ -142,7 +142,7 @@ function BacklogPageContent() {
             </Button>
             <Button
               variant={'secondary'}
-              onClick={() => router.push('/pages/hobbies')}
+              onClick={() => router.push('/pages/backlog')}
               className="h-11 rounded-[12px]"
             >
               Πίσω στο Dashboard

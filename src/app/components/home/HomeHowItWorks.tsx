@@ -11,20 +11,20 @@ type Step = {
 const steps: Step[] = [
   {
     number: '01',
-    title: 'Create your account',
-    description: 'Quick registration takes seconds. You get immediate access to your backlog and the guides.',
+    title: 'Sign up',
+    description: 'Create an account in seconds. No payment, no spam.',
     icon: <UserPlus className="h-6 w-6" />,
   },
   {
     number: '02',
-    title: 'Add your hobbies',
-    description: 'Add games, anime, movies, and more. Track each item with its status and a few notes.',
+    title: 'Add your first entry',
+    description: 'Search for a game, movie, or book. Or import your Steam library.',
     icon: <Library className="h-6 w-6" />,
   },
   {
     number: '03',
-    title: 'Track your progress',
-    description: 'Update progress with a click, review stats, and see the next steps for every hobby.',
+    title: 'Update as you go',
+    description: 'Mark status, log hours or episodes, add notes. That\'s it.',
     icon: <TrendingUp className="h-6 w-6" />,
   },
 ];
@@ -36,9 +36,9 @@ export function HomeHowItWorks() {
 
       <div className="relative mx-auto max-w-5xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">How it works</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">Getting started</p>
           <h2 className="apple-title-tracking mb-4 text-3xl font-semibold text-[var(--apple-label)] md:text-4xl">
-            Three simple steps
+            Sign up and start tracking
           </h2>
         </div>
 

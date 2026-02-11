@@ -4,21 +4,20 @@ import VersionBadge from '@/app/components/ui/VersionBadge';
 
 const NAV_LINKS = [
   { label: 'Home', href: '/' },
-  { label: 'About', href: '/pages/about' },
-  { label: 'Hobbies', href: '/pages/hobbies' },
+  { label: 'About', href: '/about' },
   { label: 'Articles', href: '/pages/news' },
   { label: 'Reviews', href: '/pages/reviews' },
   { label: 'Support', href: '/pages/support' },
 ];
 
 const LEGAL_LINKS = [
-  { label: 'Terms of Service', href: '/pages/terms' },
-  { label: 'Privacy Policy', href: '/pages/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Privacy Policy', href: '/privacy' },
 ];
 
 const CONTACT = [
-  { label: 'GitHub', href: 'https://github.com/' },
-  { label: 'Email', href: 'mailto:support@hobbistas-hub.com' },
+  { label: 'GitHub', href: 'https://github.com/Michalis89/hobbistas-hub' },
+  { label: 'Email', href: 'mailto:mouzakitis.m89+supporthobbistas-hub@gmail.com' },
 ];
 
 function FooterTextLink({ href, children }: { href: string; children: React.ReactNode }) {

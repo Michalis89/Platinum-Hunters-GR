@@ -71,13 +71,13 @@ export function HomeFeatures() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 text-center md:mb-12">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">
-            Capabilities
+            What you can do
           </p>
           <h2 className="apple-title-tracking mb-4 text-3xl font-semibold text-[var(--apple-label)] md:text-4xl">
-            Everything you need only what you choose
+            Add, track, and organize
           </h2>
           <p className="apple-body-tracking mx-auto max-w-xl text-[var(--apple-secondary-label)]">
-            A personal hobby system that stays out of your way. No feeds. No noise. No assumptions.
+            Your library, your progress, your stats. Start with any hobby category.
           </p>
         </div>
 

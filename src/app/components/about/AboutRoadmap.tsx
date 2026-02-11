@@ -19,7 +19,7 @@ export function AboutRoadmap() {
             What is next
           </h2>
           <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
-            We keep improving Hobbista. Here are some of the features we plan next.
+            We&apos;re building in public. Here&apos;s what&apos;s done, in progress, and planned.
           </p>
         </div>
 

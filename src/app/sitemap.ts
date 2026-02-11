@@ -7,13 +7,12 @@ const toUrl = (path: string) => new URL(path, SITE_URL).toString();
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     '/',
-    '/pages/about',
-    '/pages/hobbies',
+    '/about',
     '/pages/news',
     '/pages/reviews',
     '/pages/backlog',
-    '/pages/terms',
-    '/pages/privacy',
+    '/terms',
+    '/privacy',
   ];
 
   const categoryRoutes = new Set<string>();

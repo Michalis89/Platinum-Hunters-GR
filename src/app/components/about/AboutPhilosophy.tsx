@@ -42,13 +42,10 @@ export function AboutPhilosophy() {
               Why Hobbistas exists
             </h2>
             <p className="text-[var(--hb-text)]/90 mb-6 leading-relaxed">
-              Hobbistas started from one simple need: keep my backlog from scattering across five
-              different apps. I wanted a place to quickly note what I watched, read, or played and
-              find it later without drama.
+              Hobbistas was built because every other tracker felt like it wanted something from me—engagement, daily logins, content to feed an algorithm. I just wanted to remember which anime I dropped and why.
             </p>
             <p className="leading-relaxed text-[var(--hb-muted)]">
-              It is built for clear organization and flow. Not &ldquo;one more feed&rdquo;, not
-              endless menus. You sign in, record, and continue.
+              So we built a tool that doesn&apos;t assume you want to be social, doesn&apos;t push suggestions you didn&apos;t ask for, and doesn&apos;t track you for metrics. It&apos;s a personal space first.
             </p>
           </div>
 

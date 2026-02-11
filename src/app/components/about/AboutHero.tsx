@@ -16,15 +16,15 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
       title={
         <>
           <span className="bg-gradient-to-r from-[var(--hb-headline)] via-[var(--hb-text)] to-[var(--hb-muted)] bg-clip-text text-transparent">
-            This is not another tracker.
+            Not a catalog. Not a feed.
           </span>
           <br />
           <span className="bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-transparent">
-            We built the hobby hub that was missing.
+            A personal space for your hobbies.
           </span>
         </>
       }
-      subtitle="Hobbista keeps every hobby organized with a calm interface. Here is why it exists, how it works, and what comes next."
+      subtitle="Hobbistas is a modular tracking system built for privacy, clarity, and control. Here's why it exists, how it works, and what makes it different."
       sectionClassName="pb-24 pt-16 md:pb-32 md:pt-24"
       titleClassName="mb-6 text-4xl md:text-5xl lg:text-6xl"
       actions={
@@ -50,13 +50,13 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
       badges={
         <>
           <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
-            Product philosophy
+            Personal-first design
           </span>
           <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
-            Roadmap transparency
+            Modular by choice
           </span>
           <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
-            Community-first
+            Built in public
           </span>
         </>
       }

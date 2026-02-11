@@ -35,7 +35,7 @@ export type HobbyItem = NavbarLinkItem & {
 };
 
 export const NAV_ITEMS: NavbarLinkItem[] = [
-  { href: '/pages/about', label: 'About', icon: Book },
+  { href: '/about', label: 'About', icon: Book },
   { href: '/pages/news', label: 'Articles', icon: FileText },
   { href: '/pages/reviews', label: 'Reviews', icon: Star },
   { href: '/pages/support', label: 'Support', icon: MessageCircle, requiresAuth: true },
@@ -159,7 +159,7 @@ export const normalizeHref = (href: string) => href.split('?')[0];
 export const isHrefActive = (pathname: string, href: string) => {
   const targetPath = normalizeHref(href);
   if (targetPath === '/pages/backlog') {
-    return pathname.startsWith('/pages/backlog') || pathname === '/pages/hobbies';
+    return pathname.startsWith('/pages/backlog');
   }
   return pathname.startsWith(targetPath);
 };

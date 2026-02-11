@@ -192,14 +192,14 @@ export function RegisterTermsRow({ checked, error, loading, onChange }: Register
         >
           I accept the{' '}
           <Link
-            href="/pages/terms"
+            href="/terms"
             className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
           >
             terms of use
           </Link>{' '}
           and the{' '}
           <Link
-            href="/pages/privacy"
+            href="/privacy"
             className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
           >
             privacy policy

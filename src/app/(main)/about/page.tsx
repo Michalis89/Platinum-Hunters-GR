@@ -11,7 +11,7 @@ import {
   AboutFinalCTA,
   type TeamMember,
 } from '@/app/components/about';
-import AboutStatsLoader from '@/app/(main)/pages/about/AboutStatsLoader.client';
+import AboutStatsLoader from '@/app/(main)/about/AboutStatsLoader.client';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
@@ -34,7 +34,7 @@ function AboutSectionShell({ children, maxWidthClass = 'max-w-7xl' }: AboutSecti
 export const metadata = buildMetadata({
   title: 'About Hobbista',
   description: 'Learn who we are, how we work, and why Hobbistas was created for every hobby.',
-  path: '/pages/about',
+  path: '/about',
 });
 
 async function getTeam(): Promise<TeamMember[]> {
@@ -71,7 +71,7 @@ export default async function AboutPage() {
 
   const breadcrumb = [
     { name: 'Home', url: `${SITE_URL}/` },
-    { name: 'About', url: `${SITE_URL}/pages/about` },
+    { name: 'About', url: `${SITE_URL}/about` },
   ];
 
   return (
