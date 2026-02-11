@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useReducer, useCallback, useState } from 'react';
+import { useEffect, useMemo, useReducer, useCallback, useState, useTransition } from 'react';
 import { mutate } from 'swr';
 import ErrorState from '@/app/components/ui/ErrorState';
 import AlertMessage from '@/app/components/ui/AlertMessage';
@@ -382,6 +382,7 @@ export default function CategoryLibrary({
     );
   }, [libraryEntries]);
 
+  const [, startTransition] = useTransition();
   const openEntryDialog = useCallback(
     (entry: MediaEntry & Partial<SearchResult>) => {
       const payload = entry.payload as
@@ -407,7 +408,9 @@ export default function CategoryLibrary({
         totalRuntime: entry.totalRuntime ?? payload?.runtime ?? undefined,
         totalPages: entry.totalPages ?? payload?.page_count ?? undefined,
       };
-      dispatch({ type: 'patch', payload: { selectedEntry: nextEntry } });
+      startTransition(() => {
+        dispatch({ type: 'patch', payload: { selectedEntry: nextEntry } });
+      });
 
       if (
         (category === 'movies' || category === 'tv') &&
@@ -432,14 +435,16 @@ export default function CategoryLibrary({
           })
           .then(details => {
             if (!details) return;
-            dispatch({ type: 'applySelectedEntryDetails', payload: details });
+            startTransition(() => {
+              dispatch({ type: 'applySelectedEntryDetails', payload: details });
+            });
           })
           .catch(error => {
             console.warn('TMDB details fetch failed:', error);
           });
       }
     },
-    [category, dispatch],
+    [category, dispatch, startTransition],
   );
 
   const handleSaveEntry = async (editState: EditState) => {
@@ -461,7 +466,9 @@ export default function CategoryLibrary({
     const nextFavorite = editState.isFavorite;
 
     // Close dialog immediately for instant feedback (improves INP)
-    dispatch({ type: 'patch', payload: { selectedEntry: null } });
+    startTransition(() => {
+      dispatch({ type: 'patch', payload: { selectedEntry: null } });
+    });
 
     // Yield to main thread to allow browser to paint the closed dialog
     await yieldToMain();
@@ -579,7 +586,9 @@ export default function CategoryLibrary({
   const handleDeleteEntry = useCallback(
     async (entry: MediaEntry) => {
       const clearSelection = () => {
-        dispatch({ type: 'patch', payload: { selectedEntry: null } });
+        startTransition(() => {
+          dispatch({ type: 'patch', payload: { selectedEntry: null } });
+        });
       };
 
       if (!entry.mediaId) {
@@ -629,7 +638,7 @@ export default function CategoryLibrary({
       });
       clearSelection();
     },
-    [apiBase, dispatch, libraryEntries, loadLibraryEntries, showAlert, supportsExternal],
+    [apiBase, dispatch, libraryEntries, loadLibraryEntries, showAlert, startTransition, supportsExternal],
   );
 
   const handleSteamSync = async () => {
