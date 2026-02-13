@@ -192,12 +192,22 @@ export default function CategoryLibrary({
 }>) {
   const [steamSyncing, setSteamSyncing] = useState(false);
   const [steamSyncProgress, setSteamSyncProgress] = useState<SteamSyncJobSnapshot | null>(null);
+  const steamPollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const normalizedInitialStatus = initialStatus ?? 'all';
   const normalizedInitialSearch = initialSearch?.trim() ?? '';
   const [state, dispatch] = useReducer(
     categoryLibraryReducer,
     buildInitialState(normalizedInitialSearch, normalizedInitialStatus),
   );
+
+  // Cleanup polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (steamPollIntervalRef.current) {
+        clearInterval(steamPollIntervalRef.current);
+      }
+    };
+  }, []);
 
   const showAlert = useCallback(
     (payload: AlertState) => {
@@ -713,16 +723,23 @@ export default function CategoryLibrary({
 
   const handleSteamSync = async () => {
     try {
+      // Clear any existing poll interval
+      if (steamPollIntervalRef.current) {
+        clearInterval(steamPollIntervalRef.current);
+        steamPollIntervalRef.current = null;
+      }
+
       setSteamSyncing(true);
       setSteamSyncProgress({
-        id: 'syncing',
+        id: 'starting',
         status: 'running',
-        message: 'Συγχρονισμός Steam βιβλιοθήκης με RAWG metadata...',
-        percent: 50,
-        completedSteps: 1,
-        totalSteps: 2,
+        message: 'Ξεκινά ο συγχρονισμός...',
+        percent: 0,
+        completedSteps: 0,
+        totalSteps: 1,
       });
 
+      // Start the sync (this will create a job and begin processing)
       const response = await apiClient.request('/api/integrations/steam/sync', {
         method: 'POST',
       });
@@ -732,21 +749,85 @@ export default function CategoryLibrary({
         throw new Error(data.error || 'Steam sync failed');
       }
 
-      const result = (await response.json()) as {
+      const syncResponse = (await response.json()) as {
+        jobId?: string;
         totalFetched?: number;
         warnings?: string[];
       };
 
-      await loadLibraryEntries();
-      await mutate('/api/user/continue');
-      showAlert({
-        type: 'success',
-        title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
-        message:
-          (result.warnings?.length ?? 0) > 0
-            ? `Ολοκληρώθηκε με προειδοποιήσεις: ${result.warnings?.join(' | ')}`
-            : `Έγινε συγχρονισμός ${result.totalFetched ?? 0} παιχνιδιών από Steam με RAWG metadata.`,
-      });
+      const jobId = syncResponse.jobId;
+
+      // If we have a jobId, poll for progress
+      if (jobId) {
+        steamPollIntervalRef.current = setInterval(async () => {
+          try {
+            const statusResponse = await apiClient.request(
+              `/api/integrations/steam/sync/status?jobId=${jobId}`,
+            );
+
+            if (statusResponse.ok) {
+              const statusData = (await statusResponse.json()) as SteamSyncJobSnapshot;
+
+              setSteamSyncProgress({
+                id: jobId,
+                status: statusData.status,
+                message: statusData.message,
+                percent: statusData.percent,
+                completedSteps: statusData.completedSteps,
+                totalSteps: statusData.totalSteps,
+                error: statusData.error,
+                result: statusData.result,
+              });
+
+              // Stop polling if completed or failed
+              if (statusData.status === 'completed' || statusData.status === 'failed') {
+                if (steamPollIntervalRef.current) {
+                  clearInterval(steamPollIntervalRef.current);
+                  steamPollIntervalRef.current = null;
+                }
+
+                if (statusData.status === 'completed') {
+                  await loadLibraryEntries();
+                  await mutate('/api/user/continue');
+                  showAlert({
+                    type: 'success',
+                    title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
+                    message:
+                      statusData.result?.warnings && statusData.result.warnings.length > 0
+                        ? `Ολοκληρώθηκε με προειδοποιήσεις: ${statusData.result.warnings.join(' | ')}`
+                        : `Έγινε συγχρονισμός ${statusData.result?.totalFetched ?? 0} παιχνιδιών από Steam.`,
+                  });
+                } else {
+                  showAlert({
+                    type: 'error',
+                    title: 'Σφάλμα',
+                    message: statusData.error || 'Ο συγχρονισμός απέτυχε',
+                  });
+                }
+
+                setSteamSyncing(false);
+                setSteamSyncProgress(null);
+              }
+            }
+          } catch (pollError) {
+            console.warn('Status poll error:', pollError);
+          }
+        }, 1500); // Poll every 1.5 seconds
+      } else {
+        // No jobId - sync completed immediately (legacy mode)
+        await loadLibraryEntries();
+        await mutate('/api/user/continue');
+        showAlert({
+          type: 'success',
+          title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
+          message:
+            (syncResponse.warnings?.length ?? 0) > 0
+              ? `Ολοκληρώθηκε με προειδοποιήσεις: ${syncResponse.warnings?.join(' | ')}`
+              : `Έγινε συγχρονισμός ${syncResponse.totalFetched ?? 0} παιχνιδιών από Steam.`,
+        });
+        setSteamSyncing(false);
+        setSteamSyncProgress(null);
+      }
     } catch (error) {
       console.warn('Steam sync failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Άγνωστο σφάλμα';
@@ -755,9 +836,13 @@ export default function CategoryLibrary({
         title: 'Σφάλμα',
         message: `Ο συγχρονισμός Steam απέτυχε. ${errorMessage}`,
       });
-    } finally {
       setSteamSyncing(false);
       setSteamSyncProgress(null);
+
+      if (steamPollIntervalRef.current) {
+        clearInterval(steamPollIntervalRef.current);
+        steamPollIntervalRef.current = null;
+      }
     }
   };
 

@@ -2,6 +2,8 @@ const STEAM_RESOLVE_VANITY_URL =
   'https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/';
 const STEAM_OWNED_GAMES_URL =
   'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/';
+const STEAM_PLAYER_ACHIEVEMENTS_URL =
+  'https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/';
 
 export type SteamOwnedGame = {
   appid: number;
@@ -12,6 +14,31 @@ export type SteamOwnedGame = {
   has_community_visible_stats?: boolean;
   img_icon_url?: string;
   img_logo_url?: string;
+};
+
+export type SteamAchievement = {
+  apiname: string;
+  achieved: number;
+  unlocktime?: number;
+  name?: string;
+  description?: string;
+};
+
+export type SteamAchievementsResponse = {
+  playerstats?: {
+    steamID?: string;
+    gameName?: string;
+    achievements?: SteamAchievement[];
+    success?: boolean;
+    error?: string;
+  };
+};
+
+export type SteamAchievementsResult = {
+  total: number;
+  unlocked: number;
+  percent: number;
+  is100: boolean;
 };
 
 type SteamResolveVanityResponse = {
@@ -139,4 +166,51 @@ export async function fetchSteamOwnedGames(params: {
 
   const payload = (await response.json()) as SteamOwnedGamesResponse;
   return payload.response?.games ?? [];
+}
+
+/**
+ * Fetch Steam achievements for a specific app/game.
+ * Returns null if the game has no achievements or the request fails.
+ * Safe to call - won't crash if achievements are not available.
+ */
+export async function fetchSteamAchievements(params: {
+  apiKey: string;
+  steamId64: string;
+  appid: number;
+}): Promise<SteamAchievementsResult | null> {
+  const url = new URL(STEAM_PLAYER_ACHIEVEMENTS_URL);
+  url.searchParams.set('key', params.apiKey);
+  url.searchParams.set('steamid', params.steamId64);
+  url.searchParams.set('appid', params.appid.toString());
+  url.searchParams.set('format', 'json');
+
+  try {
+    const response = await fetch(url.toString(), {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+      // Game might not have achievements or stats not public
+      return null;
+    }
+
+    const payload = (await response.json()) as SteamAchievementsResponse;
+    const achievements = payload.playerstats?.achievements;
+
+    if (!achievements || achievements.length === 0) {
+      return null;
+    }
+
+    const total = achievements.length;
+    const unlocked = achievements.filter(a => a.achieved === 1).length;
+    const percent = total > 0 ? Math.round((unlocked / total) * 100) : 0;
+    const is100 = total > 0 && unlocked === total;
+
+    return { total, unlocked, percent, is100 };
+  } catch (error) {
+    // Silently fail - achievements are optional
+    console.warn(`Achievements fetch failed for appid ${params.appid}:`, error);
+    return null;
+  }
 }
