@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useReducer, useCallback, useState, useTransition } from 'react';
+import { useEffect, useMemo, useReducer, useCallback, useState, useTransition, useRef } from 'react';
 import { mutate } from 'swr';
-import ErrorState from '@/app/components/ui/ErrorState';
-import AlertMessage from '@/app/components/ui/AlertMessage';
+import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
 import { apiClient } from '@/lib/api/client';
 import { Progress } from '@/components/ui/progress';
 import { yieldToMain } from '@/lib/performance';
@@ -53,7 +53,7 @@ type SteamSyncJobSnapshot = {
 };
 
 type AlertState = {
-  type: 'success' | 'error';
+  type: 'success' | 'error' | 'warning' | 'info';
   message: string;
   title?: string;
 } | null;
@@ -154,9 +154,7 @@ function categoryLibraryReducer(
           totalRuntime,
           totalEpisodes,
           tags:
-            state.selectedEntry.tags.length > 0
-              ? state.selectedEntry.tags
-              : (details.genres ?? []),
+            state.selectedEntry.tags.length > 0 ? state.selectedEntry.tags : (details.genres ?? []),
           cover:
             state.selectedEntry.cover ||
             details.cover_image_large ||
@@ -226,9 +224,14 @@ export default function CategoryLibrary({
 
   const supportsExternal = supportsExternalApi(category);
   const apiBase = getApiBase(category);
+  const selectedEntryRef = useRef<SelectedEntry | null>(selectedEntry);
+
+  useEffect(() => {
+    selectedEntryRef.current = selectedEntry;
+  }, [selectedEntry]);
 
   const loadLibraryEntries = useCallback(
-    async (forceMocks = false) => {
+    async (forceMocks = false, refreshSelectedEntry = false) => {
       if (!supportsExternal || forceMocks) {
         dispatch({ type: 'patch', payload: { libraryEntries: [] } });
         return;
@@ -245,6 +248,20 @@ export default function CategoryLibrary({
         );
         const items = Array.isArray(data.items) ? data.items : [];
         dispatch({ type: 'patch', payload: { libraryEntries: items } });
+        if (refreshSelectedEntry && selectedEntryRef.current) {
+          const refreshed = items.find(item => item.id === selectedEntryRef.current?.id);
+          if (refreshed) {
+            dispatch({
+              type: 'patch',
+              payload: {
+                selectedEntry: {
+                  ...selectedEntryRef.current,
+                  ...refreshed,
+                },
+              },
+            });
+          }
+        }
       } catch (error) {
         console.warn('Library fetch failed:', error);
         dispatch({
@@ -269,10 +286,7 @@ export default function CategoryLibrary({
         search: normalizedInitialSearch,
       },
     });
-    
-    
-    
-    
+
     loadLibraryEntries();
   }, [category, normalizedInitialStatus, normalizedInitialSearch, loadLibraryEntries]);
 
@@ -443,6 +457,48 @@ export default function CategoryLibrary({
             console.warn('TMDB details fetch failed:', error);
           });
       }
+
+      // Fetch RAWG details for games from external source
+      if (
+        category === 'games' &&
+        entry.source === 'external' &&
+        entry.externalId &&
+        !entry.description
+      ) {
+        apiClient
+          .request(`/api/games/rawg-details?rawgId=${entry.externalId}`)
+          .then(async response => {
+            if (!response.ok) {
+              return null;
+            }
+            return (await response.json()) as {
+              description?: string | null;
+              platforms?: string[] | null;
+              payload?: Record<string, unknown>;
+            };
+          })
+          .then(details => {
+            if (!details) return;
+            startTransition(() => {
+              dispatch({
+                type: 'patch',
+                payload: {
+                  selectedEntry: selectedEntryRef.current
+                    ? {
+                        ...selectedEntryRef.current,
+                        description: details.description ?? selectedEntryRef.current.description,
+                        platforms: details.platforms ?? selectedEntryRef.current.platforms,
+                        payload: details.payload ?? selectedEntryRef.current.payload,
+                      }
+                    : null,
+                },
+              });
+            });
+          })
+          .catch(error => {
+            console.warn('RAWG details fetch failed:', error);
+          });
+      }
     },
     [category, dispatch, startTransition],
   );
@@ -463,6 +519,12 @@ export default function CategoryLibrary({
       shouldAutoCompleteProgress && editState.status === 'completed' && totalCount !== undefined
         ? totalCount
         : nextProgress;
+    const hasPlayedHours =
+      typeof nextProgressValue === 'number' && Number.isFinite(nextProgressValue) && nextProgressValue > 0;
+    let finalStatus = nextStatus;
+    if (category === 'games' && nextStatus === 'current' && !hasPlayedHours) {
+      finalStatus = 'planned';
+    }
     const nextFavorite = editState.isFavorite;
 
     // Close dialog immediately for instant feedback (improves INP)
@@ -483,10 +545,10 @@ export default function CategoryLibrary({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mediaId: selectedEntry.mediaId,
-            status: nextStatus,
+            status: finalStatus,
             is_favorite: nextFavorite,
             selected_platform:
-              category === 'games' ? (editState.selectedPlatform || null) : undefined,
+              category === 'games' ? editState.selectedPlatform || null : undefined,
             progress: nextProgressValue,
             score: nextScore,
             notes: editState.notes || null,
@@ -561,17 +623,17 @@ export default function CategoryLibrary({
         type: 'patch',
         payload: {
           libraryEntries: libraryEntries.map(entry =>
-          entry.id === selectedEntry.id
-            ? {
-                ...entry,
-                status: nextStatus,
-                isFavorite: nextFavorite,
-                selectedPlatform: editState.selectedPlatform || undefined,
-                progress: nextProgressValue ?? undefined,
-                score: editState.score || undefined,
-                notes: editState.notes || undefined,
-              }
-            : entry,
+            entry.id === selectedEntry.id
+              ? {
+                  ...entry,
+                  status: nextStatus,
+                  isFavorite: nextFavorite,
+                  selectedPlatform: editState.selectedPlatform || undefined,
+                  progress: nextProgressValue ?? undefined,
+                  score: editState.score || undefined,
+                  notes: editState.notes || undefined,
+                }
+              : entry,
           ),
         },
       });
@@ -638,7 +700,15 @@ export default function CategoryLibrary({
       });
       clearSelection();
     },
-    [apiBase, dispatch, libraryEntries, loadLibraryEntries, showAlert, startTransition, supportsExternal],
+    [
+      apiBase,
+      dispatch,
+      libraryEntries,
+      loadLibraryEntries,
+      showAlert,
+      startTransition,
+      supportsExternal,
+    ],
   );
 
   const handleSteamSync = async () => {
@@ -693,46 +763,43 @@ export default function CategoryLibrary({
 
   if (steamSyncing) {
     return (
-      <div className="apple-page-background min-h-screen px-3 py-16 text-[var(--hb-text)] sm:px-4 sm:py-20">
+      <div className="min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
         <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
-          <section className="apple-material-surface p-4 sm:p-6">
+          <section className="p-4 sm:p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-8 w-56 rounded-[12px] bg-[var(--hb-card)]" />
+              <div className="h-8 w-56 rounded-[12px] bg-card" />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="h-10 rounded-[12px] bg-[var(--hb-card)]" />
-                <div className="h-10 rounded-[12px] bg-[var(--hb-card)]" />
-                <div className="h-10 rounded-[12px] bg-[var(--hb-card)]" />
+                <div className="h-10 rounded-[12px] bg-card" />
+                <div className="h-10 rounded-[12px] bg-card" />
+                <div className="h-10 rounded-[12px] bg-card" />
               </div>
             </div>
           </section>
-          <section className="apple-material-surface p-4 sm:p-6">
+          <section className="p-4 sm:p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-12 rounded-[12px] bg-[var(--hb-card)]" />
+              <div className="h-12 rounded-[12px] bg-card" />
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="h-24 rounded-[12px] bg-[var(--hb-card)]" />
+                <div key={index} className="h-24 rounded-[12px] bg-card" />
               ))}
             </div>
           </section>
 
-          <div className="hb-dialog-overlay absolute inset-0 z-10 flex items-center justify-center rounded-[28px] p-3 sm:p-6">
-            <div className="hb-dialog-surface w-full max-w-xl rounded-[20px] border border-[var(--hb-dialog-border)] p-4 sm:p-6">
+          <div className="hb-dialog-overlay absolute inset-0 z-10 flex items-center justify-center rounded-3xl p-3 sm:p-6">
+            <div className="hb-dialog-surface w-full max-w-xl rounded-[20px] border border-border p-4 sm:p-6">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="apple-body-tracking text-sm font-semibold text-[var(--apple-label)]">
+                <p className="text-sm font-semibold text-foreground">
                   Συγχρονισμός Steam με RAWG metadata
                 </p>
-                <span className="text-xs font-semibold text-[var(--apple-secondary-label)]">
+                <span className="text-xs font-semibold text-muted-foreground">
                   {steamSyncProgress?.percent ?? 0}%
                 </span>
               </div>
-              <Progress
-                value={steamSyncProgress?.percent ?? 0}
-                className="apple-progress-track h-2.5 rounded-full"
-              />
-              <p className="mt-3 text-xs text-[var(--apple-secondary-label)]">
+              <Progress value={steamSyncProgress?.percent ?? 0} className="h-2.5 rounded-full" />
+              <p className="mt-3 text-xs text-muted-foreground">
                 {steamSyncProgress?.message ??
                   'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
               </p>
-              <p className="mt-1 text-xs text-[var(--apple-secondary-label)]/80">
+              <p className="text-muted-foreground/80 mt-1 text-xs">
                 {steamSyncProgress?.completedSteps ?? 0} / {steamSyncProgress?.totalSteps ?? 0}{' '}
                 βήματα
               </p>
@@ -744,25 +811,37 @@ export default function CategoryLibrary({
   }
 
   return (
-    <div className="apple-page-background min-h-screen px-3 py-16 text-[var(--hb-text)] sm:px-4 sm:py-20">
+    <div className="min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
       {alert && (
-        <AlertMessage
+        <Alert
           key={alertKey}
-          type={alert.type}
-          title={alert.title}
-          message={alert.message}
-          duration={2000}
-          onClose={() => dispatch({ type: 'clearAlert' })}
-        />
+          variant={
+            alert.type === 'error'
+              ? 'destructive'
+              : alert.type === 'success'
+                ? 'success'
+                : alert.type === 'warning'
+                  ? 'warning'
+                  : 'info'
+          }
+          className="mb-6"
+        >
+          {alert.type === 'success' && <CheckCircle className="h-4 w-4" />}
+          {alert.type === 'error' && <XCircle className="h-4 w-4" />}
+          {alert.type === 'warning' && <AlertTriangle className="h-4 w-4" />}
+          {alert.type === 'info' && <Info className="h-4 w-4" />}
+          {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
+          <AlertDescription>{alert.message}</AlertDescription>
+        </Alert>
       )}
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-40 blur-[110px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,color-mix(in_srgb,var(--apple-system-blue)_20%,transparent),transparent_52%)]" />
-          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,color-mix(in_srgb,var(--apple-system-blue)_14%,#34c759),transparent_58%)]" />
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-30">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,hsl(var(--primary)/0.2),transparent_52%)]" />
+          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--success)/0.15),transparent_58%)]" />
         </div>
 
-        <section className="apple-material-surface p-4 sm:p-6">
+        <section className="p-4 sm:p-6">
           <CategoryHeader
             category={category}
             username={username}
@@ -779,9 +858,7 @@ export default function CategoryLibrary({
             <CreateEntryPanel
               category={category}
               searchQuery={createQuery}
-              onSearchChange={value =>
-                dispatch({ type: 'patch', payload: { createQuery: value } })
-              }
+              onSearchChange={value => dispatch({ type: 'patch', payload: { createQuery: value } })}
               searchResults={createResults}
               isLoading={createLoading}
               onOpenDialog={openEntryDialog}
@@ -812,8 +889,8 @@ export default function CategoryLibrary({
         />
 
         {libraryError && (
-          <div className="apple-card rounded-[20px] border-[var(--apple-separator)] p-4">
-            <ErrorState error={libraryError} />
+          <div className="rounded-[20px] p-4">
+            <ErrorAlert message={libraryError} />
           </div>
         )}
 
@@ -837,4 +914,3 @@ export default function CategoryLibrary({
     </div>
   );
 }
-

@@ -70,13 +70,11 @@ export function HomeFeatures() {
     <section className="px-4 py-12 md:px-6 md:py-16">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--apple-system-blue)]">
-            What you can do
-          </p>
-          <h2 className="apple-title-tracking mb-4 text-3xl font-semibold text-[var(--apple-label)] md:text-4xl">
+          <p className="text-info mb-3 text-xs uppercase tracking-[0.28em]">What you can do</p>
+          <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
             Add, track, and organize
           </h2>
-          <p className="apple-body-tracking mx-auto max-w-xl text-[var(--apple-secondary-label)]">
+          <p className="mx-auto max-w-xl text-muted-foreground">
             Your library, your progress, your stats. Start with any hobby category.
           </p>
         </div>
@@ -85,17 +83,15 @@ export function HomeFeatures() {
           {features.map(feature => (
             <div
               key={feature.title}
-              className="apple-card group rounded-[var(--apple-radius-card)] p-6 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--apple-system-blue)_34%,transparent)] hover:shadow-[var(--hb-shadow-md-hover)]"
+              className="hover:border-primary/30 group rounded-lg p-6 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] text-[var(--apple-system-blue)] transition-colors group-hover:bg-[color-mix(in_srgb,var(--apple-system-blue)_12%,transparent)]">
+              <div className="text-info group-hover:bg-primary/10 mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border bg-card transition-colors">
                 {feature.icon}
               </div>
-              <h3 className="mb-2 text-base font-semibold tracking-[-0.01em] text-[var(--apple-label)]">
+              <h3 className="mb-2 text-base font-semibold tracking-[-0.01em] text-foreground">
                 {feature.title}
               </h3>
-              <p className="apple-body-tracking text-sm leading-relaxed text-[var(--apple-secondary-label)]">
-                {feature.description}
-              </p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>

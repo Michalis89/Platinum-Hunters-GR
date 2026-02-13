@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import { Spinner } from '@/components/ui/spinner';
 import { AboutStats, AboutStatsProps } from '@/app/components/about/AboutStats';
 
 const EMPTY_STATS: AboutStatsProps = {
@@ -47,9 +47,9 @@ export default function AboutStatsLoader() {
   if (!stats) {
     return (
       <section className="relative px-4 py-20 md:px-6 md:py-28">
-        <div className="via-[var(--hb-primary-strong)]/[0.03] absolute inset-0 bg-gradient-to-b from-[var(--hb-bg)] to-[var(--hb-bg)]" />
+        <div className="via-primary/[0.03] absolute inset-0 bg-gradient-to-b from-background to-background" />
         <div className="relative mx-auto flex max-w-6xl justify-center">
-          <LoadingSpinner size="lg" />
+          <Spinner className="size-8" />
         </div>
       </section>
     );

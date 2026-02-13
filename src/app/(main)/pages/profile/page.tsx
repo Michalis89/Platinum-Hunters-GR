@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useSelector } from 'react-redux';
-import Skeleton from '@/app/components/ui/Skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityFeed } from '@/app/components/activity/ActivityFeed';
 import {
   ProfileHeader,
@@ -39,6 +39,31 @@ const categoryLabels: Record<string, string> = {
 };
 
 const articleOnlyCategories = new Set(['coding', 'pet', 'vape']);
+
+function ProfilePageSkeleton() {
+  return (
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-4xl space-y-6 px-4 py-16 md:px-6">
+        <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-6">
+          <Skeleton className="h-24 w-24 rounded-[32px]" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-6 w-2/3 rounded-full" />
+            <Skeleton className="h-4 w-1/2 rounded-full" />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={`profile-skeleton-${index}`} className="h-24 w-full rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ProfilePage() {
   const user = useSelector(selectUser);
@@ -341,17 +366,11 @@ export default function ProfilePage() {
 
   // Show loading skeleton while user data loads from Redux
   if (!user) {
-    return (
-      <div className="apple-page-background min-h-screen">
-        <div className="mx-auto max-w-4xl px-4 py-16 md:px-6">
-          <Skeleton type="profile" />
-        </div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   return (
-    <div className="apple-page-background min-h-screen text-[var(--apple-label)]">
+    <div className="min-h-screen text-foreground">
       <div className="relative">
         {/* Profile Header (Hero-style) */}
         <ProfileHeader user={user} />
@@ -386,18 +405,18 @@ export default function ProfilePage() {
           <section className="px-4 py-10 md:px-6 md:py-14">
             <div className="mx-auto max-w-6xl">
               <div className="mb-8 text-center md:mb-10">
-                <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
                   {categoryMeta[activeCategory]?.title || 'Κατηγορία'}
                 </p>
-                <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
+                <h2 className="text-2xl font-semibold md:text-3xl">
                   {categoryLabels[activeCategory] || 'Favorites'}
                 </h2>
               </div>
 
               <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
                 {/* Favorites List */}
-                <div className="apple-material-surface overflow-hidden p-4 sm:p-6">
-                  <h3 className="apple-secondary-label mb-4 text-xs font-semibold uppercase tracking-[0.18em]">
+                <div className="p-4 sm:p-6">
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em]">
                     Top {categoryLabels[activeCategory]}
                   </h3>
                   <ProfileFavorites
@@ -417,8 +436,8 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Category Info */}
-                <div className="apple-material-surface overflow-hidden p-4 sm:p-6">
-                  <h3 className="apple-secondary-label mb-4 text-xs font-semibold uppercase tracking-[0.18em]">
+                <div className="p-4 sm:p-6">
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em]">
                     Πληροφορίες Κατηγορίας
                   </h3>
                   <ProfileCategoryInfo
@@ -436,12 +455,10 @@ export default function ProfilePage() {
         <section className="px-4 py-12 md:px-6 md:py-14">
           <div className="mx-auto max-w-4xl">
             <div className="mb-8 text-center md:mb-10">
-              <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
                 Δραστηριότητα
               </p>
-              <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
-                Οι ενέργειές μου
-              </h2>
+              <h2 className="text-2xl font-semibold md:text-3xl">Οι ενέργειές μου</h2>
             </div>
             <ActivityFeed scope="me" limit={30} compact />
           </div>

@@ -71,13 +71,13 @@ export function AboutFeatures() {
     <section className="px-4 py-20 md:px-6 md:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center md:mb-16">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">
             What&apos;s implemented
           </p>
-          <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
+          <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
             Core features available today
           </h2>
-          <p className="mx-auto max-w-2xl text-[var(--hb-muted)]">
+          <p className="mx-auto max-w-2xl text-muted-foreground">
             These are the features that exist and work right now. Not a roadmap—actual functionality.
           </p>
         </div>
@@ -86,15 +86,15 @@ export function AboutFeatures() {
           {features.map(feature => (
             <div
               key={feature.title}
-              className="hover:border-[var(--hb-primary-strong)]/50 group relative rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]"
+              className="hover:border-primary/50 group relative rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
             >
-              <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
+              <div className="bg-primary/10 group-hover:bg-primary/20 mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-primary transition-colors">
                 {feature.icon}
               </div>
-              <h3 className="mb-2 text-base font-semibold text-[var(--hb-headline)]">
+              <h3 className="mb-2 text-base font-semibold text-foreground">
                 {feature.title}
               </h3>
-              <p className="text-sm leading-relaxed text-[var(--hb-muted)]">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {feature.description}
               </p>
             </div>

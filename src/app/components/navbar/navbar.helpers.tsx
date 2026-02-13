@@ -22,23 +22,23 @@ export function NavItemContent({
 
 export const desktopLinkClass = (isActive: boolean) =>
   cn(
-    'h-9 rounded-[var(--apple-radius-control)] border border-transparent px-3 text-[13px] font-medium tracking-[-0.01em]',
-    'transition-[background-color,color,box-shadow,transform] duration-200 [transition-timing-function:var(--hb-ease)] active:scale-[0.98]',
-    'focus-visible:ring-2 focus-visible:ring-[var(--apple-system-blue)]/40 focus-visible:ring-offset-0',
+    'h-9  border border-transparent px-3 text-[13px] font-medium tracking-[-0.01em]',
+    'transition-[background-color,color,box-shadow,transform] duration-200 [transition-timing-function:var(--easing-default)] active:scale-[0.98]',
+    'focus-visible:ring-2 focus-visible:ring-[var(--ring)]/40 focus-visible:ring-offset-0',
     isActive
-      ? 'bg-[var(--apple-nav-pill-active)] text-[var(--apple-label)] shadow-[inset_0_0_0_var(--apple-hairline)_var(--apple-nav-pill-border)]'
-      : 'text-[var(--apple-secondary-label)] hover:bg-[var(--apple-nav-pill-hover)] hover:text-[var(--apple-label)]',
+      ? 'bg-[hsl(var(--accent-muted))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border))]'
+      : 'text-muted-foreground hover:bg-[hsl(var(--accent))/10] hover:text-foreground',
   );
 
 export const mobileChipClass = (isActive: boolean, fullWidth = false) =>
   cn(
-    'h-10 shrink-0 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em]',
+    'h-10 shrink-0  border border-[hsl(var(--border))] bg-card px-3 text-[13px] font-medium tracking-[-0.01em]',
     fullWidth && 'w-full justify-start',
-    'transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] active:scale-[0.98]',
-    'focus-visible:ring-2 focus-visible:ring-[var(--apple-system-blue)]/40 focus-visible:ring-offset-0',
+    'transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] active:scale-[0.98]',
+    'focus-visible:ring-2 focus-visible:ring-[var(--ring)]/40 focus-visible:ring-offset-0',
     isActive
-      ? 'bg-[var(--apple-nav-pill-active)] text-[var(--apple-label)]'
-      : 'text-[var(--apple-label)] hover:bg-[var(--apple-nav-pill-hover)]',
+      ? 'bg-[hsl(var(--accent-muted))] text-foreground'
+      : 'text-foreground hover:bg-[hsl(var(--accent))/10]',
   );
 
 export const getUserInitials = (username: string | null | undefined) => {

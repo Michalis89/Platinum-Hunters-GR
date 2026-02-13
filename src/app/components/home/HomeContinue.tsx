@@ -77,12 +77,12 @@ export function HomeContinue() {
     <section className="px-4 py-8 md:px-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-5 flex items-center gap-2">
-          <Clock className="h-5 w-5 text-[var(--hb-primary-strong)]" />
+          <Clock className="h-5 w-5 text-primary" />
           <div>
-            <h2 className="text-lg font-semibold text-[var(--hb-headline)]">
+            <h2 className="text-lg font-semibold text-foreground">
               Άλλα που έχεις ανοιχτά
             </h2>
-            <p className="text-xs text-[var(--hb-muted)]">Μικρά reminders για να αποφασίσεις</p>
+            <p className="text-xs text-muted-foreground">Μικρά reminders για να αποφασίσεις</p>
           </div>
         </div>
 
@@ -91,17 +91,17 @@ export function HomeContinue() {
             <Link
               key={item.category}
               href={item.href}
-              className="hover:border-[var(--hb-primary-strong)]/40 group flex items-center gap-4 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-4 transition hover:-translate-y-0.5"
+              className="hover:border-primary/40 group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:-translate-y-0.5"
             >
-              <div className="group-hover:bg-[var(--hb-primary-strong)]/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-[var(--hb-muted)] transition group-hover:text-[var(--hb-primary-strong)]">
+              <div className="group-hover:bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-muted-foreground transition group-hover:text-primary">
                 {item.icon}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-[var(--hb-muted)]">{item.category}</p>
-                <h3 className="truncate font-medium text-[var(--hb-headline)]">{item.title}</h3>
-                <p className="mt-0.5 text-xs text-[var(--hb-muted)]">{item.progress}</p>
+                <p className="text-xs text-muted-foreground">{item.category}</p>
+                <h3 className="truncate font-medium text-foreground">{item.title}</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">{item.progress}</p>
               </div>
-              <ArrowRight className="h-4 w-4 shrink-0 text-[var(--hb-muted)] opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
             </Link>
           ))}
         </div>

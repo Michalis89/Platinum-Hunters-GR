@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { User2, MapPin, Gamepad2 } from 'lucide-react';
-import EmptyState from '@/app/components/ui/EmptyState';
+import EmptyState from '@/components/ui/empty';
 
 export type TeamMember = {
   id: string;
@@ -27,11 +27,11 @@ const roleLabel: Record<string, string> = {
 };
 
 const roleColors: Record<string, string> = {
-  owner: 'border-[var(--hb-primary-strong)]/60 text-[var(--hb-primary-strong)]',
-  admin: 'border-[var(--hb-primary-strong)]/45 text-[var(--hb-primary-strong)]',
+  owner: 'border-primary/60 text-primary',
+  admin: 'border-primary/45 text-primary',
   moderator: 'border-sky-500/40 text-sky-400',
   reviewer: 'border-amber-500/40 text-amber-400',
-  author: 'border-[var(--hb-border)] text-[var(--hb-muted)]',
+  author: 'border-border text-muted-foreground',
 };
 
 const ROLE_PRIORITY = ['owner', 'admin', 'moderator', 'author', 'reviewer', 'user'];
@@ -61,13 +61,11 @@ export function AboutPeople({ team }: AboutPeopleProps) {
     <section className="px-4 py-20 md:px-6 md:py-28">
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center md:mb-16">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
-            The team
-          </p>
-          <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">The team</p>
+          <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
             People behind Hobbista
           </h2>
-          <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
+          <p className="mx-auto max-w-xl text-muted-foreground">
             A small team of hobbyists who love games, anime, and movies and want to build the best
             tool for everyone else.
           </p>
@@ -84,9 +82,9 @@ export function AboutPeople({ team }: AboutPeopleProps) {
             {sortedTeam.map(member => (
               <div
                 key={member.id}
-                className="hover:border-[var(--hb-primary-strong)]/40 group flex gap-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition"
+                className="hover:border-primary/40 group flex gap-4 rounded-2xl border border-border bg-card p-5 transition"
               >
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/5">
+                <div className="relative h-16 w-16 shrink-0 rounded-xl bg-white/5">
                   {member.avatar_url ? (
                     <Image
                       src={member.avatar_url}
@@ -96,7 +94,7 @@ export function AboutPeople({ team }: AboutPeopleProps) {
                       sizes="64px"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[var(--hb-muted)]">
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                       <User2 className="h-7 w-7" />
                     </div>
                   )}
@@ -104,7 +102,7 @@ export function AboutPeople({ team }: AboutPeopleProps) {
 
                 <div className="flex flex-1 flex-col gap-1.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-[var(--hb-headline)]">
+                    <span className="font-semibold text-foreground">
                       {member.display_name || member.username}
                     </span>
                     {(() => {
@@ -122,10 +120,10 @@ export function AboutPeople({ team }: AboutPeopleProps) {
                   </div>
 
                   {member.bio && (
-                    <p className="text-sm leading-relaxed text-[var(--hb-muted)]">{member.bio}</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
                   )}
 
-                  <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-[var(--hb-muted)]">
+                  <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span className="opacity-70">@{member.username}</span>
                     {member.country && (
                       <span className="flex items-center gap-1">

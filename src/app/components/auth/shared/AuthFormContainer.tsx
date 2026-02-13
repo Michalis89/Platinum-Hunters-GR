@@ -28,40 +28,40 @@ export function AuthFormContainer({
   return (
     <Card
       className={cn(
-        'apple-auth-card apple-auth-enter apple-auth-form-frame overflow-hidden border-[var(--apple-separator)] bg-[color-mix(in_srgb,var(--apple-surface)_92%,transparent)]',
+        'overflow-hidden border border-border bg-card text-card-foreground shadow-sm',
         cardClassName,
       )}
     >
       <CardHeader
-        className={cn(
-          'border-b border-[var(--apple-separator-soft)] bg-transparent px-6 pb-5 pt-6',
-          headerClassName,
-        )}
+        className={cn('border-b border-border bg-transparent px-6 pb-5 pt-6', headerClassName)}
       >
         <CardTitle
           className={cn(
-            'apple-title-tracking flex items-center gap-3 text-[1.375rem] text-[var(--apple-label)]',
+            'flex items-center gap-3 text-[1.375rem] leading-tight text-foreground',
             titleClassName,
           )}
         >
           <span
             className={cn(
-              'flex h-12 w-12 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_15%,transparent)] text-[var(--apple-system-blue)]',
+              'bg-primary/10 flex h-12 w-12 items-center justify-center rounded-[var(--radius-md)] text-primary',
               iconWrapperClassName,
             )}
           >
             {icon}
           </span>
+
           <span className="flex flex-col leading-tight">
             <span className="font-semibold">{title}</span>
-            <span className="apple-body-tracking mt-1 text-[0.93rem] font-normal text-[var(--apple-secondary-label)]">
+            <span className="mt-1 text-[0.93rem] font-normal text-muted-foreground">
               {subtitle}
             </span>
           </span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className={cn('space-y-5 px-6 pb-6 pt-5', contentClassName)}>{children}</CardContent>
+      <CardContent className={cn('space-y-5 px-6 pb-6 pt-5', contentClassName)}>
+        {children}
+      </CardContent>
     </Card>
   );
 }

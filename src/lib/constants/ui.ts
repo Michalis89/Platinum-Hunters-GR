@@ -20,11 +20,10 @@ export const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
 
 // Reusable Tailwind class patterns
 export const UI_CLASSNAMES = {
-  pageShell: 'relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)]',
-  pageBackdrop: 'pointer-events-none absolute inset-0 overflow-hidden opacity-70',
-  pageGradient: 'absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]',
-  panelCard: 'border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-[var(--hb-shadow-md)]',
-  tagPill:
-    'rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-xs text-[var(--hb-text)]',
-  mutedInteractive: 'text-[var(--hb-muted)] hover:text-[var(--hb-headline)]',
+  pageShell: 'relative min-h-screen bg-background text-foreground',
+  pageBackdrop: 'pointer-events-none absolute inset-0 opacity-70',
+  pageGradient: 'absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-primary/6',
+  panelCard: 'border border-border bg-card shadow-md',
+  tagPill: 'rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground',
+  mutedInteractive: 'text-muted-foreground hover:text-foreground',
 } as const;

@@ -3,17 +3,16 @@
 import { useTickets } from '@/lib/hooks/useTickets';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
-import { Search, ShieldCheck } from 'lucide-react';
+import { Search, ShieldCheck, X } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
-import { Input } from '@/app/components/ui/Input';
-import { Select } from '@/app/components/ui/Select';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
-import EmptyState from '@/app/components/ui/EmptyState';
-import ErrorState from '@/app/components/ui/ErrorState';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { SelectField as Select } from '@/components/ui/select-field';
+import { Spinner } from '@/components/ui/spinner';
+import EmptyState from '@/components/ui/empty';
+import { Alert, AlertDescription, ErrorAlert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import Feedback from '@/app/components/ui/Feedback';
 import { selectIsAdminOrModerator } from '@/store/slices/authSlice';
 import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
 import {
@@ -26,6 +25,7 @@ import {
   SUPPORT_SEVERITY_LABELS as severityLabels,
 } from '@/lib/constants/support';
 import { UI_CLASSNAMES } from '@/lib/constants/ui';
+import type { TicketsAlert } from '@/lib/hooks/useTickets';
 
 type AdminTicket = {
   id: string;
@@ -44,6 +44,9 @@ type AdminTicket = {
     email: string | null;
   } | null;
 };
+
+const mapAlertVariant = (type: TicketsAlert['type']) =>
+  type === 'error' ? 'destructive' : type;
 
 export default function AdminSupportInbox() {
   // Middleware ensures only authenticated users reach this page
@@ -84,7 +87,7 @@ export default function AdminSupportInbox() {
   if (!isAdmin) {
     return (
       <PageContainer size="md" className="py-20">
-        <ErrorState error="Δεν έχεις πρόσβαση σε αυτή τη σελίδα." />
+        <ErrorAlert message="Δεν έχεις πρόσβαση σε αυτή τη σελίδα." />
       </PageContainer>
     );
   }
@@ -98,13 +101,11 @@ export default function AdminSupportInbox() {
         <PageHero
           eyebrow="Διαχείριση"
           title={
-            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">
-              Εισερχόμενα Υποστήριξης
-            </span>
+            <span className="text-3xl text-foreground md:text-5xl">Εισερχόμενα Υποστήριξης</span>
           }
           subtitle="Διαχειρίσου όλα τα εισερχόμενα αιτήματα υποστήριξης."
           badges={
-            <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
+            <span className="rounded-full border border-border bg-card px-3 py-1">
               <ShieldCheck className="mr-2 inline h-4 w-4" />
               Μόνο για διαχειριστές
             </span>
@@ -114,24 +115,55 @@ export default function AdminSupportInbox() {
         <PageContainer size="lg" className="mt-10 pb-20">
           {alert && (
             <div className="mb-4">
-              <Feedback
-                variant={alert.type}
-                tone="solid"
-                description={alert.message}
-                actionLabel={alert.onConfirm ? 'Διαγραφή' : undefined}
-                onAction={alert.onConfirm}
-                secondaryActionLabel={alert.onCancel ? 'Άκυρο' : undefined}
-                onSecondaryAction={() => {
-                  alert.onCancel?.();
-                  setAlert(null);
-                }}
-                onDismiss={() => setAlert(null)}
-              />
+              <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">
+                <div className="flex flex-col gap-2">
+                  <AlertDescription>{alert.message}</AlertDescription>
+                  {(alert.onConfirm || alert.onCancel) && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {alert.onConfirm && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="font-medium"
+                          onClick={alert.onConfirm}
+                        >
+                          Διαγραφή
+                        </Button>
+                      )}
+                      {alert.onCancel && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="font-medium"
+                          onClick={() => {
+                            alert.onCancel?.();
+                            setAlert(null);
+                          }}
+                        >
+                          Άκυρο
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-3 top-3 h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Κλείσιμο μηνύματος"
+                  onClick={() => setAlert(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </Alert>
             </div>
           )}
           <Card className={UI_CLASSNAMES.panelCard}>
-            <CardHeader className="border-[var(--hb-border)]">
-              <CardTitle className="text-[var(--hb-headline)]">Φίλτρα</CardTitle>
+            <CardHeader className="border-border">
+              <CardTitle className="text-foreground">Φίλτρα</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-4">
               <Select
@@ -141,8 +173,8 @@ export default function AdminSupportInbox() {
                 options={STATUS_OPTIONS}
                 optionLabels={statusLabels}
                 placeholder="Όλα"
-                labelClassName="text-[var(--hb-headline)]"
-                className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]"
+                labelClassName="text-foreground"
+                className="border-border bg-card text-foreground"
               />
               <Select
                 label="Κατηγορία"
@@ -151,8 +183,8 @@ export default function AdminSupportInbox() {
                 options={CATEGORY_OPTIONS}
                 optionLabels={categoryLabels}
                 placeholder="Όλες"
-                labelClassName="text-[var(--hb-headline)]"
-                className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]"
+                labelClassName="text-foreground"
+                className="border-border bg-card text-foreground"
               />
               <Select
                 label="Σοβαρότητα"
@@ -161,18 +193,18 @@ export default function AdminSupportInbox() {
                 options={SEVERITY_OPTIONS}
                 optionLabels={severityLabels}
                 placeholder="Όλες"
-                labelClassName="text-[var(--hb-headline)]"
-                className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]"
+                labelClassName="text-foreground"
+                className="border-border bg-card text-foreground"
               />
               <div className="space-y-1">
-                <label className="text-sm font-medium text-[var(--hb-headline)]">Αναζήτηση</label>
+                <label className="text-sm font-medium text-foreground">Αναζήτηση</label>
                 <div className="flex items-center gap-2">
                   <Input
                     type="text"
                     value={filters.q}
                     onChange={event => setFilters(prev => ({ ...prev, q: event.target.value }))}
                     placeholder="Θέμα ή περιγραφή"
-                    className="border-[var(--hb-border)] bg-[var(--hb-card)]"
+                    className="border-border bg-card"
                   />
                   <Button variant="secondary" className="px-3">
                     <Search className="h-4 w-4" />
@@ -185,10 +217,13 @@ export default function AdminSupportInbox() {
           <div className="mt-6">
             {loading ? (
               <div className="py-16">
-                <LoadingSpinner label="Φορτώνουμε το inbox..." />
+                <div className="flex flex-col items-center justify-center gap-3">
+                  <Spinner />
+                  <span className="text-sm text-muted-foreground">Φορτώνουμε το inbox...</span>
+                </div>
               </div>
             ) : error ? (
-              <ErrorState error={error} />
+              <ErrorAlert message={error} />
             ) : tickets.length === 0 ? (
               <EmptyState
                 title="Δεν υπάρχουν tickets"
@@ -197,7 +232,7 @@ export default function AdminSupportInbox() {
             ) : (
               <div className="space-y-4">
                 {meta ? (
-                  <div className="text-xs text-[var(--hb-muted)]">
+                  <div className="text-xs text-muted-foreground">
                     Σύνολο αποτελεσμάτων: {meta.total}
                   </div>
                 ) : null}
@@ -215,7 +250,7 @@ export default function AdminSupportInbox() {
                     }
                     updatedAt={ticket.updated_at}
                     meta={
-                      <div className="text-xs text-[var(--hb-muted)]">
+                      <div className="text-xs text-muted-foreground">
                         Από:{' '}
                         {ticket.name || ticket.users?.display_name || ticket.users?.username || '—'}
                         {' • '}
@@ -282,8 +317,8 @@ export default function AdminSupportInbox() {
             )}
           </div>
 
-          <div className="mt-10 text-center text-xs text-[var(--hb-muted)]">
-            <Link href="/" className="hover:text-[var(--hb-primary)]">
+          <div className="mt-10 text-center text-xs text-muted-foreground">
+            <Link href="/" className="hover:text-primary">
               Επιστροφή στην αρχική
             </Link>
           </div>

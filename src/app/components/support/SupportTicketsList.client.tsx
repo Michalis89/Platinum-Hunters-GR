@@ -3,13 +3,13 @@
 import { useMemo, useState } from 'react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
-import EmptyState from '@/app/components/ui/EmptyState';
-import ErrorState from '@/app/components/ui/ErrorState';
+import { Spinner } from '@/components/ui/spinner';
+import EmptyState from '@/components/ui/empty';
+import { Alert, AlertDescription, ErrorAlert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
-import { Select } from '@/app/components/ui/Select';
-import Feedback from '@/app/components/ui/Feedback';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SelectField as Select } from '@/components/ui/select-field';
+import { X } from 'lucide-react';
 import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
 // Middleware ensures only authenticated users reach this page
 import { useTickets } from '@/lib/hooks/useTickets';
@@ -20,6 +20,7 @@ import {
   SUPPORT_SEVERITY_LABELS,
 } from '@/lib/constants/support';
 import { UI_CLASSNAMES } from '@/lib/constants/ui';
+import type { TicketsAlert } from '@/lib/hooks/useTickets';
 
 // User-facing override for "waiting_user" status
 const statusLabels: Record<string, string> = {
@@ -37,6 +38,9 @@ type TicketItem = {
   updated_at: string;
   user_archived?: boolean;
 };
+
+const mapAlertVariant = (type: TicketsAlert['type']) =>
+  type === 'error' ? 'destructive' : type;
 
 export default function SupportTicketsList() {
   const {
@@ -139,20 +143,23 @@ export default function SupportTicketsList() {
     if (loading) {
       return (
         <div className="py-20">
-          <LoadingSpinner label="Φορτώνουμε τα tickets..." />
+          <div className="flex flex-col items-center justify-center gap-3">
+            <Spinner />
+            <span className="text-sm text-muted-foreground">Φορτώνουμε τα tickets...</span>
+          </div>
         </div>
       );
     }
 
     if (error) {
-      return <ErrorState error={error} onRetry={reload} />;
+      return <ErrorAlert message={error} onRetry={reload} />;
     }
 
     if (filteredTickets.length === 0) {
       return (
         <EmptyState
           icon={
-            <span className="apple-pill flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-[var(--apple-system-blue)]">
+            <span className="text-info flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold">
               0
             </span>
           }
@@ -191,12 +198,7 @@ export default function SupportTicketsList() {
             }
             updatedAt={ticket.updated_at}
             updatedLabel="Τελευταία ενημέρωση:"
-            titleIcon={
-              <span
-                className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]"
-                aria-hidden
-              />
-            }
+            titleIcon={<span className="bg-info h-2.5 w-2.5 rounded-full" aria-hidden />}
             actions={
               <>
                 <Button href={`/pages/support/tickets/${ticket.id}`} variant="secondary">
@@ -225,7 +227,7 @@ export default function SupportTicketsList() {
                   <Button
                     variant="destructive"
                     onClick={() => handleDelete(ticket.id)}
-                    className="text-[var(--hb-headline)]"
+                    className="text-foreground"
                     disabled={actionLoading === ticket.id}
                   >
                     Διαγραφή
@@ -251,46 +253,85 @@ export default function SupportTicketsList() {
         <PageHero
           eyebrow="Υποστήριξη"
           title={
-            <span className="apple-title-tracking text-3xl font-semibold text-[var(--apple-label)] md:text-5xl">
+            <span className="text-3xl font-semibold text-foreground md:text-5xl">
               Τα tickets μου
             </span>
           }
           subtitle="Δες όλα τα αιτήματα υποστήριξης και την εξέλιξή τους."
-          sectionClassName="apple-hero pt-4"
-          subtitleClassName="apple-body-tracking text-[var(--apple-secondary-label)]"
+          sectionClassName=" pt-4"
+          subtitleClassName=" text-muted-foreground"
         />
         <PageContainer size="md" className="pb-20">
           {alert && (
             <div className="mb-4">
-              <Feedback
-                variant={alert.type}
-                tone="solid"
-                layout="inline"
-                description={alert.message}
-                actionLabel={alert.onConfirm ? 'Διαγραφή' : undefined}
-                onAction={alert.onConfirm}
-                secondaryActionLabel={alert.onCancel ? 'Άκυρο' : undefined}
-                onSecondaryAction={() => {
-                  alert.onCancel?.();
-                  setAlert(null);
-                }}
-                onDismiss={() => {
-                  setAlert(null);
-                }}
-              />
+              <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">
+                <div className="flex flex-col gap-2">
+                  <AlertDescription>{alert.message}</AlertDescription>
+                  {(alert.onConfirm || alert.onCancel) && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {alert.onConfirm && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={alert.onConfirm}
+                          className="font-medium"
+                        >
+                          Διαγραφή
+                        </Button>
+                      )}
+                      {alert.onCancel && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            alert.onCancel?.();
+                            setAlert(null);
+                          }}
+                          className="font-medium"
+                        >
+                          Άκυρο
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-3 top-3 h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Κλείσιμο μηνύματος"
+                  onClick={() => setAlert(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </Alert>
             </div>
           )}
-          <div className="apple-material-surface mb-6 grid gap-4 p-4 md:grid-cols-[1fr_auto] md:items-end">
-            <SegmentedControl
-              options={[
-                { id: 'active', label: 'Ενεργά' },
-                { id: 'all', label: 'Όλα' },
-                { id: 'archive', label: 'Αρχείο' },
-              ]}
+          <div className="mb-6 grid gap-4 p-4 md:grid-cols-[1fr_auto] md:items-end">
+            <Tabs
               value={view}
-              onChange={value => setView(value as typeof view)}
-              className="rounded-[var(--apple-radius-card)] border-[var(--apple-separator-soft)] bg-[var(--apple-material)]"
-            />
+              onValueChange={value => setView(value as typeof view)}
+              className="w-full"
+            >
+              <TabsList className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-2">
+                {[
+                  { value: 'active', label: 'Ενεργά' },
+                  { value: 'all', label: 'Όλα' },
+                  { value: 'archive', label: 'Αρχείο' },
+                ].map(option => (
+                  <TabsTrigger
+                    key={option.value}
+                    value={option.value}
+                    className="flex flex-1 flex-col items-center justify-center rounded-xl px-4 py-2 text-sm font-medium"
+                  >
+                    <span>{option.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
             <div className="md:w-64">
               <Select
                 label="Κατηγορία"
@@ -309,11 +350,7 @@ export default function SupportTicketsList() {
           </div>
           {content}
           <div className="mt-8 flex justify-center">
-            <Button
-              href="/pages/support"
-              variant="ghost"
-              className="apple-body-tracking rounded-full px-4"
-            >
+            <Button href="/pages/support" variant="ghost" className="rounded-full px-4">
               Δημιούργησε νέο αίτημα
             </Button>
           </div>

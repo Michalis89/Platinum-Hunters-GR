@@ -92,32 +92,34 @@ export function HomeHeroActionCard({ stats }: HomeHeroActionCardProps) {
   return (
     <section className="px-4 md:px-6">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-6 rounded-[28px] border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)] md:grid-cols-[minmax(0,1fr)_260px]">
+        <div className="grid gap-6 rounded-3xl border border-border bg-card p-6 shadow-md md:grid-cols-[minmax(0,1fr)_260px]">
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[var(--hb-muted)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground">
               Το επόμενο βήμα
             </p>
-            <h2 className="text-2xl font-bold text-[var(--hb-headline)] md:text-3xl">
+            <h2 className="text-2xl font-bold text-foreground md:text-3xl">
               Συνέχισε από εκεί που σταμάτησες
             </h2>
-            <p className="text-sm text-[var(--hb-muted)]">{playingText}</p>
-            <p className="text-lg font-semibold text-[var(--hb-headline)]">{recentCategory.label}</p>
-            <p className="text-sm text-[var(--hb-muted)]">{recentCategory.description}</p>
+            <p className="text-sm text-muted-foreground">{playingText}</p>
+            <p className="text-lg font-semibold text-foreground">
+              {recentCategory.label}
+            </p>
+            <p className="text-sm text-muted-foreground">{recentCategory.description}</p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 href={recentCategory.href}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--hb-primary-strong)] px-7 py-3 text-sm font-semibold text-slate-950 transition duration-300 hover:shadow-[var(--hb-shadow-md-hover)] hover:brightness-110"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-foreground transition duration-300 hover:shadow-md hover:brightness-110"
               >
                 Συνέχεια
                 <span aria-hidden="true">→</span>
               </Link>
-              <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] px-3 py-1 text-xs font-medium text-[var(--hb-muted)]">
-                <span className="text-[var(--hb-primary-strong)]">{recentCategory.icon}</span>
+              <div className="flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+                <span className="text-primary">{recentCategory.icon}</span>
                 Latest backlog focus
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-gradient-to-br from-[var(--hb-primary-strong)]/30 to-transparent p-4 text-[var(--hb-headline)]">
+          <div className="from-primary/30 relative rounded-2xl border border-border bg-gradient-to-br to-transparent p-4 text-foreground">
             <div className="flex h-full flex-col justify-between gap-4">
               <div className="rounded-2xl bg-gradient-to-br from-black/70 via-black/40 to-transparent p-4 shadow-inner shadow-black/60">
                 <div className="flex items-center gap-3 text-white">

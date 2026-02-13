@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             focus:z-[9999]
             focus:px-4
             focus:py-2
-            focus:bg-[var(--apple-system-blue)]
+            focus:bg-primary
             focus:text-white
             focus:rounded-xl
             focus:shadow-lg

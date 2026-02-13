@@ -11,7 +11,13 @@ import { useTheme } from '@/context/ThemeContext';
 import { DesktopNav } from './navbar/DesktopNav';
 import { LogoBrand } from './navbar/LogoBrand';
 import { MobileNavSheet } from './navbar/MobileNavSheet';
-import { getVisibleHobbyItems, getVisibleNavItems, HOBBY_ITEMS } from './navbar/navbar.data';
+import {
+  getVisibleHobbyItems,
+  getVisibleNavItems,
+  HOBBY_ITEMS,
+  type NavbarFeatureFilters,
+} from './navbar/navbar.data';
+import { useUserSettings } from '@/lib/settings/useUserSettings';
 
 const AddArticleDialog = dynamic(() => import('./articles/AddArticleDialog'), { ssr: false });
 
@@ -22,8 +28,13 @@ export default function Navbar() {
   const queryKey = searchParams.toString();
   const currentFullPath = queryKey ? `${pathname}?${queryKey}` : pathname;
   const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, isLoading: isAuthLoading, user, canQuickAdd, canAccessAdminPanel } =
-    useSelector(selectNavbarAuth);
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    user,
+    canQuickAdd,
+    canAccessAdminPanel,
+  } = useSelector(selectNavbarAuth);
   const { theme, toggleTheme } = useTheme();
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,13 +45,35 @@ export default function Navbar() {
   const logoHref = authResolved && isAuthenticated ? '/dashboard' : '/home';
   const userCategories = useMemo(() => user?.categories ?? [], [user?.categories]);
 
+  const { settings } = useUserSettings(isAuthenticated && authResolved);
+  const featureFilters = useMemo<NavbarFeatureFilters>(
+    () => ({
+      articles: settings?.articles_enabled ?? true,
+      reviews: settings?.reviews_enabled ?? true,
+    }),
+    [settings?.articles_enabled, settings?.reviews_enabled],
+  );
+
   const navItems = useMemo(
-    () => getVisibleNavItems(isDev, isAuthenticated, authResolved),
-    [isDev, isAuthenticated, authResolved],
+    () =>
+      getVisibleNavItems(
+        isDev,
+        isAuthenticated,
+        authResolved,
+        featureFilters,
+      ),
+    [isDev, isAuthenticated, authResolved, featureFilters],
   );
   const hobbyItems = useMemo(
-    () => getVisibleHobbyItems(HOBBY_ITEMS, authResolved, isAuthenticated, userCategories),
-    [authResolved, isAuthenticated, userCategories],
+    () =>
+      getVisibleHobbyItems(
+        HOBBY_ITEMS,
+        authResolved,
+        isAuthenticated,
+        userCategories,
+        featureFilters,
+      ),
+    [authResolved, isAuthenticated, userCategories, featureFilters],
   );
 
   useEffect(() => {
@@ -56,7 +89,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 md:px-4 md:pt-4">
-      <nav className="apple-nav-shell relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-2 px-2 md:px-4">
+      <nav className="relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-2 px-2 md:px-4">
         <LogoBrand href={logoHref} />
 
         <DesktopNav
@@ -93,7 +126,11 @@ export default function Navbar() {
       </nav>
 
       {addDialogOpen ? (
-        <AddArticleDialog isOpen={addDialogOpen} onClose={() => setAddDialogOpen(false)} onSuccess={() => {}} />
+        <AddArticleDialog
+          isOpen={addDialogOpen}
+          onClose={() => setAddDialogOpen(false)}
+          onSuccess={() => {}}
+        />
       ) : null}
     </header>
   );

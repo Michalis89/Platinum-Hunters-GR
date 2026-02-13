@@ -9,7 +9,7 @@ export const metadata = buildMetadata({
 
 export default function SupportTicketDetailPage() {
   return (
-    <main className="apple-page-background">
+    <main className="">
       <SupportTicketDetail />
     </main>
   );

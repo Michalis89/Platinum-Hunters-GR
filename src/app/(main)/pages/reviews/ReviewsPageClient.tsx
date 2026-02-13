@@ -9,12 +9,12 @@ import { Calendar, Clock, Eye, Heart, Star, Tag, User } from 'lucide-react';
 import type { ArticleCategory, ArticleRow } from '@/types/database';
 import { PageContainer } from '@/app/components/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import EmptyState from '@/app/components/ui/EmptyState';
-import ErrorState from '@/app/components/ui/ErrorState';
+import EmptyState from '@/components/ui/empty';
+import { ErrorAlert } from '@/components/ui/alert';
 import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
 import { normalizeSlug } from '@/utils/slugify';
 import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
-import { FormattedDate } from '@/app/components/ui/FormattedDate';
+import { FormattedDate } from '@/utils/components/FormattedDate';
 import {
   CONTENT_PUBLISHED_EVENT,
   type ContentPublishedEventDetail,
@@ -51,10 +51,10 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
-      className="apple-card group overflow-hidden rounded-[var(--apple-radius-card)] border border-[var(--apple-separator)] bg-[var(--apple-surface)] shadow-[var(--apple-shadow)] focus-within:ring-2 focus-within:ring-[color:var(--apple-system-blue)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--apple-bg)]"
+      className="group rounded-lg border bg-card shadow-md focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
       <Link href={`/pages/reviews/${normalizedSlug}`} className="block">
-        <div className="relative aspect-[16/10] overflow-hidden bg-[var(--apple-group-bg)]">
+        <div className="relative aspect-[16/10] bg-muted">
           {article.cover_image ? (
             <Image
               src={article.cover_image}
@@ -64,15 +64,15 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
               className="object-cover transition duration-300 [transition-timing-function:cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.015]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-[var(--apple-tertiary-fill)]">
-              <Star size={42} className="text-[var(--apple-secondary-label)]" />
+            <div className="flex h-full items-center justify-center bg-muted">
+              <Star size={42} className="text-muted-foreground" />
             </div>
           )}
           <div className="absolute left-3 top-3 flex items-center gap-2">
-            <span className="apple-pill px-3 py-1 text-[11px] font-semibold text-[var(--apple-label)]">
+            <span className="px-3 py-1 text-[11px] font-semibold text-foreground">
               {CATEGORY_LABELS[article.category] ?? article.category}
             </span>
-            <span className="apple-pill inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold text-[var(--apple-label)]">
+            <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold text-foreground">
               <Star size={10} className="fill-current" />
               Review
             </span>
@@ -82,12 +82,12 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
 
       <CardHeader className="p-4 pb-1">
         <Link href={`/pages/reviews/${normalizedSlug}`}>
-          <CardTitle className="apple-title-tracking text-[19px] leading-tight text-[var(--apple-label)] transition-colors duration-300 [transition-timing-function:cubic-bezier(0.2,0.8,0.2,1)] group-hover:text-[var(--apple-system-blue)] hover:text-[var(--apple-system-blue)]">
+          <CardTitle className="text-[19px] leading-tight text-foreground transition-colors duration-300 [transition-timing-function:cubic-bezier(0.2,0.8,0.2,1)] hover:text-primary group-hover:text-primary">
             {article.title}
           </CardTitle>
         </Link>
         {article.description ? (
-          <CardDescription className="apple-body-tracking mt-2 line-clamp-2 text-[13px] text-[var(--apple-secondary-label)]">
+          <CardDescription className="mt-2 line-clamp-2 text-[13px] text-muted-foreground">
             {article.description}
           </CardDescription>
         ) : null}
@@ -100,7 +100,7 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
               <Link
                 key={tag}
                 href={`/pages/reviews?tag=${encodeURIComponent(tag)}`}
-                className="apple-pill inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-[var(--apple-secondary-label)] transition hover:text-[var(--apple-label)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--apple-system-blue)]"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground transition hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 <Tag size={10} />
                 {tag}
@@ -109,7 +109,7 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
           </div>
         ) : null}
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-[var(--apple-secondary-label)]">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
           {article.users ? (
             <div className="inline-flex items-center gap-1">
               <User size={12} />
@@ -149,12 +149,12 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
 ReviewCard.displayName = 'ReviewCard';
 
 const ReviewCardSkeleton = () => (
-  <div className="apple-card min-h-[320px] overflow-hidden rounded-[var(--apple-radius-card)] border border-[var(--apple-separator)] bg-[var(--apple-surface)]">
-    <div className="aspect-[16/10] animate-pulse bg-[var(--apple-tertiary-fill)]" />
+  <div className="min-h-[320px] rounded-lg border bg-card">
+    <div className="aspect-[16/10] animate-pulse bg-muted" />
     <div className="space-y-3 p-4">
-      <div className="h-4 w-3/4 animate-pulse rounded-full bg-[var(--apple-tertiary-fill)]" />
-      <div className="h-3 animate-pulse rounded-full bg-[var(--apple-tertiary-fill)]" />
-      <div className="h-3 w-2/3 animate-pulse rounded-full bg-[var(--apple-tertiary-fill)]" />
+      <div className="h-4 w-3/4 animate-pulse rounded-full bg-muted" />
+      <div className="h-3 animate-pulse rounded-full bg-muted" />
+      <div className="h-3 w-2/3 animate-pulse rounded-full bg-muted" />
     </div>
   </div>
 );
@@ -171,19 +171,13 @@ function ReviewSkeletonGrid({ count = SKELETON_COUNT }: { count?: number }) {
 
 function ReviewsFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--apple-bg)] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <ReviewSkeletonGrid />
     </div>
   );
 }
 
-function buildHref({
-  category,
-  tag,
-}: {
-  category: ArticleCategory | null;
-  tag: string | null;
-}) {
+function buildHref({ category, tag }: { category: ArticleCategory | null; tag: string | null }) {
   const params = new URLSearchParams();
   if (category) params.set('category', category);
   if (tag) params.set('tag', tag);
@@ -203,10 +197,10 @@ function FilterSegment({
   return (
     <Link
       href={href}
-      className={`rounded-[var(--apple-radius-control)] px-3 py-2 text-[13px] font-medium transition ${
+      className={`px-3 py-2 text-[13px] font-medium transition ${
         isActive
-          ? 'bg-[var(--apple-system-blue)] text-white'
-          : 'text-[var(--apple-secondary-label)] hover:bg-[var(--apple-tertiary-fill)] hover:text-[var(--apple-label)]'
+          ? 'bg-primary text-white'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
       }`}
       aria-current={isActive ? 'page' : undefined}
     >
@@ -311,42 +305,39 @@ function ReviewsPageContent() {
     : 'Δεν υπάρχουν ακόμα δημοσιευμένα reviews';
 
   const shouldShowSkeleton = loading || isPending;
-  const categoryFilters = [null, ...PRIMARY_CATEGORIES.filter(item => allowedCategories.includes(item))];
+  const categoryFilters = [
+    null,
+    ...PRIMARY_CATEGORIES.filter(item => allowedCategories.includes(item)),
+  ];
 
   return (
     <PageContainer size="xl" className="py-10 sm:py-12">
-      <div className="apple-page-background rounded-[var(--apple-radius-container)] p-3 sm:p-4">
+      <div className="rounded-lg p-3 sm:p-4">
         <motion.section
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="apple-material-surface mb-6 rounded-[var(--apple-radius-container)] p-5 sm:p-7"
+          className="mb-6 rounded-lg p-5 sm:p-7"
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="apple-secondary-label text-[11px] font-semibold uppercase tracking-[0.18em]">
-                Κριτικές
-              </p>
-              <h1 className="apple-title-tracking text-3xl font-semibold text-[var(--apple-label)] sm:text-4xl">
-                {pageTitle}
-              </h1>
-              <p className="apple-body-tracking max-w-2xl text-[14px] text-[var(--apple-secondary-label)]">
-                {subtitle}
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">Κριτικές</p>
+              <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">{pageTitle}</h1>
+              <p className="max-w-2xl text-[14px] text-muted-foreground">{subtitle}</p>
             </div>
-            <span className="apple-pill inline-flex w-fit items-center px-3 py-1.5 text-xs font-medium text-[var(--apple-secondary-label)]">
+            <span className="inline-flex w-fit items-center px-3 py-1.5 text-xs font-medium text-muted-foreground">
               {metaLine}
             </span>
           </div>
 
-          <div className="apple-section-divider my-5" />
+          <div className="my-5" />
 
           <div className="space-y-4">
             <div className="flex flex-col items-center">
-              <p className="mb-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--apple-secondary-label)]">
+              <p className="mb-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Κατηγορίες
               </p>
-              <div className="apple-pill flex w-full max-w-5xl justify-start gap-1 overflow-x-auto p-1 sm:justify-center">
+              <div className="flex w-full max-w-5xl justify-start gap-1 overflow-x-auto p-1 sm:justify-center">
                 {categoryFilters.map(item => (
                   <FilterSegment
                     key={item ?? 'all'}
@@ -359,14 +350,14 @@ function ReviewsPageContent() {
             </div>
 
             {tag ? (
-              <div className="flex items-center justify-between rounded-[var(--apple-radius-control)] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-3 py-2">
-                <span className="inline-flex items-center gap-1.5 text-xs text-[var(--apple-secondary-label)]">
+              <div className="flex items-center justify-between border bg-muted px-3 py-2">
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Tag size={12} />
-                  Tag: <span className="font-semibold text-[var(--apple-label)]">{tag}</span>
+                  Tag: <span className="font-semibold text-foreground">{tag}</span>
                 </span>
                 <Link
                   href={buildHref({ category, tag: null })}
-                  className="text-xs font-medium text-[var(--apple-system-blue)]"
+                  className="text-xs font-medium text-primary"
                 >
                   Εκκαθάριση
                 </Link>
@@ -378,10 +369,10 @@ function ReviewsPageContent() {
         {shouldShowSkeleton ? (
           <ReviewSkeletonGrid />
         ) : error ? (
-          <ErrorState error={error} />
+          <ErrorAlert message={error} />
         ) : articles.length === 0 ? (
           <EmptyState
-            icon={<Star className="h-16 w-16 text-[var(--apple-secondary-label)]" />}
+            icon={<Star className="h-16 w-16 text-muted-foreground" />}
             title="Δεν υπάρχουν reviews"
             description={emptyDescription}
           />

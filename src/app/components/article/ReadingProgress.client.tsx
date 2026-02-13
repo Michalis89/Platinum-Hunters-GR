@@ -33,7 +33,7 @@ export default function ReadingProgress() {
   return (
     <div className="fixed left-0 top-0 z-50 h-0.5 w-full bg-transparent">
       <div
-        className="h-full bg-[var(--hb-primary)] transition-[width]"
+        className="h-full bg-primary transition-[width]"
         style={{ width: `${progress}%` }}
       />
     </div>

@@ -11,9 +11,11 @@ import {
   Film,
   Tv,
   BookText,
+  Info,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { InfoHint } from '@/app/components/ui/InfoHint';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 
 type CategoryStats = {
   total: number;
@@ -75,13 +77,13 @@ const describeTotalHours = (totalHours: number) => {
   const hours = Math.floor(remainder);
 
   const segments: string[] = [];
-  if (years > 0) segments.push(pluralize(years, 'χρόνος', 'χρόνια'));
-  if (months > 0) segments.push(pluralize(months, 'μήνας', 'μήνες'));
-  if (days > 0) segments.push(pluralize(days, 'μέρα', 'μέρες'));
-  if (hours > 0) segments.push(pluralize(hours, 'ώρα', 'ώρες'));
+  if (years > 0) segments.push(pluralize(years, 'year', 'years'));
+  if (months > 0) segments.push(pluralize(months, 'month', 'months'));
+  if (days > 0) segments.push(pluralize(days, 'day', 'days'));
+  if (hours > 0) segments.push(pluralize(hours, 'hour', 'hours'));
 
   if (segments.length === 0) {
-    return '0 ώρες';
+    return '0 hours';
   }
 
   return segments.join(', ');
@@ -93,14 +95,14 @@ const categoryConfig: CategoryConfig[] = [
     label: 'Games',
     icon: <Gamepad2 className="h-4 w-4" />,
     metric: 'hours',
-    metricLabel: 'ώρες',
+    metricLabel: 'hours',
   },
   {
     key: 'anime',
     label: 'Anime',
     icon: <Sparkles className="h-4 w-4" />,
     metric: 'hours',
-    metricLabel: 'ώρες',
+    metricLabel: 'hours',
   },
   {
     key: 'manga',
@@ -111,46 +113,46 @@ const categoryConfig: CategoryConfig[] = [
   },
   {
     key: 'movies',
-    label: 'Ταινίες',
+    label: 'Movies',
     icon: <Film className="h-4 w-4" />,
     metric: 'hours',
-    metricLabel: 'ώρες',
+    metricLabel: 'hours',
   },
   {
     key: 'tv',
-    label: 'Σειρές',
+    label: 'TV shows',
     icon: <Tv className="h-4 w-4" />,
     metric: 'hours',
-    metricLabel: 'ώρες',
+    metricLabel: 'hours',
   },
   {
     key: 'books',
-    label: 'Βιβλία',
+    label: 'Books',
     icon: <BookText className="h-4 w-4" />,
     metric: 'pages',
-    metricLabel: 'σελίδες',
+    metricLabel: 'pages',
   },
 ];
 
 export function HomeStatsRow({ stats, enabledCategories }: HomeStatsRowProps) {
   const summaryStats: SummaryStatItem[] = [
     {
-      label: 'Στο backlog',
+      label: 'Backlog',
       value: stats?.total_backlog ?? '–',
       icon: <ListTodo className="h-4 w-4" />,
     },
     {
-      label: 'Σε εξέλιξη',
+      label: 'In progress',
       value: stats?.in_progress ?? '–',
       icon: <Play className="h-4 w-4" />,
     },
     {
-      label: 'Ολοκληρωμένα',
+      label: 'Completed',
       value: stats?.completed ?? '–',
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
     {
-      label: 'Συνολικές ώρες',
+      label: 'Total hours',
       value: stats?.total_hours ?? '–',
       icon: <Clock className="h-4 w-4" />,
     },
@@ -169,16 +171,16 @@ export function HomeStatsRow({ stats, enabledCategories }: HomeStatsRowProps) {
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           {summaryStats.map(stat => (
-            <article key={stat.label} className="apple-card p-5">
-              <div className="apple-secondary-label flex items-center justify-between">
-                <span className="apple-body-tracking text-xs font-medium">{stat.label}</span>
+            <article key={stat.label} className="rounded-lg border p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">{stat.label}</span>
                 {stat.icon}
               </div>
-              <p className="apple-label mt-3 text-3xl font-semibold tracking-[-0.02em] md:text-4xl">
+              <p className="mt-3 text-3xl font-semibold tracking-[-0.02em] md:text-4xl">
                 {stat.value === '–' || stat.value === undefined ? '–' : stat.value}
               </p>
-              {stat.label === 'Συνολικές ώρες' && totalHoursDescription && (
-                <p className="apple-secondary-label apple-body-tracking mt-2 text-xs leading-relaxed">{totalHoursDescription}</p>
+              {stat.label === 'Total hours' && totalHoursDescription && (
+                <p className="mt-2 text-xs leading-relaxed">{totalHoursDescription}</p>
               )}
             </article>
           ))}
@@ -186,9 +188,7 @@ export function HomeStatsRow({ stats, enabledCategories }: HomeStatsRowProps) {
 
         {visibleCategories.length > 0 && (
           <div className="space-y-4">
-            <h2 className="apple-secondary-label apple-body-tracking text-sm font-medium uppercase opacity-60">
-              Ανά κατηγορία
-            </h2>
+            <h2 className="text-sm font-medium uppercase opacity-60">By category</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {visibleCategories.map(cat => {
                 const catStats = stats?.[cat.key];
@@ -209,46 +209,66 @@ export function HomeStatsRow({ stats, enabledCategories }: HomeStatsRowProps) {
                 const completionBase = Math.max(catStats.total - dropped, 0);
                 const completionRatio =
                   completionBase > 0 ? (catStats.completed / completionBase) * 100 : 0;
-                const completionPercent = Math.round(completionRatio);
+                const clampedCompletion = Math.min(Math.max(completionRatio, 0), 100);
+                const completionPercent = Math.round(clampedCompletion);
 
                 return (
-                  <article key={cat.key} className="apple-card p-5">
+                  <article key={cat.key} className="rounded-lg border p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
-                        <div className="apple-label flex items-center gap-2 text-sm font-semibold">
-                          <span className="apple-secondary-label">{cat.icon}</span>
+                        <div className="flex items-center gap-2 text-sm font-semibold">
+                          <span className="">{cat.icon}</span>
                           {cat.label}
                         </div>
-                        <p className="apple-secondary-label text-xs">Σύνολο: {catStats.total}</p>
+                        <p className="text-xs">Total: {catStats.total}</p>
                       </div>
                       {metricValue > 0 && (
                         <div className="text-right">
-                          <p className="apple-label text-lg font-semibold tracking-[-0.02em]">
-                            {metricValue}
-                          </p>
-                          <p className="apple-secondary-label text-xs">{cat.metricLabel}</p>
+                          <p className="text-lg font-semibold tracking-[-0.02em]">{metricValue}</p>
+                          <p className="text-xs">{cat.metricLabel}</p>
                         </div>
                       )}
                     </div>
 
-                    <div className="apple-secondary-label mt-4 grid grid-cols-2 gap-2 text-xs">
-                      <p>Σε εξέλιξη: {catStats.in_progress}</p>
-                      <p>Ολοκληρωμένα: {catStats.completed}</p>
-                      <p>Προγραμματισμένα: {planned}</p>
-                      <p>Παρατημένα: {dropped}</p>
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                      <p>In progress: {catStats.in_progress}</p>
+                      <p>Completed: {catStats.completed}</p>
+                      <p>Planned: {planned}</p>
+                      <p>Dropped: {dropped}</p>
                     </div>
 
-                    <div className="apple-secondary-label mt-4 flex items-center gap-2 text-xs">
-                      <div className="apple-progress-track h-2 flex-1 overflow-hidden rounded-full">
+                    <div className="mt-4 flex items-center gap-2 text-xs">
+                      <div className="h-2 flex-1 rounded-full bg-border/40">
                         <div
-                          className="apple-progress-fill h-full rounded-full transition-all duration-300"
+                          className="h-full rounded-full bg-primary transition-[width] duration-300"
                           style={{
-                            width: `${Math.min(completionRatio, 100)}%`,
+                            width: `${clampedCompletion}%`,
                           }}
                         />
                       </div>
-                      <span className="apple-label font-medium">{completionPercent}%</span>
-                      <InfoHint tip="Ποσοστό ολοκληρωμένων εγγραφών σε σχέση με το σύνολο χωρίς dropped." />
+                      <span className="font-medium">{completionPercent}%</span>
+                      <TooltipProvider delayDuration={150}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              aria-label="Completion details"
+                              className="hover:bg-primary/10 grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary"
+                            >
+                              <Info className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="bottom"
+                            align="center"
+                            sideOffset={8}
+                            className="z-[9999] w-[min(280px,80vw)] rounded-2xl border border-border bg-card p-3 text-xs leading-relaxed text-foreground shadow-md"
+                          >
+                            Percentage of completed entries out of the total, excluding dropped.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </article>
                 );

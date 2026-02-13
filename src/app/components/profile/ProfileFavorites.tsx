@@ -3,7 +3,7 @@
 import { memo, useState } from 'react';
 import Image from 'next/image';
 import { GripVertical, Heart } from 'lucide-react';
-import EmptyState from '@/app/components/ui/EmptyState';
+import EmptyState from '@/components/ui/empty';
 
 type FavoriteItem = {
   id: string;
@@ -39,13 +39,13 @@ function ProfileFavoritesComponent({
         {[1, 2, 3].map(i => (
           <div
             key={i}
-            className="flex animate-pulse items-center gap-3 rounded-[18px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] p-4"
+            className="flex animate-pulse items-center gap-3 rounded-[18px] border bg-card p-4"
           >
-            <div className="h-4 w-4 rounded bg-[var(--apple-surface)]" />
-            <div className="h-14 w-14 rounded-xl bg-[var(--apple-surface)]" />
+            <div className="h-4 w-4 rounded bg-card" />
+            <div className="h-14 w-14 rounded-xl bg-card" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-32 rounded bg-[var(--apple-surface)]" />
-              <div className="h-3 w-24 rounded bg-[var(--apple-surface)]" />
+              <div className="h-4 w-32 rounded bg-card" />
+              <div className="h-3 w-24 rounded bg-card" />
             </div>
           </div>
         ))}
@@ -78,20 +78,22 @@ function ProfileFavoritesComponent({
             onReorder(dragIndex, idx);
             setDragIndex(null);
           }}
-          className={`group flex min-w-0 cursor-grab items-center gap-3 rounded-[18px] border bg-[var(--apple-tertiary-fill)] p-3 transition-colors active:cursor-grabbing sm:gap-4 sm:p-4 ${
+          className={`group flex min-w-0 cursor-grab items-center gap-3 rounded-[18px] border bg-card p-3 transition-colors active:cursor-grabbing sm:gap-4 sm:p-4 ${
             dragIndex === idx
-              ? 'border-[var(--apple-system-blue)]/55 bg-[var(--apple-system-blue)]/10'
-              : 'border-[var(--apple-separator)] hover:border-[var(--apple-system-blue)]/35'
+              ? 'border-info/55 bg-background'
+              : 'hover:border-info/35'
           }`}
         >
           {/* Drag handle + Rank */}
-          <div className="flex items-center gap-1.5 text-[var(--apple-secondary-label)] sm:gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground sm:gap-2">
             <GripVertical className="hidden h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100 sm:block" />
-            <span className="w-5 text-center text-xs font-semibold sm:w-6 sm:text-sm">#{idx + 1}</span>
+            <span className="w-5 text-center text-xs font-semibold sm:w-6 sm:text-sm">
+              #{idx + 1}
+            </span>
           </div>
 
           {/* Cover image */}
-          <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-[var(--apple-surface)] sm:h-14 sm:w-14">
+          <div className="relative h-12 w-12 flex-shrink-0 rounded-xl bg-card sm:h-14 sm:w-14">
             <Image
               src={fav.game?.cover_image || fav.game?.background_image || '/og-image.png'}
               alt={fav.game?.title || 'Item'}
@@ -100,17 +102,17 @@ function ProfileFavoritesComponent({
               className="h-full w-full object-cover"
             />
             {/* Favorite heart overlay */}
-            <div className="bg-[var(--apple-bg)]/80 absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full">
-              <Heart className="h-3 w-3 fill-[var(--apple-system-blue)] text-[var(--apple-system-blue)]" />
+            <div className="bg-background/80 absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full">
+              <Heart className="h-3 w-3 fill-primary text-info" />
             </div>
           </div>
 
           {/* Title + meta */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-[var(--apple-label)] transition-colors group-hover:text-[var(--apple-system-blue)]">
+            <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-info">
               {fav.game?.title || '—'}
             </p>
-            <p className="truncate text-xs text-[var(--apple-secondary-label)]">
+            <p className="truncate text-xs text-muted-foreground">
               {fav.meta || fav.game?.slug || '—'}
             </p>
           </div>
@@ -118,7 +120,7 @@ function ProfileFavoritesComponent({
       ))}
 
       {/* Hint text */}
-      <p className="mt-4 text-center text-xs text-[var(--apple-secondary-label)]">
+      <p className="mt-4 text-center text-xs text-muted-foreground">
         {category === 'games'
           ? 'Για να προσθέσεις/αφαιρέσεις favorites, χρησιμοποίησε το toggle "Favorite" στα backlog items.'
           : 'Σύρε για αναδιάταξη. Πρόσθεσε favorites από το library.'}
@@ -134,4 +136,3 @@ const areFavoritesEqual = (prev: ProfileFavoritesProps, next: ProfileFavoritesPr
   prev.categoryLabel === next.categoryLabel;
 
 export const ProfileFavorites = memo(ProfileFavoritesComponent, areFavoritesEqual);
-

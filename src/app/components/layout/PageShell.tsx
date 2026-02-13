@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
  *
  * Provides:
  * - Consistent background color using theme variables
- * - Unified gradient blur effect (100px standard)
+ * - Performance-first gradient effect (no blur for 60fps)
  * - Min-height screen coverage
  * - Proper text color inheritance
  *
@@ -33,16 +33,17 @@ export function PageShell({
   gradientOpacity = 0.7,
 }: Readonly<PageShellProps>) {
   return (
-    <div
-      className={`relative min-h-screen bg-[var(--hb-bg)] text-[var(--hb-text)] ${className}`}
-    >
-      {/* Ambient gradient glow */}
+    <div className={`relative min-h-screen bg-background text-foreground ${className}`}>
+      {/* Ambient gradient - Performance-first: no blur */}
       {showGradient && (
-        <div
-          className="pointer-events-none absolute inset-0 overflow-hidden"
-          style={{ opacity: gradientOpacity }}
-        >
-          <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+        <div className="pointer-events-none absolute inset-0" style={{ opacity: gradientOpacity }}>
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.08), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.06), transparent 44%)',
+            }}
+          />
         </div>
       )}
 

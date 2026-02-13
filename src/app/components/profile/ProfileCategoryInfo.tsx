@@ -1,6 +1,6 @@
 'use client';
 
-import EmptyState from '@/app/components/ui/EmptyState';
+import EmptyState from '@/components/ui/empty';
 import type { User } from '@/types/user';
 
 type ProfileCategoryInfoProps = {
@@ -13,8 +13,8 @@ function InfoRow({ label, children }: Readonly<{ label: string; children: React.
   if (!children) return null;
   return (
     <div className="flex flex-col gap-1">
-      <p className="apple-secondary-label text-xs">{label}</p>
-      <p className="text-sm text-[var(--apple-label)]">{children}</p>
+      <p className="text-xs">{label}</p>
+      <p className="text-sm text-foreground">{children}</p>
     </div>
   );
 }
@@ -23,12 +23,12 @@ function ChipList({ items, label }: Readonly<{ items: string[]; label: string }>
   if (!items?.length) return null;
   return (
     <div>
-      <p className="mb-2 apple-secondary-label text-xs">{label}</p>
+      <p className="mb-2 text-xs">{label}</p>
       <div className="flex flex-wrap gap-2">
         {items.map(item => (
           <span
             key={item}
-            className="rounded-full border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-3 py-1.5 text-xs font-medium text-[var(--apple-label)]"
+            className="rounded-full border bg-card px-3 py-1.5 text-xs font-medium text-foreground"
           >
             {item}
           </span>
@@ -74,9 +74,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           {user.psn_id && <InfoRow label="PSN ID">{user.psn_id}</InfoRow>}
           {user.xbox_gamertag && <InfoRow label="Xbox Gamertag">{user.xbox_gamertag}</InfoRow>}
@@ -115,9 +113,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {tvNotes.services?.length && (
           <ChipList items={tvNotes.services} label="Αγαπημένες Πλατφόρμες" />
         )}
@@ -152,9 +148,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {moviesNotes.services?.length && (
           <ChipList items={moviesNotes.services} label="Αγαπημένες Πλατφόρμες" />
         )}
@@ -194,9 +188,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {animeNotes.platforms?.length && (
           <ChipList items={animeNotes.platforms} label="Πλατφόρμες" />
         )}
@@ -234,9 +226,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {booksNotes.genres?.length && (
           <ChipList items={booksNotes.genres} label="Αγαπημένα Genres" />
         )}
@@ -266,9 +256,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {mangaNotes.genres?.length && (
           <ChipList items={mangaNotes.genres} label="Αγαπημένα Genres" />
         )}
@@ -298,9 +286,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {codingNotes.languages?.length && (
           <ChipList items={codingNotes.languages} label="Γλώσσες" />
         )}
@@ -330,9 +316,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {petNotes.type && <InfoRow label="Είδος">{petNotes.type}</InfoRow>}
         {petNotes.name && <InfoRow label="Όνομα">{petNotes.name}</InfoRow>}
         {petNotes.breed && <InfoRow label="Ράτσα">{petNotes.breed}</InfoRow>}
@@ -360,9 +344,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        <p className="apple-secondary-label text-xs uppercase tracking-[0.14em]">
-          {sectionTitle[category]}
-        </p>
+        <p className="text-xs uppercase tracking-[0.14em]">{sectionTitle[category]}</p>
         {vapeNotes.device && <InfoRow label="Συσκευή">{vapeNotes.device}</InfoRow>}
         {vapeNotes.nicotine && <InfoRow label="Νικοτίνη (mg)">{vapeNotes.nicotine}</InfoRow>}
         {vapeNotes.since && <InfoRow label="Vaping Since">{vapeNotes.since}</InfoRow>}
@@ -374,4 +356,3 @@ export function ProfileCategoryInfo({
 
   return null;
 }
-

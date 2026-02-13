@@ -36,6 +36,17 @@ export default function CategoryStats({
       caption: 'Συνολικές καταχωρήσεις',
       accent: true,
     },
+    ...(category === 'books'
+      ? [
+          {
+            key: 'planned',
+            label: config.plannedLabel,
+            value: counts.planned,
+            caption: 'Προς ανάγνωση',
+          },
+        ]
+      : []),
+
     ...(category === 'games'
       ? [
           {
@@ -52,22 +63,13 @@ export default function CategoryStats({
       value: category === 'movies' ? counts.dropped : counts.current,
       caption: category === 'movies' ? 'Παρατημένα' : 'Σε εξέλιξη',
     },
-    ...(category === 'books'
-      ? [
-          {
-            key: 'planned',
-            label: config.plannedLabel,
-            value: counts.planned,
-            caption: 'Προς ανάγνωση',
-          },
-        ]
-      : []),
     {
       key: 'completed',
       label: config.completedLabel,
       value: counts.completed,
       caption: 'Ολοκληρωμένα',
     },
+
     ...(category !== 'movies'
       ? [
           {
@@ -93,21 +95,18 @@ export default function CategoryStats({
       }`}
     >
       {cards.map(card => (
-        <article
-          key={card.key}
-          className="apple-card rounded-[20px] border-[var(--apple-separator)] p-4 sm:p-5"
-        >
-          <p className="apple-body-tracking text-[11px] uppercase tracking-[0.2em] text-[var(--apple-secondary-label)]">
+        <article key={card.key} className="rounded-[20px] p-4 sm:p-5">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
             {card.label}
           </p>
           <p
-            className={`apple-title-tracking mt-2 text-3xl font-semibold ${
-              card.accent ? 'text-[var(--apple-system-blue)]' : 'text-[var(--apple-label)]'
+            className={`mt-2 text-3xl font-semibold ${
+              card.accent ? 'text-info' : 'text-foreground'
             }`}
           >
             {card.value}
           </p>
-          <p className="mt-1 text-xs text-[var(--apple-secondary-label)]">{card.caption}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{card.caption}</p>
         </article>
       ))}
     </div>

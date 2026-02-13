@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/utils/utils';
-import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
+import { FieldError } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
 
 export type AttachmentItem = {
@@ -127,26 +127,20 @@ export default function AttachmentDropzone({
     <div className={cn('space-y-3', className)}>
       <div
         className={cn(
-          'apple-material-surface flex min-h-[152px] flex-col items-center justify-center gap-3 rounded-[var(--apple-radius-card)] border-dashed px-4 py-6 text-center transition',
-          disabled ? 'opacity-60' : 'hover:border-[var(--apple-system-blue)]',
+          'flex min-h-[152px] flex-col items-center justify-center gap-3 rounded-lg border-dashed px-4 py-6 text-center transition',
+          disabled ? 'opacity-60' : 'hover:border-info',
         )}
         onDrop={handleDrop}
         onDragOver={event => event.preventDefault()}
       >
-        <span className="apple-pill flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-[var(--apple-system-blue)]">
+        <span className="text-info flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold">
           +
         </span>
-        <div className="apple-title-tracking text-sm font-semibold text-[var(--apple-label)]">
-          Σύρε εδώ screenshots ή αρχεία
-        </div>
-        <div className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
+        <div className="text-sm font-semibold text-foreground">Σύρε εδώ screenshots ή αρχεία</div>
+        <div className="text-xs text-muted-foreground">
           PNG, JPG, WEBP ή PDF έως 5MB (μέχρι {maxFiles} αρχεία)
         </div>
-        {helperText ? (
-          <div className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
-            {helperText}
-          </div>
-        ) : null}
+        {helperText ? <div className="text-xs text-muted-foreground">{helperText}</div> : null}
         <input
           ref={inputRef}
           type="file"
@@ -167,16 +161,13 @@ export default function AttachmentDropzone({
         </Button>
       </div>
 
-      {error ? <FormErrorMessage message={error} /> : null}
+      {error ? <FieldError>{error}</FieldError> : null}
 
       {items.length > 0 ? (
         <div className="grid gap-3 md:grid-cols-2">
           {items.map(item => (
-            <div
-              key={item.id}
-              className="apple-card flex items-center gap-3 rounded-[var(--apple-radius-control)] border-[var(--apple-separator-soft)] p-3"
-            >
-              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--apple-separator-soft)] bg-[var(--apple-tertiary-fill)]">
+            <div key={item.id} className="flex items-center gap-3 p-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border bg-card">
                 {item.previewUrl ? (
                   <Image
                     src={item.previewUrl}
@@ -187,16 +178,14 @@ export default function AttachmentDropzone({
                     unoptimized
                   />
                 ) : (
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--apple-secondary-label)]">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     {item.file.type === 'application/pdf' ? 'PDF' : 'FILE'}
                   </span>
                 )}
               </div>
               <div className="flex-1">
-                <div className="apple-title-tracking text-sm font-medium text-[var(--apple-label)]">
-                  {item.file.name}
-                </div>
-                <div className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
+                <div className="text-sm font-medium text-foreground">{item.file.name}</div>
+                <div className="text-xs text-muted-foreground">
                   {(item.file.size / 1024 / 1024).toFixed(2)} MB
                 </div>
               </div>
@@ -204,7 +193,7 @@ export default function AttachmentDropzone({
                 type="button"
                 variant="ghost"
                 onClick={() => handleRemove(item.id)}
-                className="rounded-full p-2 text-[var(--apple-secondary-label)]"
+                className="rounded-full p-2 text-muted-foreground"
               >
                 ×
               </Button>

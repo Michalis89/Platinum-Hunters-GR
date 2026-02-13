@@ -5,15 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
-import ErrorState from '../ui/ErrorState';
-import LoadingSpinner from '../ui/LoadingSpinner';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { ErrorAlert } from '@/components/ui/alert';
 import type { ArticleCategory, ArticleTopic, ArticleStatus, ArticleRow } from '@/types/database';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import dynamic from 'next/dynamic';
 import { uploadArticleCoverImage } from '@/lib/media/uploadArticleCover';
+import { Textarea } from '@/components/ui/textarea';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
   ssr: false,
@@ -328,7 +328,7 @@ export default function EditArticleDialog({
 
           <dialog
             ref={dialogRef}
-            className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-[var(--hb-dialog-border)] p-0 backdrop:bg-transparent"
+            className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border p-0 backdrop:bg-transparent"
             onClose={onClose}
           >
             <motion.div
@@ -338,10 +338,8 @@ export default function EditArticleDialog({
               transition={{ duration: 0.2 }}
               className="flex h-full max-h-[90vh] flex-col"
             >
-              <div className="flex items-center justify-between border-b border-[var(--hb-border)] px-6 py-4">
-                <h2 className="text-xl font-semibold text-[var(--hb-headline)]">
-                  Επεξεργασία Άρθρου
-                </h2>
+              <div className="flex items-center justify-between border-b border-border px-6 py-4">
+                <h2 className="text-xl font-semibold text-foreground">Επεξεργασία Άρθρου</h2>
                 <Button variant={'ghost'} onClick={onClose}>
                   <X size={20} />
                 </Button>
@@ -349,22 +347,20 @@ export default function EditArticleDialog({
 
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
-                  {error && <ErrorState error={error} />}
+                  {error && <ErrorAlert message={error} />}
                   {warning && (
-                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                    <div className="bg-warning/10 rounded-lg border border-amber-500/30 px-4 py-3 text-sm text-amber-300">
                       {warning}
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-[var(--hb-headline)]">
-                        Κατηγορία
-                      </label>
+                      <label className="text-sm font-medium text-foreground">Κατηγορία</label>
                       <select
                         value={category}
                         onChange={event => setCategory(event.target.value as ArticleCategory)}
-                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
+                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
                       >
                         {(Object.keys(CATEGORIES) as ArticleCategory[]).map(cat => (
                           <option key={cat} value={cat}>
@@ -375,13 +371,11 @@ export default function EditArticleDialog({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-[var(--hb-headline)]">
-                        Υποκατηγορία
-                      </label>
+                      <label className="text-sm font-medium text-foreground">Υποκατηγορία</label>
                       <select
                         value={topic}
                         onChange={event => setTopic(event.target.value as ArticleTopic)}
-                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
+                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
                       >
                         {availableTopics.map(item => (
                           <option key={item.value} value={item.value}>
@@ -392,13 +386,11 @@ export default function EditArticleDialog({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-[var(--hb-headline)]">
-                        Κατάσταση
-                      </label>
+                      <label className="text-sm font-medium text-foreground">Κατάσταση</label>
                       <select
                         value={status}
                         onChange={event => setStatus(event.target.value as ArticleStatus)}
-                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
+                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
                       >
                         {STATUS_OPTIONS.map(item => (
                           <option key={item.value} value={item.value}>
@@ -420,22 +412,22 @@ export default function EditArticleDialog({
                     <p className="text-xs text-red-400">Ο τίτλος δεν πρέπει να περιέχει HTML.</p>
                   )}
 
-                  <Textarea
-                    label="Περιγραφή"
-                    placeholder="Σύντομη περιγραφή του άρθρου"
-                    rows={3}
-                    value={description}
-                    onChange={event => setDescription(event.target.value)}
-                    className={!descriptionValidation.isValid ? 'border-red-500' : undefined}
-                  />
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">Περιγραφή</label>
+                    <Textarea
+                      placeholder="Σύντομη περιγραφή του άρθρου"
+                      rows={3}
+                      value={description}
+                      onChange={event => setDescription(event.target.value)}
+                      className={!descriptionValidation.isValid ? 'border-destructive' : undefined}
+                    />
+                  </div>
                   {!descriptionValidation.isValid && (
                     <p className="text-xs text-red-400">Η περιγραφή δεν πρέπει να περιέχει HTML.</p>
                   )}
 
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-[var(--hb-headline)]">
-                      Εικόνα εξωφύλλου
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Εικόνα εξωφύλλου</label>
                     <div className="flex flex-wrap gap-3">
                       <div className="flex min-w-[220px] flex-1 flex-col gap-2">
                         <Input
@@ -447,12 +439,12 @@ export default function EditArticleDialog({
                           }}
                           className="flex-1"
                         />
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--hb-muted)]">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <Button
                             variant="ghost"
                             icon={
                               isCoverUploading ? (
-                                <LoadingSpinner size="sm" inline />
+                                <Spinner className="size-4" />
                               ) : (
                                 <ImageIcon size={16} />
                               )
@@ -468,7 +460,7 @@ export default function EditArticleDialog({
                           <p className="text-xs text-amber-300">{coverUploadError}</p>
                         )}
                       </div>
-                      <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[var(--hb-border)]">
+                      <div className="relative h-12 w-12 rounded-lg border border-border">
                         {coverImage && isCoverPreviewValid ? (
                           <Image
                             src={coverImage}
@@ -480,8 +472,8 @@ export default function EditArticleDialog({
                             unoptimized
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-[var(--hb-card)]">
-                            <ImageIcon size={20} className="text-[var(--hb-muted)]" />
+                          <div className="flex h-full w-full items-center justify-center bg-card">
+                            <ImageIcon size={20} className="text-muted-foreground" />
                           </div>
                         )}
                       </div>
@@ -517,7 +509,7 @@ export default function EditArticleDialog({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-[var(--hb-border)] px-6 py-4">
+              <div className="flex items-center justify-between border-t border-border px-6 py-4">
                 <div className="flex items-center gap-2">
                   <Button variant={'secondary'} onClick={onClose}>
                     Ακύρωση
@@ -527,12 +519,12 @@ export default function EditArticleDialog({
                     onClick={handleDelete}
                     disabled={isSubmitting || isDeleting}
                   >
-                    {isDeleting ? <LoadingSpinner size="sm" inline /> : 'Διαγραφή άρθρου'}
+                    {isDeleting ? <Spinner className="size-4" /> : 'Διαγραφή άρθρου'}
                   </Button>
                 </div>
                 <Button
                   variant="primary"
-                  icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Save size={16} />}
+                  icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
                   onClick={handleSubmit}
                   disabled={isSubmitting || hasPlainTextError}
                 >

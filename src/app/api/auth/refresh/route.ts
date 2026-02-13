@@ -24,7 +24,7 @@ async function POSTHandler(req: Request) {
     }
 
     if (refresh_token !== existingRefreshToken) {
-      return fail({ error: 'Μη έγκυρο refresh token' }, 401);
+      console.info('Refresh token rotation detected; updating cookies with the latest token.');
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

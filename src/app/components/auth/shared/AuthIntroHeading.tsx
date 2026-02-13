@@ -5,39 +5,34 @@ type AuthIntroHeadingProps = {
   variant: 'desktop' | 'mobile';
 };
 
-export function AuthIntroHeading({
-  eyebrow,
-  title,
-  description,
-  variant,
-}: AuthIntroHeadingProps) {
-  if (variant === 'mobile') {
-    return (
-      <header className="text-center lg:hidden">
-        <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
-          {eyebrow}
-        </p>
-        <h1 className="apple-title-tracking mt-2 text-2xl font-semibold text-[var(--apple-label)]">
-          {title}
-        </h1>
-        <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
-          {description}
-        </p>
-      </header>
-    );
-  }
+export function AuthIntroHeading({ eyebrow, title, description, variant }: AuthIntroHeadingProps) {
+  const isMobile = variant === 'mobile';
 
   return (
-    <div className="space-y-3">
-      <p className="apple-body-tracking text-xs font-semibold uppercase tracking-[0.22em] text-[var(--apple-system-blue)]">
+    <header className={[isMobile ? 'text-center lg:hidden' : 'space-y-3'].join(' ')}>
+      {/* Eyebrow */}
+      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-primary">
         {eyebrow}
       </p>
-      <h1 className="apple-title-tracking text-4xl font-semibold leading-tight text-[var(--apple-label)]">
+
+      {/* Title */}
+      <h1
+        className={[
+          'font-semibold leading-tight text-foreground',
+          isMobile ? 'mt-2 text-2xl' : 'text-4xl',
+        ].join(' ')}
+      >
         {title}
       </h1>
-      <p className="apple-body-tracking max-w-xl text-base text-[var(--apple-secondary-label)]">
+
+      {/* Description */}
+      <p
+        className={['text-muted-foreground', isMobile ? 'mt-2 text-sm' : 'max-w-xl text-base'].join(
+          ' ',
+        )}
+      >
         {description}
       </p>
-    </div>
+    </header>
   );
 }

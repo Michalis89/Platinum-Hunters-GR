@@ -26,7 +26,7 @@ type AboutSectionShellProps = {
 function AboutSectionShell({ children, maxWidthClass = 'max-w-7xl' }: AboutSectionShellProps) {
   return (
     <div className={`mx-auto w-full px-3 md:px-6 ${maxWidthClass}`}>
-      <div className="apple-material-surface overflow-hidden">{children}</div>
+      <div className="">{children}</div>
     </div>
   );
 }
@@ -77,11 +77,15 @@ export default async function AboutPage() {
   return (
     <>
       <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
-      <main className="apple-page-background relative min-h-screen text-[var(--hb-text)]">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-[var(--hb-gradient)] opacity-80 blur-[96px]" />
-          <div className="absolute left-[-10%] top-[-20%] h-[45vh] w-[45vh] rounded-full bg-[var(--apple-system-blue)]/10 blur-[120px]" />
-          <div className="absolute bottom-[-22%] right-[-8%] h-[40vh] w-[40vh] rounded-full bg-[var(--apple-system-blue)]/8 blur-[120px]" />
+      <main className="relative min-h-screen text-foreground">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute inset-0 opacity-80"
+            style={{
+              background:
+                'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.12), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.08), transparent 44%), radial-gradient(circle at 50% 100%, hsl(var(--accent-primary) / 0.06), transparent 50%)',
+            }}
+          />
         </div>
 
         <div className="relative pb-14 md:pb-20">

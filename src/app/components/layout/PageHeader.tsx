@@ -45,10 +45,10 @@ export function PageHeader({
     <section className={`relative ${className}`}>
       <div className={`grid gap-4 md:gap-6 ${layoutClass}`}>
         <div className={`flex flex-col gap-2.5 md:gap-3 ${textAlign} ${contentClassName}`}>
-          {breadcrumbs ? <div className="text-xs text-[var(--hb-muted)]">{breadcrumbs}</div> : null}
+          {breadcrumbs ? <div className="text-xs text-muted-foreground">{breadcrumbs}</div> : null}
           {eyebrow ? (
             <p
-              className={`text-xs uppercase tracking-[0.3em] text-[var(--hb-primary-strong)] ${eyebrowClassName}`}
+              className={`text-xs uppercase tracking-[0.3em] text-primary ${eyebrowClassName}`}
             >
               {eyebrow}
             </p>
@@ -57,7 +57,7 @@ export function PageHeader({
           <div className={`flex gap-3 ${isCentered ? 'flex-col items-center' : 'items-center'}`}>
             {icon ? <div className="shrink-0">{icon}</div> : null}
             <h1
-              className={`text-2xl font-bold tracking-tight text-[var(--hb-headline)] sm:text-3xl md:text-4xl ${titleClassName}`}
+              className={`text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl ${titleClassName}`}
             >
               {title}
             </h1>
@@ -65,13 +65,13 @@ export function PageHeader({
 
           {description ? (
             <p
-              className={`text-sm text-[var(--hb-muted)] md:text-base ${descriptionClassName}`}
+              className={`text-sm text-muted-foreground md:text-base ${descriptionClassName}`}
             >
               {description}
             </p>
           ) : null}
 
-          {meta ? <div className={`text-sm text-[var(--hb-muted)] ${metaClassName}`}>{meta}</div> : null}
+          {meta ? <div className={`text-sm text-muted-foreground ${metaClassName}`}>{meta}</div> : null}
 
           {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
           {badges ? <div className="flex flex-wrap items-center gap-3">{badges}</div> : null}

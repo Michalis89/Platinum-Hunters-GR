@@ -1,4 +1,4 @@
-export const EXPIRED_REDIRECT = '/forgot-password?expired=true';
+export const EXPIRED_REDIRECT = '/auth/login?forgot=true&expired=true';
 
 export const RESET_SUCCESS_REDIRECT = '/auth/login';
 

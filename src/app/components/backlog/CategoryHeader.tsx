@@ -12,12 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { MediaCategory, CATEGORY_CONFIG } from './types';
 
@@ -56,20 +51,18 @@ export default function CategoryHeader({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex items-start gap-4">
-          <div className="apple-card flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-[var(--apple-system-blue)] sm:h-16 sm:w-16">
+          <div className="text-info flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] sm:h-16 sm:w-16">
             <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
           <div className="space-y-1">
-            <p className="apple-body-tracking text-[11px] uppercase tracking-[0.26em] text-[var(--apple-secondary-label)] sm:text-xs">
+            <p className="text-[11px] uppercase tracking-[0.26em] text-muted-foreground sm:text-xs">
               {username ? `${username} · ` : ''}
               {category.toUpperCase()}
             </p>
-            <h1 className="apple-title-tracking text-3xl font-semibold leading-tight text-[var(--apple-label)] sm:text-4xl">
+            <h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
               {config.title}
             </h1>
-            <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)] sm:text-[15px]">
-              {config.subtitle}
-            </p>
+            <p className="text-sm text-muted-foreground sm:text-[15px]">{config.subtitle}</p>
           </div>
         </div>
 
@@ -85,17 +78,14 @@ export default function CategoryHeader({
                   Συγχρονισμός
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="apple-nav-popover min-w-56 border-[var(--apple-separator)]"
-              >
+              <DropdownMenuContent align="end" className="min-w-56">
                 {routeCategory === 'anime' || routeCategory === 'manga' ? (
                   <>
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={() =>
-                        (window.location.href = `/api/integrations/mal/start?category=${routeCategory}`)
-                      }
+                      onSelect={() => {
+                        window.location.href = `/api/integrations/mal/start?category=${routeCategory}`;
+                      }}
                     >
                       MyAnimeList
                     </DropdownMenuItem>
@@ -108,7 +98,7 @@ export default function CategoryHeader({
                     {hasSteamId ? (
                       <DropdownMenuItem
                         className="cursor-pointer"
-                        onClick={() => setSteamConfirmOpen(true)}
+                        onSelect={() => setSteamConfirmOpen(true)}
                         disabled={isSteamSyncing}
                       >
                         Steam
@@ -135,12 +125,12 @@ export default function CategoryHeader({
       </div>
 
       <AlertDialog open={steamConfirmOpen} onOpenChange={setSteamConfirmOpen}>
-        <AlertDialogContent className="hb-dialog-surface border-[var(--hb-dialog-border)] text-[var(--hb-text)]">
+        <AlertDialogContent className="hb-dialog-surface border-border text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[var(--apple-label)]">Steam συγχρονισμός</AlertDialogTitle>
-            <AlertDialogDescription className="text-[var(--apple-secondary-label)]">
-              Ο αυτόματος συγχρονισμός από Steam ορίζει μόνο status `Planned` ή `Current`.
-              Τα `Completed` και `Dropped` τα ορίζεις χειροκίνητα.
+            <AlertDialogTitle className="text-foreground">Steam συγχρονισμός</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Ο αυτόματος συγχρονισμός από Steam ορίζει μόνο status `Planned` ή `Current`. Τα
+              `Completed` και `Dropped` τα ορίζεις χειροκίνητα.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -25,11 +25,13 @@ export default function MediaSearchResultCard({
 
   return (
     <article
-      className={`apple-card flex w-full min-w-0 border-[var(--apple-separator)] ${
-        variant === 'compact' ? 'items-start gap-3 rounded-[16px] p-3' : 'items-center gap-3 rounded-[18px] p-4'
+      className={`flex w-full min-w-0 ${
+        variant === 'compact'
+          ? 'items-start gap-3 rounded-[16px] p-3'
+          : 'items-center gap-3 rounded-[18px] p-4'
       }`}
     >
-      <div className="relative h-16 w-12 overflow-hidden rounded-[10px] bg-[var(--apple-tertiary-fill)]">
+      <div className="relative h-16 w-12 rounded-[10px] bg-card">
         <Image
           src={entry.cover}
           alt={entry.title}
@@ -39,16 +41,17 @@ export default function MediaSearchResultCard({
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="apple-title-tracking truncate text-sm font-semibold text-[var(--apple-label)]">
-          {entry.title}
-        </p>
-        <p className="apple-body-tracking truncate text-xs text-[var(--apple-secondary-label)]">
+        <p className="truncate text-sm font-semibold text-foreground">{entry.title}</p>
+        <p className="truncate text-xs text-muted-foreground">
           {entry.subtitle} {entry.year ? `· ${entry.year}` : ''}
         </p>
       </div>
 
       {isInLibrary ? (
-        <div className="apple-choice-chip flex items-center gap-1.5 px-3 py-2 text-xs font-semibold" data-active="true">
+        <div
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
+          data-active="true"
+        >
           <Library className="h-3.5 w-3.5" />
           <span>Στη βιβλιοθήκη</span>
         </div>

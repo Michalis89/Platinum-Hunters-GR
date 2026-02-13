@@ -13,7 +13,7 @@ import {
   Twitter,
   Link2,
 } from 'lucide-react';
-import EmptyState from '@/app/components/ui/EmptyState';
+import EmptyState from '@/components/ui/empty';
 import type { User as UserType } from '@/types/user';
 import { useEffect, useState } from 'react';
 
@@ -100,25 +100,21 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
     <section className="px-4 py-10 md:px-6 md:py-14">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 text-center md:mb-10">
-          <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
-            Προφίλ
-          </p>
-          <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
-            Προσωπικές Πληροφορίες
-          </h2>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">Προφίλ</p>
+          <h2 className="text-2xl font-semibold md:text-3xl">Προσωπικές Πληροφορίες</h2>
         </div>
 
-        <div className="apple-material-surface p-4 sm:p-6">
+        <div className="p-4 sm:p-6">
           {/* Info Grid */}
           <div className="mb-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {/* Full name */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)]">
-                <User className="h-5 w-5 text-[var(--apple-system-blue)]" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
+                <User className="text-info h-5 w-5" />
               </div>
               <div>
-                <p className="apple-secondary-label text-xs">Ονοματεπώνυμο</p>
-                <p className="break-words text-sm font-medium text-[var(--apple-label)]">
+                <p className="text-xs">Ονοματεπώνυμο</p>
+                <p className="break-words text-sm font-medium text-foreground">
                   {user.full_name || '—'}
                 </p>
               </div>
@@ -126,12 +122,12 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
             {/* Display name */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)]">
-                <Mail className="h-5 w-5 text-[var(--apple-system-blue)]" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
+                <Mail className="text-info h-5 w-5" />
               </div>
               <div>
-                <p className="apple-secondary-label text-xs">Display / Username</p>
-                <p className="break-words text-sm font-medium text-[var(--apple-label)]">
+                <p className="text-xs">Display / Username</p>
+                <p className="break-words text-sm font-medium text-foreground">
                   {user.display_name || user.username}
                 </p>
               </div>
@@ -140,12 +136,15 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             {/* Age (if visible) */}
             {showAge && (
               <div className="flex min-w-0 items-start gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)]">
-                  <Calendar className="h-5 w-5 text-[var(--apple-system-blue)]" />
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
+                  <Calendar className="text-info h-5 w-5" />
                 </div>
                 <div>
-                  <p className="apple-secondary-label text-xs">Ηλικία</p>
-                  <p className="break-words text-sm font-medium text-[var(--apple-label)]" suppressHydrationWarning>
+                  <p className="text-xs">Ηλικία</p>
+                  <p
+                    className="break-words text-sm font-medium text-foreground"
+                    suppressHydrationWarning
+                  >
                     {age ? `${age} ετών` : '—'}
                   </p>
                 </div>
@@ -154,12 +153,12 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
             {/* Location */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)]">
-                <MapPin className="h-5 w-5 text-[var(--apple-system-blue)]" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
+                <MapPin className="text-info h-5 w-5" />
               </div>
               <div>
-                <p className="apple-secondary-label text-xs">Τοποθεσία</p>
-                <p className="break-words text-sm font-medium text-[var(--apple-label)]">
+                <p className="text-xs">Τοποθεσία</p>
+                <p className="break-words text-sm font-medium text-foreground">
                   {showLocation
                     ? [locationCity, user.country].filter(Boolean).join(', ') || '—'
                     : 'Κρυφό'}
@@ -169,12 +168,12 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
             {/* Timezone */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)]">
-                <Globe2 className="h-5 w-5 text-[var(--apple-system-blue)]" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
+                <Globe2 className="text-info h-5 w-5" />
               </div>
               <div>
-                <p className="apple-secondary-label text-xs">Ζώνη Ώρας</p>
-                <p className="break-words text-sm font-medium text-[var(--apple-label)]">
+                <p className="text-xs">Ζώνη Ώρας</p>
+                <p className="break-words text-sm font-medium text-foreground">
                   {showLocation ? user.timezone || '—' : 'Κρυφό'}
                 </p>
               </div>
@@ -183,10 +182,8 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
 
           {/* Social Links */}
           {showSocial && (
-            <div className="border-t border-[var(--apple-separator)] pt-6">
-              <p className="apple-secondary-label mb-4 text-xs uppercase tracking-[0.14em]">
-                Social Presence
-              </p>
+            <div className="border-t pt-6">
+              <p className="mb-4 text-xs uppercase tracking-[0.14em]">Social Presence</p>
 
               {visibleSocialLinks.length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -198,14 +195,12 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
                         href={normalizeSocialUrl(value)}
                         target="_blank"
                         rel="noreferrer"
-                        className="group flex items-center gap-3 rounded-[14px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] p-3 transition-colors hover:border-[var(--apple-system-blue)]/35"
+                        className="hover:border-info/35 group flex items-center gap-3 rounded-[14px] border bg-card p-3 transition-colors"
                       >
-                        <span className="text-[var(--apple-system-blue)] transition-colors">
-                          {platform.icon}
-                        </span>
+                        <span className="text-info transition-colors">{platform.icon}</span>
                         <div className="min-w-0 flex-1">
-                          <p className="apple-secondary-label text-xs">{platform.label}</p>
-                          <p className="break-all text-sm text-[var(--apple-label)] transition-colors group-hover:text-[var(--apple-system-blue)] sm:truncate">
+                          <p className="text-xs">{platform.label}</p>
+                          <p className="group-hover:text-info break-all text-sm text-foreground transition-colors sm:truncate">
                             {getSocialDisplayValue(value)}
                           </p>
                         </div>
@@ -223,4 +218,3 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
     </section>
   );
 }
-

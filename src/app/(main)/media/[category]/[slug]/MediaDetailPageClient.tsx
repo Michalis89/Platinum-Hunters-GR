@@ -2,15 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Heart, Star } from 'lucide-react';
+import { Heart, Star, CheckCircle, XCircle } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
-import ErrorState from '@/app/components/ui/ErrorState';
-import EmptyState from '@/app/components/ui/EmptyState';
-import AlertMessage from '@/app/components/ui/AlertMessage';
+import { Spinner } from '@/components/ui/spinner';
+import EmptyState from '@/components/ui/empty';
+import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
 import MediaEntryDialogController from '@/app/components/media/MediaEntryDialogController';
-import Breadcrumbs from '@/app/components/ui/Breadcrumbs';
+import Breadcrumbs from '@/components/ui/breadcrumbs';
 import type { EditState } from '@/app/components/backlog/EntryEditDialog';
 import { yieldToMain } from '@/lib/performance';
 import {
@@ -230,7 +229,8 @@ export default function MediaDetailPageClient({
             mediaId: mediaItem.id,
             status: editState.status,
             is_favorite: editState.isFavorite,
-            selected_platform: category === 'games' ? (editState.selectedPlatform || null) : undefined,
+            selected_platform:
+              category === 'games' ? editState.selectedPlatform || null : undefined,
             progress: nextProgress,
             score: nextScore,
             notes: nextNotes,
@@ -385,27 +385,28 @@ export default function MediaDetailPageClient({
   return (
     <PageContainer size="xl" className="py-10">
       {alert && (
-        <AlertMessage
+        <Alert
           key={`${alert.type}-${alert.title}`}
-          type={alert.type}
-          title={alert.title}
-          message={alert.message}
-          duration={2400}
-          onClose={() => setAlert(null)}
-        />
+          variant={alert.type === 'error' ? 'destructive' : 'success'}
+          className="mb-6"
+        >
+          {alert.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+          <AlertTitle>{alert.title}</AlertTitle>
+          <AlertDescription>{alert.message}</AlertDescription>
+        </Alert>
       )}
 
       <Breadcrumbs items={breadcrumbs} className="mb-6" />
 
       <div className="relative">
-        <div className="absolute inset-0 -z-10 opacity-30 blur-[120px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,var(--hb-primary-strong),transparent_50%)]" />
-          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_80%_20%,var(--hb-accent),transparent_55%)]" />
+        <div className="absolute inset-0 -z-10 opacity-20">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,hsl(var(--primary)),transparent_50%)]" />
+          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_80%_20%,hsl(var(--accent)),transparent_55%)]" />
         </div>
 
-        <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
+        <section className="rounded-3xl border border-border bg-card p-6 shadow-md">
           <div className="grid gap-6 lg:grid-cols-[240px,1fr]">
-            <div className="relative mx-auto w-full max-w-[240px] overflow-hidden rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)]">
+            <div className="relative mx-auto w-full max-w-[240px] rounded-2xl border border-border bg-card">
               <div className="relative aspect-[3/4]">
                 <Image
                   src={baseEntry.cover}
@@ -419,13 +420,13 @@ export default function MediaDetailPageClient({
 
             <div className="flex flex-col gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-[var(--hb-muted)]">
+                <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
                   {category.toUpperCase()}
                 </p>
-                <h1 className="text-2xl font-semibold text-[var(--hb-headline)] md:text-3xl">
+                <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
                   {baseEntry.title}
                 </h1>
-                <p className="text-sm text-[var(--hb-muted)]">
+                <p className="text-sm text-muted-foreground">
                   {baseEntry.subtitle}
                   {baseEntry.year ? ` • ${baseEntry.year}` : ''}
                 </p>
@@ -436,22 +437,22 @@ export default function MediaDetailPageClient({
                   baseEntry.tags.slice(0, 8).map(tag => (
                     <span
                       key={tag}
-                      className="rounded-full border border-[var(--hb-border)] px-2.5 py-1 text-xs text-[var(--hb-muted)]"
+                      className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground"
                     >
                       {tag}
                     </span>
                   ))
                 ) : (
-                  <span className="text-xs text-[var(--hb-muted)]">No genres available</span>
+                  <span className="text-xs text-muted-foreground">No genres available</span>
                 )}
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-xs font-semibold text-[var(--hb-text)]">
+                <span className="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-foreground">
                   {statusLabel}
                 </span>
-                <span className="flex items-center gap-1 rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-1 text-xs text-[var(--hb-muted)]">
-                  <Star className="h-3.5 w-3.5 text-[var(--hb-primary-strong)]" />
+                <span className="flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
+                  <Star className="h-3.5 w-3.5 text-primary" />
                   {ratingLabel}
                 </span>
                 <Button
@@ -477,8 +478,13 @@ export default function MediaDetailPageClient({
                 </Button>
               </div>
 
-              {entryLoading && <LoadingSpinner size="sm" label="Φόρτωση καταχώρησης..." inline />}
-              {entryError && <ErrorState error={entryError} />}
+              {entryLoading && (
+                <div className="inline-flex items-center gap-2">
+                  <Spinner className="size-4" />
+                  <span className="text-sm text-muted-foreground">Φόρτωση καταχώρησης...</span>
+                </div>
+              )}
+              {entryError && <ErrorAlert message={entryError} />}
               {!entryLoading && !entryError && !hasEntry && (
                 <div className="max-w-sm">
                   <EmptyState
@@ -492,34 +498,34 @@ export default function MediaDetailPageClient({
         </section>
 
         <div className="mt-8 grid gap-6">
-          <section className="rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 shadow-[var(--hb-shadow-md)]">
-            <h2 className="text-lg font-semibold text-[var(--hb-headline)]">Περιγραφή</h2>
-            <div className="text-[var(--hb-text)]/90 mt-3 text-sm leading-relaxed">
+          <section className="rounded-3xl border border-border bg-card p-6 shadow-md">
+            <h2 className="text-lg font-semibold text-foreground">Περιγραφή</h2>
+            <div className="text-foreground/90 mt-3 text-sm leading-relaxed">
               {mediaItem.description ? (
                 <p className="whitespace-pre-line">{mediaItem.description}</p>
               ) : (
-                <p className="text-[var(--hb-muted)]">Δεν υπάρχει περιγραφή διαθέσιμη.</p>
+                <p className="text-muted-foreground">Δεν υπάρχει περιγραφή διαθέσιμη.</p>
               )}
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">Format</p>
-                <p className="mt-2 text-sm text-[var(--hb-text)]">{mediaItem.format || '—'}</p>
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Format</p>
+                <p className="mt-2 text-sm text-foreground">{mediaItem.format || '—'}</p>
               </div>
-              <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                   {metaCard.label}
                 </p>
-                <p className="mt-2 text-sm text-[var(--hb-text)]">{metaCard.value}</p>
+                <p className="mt-2 text-sm text-foreground">{metaCard.value}</p>
               </div>
               {category === 'games' &&
                 (baseEntry.platforms || baseEntry.developer || baseEntry.publisher) && (
-                  <div className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4 sm:col-span-2">
-                    <p className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">
+                  <div className="rounded-2xl border border-border bg-card p-4 sm:col-span-2">
+                    <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                       Game details
                     </p>
-                    <div className="mt-2 space-y-1 text-sm text-[var(--hb-text)]">
+                    <div className="mt-2 space-y-1 text-sm text-foreground">
                       {baseEntry.platforms && baseEntry.platforms.length > 0 && (
                         <p>Platforms: {baseEntry.platforms.slice(0, 5).join(', ')}</p>
                       )}

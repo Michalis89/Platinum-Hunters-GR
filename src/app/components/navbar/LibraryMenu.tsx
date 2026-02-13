@@ -41,22 +41,20 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
 
   return (
     <MenubarMenu>
-      <MenubarTrigger className={`${desktopLinkClass(isLibraryActive)} gap-2`} aria-label="Open library menu">
+      <MenubarTrigger
+        className={`${desktopLinkClass(isLibraryActive)} gap-2`}
+        aria-label="Open library menu"
+      >
         <Layers className="size-4" />
         <span>Library</span>
         <ChevronDown className="ml-0.5 size-4" />
       </MenubarTrigger>
-      <MenubarContent className="apple-nav-popover w-64 p-1.5 text-[var(--apple-label)]">
+      <MenubarContent className="w-64 p-1.5 text-foreground">
         <MenubarItem
           asChild
-          className="rounded-[var(--apple-radius-control)] px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--hb-ease)] focus:bg-[var(--apple-nav-pill-hover)] focus:text-[var(--apple-label)]"
-        >
-          <Link href="/pages/backlog" className="inline-flex items-center gap-2">
-            <Layers className="size-4" />
-            <span>Browse backlog</span>
-          </Link>
-        </MenubarItem>
-        <MenubarSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
+          className="px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--easing-default)] focus:bg-[hsl(var(--accent))/10] focus:text-foreground"
+        ></MenubarItem>
+        <MenubarSeparator className="h-[0.5px] bg-[var(--border)]" />
         {libraryItems.map(item => {
           const active = isHrefActive(pathname, item.href);
 
@@ -64,9 +62,12 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
             <MenubarItem
               key={item.href}
               asChild
-              className="rounded-[var(--apple-radius-control)] px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--hb-ease)] focus:bg-[var(--apple-nav-pill-hover)] focus:text-[var(--apple-label)]"
+              className="px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--easing-default)] focus:bg-[hsl(var(--accent))/10] focus:text-foreground"
             >
-              <Link href={item.href} className={active ? 'text-[var(--apple-label)]' : 'text-[var(--apple-secondary-label)]'}>
+              <Link
+                href={item.href}
+                className={active ? 'text-foreground' : 'text-muted-foreground'}
+              >
                 <NavItemContent icon={item.icon} label={item.label} />
               </Link>
             </MenubarItem>

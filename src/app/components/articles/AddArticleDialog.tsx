@@ -6,10 +6,9 @@ import { X, Save, Eye, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
-import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
-import ErrorState from '../ui/ErrorState';
-import LoadingSpinner from '../ui/LoadingSpinner';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { ErrorAlert } from '@/components/ui/alert';
 import type { ArticleCategory, ArticleTopic, ArticleStatus } from '@/types/database';
 import { validatePlainText } from '@/utils/validation/text';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
@@ -22,6 +21,7 @@ import {
   ContentPublicationType,
   ContentPublishedEventDetail,
 } from '@/app/constants/contentEvents';
+import { Textarea } from '@/components/ui/textarea';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
   ssr: false,
@@ -370,7 +370,7 @@ export default function AddArticleDialog({
           {/* Dialog Container - Centered */}
           <dialog
             ref={dialogRef}
-            className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-[var(--hb-dialog-border)] p-0 backdrop:bg-transparent"
+            className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border p-0 backdrop:bg-transparent"
             onClose={onClose}
           >
             <motion.div
@@ -381,8 +381,8 @@ export default function AddArticleDialog({
               className="flex h-full max-h-[90vh] flex-col"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-[var(--hb-border)] px-6 py-4">
-                <h2 className="text-xl font-semibold text-[var(--hb-headline)]">{dialogTitle}</h2>
+              <div className="flex items-center justify-between border-b border-border px-6 py-4">
+                <h2 className="text-xl font-semibold text-foreground">{dialogTitle}</h2>
                 <Button variant="secondary" onClick={onClose}>
                   <X size={20} />
                 </Button>
@@ -392,12 +392,12 @@ export default function AddArticleDialog({
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
                   {/* Error message */}
-                  {error && <ErrorState error={error} />}
+                  {error && <ErrorAlert message={error} />}
                   {noPermission && (
-                    <ErrorState error="Δεν έχεις δικαίωμα να δημιουργήσεις άρθρο ή review." />
+                    <ErrorAlert message="Δεν έχεις δικαίωμα να δημιουργήσεις άρθρο ή review." />
                   )}
                   {warning && (
-                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                    <div className="bg-warning/10 rounded-lg border border-amber-500/30 px-4 py-3 text-sm text-amber-300">
                       {warning}
                     </div>
                   )}
@@ -406,12 +406,12 @@ export default function AddArticleDialog({
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {/* Content Type */}
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-[var(--hb-headline)]">Τύπος</label>
+                      <label className="text-sm font-medium text-foreground">Τύπος</label>
                       <select
                         value={contentType}
                         onChange={e => setContentType(e.target.value as ContentType)}
                         disabled={availableContentTypes.length <= 1}
-                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
+                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
                       >
                         {availableContentTypes.map(type => (
                           <option key={type.value} value={type.value}>
@@ -423,13 +423,11 @@ export default function AddArticleDialog({
 
                     {/* Category */}
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-[var(--hb-headline)]">
-                        Κατηγορία *
-                      </label>
+                      <label className="text-sm font-medium text-foreground">Κατηγορία *</label>
                       <select
                         value={category}
                         onChange={e => setCategory(e.target.value as ArticleCategory)}
-                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2"
+                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
                       >
                         <option value="">-- Επιλέξτε --</option>
                         {availableCategories.map(cat => (
@@ -442,14 +440,12 @@ export default function AddArticleDialog({
 
                     {/* Topic */}
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-[var(--hb-headline)]">
-                        Υποκατηγορία
-                      </label>
+                      <label className="text-sm font-medium text-foreground">Υποκατηγορία</label>
                       <select
                         value={topic}
                         onChange={e => setTopic(e.target.value as ArticleTopic)}
                         disabled={!category || contentType === 'review'}
-                        className="hover:border-[var(--hb-primary-strong)]/70 focus:ring-[var(--hb-primary-strong)]/50 w-full rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3 text-sm text-[var(--hb-text)] transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2 disabled:opacity-50"
+                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2 disabled:opacity-50"
                       >
                         {availableTopics.map(t => (
                           <option key={t.value} value={t.value}>
@@ -473,23 +469,23 @@ export default function AddArticleDialog({
                   )}
 
                   {/* Description */}
-                  <Textarea
-                    label="Περιγραφή"
-                    placeholder="Σύντομη περιγραφή του άρθρου (εμφανίζεται στις κάρτες)"
-                    rows={3}
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    className={!descriptionValidation.isValid ? 'border-red-500' : undefined}
-                  />
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">Περιγραφή</label>
+                    <Textarea
+                      placeholder="Σύντομη περιγραφή του άρθρου (εμφανίζεται στις κάρτες)"
+                      rows={3}
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                      className={!descriptionValidation.isValid ? 'border-destructive' : undefined}
+                    />
+                  </div>
                   {!descriptionValidation.isValid && (
                     <p className="text-xs text-red-400">Η περιγραφή δεν πρέπει να περιέχει HTML.</p>
                   )}
 
                   {/* Cover Image */}
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-[var(--hb-headline)]">
-                      Εικόνα εξωφύλλου
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Εικόνα εξωφύλλου</label>
                     <div className="flex flex-wrap gap-3">
                       <div className="flex min-w-[220px] flex-1 flex-col gap-2">
                         <Input
@@ -501,12 +497,12 @@ export default function AddArticleDialog({
                           }}
                           className="flex-1"
                         />
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--hb-muted)]">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <Button
                             variant="ghost"
                             icon={
                               isCoverUploading ? (
-                                <LoadingSpinner size="sm" inline />
+                                <Spinner className="size-4" />
                               ) : (
                                 <ImageIcon size={16} />
                               )
@@ -522,7 +518,7 @@ export default function AddArticleDialog({
                           <p className="text-xs text-amber-300">{coverUploadError}</p>
                         )}
                       </div>
-                      <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[var(--hb-border)]">
+                      <div className="relative h-12 w-12 rounded-lg border border-border">
                         {coverImage && isCoverPreviewValid ? (
                           <Image
                             src={coverImage}
@@ -534,8 +530,8 @@ export default function AddArticleDialog({
                             unoptimized
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-[var(--hb-card)]">
-                            <ImageIcon size={20} className="text-[var(--hb-muted)]" />
+                          <div className="flex h-full w-full items-center justify-center bg-card">
+                            <ImageIcon size={20} className="text-muted-foreground" />
                           </div>
                         )}
                       </div>
@@ -574,14 +570,14 @@ export default function AddArticleDialog({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between border-t border-[var(--hb-border)] px-6 py-4">
+              <div className="flex items-center justify-between border-t border-border px-6 py-4">
                 <Button variant="secondary" onClick={onClose}>
                   Ακύρωση
                 </Button>
                 <div className="flex gap-3">
                   <Button
                     variant="ghost"
-                    icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Save size={16} />}
+                    icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
                     onClick={() => handleSubmit('draft')}
                     disabled={isSubmitting || hasPlainTextError || noPermission}
                   >
@@ -589,7 +585,7 @@ export default function AddArticleDialog({
                   </Button>
                   <Button
                     variant="primary"
-                    icon={isSubmitting ? <LoadingSpinner size="sm" inline /> : <Eye size={16} />}
+                    icon={isSubmitting ? <Spinner className="size-4" /> : <Eye size={16} />}
                     onClick={() => handleSubmit('published')}
                     disabled={isSubmitting || hasPlainTextError || noPermission}
                   >

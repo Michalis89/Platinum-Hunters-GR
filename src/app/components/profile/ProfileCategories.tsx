@@ -85,16 +85,14 @@ export function ProfileCategories({
     <section className="px-4 py-12 md:px-6 md:py-14">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 text-center md:mb-10">
-          <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
             Οι κατηγορίες μου
           </p>
-          <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
-            Τα hobbies που παρακολουθώ
-          </h2>
+          <h2 className="text-2xl font-semibold md:text-3xl">Τα hobbies που παρακολουθώ</h2>
         </div>
 
         {/* Category chips grid */}
-        <div className="apple-material-surface flex flex-wrap items-center justify-center gap-3 p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-center gap-3 p-4 sm:p-5">
           {categories.map(cat => {
             const meta = categoryMeta[cat];
             if (!meta) return null;
@@ -107,17 +105,13 @@ export function ProfileCategories({
                 variant={isActive ? 'primary' : 'secondary'}
                 onClick={() => onCategoryChange(cat)}
                 className={`group inline-flex items-center gap-2 ${
-                  isActive
-                    ? ''
-                    : 'bg-[var(--apple-tertiary-fill)] text-[var(--apple-secondary-label)] hover:text-[var(--apple-label)]'
+                  isActive ? '' : 'bg-card text-muted-foreground hover:text-foreground'
                 }`}
                 aria-pressed={isActive}
               >
                 <span
                   className={`transition-colors ${
-                    isActive
-                      ? 'text-[var(--apple-label)]'
-                      : 'text-[var(--apple-secondary-label)] group-hover:text-[var(--apple-system-blue)]'
+                    isActive ? 'text-foreground' : 'group-hover:text-info text-muted-foreground'
                   }`}
                 >
                   {meta.icon}
@@ -130,17 +124,17 @@ export function ProfileCategories({
 
         {/* Quick links for active category */}
         {activeCategory && categoryMeta[activeCategory] && (
-          <div className="mt-8 apple-material-surface flex flex-wrap items-center justify-center gap-3 p-4 sm:p-5">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 p-4 sm:p-5">
             <a
               href={categoryMeta[activeCategory].href}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-5 py-2 text-sm font-medium text-[var(--apple-label)] transition-colors hover:border-[var(--apple-system-blue)]/40 hover:text-[var(--apple-system-blue)]"
+              className="hover:border-info/40 hover:text-info inline-flex items-center gap-2 rounded-full border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors"
             >
               Άνοιγμα Library
             </a>
             {['anime', 'manga', 'books', 'movies', 'tv', 'vape'].includes(activeCategory) && (
               <a
                 href={`/pages/reviews?category=${activeCategory}`}
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] px-5 py-2 text-sm font-medium text-[var(--apple-label)] transition-colors hover:border-[var(--apple-system-blue)]/40 hover:text-[var(--apple-system-blue)]"
+                className="hover:border-info/40 hover:text-info inline-flex items-center gap-2 rounded-full border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors"
               >
                 Δες Reviews
               </a>
@@ -153,4 +147,3 @@ export function ProfileCategories({
 }
 
 export { categoryMeta };
-

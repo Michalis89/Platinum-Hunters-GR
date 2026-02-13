@@ -22,10 +22,16 @@ type Props = {
  */
 export default function AppShell({ children }: Props) {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--hb-bg)] text-[var(--hb-text)]">
-      {/* Ambient gradient glow - standardized to 100px blur */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+      {/* Ambient gradient glow - Performance-first: no blur */}
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.08), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.06), transparent 44%)',
+          }}
+        />
       </div>
 
       {/* Content wrapper with flex layout for sticky footer */}
@@ -33,7 +39,7 @@ export default function AppShell({ children }: Props) {
         <NavbarWrapper />
         <main
           id="main-content"
-          className="flex-1 pb-12 pt-4 scroll-smooth"
+          className="flex-1 scroll-smooth pb-12 pt-4"
           style={{ scrollPaddingBlockStart: '6rem' }}
         >
           {children}

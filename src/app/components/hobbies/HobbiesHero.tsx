@@ -7,10 +7,10 @@ export function HobbiesHero() {
       eyebrow="Ο κατάλογος των hobbies"
       title={
         <>
-          <span className="bg-gradient-to-r from-[var(--hb-headline)] via-[var(--hb-text)] to-[var(--hb-muted)] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
             Εξερεύνησε τα
           </span>{' '}
-          <span className="bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
             Hobbies
           </span>
         </>
@@ -21,19 +21,19 @@ export function HobbiesHero() {
       subtitleClassName="mb-8 text-base md:text-lg"
       badges={
         <>
-          <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-2">
-            <Layers className="h-4 w-4 text-[var(--hb-primary-strong)]" />
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
+            <Layers className="h-4 w-4 text-primary" />
             <span>9 κατηγορίες</span>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-2">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             <span>Backlog</span>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-2">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
             <span className="h-2 w-2 rounded-full bg-sky-400" />
             <span>Άρθρα</span>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-4 py-2">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
             <span className="h-2 w-2 rounded-full bg-amber-400" />
             <span>Reviews</span>
           </div>

@@ -39,7 +39,7 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${config.title}</title>
   </head>
-  <body style="margin:0;padding:0;background:${palette.bg};font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:${palette.text};">
+  <body style="margin:0;padding:0;background:${palette.bg};font-family:,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:${palette.text};">
     <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;mso-hide:all;">
       ${config.preheader}
     </span>

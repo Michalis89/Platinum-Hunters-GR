@@ -15,11 +15,11 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
       eyebrow="About Hobbistas"
       title={
         <>
-          <span className="bg-gradient-to-r from-[var(--hb-headline)] via-[var(--hb-text)] to-[var(--hb-muted)] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
             Not a catalog. Not a feed.
           </span>
           <br />
-          <span className="bg-gradient-to-r from-[var(--hb-primary-strong)] via-[var(--hb-primary)] to-[var(--hb-accent)] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
             A personal space for your hobbies.
           </span>
         </>
@@ -31,7 +31,7 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
         <>
           <Link
             href={primaryHref}
-            className="group inline-flex items-center gap-2 rounded-full bg-[var(--hb-primary-strong)] px-8 py-3.5 text-base font-semibold text-white transition hover:brightness-110"
+            className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-base font-semibold text-white transition hover:brightness-110"
           >
             <Sparkles className="h-5 w-5" />
             {primaryLabel}
@@ -40,7 +40,7 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
 
           <Link
             href="/pages/hobbies"
-            className="hover:border-[var(--hb-primary-strong)]/60 inline-flex items-center gap-2 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-8 py-3.5 text-base font-semibold text-[var(--hb-text)] transition hover:text-[var(--hb-headline)]"
+            className="hover:border-primary/60 inline-flex items-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-base font-semibold text-foreground transition hover:text-foreground"
           >
             <Compass className="h-4 w-4" />
             Browse the categories
@@ -49,13 +49,13 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
       }
       badges={
         <>
-          <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
+          <span className="rounded-full border border-border bg-card px-3 py-1">
             Personal-first design
           </span>
-          <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
+          <span className="rounded-full border border-border bg-card px-3 py-1">
             Modular by choice
           </span>
-          <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
+          <span className="rounded-full border border-border bg-card px-3 py-1">
             Built in public
           </span>
         </>

@@ -3,20 +3,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Link from 'next/link';
-import { AlertTriangle, Bug, Mail, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import { AlertTriangle, Bug, Info, Mail, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
-import { Input } from '@/app/components/ui/Input';
-import { Textarea } from '@/app/components/ui/Textarea';
-import { Select } from '@/app/components/ui/Select';
-import { Checkbox } from '@/app/components/ui/Checkbox';
-import { Switch } from '@/app/components/ui/Switch';
-import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { SelectField as Select } from '@/components/ui/select-field';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import Feedback from '@/app/components/ui/Feedback';
-import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
-import { InfoHint } from '@/app/components/ui/InfoHint';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FieldError } from '@/components/ui/field';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { selectUser } from '@/store/slices/authSlice';
 import AttachmentDropzone, {
   type AttachmentItem,
@@ -338,7 +338,7 @@ export default function SupportForm({}: Readonly<{
         <PageHero
           eyebrow="Υποστήριξη"
           title={
-            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">
+            <span className="text-3xl text-foreground md:text-5xl">
               Είμαστε εδώ για να βοηθήσουμε
             </span>
           }
@@ -354,7 +354,7 @@ export default function SupportForm({}: Readonly<{
           }
           badges={
             <>
-              <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1">
+              <span className="rounded-full border border-border bg-card px-3 py-1">
                 Μην ανεβάζεις προσωπικά δεδομένα σε screenshots.
               </span>
             </>
@@ -363,37 +363,58 @@ export default function SupportForm({}: Readonly<{
 
         <PageContainer size="md" className="mt-10 pb-20">
           <Card className={UI_CLASSNAMES.panelCard}>
-            <CardHeader className="border-[var(--hb-border)]">
-              <CardTitle className="flex items-center gap-3 text-[var(--hb-headline)]">
-                <Mail className="h-5 w-5 text-[var(--hb-primary)]" />
+            <CardHeader className="border-border">
+              <CardTitle className="flex items-center gap-3 text-foreground">
+                <Mail className="h-5 w-5 text-primary" />
                 Επικοινωνία & Υποστήριξη
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <SegmentedControl
-                options={CATEGORY_OPTIONS}
+              <Tabs
                 value={category}
-                onChange={value => setCategory(value)}
-              />
+                onValueChange={value => setCategory(value as typeof category)}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 md:grid-cols-4">
+                  {CATEGORY_OPTIONS.map(option => (
+                    <TabsTrigger
+                      key={option.id}
+                      value={option.id}
+                      className="flex flex-col items-start rounded-xl px-4 py-3 text-sm font-semibold text-foreground"
+                    >
+                      <span>{option.label}</span>
+                      {option.description && (
+                        <span className="mt-1 text-xs font-normal text-muted-foreground">
+                          {option.description}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 {result ? (
-                  <Feedback
-                    variant={result.type === 'success' ? 'success' : 'error'}
-                    tone={result.type === 'success' ? 'solid' : 'soft'}
-                    title={result.type === 'success' ? 'Επιτυχία' : 'Σφάλμα'}
+                  <Alert
+                    variant={result.type === 'success' ? 'success' : 'destructive'}
+                    className="rounded-2xl border border-border bg-card/70 px-4 py-3"
                   >
-                    {result.type === 'success' && ticketId ? (
-                      <span>
-                        {result.message}{' '}
-                        <Link className="underline" href={`/pages/support/tickets/${ticketId}`}>
-                          Δες το ticket σου
-                        </Link>
-                      </span>
-                    ) : (
-                      result.message
-                    )}
-                  </Feedback>
+                    <AlertTitle className="text-base">
+                      {result.type === 'success' ? 'Επιτυχία' : 'Σφάλμα'}
+                    </AlertTitle>
+                    <AlertDescription className="text-sm">
+                      {result.type === 'success' && ticketId ? (
+                        <>
+                          {result.message}{' '}
+                          <Link className="underline transition-colors hover:text-primary" href={`/pages/support/tickets/${ticketId}`}>
+                            Δες το ticket σου
+                          </Link>
+                        </>
+                      ) : (
+                        result.message
+                      )}
+                    </AlertDescription>
+                  </Alert>
                 ) : null}
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -404,21 +425,18 @@ export default function SupportForm({}: Readonly<{
                     onChange={handleChange('name')}
                     placeholder="Προαιρετικό"
                     disabled={submitting}
-                    className="border-[var(--hb-border)] bg-[var(--hb-card)]"
+                    className="border-border bg-card"
                   />
-                  <div>
-                    <Input
-                      label="Email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange('email')}
-                      placeholder="you@email.com"
-                      disabled={submitting}
-                      error={!!errors.email}
-                      className="border-[var(--hb-border)] bg-[var(--hb-card)]"
-                    />
-                    <FormErrorMessage message={errors.email} />
-                  </div>
+                  <Input
+                    label="Email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange('email')}
+                    placeholder="you@email.com"
+                    disabled={submitting}
+                    error={errors.email}
+                    className="border-border bg-card"
+                  />
                 </div>
 
                 <div>
@@ -430,70 +448,79 @@ export default function SupportForm({}: Readonly<{
                     placeholder="Σύντομος τίτλος"
                     disabled={submitting}
                     required
-                    error={!!errors.subject}
-                    className="border-[var(--hb-border)] bg-[var(--hb-card)]"
+                    error={errors.subject}
+                    className="border-border bg-card"
                   />
-                  <FormErrorMessage message={errors.subject} />
                 </div>
 
                 <div>
-                  <Textarea
-                    label="Περιγραφή"
-                    value={formData.description}
-                    onChange={handleChange('description')}
-                    placeholder="Περιέγραψε τι χρειάζεσαι"
-                    rows={4}
-                    disabled={submitting}
-                    required
-                    error={!!errors.description}
-                  />
-                  <FormErrorMessage message={errors.description} />
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">
+                      Περιγραφή <span className="text-red-500">*</span>
+                    </label>
+                    <Textarea
+                      value={formData.description}
+                      onChange={handleChange('description')}
+                      placeholder="Περιέγραψε τι χρειάζεσαι"
+                      rows={4}
+                      disabled={submitting}
+                      required
+                      className={errors.description ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                    />
+                  </div>
+                  <FieldError>{errors.description}</FieldError>
                 </div>
 
                 {category === 'bug' ? (
-                  <div className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                      <span className="bg-[var(--hb-primary-strong)]/20 flex h-7 w-7 items-center justify-center rounded-full text-[var(--hb-primary)]">
+                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
                         {categoryIcons.bug}
                       </span>
                       Στοιχεία bug
                     </div>
                     <div>
-                      <Textarea
-                        label="Βήματα αναπαραγωγής"
-                        value={formData.steps}
-                        onChange={handleChange('steps')}
-                        placeholder="1. ...\n2. ..."
-                        rows={3}
-                        disabled={submitting}
-                        error={!!errors.steps}
-                      />
-                      <FormErrorMessage message={errors.steps} />
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">Βήματα αναπαραγωγής</label>
+                        <Textarea
+                          value={formData.steps}
+                          onChange={handleChange('steps')}
+                          placeholder="1. ...\n2. ..."
+                          rows={3}
+                          disabled={submitting}
+                          className={errors.steps ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                        />
+                      </div>
+                      <FieldError>{errors.steps}</FieldError>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
-                        <Textarea
-                          label="Αναμενόμενο αποτέλεσμα"
-                          value={formData.expected}
-                          onChange={handleChange('expected')}
-                          placeholder="Τι έπρεπε να συμβεί"
-                          rows={2}
-                          disabled={submitting}
-                          error={!!errors.expected}
-                        />
-                        <FormErrorMessage message={errors.expected} />
+                        <div className="space-y-1.5">
+                          <label className="text-sm font-medium text-foreground">Αναμενόμενο αποτέλεσμα</label>
+                          <Textarea
+                            value={formData.expected}
+                            onChange={handleChange('expected')}
+                            placeholder="Τι έπρεπε να συμβεί"
+                            rows={2}
+                            disabled={submitting}
+                            className={errors.expected ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                          />
+                        </div>
+                        <FieldError>{errors.expected}</FieldError>
                       </div>
                       <div>
-                        <Textarea
-                          label="Πραγματικό αποτέλεσμα"
-                          value={formData.actual}
-                          onChange={handleChange('actual')}
-                          placeholder="Τι συνέβη"
-                          rows={2}
-                          disabled={submitting}
-                          error={!!errors.actual}
-                        />
-                        <FormErrorMessage message={errors.actual} />
+                        <div className="space-y-1.5">
+                          <label className="text-sm font-medium text-foreground">Πραγματικό αποτέλεσμα</label>
+                          <Textarea
+                            value={formData.actual}
+                            onChange={handleChange('actual')}
+                            placeholder="Τι συνέβη"
+                            rows={2}
+                            disabled={submitting}
+                            className={errors.actual ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                          />
+                        </div>
+                        <FieldError>{errors.actual}</FieldError>
                       </div>
                     </div>
                     <div>
@@ -503,12 +530,12 @@ export default function SupportForm({}: Readonly<{
                         onChange={handleSelect('severity')}
                         options={SUPPORT_SEVERITY_OPTIONS}
                         optionLabels={SUPPORT_SEVERITY_LABELS}
-                        className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]"
-                        labelClassName="text-[var(--hb-headline)]"
+                        className="border-border bg-card text-foreground focus:border-primary focus:ring-primary"
+                        labelClassName="text-foreground"
                         placeholder="Επίλεξε"
                         error={!!errors.severity}
                       />
-                      <FormErrorMessage message={errors.severity} />
+                      <FieldError>{errors.severity}</FieldError>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       <Select
@@ -538,10 +565,31 @@ export default function SupportForm({}: Readonly<{
                       />
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <label className="text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="text-sm font-medium text-foreground">
                             Έκδοση εφαρμογής
                           </label>
-                          <InfoHint tip="Η έκδοση της εφαρμογής φαίνεται στο footer Personal Hobby Hub: x.x.x." />
+                          <TooltipProvider delayDuration={150}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  aria-label="Πληροφορίες υπολογισμού"
+                                  className="hover:bg-primary/10 grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary"
+                                >
+                                  <Info className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="bottom"
+                                align="center"
+                                sideOffset={8}
+                                className="z-[9999] w-[min(280px,80vw)] rounded-2xl border border-border bg-card p-3 text-xs leading-relaxed text-foreground shadow-md"
+                              >
+                                Η έκδοση της εφαρμογής φαίνεται στο footer Personal Hobby Hub: x.x.x.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                         <Input
                           type="text"
@@ -560,36 +608,40 @@ export default function SupportForm({}: Readonly<{
                 ) : null}
 
                 {category === 'feature' ? (
-                  <div className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                      <span className="bg-[var(--hb-primary-strong)]/20 flex h-7 w-7 items-center justify-center rounded-full text-[var(--hb-primary)]">
+                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
                         {categoryIcons.feature}
                       </span>
                       Πρόταση λειτουργίας
                     </div>
                     <div>
-                      <Textarea
-                        label="Περίπτωση χρήσης"
-                        value={formData.useCase}
-                        onChange={handleChange('useCase')}
-                        placeholder="Ποιο πρόβλημα λύνει;"
-                        rows={3}
-                        disabled={submitting}
-                        error={!!errors.useCase}
-                      />
-                      <FormErrorMessage message={errors.useCase} />
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">Περίπτωση χρήσης</label>
+                        <Textarea
+                          value={formData.useCase}
+                          onChange={handleChange('useCase')}
+                          placeholder="Ποιο πρόβλημα λύνει;"
+                          rows={3}
+                          disabled={submitting}
+                          className={errors.useCase ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                        />
+                      </div>
+                      <FieldError>{errors.useCase}</FieldError>
                     </div>
                     <div>
-                      <Textarea
-                        label="Αξία"
-                        value={formData.value}
-                        onChange={handleChange('value')}
-                        placeholder="Πώς θα βοηθήσει την κοινότητα;"
-                        rows={3}
-                        disabled={submitting}
-                        error={!!errors.value}
-                      />
-                      <FormErrorMessage message={errors.value} />
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">Αξία</label>
+                        <Textarea
+                          value={formData.value}
+                          onChange={handleChange('value')}
+                          placeholder="Πώς θα βοηθήσει την κοινότητα;"
+                          rows={3}
+                          disabled={submitting}
+                          className={errors.value ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                        />
+                      </div>
+                      <FieldError>{errors.value}</FieldError>
                     </div>
                     <div>
                       <Select
@@ -598,20 +650,20 @@ export default function SupportForm({}: Readonly<{
                         onChange={handleSelect('urgency')}
                         options={URGENCY_OPTIONS}
                         optionLabels={urgencyLabels}
-                        className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)] focus:border-[var(--hb-primary-strong)] focus:ring-[var(--hb-primary-strong)]"
-                        labelClassName="text-[var(--hb-headline)]"
+                        className="border-border bg-card text-foreground focus:border-primary focus:ring-primary"
+                        labelClassName="text-foreground"
                         placeholder="Επίλεξε"
                         error={!!errors.urgency}
                       />
-                      <FormErrorMessage message={errors.urgency} />
+                      <FieldError>{errors.urgency}</FieldError>
                     </div>
                   </div>
                 ) : null}
 
                 {category === 'author_rights' ? (
-                  <div className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                      <span className="bg-[var(--hb-primary-strong)]/20 flex h-7 w-7 items-center justify-center rounded-full text-[var(--hb-primary)]">
+                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
                         {categoryIcons.author_rights}
                       </span>
                       Αίτημα author δικαιωμάτων
@@ -633,32 +685,38 @@ export default function SupportForm({}: Readonly<{
                       />
                     </div>
                     <div>
-                      <Textarea
-                        label="Λόγος αιτήματος"
-                        value={formData.reason}
-                        onChange={handleChange('reason')}
-                        placeholder="Γιατί θέλεις author rights;"
-                        rows={3}
-                        disabled={submitting}
-                        error={!!errors.reason}
-                      />
-                      <FormErrorMessage message={errors.reason} />
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">Λόγος αιτήματος</label>
+                        <Textarea
+                          value={formData.reason}
+                          onChange={handleChange('reason')}
+                          placeholder="Γιατί θέλεις author rights;"
+                          rows={3}
+                          disabled={submitting}
+                          className={errors.reason ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                        />
+                      </div>
+                      <FieldError>{errors.reason}</FieldError>
                     </div>
                     <div>
-                      <div className="mb-2 text-sm font-medium text-[var(--hb-headline)]">
+                      <div className="mb-2 text-sm font-medium text-foreground">
                         Ζητούμενα δικαιώματα
                       </div>
-                      <p className="mb-3 text-xs text-[var(--hb-muted)]">
+                      <p className="mb-3 text-xs text-muted-foreground">
                         Μπορείς να επιλέξεις και τα δύο Author και Reviewer.
                       </p>
                       <div className="grid gap-2 md:grid-cols-2">
                         {PERMISSIONS.map(permission => (
-                          <Checkbox
+                          <label
                             key={permission}
-                            label={permission}
-                            checked={requestedPermissions.includes(permission)}
-                            onChange={() => togglePermission(permission)}
-                          />
+                            className="flex cursor-pointer items-center gap-3 text-sm"
+                          >
+                            <Checkbox
+                              checked={requestedPermissions.includes(permission)}
+                              onCheckedChange={() => togglePermission(permission)}
+                            />
+                            <span className="font-medium text-foreground">{permission}</span>
+                          </label>
                         ))}
                       </div>
                     </div>
@@ -666,9 +724,9 @@ export default function SupportForm({}: Readonly<{
                 ) : null}
 
                 {category === 'general' ? (
-                  <div className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                      <span className="bg-[var(--hb-primary-strong)]/20 flex h-7 w-7 items-center justify-center rounded-full text-[var(--hb-primary)]">
+                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
                         {categoryIcons.general}
                       </span>
                       Γενικό θέμα
@@ -690,32 +748,44 @@ export default function SupportForm({}: Readonly<{
                   disabled={submitting}
                 />
 
-                <div className="space-y-3 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4">
-                  <Checkbox
-                    label="Συμφωνώ να αποθηκευτούν τα στοιχεία του αιτήματος"
-                    description="Χρειαζόμαστε τα στοιχεία σου μόνο για την υποστήριξη."
-                    checked={formData.consent}
-                    onChange={event => {
-                      setFormData(prev => ({ ...prev, consent: event.target.checked }));
-                      if (errors.consent) {
-                        setErrors(prev => ({ ...prev, consent: '' }));
-                      }
-                    }}
-                  />
-                  <FormErrorMessage message={errors.consent} />
+                <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
+                  <label className="flex cursor-pointer items-start gap-3 text-sm">
+                    <Checkbox
+                      checked={formData.consent}
+                      onCheckedChange={checked => {
+                        setFormData(prev => ({ ...prev, consent: checked as boolean }));
+                        if (errors.consent) {
+                          setErrors(prev => ({ ...prev, consent: '' }));
+                        }
+                      }}
+                    />
+                    <span className="flex flex-col gap-1">
+                      <span className="font-medium text-foreground">Συμφωνώ να αποθηκευτούν τα στοιχεία του αιτήματος</span>
+                      <span className="text-muted-foreground">Χρειαζόμαστε τα στοιχεία σου μόνο για την υποστήριξη.</span>
+                    </span>
+                  </label>
+                  <FieldError>{errors.consent}</FieldError>
 
+                <label className="flex items-start justify-between gap-4">
+                  <span className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-[var(--hb-headline)]">
+                      Επιτρέπω follow-up email
+                    </span>
+                    <span className="text-xs text-[var(--hb-muted)]">
+                      Θα λάβεις ενημερώσεις για την πορεία του ticket.
+                    </span>
+                  </span>
                   <Switch
-                    label="Επιτρέπω follow-up email"
-                    description="Θα λάβεις ενημερώσεις για την πορεία του ticket."
                     checked={formData.allowFollowUp}
-                    onChange={event =>
-                      setFormData(prev => ({ ...prev, allowFollowUp: event.target.checked }))
+                    onCheckedChange={value =>
+                      setFormData(prev => ({ ...prev, allowFollowUp: value }))
                     }
                   />
+                </label>
                 </div>
 
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-2 text-xs text-[var(--hb-muted)] dark:text-[var(--hb-muted)]">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground dark:text-muted-foreground">
                     <AlertTriangle className="h-4 w-4" />
                     Τα αρχεία αποθηκεύονται σε ιδιωτικό χώρο.
                   </div>

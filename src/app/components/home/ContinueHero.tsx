@@ -67,31 +67,31 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   games: {
     label: 'Games',
     icon: <Gamepad2 className="h-4 w-4" />,
-    verb: count => `Σε εξέλιξη: ${count} παιχνίδια`,
+    verb: count => `In progress: ${count} games`,
     route: '/pages/backlog?category=games',
   },
   anime: {
     label: 'Anime',
     icon: <Sparkles className="h-4 w-4" />,
-    verb: count => `Σε εξέλιξη: ${count} anime`,
+    verb: count => `In progress: ${count} anime`,
     route: '/pages/backlog?category=anime',
   },
   manga: {
     label: 'Manga',
     icon: <BookOpen className="h-4 w-4" />,
-    verb: count => `Σε εξέλιξη: ${count} manga`,
+    verb: count => `In progress: ${count} manga`,
     route: '/pages/backlog?category=manga',
   },
   tv: {
-    label: 'Σειρές',
+    label: 'TV shows',
     icon: <Tv className="h-4 w-4" />,
-    verb: count => `Σε εξέλιξη: ${count} σειρές`,
+    verb: count => `In progress: ${count} TV shows`,
     route: '/pages/backlog?category=tv',
   },
   books: {
-    label: 'Βιβλία',
+    label: 'Books',
     icon: <BookText className="h-4 w-4" />,
-    verb: count => `Σε εξέλιξη: ${count} βιβλία`,
+    verb: count => `In progress: ${count} books`,
     route: '/pages/backlog?category=books',
   },
 };
@@ -118,28 +118,28 @@ const appendSearchParam = (route: string, search?: string | null) => {
 const formatTimeAgo = (value: string) => {
   const normalized = value.replace(' ', 'T') + 'Z';
   const timestamp = Date.parse(normalized);
-  if (Number.isNaN(timestamp)) return 'λίγο';
+  if (Number.isNaN(timestamp)) return 'just now';
 
   const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-  if (seconds < 60) return 'λίγα δευτερόλεπτα';
+  if (seconds < 60) return 'a few seconds';
 
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'λεπτό' : 'λεπτά'}`;
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} ${hours === 1 ? 'ώρα' : 'ώρες'}`;
+  if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
 
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`;
+  if (days < 7) return `${days} ${days === 1 ? 'day' : 'days'}`;
 
   const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `${weeks} ${weeks === 1 ? 'εβδομάδα' : 'εβδομάδες'}`;
+  if (weeks < 5) return `${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;
 
   const months = Math.floor(days / 30);
-  if (months < 12) return `${months} ${months === 1 ? 'μήνας' : 'μήνες'}`;
+  if (months < 12) return `${months} ${months === 1 ? 'month' : 'months'}`;
 
   const years = Math.floor(days / 365);
-  return `${years} ${years === 1 ? 'χρόνος' : 'χρόνια'}`;
+  return `${years} ${years === 1 ? 'year' : 'years'}`;
 };
 
 function RelativeTimeDisplay({ date }: { date: string }) {
@@ -169,12 +169,12 @@ const getFallbackRoute = (enabledCategories: string[]) => {
 const getProgressLabel = (category: string, progress: number | null) => {
   if (!progress || progress <= 0) return null;
   if (category === 'games') return null;
-  if (category === 'anime' || category === 'tv') return `Επεισόδιο ${progress}`;
+  if (category === 'anime' || category === 'tv') return `Episode ${progress}`;
   if (category === 'manga') {
-    const plural = progress === 1 ? 'Τόμος' : 'Τόμοι';
+    const plural = progress === 1 ? 'Volume' : 'Volumes';
     return `${plural} ${progress}`;
   }
-  if (category === 'books') return `Σελίδα ${progress}`;
+  if (category === 'books') return `Page ${progress}`;
   return null;
 };
 
@@ -183,35 +183,31 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
   const progressLabel = getProgressLabel(item.slide.category, item.slide.progress);
 
   return (
-    <div className="grid min-h-[304px] items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
+    <div className="border-border/40 bg-card/30 grid min-h-[304px] items-center gap-8 rounded-xl border p-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
       <div className="space-y-5">
-        <div className="apple-secondary-label inline-flex items-center gap-2 text-xs font-medium tracking-[0.06em]">
+        <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.06em]">
           <span>{item.config.icon}</span>
           {item.config.label}
         </div>
 
         <div className="space-y-2">
-          <h2 className="apple-label text-3xl font-semibold leading-[1.08] tracking-[-0.03em] md:text-4xl">
-            Συνέχισε από εκεί που σταμάτησες
+          <h2 className="text-3xl font-semibold leading-[1.08] tracking-[-0.03em] md:text-4xl">
+            Continue where you left off
           </h2>
-          <p className="apple-secondary-label text-sm leading-relaxed">
-            {item.config.verb(item.currentCount)}
-          </p>
+          <p className="text-sm leading-relaxed">{item.config.verb(item.currentCount)}</p>
         </div>
 
         <div className="space-y-1.5">
-          <p className="apple-label text-lg font-semibold tracking-[-0.02em]">
-            {item.slide.title ?? 'Χωρίς τίτλο'}
+          <p className="text-lg font-semibold tracking-[-0.02em]">
+            {item.slide.title ?? 'Untitled'}
           </p>
-          <p className="apple-secondary-label text-sm">
-            Τελευταία ενημέρωση: πριν <RelativeTimeDisplay date={item.slide.updated_at} />
+          <p className="text-sm">
+            Last updated: <RelativeTimeDisplay date={item.slide.updated_at} /> ago
           </p>
         </div>
 
         {progressLabel && (
-          <div className="apple-pill apple-secondary-label inline-flex items-center px-3 py-1 text-xs">
-            {progressLabel}
-          </div>
+          <div className="inline-flex items-center px-3 py-1 text-xs">{progressLabel}</div>
         )}
 
         <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -220,7 +216,7 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
             href={getCategoryRoute(item.slide.category, item.slide.title)}
             className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
           >
-            Συνέχεια
+            Continue
             <span aria-hidden="true">→</span>
           </Button>
           <Button
@@ -228,34 +224,31 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
             href={getCategoryRoute(item.slide.category)}
             className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
           >
-            Όλα τα {item.config.label} σε εξέλιξη
+            All {item.config.label} in progress
           </Button>
         </div>
       </div>
 
       <div className="w-full md:w-[260px] md:min-w-[240px] md:max-w-[260px]">
-        <AspectRatio
-          ratio={4 / 5}
-          className="apple-card relative overflow-hidden"
-        >
+        <AspectRatio ratio={4 / 5} className="relative">
           {imageUrl ? (
             <>
-              <Image
-                src={imageUrl}
-                alt={item.slide.title ?? 'Τίτλος'}
-                fill
-                sizes="(max-width: 768px) 88vw, 300px"
-                className="absolute inset-0 object-contain p-2"
-                priority
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+            <Image
+              src={imageUrl}
+              alt={item.slide.title ?? 'Title'}
+              fill
+              sizes="(max-width: 768px) 88vw, 300px"
+              className="absolute inset-0 object-contain p-2"
+              priority
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
             </>
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]">
-              <span className="apple-system-blue flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                 {item.config.icon}
               </span>
-              <p className="text-xs font-medium tracking-[0.06em] text-white/65">Χωρίς εικόνα</p>
+              <p className="text-xs font-medium tracking-[0.06em] text-white/65">No image</p>
             </div>
           )}
         </AspectRatio>
@@ -333,18 +326,18 @@ export function ContinueHero() {
     return (
       <section className="px-4 py-6 md:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="apple-material-surface min-h-[304px] animate-pulse p-6">
+          <div className="min-h-[304px] animate-pulse p-6">
             <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">
-                <div className="bg-[var(--hb-card)]/60 h-4 w-24 rounded" />
-                <div className="bg-[var(--hb-card)]/70 h-8 w-3/4 rounded" />
-                <div className="bg-[var(--hb-card)]/50 h-4 w-1/2 rounded" />
+                <div className="bg-card/60 h-4 w-24 rounded" />
+                <div className="bg-card/70 h-8 w-3/4 rounded" />
+                <div className="bg-card/50 h-4 w-1/2 rounded" />
                 <div className="flex gap-3 pt-4">
-                  <div className="bg-[var(--hb-card)]/60 h-12 w-32 rounded-full" />
-                  <div className="bg-[var(--hb-card)]/40 h-12 w-48 rounded-full" />
+                  <div className="bg-card/60 h-12 w-32 rounded-full" />
+                  <div className="bg-card/40 h-12 w-48 rounded-full" />
                 </div>
               </div>
-              <div className="bg-[var(--hb-card)]/30 aspect-[4/5] w-full rounded-2xl md:w-[340px]" />
+              <div className="bg-card/30 aspect-[4/5] w-full rounded-2xl md:w-[340px]" />
             </div>
           </div>
         </div>
@@ -356,17 +349,17 @@ export function ContinueHero() {
     return (
       <section className="px-4 py-6 md:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="apple-material-surface p-7">
-            <h2 className="apple-label text-3xl font-semibold tracking-[-0.03em]">
-              Συνέχισε από εκεί που σταμάτησες
+          <div className="p-7">
+            <h2 className="text-3xl font-semibold tracking-[-0.03em]">
+              Continue where you left off
             </h2>
-            <p className="apple-secondary-label mt-2 text-sm">Δεν έχεις κάτι σε εξέλιξη ακόμα.</p>
+            <p className="mt-2 text-sm">You don&apos;t have anything in progress yet.</p>
             <div className="mt-6">
               <Link
                 href={getFallbackRoute(enabledCategories)}
-                className="apple-pill apple-label inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition hover:brightness-95"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition hover:brightness-95"
               >
-                Δες το backlog
+                View backlog
                 <span aria-hidden="true">→</span>
               </Link>
             </div>
@@ -379,18 +372,19 @@ export function ContinueHero() {
   return (
     <section className="px-4 py-6 md:px-6">
       <div className="mx-auto max-w-7xl">
-        <div className="apple-material-surface overflow-hidden p-7">
+        <div className="p-7">
           <Carousel
             setApi={setCarouselApi}
             opts={{
               align: 'start',
               loop: slideItems.length > 1,
+              containScroll: 'trimSnaps',
             }}
-            className="w-full"
+            className="w-full overflow-hidden"
           >
-            <CarouselContent className="-ml-0">
+            <CarouselContent>
               {slideItems.map(item => (
-                <CarouselItem key={`slide-${item.slide.entry_id}`} className="basis-full pl-0">
+                <CarouselItem key={`slide-${item.slide.entry_id}`} className="min-w-0 basis-full">
                   <SlideCard item={item} />
                 </CarouselItem>
               ))}
@@ -419,9 +413,7 @@ export function ContinueHero() {
                     onClick={() => carouselApi?.scrollTo(index)}
                     aria-label={`Go to slide ${index + 1}`}
                     className={`h-2.5 w-2.5 rounded-full border transition ${
-                      isActive
-                        ? 'border-[var(--apple-label)] bg-[var(--apple-label)]'
-                        : 'border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)]'
+                      isActive ? 'border-foreground bg-foreground' : 'border-input bg-card'
                     }`}
                   />
                 );

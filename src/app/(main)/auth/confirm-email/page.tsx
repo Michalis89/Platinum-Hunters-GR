@@ -58,38 +58,38 @@ export default async function ConfirmEmailPage({ searchParams }: ConfirmEmailPag
   const Icon = config.Icon;
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--hb-bg)] px-6 py-16">
-      <div className="absolute inset-0 bg-[image:var(--hb-gradient)] opacity-60" />
+    <main className="relative flex min-h-screen items-center justify-center bg-background px-6 py-16">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-60" />
 
       <section aria-live="polite" aria-atomic="true" className="relative z-10 w-full max-w-md">
-        <Card className="border-[var(--hb-border)] bg-[var(--hb-panel)]/95 shadow-xl backdrop-blur">
+        <Card className="bg-card/95 border-border shadow-xl">
           <CardHeader className="space-y-4 pb-2 text-center">
             <div className="flex justify-center">
               <div className="relative">
-                <div className="absolute inset-0 animate-ping rounded-full bg-[var(--hb-primary)] opacity-20" />
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-xl">
-                  <Icon className="h-10 w-10 text-[var(--hb-primary)]" />
+                <div className="absolute inset-0 animate-ping rounded-full bg-primary opacity-20" />
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-border bg-card shadow-xl">
+                  <Icon className="h-10 w-10 text-primary" />
                 </div>
               </div>
             </div>
 
-            <CardTitle className="text-3xl font-black tracking-tight text-[var(--hb-headline)]">
+            <CardTitle className="text-3xl font-black tracking-tight text-foreground">
               {config.title}
             </CardTitle>
 
-            <CardDescription className="mx-auto max-w-[32ch] text-base leading-relaxed text-[var(--hb-muted)]">
+            <CardDescription className="mx-auto max-w-[32ch] text-base leading-relaxed text-muted-foreground">
               {config.description}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-5 pt-4">
-            <Alert className="border-[var(--hb-border)] bg-[var(--hb-bg)]/70 text-[var(--hb-text)]">
-              <Icon className="h-4 w-4 text-[var(--hb-primary)]" />
+            <Alert className="bg-background/70 border-border text-foreground">
+              <Icon className="h-4 w-4 text-primary" />
               <AlertTitle>{config.alertTitle}</AlertTitle>
               <AlertDescription>{config.alertDescription}</AlertDescription>
             </Alert>
 
-            <Separator className="bg-[var(--hb-border)]/70" />
+            <Separator className="bg-border/70" />
 
             <Button asChild variant="primary" size="xl">
               <Link href={config.ctaHref} aria-label={config.ctaLabel}>
@@ -105,7 +105,7 @@ export default async function ConfirmEmailPage({ searchParams }: ConfirmEmailPag
             <div className="text-center">
               <Link
                 href="/"
-                className="text-sm font-medium text-[var(--hb-muted)] underline-offset-4 transition-colors hover:text-[var(--hb-text)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hb-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hb-panel)]"
+                className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
               >
                 Back to Home
               </Link>

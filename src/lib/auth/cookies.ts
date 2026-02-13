@@ -64,6 +64,16 @@ export async function clearAuthCookies() {
 }
 
 /**
+ * Clear auth cookies from NextResponse (for middleware)
+ * Used when session is invalid or expired during middleware execution
+ */
+export function clearAuthCookiesFromResponse(response: import('next/server').NextResponse) {
+  response.cookies.delete(AUTH_COOKIE_NAMES.ACCESS_TOKEN);
+  response.cookies.delete(AUTH_COOKIE_NAMES.REFRESH_TOKEN);
+  return response;
+}
+
+/**
  * Get auth cookie names (useful for reference)
  */
 export function getAuthCookieNames() {

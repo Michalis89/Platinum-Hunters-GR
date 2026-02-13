@@ -1,6 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
-import { LogIn, LogOut, Menu, PenLine, Plus, ShieldCheck, Ticket, User, UserPlus } from 'lucide-react';
+import {
+  LogIn,
+  LogOut,
+  Menu,
+  PenLine,
+  Plus,
+  ShieldCheck,
+  Ticket,
+  User,
+  UserPlus,
+} from 'lucide-react';
 import type { User as UserEntity } from '@/types/user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -46,6 +56,15 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
   onToggleTheme,
 }: MobileNavSheetProps) {
   const closeSheet = () => onOpenChange(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className="md:hidden">
@@ -56,30 +75,52 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
             variant="secondary"
             size="icon"
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className="h-11 w-11 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[var(--apple-label)] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+            className="h-11 w-11 border border-[var(--border)] bg-card text-foreground transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
           >
             <Menu className="size-5" />
           </Button>
         </SheetTrigger>
         <SheetContent
           side="right"
-          className="hb-dialog-surface w-[92vw] max-w-sm border-[var(--hb-dialog-border)] p-0 text-[var(--apple-label)]"
+          className="hb-dialog-surface w-[92vw] max-w-sm border-border p-0 text-foreground"
         >
-          <SheetHeader className="border-b border-[var(--apple-nav-pill-border)] px-5 py-4">
-            <SheetTitle className="text-left text-sm font-semibold tracking-[-0.015em] text-[var(--apple-label)]">
+          <SheetHeader className="border-b border-[var(--border)] px-5 py-4">
+            <SheetTitle className="text-left text-sm font-semibold tracking-[-0.015em] text-foreground">
               Hobbistas Menu
             </SheetTitle>
           </SheetHeader>
 
           <div className="h-[calc(100vh-72px)] overflow-y-auto px-5 py-4 [scrollbar-width:thin]">
             <div className="space-y-4 pr-1">
+              <section className="space-y-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Quick links
+                </h3>
+                <div className="grid gap-2">
+                  {navItems.slice(0, 2).map(item => (
+                    <Button
+                      key={item.href}
+                      asChild
+                      variant="secondary"
+                      className={mobileChipClass(isHrefActive(pathname, item.href), true)}
+                    >
+                      <Link href={item.href}>
+                        <NavItemContent icon={item.icon} label={item.label} />
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              </section>
+
               {hobbyItems.length > 0 ? (
                 <>
+                  <Separator className="h-[0.5px] bg-[var(--border)]" />
+
                   <section className="space-y-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Library
                     </h3>
-                    <div className="-mx-1 overflow-x-auto px-1 pb-2 [scrollbar-width:thin] touch-pan-x">
+                    <div className="-mx-1 touch-pan-x overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
                       <div className="flex w-max min-w-max gap-2">
                         {hobbyItems.map(item => (
                           <Button
@@ -96,55 +137,66 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       </div>
                     </div>
                   </section>
-
-                  <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
                 </>
               ) : null}
 
+              {navItems.length > 2 && (
+                <>
+                  <Separator className="h-[0.5px] bg-[var(--border)]" />
+
+                  <section className="space-y-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      More
+                    </h3>
+                    <div className="grid gap-2">
+                      {navItems.slice(2).map(item => (
+                        <Button
+                          key={item.href}
+                          asChild
+                          variant="secondary"
+                          className={mobileChipClass(isHrefActive(pathname, item.href), true)}
+                        >
+                          <Link href={item.href}>
+                            <NavItemContent icon={item.icon} label={item.label} />
+                          </Link>
+                        </Button>
+                      ))}
+                    </div>
+                  </section>
+                </>
+              )}
+
+              <Separator className="h-[0.5px] bg-[var(--border)]" />
+
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">
-                  Quick links
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Appearance
                 </h3>
-                <div className="grid gap-2">
-                  {navItems.map(item => (
-                    <Button
-                      key={item.href}
-                      asChild
-                      variant="secondary"
-                      className={mobileChipClass(isHrefActive(pathname, item.href), true)}
-                    >
-                      <Link href={item.href}>
-                        <NavItemContent icon={item.icon} label={item.label} />
-                      </Link>
-                    </Button>
-                  ))}
-                </div>
-              </section>
-
-              <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
-
-              <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Appearance</h3>
                 <ThemeToggleButton
                   theme={theme}
                   onToggle={onToggleTheme}
                   iconOnly={false}
-                  className="w-full justify-start border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3"
+                  className="w-full justify-start border-[var(--border)] bg-card px-3"
                 />
               </section>
 
-              <Separator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
+              <Separator className="h-[0.5px] bg-[var(--border)]" />
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--apple-secondary-label)]">Account</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Account
+                </h3>
                 {!authResolved ? (
                   <NavbarAuthSkeletonMobile />
                 ) : isAuthenticated && user ? (
                   <div className="grid gap-2">
-                    <div className="flex h-11 items-center gap-2 rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3">
-                      <Avatar className="h-7 w-7 border border-[var(--apple-nav-pill-border)]">
-                        <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
-                        <AvatarFallback className="bg-[var(--apple-nav-pill-hover)] text-xs font-semibold text-[var(--apple-label)]">
+                    <div className="flex h-11 items-center gap-2 border border-[var(--border)] bg-card px-3">
+                      <Avatar className="h-7 w-7 border border-[var(--border)]">
+                        <AvatarImage
+                          src={user.avatar_url || undefined}
+                          alt={user.username || 'User'}
+                        />
+                        <AvatarFallback className="bg-[hsl(var(--accent))/10] text-xs font-semibold text-foreground">
                           {getUserInitials(user.username)}
                         </AvatarFallback>
                       </Avatar>
@@ -154,7 +206,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       <Button
                         type="button"
                         variant="secondary"
-                        className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+                        className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
                         onClick={() => {
                           closeSheet();
                           onAdd();
@@ -164,26 +216,42 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                         <span>Quick add</span>
                       </Button>
                     ) : null}
-                    <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
+                    >
                       <Link href="/pages/profile">
                         <User className="size-4" />
                         <span>Profile</span>
                       </Link>
                     </Button>
-                    <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
+                    >
                       <Link href="/pages/profile/edit">
                         <PenLine className="size-4" />
                         <span>Edit profile</span>
                       </Link>
                     </Button>
-                    <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
+                    >
                       <Link href="/pages/support/tickets">
                         <Ticket className="size-4" />
                         <span>My tickets</span>
                       </Link>
                     </Button>
                     {canAccessAdminPanel ? (
-                      <Button asChild variant="secondary" className="h-11 justify-start rounded-[var(--apple-radius-control)] border border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]">
+                      <Button
+                        asChild
+                        variant="secondary"
+                        className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
+                      >
                         <Link href="/admin">
                           <ShieldCheck className="size-4" />
                           <span>Admin Panel</span>
@@ -193,7 +261,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-11 justify-start rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+                      className="h-11 justify-start border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
                       onClick={() => {
                         closeSheet();
                         void onLogout();
@@ -208,7 +276,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                     <Button
                       asChild
                       variant="outline"
-                      className="h-11 rounded-[var(--apple-radius-control)] border-[var(--apple-nav-pill-border)] bg-[var(--apple-nav-pill-bg)] text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:bg-[var(--apple-nav-pill-hover)] active:scale-[0.98]"
+                      className="h-11 border-[var(--border)] bg-card text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
                     >
                       <Link href="/auth/login">
                         <LogIn className="size-4" />
@@ -218,7 +286,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                     <Button
                       asChild
                       variant="primary"
-                      className="h-11 rounded-[var(--apple-radius-control)] border border-transparent bg-[var(--apple-system-blue)] text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--hb-ease)] hover:brightness-110 active:scale-[0.98]"
+                      className="h-11 border border-transparent bg-info text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:brightness-110 active:scale-[0.98]"
                     >
                       <Link href="/auth/register">
                         <UserPlus className="size-4" />
@@ -239,10 +307,10 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
 function NavbarAuthSkeletonMobile() {
   return (
     <div className="grid gap-2">
-      <div className="h-11 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
+      <div className="h-11 animate-pulse bg-[hsl(var(--accent))/10]" />
       <div className="grid grid-cols-2 gap-2">
-        <div className="h-10 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
-        <div className="h-10 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
+        <div className="h-10 animate-pulse bg-[hsl(var(--accent))/10]" />
+        <div className="h-10 animate-pulse bg-[hsl(var(--accent))/10]" />
       </div>
     </div>
   );

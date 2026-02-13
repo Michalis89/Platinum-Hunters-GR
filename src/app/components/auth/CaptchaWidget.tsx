@@ -92,7 +92,11 @@ type CaptchaWidgetProps = {
   resetSignal?: number;
 };
 
-export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }: CaptchaWidgetProps) {
+export default function CaptchaWidget({
+  onTokenChange,
+  helperText,
+  resetSignal,
+}: CaptchaWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
   const onTokenRef = useRef(onTokenChange);
@@ -193,31 +197,25 @@ export default function CaptchaWidget({ onTokenChange, helperText, resetSignal }
   };
 
   return (
-    <div className="apple-auth-section space-y-2 px-4 py-4">
+    <div className="space-y-2 px-4 py-4">
       <div ref={containerRef} />
-      {helperText && (
-        <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">{helperText}</p>
-      )}
+      {helperText && <p className="text-xs text-muted-foreground">{helperText}</p>}
       {error && (
         <div className="space-y-2">
-          <p className="text-xs text-[#ff3b30]">{error}</p>
-          <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
+          <p className="text-xs text-destructive">{error}</p>
+          <p className="text-xs text-muted-foreground">
             If this keeps happening, retry CAPTCHA and then refresh the page.
           </p>
           <button
             type="button"
             onClick={retryCaptcha}
-            className="rounded-[var(--apple-radius-control)] border border-[var(--apple-separator)] px-2.5 py-1 text-xs text-[var(--apple-label)] transition hover:border-[var(--apple-system-blue)]/55"
+            className="hover:border-info/55 border-border px-2.5 py-1 text-xs text-foreground transition"
           >
             Retry CAPTCHA
           </button>
         </div>
       )}
-      {!error && !ready && (
-        <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
-          Loading CAPTCHA...
-        </p>
-      )}
+      {!error && !ready && <p className="text-xs text-muted-foreground">Loading CAPTCHA...</p>}
     </div>
   );
 }

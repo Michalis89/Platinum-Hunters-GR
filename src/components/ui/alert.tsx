@@ -2,6 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 const alertVariants = cva(
   "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
@@ -11,6 +12,12 @@ const alertVariants = cva(
         default: "bg-background text-foreground",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        success:
+          "border-success/50 text-success dark:border-success [&>svg]:text-success",
+        warning:
+          "border-warning/50 text-warning dark:border-warning [&>svg]:text-warning",
+        info:
+          "border-info/50 text-info dark:border-info [&>svg]:text-info",
       },
     },
     defaultVariants: {
@@ -57,3 +64,42 @@ const AlertDescription = React.forwardRef<
 AlertDescription.displayName = "AlertDescription"
 
 export { Alert, AlertTitle, AlertDescription }
+
+type ErrorAlertProps = {
+  message: React.ReactNode
+  title?: React.ReactNode
+  onRetry?: () => void
+  retryLabel?: string
+  className?: string
+}
+
+function ErrorAlert({
+  message,
+  title = "Σφάλμα",
+  onRetry,
+  retryLabel = "Δοκίμασε ξανά",
+  className,
+}: ErrorAlertProps) {
+  return (
+    <Alert
+      variant="destructive"
+      className={cn(
+        "rounded-2xl border-border bg-card/80",
+        "px-4 py-3",
+        className,
+      )}
+    >
+      <AlertTitle className="text-sm font-semibold">{title}</AlertTitle>
+      <AlertDescription className="text-sm text-muted-foreground">{message}</AlertDescription>
+      {onRetry && (
+        <div className="mt-3">
+          <Button variant="secondary" size="sm" onClick={onRetry}>
+            {retryLabel}
+          </Button>
+        </div>
+      )}
+    </Alert>
+  )
+}
+
+export { ErrorAlert }

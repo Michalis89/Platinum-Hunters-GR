@@ -111,15 +111,15 @@ export function HobbiesCategoryCard({ category }: HobbiesCategoryCardProps) {
   const IconComponent = ICON_MAP[category.icon] || Gamepad2;
 
   return (
-    <div className="hover:border-[var(--hb-primary-strong)]/50 group rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--hb-shadow-md-hover)]">
+    <div className="hover:border-primary/50 group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
       <div className="mb-4 flex items-start justify-between">
-        <div className="bg-[var(--hb-primary-strong)]/10 group-hover:bg-[var(--hb-primary-strong)]/20 flex h-12 w-12 items-center justify-center rounded-xl text-[var(--hb-primary-strong)] transition-colors">
+        <div className="bg-primary/10 group-hover:bg-primary/20 flex h-12 w-12 items-center justify-center rounded-xl text-primary transition-colors">
           <IconComponent className="h-6 w-6" />
         </div>
       </div>
 
-      <h3 className="mb-1.5 text-lg font-semibold text-[var(--hb-headline)]">{category.title}</h3>
-      <p className="mb-4 text-sm leading-relaxed text-[var(--hb-muted)]">{category.description}</p>
+      <h3 className="mb-1.5 text-lg font-semibold text-foreground">{category.title}</h3>
+      <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{category.description}</p>
 
       <div className="flex flex-wrap gap-2">
         <ModuleButton

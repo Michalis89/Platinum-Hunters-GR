@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -7,7 +7,7 @@ import { ClipboardCopy, Heart, Pencil, Share2, Trash2 } from 'lucide-react';
 import type { ArticleRow } from '@/types/database';
 import { selectCanEditArticles, selectIsAuthorOf } from '@/store/slices/authSlice';
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 
 type ActionRowProps = {
@@ -128,7 +128,11 @@ export default function ActionRow({ article }: ActionRowProps) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Θέλεις να διαγράψεις οριστικά το άρθρο; Η ενέργεια δεν αναστρέφεται.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to permanently delete this article? This action cannot be undone.',
+      )
+    ) {
       return;
     }
 
@@ -140,16 +144,16 @@ export default function ActionRow({ article }: ActionRowProps) {
 
       if (!response.ok) {
         const data = await response.json().catch(() => null);
-        throw new Error(data?.error || 'Αποτυχία διαγραφής άρθρου');
+        throw new Error(data?.error || 'Failed to delete the article.');
       }
 
       router.push(fallbackHref);
     } catch (deleteError) {
       console.error('Error deleting article:', deleteError);
       window.alert(
-        deleteError instanceof Error
-          ? deleteError.message
-          : 'Κάτι πήγε στραβά κατά τη διαγραφή. Δοκίμασε ξανά.',
+          deleteError instanceof Error
+            ? deleteError.message
+            : 'Something went wrong while deleting. Please try again.',
       );
     } finally {
       setIsDeleteLoading(false);
@@ -165,11 +169,11 @@ export default function ActionRow({ article }: ActionRowProps) {
           size="icon"
           variant="secondary"
           onClick={handleShare}
-          aria-label="Κοινοποίηση"
-          title="Κοινοποίηση"
-          className="h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)] shadow-sm transition-all hover:scale-110 hover:text-[var(--hb-primary)] active:scale-95"
+          aria-label="Share"
+          title="Share"
+          className="h-12 w-12 rounded-full border border-border bg-card text-foreground shadow-sm transition-all hover:scale-110 hover:text-primary active:scale-95"
         >
-          <Share2 size={28} strokeWidth={2.2} /> {/* Μεγαλύτερο εικονίδιο & πιο παχύ stroke */}
+          <Share2 size={28} strokeWidth={2.2} /> {/* Larger icon & thicker stroke */}
         </Button>
 
         <Button
@@ -178,12 +182,10 @@ export default function ActionRow({ article }: ActionRowProps) {
           size="icon"
           variant="secondary"
           onClick={handleCopyLink}
-          aria-label="Αντιγραφή συνδέσμου"
-          title={copied ? 'Ο σύνδεσμος αντιγράφηκε' : 'Αντιγραφή συνδέσμου'}
-          className={`h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-all active:scale-95 ${
-            copied
-              ? 'text-[var(--hb-primary)]'
-              : 'text-[var(--hb-text)] hover:text-[var(--hb-primary)]'
+          aria-label="Copy link"
+          title={copied ? 'Link copied!' : 'Copy link'}
+          className={`h-12 w-12 rounded-full border border-border bg-card shadow-sm transition-all active:scale-95 ${
+            copied ? 'text-primary' : 'text-foreground hover:text-primary'
           }`}
         >
           <ClipboardCopy size={28} strokeWidth={2.2} />
@@ -196,9 +198,9 @@ export default function ActionRow({ article }: ActionRowProps) {
           variant="secondary"
           onClick={toggleLike}
           disabled={likeLoading || isAuthor}
-          className={`h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] shadow-sm transition-all active:scale-90 ${
-            likeState.liked ? 'text-[var(--hb-primary)]' : 'text-[var(--hb-text)]'
-          } ${isAuthor ? 'cursor-not-allowed opacity-40' : 'hover:text-[var(--hb-primary)]'}`}
+          className={`h-12 w-12 rounded-full border border-border bg-card shadow-sm transition-all active:scale-90 ${
+            likeState.liked ? 'text-primary' : 'text-foreground'
+          } ${isAuthor ? 'cursor-not-allowed opacity-40' : 'hover:text-primary'}`}
         >
           <Heart size={28} fill={likeState.liked ? 'currentColor' : 'none'} strokeWidth={2.2} />
         </Button>
@@ -210,7 +212,7 @@ export default function ActionRow({ article }: ActionRowProps) {
             size="icon"
             variant="secondary"
             onClick={() => setIsEditOpen(true)}
-            className="h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)] shadow-sm transition-all hover:text-[var(--hb-primary)] active:scale-95"
+            className="h-12 w-12 rounded-full border border-border bg-card text-foreground shadow-sm transition-all hover:text-primary active:scale-95"
           >
             <Pencil size={28} strokeWidth={2.2} />
           </Button>
@@ -224,10 +226,10 @@ export default function ActionRow({ article }: ActionRowProps) {
             size="icon"
             onClick={handleDelete}
             disabled={isDeleteLoading}
-            className="h-12 w-12 rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] text-red-500 shadow-sm transition-all hover:bg-red-500/10 active:scale-95"
+            className="hover:bg-destructive/10 h-12 w-12 rounded-full border border-border bg-card text-destructive shadow-sm transition-all active:scale-95"
           >
             {isDeleteLoading ? (
-              <LoadingSpinner size="sm" inline className="text-red-500" />
+              <Spinner className="size-4 text-destructive" />
             ) : (
               <Trash2 size={28} strokeWidth={2.2} />
             )}

@@ -7,7 +7,6 @@ const REVIEW_DETAIL_OPTIONS: ArticleDetailPageOptions = {
   basePath: '/pages/reviews',
   breadcrumbLabel: 'Κριτικές',
   topicFilter: 'reviews',
-  designVariant: 'apple',
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -24,7 +23,6 @@ export default function ReviewPage({ params }: { params: Promise<{ slug: string 
       basePath={REVIEW_DETAIL_OPTIONS.basePath}
       breadcrumbLabel={REVIEW_DETAIL_OPTIONS.breadcrumbLabel}
       topicFilter={REVIEW_DETAIL_OPTIONS.topicFilter}
-      designVariant={REVIEW_DETAIL_OPTIONS.designVariant}
     />
   );
 }

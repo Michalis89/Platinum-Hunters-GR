@@ -1,11 +1,5 @@
 'use client';
 
-/**
- * iOS-native bottom tab bar for mobile navigation
- * Follows Apple Human Interface Guidelines for tab bars
- * Provides quick access to primary app sections without opening menu
- */
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Library, Newspaper, User } from 'lucide-react';
@@ -63,7 +57,6 @@ export default function MobileTabBar() {
     '/auth/login',
     '/auth/register',
     '/auth/reset-password',
-    '/forgot-password',
     '/auth/confirm-email',
   ];
 
@@ -84,10 +77,10 @@ export default function MobileTabBar() {
 
       {/* Tab Bar */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden safe-area-inset-bottom"
+        className="safe-area-inset-bottom fixed bottom-0 left-0 right-0 z-50 md:hidden"
         aria-label="Mobile navigation"
       >
-        <div className="apple-nav-shell border-t border-[var(--apple-separator)]">
+        <div className="border-t">
           <div className="flex h-16 items-center justify-around px-2">
             {visibleTabs.map(tab => {
               const Icon = tab.icon;
@@ -97,14 +90,9 @@ export default function MobileTabBar() {
                 <Link
                   key={tab.href}
                   href={tab.href}
-                  className={`
-                    flex min-w-[64px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2
-                    transition-colors duration-150
-                    ${active
-                      ? 'text-[var(--apple-system-blue)]'
-                      : 'text-[var(--apple-secondary-label)] active:text-[var(--apple-label)]'
-                    }
-                  `}
+                  className={`flex min-w-[64px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-colors duration-150 ${
+                    active ? 'text-info' : 'text-muted-foreground active:text-foreground'
+                  } `}
                   aria-label={tab.label}
                   aria-current={active ? 'page' : undefined}
                 >
@@ -112,9 +100,7 @@ export default function MobileTabBar() {
                     className={`h-6 w-6 transition-transform duration-150 ${active ? 'scale-110' : ''}`}
                     aria-hidden="true"
                   />
-                  <span className="apple-caption text-[11px] font-medium tracking-tight">
-                    {tab.label}
-                  </span>
+                  <span className="text-[11px] font-medium tracking-tight">{tab.label}</span>
                 </Link>
               );
             })}

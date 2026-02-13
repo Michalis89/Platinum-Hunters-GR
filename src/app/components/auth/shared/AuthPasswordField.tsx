@@ -38,10 +38,7 @@ export function AuthPasswordField({
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
-        <Label
-          htmlFor={id}
-          className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
-        >
+        <Label htmlFor={id} className="text-[13px] font-medium tracking-[-0.008em] text-foreground">
           {label}
         </Label>
         {infoTooltip ? (
@@ -51,7 +48,7 @@ export function AuthPasswordField({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 rounded-full text-[var(--apple-secondary-label)]"
+                className="h-7 w-7 rounded-full text-muted-foreground"
                 ariaLabel={`${label} info`}
               >
                 <CircleAlert className="h-4 w-4" />
@@ -74,7 +71,7 @@ export function AuthPasswordField({
           suppressHydrationWarning
           aria-invalid={!!error}
           aria-describedby={errorId}
-          className="apple-auth-control h-11 border-[var(--apple-separator)] bg-[var(--hb-input-bg)] pr-12 text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]"
+          className="h-11 bg-card pr-12 text-foreground placeholder:text-muted-foreground"
         />
         <Tooltip>
           <TooltipTrigger asChild>
@@ -85,15 +82,15 @@ export function AuthPasswordField({
               onClick={onToggleVisibility}
               className={`absolute right-1.5 top-1/2 z-20 h-8 w-8 -translate-y-1/2 rounded-[10px] border ${
                 showPassword
-                  ? 'border-[var(--apple-system-blue)] bg-[var(--apple-system-blue)] text-white hover:bg-[var(--apple-system-blue)]'
-                  : 'border-[var(--apple-separator)] bg-[var(--hb-card)] text-[var(--apple-label)] hover:bg-[var(--apple-tertiary-fill)]'
+                  ? 'border-primary bg-primary text-white hover:bg-primary'
+                  : 'hover:bg-accent/10 bg-card text-foreground'
               }`}
               ariaLabel={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4 stroke-current text-white opacity-100" />
               ) : (
-                <Eye className="h-4 w-4 stroke-current text-[var(--apple-label)] opacity-100" />
+                <Eye className="h-4 w-4 stroke-current text-foreground opacity-100" />
               )}
             </Button>
           </TooltipTrigger>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import EmptyState from '@/app/components/ui/EmptyState';
+import EmptyState from '@/components/ui/empty';
 import MediaSearchResultCard from './MediaSearchResultCard';
 import { MediaEntry, SearchResult } from './types';
 import { Button } from '@/components/ui/button';
@@ -33,16 +33,14 @@ export default function SuggestionsPanel({
   };
 
   return (
-    <section className="apple-card mt-6 rounded-[20px] border-[var(--apple-separator)] p-4 sm:p-5">
+    <section className="mt-6 rounded-[20px] p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="apple-body-tracking text-sm font-medium text-[var(--apple-label)]">
-          Προτάσεις από την κοινότητα
-        </p>
+        <p className="text-sm font-medium text-foreground">Προτάσεις από την κοινότητα</p>
         <Button
           type="button"
           variant="ghost"
           onClick={onClose}
-          className="h-9 rounded-[12px] px-3 text-[var(--apple-secondary-label)]"
+          className="h-9 rounded-[12px] px-3 text-muted-foreground"
         >
           Κλείσιμο
         </Button>
@@ -57,7 +55,7 @@ export default function SuggestionsPanel({
           />
         ))}
         {isLoading && (
-          <div className="apple-card md:col-span-2 rounded-[16px] border-[var(--apple-separator)] px-4 py-5 text-center text-xs text-[var(--apple-secondary-label)]">
+          <div className="rounded-[16px] px-4 py-5 text-center text-xs text-muted-foreground md:col-span-2">
             Φόρτωση προτάσεων...
           </div>
         )}

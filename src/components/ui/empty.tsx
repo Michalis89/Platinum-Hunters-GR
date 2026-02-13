@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority"
+import type { ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -94,6 +95,43 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+type EmptyStateSize = "sm" | "md"
+
+type EmptyStateProps = {
+  icon?: ReactNode
+  title: string
+  description?: string
+  action?: ReactNode
+  size?: EmptyStateSize
+  className?: string
+}
+
+function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+  size = "md",
+  className,
+}: EmptyStateProps) {
+  const isCompact = size === "sm"
+
+  return (
+    <Empty className={cn(isCompact ? "gap-4" : "gap-6", className)}>
+      {icon ? <EmptyMedia variant="icon">{icon}</EmptyMedia> : null}
+      <EmptyHeader className={cn(isCompact ? "gap-1" : "gap-2")}>
+        <EmptyTitle className={cn(isCompact ? "text-base" : "text-lg")}>{title}</EmptyTitle>
+        {description ? (
+          <EmptyDescription className={cn(isCompact ? "text-sm" : "")}>{description}</EmptyDescription>
+        ) : null}
+      </EmptyHeader>
+      {action ? (
+        <EmptyContent className={cn(isCompact ? "gap-2" : "gap-3")}>{action}</EmptyContent>
+      ) : null}
+    </Empty>
+  )
+}
+
 export {
   Empty,
   EmptyHeader,
@@ -101,4 +139,7 @@ export {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
+  EmptyState,
 }
+
+export default EmptyState

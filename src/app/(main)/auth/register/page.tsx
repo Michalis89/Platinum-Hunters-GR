@@ -32,14 +32,14 @@ const highlights = [
 
 export default function RegisterPage() {
   return (
-    <div className="apple-auth-shell min-h-screen text-[var(--apple-label)]">
-      <PageWrapper className="py-5 md:py-12">
-        <section className="apple-auth-card relative isolate overflow-hidden px-4 py-5 md:px-8 md:py-8">
-          <div className="pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full bg-[var(--apple-system-blue)]/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full bg-[var(--apple-system-blue)]/8 blur-3xl" />
+    <div className="min-h-screen text-foreground">
+      <PageWrapper>
+        <section className="relative isolate px-4 py-5 md:px-8 md:py-8">
+          <div className="pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full bg-background blur-3xl" />
+          <div className="bg-primary/8 pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full blur-3xl" />
 
-          <div className="relative grid items-start gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8">
-            <aside className="hidden space-y-6 lg:block">
+          <div>
+            <aside>
               <AuthIntroHeading
                 variant="desktop"
                 eyebrow="Join now"
@@ -47,13 +47,13 @@ export default function RegisterPage() {
                 description="One dashboard for all your hobbies, with clean organization and clear progress."
               />
 
-              <div className="apple-auth-section flex items-center gap-3 px-4 py-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[var(--apple-radius-control)] bg-[var(--apple-system-blue)]/12 text-[var(--apple-system-blue)]">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="bg-primary/12 flex h-10 w-10 items-center justify-center text-primary">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[var(--apple-label)]">Hobbista Hub</p>
-                  <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
+                  <p>Hobbista Hub</p>
+                  <p className="text-xs text-muted-foreground">
                     Consistent layout, controls, and interactions.
                   </p>
                 </div>
@@ -63,15 +63,13 @@ export default function RegisterPage() {
                 {highlights.map(item => {
                   const Icon = item.icon;
                   return (
-                    <article key={item.title} className="apple-auth-section flex gap-3 px-4 py-3">
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-[var(--apple-system-blue)]/12 text-[var(--apple-system-blue)]">
+                    <article key={item.title} className="flex gap-3 px-4 py-3">
+                      <div className="bg-primary/12 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] text-primary">
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-[var(--apple-label)]">{item.title}</p>
-                        <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">
-                          {item.description}
-                        </p>
+                        <p>{item.title}</p>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
                       </div>
                     </article>
                   );

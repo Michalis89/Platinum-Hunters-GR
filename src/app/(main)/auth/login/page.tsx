@@ -32,11 +32,19 @@ const highlights = [
 
 export default function LoginPage() {
   return (
-    <div className="apple-auth-shell min-h-screen text-[var(--apple-label)]">
+    <div className="min-h-screen bg-background text-foreground">
       <PageWrapper className="py-5 md:py-12">
-        <section className="apple-auth-card relative isolate overflow-hidden px-4 py-5 md:px-8 md:py-8">
-          <div className="bg-[var(--apple-system-blue)]/10 pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full blur-3xl" />
-          <div className="bg-[var(--apple-system-blue)]/8 pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full blur-3xl" />
+        <section
+          className={[
+            // “Hero card”
+            'relative isolate overflow-hidden',
+            'rounded-[var(--radius-xl)] border border-border bg-card shadow-[var(--shadow-lg)]',
+            'px-4 py-5 md:px-8 md:py-8',
+          ].join(' ')}
+        >
+          {/* Ambient blobs */}
+          <div className="bg-primary/10 pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full blur-3xl" />
+          <div className="bg-primary/10 pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full blur-3xl" />
 
           <div className="relative grid items-start gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8">
             <aside className="hidden space-y-6 lg:block">
@@ -47,15 +55,18 @@ export default function LoginPage() {
                 description="Pick up where you left off. Everything in one place with a single sign-in."
               />
 
-              <div className="apple-auth-section flex items-center gap-3 px-4 py-3">
-                <div className="bg-[var(--apple-system-blue)]/12 flex h-10 w-10 items-center justify-center rounded-[var(--apple-radius-control)] text-[var(--apple-system-blue)]">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[var(--apple-label)]">Hobbista Hub</p>
-                  <p className="apple-body-tracking text-xs text-[var(--apple-secondary-label)]">
-                    Stable, clean, and consistent workspace.
-                  </p>
+              {/* “Row” style (sub-surface) */}
+              <div className="bg-background/30 rounded-[var(--radius-lg)] border border-border px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] text-primary">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Hobbista Hub</p>
+                    <p className="text-xs text-muted-foreground">
+                      Stable, clean, and consistent workspace.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -63,17 +74,23 @@ export default function LoginPage() {
                 {highlights.map(item => {
                   const Icon = item.icon;
                   return (
-                    <article key={item.title} className="apple-auth-section flex gap-3 px-4 py-3">
-                      <div className="bg-[var(--apple-system-blue)]/12 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] text-[var(--apple-system-blue)]">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[var(--apple-label)]">
-                          {item.title}
-                        </p>
-                        <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">
-                          {item.description}
-                        </p>
+                    <article
+                      key={item.title}
+                      className={[
+                        'bg-background/30 rounded-[var(--radius-lg)] border border-border',
+                        'px-4 py-3',
+                        'transition-colors duration-150',
+                        'hover:bg-background/40',
+                      ].join(' ')}
+                    >
+                      <div className="flex gap-3">
+                        <div className="bg-primary/10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] text-primary">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </div>
                       </div>
                     </article>
                   );
@@ -89,7 +106,11 @@ export default function LoginPage() {
                 description="Sign in to continue with your hobbies and backlogs."
               />
 
-              <Suspense fallback={<div className="h-[560px] w-full" />}>
+              <Suspense
+                fallback={
+                  <div className="bg-card/60 h-[560px] w-full animate-pulse rounded-[var(--radius-xl)] border border-border" />
+                }
+              >
                 <LoginForm />
               </Suspense>
             </div>

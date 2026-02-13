@@ -8,7 +8,7 @@ type HomeDashboardHeaderProps = {
 };
 
 function useGreeting() {
-  const [greeting, setGreeting] = useState<string>('Γεια σου');
+  const [greeting, setGreeting] = useState<string>('Hello');
 
   useEffect(() => {
     setGreeting(getGreeting());
@@ -26,19 +26,19 @@ export function HomeDashboardHeader({ username, displayName }: HomeDashboardHead
       <div className="mx-auto max-w-7xl">
         <div className="max-w-3xl space-y-4">
           <p
-            className="apple-secondary-label apple-body-tracking min-h-[1.25rem] text-sm font-medium"
+            className="text-muted-foreground min-h-[1.25rem] text-sm font-medium tracking-normal"
             suppressHydrationWarning
           >
             {greeting}
           </p>
-          <h1 className="apple-label apple-title-tracking text-4xl font-semibold leading-[1.05] md:text-5xl">
-            Καλωσόρισες,{' '}
-            <span className="bg-gradient-to-r from-[var(--apple-label)] via-[var(--apple-label)] to-[var(--apple-secondary-label)] bg-clip-text text-transparent">
+          <h1 className="text-foreground text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
+            Welcome back,{' '}
+            <span className="bg-gradient-to-r from-[hsl(var(--text-primary))] via-[hsl(var(--text-primary))] to-[hsl(var(--text-secondary))] bg-clip-text text-transparent">
               {name}
             </span>
           </h1>
-          <p className="apple-secondary-label apple-body-tracking max-w-2xl text-base leading-relaxed">
-            Οργάνωσε το backlog σου, συνέχισε ό,τι έχεις ξεκινήσει και δες τι προτείνει η κοινότητα.
+          <p className="text-muted-foreground max-w-2xl text-base leading-relaxed tracking-normal">
+            Keep your backlog organized, pick up where you left off, and explore community recommendations.
           </p>
         </div>
       </div>
@@ -47,5 +47,5 @@ export function HomeDashboardHeader({ username, displayName }: HomeDashboardHead
 }
 
 function getGreeting(): string {
-  return new Date().getHours() < 12 ? 'Καλημέρα' : 'Καλησπέρα';
+  return new Date().getHours() < 12 ? 'Good morning' : 'Good afternoon';
 }

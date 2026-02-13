@@ -6,7 +6,6 @@ const AUTH_ROUTES = [
   '/auth/register',
   '/auth/reset-password',
   '/auth/confirm-email',
-  '/forgot-password',
 ];
 
 const matchesRoute = (route: string, pathname: string) => pathname === route || pathname.startsWith(`${route}/`);

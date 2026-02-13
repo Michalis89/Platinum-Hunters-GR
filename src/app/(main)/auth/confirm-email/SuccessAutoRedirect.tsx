@@ -29,7 +29,7 @@ export default function SuccessAutoRedirect({
   }, [countdown, router, to]);
 
   return (
-    <p className="text-center text-sm text-[var(--hb-muted)]" aria-live="polite">
+    <p className="text-center text-sm text-muted-foreground" aria-live="polite">
       Auto redirect to sign in in {countdown}s.
     </p>
   );

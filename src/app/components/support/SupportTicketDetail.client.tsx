@@ -4,18 +4,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
-import ErrorState from '@/app/components/ui/ErrorState';
-import Badge from '@/app/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/app/components/ui/Textarea';
-import Feedback from '@/app/components/ui/Feedback';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
 // Middleware ensures only authenticated users reach this page
-import { FormattedDate } from '@/app/components/ui/FormattedDate';
+import { FormattedDate } from '@/utils/components/FormattedDate';
 import {
   SUPPORT_STATUS_LABELS,
   SUPPORT_STATUS_COLORS,
@@ -174,13 +173,16 @@ export default function SupportTicketDetail() {
   if (loading) {
     return (
       <div className="py-20">
-        <LoadingSpinner label="Φορτώνουμε το ticket..." />
+        <div className="flex flex-col items-center justify-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Φορτώνουμε το ticket...</span>
+        </div>
       </div>
     );
   }
 
   if (error || !ticket) {
-    return <ErrorState error={error || 'Το ticket δεν βρέθηκε'} />;
+    return <ErrorAlert message={error || 'Το ticket δεν βρέθηκε'} />;
   }
 
   return (
@@ -192,21 +194,30 @@ export default function SupportTicketDetail() {
         <PageHero
           eyebrow="Υποστήριξη"
           title={
-            <span className="apple-title-tracking text-3xl font-semibold text-[var(--apple-label)] md:text-5xl">
+            <span className="text-3xl font-semibold text-foreground md:text-5xl">
               {ticket.subject}
             </span>
           }
           subtitle={`Κατηγορία: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
-          sectionClassName="apple-hero pt-4"
-          subtitleClassName="apple-body-tracking text-[var(--apple-secondary-label)]"
+          sectionClassName=" pt-4"
+          subtitleClassName=" text-muted-foreground"
           badges={
             <>
               <Badge
-                text={statusLabels[ticket.status] || ticket.status}
-                color={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
-              />
+                variant={
+                  SUPPORT_STATUS_COLORS[ticket.status] === 'green'
+                    ? 'default'
+                    : SUPPORT_STATUS_COLORS[ticket.status] === 'blue'
+                      ? 'default'
+                      : SUPPORT_STATUS_COLORS[ticket.status] === 'yellow'
+                        ? 'outline'
+                        : 'secondary'
+                }
+              >
+                {statusLabels[ticket.status] || ticket.status}
+              </Badge>
               {ticket.severity ? (
-                <span className="apple-pill rounded-full px-3 py-1 text-xs text-[var(--apple-secondary-label)]">
+                <span className="rounded-full px-3 py-1 text-xs text-muted-foreground">
                   Σοβαρότητα: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
                 </span>
               ) : null}
@@ -215,13 +226,10 @@ export default function SupportTicketDetail() {
         />
 
         <PageContainer size="md" className="pb-20">
-          <Card className={`${UI_CLASSNAMES.panelCard} apple-card overflow-hidden`}>
-            <CardHeader className="border-[var(--apple-separator-soft)] bg-transparent">
-              <CardTitle className="apple-title-tracking flex items-center gap-2 text-[var(--apple-label)]">
-                <span
-                  className="h-2.5 w-2.5 rounded-full bg-[var(--apple-system-blue)]"
-                  aria-hidden
-                />
+          <Card className={`${UI_CLASSNAMES.panelCard} `}>
+            <CardHeader className="bg-transparent">
+              <CardTitle className="flex items-center gap-2 text-foreground">
+                <span className="bg-info h-2.5 w-2.5 rounded-full" aria-hidden />
                 Ιστορικό συνομιλίας
               </CardTitle>
             </CardHeader>
@@ -229,19 +237,17 @@ export default function SupportTicketDetail() {
               {messages.map(message => (
                 <div
                   key={message.id}
-                  className={`rounded-[var(--apple-radius-card)] border p-4 ${
-                    message.author_role === 'admin'
-                      ? 'border-[color-mix(in_srgb,var(--apple-system-blue)_35%,transparent)] bg-[color-mix(in_srgb,var(--apple-system-blue)_8%,var(--apple-surface))]'
-                      : 'border-[var(--apple-separator-soft)] bg-[var(--apple-surface)]'
+                  className={`rounded-lg border p-4 ${
+                    message.author_role === 'admin' ? 'border-primary/35 bg-primary/10' : 'bg-card'
                   }`}
                 >
-                  <div className="mb-2 flex items-center justify-between text-xs text-[var(--apple-secondary-label)]">
+                  <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-2">
                       <span
                         className={`h-2 w-2 rounded-full ${
                           message.author_role === 'admin'
-                            ? 'bg-[var(--apple-system-blue)]'
-                            : 'bg-[var(--apple-secondary-label)]'
+                            ? 'bg-info'
+                            : 'bg-[hsl(var(--muted-foreground))]'
                         }`}
                         aria-hidden
                       />
@@ -254,9 +260,7 @@ export default function SupportTicketDetail() {
                       className="text-xs"
                     />
                   </div>
-                  <p className="whitespace-pre-line text-sm text-[var(--hb-text)]">
-                    {message.message}
-                  </p>
+                  <p className="whitespace-pre-line text-sm text-foreground">{message.message}</p>
 
                   {attachmentsByMessage[message.id]?.length ? (
                     <div className="mt-3 space-y-2">
@@ -264,12 +268,12 @@ export default function SupportTicketDetail() {
                         <a
                           key={attachment.id}
                           href={attachment.signed_url ?? '#'}
-                          className="apple-pill flex items-center gap-2 rounded-[var(--apple-radius-control)] px-3 py-2 text-xs text-[var(--apple-label)] transition hover:border-[var(--apple-system-blue)]"
+                          className="hover:border-info flex items-center gap-2 px-3 py-2 text-xs text-foreground transition"
                           target="_blank"
                           rel="noreferrer"
                         >
                           <span
-                            className="h-1.5 w-1.5 rounded-full bg-[var(--apple-secondary-label)]"
+                            className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--muted-foreground))]"
                             aria-hidden
                           />
                           {attachment.file_name || 'Συνημμένο'}
@@ -280,28 +284,28 @@ export default function SupportTicketDetail() {
                 </div>
               ))}
 
-              <form
-                onSubmit={handleReplySubmit}
-                className="apple-material-surface space-y-4 rounded-[var(--apple-radius-card)] border-[var(--apple-separator-soft)] p-4"
-              >
-                <div className="apple-title-tracking text-sm font-semibold text-[var(--apple-label)]">
-                  Απάντησε στο ticket
-                </div>
+              <form onSubmit={handleReplySubmit} className="space-y-4 rounded-lg p-4">
+                <div className="text-sm font-semibold text-foreground">Απάντησε στο ticket</div>
                 {replyResult ? (
-                  <Feedback
-                    variant={replyResult.type === 'success' ? 'success' : 'error'}
-                    tone={replyResult.type === 'success' ? 'solid' : 'soft'}
-                    title={replyResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
-                    description={replyResult.message}
-                  />
+                  <Alert
+                    variant={replyResult.type === 'success' ? 'success' : 'destructive'}
+                    className="rounded-xl border border-border bg-card/80 px-4 py-3"
+                  >
+                    <AlertTitle className="text-base">
+                      {replyResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
+                    </AlertTitle>
+                    <AlertDescription>{replyResult.message}</AlertDescription>
+                  </Alert>
                 ) : null}
-                <Textarea
-                  label="Μήνυμα"
-                  value={replyText}
-                  onChange={event => setReplyText(event.target.value)}
-                  rows={3}
-                  disabled={replyLoading}
-                />
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">Μήνυμα</label>
+                  <Textarea
+                    value={replyText}
+                    onChange={event => setReplyText(event.target.value)}
+                    rows={3}
+                    disabled={replyLoading}
+                  />
+                </div>
                 <AttachmentDropzone
                   items={replyAttachments}
                   onChange={setReplyAttachments}

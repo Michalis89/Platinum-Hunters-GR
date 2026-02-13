@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
-import { SearchBar } from '@/app/components/ui/SearchBar';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import EmptyState from '@/app/components/ui/EmptyState';
+import EmptyState from '@/components/ui/empty';
+import { Input } from '@/components/ui/input';
 import MediaSearchResultCard from './MediaSearchResultCard';
 import { MediaCategory, MediaEntry, SearchResult, CATEGORY_CONFIG } from './types';
 
@@ -42,24 +43,31 @@ export default function CreateEntryPanel({
   };
 
   return (
-    <section className="apple-card mt-6 rounded-[20px] border-[var(--apple-separator)] p-4 sm:p-5">
+    <section className="mt-6 rounded-[20px] p-4 sm:p-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button
           type="button"
           variant="ghost"
           onClick={onClose}
-          className="h-9 rounded-[12px] px-3 text-[var(--apple-secondary-label)]"
+          className="h-9 rounded-[12px] px-3 text-muted-foreground"
         >
           Κλείσιμο
         </Button>
       </div>
 
       <div className="mt-4">
-        <SearchBar
-          value={searchQuery}
-          onChange={onSearchChange}
-          placeholder={config.searchPlaceholder}
-        />
+        <div className="relative">
+          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <Search size={16} />
+          </div>
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={event => onSearchChange(event.target.value)}
+            placeholder={config.searchPlaceholder}
+            className="pl-10"
+          />
+        </div>
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -73,7 +81,7 @@ export default function CreateEntryPanel({
           />
         ))}
         {isLoading && (
-          <div className="apple-card rounded-[16px] border-[var(--apple-separator)] px-4 py-5 text-center text-xs text-[var(--apple-secondary-label)] md:col-span-2">
+          <div className="rounded-[16px] px-4 py-5 text-center text-xs text-muted-foreground md:col-span-2">
             Αναζήτηση στη βάση μας...
           </div>
         )}

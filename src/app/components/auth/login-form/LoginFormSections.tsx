@@ -27,9 +27,7 @@ export function LoginStatusAlert({ alert, isRedirecting }: StatusAlertProps) {
   if (!alert) return null;
 
   return (
-    <Alert
-      className={`apple-auth-enter rounded-[var(--apple-radius-card)] ${alertToneClass(alert.type)}`}
-    >
+    <Alert className={`rounded-lg ${alertToneClass(alert.type)}`}>
       {alert.type === 'success' ? (
         isRedirecting ? (
           <Spinner className="h-4 w-4" />
@@ -118,18 +116,18 @@ export function RememberForgotRow({
   isRedirecting,
 }: RememberRowProps) {
   return (
-    <div className="apple-auth-section flex items-center justify-between gap-4 px-4 py-3 text-sm">
+    <div className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
       <div className="flex items-center gap-2">
         <Checkbox
           id="remember"
           checked={remember}
           onCheckedChange={checked => onRememberChange(checked === true)}
           disabled={loading || isRedirecting}
-          className="h-4 w-4 rounded-[7px] border-[var(--apple-separator)] data-[state=checked]:border-[var(--apple-system-blue)] data-[state=checked]:bg-[var(--apple-system-blue)]"
+          className="data-[state=checked]:border-info data-[state=checked]:bg-info h-4 w-4 rounded-[7px]"
         />
         <label
           htmlFor="remember"
-          className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
+          className="text-[13px] font-medium tracking-[-0.008em] text-foreground"
         >
           Remember me
         </label>
@@ -165,7 +163,7 @@ export function CaptchaSection({
   return (
     <div>
       {isCaptchaDisabled ? (
-        <div className="apple-auth-section px-4 py-4 text-xs text-[var(--apple-secondary-label)]">
+        <div className="px-4 py-4 text-xs text-muted-foreground">
           CAPTCHA is disabled in development mode.
         </div>
       ) : captchaVisible ? (
@@ -175,14 +173,14 @@ export function CaptchaSection({
           resetSignal={captchaResetKey}
         />
       ) : (
-        <div className="apple-auth-section space-y-3 px-4 py-4">
-          <Skeleton className="h-4 w-40 rounded-full bg-[var(--apple-tertiary-fill)]" />
-          <Skeleton className="h-10 w-full rounded-[var(--apple-radius-control)] bg-[var(--apple-tertiary-fill)]" />
+        <div className="space-y-3 px-4 py-4">
+          <Skeleton className="h-4 w-40 rounded-full bg-card" />
+          <Skeleton className="h-10 w-full bg-card" />
         </div>
       )}
 
       {!isCaptchaDisabled && captchaError && (
-        <p className="mt-2 text-sm text-[#ff3b30]">{captchaError}</p>
+        <p className="mt-2 text-sm text-destructive">{captchaError}</p>
       )}
     </div>
   );
@@ -199,7 +197,7 @@ export function LoginSubmitButton({ loading, isRedirecting, canSubmit }: SubmitB
     <AuthSubmitButton
       type="submit"
       variant="primary"
-      className="apple-auth-control flex h-11 w-full items-center justify-center gap-2 text-[0.95rem] font-semibold tracking-[-0.01em]"
+      className="flex h-11 w-full items-center justify-center gap-2 text-[0.95rem] font-semibold tracking-[-0.01em]"
       disabled={!canSubmit}
       loading={isBusy}
       loadingContent={
@@ -232,9 +230,9 @@ type SignUpPromptProps = {
 export function SignUpPrompt({ redirectParam }: SignUpPromptProps) {
   return (
     <>
-      <Separator className="bg-[var(--apple-separator-soft)]" />
+      <Separator className="bg-border" />
 
-      <div className="apple-body-tracking text-center text-sm text-[var(--apple-secondary-label)]">
+      <div className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{' '}
         <Link
           href={
@@ -242,7 +240,7 @@ export function SignUpPrompt({ redirectParam }: SignUpPromptProps) {
               ? `/auth/register?redirect=${encodeURIComponent(redirectParam)}`
               : '/auth/register'
           }
-          className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
+          className="text-info font-semibold transition hover:opacity-80"
         >
           Create one
         </Link>
@@ -273,20 +271,18 @@ export function ResetPanel({
   if (!showResetPanel) return null;
 
   return (
-    <div className="apple-auth-enter apple-auth-section space-y-4 p-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--apple-label)]">
-        <Mail className="h-4 w-4 text-[var(--apple-system-blue)]" />
+    <div className="space-y-4 p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <Mail className="text-info h-4 w-4" />
         Password recovery
       </div>
 
-      <p className="apple-body-tracking text-sm text-[var(--apple-secondary-label)]">
+      <p className="text-sm text-muted-foreground">
         We&apos;ll send a recovery link to this email.
       </p>
 
       {resetAlert && (
-        <Alert
-          className={`rounded-[var(--apple-radius-control)] ${alertToneClass(resetAlert.type)}`}
-        >
+        <Alert className={` ${alertToneClass(resetAlert.type)}`}>
           {resetAlert.type === 'success' ? (
             <CheckCircle2 className="h-4 w-4" />
           ) : (

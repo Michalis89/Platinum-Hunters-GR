@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareClient } from '@/lib/supabase-middleware';
 import { LOGIN_REQUIRED_PREFIXES, AUTH_ROUTES, DASHBOARD_PATH, HOME_PATHS } from '@/lib/routes/authRoutes';
+import { clearAuthCookiesFromResponse } from '@/lib/auth/cookies';
 
 function buildCsp(isProd: boolean) {
   const scriptSrc = [`'self'`, ...(isProd ? [] : [`'unsafe-eval'`])];
@@ -47,13 +48,20 @@ export async function middleware(request: NextRequest) {
     const { user, response } = await createMiddlewareClient(request);
 
     if (!user) {
+      // Clear any stale/expired auth cookies when no valid user session exists
+      clearAuthCookiesFromResponse(response);
+
       if (isDashboardRoute) {
-        return NextResponse.redirect(new URL('/home', request.url));
+        const redirectResponse = NextResponse.redirect(new URL('/home', request.url));
+        clearAuthCookiesFromResponse(redirectResponse);
+        return redirectResponse;
       }
       if (requiresAuth) {
         const redirectUrl = new URL('/auth/login', request.url);
         redirectUrl.searchParams.set('redirectTo', redirectBack);
-        return NextResponse.redirect(redirectUrl);
+        const redirectResponse = NextResponse.redirect(redirectUrl);
+        clearAuthCookiesFromResponse(redirectResponse);
+        return redirectResponse;
       }
     }
 
@@ -86,22 +94,28 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error('Middleware error:', error);
 
-    if (isDashboardRoute) {
-      return NextResponse.redirect(new URL('/home', request.url));
-    }
-    if (requiresAuth) {
-      const redirectUrl = new URL('/auth/login', request.url);
-      redirectUrl.searchParams.set('redirectTo', redirectBack);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // For non-protected routes, continue with default response
+    // Clear expired/invalid auth cookies
     const response = NextResponse.next({
       request: {
         headers: request.headers,
       },
     });
+    clearAuthCookiesFromResponse(response);
 
+    if (isDashboardRoute) {
+      const redirectResponse = NextResponse.redirect(new URL('/home', request.url));
+      clearAuthCookiesFromResponse(redirectResponse);
+      return redirectResponse;
+    }
+    if (requiresAuth) {
+      const redirectUrl = new URL('/auth/login', request.url);
+      redirectUrl.searchParams.set('redirectTo', redirectBack);
+      const redirectResponse = NextResponse.redirect(redirectUrl);
+      clearAuthCookiesFromResponse(redirectResponse);
+      return redirectResponse;
+    }
+
+    // For non-protected routes, continue with cleared cookies
     const isProd = process.env.NODE_ENV === 'production';
     response.headers.set('Content-Security-Policy', buildCsp(isProd));
 

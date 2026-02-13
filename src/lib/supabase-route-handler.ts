@@ -4,7 +4,6 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import type { Database } from '@/lib/supabase/database.types';
 
 type RouteHandlerOptions = {
@@ -16,7 +15,7 @@ export async function createRouteHandlerClient(
   options: RouteHandlerOptions = {},
 ) {
   const { ignoreCookies = false } = options;
-  const cookieStore = await cookies();
+  const cookieStore = await getCookieStore();
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -28,11 +27,11 @@ export async function createRouteHandlerClient(
   // Get auth tokens from cookies (unless an override is provided)
   const accessToken =
     accessTokenOverride ??
-    (ignoreCookies ? undefined : cookieStore.get('sb-access-token')?.value);
+    (ignoreCookies ? undefined : cookieStore?.get('sb-access-token')?.value);
   const refreshToken =
     accessTokenOverride !== undefined || ignoreCookies
       ? undefined
-      : cookieStore.get('sb-refresh-token')?.value;
+      : cookieStore?.get('sb-refresh-token')?.value;
 
   const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
@@ -61,4 +60,16 @@ export async function createRouteHandlerClient(
   // and we skip setSession to avoid passing empty refresh token
 
   return supabase;
+}
+
+async function getCookieStore() {
+  if (typeof window !== 'undefined') {
+    return null;
+  }
+  try {
+    const { cookies } = await import('next/headers');
+    return cookies();
+  } catch {
+    return null;
+  }
 }

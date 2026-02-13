@@ -12,7 +12,7 @@ export default async function SupportTicketsPage() {
   await requireServerAuth('/pages/support/tickets');
 
   return (
-    <main className="apple-page-background">
+    <main className="">
       <SupportTicketsList />
     </main>
   );

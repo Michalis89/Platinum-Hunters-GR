@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { UserPlus } from 'lucide-react';
-import FormErrorMessage from '@/app/components/ui/FormErrorMessage';
-import AlertMessage from '@/app/components/ui/AlertMessage';
+import { UserPlus, CheckCircle, XCircle } from 'lucide-react';
+import { FieldError } from '@/components/ui/field';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
 import { AuthPasswordField } from '@/app/components/auth/shared/AuthPasswordField';
 import { AuthSubmitButton } from '@/app/components/auth/shared/AuthSubmitButton';
@@ -27,7 +27,15 @@ type RegisterStatusAlertProps = {
 export function RegisterStatusAlert({ alert }: RegisterStatusAlertProps) {
   if (!alert) return null;
 
-  return <AlertMessage type={alert.type} message={alert.message} />;
+  const Icon = alert.type === 'success' ? CheckCircle : XCircle;
+  const variant = alert.type === 'error' ? 'destructive' : 'success';
+
+  return (
+    <Alert variant={variant}>
+      <Icon className="h-4 w-4" />
+      <AlertDescription>{alert.message}</AlertDescription>
+    </Alert>
+  );
 }
 
 type RegisterIdentityFieldsProps = {
@@ -129,7 +137,7 @@ export function RegisterPasswordFields({
         {passwordStrength ? (
           <div className="mt-2">
             <div className="flex items-center gap-2 text-sm">
-              <div className="apple-progress-track h-2 flex-1 rounded-full">
+              <div className="h-2 flex-1 rounded-full">
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
@@ -141,7 +149,7 @@ export function RegisterPasswordFields({
               <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
             </div>
             {passwordStrength.errors.length > 0 ? (
-              <ul className="apple-body-tracking mt-1 text-xs text-[var(--apple-secondary-label)]">
+              <ul className="mt-1 text-xs text-muted-foreground">
                 {passwordStrength.errors.map((err, i) => (
                   <li key={i}>- {err}</li>
                 ))}
@@ -178,35 +186,29 @@ type RegisterTermsRowProps = {
 export function RegisterTermsRow({ checked, error, loading, onChange }: RegisterTermsRowProps) {
   return (
     <div className="space-y-2">
-      <div className="apple-auth-section flex items-start gap-2 px-4 py-3 text-sm">
+      <div className="flex items-start gap-2 px-4 py-3 text-sm">
         <Checkbox
           id="agree-to-terms"
           checked={checked}
           onCheckedChange={value => onChange(value === true)}
           disabled={loading}
-          className="mt-0.5 h-4 w-4 rounded-[7px] border-[var(--apple-separator)] data-[state=checked]:border-[var(--apple-system-blue)] data-[state=checked]:bg-[var(--apple-system-blue)]"
+          className="data-[state=checked]:border-info data-[state=checked]:bg-info mt-0.5 h-4 w-4 rounded-[7px]"
         />
         <Label
           htmlFor="agree-to-terms"
-          className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
+          className="text-[13px] font-medium tracking-[-0.008em] text-foreground"
         >
           I accept the{' '}
-          <Link
-            href="/terms"
-            className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
-          >
+          <Link href="/terms" className="text-info font-semibold transition hover:opacity-80">
             terms of use
           </Link>{' '}
           and the{' '}
-          <Link
-            href="/privacy"
-            className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
-          >
+          <Link href="/privacy" className="text-info font-semibold transition hover:opacity-80">
             privacy policy
           </Link>
         </Label>
       </div>
-      <FormErrorMessage message={error} />
+      <FieldError>{error}</FieldError>
     </div>
   );
 }
@@ -227,7 +229,7 @@ export function RegisterCaptchaSection({
   return (
     <div>
       {isCaptchaDisabled ? (
-        <div className="apple-auth-section px-4 py-4 text-xs text-[var(--apple-secondary-label)]">
+        <div className="px-4 py-4 text-xs text-muted-foreground">
           CAPTCHA is disabled in development mode.
         </div>
       ) : (
@@ -237,7 +239,7 @@ export function RegisterCaptchaSection({
         />
       )}
 
-      {!isCaptchaDisabled && captchaError ? <FormErrorMessage message={captchaError} /> : null}
+      {!isCaptchaDisabled && captchaError ? <FieldError>{captchaError}</FieldError> : null}
     </div>
   );
 }
@@ -260,7 +262,7 @@ export function RegisterSubmitButton({
       type="submit"
       variant="primary"
       disabled={!canSubmit}
-      className="apple-auth-control flex h-11 w-full items-center justify-center gap-2 text-[0.95rem] font-semibold tracking-[-0.01em]"
+      className="flex h-11 w-full items-center justify-center gap-2 text-[0.95rem] font-semibold tracking-[-0.01em]"
       loading={isBusy}
       loadingContent={
         isRedirecting ? (
@@ -292,9 +294,9 @@ type LoginPromptProps = {
 export function LoginPrompt({ redirectParam }: LoginPromptProps) {
   return (
     <>
-      <Separator className="bg-[var(--apple-separator-soft)]" />
+      <Separator className="bg-border" />
 
-      <div className="apple-body-tracking text-center text-sm text-[var(--apple-secondary-label)]">
+      <div className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
         <Link
           href={
@@ -302,7 +304,7 @@ export function LoginPrompt({ redirectParam }: LoginPromptProps) {
               ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}`
               : '/auth/login'
           }
-          className="font-semibold text-[var(--apple-system-blue)] transition hover:opacity-80"
+          className="text-info font-semibold transition hover:opacity-80"
         >
           Login
         </Link>

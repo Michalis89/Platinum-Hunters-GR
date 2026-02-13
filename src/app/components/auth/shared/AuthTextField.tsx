@@ -32,10 +32,7 @@ export function AuthTextField({
 
   return (
     <div className="space-y-2.5">
-      <Label
-        htmlFor={id}
-        className="apple-body-tracking text-[13px] font-medium tracking-[-0.008em] text-[var(--apple-label)]"
-      >
+      <Label htmlFor={id} className="text-[13px] font-medium tracking-[-0.008em] text-foreground">
         {label}
       </Label>
       <Input
@@ -51,10 +48,10 @@ export function AuthTextField({
         suppressHydrationWarning
         aria-invalid={!!error}
         aria-describedby={errorId}
-        className="apple-auth-control h-11 border-[var(--apple-separator)] bg-[var(--hb-input-bg)] text-[var(--apple-label)] placeholder:text-[var(--apple-secondary-label)]"
+        className="h-11 bg-card text-foreground placeholder:text-muted-foreground"
       />
       {error ? (
-        <p id={errorId} className="text-[13px] leading-relaxed text-[#ff3b30]">
+        <p id={errorId} className="text-[13px] leading-relaxed text-destructive">
           {error}
         </p>
       ) : null}

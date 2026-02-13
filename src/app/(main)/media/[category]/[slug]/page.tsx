@@ -1,7 +1,7 @@
 ﻿import { Suspense } from 'react';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import { Spinner } from '@/components/ui/spinner';
 import { isMediaCategory } from '@/app/components/backlog/types';
 import type { MediaItem } from '@/lib/media/types';
 import MediaDetailPageClient from './MediaDetailPageClient';
@@ -52,7 +52,10 @@ export default function MediaDetailPage({ params }: MediaDetailPageProps) {
     <Suspense
       fallback={
         <div className="flex min-h-[60vh] items-center justify-center">
-          <LoadingSpinner label="Φόρτωση..." />
+          <div className="flex flex-col items-center justify-center gap-3">
+            <Spinner />
+            <span className="text-sm text-muted-foreground">Φόρτωση...</span>
+          </div>
         </div>
       }
     >

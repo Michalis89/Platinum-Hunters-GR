@@ -6,22 +6,21 @@ import { useSelector } from 'react-redux';
 import { ClipboardList, Paperclip, ShieldCheck, Tag, UserCheck } from 'lucide-react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
-import { Select } from '@/app/components/ui/Select';
-import { Input } from '@/app/components/ui/Input';
-import { Textarea } from '@/app/components/ui/Textarea';
-import { Switch } from '@/app/components/ui/Switch';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
-import ErrorState from '@/app/components/ui/ErrorState';
-import Feedback from '@/app/components/ui/Feedback';
-import Badge from '@/app/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SelectField as Select } from '@/components/ui/select-field';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Spinner } from '@/components/ui/spinner';
+import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
-import { FormattedDate } from '@/app/components/ui/FormattedDate';
+import { FormattedDate } from '@/utils/components/FormattedDate';
 import {
   SUPPORT_STATUS_OPTIONS,
   SUPPORT_STATUS_LABELS,
@@ -251,7 +250,7 @@ export default function AdminSupportTicketDetail() {
   if (!isAdmin) {
     return (
       <PageContainer size="md" className="py-20">
-        <ErrorState error="Δεν έχεις πρόσβαση σε αυτή τη σελίδα." />
+        <ErrorAlert message="Δεν έχεις πρόσβαση σε αυτή τη σελίδα." />
         <div className="mt-6 flex justify-center">
           <Button variant={'link'} onClick={() => router.push('/')}>
             Επιστροφή στην αρχική
@@ -264,13 +263,16 @@ export default function AdminSupportTicketDetail() {
   if (loading) {
     return (
       <div className="py-20">
-        <LoadingSpinner label="Φορτώνουμε το ticket..." />
+        <div className="flex flex-col items-center justify-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Φορτώνουμε το ticket...</span>
+        </div>
       </div>
     );
   }
 
   if (error || !ticket) {
-    return <ErrorState error={error || 'Το ticket δεν βρέθηκε'} />;
+    return <ErrorAlert message={error || 'Το ticket δεν βρέθηκε'} />;
   }
 
   return (
@@ -281,18 +283,25 @@ export default function AdminSupportTicketDetail() {
       <div className="relative">
         <PageHero
           eyebrow="Διαχείριση"
-          title={
-            <span className="text-3xl text-[var(--hb-headline)] md:text-5xl">{ticket.subject}</span>
-          }
+          title={<span className="text-3xl text-foreground md:text-5xl">{ticket.subject}</span>}
           subtitle={`Κατηγορία: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
           badges={
             <>
               <Badge
-                text={SUPPORT_STATUS_LABELS[ticket.status] || ticket.status}
-                color={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
-              />
+                variant={
+                  SUPPORT_STATUS_COLORS[ticket.status] === 'green'
+                    ? 'default'
+                    : SUPPORT_STATUS_COLORS[ticket.status] === 'blue'
+                      ? 'default'
+                      : SUPPORT_STATUS_COLORS[ticket.status] === 'yellow'
+                        ? 'outline'
+                        : 'secondary'
+                }
+              >
+                {SUPPORT_STATUS_LABELS[ticket.status] || ticket.status}
+              </Badge>
               {ticket.severity ? (
-                <span className="rounded-full border border-[var(--hb-border)] bg-[var(--hb-panel)] px-3 py-1 text-xs">
+                <span className="rounded-full border border-border bg-card px-3 py-1 text-xs">
                   Σοβαρότητα: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
                 </span>
               ) : null}
@@ -337,9 +346,9 @@ export default function AdminSupportTicketDetail() {
           </div>
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <Card className={UI_CLASSNAMES.panelCard}>
-              <CardHeader className="border-[var(--hb-border)]">
-                <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
-                  <ClipboardList className="h-5 w-5 text-[var(--hb-primary)]" />
+              <CardHeader className="border-border">
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <ClipboardList className="h-5 w-5 text-primary" />
                   Συνομιλία
                 </CardTitle>
               </CardHeader>
@@ -349,16 +358,16 @@ export default function AdminSupportTicketDetail() {
                     key={message.id}
                     className={`rounded-2xl border p-4 ${
                       message.is_internal
-                        ? 'border-amber-500/40 bg-amber-500/10'
+                        ? 'bg-warning/10 border-amber-500/40'
                         : message.author_role === 'admin'
-                          ? 'border-[var(--hb-primary-strong)]/40 bg-[var(--hb-card)]'
-                          : 'border-[var(--hb-border)] bg-[var(--hb-panel)]'
+                          ? 'border-primary/40 bg-card'
+                          : 'border-border bg-card'
                     }`}
                   >
-                    <div className="mb-2 flex items-center justify-between text-xs text-[var(--hb-muted)]">
+                    <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-2">
                         {message.author_role === 'admin' ? (
-                          <ShieldCheck className="h-4 w-4 text-[var(--hb-primary)]" />
+                          <ShieldCheck className="h-4 w-4 text-primary" />
                         ) : null}
                         {message.is_internal
                           ? 'Εσωτερική σημείωση'
@@ -373,9 +382,7 @@ export default function AdminSupportTicketDetail() {
                         className="text-xs"
                       />
                     </div>
-                    <p className="whitespace-pre-line text-sm text-[var(--hb-text)]">
-                      {message.message}
-                    </p>
+                    <p className="whitespace-pre-line text-sm text-foreground">{message.message}</p>
 
                     {attachmentsByMessage[message.id]?.length ? (
                       <div className="mt-3 space-y-2">
@@ -383,11 +390,11 @@ export default function AdminSupportTicketDetail() {
                           <a
                             key={attachment.id}
                             href={attachment.signed_url ?? '#'}
-                            className="flex items-center gap-2 rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-xs text-[var(--hb-text)] hover:border-[var(--hb-primary-strong)]"
+                            className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground hover:border-primary"
                             target="_blank"
                             rel="noreferrer"
                           >
-                            <Paperclip className="h-4 w-4 text-[var(--hb-muted)]" />
+                            <Paperclip className="h-4 w-4 text-muted-foreground" />
                             {attachment.file_name || 'Συνημμένο'}
                           </a>
                         ))}
@@ -398,32 +405,41 @@ export default function AdminSupportTicketDetail() {
 
                 <form
                   onSubmit={handleReply}
-                  className="space-y-4 rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4"
+                  className="space-y-4 rounded-2xl border border-border bg-card p-4"
                 >
-                  <div className="text-sm font-semibold text-[var(--hb-headline)]">
-                    Απάντηση / Σημείωση
-                  </div>
+                  <div className="text-sm font-semibold text-foreground">Απάντηση / Σημείωση</div>
                   {replyResult ? (
-                    <Feedback
-                      variant={replyResult.type === 'success' ? 'success' : 'error'}
-                      tone={replyResult.type === 'success' ? 'solid' : 'soft'}
-                      title={replyResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
-                      description={replyResult.message}
-                    />
+                    <Alert
+                      variant={replyResult.type === 'success' ? 'success' : 'destructive'}
+                      className="rounded-xl border border-border bg-card/80 px-4 py-3"
+                    >
+                      <AlertTitle className="text-base">
+                        {replyResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
+                      </AlertTitle>
+                      <AlertDescription>{replyResult.message}</AlertDescription>
+                    </Alert>
                   ) : null}
-                  <Textarea
-                    label="Μήνυμα"
-                    value={replyText}
-                    onChange={event => setReplyText(event.target.value)}
-                    rows={3}
-                    disabled={replyLoading}
-                  />
-                  <Switch
-                    label="Εσωτερική σημείωση"
-                    description="Ο χρήστης δεν θα τη δει."
-                    checked={replyInternal}
-                    onChange={event => setReplyInternal(event.target.checked)}
-                  />
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">Μήνυμα</label>
+                    <Textarea
+                      value={replyText}
+                      onChange={event => setReplyText(event.target.value)}
+                      rows={3}
+                      disabled={replyLoading}
+                    />
+                  </div>
+                  <label className="flex items-start justify-between gap-4">
+                    <span className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-[var(--hb-headline)]">
+                        Εσωτερική σημείωση
+                      </span>
+                      <span className="text-xs text-[var(--hb-muted)]">Ο χρήστης δεν θα τη δει.</span>
+                    </span>
+                    <Switch
+                      checked={replyInternal}
+                      onCheckedChange={value => setReplyInternal(value)}
+                    />
+                  </label>
                   <AttachmentDropzone
                     items={replyAttachments}
                     onChange={setReplyAttachments}
@@ -442,20 +458,23 @@ export default function AdminSupportTicketDetail() {
 
             <div className="mt-10 space-y-6">
               <Card className={UI_CLASSNAMES.panelCard}>
-                <CardHeader className="border-[var(--hb-border)]">
-                  <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
-                    <UserCheck className="h-5 w-5 text-[var(--hb-primary)]" />
+                <CardHeader className="border-border">
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <UserCheck className="h-5 w-5 text-primary" />
                     Διαχείριση
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {saveResult ? (
-                    <Feedback
-                      variant={saveResult.type === 'success' ? 'success' : 'error'}
-                      tone={saveResult.type === 'success' ? 'solid' : 'soft'}
-                      title={saveResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
-                      description={saveResult.message}
-                    />
+                    <Alert
+                      variant={saveResult.type === 'success' ? 'success' : 'destructive'}
+                      className="rounded-xl border border-border bg-card/80 px-4 py-3"
+                    >
+                      <AlertTitle className="text-base">
+                        {saveResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
+                      </AlertTitle>
+                      <AlertDescription>{saveResult.message}</AlertDescription>
+                    </Alert>
                   ) : null}
                   <Select
                     label="Κατάσταση"
@@ -464,15 +483,23 @@ export default function AdminSupportTicketDetail() {
                     options={SUPPORT_STATUS_OPTIONS}
                     optionLabels={SUPPORT_STATUS_LABELS}
                     placeholder="Επίλεξε"
-                    labelClassName="text-[var(--hb-headline)]"
-                    className="border-[var(--hb-border)] bg-[var(--hb-panel)] text-[var(--hb-text)]"
+                    labelClassName="text-foreground"
+                    className="border-border bg-card text-foreground"
                   />
-                  <Switch
-                    label="Ανάθεση σε μένα"
-                    description="Το ticket θα εμφανίζεται ως assigned στον λογαριασμό σου."
-                    checked={assignToMe}
-                    onChange={event => setAssignToMe(event.target.checked)}
-                  />
+                  <label className="flex items-start justify-between gap-4">
+                    <span className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-[var(--hb-headline)]">
+                        Ανάθεση σε μένα
+                      </span>
+                      <span className="text-xs text-[var(--hb-muted)]">
+                        Το ticket θα εμφανίζεται ως assigned στον λογαριασμό σου.
+                      </span>
+                    </span>
+                    <Switch
+                      checked={assignToMe}
+                      onCheckedChange={value => setAssignToMe(value)}
+                    />
+                  </label>
                   <div>
                     <Input
                       label="Labels"
@@ -480,9 +507,9 @@ export default function AdminSupportTicketDetail() {
                       value={labels}
                       onChange={event => setLabels(event.target.value)}
                       placeholder="π.χ. billing, ux"
-                      className="border-[var(--hb-border)] bg-[var(--hb-card)]"
+                      className="border-border bg-card"
                     />
-                    <div className="mt-2 text-xs text-[var(--hb-muted)]">Χώρισε με κόμμα.</div>
+                    <div className="mt-2 text-xs text-muted-foreground">Χώρισε με κόμμα.</div>
                   </div>
                   <Button type="button" variant="primary" onClick={handleSave} disabled={saving}>
                     {saving ? 'Αποθήκευση...' : 'Αποθήκευση αλλαγών'}
@@ -491,23 +518,20 @@ export default function AdminSupportTicketDetail() {
               </Card>
 
               <Card className={UI_CLASSNAMES.panelCard}>
-                <CardHeader className="border-[var(--hb-border)]">
-                  <CardTitle className="flex items-center gap-2 text-[var(--hb-headline)]">
-                    <Tag className="h-5 w-5 text-[var(--hb-primary)]" />
+                <CardHeader className="border-border">
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <Tag className="h-5 w-5 text-primary" />
                     Ενέργειες
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm text-[var(--hb-muted)]">
+                <CardContent className="space-y-3 text-sm text-muted-foreground">
                   {events.length === 0 ? (
                     <p>Δεν υπάρχουν ακόμη events.</p>
                   ) : (
                     events.map(event => (
-                      <div
-                        key={event.id}
-                        className="rounded-xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-3"
-                      >
-                        <div className="text-xs uppercase text-[var(--hb-muted)]">{event.type}</div>
-                        <div className="text-xs text-[var(--hb-muted)]">
+                      <div key={event.id} className="rounded-xl border border-border bg-card p-3">
+                        <div className="text-xs uppercase text-muted-foreground">{event.type}</div>
+                        <div className="text-xs text-muted-foreground">
                           <FormattedDate
                             date={event.created_at}
                             options={DATE_TIME_OPTIONS}

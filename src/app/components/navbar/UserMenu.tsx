@@ -3,11 +3,10 @@ import Link from 'next/link';
 import {
   ChevronDown,
   LogOut,
-  Moon,
   PenLine,
   Plus,
+  Settings,
   ShieldCheck,
-  Sun,
   Ticket,
   User,
 } from 'lucide-react';
@@ -26,32 +25,25 @@ import { cn } from '@/lib/utils';
 import type { User as UserEntity } from '@/types/user';
 import { desktopLinkClass, getUserInitials } from './navbar.helpers';
 
-type Theme = 'dark' | 'light';
-
 type UserMenuProps = {
   user: UserEntity;
-  theme: Theme;
   canQuickAdd: boolean;
   canAccessAdminPanel: boolean;
   onAdd: () => void;
   onLogout: () => Promise<void>;
-  onToggleTheme: () => void;
 };
 
 const itemClassName =
-  'rounded-[var(--apple-radius-control)] px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--hb-ease)] focus:bg-[var(--apple-nav-pill-hover)] focus:text-[var(--apple-label)]';
+  ' px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--easing-default)] focus:bg-accent/10 focus:text-foreground';
 
 export const UserMenu = React.memo(function UserMenu({
   user,
-  theme,
   canQuickAdd,
   canAccessAdminPanel,
   onAdd,
   onLogout,
-  onToggleTheme,
 }: UserMenuProps) {
   const fallbackInitial = getUserInitials(user.username);
-  const handleThemeSelect = () => window.setTimeout(onToggleTheme, 0);
 
   return (
     <DropdownMenu modal={false}>
@@ -61,45 +53,41 @@ export const UserMenu = React.memo(function UserMenu({
           variant="secondary"
           className={cn(
             desktopLinkClass(false),
-            'h-9 gap-2 rounded-[var(--apple-radius-control)] border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-[var(--apple-label)]',
+            'h-9 gap-2 border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-foreground',
           )}
         >
-          <Avatar className="h-7 w-7 border border-[var(--apple-nav-pill-border)]">
+          <Avatar className="h-7 w-7 border border-border">
             <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
-            <AvatarFallback className="bg-[var(--apple-nav-pill-hover)] text-xs font-semibold text-[var(--apple-label)]">
+            <AvatarFallback className="bg-accent/10 text-xs font-semibold text-foreground">
               {fallbackInitial}
             </AvatarFallback>
           </Avatar>
           <span className="max-w-[130px] truncate text-[13px] font-medium tracking-[-0.01em]">
             {user.username ?? 'Hobbistas User'}
           </span>
-          <ChevronDown className="size-4 text-[var(--apple-secondary-label)]" />
+          <ChevronDown className="size-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        sideOffset={10}
-        className="apple-nav-popover w-72 p-1.5 text-[var(--apple-label)]"
-      >
-        <DropdownMenuLabel className="rounded-[var(--apple-radius-card)] px-2.5 py-2 font-normal">
+      <DropdownMenuContent align="end" sideOffset={10} className="w-72 p-1.5 text-foreground">
+        <DropdownMenuLabel className="rounded-lg px-2.5 py-2 font-normal">
           <div className="flex items-center gap-2.5">
-            <Avatar className="h-9 w-9 border border-[var(--apple-nav-pill-border)]">
+            <Avatar className="h-9 w-9 border border-border">
               <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
-              <AvatarFallback className="bg-[var(--apple-nav-pill-hover)] text-sm font-semibold text-[var(--apple-label)]">
+              <AvatarFallback className="bg-accent/10 text-sm font-semibold text-foreground">
                 {fallbackInitial}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[var(--apple-label)]">
+              <p className="truncate text-sm font-semibold text-foreground">
                 {user.username ?? 'Hobbistas User'}
               </p>
-              <p className="truncate text-xs text-[var(--apple-secondary-label)]">
+              <p className="truncate text-xs text-muted-foreground">
                 {user.email ?? 'Community member'}
               </p>
             </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
+        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--border)]" />
         <DropdownMenuGroup>
           {canQuickAdd ? (
             <DropdownMenuItem onSelect={onAdd} className={itemClassName}>
@@ -120,6 +108,12 @@ export const UserMenu = React.memo(function UserMenu({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={itemClassName}>
+            <Link href="/settings" prefetch={false}>
+              <Settings className="size-4" />
+              <span>Settings</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className={itemClassName}>
             <Link href="/pages/support/tickets" prefetch={false}>
               <Ticket className="size-4" />
               <span>My tickets</span>
@@ -134,12 +128,8 @@ export const UserMenu = React.memo(function UserMenu({
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuGroup>
-        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
-        <DropdownMenuItem onSelect={handleThemeSelect} className={itemClassName}>
-          {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          <span>Appearance</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--apple-nav-pill-border)]" />
+        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--border)]" />
+        <DropdownMenuSeparator className="h-[0.5px] bg-[var(--border)]" />
         <DropdownMenuItem
           onSelect={() => {
             void onLogout();

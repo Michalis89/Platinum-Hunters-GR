@@ -29,8 +29,8 @@
   border-radius: 9999px !important;
   display: block !important;
   line-height: 0 !important;
-  border: 0.5px solid var(--hb-input-border) !important;
-  background: var(--hb-input-bg) !important;
+  border: 0.5px solid hsl(var(--input)) !important;
+  background: hsl(var(--input)) !important;
   opacity: 1 !important;
   box-shadow: none !important;
   transition:
@@ -41,14 +41,14 @@
 
 .continueHero :global(.continueHero-dots li button.continueHero-dot:hover),
 .continueHero :global(.continueHero-dots li button.continueHero-dot:focus-visible) {
-  background: var(--hb-card) !important;
-  border-color: var(--hb-input-border) !important;
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--input)) !important;
   transform: translateY(-0.5px) !important;
   outline: none !important;
 }
 
 .continueHero :global(.continueHero-dots li.slick-active button.continueHero-dot) {
-  background: var(--hb-headline) !important;
-  border-color: var(--hb-headline) !important;
+  background: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--foreground)) !important;
   transform: scale(1.04) !important;
 }

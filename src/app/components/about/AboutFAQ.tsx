@@ -42,7 +42,6 @@ const faqItems: FAQItem[] = [
   },
 ];
 
-
 export function AboutFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -54,13 +53,13 @@ export function AboutFAQ() {
     <section className="px-4 py-20 md:px-6 md:py-28">
       <div className="mx-auto max-w-3xl">
         <div className="mb-12 text-center md:mb-16">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[var(--hb-primary-strong)]">
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">
             FAQ
           </p>
-          <h2 className="mb-4 text-3xl font-bold text-[var(--hb-headline)] md:text-4xl">
+          <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
             Frequently asked questions
           </h2>
-          <p className="mx-auto max-w-xl text-[var(--hb-muted)]">
+          <p className="mx-auto max-w-xl text-muted-foreground">
             Answers to the most common questions about Hobbista.
           </p>
         </div>
@@ -69,16 +68,16 @@ export function AboutFAQ() {
           {faqItems.map((item, index) => (
             <div
               key={index}
-              className="hover:border-[var(--hb-primary-strong)]/30 rounded-xl border border-[var(--hb-border)] bg-[var(--hb-panel)] transition-colors"
+              className="hover:border-primary/30 rounded-xl border border-border bg-card transition-colors"
             >
               <Button
                 onClick={() => toggleFAQ(index)}
                 className="flex w-full items-center justify-between gap-4 p-5 text-left"
                 aria-expanded={openIndex === index}
               >
-                <span className="font-medium text-[var(--hb-headline)]">{item.question}</span>
+                <span className="font-medium text-foreground">{item.question}</span>
                 <ChevronDown
-                  className={`h-5 w-5 shrink-0 text-[var(--hb-muted)] transition-transform duration-200 ${
+                  className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 ${
                     openIndex === index ? 'rotate-180' : ''
                   }`}
                 />
@@ -88,8 +87,8 @@ export function AboutFAQ() {
                   openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                 }`}
               >
-                <div className="overflow-hidden">
-                  <p className="px-5 pb-5 text-sm leading-relaxed text-[var(--hb-muted)]">
+                <div className="">
+                  <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">
                     {item.answer}
                   </p>
                 </div>

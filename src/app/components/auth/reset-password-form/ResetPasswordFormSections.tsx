@@ -22,20 +22,20 @@ type StatusAlertsProps = {
 
 export function LoadingState() {
   return (
-    <div className="apple-auth-shell flex min-h-screen items-center justify-center px-4 py-12">
-      <Card className="apple-auth-card w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md">
         <CardHeader className="space-y-3 px-6 pt-7">
-          <Skeleton className="mx-auto h-12 w-12 rounded-[var(--apple-radius-control)]" />
+          <Skeleton className="mx-auto h-12 w-12" />
           <Skeleton className="mx-auto h-6 w-52" />
           <Skeleton className="mx-auto h-4 w-64" />
         </CardHeader>
         <CardContent className="space-y-4 px-6 pb-7">
-          <Skeleton className="h-10 w-full rounded-[var(--apple-radius-control)]" />
-          <Skeleton className="h-10 w-full rounded-[var(--apple-radius-control)]" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
           <Skeleton className="h-24 w-full rounded-xl" />
-          <Skeleton className="h-12 w-full rounded-[var(--apple-radius-control)]" />
+          <Skeleton className="h-12 w-full" />
           <div className="flex justify-center pt-1">
-            <Spinner className="h-5 w-5 text-[var(--apple-system-blue)]" />
+            <Spinner className="text-info h-5 w-5" />
           </div>
         </CardContent>
       </Card>
@@ -47,15 +47,15 @@ export function StatusAlerts({ error, success }: StatusAlertsProps) {
   return (
     <>
       {error && (
-        <Alert variant="destructive" className="bg-[#ff3b30]/8 border-[#ff3b30]/40">
+        <Alert variant="destructive" className="bg-destructive/8 border-destructive/40">
           <CircleAlert className="h-4 w-4" />
           <AlertTitle>Password update failed</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
       {success && (
-        <Alert className="border-[#34c759]/40 bg-[#34c759]/10 text-[var(--apple-label)]">
-          <CheckCircle2 className="h-4 w-4 text-[#34c759]" />
+        <Alert className="border-success/40 bg-success/10 text-foreground">
+          <CheckCircle2 className="text-success h-4 w-4" />
           <AlertTitle>Password updated</AlertTitle>
           <AlertDescription>{success}</AlertDescription>
         </Alert>
@@ -117,12 +117,12 @@ export function PasswordStrengthCard({
   passwordStrengthProgress,
 }: PasswordStrengthProps) {
   return (
-    <div className="bg-[var(--apple-surface)]/60 rounded-xl border border-[var(--apple-separator-soft)] p-4">
+    <div className="bg-card/60 rounded-xl border-border p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-[var(--apple-secondary-label)]">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Password strength
         </p>
-        <p className="text-xs font-medium text-[var(--apple-label)]">
+        <p className="text-xs font-medium text-foreground">
           {passedRequirementCount}/{requirements.length}
         </p>
       </div>
@@ -131,20 +131,20 @@ export function PasswordStrengthCard({
         {requirements.map(requirement => (
           <div
             key={requirement.label}
-            className="flex items-center gap-2 text-xs text-[var(--apple-secondary-label)]"
+            className="flex items-center gap-2 text-xs text-muted-foreground"
           >
             <CheckCircle2
               className={`h-3.5 w-3.5 ${
-                requirement.valid ? 'text-[#34c759]' : 'text-[var(--apple-tertiary-label)]'
+                requirement.valid ? 'text-success' : 'text-muted-foreground/50'
               }`}
             />
             <span>{requirement.label}</span>
           </div>
         ))}
-        <div className="flex items-center gap-2 text-xs text-[var(--apple-secondary-label)]">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <CheckCircle2
             className={`h-3.5 w-3.5 ${
-              passwordsMatch ? 'text-[#34c759]' : 'text-[var(--apple-tertiary-label)]'
+              passwordsMatch ? 'text-success' : 'text-muted-foreground/50'
             }`}
           />
           <span>Passwords match</span>
@@ -220,15 +220,15 @@ export function ResetPasswordCard({
   return (
     <TooltipProvider delayDuration={120}>
       <div className="w-full max-w-md">
-        <Card className="apple-auth-card overflow-hidden border-[var(--apple-separator-soft)] bg-[color-mix(in_srgb,var(--apple-surface)_84%,transparent)] backdrop-blur-xl">
+        <Card className="bg-card/84">
           <CardHeader className="bg-transparent pb-4 pt-7 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--apple-radius-control)] bg-[color-mix(in_srgb,var(--apple-system-blue)_14%,transparent)] text-[var(--apple-system-blue)]">
+            <div className="bg-info/14 text-info mx-auto mb-4 flex h-12 w-12 items-center justify-center">
               <Lock className="h-6 w-6" />
             </div>
-            <CardTitle className="text-2xl font-semibold text-[var(--apple-label)]">
+            <CardTitle className="text-2xl font-semibold text-foreground">
               Set New Password
             </CardTitle>
-            <p className="apple-body-tracking mt-2 text-sm text-[var(--apple-secondary-label)]">
+            <p className="mt-2 text-sm text-muted-foreground">
               Choose a secure password for your account.
             </p>
           </CardHeader>
@@ -260,7 +260,7 @@ export function ResetPasswordCard({
                 onToggleVisibility={onToggleConfirmPassword}
               />
 
-              <Separator className="bg-[var(--apple-separator-soft)]" />
+              <Separator className="bg-border" />
 
               <PasswordStrengthCard
                 requirements={passwordRequirements}

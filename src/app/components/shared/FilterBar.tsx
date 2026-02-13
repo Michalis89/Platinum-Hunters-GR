@@ -12,10 +12,10 @@ const BASE_PATHS: Record<CategoryScope, string> = {
 };
 
 const PILL_BASE =
-  'inline-flex items-center justify-center whitespace-nowrap rounded-full font-medium transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--hb-primary-strong)]';
-const PILL_ACTIVE = 'bg-[var(--hb-primary-strong)] border-[var(--hb-primary-strong)] text-white';
+  'inline-flex items-center justify-center whitespace-nowrap rounded-full font-medium transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary';
+const PILL_ACTIVE = 'bg-primary border-primary text-white';
 const PILL_INACTIVE =
-  'border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary-strong)]/70 hover:bg-[var(--hb-card)]/80 hover:text-[var(--hb-headline)]';
+  'border-border bg-card text-muted-foreground hover:border-primary/70 hover:bg-card/80 hover:text-foreground';
 const PILL_SPACING = 'px-4 py-2 text-[13px]';
 
 type FilterBarProps = {
@@ -38,7 +38,7 @@ const PRIMARY_CATEGORIES_DEFAULT: ArticleCategory[] = [
 ];
 
 const CLEAR_BUTTON =
-  'flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--hb-primary-strong)] transition hover:text-[var(--hb-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hb-primary-strong)]';
+  'flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-primary transition hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 
 export default function FilterBar({
   scope,
@@ -84,8 +84,8 @@ export default function FilterBar({
   };
 
   return (
-    <div className="bg-[var(--hb-panel)]/90 rounded-3xl border border-[var(--hb-border)] p-4 shadow-[var(--hb-shadow-md)] backdrop-blur-xl">
-      <div className="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--hb-muted)]">
+    <div className="bg-card/90 rounded-3xl border border-border p-4 shadow-md ">
+      <div className="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
         <span>Κατηγορίες</span>
         {hasActiveCategory && (
           <Link href={basePath} className={CLEAR_BUTTON} aria-label="Επαναφορά φίλτρων">
@@ -106,9 +106,9 @@ export default function FilterBar({
       </div>
 
       {tagLabel && (
-        <div className="mt-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--hb-muted)]">
+        <div className="mt-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           <Tag size={12} />
-          <span className="font-semibold text-[var(--hb-headline)]">{tagLabel}</span>
+          <span className="font-semibold text-foreground">{tagLabel}</span>
         </div>
       )}
     </div>

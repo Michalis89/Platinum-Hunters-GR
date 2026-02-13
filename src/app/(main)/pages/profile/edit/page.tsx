@@ -21,25 +21,48 @@ import {
   EyeOff,
   CircleHelp,
 } from 'lucide-react';
-import { Card, CardTitle } from '@/app/components/ui/Card';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import {
-  CollapsibleCardHeader as CardHeader,
-  CollapsibleCardContent as CardContent,
-} from '@/app/components/ui/CollapsibleCard.client';
-import { Input } from '@/app/components/ui/Input';
-import { Select } from '@/app/components/ui/Select';
-import { Textarea } from '@/app/components/ui/Textarea';
-import Skeleton from '@/app/components/ui/Skeleton';
-import AlertMessage from '@/app/components/ui/AlertMessage';
-import Breadcrumbs from '@/app/components/ui/Breadcrumbs';
-import {
-  selectUser,
-  updateUserProfile,
-  logout,
-} from '@/store/slices/authSlice';
+  CollapsibleCard,
+  CollapsibleCardContent,
+  CollapsibleCardHeader,
+} from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
+import { SelectField as Select } from '@/components/ui/select-field';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, XCircle } from 'lucide-react';
+import Breadcrumbs from '@/components/ui/breadcrumbs';
+import { selectUser, updateUserProfile, logout } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
+
+function ProfileEditSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-4xl space-y-6 px-4 py-16">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-2/3 rounded-full" />
+            <Skeleton className="h-4 w-1/2 rounded-full" />
+          </div>
+        </div>
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton
+              key={`profile-edit-skeleton-${index}`}
+              className="h-12 w-full rounded-2xl"
+            />
+          ))}
+        </div>
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
+    </div>
+  )
+}
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -290,13 +313,7 @@ export default function EditProfilePage() {
 
   // Show loading skeleton while user data loads from Redux
   if (!user) {
-    return (
-      <div className="min-h-screen bg-[var(--hb-bg)]">
-        <div className="mx-auto max-w-4xl px-4 py-16">
-          <Skeleton type="profile-edit" />
-        </div>
-      </div>
-    );
+    return <ProfileEditSkeleton />;
   }
 
   const currentAvatar =
@@ -699,10 +716,16 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="apple-page-background relative min-h-screen text-[var(--hb-text)]">
-      {/* Background gradient (like About/Profile page) */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-70">
-        <div className="absolute inset-0 bg-[var(--hb-gradient)] blur-[100px]" />
+    <div className="relative min-h-screen text-foreground">
+      {/* Background gradient - Performance-first: no blur */}
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.08), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.06), transparent 44%)',
+          }}
+        />
       </div>
 
       <div className="relative px-4 py-10 md:px-6">
@@ -718,37 +741,38 @@ export default function EditProfilePage() {
 
           {/* Hero-style Header */}
           <section className="mb-4 text-center">
-            <p className="mb-3 text-xs uppercase tracking-[0.3em] text-[var(--hb-primary-strong)]">
+            <p className="mb-3 text-xs uppercase tracking-[0.3em] text-primary">
               Account • Profile Settings
             </p>
-            <h1 className="apple-title-tracking mb-2 text-3xl font-semibold leading-tight md:text-4xl">
-              <span className="text-[var(--apple-label)]">
-                Επεξεργασία Προφίλ
-              </span>
+            <h1 className="mb-2 text-3xl font-semibold leading-tight md:text-4xl">
+              <span className="text-foreground">Επεξεργασία Προφίλ</span>
             </h1>
-            <p className="apple-body-tracking mx-auto max-w-xl text-sm text-[var(--apple-secondary-label)]">
+            <p className="mx-auto max-w-xl text-sm text-muted-foreground">
               Διαχειρίσου τις πληροφορίες, τα hobbies και τις ρυθμίσεις απορρήτου του λογαριασμού
               σου.
             </p>
           </section>
 
-          {alert && <AlertMessage type={alert.type} message={alert.message} />}
+          {alert && (
+            <Alert variant={alert.type === 'error' ? 'destructive' : 'success'} className="mb-6">
+              {alert.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+              <AlertDescription>{alert.message}</AlertDescription>
+            </Alert>
+          )}
 
           <form id="edit-profile-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
-            <Card className="overflow-hidden apple-material-surface">
-              <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
-                <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
+            <Card className="">
+              <CardHeader className="bg-card/50 border-b border-border">
+                <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">
                   Βασικά Στοιχεία
                 </p>
-                <CardTitle className="text-lg text-[var(--hb-headline)]">
-                  Προσωπικές Πληροφορίες
-                </CardTitle>
+                <CardTitle className="text-lg text-foreground">Προσωπικές Πληροφορίες</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
-                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                    <ShieldCheck className="h-4 w-4 text-[var(--hb-primary)]" />
+                <div className="bg-card/88 rounded-lg border p-4">
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
                     <span>Πληροφορίες Λογαριασμού</span>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -783,9 +807,9 @@ export default function EditProfilePage() {
                   />
                 </div>
 
-                <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
-                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                    <MapPin className="h-4 w-4 text-[var(--hb-primary)]" />
+                <div className="bg-card/88 rounded-lg border p-4">
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <MapPin className="h-4 w-4 text-primary" />
                     <span>Location Details</span>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -813,26 +837,28 @@ export default function EditProfilePage() {
                 </div>
 
                 <div>
-                  <Textarea
-                    label="Bio"
-                    name="bio"
-                    value={formData.bio || ''}
-                    onChange={handleChange}
-                    placeholder="Πες μας λίγα λόγια για σένα..."
-                    rows={4}
-                  />
-                  <div className="mt-1 text-xs text-[var(--hb-muted)]">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">Bio</label>
+                    <Textarea
+                      name="bio"
+                      value={formData.bio || ''}
+                      onChange={handleChange}
+                      placeholder="Πες μας λίγα λόγια για σένα..."
+                      rows={4}
+                    />
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
                     {formData.bio?.length || 0} / 500 χαρακτήρες
                   </div>
                 </div>
 
-                <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
+                <div className="bg-card/88 rounded-lg border p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                      <Link2 className="h-4 w-4 text-[var(--hb-primary)]" />
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <Link2 className="h-4 w-4 text-primary" />
                       <span>Social Presence</span>
                     </div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--hb-muted)]">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                       2 στήλες • με icons
                     </p>
                   </div>
@@ -842,13 +868,13 @@ export default function EditProfilePage() {
                       return (
                         <div
                           key={platform.key}
-                          className="flex items-center gap-3 rounded-[var(--apple-radius-control)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/80 p-3"
+                          className="bg-card/80 flex items-center gap-3 border p-3"
                         >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--apple-separator)] bg-[var(--apple-tertiary-fill)] text-[var(--hb-primary)]">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border bg-muted text-primary">
                             <Icon className="h-5 w-5" />
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                               {platform.label}
                             </p>
                             <input
@@ -856,7 +882,7 @@ export default function EditProfilePage() {
                               value={socialLinks[platform.key] || ''}
                               onChange={e => handleSocialLinkChange(platform.key, e.target.value)}
                               placeholder={platform.placeholder}
-                              className="mt-1 w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-card)] px-3 py-2 text-sm text-[var(--hb-headline)] placeholder:text-[var(--hb-muted)] focus:border-[var(--hb-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--hb-ring)]"
+                              className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                           </div>
                         </div>
@@ -866,13 +892,13 @@ export default function EditProfilePage() {
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
-                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                      <Camera className="h-4 w-4 text-[var(--hb-primary)]" />
+                  <div className="bg-card/88 rounded-lg border p-4">
+                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <Camera className="h-4 w-4 text-primary" />
                       <span>Profile Photo</span>
                     </div>
                     <div className="flex items-start gap-4">
-                      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-[var(--hb-border)] bg-[var(--hb-card)]">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full border border-border bg-card">
                         {currentAvatar ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -881,23 +907,23 @@ export default function EditProfilePage() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs text-[var(--hb-muted)]">
+                          <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                             No avatar
                           </div>
                         )}
                       </div>
                       <div className="flex-1 space-y-3">
                         <div className="space-y-1">
-                          <label className="text-xs font-semibold uppercase tracking-wide text-[var(--hb-muted)]">
+                          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Avatar Upload
                           </label>
                           <input
                             type="file"
                             accept="image/*"
                             onChange={handleAvatarUpload}
-                            className="block w-full text-xs text-[var(--hb-muted)] file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-[var(--hb-primary)] file:px-3 file:py-1 file:font-semibold file:uppercase file:tracking-wide file:text-[var(--hb-bg)] hover:file:opacity-90"
+                            className="block w-full text-xs text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1 file:font-semibold file:uppercase file:tracking-wide file:text-background hover:file:opacity-90"
                           />
-                          <p className="text-[11px] text-[var(--hb-muted)]">
+                          <p className="text-[11px] text-muted-foreground">
                             Auto–avatar generation: placeholder για επόμενη έκδοση.
                           </p>
                         </div>
@@ -921,9 +947,9 @@ export default function EditProfilePage() {
                     </div>
                   </div>
 
-                  <div className="rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] bg-[var(--hb-card)]/88 p-4">
-                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hb-headline)]">
-                      <ShieldCheck className="h-4 w-4 text-[var(--hb-primary)]" />
+                  <div className="bg-card/88 rounded-lg border p-4">
+                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <ShieldCheck className="h-4 w-4 text-primary" />
                       <span>Privacy Settings</span>
                     </div>
                     <div className="space-y-3">
@@ -942,20 +968,20 @@ export default function EditProfilePage() {
                             }
                             className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition ${
                               active
-                                ? `border-[var(--hb-primary)]/30 bg-[var(--hb-primary)]/12 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-text)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                ? `border-primary/30 bg-primary/12 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-foreground`
                             }`}
                           >
                             <span className="text-sm font-medium">{setting.label}</span>
                             {active ? (
-                              <Eye className="h-4 w-4 text-[var(--hb-primary)]" />
+                              <Eye className="h-4 w-4 text-primary" />
                             ) : (
-                              <EyeOff className="h-4 w-4 text-[var(--hb-muted)]" />
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
                             )}
                           </Button>
                         );
                       })}
-                      <p className="text-[11px] text-[var(--hb-muted)]">
+                      <p className="text-[11px] text-muted-foreground">
                         Μικρές ρυθμίσεις που δίνουν κύρος και έλεγχο στο προφίλ σου.
                       </p>
                     </div>
@@ -965,20 +991,15 @@ export default function EditProfilePage() {
             </Card>
 
             {/* Categories selection */}
-            <Card
-              id="categories"
-              className="scroll-mt-24 overflow-hidden apple-material-surface"
-            >
-              <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
-                <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
+            <Card id="categories" className="scroll-mt-24">
+              <CardHeader className="bg-card/50 border-b border-border">
+                <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">
                   Τα Hobbies μου
                 </p>
-                <CardTitle className="text-lg text-[var(--hb-headline)]">
-                  Κατηγορίες χόμπι
-                </CardTitle>
+                <CardTitle className="text-lg text-foreground">Κατηγορίες χόμπι</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-[var(--hb-muted)]">
+                <p className="text-sm text-muted-foreground">
                   Επέλεξε τις κατηγορίες που σε ενδιαφέρουν. Θα εμφανίζονται μόνο τα σχετικά blocks
                   στις σελίδες σου.
                 </p>
@@ -1003,8 +1024,8 @@ export default function EditProfilePage() {
                         onClick={() => toggleCategory(cat)}
                         className={`rounded-full border px-3 py-1.5 text-sm transition ${
                           active
-                            ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                            : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                            ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                            : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                         }`}
                       >
                         {labels[cat] || cat}
@@ -1017,19 +1038,12 @@ export default function EditProfilePage() {
 
             {/* Gaming Information */}
             {(formData.categories as string[] | undefined)?.includes('games') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader className="bg-[var(--hb-card)]/50 border-b border-[var(--hb-border)]">
-                  <p className="mb-1 text-xs uppercase tracking-[0.25em] text-[var(--hb-primary-strong)]">
-                    Gaming
-                  </p>
-                  <CardTitle className="text-lg text-[var(--hb-headline)]">
-                    Πληροφορίες για Gaming
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader className="bg-card/50 border-b border-border">
+                  <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">Gaming</p>
+                  <CardTitle className="text-lg text-foreground">Πληροφορίες για Gaming</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <Input
                       label="PSN ID"
@@ -1051,19 +1065,22 @@ export default function EditProfilePage() {
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-[var(--hb-headline)]">Steam ID</label>
+                        <label className="text-sm font-medium text-foreground">Steam ID</label>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button
                                 type="button"
-                                className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[var(--hb-muted)] hover:text-[var(--hb-headline)]"
+                                className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
                                 aria-label="Steam ID help"
                               >
                                 <CircleHelp className="h-4 w-4" />
                               </button>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-xs text-left leading-relaxed">
+                            <TooltipContent
+                              side="top"
+                              className="max-w-xs text-left leading-relaxed"
+                            >
                               Βρες το Steam ID από το προφίλ σου. Προτίμησε το 17-ψηφιο SteamID64
                               (π.χ. 7656119...). Δεκτό και vanity name ή URL από
                               steamcommunity.com/id/... καθώς και steamcommunity.com/profiles/...
@@ -1077,7 +1094,7 @@ export default function EditProfilePage() {
                         value={formData.steam_id || ''}
                         onChange={handleChange}
                         placeholder="76561198083126936 ή steamcommunity.com/id/yourname"
-                        className="w-full rounded-lg border border-[var(--hb-border)] bg-[var(--hb-panel)] p-3 text-[var(--hb-text)] placeholder:text-[var(--hb-muted)] placeholder:opacity-80 transition focus:border-[var(--hb-primary-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--hb-primary)] focus:placeholder-transparent"
+                        className="w-full rounded-lg border border-border bg-card p-3 text-foreground transition placeholder:text-muted-foreground placeholder:opacity-80 focus:border-primary focus:placeholder-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
 
@@ -1099,7 +1116,7 @@ export default function EditProfilePage() {
                   />
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                    <label className="mb-2 block text-sm font-medium text-foreground">
                       Αγαπημένα Genres
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -1112,8 +1129,8 @@ export default function EditProfilePage() {
                             onClick={() => handleGenreToggle(genre)}
                             className={`rounded-full border px-3 py-1 text-xs transition ${
                               active
-                                ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                             }`}
                           >
                             {genre}
@@ -1133,16 +1150,14 @@ export default function EditProfilePage() {
                     min="1970"
                     max={new Date().getFullYear()}
                   />
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Gaming
-                  </CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Gaming</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Gaming&quot; για να εμφανιστεί η φόρμα με τα gaming
                   στοιχεία σου.
                 </CardContent>
@@ -1151,14 +1166,11 @@ export default function EditProfilePage() {
 
             {/* Anime Information */}
             {(formData.categories as string[] | undefined)?.includes('anime') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Anime</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για Anime</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('anime');
                     const animeGenres = resolveGenreList(note, formData.favorite_anime_genres);
@@ -1169,7 +1181,7 @@ export default function EditProfilePage() {
                     return (
                       <>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένα Είδη Anime
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1182,8 +1194,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('anime', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {genre}
@@ -1194,7 +1206,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Preferred Watching Format
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1207,8 +1219,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('anime', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {format}
@@ -1219,7 +1231,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Preferred Source / Platform
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1234,8 +1246,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {platform}
@@ -1269,27 +1281,29 @@ export default function EditProfilePage() {
                           max={new Date().getFullYear()}
                         />
 
-                        <Textarea
-                          label="Favorite Anime Directors / Studios"
-                          name="anime_directors"
-                          value={(note.directors as string) || ''}
-                          onChange={e =>
-                            handleCategoryNoteField('anime', 'directors')(e.target.value)
-                          }
-                          placeholder="Favorite directors / studios (π.χ. Miyazaki, Ufotable)"
-                          rows={3}
-                        />
+                        <div className="space-y-1.5">
+                          <label className="text-sm font-medium text-foreground">Favorite Anime Directors / Studios</label>
+                          <Textarea
+                            name="anime_directors"
+                            value={(note.directors as string) || ''}
+                            onChange={e =>
+                              handleCategoryNoteField('anime', 'directors')(e.target.value)
+                            }
+                            placeholder="Favorite directors / studios (π.χ. Miyazaki, Ufotable)"
+                            rows={3}
+                          />
+                        </div>
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Anime</CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Anime</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Anime&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
                   σου.
                 </CardContent>
@@ -1298,21 +1312,18 @@ export default function EditProfilePage() {
 
             {/* Manga Information */}
             {(formData.categories as string[] | undefined)?.includes('manga') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για manga</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για manga</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('manga');
                     const mangaGenres = resolveGenreList(note, formData.favorite_anime_genres);
                     return (
                       <>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένα Είδη / Demographics
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1325,8 +1336,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('manga', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {genre}
@@ -1337,7 +1348,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Preferred Reading Format
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1350,8 +1361,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('manga', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {format}
@@ -1372,27 +1383,29 @@ export default function EditProfilePage() {
                           max={new Date().getFullYear()}
                         />
 
-                        <Textarea
-                          label="Favorite Mangaka / Artists"
-                          name="manga_authors"
-                          value={(note.authors as string) || ''}
-                          onChange={e =>
-                            handleCategoryNoteField('manga', 'authors')(e.target.value)
-                          }
-                          placeholder="Favorite mangaka / artists"
-                          rows={3}
-                        />
+                        <div className="space-y-1.5">
+                          <label className="text-sm font-medium text-foreground">Favorite Mangaka / Artists</label>
+                          <Textarea
+                            name="manga_authors"
+                            value={(note.authors as string) || ''}
+                            onChange={e =>
+                              handleCategoryNoteField('manga', 'authors')(e.target.value)
+                            }
+                            placeholder="Favorite mangaka / artists"
+                            rows={3}
+                          />
+                        </div>
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για manga</CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για manga</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Manga&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
                   σου.
                 </CardContent>
@@ -1401,16 +1414,11 @@ export default function EditProfilePage() {
 
             {/* Movies Information */}
             {(formData.categories as string[] | undefined)?.includes('movies') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Ταινίες
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για Ταινίες</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('movies');
                     const movieGenres = resolveGenreList(note, formData.favorite_movie_genres);
@@ -1422,7 +1430,7 @@ export default function EditProfilePage() {
                     return (
                       <>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένες Πλατφόρμες Streaming / Watching
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1437,8 +1445,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {service}
@@ -1462,7 +1470,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένα Genres Ταινιών
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1475,8 +1483,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('movies', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {genre}
@@ -1487,7 +1495,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Preferred Watching Style
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1500,8 +1508,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('movies', 'style')(style)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {style}
@@ -1522,29 +1530,29 @@ export default function EditProfilePage() {
                           max={new Date().getFullYear()}
                         />
 
-                        <Textarea
-                          label="Αγαπημένοι Ηθοποιοί / Σκηνοθέτες"
-                          name="movies_people"
-                          value={(note.people as string) || ''}
-                          onChange={e =>
-                            handleCategoryNoteField('movies', 'people')(e.target.value)
-                          }
-                          placeholder="Αγαπημένοι ηθοποιοί ή σκηνοθέτες που σε εμπνέουν"
-                          rows={3}
-                        />
+                        <div className="space-y-1.5">
+                          <label className="text-sm font-medium text-foreground">Αγαπημένοι Ηθοποιοί / Σκηνοθέτες</label>
+                          <Textarea
+                            name="movies_people"
+                            value={(note.people as string) || ''}
+                            onChange={e =>
+                              handleCategoryNoteField('movies', 'people')(e.target.value)
+                            }
+                            placeholder="Αγαπημένοι ηθοποιοί ή σκηνοθέτες που σε εμπνέουν"
+                            rows={3}
+                          />
+                        </div>
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Ταινίες
-                  </CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Ταινίες</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Movies&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
                   σου.
                 </CardContent>
@@ -1553,16 +1561,11 @@ export default function EditProfilePage() {
 
             {/* TV Series Information */}
             {(formData.categories as string[] | undefined)?.includes('tv') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Σειρές
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για Σειρές</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('tv');
                     const tvGenres = resolveGenreList(note, formData.favorite_movie_genres);
@@ -1570,7 +1573,7 @@ export default function EditProfilePage() {
                     return (
                       <>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένες Πλατφόρμες Streaming
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1590,8 +1593,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {service}
@@ -1615,7 +1618,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένα Genres Σειρών
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1628,8 +1631,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('tv', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {genre}
@@ -1640,7 +1643,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Preferred Watching Style
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1653,8 +1656,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('tv', 'style')(style)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {style}
@@ -1675,27 +1678,27 @@ export default function EditProfilePage() {
                           max={new Date().getFullYear()}
                         />
 
-                        <Textarea
-                          name="tv_people"
-                          value={(note.people as string) || ''}
-                          onChange={e => handleCategoryNoteField('tv', 'people')(e.target.value)}
-                          label="Αγαπημένοι Ηθοποιοί / Σκηνοθέτες"
-                          placeholder="Αγαπημένοι ηθοποιοί/σκηνοθέτες ή έξτρα σημειώσεις."
-                          rows={3}
-                        />
+                        <div className="space-y-1.5">
+                          <label className="text-sm font-medium text-foreground">Αγαπημένοι Ηθοποιοί / Σκηνοθέτες</label>
+                          <Textarea
+                            name="tv_people"
+                            value={(note.people as string) || ''}
+                            onChange={e => handleCategoryNoteField('tv', 'people')(e.target.value)}
+                            placeholder="Αγαπημένοι ηθοποιοί/σκηνοθέτες ή έξτρα σημειώσεις."
+                            rows={3}
+                          />
+                        </div>
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Σειρές
-                  </CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Σειρές</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;TV Series&quot; για να εμφανιστεί η φόρμα με τα
                   στοιχεία σου.
                 </CardContent>
@@ -1704,23 +1707,18 @@ export default function EditProfilePage() {
 
             {/* Books Information */}
             {(formData.categories as string[] | undefined)?.includes('books') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Βιβλία
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για Βιβλία</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('books');
                     const bookGenres = resolveGenreList(note, formData.favorite_book_genres);
                     return (
                       <>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένα Είδη Βιβλίων
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1733,8 +1731,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('books', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {genre}
@@ -1745,7 +1743,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Preferred Reading Format
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1758,8 +1756,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('books', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {format}
@@ -1780,29 +1778,29 @@ export default function EditProfilePage() {
                           max={new Date().getFullYear()}
                         />
 
-                        <Textarea
-                          label="Αγαπημένοι Συγγραφείς"
-                          name="books_authors"
-                          value={(note.authors as string) || ''}
-                          onChange={e =>
-                            handleCategoryNoteField('books', 'authors')(e.target.value)
-                          }
-                          placeholder="Αγαπημένοι συγγραφείς"
-                          rows={3}
-                        />
+                        <div className="space-y-1.5">
+                          <label className="text-sm font-medium text-foreground">Αγαπημένοι Συγγραφείς</label>
+                          <Textarea
+                            name="books_authors"
+                            value={(note.authors as string) || ''}
+                            onChange={e =>
+                              handleCategoryNoteField('books', 'authors')(e.target.value)
+                            }
+                            placeholder="Αγαπημένοι συγγραφείς"
+                            rows={3}
+                          />
+                        </div>
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Βιβλία
-                  </CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Βιβλία</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Books&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
                   σου.
                 </CardContent>
@@ -1811,23 +1809,18 @@ export default function EditProfilePage() {
 
             {/* Coding Information */}
             {(formData.categories as string[] | undefined)?.includes('coding') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Κώδικα
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για Κώδικα</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('coding');
                     const codingLanguages = resolveLanguageList(note, formData.favorite_languages);
                     return (
                       <>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Γλώσσες που χρησιμοποιείς
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1842,8 +1835,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {lang}
@@ -1854,7 +1847,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Focus / Κατεύθυνση
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1871,8 +1864,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryListToggle('coding', 'focus', focus)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {focus}
@@ -1907,16 +1900,14 @@ export default function EditProfilePage() {
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Κώδικα
-                  </CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Κώδικα</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Coding&quot; για να εμφανιστεί η φόρμα με τα coding
                   στοιχεία σου.
                 </CardContent>
@@ -1925,16 +1916,11 @@ export default function EditProfilePage() {
 
             {/* Pet Information */}
             {(formData.categories as string[] | undefined)?.includes('pet') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Κατοικίδια
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για Κατοικίδια</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('pet');
                     const petSelection = (formData.pet_types as string[] | undefined) || [];
@@ -1984,7 +1970,7 @@ export default function EditProfilePage() {
                     return (
                       <>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Είδη Κατοικιδίων
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -1997,8 +1983,8 @@ export default function EditProfilePage() {
                                   onClick={() => togglePetType(type)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {type}
@@ -2009,7 +1995,7 @@ export default function EditProfilePage() {
                         </div>
 
                         {activePetTypes.length === 0 ? (
-                          <p className="text-sm text-[var(--hb-muted)]">
+                          <p className="text-sm text-muted-foreground">
                             Επίλεξε ένα κατοικίδιο για να αποθηκευτούν τα στοιχεία του.
                           </p>
                         ) : (
@@ -2017,11 +2003,9 @@ export default function EditProfilePage() {
                             {activePetTypes.map(type => (
                               <div
                                 key={`pet-entry-${type}`}
-                                className="bg-[var(--hb-card)]/70 space-y-3 rounded-[var(--apple-radius-card)] border border-[var(--apple-separator-soft)] px-4 py-3"
+                                className="bg-card/70 space-y-3 rounded-lg border px-4 py-3"
                               >
-                                <p className="text-sm font-semibold text-[var(--hb-headline)]">
-                                  {type}
-                                </p>
+                                <p className="text-sm font-semibold text-foreground">{type}</p>
                                 <div className="grid gap-4 md:grid-cols-3">
                                   <Input
                                     label={`Όνομα (${type})`}
@@ -2060,16 +2044,14 @@ export default function EditProfilePage() {
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">
-                    Πληροφορίες για Κατοικίδια
-                  </CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Κατοικίδια</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Pet&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
                   του κατοικιδίου σου.
                 </CardContent>
@@ -2078,14 +2060,11 @@ export default function EditProfilePage() {
 
             {/* Vape Information */}
             {(formData.categories as string[] | undefined)?.includes('vape') ? (
-              <Card
-                collapsible
-                className="overflow-hidden apple-material-surface"
-              >
-                <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Vape</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <CollapsibleCard className="">
+                <CollapsibleCardHeader>
+                  <CardTitle className="text-foreground">Πληροφορίες για Vape</CardTitle>
+                </CollapsibleCardHeader>
+                <CollapsibleCardContent className="space-y-4">
                   {(() => {
                     const note = getCategoryNote('vape');
                     const vapeDeviceValue =
@@ -2132,7 +2111,7 @@ export default function EditProfilePage() {
                         </div>
 
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-[var(--hb-headline)]">
+                          <label className="mb-2 block text-sm font-medium text-foreground">
                             Αγαπημένες Γεύσεις
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -2147,8 +2126,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-[var(--hb-primary)]/35 bg-[var(--hb-primary)]/14 text-[var(--hb-primary)] dark:border-[var(--hb-primary)]/55 dark:bg-[var(--hb-primary)]/22 dark:text-[#8ec5ff]`
-                                      : `border-[var(--hb-border)] bg-[var(--hb-card)] text-[var(--hb-muted)] hover:border-[var(--hb-primary)]/35 hover:bg-[var(--hb-primary)]/8`
+                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
+                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
                                   }`}
                                 >
                                   {flavor}
@@ -2160,14 +2139,14 @@ export default function EditProfilePage() {
                       </>
                     );
                   })()}
-                </CardContent>
-              </Card>
+                </CollapsibleCardContent>
+              </CollapsibleCard>
             ) : (
-              <Card className="overflow-hidden apple-material-surface">
+              <Card className="">
                 <CardHeader>
-                  <CardTitle className="text-[var(--hb-headline)]">Πληροφορίες για Vape</CardTitle>
+                  <CardTitle className="text-foreground">Πληροφορίες για Vape</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-[var(--hb-muted)]">
+                <CardContent className="text-sm text-muted-foreground">
                   Πρόσθεσε την κατηγορία &quot;Vape&quot; για να εμφανιστεί η φόρμα με τα στοιχεία
                   για το vaping σου.
                 </CardContent>
@@ -2175,7 +2154,7 @@ export default function EditProfilePage() {
             )}
 
             {/* Bottom Save Buttons */}
-            <div className="mt-6 flex flex-wrap items-center justify-end gap-3 rounded-[var(--apple-radius-card)] border border-[var(--apple-separator)] bg-[var(--hb-card)]/80 px-4 py-3 shadow-[var(--hb-shadow-sm)] backdrop-blur-xl">
+            <div className="bg-card/80 mt-6 flex flex-wrap items-center justify-end gap-3 rounded-lg border px-4 py-3 shadow-sm">
               {/* Primary Button */}
               <Button
                 type="submit"
@@ -2199,7 +2178,7 @@ export default function EditProfilePage() {
           </form>
 
           {/* Danger Zone */}
-          <Card className="apple-destructive-surface backdrop-blur-xl">
+          <Card className="">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#ff453a]">
                 <AlertTriangle className="h-5 w-5" />
@@ -2207,12 +2186,12 @@ export default function EditProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
-              <p className="text-[var(--hb-text)]">
+              <p className="text-foreground">
                 Η διαγραφή του λογαριασμού σου είναι <strong>μόνιμη</strong> και δεν μπορεί να
                 αναιρεθεί.
               </p>
-              <p className="text-[var(--hb-muted)]">Θα διαγραφούν:</p>
-              <ul className="mb-4 ml-4 list-disc space-y-1 text-[var(--hb-muted)]">
+              <p className="text-muted-foreground">Θα διαγραφούν:</p>
+              <ul className="mb-4 ml-4 list-disc space-y-1 text-muted-foreground">
                 <li>Όλα τα προσωπικά σου δεδομένα</li>
                 <li>Το προφίλ σου</li>
                 <li>Οι οδηγοί που έχεις γράψει (αν υπάρχουν)</li>
@@ -2223,20 +2202,20 @@ export default function EditProfilePage() {
               {!showDeleteConfirm ? (
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-2 rounded-[var(--apple-radius-control)] border border-[#ff3b30]/55 bg-[#ff3b30]/14 px-5 py-2.5 font-semibold text-[#ff453a] shadow-[var(--hb-shadow-sm)] transition hover:bg-[#ff3b30]/20"
+                  className="bg-[#ff3b30]/14 flex items-center gap-2 border border-[#ff3b30]/55 px-5 py-2.5 font-semibold text-[#ff453a] shadow-sm transition hover:bg-[#ff3b30]/20"
                 >
                   <Trash2 className="h-4 w-4" />
                   Διαγραφή Λογαριασμού
                 </Button>
               ) : (
-                <div className="space-y-4 rounded-[var(--apple-radius-control)] border border-[#ff3b30]/45 bg-[#ff3b30]/12 p-4">
+                <div className="bg-[#ff3b30]/12 space-y-4 border border-[#ff3b30]/45 p-4">
                   <p className="font-semibold text-[#ffb4ae]">
                     ⚠️ Είσαι σίγουρος; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί!
                   </p>
                   <div>
-                    <label className="mb-2 block text-xs text-[var(--hb-text)]">
+                    <label className="mb-2 block text-xs text-foreground">
                       Πληκτρολόγησε{' '}
-                      <code className="rounded-[8px] bg-[var(--hb-card)] px-2 py-1 text-[#ff6961]">
+                      <code className="rounded-[8px] bg-card px-2 py-1 text-[#ff6961]">
                         ΔΙΑΓΡΑΦΗ
                       </code>{' '}
                       για να επιβεβαιώσεις:
@@ -2263,7 +2242,8 @@ export default function EditProfilePage() {
                     <Button
                       onClick={handleDeleteAccount}
                       disabled={deleting || deleteConfirmText !== 'ΔΙΑΓΡΑΦΗ'}
-                      variant="destructive" className="disabled:opacity-50"
+                      variant="destructive"
+                      className="disabled:opacity-50"
                     >
                       <Trash2 className="h-4 w-4" />
                       {deleting ? 'Διαγραφή...' : 'Οριστική Διαγραφή'}

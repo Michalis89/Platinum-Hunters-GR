@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
-import { Textarea } from '@/app/components/ui/Textarea';
+import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
 import { useSelector } from 'react-redux';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
-import { FormattedDate } from '@/app/components/ui/FormattedDate';
+import { FormattedDate } from '@/utils/components/FormattedDate';
 
 type Comment = {
   id: number;
@@ -164,29 +164,26 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   );
 
   return (
-    <section className="mt-12 rounded-3xl border border-[var(--hb-border)] bg-[var(--hb-panel)] p-6 text-[var(--hb-text)] shadow-[var(--hb-shadow-md)]">
+    <section className="mt-12 rounded-3xl border border-border bg-card p-6 text-foreground shadow-md">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-[var(--hb-headline)]">Σχόλια</h3>
-        <span className="text-xs uppercase tracking-[0.3em] text-[var(--hb-muted)]">
+        <h3 className="text-lg font-semibold text-foreground">Σχόλια</h3>
+        <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
           {comments.length} σχόλια
         </span>
       </div>
       {loading ? (
         <div className="mt-6 flex items-center justify-center">
-          <LoadingSpinner />
+          <Spinner />
         </div>
       ) : (
         <div className="mt-6 space-y-4">
           {error && <p className="text-sm text-red-400">{error}</p>}
           {comments.length === 0 ? (
-            <p className="text-sm text-[var(--hb-muted)]">Δεν υπάρχουν ακόμα σχόλια.</p>
+            <p className="text-sm text-muted-foreground">Δεν υπάρχουν ακόμα σχόλια.</p>
           ) : (
             comments.map(comment => (
-              <article
-                key={comment.id}
-                className="rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-card)] p-4"
-              >
-                <div className="flex items-center justify-between text-xs text-[var(--hb-muted)]">
+              <article key={comment.id} className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>
                     {comment.users?.display_name || comment.users?.username || 'Ανώνυμος'}
                   </span>
@@ -204,7 +201,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                       rows={4}
                       onChange={event => setEditContent(event.target.value)}
                       placeholder="Επεξεργάσου το σχόλιο"
-                      error={Boolean(editError)}
+                      className={editError ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
                     />
                     {editError && <p className="text-xs text-red-400">{editError}</p>}
                     <div className="flex flex-wrap gap-2">
@@ -260,19 +257,13 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
 
       <div className="mt-8 space-y-3">
         {!user && (
-          <p className="text-xs text-[var(--hb-muted)]">
+          <p className="text-xs text-muted-foreground">
             Για να κάνεις σχόλιο χρειάζεται λογαριασμός.{' '}
-            <Link
-              href="/auth/login"
-              className="text-[var(--hb-primary)] underline-offset-4 hover:underline"
-            >
+            <Link href="/auth/login" className="text-primary underline-offset-4 hover:underline">
               Σύνδεση
             </Link>{' '}
             ή{' '}
-            <Link
-              href="/auth/register"
-              className="text-[var(--hb-primary)] underline-offset-4 hover:underline"
-            >
+            <Link href="/auth/register" className="text-primary underline-offset-4 hover:underline">
               Εγγραφή
             </Link>
             .
@@ -280,15 +271,17 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         )}
         {user ? (
           <form className="space-y-3" onSubmit={handleSubmit}>
-            <Textarea
-              label="Το σχόλιό σου"
-              value={commentText}
-              onChange={event => setCommentText(event.target.value)}
-              rows={4}
-              placeholder="Πες μας τη γνώμη σου"
-              error={Boolean(error)}
-            />
-            {successMessage && <p className="text-sm text-[var(--hb-primary)]">{successMessage}</p>}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Το σχόλιό σου</label>
+              <Textarea
+                value={commentText}
+                onChange={event => setCommentText(event.target.value)}
+                rows={4}
+                placeholder="Πες μας τη γνώμη σου"
+                className={error ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+              />
+            </div>
+            {successMessage && <p className="text-sm text-primary">{successMessage}</p>}
             <Button type="submit" variant="primary" disabled={submitting}>
               {submitting ? 'Αποστολή...' : 'Δημοσίευση σχολίου'}
             </Button>

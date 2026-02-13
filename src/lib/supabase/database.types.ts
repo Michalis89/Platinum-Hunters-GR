@@ -781,6 +781,7 @@ export type Database = {
           progress: number | null
           score: number | null
           selected_platform: string | null
+          pinned_rank: number | null
           status: string
           updated_at: string | null
           user_id: string
@@ -796,6 +797,7 @@ export type Database = {
           progress?: number | null
           score?: number | null
           selected_platform?: string | null
+          pinned_rank?: number | null
           status: string
           updated_at?: string | null
           user_id: string
@@ -811,6 +813,7 @@ export type Database = {
           progress?: number | null
           score?: number | null
           selected_platform?: string | null
+          pinned_rank?: number | null
           status?: string
           updated_at?: string | null
           user_id?: string
@@ -825,6 +828,50 @@ export type Database = {
           },
           {
             foreignKeyName: "user_media_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_settings: {
+        Row: {
+          articles_enabled: boolean
+          community_activity_enabled: boolean
+          community_suggestions_enabled: boolean
+          created_at: string | null
+          reviews_enabled: boolean
+          social_enabled: boolean
+          theme: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          articles_enabled?: boolean
+          community_activity_enabled?: boolean
+          community_suggestions_enabled?: boolean
+          created_at?: string | null
+          reviews_enabled?: boolean
+          social_enabled?: boolean
+          theme?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          articles_enabled?: boolean
+          community_activity_enabled?: boolean
+          community_suggestions_enabled?: boolean
+          created_at?: string | null
+          reviews_enabled?: boolean
+          social_enabled?: boolean
+          theme?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -963,6 +1010,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      category_dashboard_history: {
+        Args: { p_user_id: string; p_category: string; p_since: string }
+        Returns: {
+          day: string | null
+          completed: number | null
+          dropped: number | null
+        }[]
+      }
       cleanup_expired_steam_sync_jobs: { Args: never; Returns: undefined }
       has_any_role: { Args: { required_roles: string[] }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
@@ -997,6 +1052,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      reorder_pins: {
+        Args: { p_user_id: string; p_category: string; p_order: Json }
+        Returns: undefined
       }
     }
     Enums: {

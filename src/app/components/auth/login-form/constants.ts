@@ -5,5 +5,5 @@ export const EXPIRED_RESET_MESSAGE =
 
 export const alertToneClass = (type: 'success' | 'error') =>
   type === 'success'
-    ? 'border-[var(--apple-system-blue)]/35 bg-[var(--apple-system-blue)]/10 text-[var(--apple-label)]'
-    : 'border-[#ff3b30]/35 bg-[#ff3b30]/10 text-[var(--apple-label)]';
+    ? 'border-primary/35 bg-background text-foreground'
+    : 'border-[#ff3b30]/35 bg-[#ff3b30]/10 text-foreground';

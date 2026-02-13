@@ -44,9 +44,9 @@ export default function ResetPasswordForm({
   if (!hasValidSession) return null;
 
   return (
-    <div className="apple-auth-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
-      <div className="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--apple-system-blue)_22%,transparent)] blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--apple-system-green)_18%,transparent)] blur-3xl" />
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-success/15 blur-3xl" />
 
       <ResetPasswordCard
         error={error}

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -45,7 +45,7 @@ type CategoryConfig = {
 const categoryConfigs: CategoryConfig[] = [
   {
     key: 'games',
-    label: 'Παιχνίδια',
+    label: 'Games',
     icon: <Gamepad2 className="h-4 w-4" />,
     apiPath: '/api/games/suggestions?category=games',
     addPath: '/pages/backlog?category=games',
@@ -66,21 +66,21 @@ const categoryConfigs: CategoryConfig[] = [
   },
   {
     key: 'movies',
-    label: 'Ταινίες',
+    label: 'Movies',
     icon: <Film className="h-4 w-4" />,
     apiPath: '/api/movies/suggestions?category=movies',
     addPath: '/pages/backlog?category=movies',
   },
   {
     key: 'tv',
-    label: 'Σειρές',
+    label: 'TV shows',
     icon: <Tv className="h-4 w-4" />,
     apiPath: '/api/movies/suggestions?category=tv',
     addPath: '/pages/backlog?category=tv',
   },
   {
     key: 'books',
-    label: 'Βιβλία',
+    label: 'Books',
     icon: <BookText className="h-4 w-4" />,
     apiPath: '/api/books/suggestions',
     addPath: '/pages/backlog?category=books',
@@ -126,9 +126,9 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
       <div className="mx-auto max-w-7xl space-y-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-1.5">
-            <h2 className="apple-label apple-title-tracking text-2xl font-semibold">Προτάσεις κοινότητας</h2>
-            <p className="apple-secondary-label apple-body-tracking text-sm leading-relaxed">
-              Επιλεγμένες προτάσεις με βάση τις βαθμολογίες της κοινότητας.
+            <h2 className="text-2xl font-semibold">Discover more favorites?</h2>
+            <p className="text-sm leading-relaxed">
+              Curated suggestions inspired by what the community is enjoying right now.
             </p>
           </div>
 
@@ -141,9 +141,7 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
                   key={config.key}
                   onClick={() => setActiveTab(config.key)}
                   className={`h-9 rounded-full px-4 text-sm transition ${
-                    isActiveTab
-                      ? 'apple-pill apple-label'
-                      : 'border-[var(--apple-separator)] bg-transparent text-[var(--apple-secondary-label)]'
+                    isActiveTab ? '' : 'bg-transparent text-muted-foreground'
                   }`}
                 >
                   {config.icon}
@@ -165,21 +163,21 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
             ))}
           </div>
         ) : (
-          <div className="apple-card p-8 text-center">
-            <div className="apple-pill apple-secondary-label mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full">
+          <div className="p-8 text-center">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full">
               {activeConfig?.icon ?? <Sparkles className="h-5 w-5" />}
             </div>
-            <p className="apple-label text-base font-medium">Δεν υπάρχουν προτάσεις ακόμα</p>
-            <p className="apple-secondary-label mx-auto mt-2 max-w-md text-sm leading-relaxed">
-              Όταν προστεθούν περισσότερες βαθμολογίες στην κατηγορία {activeConfig?.label.toLowerCase()},
-              θα εμφανιστούν εδώ.
+            <p className="text-base font-medium">Nothing queued yet?</p>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed">
+              Try browsing other categories like{' '}
+              {activeConfig?.label?.toLowerCase() ?? 'the community backlog'} for fresh picks.
             </p>
 
             <Link
               href={activeConfig?.addPath ?? '/pages/backlog'}
-              className="apple-label mt-5 inline-flex items-center gap-1 text-sm font-medium transition hover:text-[var(--apple-system-blue)]"
+              className="hover:text-info mt-5 inline-flex items-center gap-1 text-sm font-medium transition"
             >
-              Εξερεύνηση
+              Browse backlog
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
@@ -196,11 +194,8 @@ type SuggestionCardProps = {
 
 function SuggestionCard({ item, addPath }: SuggestionCardProps) {
   return (
-    <Link
-      href={addPath}
-      className="apple-card group overflow-hidden transition duration-200 hover:border-[var(--apple-system-blue)]/55"
-    >
-      <div className="relative aspect-[2/3] overflow-hidden">
+    <Link href={addPath} className="hover:border-info/55 group transition duration-200">
+      <div className="relative aspect-[2/3]">
         <Image
           src={item.cover}
           alt={item.title}
@@ -213,7 +208,7 @@ function SuggestionCard({ item, addPath }: SuggestionCardProps) {
         />
 
         {item.score && (
-          <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/30 bg-black/35 px-2 py-1 text-xs text-white backdrop-blur-sm">
+          <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/30 bg-black/35 px-2 py-1 text-xs text-white">
             <Star className="h-3 w-3 fill-current" />
             {item.score}
           </div>
@@ -221,8 +216,8 @@ function SuggestionCard({ item, addPath }: SuggestionCardProps) {
       </div>
 
       <div className="space-y-1 p-3">
-        <h3 className="apple-label line-clamp-2 text-sm font-semibold">{item.title}</h3>
-        {item.year && <p className="apple-secondary-label text-xs">{item.year}</p>}
+        <h3 className="line-clamp-2 text-sm font-semibold">{item.title}</h3>
+        {item.year && <p className="text-xs">{item.year}</p>}
       </div>
     </Link>
   );

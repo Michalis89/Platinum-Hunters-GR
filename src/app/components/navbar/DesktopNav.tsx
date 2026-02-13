@@ -40,21 +40,32 @@ export const DesktopNav = React.memo(function DesktopNav({
   onToggleTheme,
 }: DesktopNavProps) {
   return (
-    <div className="hidden flex-1 items-center justify-end md:flex">
-      <Menubar className="pointer-events-auto absolute left-1/2 h-11 -translate-x-1/2 items-center gap-1 rounded-[20px] border-[var(--apple-nav-border)] bg-[var(--apple-nav-pill-bg)] px-1.5 py-1 text-[var(--apple-label)] shadow-none backdrop-blur-xl">
-        {hobbyItems.length > 0 ? <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} /> : null}
-        {navItems.map(item => (
-          <MenubarMenu key={item.href}>
-            <MenubarTrigger asChild className={desktopLinkClass(isHrefActive(pathname, item.href))}>
-              <Link href={item.href}>
-                <NavItemContent icon={item.icon} label={item.label} />
-              </Link>
-            </MenubarTrigger>
-          </MenubarMenu>
-        ))}
-      </Menubar>
+    <div className="hidden w-full items-center justify-between gap-4 md:flex">
+      <div className="flex flex-1 items-center justify-center">
+        <Menubar className="pointer-events-auto flex h-11 items-center justify-center gap-1 rounded-[20px] border-border bg-card px-1.5 py-1 text-foreground shadow-none">
+          {navItems.slice(0, 2).map(item => (
+            <MenubarMenu key={item.href}>
+              <MenubarTrigger asChild className={desktopLinkClass(isHrefActive(pathname, item.href))}>
+                <Link href={item.href}>
+                  <NavItemContent icon={item.icon} label={item.label} />
+                </Link>
+              </MenubarTrigger>
+            </MenubarMenu>
+          ))}
+          {hobbyItems.length > 0 ? <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} /> : null}
+          {navItems.slice(2).map(item => (
+            <MenubarMenu key={item.href}>
+              <MenubarTrigger asChild className={desktopLinkClass(isHrefActive(pathname, item.href))}>
+                <Link href={item.href}>
+                  <NavItemContent icon={item.icon} label={item.label} />
+                </Link>
+              </MenubarTrigger>
+            </MenubarMenu>
+          ))}
+        </Menubar>
+      </div>
 
-      <div className="flex h-11 items-center rounded-[20px] border border-[var(--apple-nav-border)] bg-[var(--apple-nav-pill-bg)] px-1.5 text-[var(--apple-label)] backdrop-blur-xl">
+      <div className="relative z-20 flex h-11 items-center rounded-[20px] border border-border bg-card px-1.5 text-foreground">
         {!authResolved ? (
           <NavbarAuthSkeleton />
         ) : isAuthenticated && user ? (
@@ -64,8 +75,6 @@ export const DesktopNav = React.memo(function DesktopNav({
             canAccessAdminPanel={canAccessAdminPanel}
             onAdd={onAdd}
             onLogout={onLogout}
-            theme={theme}
-            onToggleTheme={onToggleTheme}
           />
         ) : (
           <AuthButtons theme={theme} onToggleTheme={onToggleTheme} />
@@ -78,9 +87,9 @@ export const DesktopNav = React.memo(function DesktopNav({
 function NavbarAuthSkeleton() {
   return (
     <div className="flex h-9 items-center gap-2 px-1">
-      <div className="h-7 w-7 animate-pulse rounded-full bg-[var(--apple-nav-pill-hover)]" />
-      <div className="h-4 w-24 animate-pulse rounded bg-[var(--apple-nav-pill-hover)]" />
-      <div className="h-9 w-9 animate-pulse rounded-[var(--apple-radius-control)] bg-[var(--apple-nav-pill-hover)]" />
+      <div className="h-7 w-7 animate-pulse rounded-full bg-[hsl(var(--accent))/10]" />
+      <div className="h-4 w-24 animate-pulse rounded bg-[hsl(var(--accent))/10]" />
+      <div className="h-9 w-9 animate-pulse bg-[hsl(var(--accent))/10]" />
     </div>
   );
 }

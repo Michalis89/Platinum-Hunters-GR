@@ -13,9 +13,11 @@ import {
   Heart,
   Eye,
   Clock,
+  Info,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { InfoHint } from '@/app/components/ui/InfoHint';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 import { memo } from 'react';
 
 type Stat = {
@@ -127,35 +129,30 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
     <section className="px-4 py-12 md:px-6 md:py-14">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 text-center md:mb-10">
-          <p className="apple-secondary-label mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
             {titles.eyebrow}
           </p>
-          <h2 className="apple-title-tracking text-2xl font-semibold md:text-3xl">
-            {titles.title}
-          </h2>
+          <h2 className="text-2xl font-semibold md:text-3xl">{titles.title}</h2>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {primaryStats.map(stat => (
-            <div
-              key={stat.label}
-              className="group rounded-[18px] border border-[var(--apple-separator)] bg-[var(--apple-surface)] p-4 text-center"
-            >
+            <div key={stat.label} className="group rounded-[18px] border bg-card p-4 text-center">
               {/* Icon */}
-              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)] text-[var(--apple-system-blue)]">
+              <div className="text-info mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card">
                 {stat.icon}
               </div>
 
               {/* Value */}
-              <p className="mb-1 text-2xl font-semibold text-[var(--apple-label)] md:text-[28px]">
+              <p className="mb-1 text-2xl font-semibold text-foreground md:text-[28px]">
                 {stat.value}
               </p>
 
               {/* Label */}
-              <p className="text-sm font-medium text-[var(--apple-label)]">{stat.label}</p>
+              <p className="text-sm font-medium text-foreground">{stat.label}</p>
 
               {/* Note */}
-              {stat.note && <p className="mt-1 text-xs text-[var(--apple-secondary-label)]">{stat.note}</p>}
+              {stat.note && <p className="mt-1 text-xs text-muted-foreground">{stat.note}</p>}
             </div>
           ))}
         </div>
@@ -168,21 +165,42 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
                 return (
                   <div
                     key={stat.label}
-                    className="group w-full rounded-[18px] border border-[var(--apple-separator)] bg-[var(--apple-surface)] p-4 text-center"
+                    className="group w-full rounded-[18px] border bg-card p-4 text-center"
                   >
-                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--apple-tertiary-fill)] text-[var(--apple-system-blue)]">
+                    <div className="text-info mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card">
                       {stat.icon}
                     </div>
-                    <p className="mb-1 text-2xl font-semibold text-[var(--apple-label)] md:text-[28px]">
+                    <p className="mb-1 text-2xl font-semibold text-foreground md:text-[28px]">
                       {stat.value}
                     </p>
-                    <p className="flex items-center justify-center gap-2 text-sm font-medium text-[var(--apple-label)]">
+                    <p className="flex items-center justify-center gap-2 text-sm font-medium text-foreground">
                       {stat.label}
-                      {tipText && <InfoHint tip={tipText} />}
+                      {tipText && (
+                        <TooltipProvider delayDuration={150}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                aria-label="Πληροφορίες υπολογισμού"
+                                className="hover:bg-primary/10 grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary"
+                              >
+                                <Info className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="bottom"
+                              align="center"
+                              sideOffset={8}
+                              className="z-[9999] w-[min(280px,80vw)] rounded-2xl border border-border bg-card p-3 text-xs leading-relaxed text-foreground shadow-md"
+                            >
+                              {tipText}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </p>
-                    {stat.note && (
-                      <p className="mt-1 text-xs text-[var(--apple-secondary-label)]">{stat.note}</p>
-                    )}
+                    {stat.note && <p className="mt-1 text-xs text-muted-foreground">{stat.note}</p>}
                   </div>
                 );
               })}
@@ -195,4 +213,3 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
 }
 
 export const ProfileStats = memo(ProfileStatsComponent);
-
