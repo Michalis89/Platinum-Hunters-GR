@@ -655,6 +655,20 @@ export default function CategoryLibrary({
     }
   };
 
+  const normalizedProgressPercent = (() => {
+    const percent = steamSyncProgress?.percent;
+    if (typeof percent === 'number' && Number.isFinite(percent)) {
+      return Math.max(0, Math.min(100, percent));
+    }
+    return 0;
+  })();
+  const stepLabel = `${steamSyncProgress?.completedSteps ?? 0} / ${
+    steamSyncProgress?.totalSteps ?? 0
+  } βήματα`;
+  const statusLabel = steamSyncProgress?.status
+    ? steamSyncProgress.status.charAt(0).toUpperCase() + steamSyncProgress.status.slice(1)
+    : 'Running';
+
   const handleDeleteEntry = useCallback(
     async (entry: MediaEntry) => {
       const clearSelection = () => {
@@ -739,95 +753,103 @@ export default function CategoryLibrary({
         totalSteps: 1,
       });
 
-      // Start the sync (this will create a job and begin processing)
-      const response = await apiClient.request('/api/integrations/steam/sync', {
+      // Step 1: Start the sync (fetch Steam games and create job)
+      const startResponse = await apiClient.request('/api/integrations/steam/sync/start', {
         method: 'POST',
       });
 
-      if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        throw new Error(data.error || 'Steam sync failed');
+      if (!startResponse.ok) {
+        const data = (await startResponse.json()) as { error?: string };
+        throw new Error(data.error || 'Failed to start Steam sync');
       }
 
-      const syncResponse = (await response.json()) as {
-        jobId?: string;
-        totalFetched?: number;
-        warnings?: string[];
+      const startData = (await startResponse.json()) as {
+        jobId: string | null;
+        totalGames: number;
+        batchSize: number;
+        estimatedBatches: number;
+        message: string;
       };
 
-      const jobId = syncResponse.jobId;
-
-      // If we have a jobId, poll for progress
-      if (jobId) {
-        steamPollIntervalRef.current = setInterval(async () => {
-          try {
-            const statusResponse = await apiClient.request(
-              `/api/integrations/steam/sync/status?jobId=${jobId}`,
-            );
-
-            if (statusResponse.ok) {
-              const statusData = (await statusResponse.json()) as SteamSyncJobSnapshot;
-
-              setSteamSyncProgress({
-                id: jobId,
-                status: statusData.status,
-                message: statusData.message,
-                percent: statusData.percent,
-                completedSteps: statusData.completedSteps,
-                totalSteps: statusData.totalSteps,
-                error: statusData.error,
-                result: statusData.result,
-              });
-
-              // Stop polling if completed or failed
-              if (statusData.status === 'completed' || statusData.status === 'failed') {
-                if (steamPollIntervalRef.current) {
-                  clearInterval(steamPollIntervalRef.current);
-                  steamPollIntervalRef.current = null;
-                }
-
-                if (statusData.status === 'completed') {
-                  await loadLibraryEntries();
-                  await mutate('/api/user/continue');
-                  showAlert({
-                    type: 'success',
-                    title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
-                    message:
-                      statusData.result?.warnings && statusData.result.warnings.length > 0
-                        ? `Ολοκληρώθηκε με προειδοποιήσεις: ${statusData.result.warnings.join(' | ')}`
-                        : `Έγινε συγχρονισμός ${statusData.result?.totalFetched ?? 0} παιχνιδιών από Steam.`,
-                  });
-                } else {
-                  showAlert({
-                    type: 'error',
-                    title: 'Σφάλμα',
-                    message: statusData.error || 'Ο συγχρονισμός απέτυχε',
-                  });
-                }
-
-                setSteamSyncing(false);
-                setSteamSyncProgress(null);
-              }
-            }
-          } catch (pollError) {
-            console.warn('Status poll error:', pollError);
-          }
-        }, 1500); // Poll every 1.5 seconds
-      } else {
-        // No jobId - sync completed immediately (legacy mode)
-        await loadLibraryEntries();
-        await mutate('/api/user/continue');
+      if (!startData.jobId) {
+        // No games found
         showAlert({
-          type: 'success',
-          title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
-          message:
-            (syncResponse.warnings?.length ?? 0) > 0
-              ? `Ολοκληρώθηκε με προειδοποιήσεις: ${syncResponse.warnings?.join(' | ')}`
-              : `Έγινε συγχρονισμός ${syncResponse.totalFetched ?? 0} παιχνιδιών από Steam.`,
+          type: 'info',
+          title: 'Συγχρονισμός Steam',
+          message: startData.message || 'Δεν βρέθηκαν παιχνίδια.',
         });
         setSteamSyncing(false);
         setSteamSyncProgress(null);
+        return;
       }
+
+      const jobId = startData.jobId;
+
+      setSteamSyncProgress({
+        id: jobId,
+        status: 'running',
+        message: `Βρέθηκαν ${startData.totalGames} παιχνίδια. Ξεκινά η επεξεργασία...`,
+        percent: 0,
+        completedSteps: 0,
+        totalSteps: startData.totalGames,
+      });
+
+      // Step 2: Process batches in a loop
+      let isComplete = false;
+      let processBatchCount = 0;
+
+      while (!isComplete) {
+        processBatchCount += 1;
+        console.log(`🔄 Processing batch ${processBatchCount}...`);
+
+        const processResponse = await apiClient.request(
+          `/api/integrations/steam/sync/process?jobId=${jobId}`,
+          { method: 'POST' },
+        );
+
+        if (!processResponse.ok) {
+          const data = (await processResponse.json()) as { error?: string };
+          throw new Error(data.error || 'Failed to process batch');
+        }
+
+        const processData = (await processResponse.json()) as {
+          processed: number;
+          totalGames: number;
+          isComplete: boolean;
+          percent: number;
+          message: string;
+        };
+
+        isComplete = processData.isComplete;
+
+        // Update progress
+        setSteamSyncProgress({
+          id: jobId,
+          status: isComplete ? 'completed' : 'running',
+          message: processData.message,
+          percent: processData.percent,
+          completedSteps: processData.processed,
+          totalSteps: processData.totalGames,
+        });
+
+        // Add a small delay between batches to avoid rate limiting
+        if (!isComplete) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+
+      // Step 3: Sync completed successfully
+      await loadLibraryEntries();
+      await mutate('/api/user/continue');
+
+      showAlert({
+        type: 'success',
+        title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
+        message: `Έγινε συγχρονισμός ${startData.totalGames} παιχνιδιών από Steam.`,
+      });
+
+      setSteamSyncing(false);
+      setSteamSyncProgress(null);
     } catch (error) {
       console.warn('Steam sync failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Άγνωστο σφάλμα';
@@ -846,61 +868,13 @@ export default function CategoryLibrary({
     }
   };
 
-  if (steamSyncing) {
+
     return (
-      <div className="min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
-        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
-          <section className="p-4 sm:p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 w-56 rounded-[12px] bg-card" />
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="h-10 rounded-[12px] bg-card" />
-                <div className="h-10 rounded-[12px] bg-card" />
-                <div className="h-10 rounded-[12px] bg-card" />
-              </div>
-            </div>
-          </section>
-          <section className="p-4 sm:p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-12 rounded-[12px] bg-card" />
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="h-24 rounded-[12px] bg-card" />
-              ))}
-            </div>
-          </section>
-
-          <div className="hb-dialog-overlay absolute inset-0 z-10 flex items-center justify-center rounded-3xl p-3 sm:p-6">
-            <div className="hb-dialog-surface w-full max-w-xl rounded-[20px] border border-border p-4 sm:p-6">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-foreground">
-                  Συγχρονισμός Steam με RAWG metadata
-                </p>
-                <span className="text-xs font-semibold text-muted-foreground">
-                  {steamSyncProgress?.percent ?? 0}%
-                </span>
-              </div>
-              <Progress value={steamSyncProgress?.percent ?? 0} className="h-2.5 rounded-full" />
-              <p className="mt-3 text-xs text-muted-foreground">
-                {steamSyncProgress?.message ??
-                  'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
-              </p>
-              <p className="text-muted-foreground/80 mt-1 text-xs">
-                {steamSyncProgress?.completedSteps ?? 0} / {steamSyncProgress?.totalSteps ?? 0}{' '}
-                βήματα
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
-      {alert && (
-        <Alert
-          key={alertKey}
-          variant={
+      <div className="relative min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
+        {alert && (
+          <Alert
+            key={alertKey}
+            variant={
             alert.type === 'error'
               ? 'destructive'
               : alert.type === 'success'
@@ -917,10 +891,10 @@ export default function CategoryLibrary({
           {alert.type === 'info' && <Info className="h-4 w-4" />}
           {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
           <AlertDescription>{alert.message}</AlertDescription>
-        </Alert>
-      )}
+          </Alert>
+        )}
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
         <div className="pointer-events-none absolute inset-0 -z-10 opacity-30">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,hsl(var(--primary)/0.2),transparent_52%)]" />
           <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--success)/0.15),transparent_58%)]" />
@@ -995,7 +969,64 @@ export default function CategoryLibrary({
           onDelete={handleDeleteEntry}
           onRefreshEntry={loadLibraryEntries}
         />
+        </div>
+
+        {steamSyncing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
+            <div className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/90 p-6 text-white shadow-2xl shadow-violet-500/20">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-lg font-semibold text-white">
+                    Συγχρονισμός Steam με RAWG metadata
+                  </p>
+                  <p className="text-sm text-slate-300">
+                    {steamSyncProgress?.message ??
+                      'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
+                  </p>
+                </div>
+                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-100">
+                  {statusLabel}
+                </span>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <span>Πρόοδος</span>
+                <span>{normalizedProgressPercent}%</span>
+              </div>
+              <Progress value={normalizedProgressPercent} className="mt-1 h-3 rounded-full" />
+              <p className="mt-3 text-xs text-slate-300">{stepLabel}</p>
+              {steamSyncProgress?.error && (
+                <p className="mt-2 text-xs font-semibold text-rose-400">
+                  Σφάλμα: {steamSyncProgress.error}
+                </p>
+              )}
+              {steamSyncProgress?.result && (
+                <div className="mt-4 grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 sm:grid-cols-3">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Παιχνίδια</p>
+                    <p className="text-lg font-semibold text-white">
+                      {steamSyncProgress.result.totalFetched ?? 0}
+                    </p>
+                    <p className="text-xs text-slate-400">συνολικά</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Εισαγωγές</p>
+                    <p className="text-lg font-semibold text-white">
+                      {steamSyncProgress.result.mediaInserted ?? 0}
+                    </p>
+                    <p className="text-xs text-slate-400">νέα entries</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Ενημερώσεις</p>
+                    <p className="text-lg font-semibold text-white">
+                      {steamSyncProgress.result.mediaUpdated ?? 0}
+                    </p>
+                    <p className="text-xs text-slate-400">ρυθμίστηκαν</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  );
-}
+    );
+  }

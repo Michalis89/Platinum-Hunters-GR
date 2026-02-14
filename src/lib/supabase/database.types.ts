@@ -460,6 +460,9 @@ export type Database = {
       steam_sync_jobs: {
         Row: {
           completed_steps: number
+          steam_games: Json | null
+          processed_count: number
+          batch_size: number
           created_at: string
           error: string | null
           expires_at: string
@@ -475,6 +478,9 @@ export type Database = {
         }
         Insert: {
           completed_steps?: number
+          steam_games?: Json | null
+          processed_count?: number
+          batch_size?: number
           created_at?: string
           error?: string | null
           expires_at?: string
@@ -490,6 +496,9 @@ export type Database = {
         }
         Update: {
           completed_steps?: number
+          steam_games?: Json | null
+          processed_count?: number
+          batch_size?: number
           created_at?: string
           error?: string | null
           expires_at?: string
