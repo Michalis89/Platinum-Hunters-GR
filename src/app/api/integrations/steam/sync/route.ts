@@ -114,6 +114,20 @@ function normalizeTitle(value?: string | null): string {
   return (value ?? '').trim().toLowerCase();
 }
 
+/**
+ * Clean title for storage: remove trademark symbols.
+ * Use this when STORING titles in the database.
+ */
+function cleanTitleForStorage(value?: string | null): string {
+  if (!value) return '';
+  // Remove trademark symbols (™, ®, ©)
+  return value.replace(/[™®©]/g, '').trim();
+}
+
+/**
+ * Normalize title for MATCHING purposes (more aggressive).
+ * Use this when COMPARING titles to find matches.
+ */
 function normalizeForMatch(value?: string | null): string {
   let normalized = (value ?? '').trim();
 
@@ -324,11 +338,12 @@ async function enrichRawgMatches(
 }
 
 /**
- * CRITICAL: Steam imports must ALWAYS have platform = ['PC'] only.
- * Do not merge with RAWG platforms - Steam is PC-only.
+ * Merge platforms ensuring PC is included for Steam games.
+ * Matches EditEntryDialog behavior.
  */
-function getSteamPlatform(): string[] {
-  return ['PC'];
+function mergePlatforms(rawgPlatforms: string[] | null | undefined): string[] {
+  const ordered = ['PC', ...(rawgPlatforms ?? [])].filter(Boolean) as string[];
+  return Array.from(new Set(ordered));
 }
 
 function getSteamHours(game: SteamOwnedGame): number | null {
@@ -338,16 +353,30 @@ function getSteamHours(game: SteamOwnedGame): number | null {
   return Math.max(0, Math.floor(game.playtime_forever / 60));
 }
 
+/**
+ * Build RAWG metadata patch for a Steam game.
+ * EXACTLY like EditEntryDialog's sync_rawg_metadata action.
+ * This should ONLY be called for NEW enrichment, NOT for already-enriched items.
+ */
 function buildGameMetadataPatch(game: SteamOwnedGame, rawg: RawgGame) {
   const rawgGenres = rawg.genres?.map(item => item.name) ?? [];
+  const rawgPlatforms = rawg.platforms?.map(item => item.platform.name) ?? [];
   const year = rawg.released ? Number.parseInt(rawg.released.slice(0, 4), 10) : null;
+
+  // Safety: Ensure we have full RAWG data (not just search result)
+  if (!rawg.background_image && !rawg.description_raw) {
+    console.warn(`⚠️ buildGameMetadataPatch called with incomplete RAWG data for ${rawg.name}`);
+  }
+
+  // Clean titles: remove trademark symbols (™, ®, ©)
+  const cleanTitle = cleanTitleForStorage(rawg.name ?? game.name ?? `Steam App ${game.appid}`);
 
   return {
     source: 'rawg',
     rawg_id: rawg.id,
     steam_app_id: game.appid,
-    title: rawg.name ?? game.name ?? `Steam App ${game.appid}`,
-    title_english: rawg.name ?? game.name ?? `Steam App ${game.appid}`,
+    title: cleanTitle,
+    title_english: cleanTitle,
     description: rawg.description_raw ?? null,
     cover_image_large: rawg.background_image ?? getSteamCoverUrls(game).large,
     cover_image_medium: rawg.background_image ?? getSteamCoverUrls(game).medium,
@@ -355,7 +384,7 @@ function buildGameMetadataPatch(game: SteamOwnedGame, rawg: RawgGame) {
     release_date: rawg.released ?? null,
     rating: rawg.rating ?? null,
     metacritic: rawg.metacritic ?? null,
-    platforms: getSteamPlatform(), // Steam imports = PC only
+    platforms: mergePlatforms(rawgPlatforms), // PC + RAWG platforms (merged like EditEntryDialog)
     genres: rawgGenres,
     developer: rawg.developers?.[0]?.name ?? null,
     publisher: rawg.publishers?.[0]?.name ?? null,
@@ -366,15 +395,17 @@ function buildGameMetadataPatch(game: SteamOwnedGame, rawg: RawgGame) {
 
 function buildSteamFallbackInsert(game: SteamOwnedGame) {
   const covers = getSteamCoverUrls(game);
+  const cleanTitle = cleanTitleForStorage(game.name ?? `Steam App ${game.appid}`);
+
   return {
     category: 'games',
     source: 'steam',
     steam_app_id: game.appid,
-    title: game.name ?? `Steam App ${game.appid}`,
-    title_english: game.name ?? `Steam App ${game.appid}`,
+    title: cleanTitle,
+    title_english: cleanTitle,
     cover_image_large: covers.large,
     cover_image_medium: covers.medium,
-    platforms: getSteamPlatform(), // Steam imports = PC only
+    platforms: ['PC'], // Steam-only fallback = PC only
   } satisfies Database['public']['Tables']['media_items']['Insert'];
 }
 
@@ -392,6 +423,8 @@ async function syncSteamForUser(options?: {
   jobId?: string;
   onProgress?: (progress: SyncProgress) => Promise<void> | void;
 }): Promise<SyncResult> {
+  console.log('🚀 [Steam Sync] Starting sync...', { jobId: options?.jobId });
+
   const supabase = await createRouteHandlerClient();
   const adminSupabase = createSupabaseAdminClient();
   const session = await requireAuth(supabase);
@@ -401,6 +434,8 @@ async function syncSteamForUser(options?: {
   const updateProgress = async (message: string, stepDelta = 0) => {
     completedSteps += stepDelta;
     const percent = totalSteps > 0 ? Math.min(100, Math.round((completedSteps / totalSteps) * 100)) : 0;
+
+    console.log(`📊 [Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`);
 
     // Update job record if jobId provided
     if (options?.jobId) {
@@ -430,16 +465,23 @@ async function syncSteamForUser(options?: {
     .maybeSingle();
 
   if (userError) {
+    console.error('❌ [Steam Sync] User fetch error:', userError);
     throw userError;
   }
 
   const steamInput = userData?.steam_id?.trim();
   if (!steamInput) {
-    throw new Error('Missing steam_id in user profile');
+    console.error('❌ [Steam Sync] No steam_id in user profile');
+    throw new Error('Δεν έχεις ορίσει Steam ID στο προφίλ σου. Πήγαινε στις ρυθμίσεις για να το προσθέσεις.');
   }
 
+  console.log('🔑 [Steam Sync] Fetching Steam API key...');
   const apiKey = getSteamApiKey();
+
+  console.log('🎮 [Steam Sync] Resolving Steam ID64...');
   const steamId64 = await resolveSteamId64({ apiKey, steamInput });
+
+  console.log('📚 [Steam Sync] Fetching owned games...');
   const steamGames = await fetchSteamOwnedGames({ apiKey, steamId64 });
 
   const uniqueGames = Array.from(
@@ -598,9 +640,25 @@ async function syncSteamForUser(options?: {
 
     if (existingByAppId) {
       mediaIdByAppId.set(game.appid, existingByAppId.id);
-      if (matchedRawg) {
+
+      // CRITICAL: Check if this item is already RAWG-enriched
+      // If yes, ONLY update steam_app_id + runtime
+      // NEVER touch: images, platforms, description, genres, developer, publisher, etc.
+      const isAlreadyEnriched = existingByAppId.source === 'rawg' && existingByAppId.rawg_id;
+
+      if (isAlreadyEnriched) {
+        // ✅ PRESERVING EXISTING RAWG DATA (images, platforms, etc.)
+        console.log(`✅ [Steam Sync] Preserving RAWG data for: ${game.name} (RAWG ID: ${existingByAppId.rawg_id})`);
+        updateByMediaId.set(existingByAppId.id, {
+          steam_app_id: game.appid,
+          runtime: getSteamHours(game),
+        });
+      } else if (matchedRawg) {
+        // 🆕 NEW RAWG ENRICHMENT (item has no RAWG data yet)
+        console.log(`🆕 [Steam Sync] Enriching with RAWG: ${game.name} (RAWG ID: ${matchedRawg.id})`);
         updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedRawg));
       } else {
+        // No RAWG match found, just update Steam fields
         updateByMediaId.set(existingByAppId.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
@@ -614,7 +672,12 @@ async function syncSteamForUser(options?: {
       const existingRawgMedia = existingRawgMediaByRawgId.get(matchedRawg.id);
       if (existingRawgMedia) {
         mediaIdByAppId.set(game.appid, existingRawgMedia.id);
-        updateByMediaId.set(existingRawgMedia.id, buildGameMetadataPatch(game, matchedRawg));
+        // ✅ PRESERVING: Game exists with same RAWG ID (already enriched)
+        console.log(`✅ [Steam Sync] Preserving existing RAWG media: ${game.name} (RAWG ID: ${matchedRawg.id})`);
+        updateByMediaId.set(existingRawgMedia.id, {
+          steam_app_id: game.appid,
+          runtime: getSteamHours(game),
+        });
         await updateProgress(`Catalog ενημέρωση ${mediaIdByAppId.size}/${uniqueGames.length}`, 1);
         continue;
       }
@@ -684,6 +747,8 @@ async function syncSteamForUser(options?: {
           .eq('id', mediaId);
 
         if (error) {
+          console.error(`❌ Media update failed for ID ${mediaId}:`, error);
+          console.error(`   Payload:`, JSON.stringify(updatePayload, null, 2));
           failedMediaUpdateCount += 1;
           return false;
         }

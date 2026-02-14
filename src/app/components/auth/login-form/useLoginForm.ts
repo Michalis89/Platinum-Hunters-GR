@@ -269,9 +269,22 @@ export function useLoginForm() {
         }
       }
 
-      setTimeout(() => {
+      // Immediate redirect with error handling
+      try {
         router.push(redirectUrl);
-      }, 1000);
+        // Fallback: if router.push doesn't trigger navigation, use window.location
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && window.location.pathname === '/auth/login') {
+            window.location.href = redirectUrl;
+          }
+        }, 500);
+      } catch (redirectError) {
+        console.error('Redirect failed:', redirectError);
+        // Force redirect via window.location as fallback
+        if (typeof window !== 'undefined') {
+          window.location.href = redirectUrl;
+        }
+      }
     } catch (error) {
       console.error('Login error:', error);
       if (error instanceof Error && error.message.toLowerCase().includes('captcha')) {

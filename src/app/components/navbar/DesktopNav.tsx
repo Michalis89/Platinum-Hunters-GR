@@ -65,7 +65,7 @@ export const DesktopNav = React.memo(function DesktopNav({
         </Menubar>
       </div>
 
-      <div className="relative z-20 flex h-11 items-center rounded-[20px] border border-border bg-card px-1.5 text-foreground">
+      <div className="pointer-events-auto relative z-20 flex h-11 items-center rounded-[20px] border border-border bg-card px-1.5 text-foreground">
         {!authResolved ? (
           <NavbarAuthSkeleton />
         ) : isAuthenticated && user ? (
