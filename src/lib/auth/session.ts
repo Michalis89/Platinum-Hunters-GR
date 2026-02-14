@@ -16,7 +16,7 @@ export function isSessionError(message: string): boolean {
     normalized.includes('invalid session') ||
     normalized.includes('jwt') ||
     normalized.includes('session expired') ||
-    normalized.includes('token') && normalized.includes('expired')
+    (normalized.includes('token') && normalized.includes('expired'))
   );
 }
 

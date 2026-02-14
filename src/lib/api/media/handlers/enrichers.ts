@@ -57,15 +57,9 @@ export async function fetchTmdbDetails(
       number_of_seasons: data.number_of_seasons ?? null,
       number_of_episodes: data.number_of_episodes ?? null,
       genres: data.genres?.map(item => item.name) ?? [],
-      cover_image_large: data.poster_path
-        ? `${TMDB_IMAGE_BASE}w780${data.poster_path}`
-        : null,
-      cover_image_medium: data.poster_path
-        ? `${TMDB_IMAGE_BASE}w342${data.poster_path}`
-        : null,
-      banner_image: data.backdrop_path
-        ? `${TMDB_IMAGE_BASE}w1280${data.backdrop_path}`
-        : null,
+      cover_image_large: data.poster_path ? `${TMDB_IMAGE_BASE}w780${data.poster_path}` : null,
+      cover_image_medium: data.poster_path ? `${TMDB_IMAGE_BASE}w342${data.poster_path}` : null,
+      banner_image: data.backdrop_path ? `${TMDB_IMAGE_BASE}w1280${data.backdrop_path}` : null,
     };
   } catch (error) {
     console.error('TMDB fetch error:', error);

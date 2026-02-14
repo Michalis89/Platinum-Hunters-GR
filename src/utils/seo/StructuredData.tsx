@@ -7,7 +7,5 @@ export default function StructuredData({ data }: Props) {
 
   const jsonLd = JSON.stringify(data).replace(/</g, '\\u003c');
 
-  return (
-    <script type="application/ld+json">{jsonLd}</script>
-  );
+  return <script type="application/ld+json">{jsonLd}</script>;
 }

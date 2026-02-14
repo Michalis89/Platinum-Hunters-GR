@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-type ContainerSize = 'sm' | 'md' | 'lg' | 'xl';
+type ContainerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
 interface PageContainerProps {
   children: ReactNode;
@@ -15,6 +15,7 @@ const sizeClasses: Record<ContainerSize, string> = {
   md: 'max-w-5xl',
   lg: 'max-w-7xl',
   xl: 'max-w-7xl',
+  full: 'max-w-none',
 };
 
 export function PageContainer({

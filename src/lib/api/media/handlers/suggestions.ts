@@ -29,10 +29,7 @@ export type SuggestionsConfig<TMediaItem = Record<string, unknown>, TResult = un
   mapper: (media: TMediaItem, weightedScore: number, userCount?: number) => TResult;
 
   /** Optional fallback handler when no suggestions are found */
-  fallback?: (
-    category: string,
-    userMediaIds: Set<number>,
-  ) => Promise<TResult[]>;
+  fallback?: (category: string, userMediaIds: Set<number>) => Promise<TResult[]>;
 
   /** Minimum votes threshold for Bayesian averaging (default: 2) */
   minimumVotes?: number;
@@ -72,9 +69,7 @@ export async function handleSuggestionsGet<TMediaItem, TResult>(
       .eq('user_id', userId)
       .eq('media_items.category', category);
 
-    const userMediaIds = new Set(
-      (userEntries ?? []).map((e: { media_id: number }) => e.media_id),
-    );
+    const userMediaIds = new Set((userEntries ?? []).map((e: { media_id: number }) => e.media_id));
 
     // Fetch all scored entries for this category from ALL users
     const { data, error } = await supabase

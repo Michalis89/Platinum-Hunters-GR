@@ -17,11 +17,9 @@ async function POSTHandler(req: Request) {
     const rateLimitResult = await rateLimit('deleteAccount', userId);
 
     if (!rateLimitResult.success) {
-      return fail(
-        { error: 'Πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα.' },
-        429,
-        { headers: rateLimitHeaders(rateLimitResult) }
-      );
+      return fail({ error: 'Πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα.' }, 429, {
+        headers: rateLimitHeaders(rateLimitResult),
+      });
     }
 
     // Require password confirmation

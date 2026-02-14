@@ -57,9 +57,7 @@ export default function PrivacyPage() {
             <div className="space-y-6">
               {/* 1. Data Controller */}
               <section>
-                <h2 className="mb-2 text-lg font-semibold text-foreground">
-                  1. Data Controller
-                </h2>
+                <h2 className="mb-2 text-lg font-semibold text-foreground">1. Data Controller</h2>
                 <p>
                   The data controller for data collected through the Service is the creator of{' '}
                   <span className="font-semibold text-primary">{SITE_NAME}</span>. For matters

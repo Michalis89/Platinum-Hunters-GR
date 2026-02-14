@@ -1,4 +1,4 @@
-﻿import { Suspense } from 'react';
+import { Suspense } from 'react';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { Spinner } from '@/components/ui/spinner';
@@ -54,7 +54,7 @@ export default function MediaDetailPage({ params }: MediaDetailPageProps) {
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="flex flex-col items-center justify-center gap-3">
             <Spinner />
-            <span className="text-sm text-muted-foreground">Φόρτωση...</span>
+            <span className="text-sm text-muted-foreground">Loading...</span>
           </div>
         </div>
       }

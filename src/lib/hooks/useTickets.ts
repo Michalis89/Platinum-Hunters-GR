@@ -62,7 +62,7 @@ const getErrorMessage = (payload: unknown, fallback: string) => {
   return fallback;
 };
 
-const defaultMapData = <TTicket,>(payload: unknown): TTicket[] => {
+const defaultMapData = <TTicket>(payload: unknown): TTicket[] => {
   if (payload && typeof payload === 'object' && 'data' in payload && Array.isArray(payload.data)) {
     return payload.data as TTicket[];
   }
@@ -93,9 +93,10 @@ const defaultMapMeta = (payload: unknown): TicketMeta | null => {
   return null;
 };
 
-export function useTickets<TTicket, TFilters extends Record<string, string> = Record<string, never>>(
-  options: UseTicketsOptions<TTicket, TFilters>,
-): UseTicketsResult<TTicket, TFilters> {
+export function useTickets<
+  TTicket,
+  TFilters extends Record<string, string> = Record<string, never>,
+>(options: UseTicketsOptions<TTicket, TFilters>): UseTicketsResult<TTicket, TFilters> {
   const {
     endpoint,
     enabled = true,
@@ -112,9 +113,12 @@ export function useTickets<TTicket, TFilters extends Record<string, string> = Re
   const [meta, setMeta] = useState<TicketMeta | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [alert, setAlert] = useState<TicketsAlert | null>(null);
-  const [filters, setFilters] = useState<TFilters>(() => (initialFilters ?? ({} as TFilters)));
+  const [filters, setFilters] = useState<TFilters>(() => initialFilters ?? ({} as TFilters));
 
-  const queryString = useMemo(() => buildQueryParams(filters).toString(), [buildQueryParams, filters]);
+  const queryString = useMemo(
+    () => buildQueryParams(filters).toString(),
+    [buildQueryParams, filters],
+  );
 
   const loadTickets = useCallback(async () => {
     if (!enabled) {

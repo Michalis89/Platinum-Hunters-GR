@@ -43,7 +43,7 @@ export function AuthFormContainer({
         >
           <span
             className={cn(
-              'bg-primary/10 flex h-12 w-12 items-center justify-center rounded-[var(--radius-md)] text-primary',
+              'flex h-12 w-12 items-center justify-center rounded-[var(--radius-md)] bg-primary/10 text-primary',
               iconWrapperClassName,
             )}
           >

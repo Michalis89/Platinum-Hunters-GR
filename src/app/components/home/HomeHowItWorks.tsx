@@ -32,11 +32,11 @@ const steps: Step[] = [
 export function HomeHowItWorks() {
   return (
     <section className="relative px-4 py-12 md:px-6 md:py-16">
-      <div className="via-primary/5 pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
 
       <div className="relative mx-auto max-w-5xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="text-info mb-3 text-xs uppercase tracking-[0.28em]">Getting started</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-info">Getting started</p>
           <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
             Sign up and start tracking
           </h2>
@@ -46,15 +46,15 @@ export function HomeHowItWorks() {
           {steps.map((step, index) => (
             <div key={step.number} className="relative">
               {index < steps.length - 1 && (
-                <div className="via-primary/20 absolute left-1/2 top-14 hidden h-px w-full -translate-x-1/2 bg-gradient-to-r from-border to-border md:block" />
+                <div className="absolute left-1/2 top-14 hidden h-px w-full -translate-x-1/2 bg-gradient-to-r from-border via-primary/20 to-border md:block" />
               )}
 
               <div className="relative flex flex-col items-center rounded-lg p-6 text-center">
                 <div className="relative mb-5">
-                  <div className="text-info flex h-14 w-14 items-center justify-center rounded-2xl border bg-card shadow-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border bg-card text-info shadow-sm">
                     {step.icon}
                   </div>
-                  <span className="bg-info absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold tracking-[-0.01em] text-white">
+                  <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-info text-[10px] font-semibold tracking-[-0.01em] text-white">
                     {step.number}
                   </span>
                 </div>

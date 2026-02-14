@@ -43,8 +43,8 @@ export default function LoginPage() {
           ].join(' ')}
         >
           {/* Ambient blobs */}
-          <div className="bg-primary/10 pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full blur-3xl" />
-          <div className="bg-primary/10 pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full blur-3xl" />
+          <div className="pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
 
           <div className="relative grid items-start gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8">
             <aside className="hidden space-y-6 lg:block">
@@ -56,9 +56,9 @@ export default function LoginPage() {
               />
 
               {/* “Row” style (sub-surface) */}
-              <div className="bg-background/30 rounded-[var(--radius-lg)] border border-border px-4 py-3">
+              <div className="rounded-[var(--radius-lg)] border border-border bg-background/30 px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] text-primary">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] bg-primary/10 text-primary">
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
@@ -77,14 +77,14 @@ export default function LoginPage() {
                     <article
                       key={item.title}
                       className={[
-                        'bg-background/30 rounded-[var(--radius-lg)] border border-border',
+                        'rounded-[var(--radius-lg)] border border-border bg-background/30',
                         'px-4 py-3',
                         'transition-colors duration-150',
                         'hover:bg-background/40',
                       ].join(' ')}
                     >
                       <div className="flex gap-3">
-                        <div className="bg-primary/10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] text-primary">
+                        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div>
@@ -108,7 +108,7 @@ export default function LoginPage() {
 
               <Suspense
                 fallback={
-                  <div className="bg-card/60 h-[560px] w-full animate-pulse rounded-[var(--radius-xl)] border border-border" />
+                  <div className="h-[560px] w-full animate-pulse rounded-[var(--radius-xl)] border border-border bg-card/60" />
                 }
               >
                 <LoginForm />

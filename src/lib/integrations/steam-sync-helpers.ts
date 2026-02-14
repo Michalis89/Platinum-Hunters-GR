@@ -1,9 +1,5 @@
 import type { Database } from '@/lib/supabase/database.types';
-import {
-  searchRawgGames,
-  fetchRawgGameDetails,
-  type RawgGame,
-} from '@/lib/services/rawgService';
+import { searchRawgGames, fetchRawgGameDetails, type RawgGame } from '@/lib/services/rawgService';
 import { getSteamCoverUrls, type SteamOwnedGame } from './steam';
 
 export type SteamGameWithAchievements = SteamOwnedGame & {
@@ -87,7 +83,12 @@ export function deriveStatusFromSteamData(params: {
   achievementsPercent?: number;
   droppedThresholdDays?: number;
 }): 'planned' | 'current' | 'completed' | 'dropped' {
-  const { playtimeMinutes = 0, lastPlayedUnix = 0, achievementsPercent, droppedThresholdDays = 90 } = params;
+  const {
+    playtimeMinutes = 0,
+    lastPlayedUnix = 0,
+    achievementsPercent,
+    droppedThresholdDays = 90,
+  } = params;
 
   // Never played => planned (backlog)
   if (playtimeMinutes === 0 && lastPlayedUnix === 0) {
@@ -187,7 +188,8 @@ export async function matchSteamGamesToRawg(
 
       try {
         const candidates = await searchRawgGames(title, 8);
-        const matched = candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
+        const matched =
+          candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
 
         cache.set(key, matched);
         return [game.appid, matched] as const;

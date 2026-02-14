@@ -50,9 +50,7 @@ type SettingsFormProps = {
 };
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {
-  const [formState, setFormState] = useState<UserSettingsValue>(() =>
-    toFormState(initialSettings),
-  );
+  const [formState, setFormState] = useState<UserSettingsValue>(() => toFormState(initialSettings));
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isResetDialogOpen, setResetDialogOpen] = useState(false);
@@ -162,8 +160,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     void updateSetting(USER_SETTINGS_DEFAULTS);
   };
 
-  const { social_enabled, community_activity_enabled, community_suggestions_enabled } =
-    formState;
+  const { social_enabled, community_activity_enabled, community_suggestions_enabled } = formState;
 
   return (
     <div className="space-y-6">
@@ -241,9 +238,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 </div>
                 <Switch
                   checked={community_activity_enabled}
-                  onCheckedChange={checked =>
-                    handleToggle('community_activity_enabled', checked)
-                  }
+                  onCheckedChange={checked => handleToggle('community_activity_enabled', checked)}
                   disabled={isSaving}
                 />
               </div>
@@ -324,8 +319,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Reset to defaults?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will revert every preference to the default state. You can redo these
-                    steps anytime.
+                    This will revert every preference to the default state. You can redo these steps
+                    anytime.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -346,4 +341,3 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     </div>
   );
 }
-

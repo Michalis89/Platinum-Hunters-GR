@@ -105,7 +105,7 @@ const supabaseStorage = {
       // Ignore storage errors.
     }
   },
- };
+};
 
 /**
  * Supabase client for browser with auth enabled

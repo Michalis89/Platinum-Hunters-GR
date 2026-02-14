@@ -7,10 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { PersonalStats } from './types';
 import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
-import { HomeDashboardHeader, HomeStatsRow, ContinueHero } from '@/app/components/home';
+import { HomeDashboardHeader, ContinueHero } from '@/app/components/home';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
 
-const SECTION_SPACING = 'pt-10 md:pt-12';
 const DIVIDER_WRAP = 'mx-auto mt-8 max-w-7xl px-4 md:mt-10 md:px-6';
 const DIVIDER_STYLE = '';
 const HomeSocialSection = dynamic(
@@ -38,7 +37,6 @@ type HomeDashboardContentProps = {
 export default function HomeDashboardContent({
   username,
   displayName,
-  stats,
   mediaCategories,
   categorySections,
   socialPreferences,
@@ -54,7 +52,7 @@ export default function HomeDashboardContent({
       <HomeDashboardHeader username={username} displayName={displayName} />
 
       {mediaCategories.length === 0 && (
-        <section className={SECTION_SPACING}>
+        <section>
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             <div className="rounded-lg border p-5 md:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -86,19 +84,9 @@ export default function HomeDashboardContent({
         <ContinueHero />
       </section>
 
-      <section className={SECTION_SPACING}>
-        <HomeStatsRow stats={stats} enabledCategories={mediaCategories} />
-      </section>
-      <div className={DIVIDER_WRAP}>
-        <Separator className={DIVIDER_STYLE} />
-      </div>
-
       {mediaCategories.length > 0 && (
         <>
-          <div className={DIVIDER_WRAP}>
-            <Separator className={DIVIDER_STYLE} />
-          </div>
-          <section className={SECTION_SPACING}>
+          <section>
             <CategoryDashboardTabs
               enabledCategories={mediaCategories}
               sections={categorySections}

@@ -13,7 +13,6 @@ import { Separator } from '@/components/ui/separator';
 import type { PersonalStats } from './types';
 import {
   HomeDashboardHeader,
-  HomeStatsRow,
   HomeRecentActivity,
   HomeSuggestions,
   ContinueHero,
@@ -134,9 +133,6 @@ export default function HomeDashboardPageClient() {
         <ContinueHero />
       </section>
 
-      <section className={SECTION_SPACING}>
-        <HomeStatsRow stats={personalStats?.data} enabledCategories={mediaCategories} />
-      </section>
       <div className={DIVIDER_WRAP}>
         <Separator className={DIVIDER_STYLE} />
       </div>

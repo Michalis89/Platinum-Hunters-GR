@@ -23,7 +23,7 @@ async function POSTHandler(req: Request) {
       return fail({ error: 'Λείπουν τα tokens' }, 400);
     }
 
-    if (refresh_token !== existingRefreshToken) {
+    if (refresh_token !== existingRefreshToken && process.env.NODE_ENV !== 'production') {
       console.info('Refresh token rotation detected; updating cookies with the latest token.');
     }
 

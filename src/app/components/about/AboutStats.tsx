@@ -77,7 +77,7 @@ export function AboutStats({
 
   return (
     <section className="relative px-4 py-20 md:px-6 md:py-28">
-      <div className="via-primary/[0.03] absolute inset-0 bg-gradient-to-b from-background to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.03] to-background" />
 
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-12 text-center">
@@ -89,7 +89,7 @@ export function AboutStats({
           {displayStats.map(stat => (
             <div
               key={stat.label}
-              className="hover:border-primary/40 w-[calc(50%-0.5rem)] rounded-2xl border border-border bg-card p-5 text-center shadow-md transition sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)]"
+              className="w-[calc(50%-0.5rem)] rounded-2xl border border-border bg-card p-5 text-center shadow-md transition hover:border-primary/40 sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)]"
             >
               <div className="mb-2 flex justify-center text-primary">{stat.icon}</div>
               <p className="mb-1 bg-gradient-to-r from-primary to-accent bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">

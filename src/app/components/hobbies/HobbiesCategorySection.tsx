@@ -34,9 +34,7 @@ export function HobbiesCategorySection({ section }: HobbiesCategorySectionProps)
             <Icon className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground md:text-2xl">
-              {section.title}
-            </h2>
+            <h2 className="text-xl font-bold text-foreground md:text-2xl">{section.title}</h2>
             <p className="text-sm text-muted-foreground">{section.description}</p>
           </div>
         </div>

@@ -239,42 +239,42 @@ function renderText(item: ActivityItem) {
 }
 
 function iconFor(item: ActivityItem) {
-  if (item.type === 'backlog_added') return <Gamepad2 className="text-info h-4 w-4" />;
+  if (item.type === 'backlog_added') return <Gamepad2 className="h-4 w-4 text-info" />;
   if (item.type === 'backlog_status') {
     const status = (item.payload?.status || '').toString();
-    if (status === 'platinumed') return <TrophyIcon className="text-warning h-4 w-4" />;
+    if (status === 'platinumed') return <TrophyIcon className="h-4 w-4 text-warning" />;
     if (status === 'dropped') return <Flag className="h-4 w-4 text-destructive" />;
     if (status === 'playing') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
     if (item.payload?.favoriteAction === 'added')
       return <Heart className="h-4 w-4 text-rose-500" />;
     if (item.payload?.favoriteAction === 'removed')
       return <Heart className="h-4 w-4 text-muted-foreground" />;
-    return <Gamepad2 className="text-info h-4 w-4" />;
+    return <Gamepad2 className="h-4 w-4 text-info" />;
   }
-  if (item.type === 'media_added') return <Sparkles className="text-info h-4 w-4" />;
+  if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-info" />;
   if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
   if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-500" />;
   // Article/Review icons - use Star for reviews
   const isReview = item.payload?.topic === 'reviews';
   if (item.type === 'article_created') {
     return isReview ? (
-      <Star className="text-warning h-4 w-4" />
+      <Star className="h-4 w-4 text-warning" />
     ) : (
-      <FileText className="text-info h-4 w-4" />
+      <FileText className="h-4 w-4 text-info" />
     );
   }
   if (item.type === 'article_updated') {
     return isReview ? (
-      <Star className="text-warning h-4 w-4" />
+      <Star className="h-4 w-4 text-warning" />
     ) : (
-      <Pencil className="text-info h-4 w-4" />
+      <Pencil className="h-4 w-4 text-info" />
     );
   }
   if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-destructive" />;
   if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-500" />;
   if (item.type === 'article_unliked') return <Heart className="h-4 w-4 text-muted-foreground" />;
-  if (item.type === 'article_comment') return <MessageSquare className="text-info h-4 w-4" />;
-  if (item.type === 'article_commented') return <MessageSquare className="text-info h-4 w-4" />;
+  if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-info" />;
+  if (item.type === 'article_commented') return <MessageSquare className="h-4 w-4 text-info" />;
   if (item.type === 'article_comment_deleted')
     return <MessageSquare className="h-4 w-4 text-muted-foreground" />;
   return <UserIcon className="h-4 w-4 text-muted-foreground" />;
@@ -329,7 +329,7 @@ function ActivityFeedComponent({
               <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
               <Link
                 href="/pages/profile/edit#categories"
-                className="text-info font-semibold underline hover:opacity-85"
+                className="font-semibold text-info underline hover:opacity-85"
               >
                 Πρόσθεσέ την εδώ
               </Link>
@@ -352,9 +352,7 @@ function ActivityFeedComponent({
           <span className="text-sm text-muted-foreground">Φόρτωση...</span>
         </div>
       )}
-      {error && (
-        <ErrorAlert message="Σφάλμα φόρτωσης activity. Προσπάθησε ξανά αργότερα." />
-      )}
+      {error && <ErrorAlert message="Σφάλμα φόρτωσης activity. Προσπάθησε ξανά αργότερα." />}
       {!isLoading && !error && activities.length === 0 && (
         <EmptyState title="Καμία πρόσφατη ενέργεια." />
       )}
@@ -367,7 +365,7 @@ function ActivityFeedComponent({
           {activities.map(item => (
             <div
               key={item.id}
-              className={`bg-card/80 group flex items-start gap-3 rounded-[16px] border p-3 ${
+              className={`group flex items-start gap-3 rounded-[16px] border bg-card/80 p-3 ${
                 compact ? 'text-sm' : 'text-base'
               }`}
             >

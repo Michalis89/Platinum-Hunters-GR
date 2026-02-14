@@ -53,8 +53,8 @@ function buildMediaPayload(
     format: node.media_type ?? null,
     status: node.status ?? null,
     season_year: getSeasonYear(node.start_date),
-    episodes: category === 'anime' ? node.num_episodes ?? null : null,
-    chapters: category === 'manga' ? item.list_status.num_chapters_read ?? null : null,
+    episodes: category === 'anime' ? (node.num_episodes ?? null) : null,
+    chapters: category === 'manga' ? (item.list_status.num_chapters_read ?? null) : null,
     start_date: node.start_date ?? null,
     cover_image_large: node.main_picture?.large ?? null,
     cover_image_medium: node.main_picture?.medium ?? null,
@@ -92,18 +92,16 @@ async function ensureValidAccessToken(
         .split(' ')
         .map(value => value.trim())
         .filter(Boolean)
-    : integration.scopes ?? [];
+    : (integration.scopes ?? []);
 
   const { error: refreshStoreError } = await supabase
     .from('user_integrations' as never)
-    .update(
-      {
-        access_token: refreshedTokens.access_token,
-        refresh_token: refreshedTokens.refresh_token,
-        expires_at: refreshedExpiresAt,
-        scopes: refreshedScopes,
-      } as never,
-    )
+    .update({
+      access_token: refreshedTokens.access_token,
+      refresh_token: refreshedTokens.refresh_token,
+      expires_at: refreshedExpiresAt,
+      scopes: refreshedScopes,
+    } as never)
     .eq('user_id', integration.user_id)
     .eq('provider', 'mal');
 
@@ -213,7 +211,9 @@ async function POSTHandler(req: Request) {
       throw existingEntriesError;
     }
 
-    const existingEntryMediaIds = new Set<number>((existingEntryRows ?? []).map(row => row.media_id));
+    const existingEntryMediaIds = new Set<number>(
+      (existingEntryRows ?? []).map(row => row.media_id),
+    );
 
     const userEntryPayload: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
     for (const item of uniqueMalItems) {
@@ -234,8 +234,8 @@ async function POSTHandler(req: Request) {
         import_source: 'mal',
         progress:
           syncCategory === 'manga'
-            ? item.list_status.num_chapters_read ?? 0
-            : item.list_status.num_episodes_watched ?? 0,
+            ? (item.list_status.num_chapters_read ?? 0)
+            : (item.list_status.num_episodes_watched ?? 0),
       };
       if (score !== null) {
         nextEntry.score = score;

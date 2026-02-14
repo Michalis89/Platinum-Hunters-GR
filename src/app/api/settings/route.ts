@@ -49,11 +49,9 @@ const handler = withApiRoute(async (request: Request) => {
       return ok(updated);
     }
 
-    return fail(
-      { error: 'Method not allowed', code: 'METHOD_NOT_ALLOWED' },
-      405,
-      { headers: { Allow: 'GET, PATCH' } },
-    );
+    return fail({ error: 'Method not allowed', code: 'METHOD_NOT_ALLOWED' }, 405, {
+      headers: { Allow: 'GET, PATCH' },
+    });
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);

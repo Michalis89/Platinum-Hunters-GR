@@ -138,9 +138,7 @@ export function mapLibraryEntry(
     score: row.score?.toString() ?? undefined,
     progress: row.progress ?? undefined,
     notes: row.notes ?? undefined,
-    selectedPlatform:
-      row.selected_platform ??
-      (inferredSource === 'steam' ? 'PC' : undefined),
+    selectedPlatform: row.selected_platform ?? (inferredSource === 'steam' ? 'PC' : undefined),
     title,
     subtitle,
     year,

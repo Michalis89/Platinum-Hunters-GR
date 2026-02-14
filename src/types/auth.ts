@@ -62,10 +62,7 @@ export interface RegisterDataStep3 {
 /**
  * Complete Registration Data
  */
-export interface RegisterData
-  extends RegisterDataStep1,
-    RegisterDataStep2,
-    RegisterDataStep3 {}
+export interface RegisterData extends RegisterDataStep1, RegisterDataStep2, RegisterDataStep3 {}
 
 /**
  * Registration Response

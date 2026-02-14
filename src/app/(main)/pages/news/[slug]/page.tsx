@@ -5,7 +5,7 @@ import ArticleDetailPage, {
 
 const NEWS_DETAIL_OPTIONS: ArticleDetailPageOptions = {
   basePath: '/pages/news',
-  breadcrumbLabel: 'Άρθρα',
+  breadcrumbLabel: 'News',
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {

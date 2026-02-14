@@ -1,3 +1,5 @@
+import { logApplicationEvent, type ApplicationLogLevel } from './applicationLogger';
+
 type LogPayload = {
   readonly method: string;
   readonly path: string;
@@ -12,4 +14,18 @@ export function logApiRequest(payload: LogPayload) {
   console.info(
     `[API] ${verb} ${payload.method} ${payload.path} ${formattedStatus} ${payload.durationMs}ms`,
   );
+
+  const level: ApplicationLogLevel =
+    payload.error || formattedStatus >= 500 ? 'error' : formattedStatus >= 400 ? 'warn' : 'info';
+
+  void logApplicationEvent({
+    level,
+    source: 'api',
+    message: `${payload.method} ${payload.path}`,
+    path: payload.path,
+    method: payload.method,
+    status: formattedStatus,
+    durationMs: payload.durationMs,
+    details: payload.error ? { error: true } : null,
+  });
 }

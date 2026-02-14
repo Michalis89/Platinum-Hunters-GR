@@ -53,9 +53,9 @@ async function GETHandler(req: Request) {
 
     const runtime =
       category === 'movies'
-        ? data.runtime ?? null
+        ? (data.runtime ?? null)
         : Array.isArray(data.episode_run_time) && data.episode_run_time.length > 0
-          ? data.episode_run_time[0] ?? null
+          ? (data.episode_run_time[0] ?? null)
           : null;
 
     return NextResponse.json({

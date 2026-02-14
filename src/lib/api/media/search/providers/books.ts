@@ -105,7 +105,10 @@ const normalizeSearchTerm = (value: string) => {
     .trim();
 };
 
-const fetchBooks = async (search: string, { limit }: { category: BooksCategory; limit: number }) => {
+const fetchBooks = async (
+  search: string,
+  { limit }: { category: BooksCategory; limit: number },
+) => {
   const apiKey = process.env.GOOGLE_BOOKS_API_KEY || '';
   if (!apiKey) {
     console.warn('Missing GOOGLE_BOOKS_API_KEY');

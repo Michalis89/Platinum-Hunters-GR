@@ -54,7 +54,9 @@ const config = {
           loc: `${basePath}/${item.slug}`,
           changefreq: isReview ? 'monthly' : 'weekly',
           priority: 0.8,
-          lastmod: item.updated_at ? new Date(item.updated_at).toISOString() : new Date().toISOString(),
+          lastmod: item.updated_at
+            ? new Date(item.updated_at).toISOString()
+            : new Date().toISOString(),
         });
       }
     }

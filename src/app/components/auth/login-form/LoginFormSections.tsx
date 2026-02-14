@@ -123,7 +123,7 @@ export function RememberForgotRow({
           checked={remember}
           onCheckedChange={checked => onRememberChange(checked === true)}
           disabled={loading || isRedirecting}
-          className="data-[state=checked]:border-info data-[state=checked]:bg-info h-4 w-4 rounded-[7px]"
+          className="h-4 w-4 rounded-[7px] data-[state=checked]:border-info data-[state=checked]:bg-info"
         />
         <label
           htmlFor="remember"
@@ -240,7 +240,7 @@ export function SignUpPrompt({ redirectParam }: SignUpPromptProps) {
               ? `/auth/register?redirect=${encodeURIComponent(redirectParam)}`
               : '/auth/register'
           }
-          className="text-info font-semibold transition hover:opacity-80"
+          className="font-semibold text-info transition hover:opacity-80"
         >
           Create one
         </Link>
@@ -273,7 +273,7 @@ export function ResetPanel({
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <Mail className="text-info h-4 w-4" />
+        <Mail className="h-4 w-4 text-info" />
         Password recovery
       </div>
 

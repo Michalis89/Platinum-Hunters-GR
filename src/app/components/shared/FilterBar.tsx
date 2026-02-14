@@ -84,7 +84,7 @@ export default function FilterBar({
   };
 
   return (
-    <div className="bg-card/90 rounded-3xl border border-border p-4 shadow-md ">
+    <div className="rounded-3xl border border-border bg-card/90 p-4 shadow-md">
       <div className="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
         <span>Κατηγορίες</span>
         {hasActiveCategory && (

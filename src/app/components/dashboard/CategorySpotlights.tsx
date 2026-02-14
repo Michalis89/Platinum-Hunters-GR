@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { CoverThumbImage, THUMB_SIZES_TINY } from '@/components/ui/cover-image';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,19 +28,18 @@ export default function CategorySpotlights({ cards }: CategorySpotlightsProps) {
             </Badge>
           </CardHeader>
           <CardContent className="space-y-4 px-6 pb-4 pt-0">
-            <p className="text-sm font-semibold leading-snug text-foreground line-clamp-3">
+            <p className="line-clamp-3 text-sm font-semibold leading-snug text-foreground">
               {card.explanation}
             </p>
             {card.entry && (
               <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-muted/30 p-3">
                 <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-2xl bg-muted">
                   {card.entry.cover ? (
-                    <Image
+                    <CoverThumbImage
                       src={card.entry.cover}
                       alt={card.entry.title ?? 'Entry cover'}
-                      fill
                       className="object-cover"
-                      sizes="56px"
+                      sizes={THUMB_SIZES_TINY}
                       loading="lazy"
                     />
                   ) : (
@@ -49,14 +48,14 @@ export default function CategorySpotlights({ cards }: CategorySpotlightsProps) {
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0 space-y-1">
+                <div className="min-w-0 flex-1 space-y-1">
                   {card.entry.title && (
-                    <p className="text-sm font-medium text-foreground line-clamp-1">
+                    <p className="line-clamp-1 text-sm font-medium text-foreground">
                       {card.entry.title}
                     </p>
                   )}
                   {card.entry.detail && (
-                    <p className="text-xs text-muted-foreground line-clamp-2">
+                    <p className="line-clamp-2 text-xs text-muted-foreground">
                       {card.entry.detail}
                     </p>
                   )}

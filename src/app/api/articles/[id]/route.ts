@@ -14,10 +14,7 @@ import { hasAnyRole } from '@/lib/roles';
 import { getUserFullInfo } from '@/lib/services/userService';
 
 // GET - Fetch single article by ID or slug
-async function GETHandler(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function GETHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
@@ -46,7 +43,9 @@ async function GETHandler(
     }
 
     // Record view (optionally)
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
     try {
       const viewPayload: Database['public']['Tables']['article_views']['Insert'] = {
@@ -66,10 +65,7 @@ async function GETHandler(
 }
 
 // PUT - Update article
-async function PUTHandler(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function PUTHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
@@ -132,12 +128,12 @@ async function PUTHandler(
       }
     }
     if (meta_description !== undefined) {
-      const metaDescriptionValidation = validatePlainText(
-        meta_description,
-        'Το meta description',
-      );
+      const metaDescriptionValidation = validatePlainText(meta_description, 'Το meta description');
       if (!metaDescriptionValidation.isValid) {
-        return fail({ error: metaDescriptionValidation.error || 'Μη έγκυρο meta description' }, 400);
+        return fail(
+          { error: metaDescriptionValidation.error || 'Μη έγκυρο meta description' },
+          400,
+        );
       }
     }
     if (tags !== undefined) {
@@ -209,10 +205,7 @@ async function PUTHandler(
 }
 
 // DELETE - Delete article
-async function DELETEHandler(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();

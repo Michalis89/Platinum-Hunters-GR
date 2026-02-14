@@ -309,7 +309,7 @@ export default function AdminSupportTicketDetail() {
           }
         />
 
-        <PageContainer size="lg" className="pb-20">
+        <PageContainer size="lg" className="max-w-none pb-20">
           <div className="mb-4 flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => router.push('/admin/support')}>
               Πίσω
@@ -358,7 +358,7 @@ export default function AdminSupportTicketDetail() {
                     key={message.id}
                     className={`rounded-2xl border p-4 ${
                       message.is_internal
-                        ? 'bg-warning/10 border-amber-500/40'
+                        ? 'border-amber-500/40 bg-warning/10'
                         : message.author_role === 'admin'
                           ? 'border-primary/40 bg-card'
                           : 'border-border bg-card'
@@ -433,7 +433,9 @@ export default function AdminSupportTicketDetail() {
                       <span className="text-sm font-medium text-[var(--hb-headline)]">
                         Εσωτερική σημείωση
                       </span>
-                      <span className="text-xs text-[var(--hb-muted)]">Ο χρήστης δεν θα τη δει.</span>
+                      <span className="text-xs text-[var(--hb-muted)]">
+                        Ο χρήστης δεν θα τη δει.
+                      </span>
                     </span>
                     <Switch
                       checked={replyInternal}
@@ -495,10 +497,7 @@ export default function AdminSupportTicketDetail() {
                         Το ticket θα εμφανίζεται ως assigned στον λογαριασμό σου.
                       </span>
                     </span>
-                    <Switch
-                      checked={assignToMe}
-                      onCheckedChange={value => setAssignToMe(value)}
-                    />
+                    <Switch checked={assignToMe} onCheckedChange={value => setAssignToMe(value)} />
                   </label>
                   <div>
                     <Input

@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/nextjs';
 import { logApiRequest } from '@/lib/observability/requestLogger';
 
 export function withApiRoute<Ctx extends unknown[]>(
@@ -17,7 +16,6 @@ export function withApiRoute<Ctx extends unknown[]>(
       });
       return response;
     } catch (error) {
-      Sentry.captureException(error);
       const duration = Date.now() - start;
       logApiRequest({
         method: request.method,

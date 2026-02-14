@@ -62,7 +62,7 @@ export default async function ConfirmEmailPage({ searchParams }: ConfirmEmailPag
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-60" />
 
       <section aria-live="polite" aria-atomic="true" className="relative z-10 w-full max-w-md">
-        <Card className="bg-card/95 border-border shadow-xl">
+        <Card className="border-border bg-card/95 shadow-xl">
           <CardHeader className="space-y-4 pb-2 text-center">
             <div className="flex justify-center">
               <div className="relative">
@@ -83,7 +83,7 @@ export default async function ConfirmEmailPage({ searchParams }: ConfirmEmailPag
           </CardHeader>
 
           <CardContent className="space-y-5 pt-4">
-            <Alert className="bg-background/70 border-border text-foreground">
+            <Alert className="border-border bg-background/70 text-foreground">
               <Icon className="h-4 w-4 text-primary" />
               <AlertTitle>{config.alertTitle}</AlertTitle>
               <AlertDescription>{config.alertDescription}</AlertDescription>

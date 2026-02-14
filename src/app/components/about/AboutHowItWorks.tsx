@@ -37,7 +37,7 @@ const boundaries: Boundary[] = [
 export function AboutHowItWorks() {
   return (
     <section className="relative px-4 py-20 md:px-6 md:py-28">
-      <div className="via-primary/[0.02] pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent" />
 
       <div className="relative mx-auto max-w-5xl">
         <div className="mb-12 text-center md:mb-16">
@@ -55,9 +55,9 @@ export function AboutHowItWorks() {
           {boundaries.map(boundary => (
             <div
               key={boundary.title}
-              className="hover:border-primary/40 flex gap-4 rounded-xl border border-border bg-card p-5 transition"
+              className="flex gap-4 rounded-xl border border-border bg-card p-5 transition hover:border-primary/40"
             >
-              <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-primary">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 {boundary.icon}
               </div>
               <div>

@@ -1,4 +1,4 @@
-import AdminSupportInbox from '@/app/components/support/AdminSupportInbox.client';
+import AdminSupportTicketsPane from '@/app/components/support/AdminSupportTicketsPane.client';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function AdminSupportPage() {
-  return <AdminSupportInbox />;
+  return <AdminSupportTicketsPane />;
 }

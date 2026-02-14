@@ -30,9 +30,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
     const errorDescription = params.error_description || 'Invalid or expired reset link';
 
     // Redirect to forgot password page with error
-    redirect(
-      `/auth/login?reset_error=${encodeURIComponent(errorDescription)}`
-    );
+    redirect(`/auth/login?reset_error=${encodeURIComponent(errorDescription)}`);
   }
 
   // Validate recovery params

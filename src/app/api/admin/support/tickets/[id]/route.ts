@@ -82,8 +82,7 @@ async function GETHandler(_req: Request, context: { params: Promise<{ id: string
 
     const attachmentsWithUrls = await Promise.all(
       (attachments ?? []).map(async attachment => {
-        const { data: signedData } = await supabase
-          .storage
+        const { data: signedData } = await supabase.storage
           .from('support-attachments')
           .createSignedUrl(attachment.storage_path, 60 * 60);
 

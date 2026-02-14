@@ -58,6 +58,7 @@ export default function MobileTabBar() {
     '/auth/register',
     '/auth/reset-password',
     '/auth/confirm-email',
+    '/admin/support',
   ];
 
   if (hideOnPaths.some(path => pathname?.startsWith(path))) {

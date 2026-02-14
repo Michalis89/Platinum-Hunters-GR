@@ -3,6 +3,7 @@
 import { Edit, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { AvatarImage } from '@/components/ui/avatar-image';
 import type { User } from '@/types/user';
 import { hasAnyRole } from '@/lib/roles';
 
@@ -28,12 +29,12 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
         <div className="flex flex-col items-center p-6 text-center sm:p-8">
           {/* Avatar */}
           {avatarUrl ? (
-            <div className="relative mb-5 h-28 w-28 rounded-full border md:h-32 md:w-32">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+            <div className="mb-5 h-28 w-28 rounded-full border md:h-32 md:w-32">
+              <AvatarImage
                 src={avatarUrl}
                 alt={`${displayName} avatar`}
-                className="h-full w-full object-cover"
+                size={128}
+                className="rounded-full"
               />
             </div>
           ) : (
@@ -54,7 +55,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
           <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             {/* Role badge */}
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-foreground">
-              {showShield && <ShieldCheck className="text-info h-3.5 w-3.5" />}
+              {showShield && <ShieldCheck className="h-3.5 w-3.5 text-info" />}
               {user.role}
             </span>
 

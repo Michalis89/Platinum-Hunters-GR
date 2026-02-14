@@ -229,7 +229,7 @@ export default function SupportTicketDetail() {
           <Card className={`${UI_CLASSNAMES.panelCard} `}>
             <CardHeader className="bg-transparent">
               <CardTitle className="flex items-center gap-2 text-foreground">
-                <span className="bg-info h-2.5 w-2.5 rounded-full" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-info" aria-hidden />
                 Ιστορικό συνομιλίας
               </CardTitle>
             </CardHeader>
@@ -268,7 +268,7 @@ export default function SupportTicketDetail() {
                         <a
                           key={attachment.id}
                           href={attachment.signed_url ?? '#'}
-                          className="hover:border-info flex items-center gap-2 px-3 py-2 text-xs text-foreground transition"
+                          className="flex items-center gap-2 px-3 py-2 text-xs text-foreground transition hover:border-info"
                           target="_blank"
                           rel="noreferrer"
                         >

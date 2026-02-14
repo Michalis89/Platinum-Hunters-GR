@@ -38,6 +38,7 @@ import { selectUser, updateUserProfile, logout } from '@/store/slices/authSlice'
 import type { AppDispatch } from '@/store/store';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
+import { AvatarImage } from '@/components/ui/avatar-image';
 
 function ProfileEditSkeleton() {
   return (
@@ -52,16 +53,13 @@ function ProfileEditSkeleton() {
         </div>
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton
-              key={`profile-edit-skeleton-${index}`}
-              className="h-12 w-full rounded-2xl"
-            />
+            <Skeleton key={`profile-edit-skeleton-${index}`} className="h-12 w-full rounded-2xl" />
           ))}
         </div>
         <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     </div>
-  )
+  );
 }
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -755,7 +753,11 @@ export default function EditProfilePage() {
 
           {alert && (
             <Alert variant={alert.type === 'error' ? 'destructive' : 'success'} className="mb-6">
-              {alert.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+              {alert.type === 'success' ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <XCircle className="h-4 w-4" />
+              )}
               <AlertDescription>{alert.message}</AlertDescription>
             </Alert>
           )}
@@ -763,7 +765,7 @@ export default function EditProfilePage() {
           <form id="edit-profile-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
             <Card className="">
-              <CardHeader className="bg-card/50 border-b border-border">
+              <CardHeader className="border-b border-border bg-card/50">
                 <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">
                   Βασικά Στοιχεία
                 </p>
@@ -868,7 +870,7 @@ export default function EditProfilePage() {
                       return (
                         <div
                           key={platform.key}
-                          className="bg-card/80 flex items-center gap-3 border p-3"
+                          className="flex items-center gap-3 border bg-card/80 p-3"
                         >
                           <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border bg-muted text-primary">
                             <Icon className="h-5 w-5" />
@@ -900,11 +902,11 @@ export default function EditProfilePage() {
                     <div className="flex items-start gap-4">
                       <div className="flex h-20 w-20 items-center justify-center rounded-full border border-border bg-card">
                         {currentAvatar ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <AvatarImage
                             src={currentAvatar}
                             alt="Avatar"
-                            className="h-full w-full object-cover"
+                            size={80}
+                            className="rounded-full"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
@@ -968,8 +970,8 @@ export default function EditProfilePage() {
                             }
                             className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition ${
                               active
-                                ? `border-primary/30 bg-primary/12 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-foreground`
+                                ? `bg-primary/12 dark:bg-primary/22 border-primary/30 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                : `hover:bg-primary/8 border-border bg-card text-foreground hover:border-primary/35`
                             }`}
                           >
                             <span className="text-sm font-medium">{setting.label}</span>
@@ -992,7 +994,7 @@ export default function EditProfilePage() {
 
             {/* Categories selection */}
             <Card id="categories" className="scroll-mt-24">
-              <CardHeader className="bg-card/50 border-b border-border">
+              <CardHeader className="border-b border-border bg-card/50">
                 <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">
                   Τα Hobbies μου
                 </p>
@@ -1024,8 +1026,8 @@ export default function EditProfilePage() {
                         onClick={() => toggleCategory(cat)}
                         className={`rounded-full border px-3 py-1.5 text-sm transition ${
                           active
-                            ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                            : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                            ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                            : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                         }`}
                       >
                         {labels[cat] || cat}
@@ -1039,7 +1041,7 @@ export default function EditProfilePage() {
             {/* Gaming Information */}
             {(formData.categories as string[] | undefined)?.includes('games') ? (
               <CollapsibleCard className="">
-                <CollapsibleCardHeader className="bg-card/50 border-b border-border">
+                <CollapsibleCardHeader className="border-b border-border bg-card/50">
                   <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">Gaming</p>
                   <CardTitle className="text-lg text-foreground">Πληροφορίες για Gaming</CardTitle>
                 </CollapsibleCardHeader>
@@ -1129,8 +1131,8 @@ export default function EditProfilePage() {
                             onClick={() => handleGenreToggle(genre)}
                             className={`rounded-full border px-3 py-1 text-xs transition ${
                               active
-                                ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                             }`}
                           >
                             {genre}
@@ -1194,8 +1196,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('anime', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {genre}
@@ -1219,8 +1221,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('anime', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {format}
@@ -1246,8 +1248,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {platform}
@@ -1282,7 +1284,9 @@ export default function EditProfilePage() {
                         />
 
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">Favorite Anime Directors / Studios</label>
+                          <label className="text-sm font-medium text-foreground">
+                            Favorite Anime Directors / Studios
+                          </label>
                           <Textarea
                             name="anime_directors"
                             value={(note.directors as string) || ''}
@@ -1336,8 +1340,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('manga', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {genre}
@@ -1361,8 +1365,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('manga', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {format}
@@ -1384,7 +1388,9 @@ export default function EditProfilePage() {
                         />
 
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">Favorite Mangaka / Artists</label>
+                          <label className="text-sm font-medium text-foreground">
+                            Favorite Mangaka / Artists
+                          </label>
                           <Textarea
                             name="manga_authors"
                             value={(note.authors as string) || ''}
@@ -1445,8 +1451,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {service}
@@ -1483,8 +1489,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('movies', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {genre}
@@ -1508,8 +1514,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('movies', 'style')(style)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {style}
@@ -1531,7 +1537,9 @@ export default function EditProfilePage() {
                         />
 
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">Αγαπημένοι Ηθοποιοί / Σκηνοθέτες</label>
+                          <label className="text-sm font-medium text-foreground">
+                            Αγαπημένοι Ηθοποιοί / Σκηνοθέτες
+                          </label>
                           <Textarea
                             name="movies_people"
                             value={(note.people as string) || ''}
@@ -1593,8 +1601,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {service}
@@ -1631,8 +1639,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('tv', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {genre}
@@ -1656,8 +1664,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('tv', 'style')(style)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {style}
@@ -1679,7 +1687,9 @@ export default function EditProfilePage() {
                         />
 
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">Αγαπημένοι Ηθοποιοί / Σκηνοθέτες</label>
+                          <label className="text-sm font-medium text-foreground">
+                            Αγαπημένοι Ηθοποιοί / Σκηνοθέτες
+                          </label>
                           <Textarea
                             name="tv_people"
                             value={(note.people as string) || ''}
@@ -1731,8 +1741,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryGenreToggle('books', genre)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {genre}
@@ -1756,8 +1766,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryNoteField('books', 'format')(format)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {format}
@@ -1779,7 +1789,9 @@ export default function EditProfilePage() {
                         />
 
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">Αγαπημένοι Συγγραφείς</label>
+                          <label className="text-sm font-medium text-foreground">
+                            Αγαπημένοι Συγγραφείς
+                          </label>
                           <Textarea
                             name="books_authors"
                             value={(note.authors as string) || ''}
@@ -1835,8 +1847,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {lang}
@@ -1864,8 +1876,8 @@ export default function EditProfilePage() {
                                   onClick={() => handleCategoryListToggle('coding', 'focus', focus)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {focus}
@@ -1983,8 +1995,8 @@ export default function EditProfilePage() {
                                   onClick={() => togglePetType(type)}
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {type}
@@ -2003,7 +2015,7 @@ export default function EditProfilePage() {
                             {activePetTypes.map(type => (
                               <div
                                 key={`pet-entry-${type}`}
-                                className="bg-card/70 space-y-3 rounded-lg border px-4 py-3"
+                                className="space-y-3 rounded-lg border bg-card/70 px-4 py-3"
                               >
                                 <p className="text-sm font-semibold text-foreground">{type}</p>
                                 <div className="grid gap-4 md:grid-cols-3">
@@ -2126,8 +2138,8 @@ export default function EditProfilePage() {
                                   }
                                   className={`rounded-full border px-3 py-1 text-xs transition ${
                                     active
-                                      ? `border-primary/35 bg-primary/14 dark:border-primary/55 dark:bg-primary/22 text-primary dark:text-[#8ec5ff]`
-                                      : `hover:border-primary/35 hover:bg-primary/8 border-border bg-card text-muted-foreground`
+                                      ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                      : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
                                   }`}
                                 >
                                   {flavor}
@@ -2154,7 +2166,7 @@ export default function EditProfilePage() {
             )}
 
             {/* Bottom Save Buttons */}
-            <div className="bg-card/80 mt-6 flex flex-wrap items-center justify-end gap-3 rounded-lg border px-4 py-3 shadow-sm">
+            <div className="mt-6 flex flex-wrap items-center justify-end gap-3 rounded-lg border bg-card/80 px-4 py-3 shadow-sm">
               {/* Primary Button */}
               <Button
                 type="submit"

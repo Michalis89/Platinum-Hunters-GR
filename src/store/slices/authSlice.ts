@@ -249,14 +249,21 @@ export const selectCanEditArticles = (state: { auth: AuthSession }) => {
 };
 
 // Factory selector: Check if user is author of specific item
-export const selectIsAuthorOf = (authorId: string | null | undefined) => (state: { auth: AuthSession }) => {
-  const user = state.auth.user;
-  return Boolean(user && authorId && user.id === authorId);
-};
+export const selectIsAuthorOf =
+  (authorId: string | null | undefined) => (state: { auth: AuthSession }) => {
+    const user = state.auth.user;
+    return Boolean(user && authorId && user.id === authorId);
+  };
 
 // Combined selector for Navbar - reduces re-renders by subscribing once
 export const selectNavbarAuth = createSelector(
-  [selectIsAuthenticated, selectIsLoading, selectUser, selectCanQuickAdd, selectCanAccessAdminPanel],
+  [
+    selectIsAuthenticated,
+    selectIsLoading,
+    selectUser,
+    selectCanQuickAdd,
+    selectCanAccessAdminPanel,
+  ],
   (isAuthenticated, isLoading, user, canQuickAdd, canAccessAdminPanel) => ({
     isAuthenticated,
     isLoading,

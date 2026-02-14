@@ -22,7 +22,10 @@ async function GETHandler() {
       { count: totalMediaItems, error: mediaError },
     ] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact', head: true }),
-      supabase.from('users').select('id', { count: 'exact', head: true }).gte('last_login', since5m),
+      supabase
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .gte('last_login', since5m),
       supabase.from('media_items').select('id', { count: 'exact', head: true }),
     ]);
 

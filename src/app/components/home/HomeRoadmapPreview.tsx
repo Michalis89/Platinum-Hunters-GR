@@ -15,7 +15,7 @@ export function HomeRoadmapPreview() {
     <section className="px-4 py-12 md:px-6 md:py-16">
       <div className="mx-auto max-w-5xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="text-info mb-3 text-xs uppercase tracking-[0.28em]">Coming soon</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-info">Coming soon</p>
           <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
             What&apos;s next
           </h2>
@@ -28,10 +28,10 @@ export function HomeRoadmapPreview() {
           {previewItems.map(item => (
             <div
               key={item.title}
-              className="hover:border-primary/30 group rounded-lg p-5 transition hover:-translate-y-0.5"
+              className="group rounded-lg p-5 transition hover:-translate-y-0.5 hover:border-primary/30"
             >
               <div className="mb-4 flex items-start justify-between">
-                <div className="group-hover:text-info flex h-10 w-10 items-center justify-center rounded-xl border bg-card text-muted-foreground transition-colors">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-card text-muted-foreground transition-colors group-hover:text-info">
                   <item.icon className="h-5 w-5" aria-hidden />
                 </div>
                 <span
@@ -51,7 +51,7 @@ export function HomeRoadmapPreview() {
         <div className="mt-8 text-center">
           <Link
             href="/about"
-            className="text-info group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition hover:bg-card"
+            className="group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-info transition hover:bg-card"
           >
             See the full roadmap
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

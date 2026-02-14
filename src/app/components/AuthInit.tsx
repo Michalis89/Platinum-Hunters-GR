@@ -332,20 +332,20 @@ export default function AuthInit() {
     let lastActivityTime = 0;
     let cancelled = false;
 
-        const resetTimer = () => {
-          if (timer) clearTimeout(timer);
-          timer = setTimeout(async () => {
-            const { data } = await supabase.auth.getSession();
-            if (cancelled) return;
-            // If there is still a valid session, keep it; otherwise logout hard
-            if (!data.session) {
-              await dispatch(logout());
-              dispatch(setUser(null));
-              clearAuthStorage();
-              redirectAfterLogout();
-            }
-          }, IDLE_LIMIT_MS);
-        };
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(async () => {
+        const { data } = await supabase.auth.getSession();
+        if (cancelled) return;
+        // If there is still a valid session, keep it; otherwise logout hard
+        if (!data.session) {
+          await dispatch(logout());
+          dispatch(setUser(null));
+          clearAuthStorage();
+          redirectAfterLogout();
+        }
+      }, IDLE_LIMIT_MS);
+    };
 
     // Debounced activity handler - prevents excessive calls from mousemove etc.
     const onActivity = () => {
@@ -355,13 +355,7 @@ export default function AuthInit() {
       resetTimer();
     };
 
-    const activityEvents = [
-      'click',
-      'keydown',
-      'mousemove',
-      'focus',
-      'visibilitychange',
-    ];
+    const activityEvents = ['click', 'keydown', 'mousemove', 'focus', 'visibilitychange'];
     // Use passive listeners for better scroll/touch performance
     activityEvents.forEach(ev => window.addEventListener(ev, onActivity, { passive: true }));
     resetTimer();

@@ -1,22 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle } from 'lucide-react';
-import { captureException } from '@sentry/nextjs';
 import { Button } from '@/components/ui/button';
 
 type GlobalErrorProps = {
-  error: Error;
   reset: () => void;
 };
 
-export default function GlobalError({ error, reset }: GlobalErrorProps) {
+export default function GlobalError({ reset }: GlobalErrorProps) {
   const router = useRouter();
-
-  useEffect(() => {
-    captureException(error);
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">

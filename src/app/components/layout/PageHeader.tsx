@@ -47,9 +47,7 @@ export function PageHeader({
         <div className={`flex flex-col gap-2.5 md:gap-3 ${textAlign} ${contentClassName}`}>
           {breadcrumbs ? <div className="text-xs text-muted-foreground">{breadcrumbs}</div> : null}
           {eyebrow ? (
-            <p
-              className={`text-xs uppercase tracking-[0.3em] text-primary ${eyebrowClassName}`}
-            >
+            <p className={`text-xs uppercase tracking-[0.3em] text-primary ${eyebrowClassName}`}>
               {eyebrow}
             </p>
           ) : null}
@@ -64,14 +62,14 @@ export function PageHeader({
           </div>
 
           {description ? (
-            <p
-              className={`text-sm text-muted-foreground md:text-base ${descriptionClassName}`}
-            >
+            <p className={`text-sm text-muted-foreground md:text-base ${descriptionClassName}`}>
               {description}
             </p>
           ) : null}
 
-          {meta ? <div className={`text-sm text-muted-foreground ${metaClassName}`}>{meta}</div> : null}
+          {meta ? (
+            <div className={`text-sm text-muted-foreground ${metaClassName}`}>{meta}</div>
+          ) : null}
 
           {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
           {badges ? <div className="flex flex-wrap items-center gap-3">{badges}</div> : null}

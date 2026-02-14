@@ -24,7 +24,7 @@ const toAbsoluteUrl = (path: string) => new URL(path, SITE_URL).toString();
 
 const buildImages = (images?: Array<{ url: string; alt?: string }>) => {
   if (images && images.length > 0) {
-    return images.map((image) => ({
+    return images.map(image => ({
       url: image.url.startsWith('http') ? image.url : toAbsoluteUrl(image.url),
       alt: image.alt || DEFAULT_OG_IMAGE_ALT,
     }));
@@ -66,15 +66,15 @@ export const buildMetadata = ({
       locale: SITE_LOCALE,
       type: openGraphType,
       images: ogImages,
-    ...(publishedTime ? { publishedTime } : {}),
-    ...(modifiedTime ? { modifiedTime } : {}),
-    ...(authors ? { authors } : {}),
+      ...(publishedTime ? { publishedTime } : {}),
+      ...(modifiedTime ? { modifiedTime } : {}),
+      ...(authors ? { authors } : {}),
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description: resolvedDescription,
-      images: ogImages.map((image) => image.url),
+      images: ogImages.map(image => image.url),
     },
     ...(noindex
       ? {

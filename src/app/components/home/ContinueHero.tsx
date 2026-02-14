@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import Image from 'next/image';
+import { CoverHeroImage } from '@/components/ui/cover-image';
 import Link from 'next/link';
 import useSWR from 'swr';
 import {
@@ -183,7 +183,7 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
   const progressLabel = getProgressLabel(item.slide.category, item.slide.progress);
 
   return (
-    <div className="border-border/40 bg-card/30 grid min-h-[304px] items-center gap-8 rounded-xl border p-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
+    <div className="grid min-h-[304px] items-center gap-8 rounded-xl border border-border/40 bg-card/30 p-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
       <div className="space-y-5">
         <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.06em]">
           <span>{item.config.icon}</span>
@@ -217,7 +217,7 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
             className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
           >
             Continue
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true">?</span>
           </Button>
           <Button
             variant="secondary"
@@ -233,15 +233,14 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
         <AspectRatio ratio={4 / 5} className="relative">
           {imageUrl ? (
             <>
-            <Image
-              src={imageUrl}
-              alt={item.slide.title ?? 'Title'}
-              fill
-              sizes="(max-width: 768px) 88vw, 300px"
-              className="absolute inset-0 object-contain p-2"
-              priority
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+              <CoverHeroImage
+                src={imageUrl}
+                alt={item.slide.title ?? 'Title'}
+                sizes="(max-width: 768px) 88vw, 300px"
+                className="absolute inset-0 object-contain p-2"
+                priority
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
             </>
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]">
@@ -329,15 +328,15 @@ export function ContinueHero() {
           <div className="min-h-[304px] animate-pulse p-6">
             <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">
-                <div className="bg-card/60 h-4 w-24 rounded" />
-                <div className="bg-card/70 h-8 w-3/4 rounded" />
-                <div className="bg-card/50 h-4 w-1/2 rounded" />
+                <div className="h-4 w-24 rounded bg-card/60" />
+                <div className="h-8 w-3/4 rounded bg-card/70" />
+                <div className="h-4 w-1/2 rounded bg-card/50" />
                 <div className="flex gap-3 pt-4">
-                  <div className="bg-card/60 h-12 w-32 rounded-full" />
-                  <div className="bg-card/40 h-12 w-48 rounded-full" />
+                  <div className="h-12 w-32 rounded-full bg-card/60" />
+                  <div className="h-12 w-48 rounded-full bg-card/40" />
                 </div>
               </div>
-              <div className="bg-card/30 aspect-[4/5] w-full rounded-2xl md:w-[340px]" />
+              <div className="aspect-[4/5] w-full rounded-2xl bg-card/30 md:w-[340px]" />
             </div>
           </div>
         </div>
@@ -360,7 +359,7 @@ export function ContinueHero() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition hover:brightness-95"
               >
                 View backlog
-                <span aria-hidden="true">→</span>
+                <span aria-hidden="true">?</span>
               </Link>
             </div>
           </div>

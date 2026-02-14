@@ -39,8 +39,7 @@ type TicketItem = {
   user_archived?: boolean;
 };
 
-const mapAlertVariant = (type: TicketsAlert['type']) =>
-  type === 'error' ? 'destructive' : type;
+const mapAlertVariant = (type: TicketsAlert['type']) => (type === 'error' ? 'destructive' : type);
 
 export default function SupportTicketsList() {
   const {
@@ -159,7 +158,7 @@ export default function SupportTicketsList() {
       return (
         <EmptyState
           icon={
-            <span className="text-info flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-info">
               0
             </span>
           }
@@ -198,7 +197,7 @@ export default function SupportTicketsList() {
             }
             updatedAt={ticket.updated_at}
             updatedLabel="Τελευταία ενημέρωση:"
-            titleIcon={<span className="bg-info h-2.5 w-2.5 rounded-full" aria-hidden />}
+            titleIcon={<span className="h-2.5 w-2.5 rounded-full bg-info" aria-hidden />}
             actions={
               <>
                 <Button href={`/pages/support/tickets/${ticket.id}`} variant="secondary">

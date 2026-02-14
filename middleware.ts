@@ -1,6 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareClient } from '@/lib/supabase-middleware';
-import { LOGIN_REQUIRED_PREFIXES, AUTH_ROUTES, DASHBOARD_PATH, HOME_PATHS } from '@/lib/routes/authRoutes';
+import {
+  LOGIN_REQUIRED_PREFIXES,
+  AUTH_ROUTES,
+  DASHBOARD_PATH,
+  HOME_PATHS,
+} from '@/lib/routes/authRoutes';
 import { clearAuthCookiesFromResponse } from '@/lib/auth/cookies';
 
 function buildCsp(isProd: boolean) {

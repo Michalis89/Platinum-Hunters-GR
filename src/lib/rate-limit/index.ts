@@ -75,10 +75,7 @@ export type RateLimitResult = {
  * const result = await rateLimit('loginEmail', `${clientIp}:${email}`);
  * ```
  */
-export async function rateLimit(
-  limiter: LimiterName,
-  key: string
-): Promise<RateLimitResult> {
+export async function rateLimit(limiter: LimiterName, key: string): Promise<RateLimitResult> {
   const rateLimiter = getNamedLimiter(limiter);
   const config = getLimiterConfig(limiter);
 

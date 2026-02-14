@@ -9,10 +9,7 @@ import { fail, ok } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
 
 // GET - Check if user has liked the article
-async function GETHandler(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function GETHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
@@ -50,10 +47,7 @@ async function GETHandler(
 }
 
 // POST - Like the article
-async function POSTHandler(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
@@ -87,12 +81,10 @@ async function POSTHandler(
     const userData = await getUserBasicInfo(supabase, session.user.id);
 
     // Insert like
-    const { error: insertError } = await supabase
-      .from('article_likes')
-      .insert({
-        article_id: Number.parseInt(id, 10),
-        user_id: session.user.id,
-      });
+    const { error: insertError } = await supabase.from('article_likes').insert({
+      article_id: Number.parseInt(id, 10),
+      user_id: session.user.id,
+    });
 
     if (insertError) {
       console.error('Error inserting like:', insertError);
@@ -133,10 +125,7 @@ async function POSTHandler(
 }
 
 // DELETE - Unlike the article
-async function DELETEHandler(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();

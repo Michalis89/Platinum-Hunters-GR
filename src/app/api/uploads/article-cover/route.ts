@@ -16,7 +16,9 @@ const sanitizeExtension = (fileName: string) => {
 };
 
 const buildStoragePath = (extension: string) => {
-  const uuid = randomUUID ? randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const uuid = randomUUID
+    ? randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   return `articles/cover-${uuid}.${extension}`;
 };
 
@@ -43,8 +45,11 @@ async function POSTHandler(request: Request) {
     }
 
     const role = user.role;
-    if (!role || !ALLOWED_ROLES.includes(role as typeof ALLOWED_ROLES[number])) {
-      return NextResponse.json({ message: 'Δεν έχεις δικαίωμα για αυτή τη δράση.' }, { status: 403 });
+    if (!role || !ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number])) {
+      return NextResponse.json(
+        { message: 'Δεν έχεις δικαίωμα για αυτή τη δράση.' },
+        { status: 403 },
+      );
     }
 
     const extension = sanitizeExtension(file.name);
@@ -64,8 +69,7 @@ async function POSTHandler(request: Request) {
       return NextResponse.json({ message: 'Αστοχία ανέβασματος.' }, { status: 500 });
     }
 
-    const { data: urlData } = await supabaseServer
-      .storage
+    const { data: urlData } = await supabaseServer.storage
       .from(BUCKET_NAME)
       .getPublicUrl(storagePath);
 

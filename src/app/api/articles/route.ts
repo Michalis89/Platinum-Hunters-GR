@@ -21,9 +21,7 @@ type ArticlePayloadValidationInput = {
   tags?: string[] | null;
 };
 
-type ArticlePayloadValidationResult =
-  | { isValid: true }
-  | { isValid: false; error: string };
+type ArticlePayloadValidationResult = { isValid: true } | { isValid: false; error: string };
 
 function validateArticlePayload({
   title,
@@ -34,8 +32,14 @@ function validateArticlePayload({
 }: ArticlePayloadValidationInput): ArticlePayloadValidationResult {
   const plainTextFieldChecks = [
     { validation: validatePlainText(title, 'Ο τίτλος'), fallbackError: 'Μη έγκυρος τίτλος' },
-    { validation: validatePlainText(description, 'Η περιγραφή'), fallbackError: 'Μη έγκυρη περιγραφή' },
-    { validation: validatePlainText(meta_title, 'Ο meta τίτλος'), fallbackError: 'Μη έγκυρος meta τίτλος' },
+    {
+      validation: validatePlainText(description, 'Η περιγραφή'),
+      fallbackError: 'Μη έγκυρη περιγραφή',
+    },
+    {
+      validation: validatePlainText(meta_title, 'Ο meta τίτλος'),
+      fallbackError: 'Μη έγκυρος meta τίτλος',
+    },
     {
       validation: validatePlainText(meta_description, 'Το meta description'),
       fallbackError: 'Μη έγκυρο meta description',
@@ -225,4 +229,3 @@ async function POSTHandler(req: Request) {
 
 export const GET = withApiRoute(GETHandler);
 export const POST = withApiRoute(POSTHandler);
-

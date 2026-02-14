@@ -85,7 +85,10 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
     const passwordVal = validatePassword(formData.password);
     if (!passwordVal.isValid) nextErrors.password = passwordVal.error || 'Invalid password';
 
-    const passwordConfirmVal = validatePasswordConfirm(formData.password, formData.password_confirm);
+    const passwordConfirmVal = validatePasswordConfirm(
+      formData.password,
+      formData.password_confirm,
+    );
     if (!passwordConfirmVal.isValid) {
       nextErrors.password_confirm = passwordConfirmVal.error || 'Passwords do not match';
     }
@@ -184,7 +187,8 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
       } else {
         setAlert({
           type: 'error',
-          message: error instanceof Error ? error.message : 'Registration failed. Please try again.',
+          message:
+            error instanceof Error ? error.message : 'Registration failed. Please try again.',
         });
       }
     } finally {

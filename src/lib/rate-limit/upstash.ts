@@ -58,7 +58,7 @@ function getRedisClient(): Redis {
   if (!url || !token) {
     throw new Error(
       'Missing Upstash Redis configuration. ' +
-        'Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables.'
+        'Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables.',
     );
   }
 

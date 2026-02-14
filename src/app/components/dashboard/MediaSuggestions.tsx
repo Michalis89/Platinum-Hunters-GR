@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { CoverThumbImage, THUMB_SIZES_TINY } from '@/components/ui/cover-image';
 import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -58,12 +58,11 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
             >
               <div className="flex gap-3">
                 <div className="relative h-20 w-14 flex-shrink-0 overflow-hidden rounded">
-                  <Image
+                  <CoverThumbImage
                     src={suggestion.cover || DEFAULT_COVER}
                     alt={suggestion.title}
-                    fill
                     className="object-cover"
-                    sizes="56px"
+                    sizes={THUMB_SIZES_TINY}
                   />
                 </div>
                 <div className="min-w-0 flex-1">

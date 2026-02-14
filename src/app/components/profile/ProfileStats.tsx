@@ -139,7 +139,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
           {primaryStats.map(stat => (
             <div key={stat.label} className="group rounded-[18px] border bg-card p-4 text-center">
               {/* Icon */}
-              <div className="text-info mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-info">
                 {stat.icon}
               </div>
 
@@ -167,7 +167,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
                     key={stat.label}
                     className="group w-full rounded-[18px] border bg-card p-4 text-center"
                   >
-                    <div className="text-info mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card">
+                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-info">
                       {stat.icon}
                     </div>
                     <p className="mb-1 text-2xl font-semibold text-foreground md:text-[28px]">
@@ -183,7 +183,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
                                 type="button"
                                 variant="secondary"
                                 aria-label="Πληροφορίες υπολογισμού"
-                                className="hover:bg-primary/10 grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary"
+                                className="grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary hover:bg-primary/10"
                               >
                                 <Info className="h-4 w-4" />
                               </Button>

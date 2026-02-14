@@ -280,6 +280,7 @@ export default function EntryEditDialog({
                       alt={entry.title}
                       width={144}
                       height={208}
+                      unoptimized
                       className="h-full w-full object-cover"
                     />
                   </div>

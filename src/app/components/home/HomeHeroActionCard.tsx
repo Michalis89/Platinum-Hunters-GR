@@ -101,9 +101,7 @@ export function HomeHeroActionCard({ stats }: HomeHeroActionCardProps) {
               Συνέχισε από εκεί που σταμάτησες
             </h2>
             <p className="text-sm text-muted-foreground">{playingText}</p>
-            <p className="text-lg font-semibold text-foreground">
-              {recentCategory.label}
-            </p>
+            <p className="text-lg font-semibold text-foreground">{recentCategory.label}</p>
             <p className="text-sm text-muted-foreground">{recentCategory.description}</p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
@@ -119,7 +117,7 @@ export function HomeHeroActionCard({ stats }: HomeHeroActionCardProps) {
               </div>
             </div>
           </div>
-          <div className="from-primary/30 relative rounded-2xl border border-border bg-gradient-to-br to-transparent p-4 text-foreground">
+          <div className="relative rounded-2xl border border-border bg-gradient-to-br from-primary/30 to-transparent p-4 text-foreground">
             <div className="flex h-full flex-col justify-between gap-4">
               <div className="rounded-2xl bg-gradient-to-br from-black/70 via-black/40 to-transparent p-4 shadow-inner shadow-black/60">
                 <div className="flex items-center gap-3 text-white">

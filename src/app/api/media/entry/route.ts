@@ -19,6 +19,11 @@ type UpdateMediaEntryBody =
       action: 'sync_rawg_metadata';
       category: string;
       mediaId: number;
+    }
+  | {
+      action: 'preview_rawg_metadata';
+      category: string;
+      mediaId: number;
     };
 
 function normalizeForMatch(value?: string | null): string {
@@ -32,6 +37,92 @@ function normalizeForMatch(value?: string | null): string {
 function mergePlatforms(rawgPlatforms: string[] | null | undefined, forcePc: boolean): string[] {
   const ordered = [forcePc ? 'PC' : null, ...(rawgPlatforms ?? [])].filter(Boolean) as string[];
   return Array.from(new Set(ordered));
+}
+
+type RawgMetadataPreview = {
+  source: string;
+  rawg_id: number;
+  title: string | null;
+  title_english: string | null;
+  description: string | null;
+  cover_image_large: string | null;
+  cover_image_medium: string | null;
+  season_year: number | null;
+  release_date: string | null;
+  rating: number | null;
+  metacritic: number | null;
+  platforms: string[];
+  genres: string[];
+  developer: string | null;
+  publisher: string | null;
+  esrb_rating: string | null;
+  runtime: number | null;
+  steam_app_id: number | null;
+};
+
+async function buildRawgMetadataPatch(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  mediaId: number,
+): Promise<{ patch: RawgMetadataPreview; rawgId: number }> {
+  const { data: media, error: mediaError } = await admin
+    .from('media_items')
+    .select('id,title,title_english,rawg_id,steam_app_id,category')
+    .eq('id', mediaId)
+    .eq('category', 'games')
+    .maybeSingle();
+
+  if (mediaError) throw mediaError;
+  if (!media) {
+    throw new Error('GAME_NOT_FOUND');
+  }
+
+  let rawgId = media.rawg_id ?? null;
+  if (!rawgId) {
+    const query = media.title_english || media.title || '';
+    const key = normalizeForMatch(query);
+    if (!key) {
+      throw new Error('RAWG_ID_NOT_RESOLVED');
+    }
+    const candidates = await searchRawgGames(query, 8);
+    const matched =
+      candidates.find(candidate => normalizeForMatch(candidate.name) === key) ??
+      candidates[0] ??
+      null;
+    rawgId = matched?.id ?? null;
+  }
+
+  if (!rawgId) {
+    throw new Error('RAWG_MATCH_NOT_FOUND');
+  }
+
+  const rawg = await fetchRawgGameDetails(rawgId);
+  if (!rawg) {
+    throw new Error('RAWG_DETAILS_FAILED');
+  }
+
+  const rawgPlatforms = rawg.platforms?.map(item => item.platform.name) ?? [];
+  const patch: RawgMetadataPreview = {
+    source: 'rawg',
+    rawg_id: rawg.id,
+    title: rawg.name ?? media.title ?? media.title_english,
+    title_english: rawg.name ?? media.title_english ?? media.title,
+    description: rawg.description_raw ?? null,
+    cover_image_large: rawg.background_image ?? null,
+    cover_image_medium: rawg.background_image ?? null,
+    season_year: rawg.released ? Number.parseInt(rawg.released.slice(0, 4), 10) || null : null,
+    release_date: rawg.released ?? null,
+    rating: rawg.rating ?? null,
+    metacritic: rawg.metacritic ?? null,
+    platforms: mergePlatforms(rawgPlatforms, Boolean(media.steam_app_id)),
+    genres: rawg.genres?.map(item => item.name) ?? [],
+    developer: rawg.developers?.[0]?.name ?? null,
+    publisher: rawg.publishers?.[0]?.name ?? null,
+    esrb_rating: rawg.esrb_rating?.name ?? null,
+    runtime: rawg.playtime ?? null,
+    steam_app_id: media.steam_app_id ?? null,
+  };
+
+  return { patch, rawgId: rawg.id };
 }
 
 async function assertPrivilegedUser(userId: string) {
@@ -137,7 +228,7 @@ async function PATCHHandler(req: Request) {
       return NextResponse.json({ success: true, mediaId, description: data.description ?? '' });
     }
 
-    if (body.action === 'sync_rawg_metadata') {
+    if (body.action === 'sync_rawg_metadata' || body.action === 'preview_rawg_metadata') {
       if (body.category !== 'games') {
         return NextResponse.json(
           { error: 'RAWG metadata sync is only available for games' },
@@ -145,61 +236,40 @@ async function PATCHHandler(req: Request) {
         );
       }
 
-      const { data: media, error: mediaError } = await admin
-        .from('media_items')
-        .select('id,title,title_english,rawg_id,steam_app_id,category')
-        .eq('id', mediaId)
-        .eq('category', 'games')
-        .maybeSingle();
-
-      if (mediaError) throw mediaError;
-      if (!media) return NextResponse.json({ error: 'Game not found' }, { status: 404 });
-
-      let rawgId = media.rawg_id ?? null;
-      if (!rawgId) {
-        const query = media.title_english || media.title || '';
-        const key = normalizeForMatch(query);
-        if (!key) {
-          return NextResponse.json({ error: 'Unable to resolve RAWG ID for this title' }, { status: 404 });
+      let patch: RawgMetadataPreview;
+      try {
+        const resolved = await buildRawgMetadataPatch(admin, mediaId);
+        patch = resolved.patch;
+      } catch (resolveError) {
+        if (resolveError instanceof Error) {
+          if (resolveError.message === 'GAME_NOT_FOUND') {
+            return NextResponse.json({ error: 'Game not found' }, { status: 404 });
+          }
+          if (resolveError.message === 'RAWG_ID_NOT_RESOLVED') {
+            return NextResponse.json(
+              { error: 'Unable to resolve RAWG ID for this title' },
+              { status: 404 },
+            );
+          }
+          if (resolveError.message === 'RAWG_MATCH_NOT_FOUND') {
+            return NextResponse.json({ error: 'RAWG match not found' }, { status: 404 });
+          }
+          if (resolveError.message === 'RAWG_DETAILS_FAILED') {
+            return NextResponse.json({ error: 'RAWG details fetch failed' }, { status: 502 });
+          }
         }
-        const candidates = await searchRawgGames(query, 8);
-        const matched =
-          candidates.find(candidate => normalizeForMatch(candidate.name) === key) ??
-          candidates[0] ??
-          null;
-        rawgId = matched?.id ?? null;
+        throw resolveError;
       }
 
-      if (!rawgId) {
-        return NextResponse.json({ error: 'RAWG match not found' }, { status: 404 });
+      if (body.action === 'preview_rawg_metadata') {
+        return NextResponse.json({
+          success: true,
+          mediaId,
+          rawgId: patch.rawg_id,
+          patch,
+          description: patch.description ?? '',
+        });
       }
-
-      const rawg = await fetchRawgGameDetails(rawgId);
-      if (!rawg) {
-        return NextResponse.json({ error: 'RAWG details fetch failed' }, { status: 502 });
-      }
-
-      const rawgPlatforms = rawg.platforms?.map(item => item.platform.name) ?? [];
-      const patch = {
-        source: 'rawg',
-        rawg_id: rawg.id,
-        title: rawg.name ?? media.title ?? media.title_english,
-        title_english: rawg.name ?? media.title_english ?? media.title,
-        description: rawg.description_raw ?? null,
-        cover_image_large: rawg.background_image ?? null,
-        cover_image_medium: rawg.background_image ?? null,
-        season_year: rawg.released ? Number.parseInt(rawg.released.slice(0, 4), 10) || null : null,
-        release_date: rawg.released ?? null,
-        rating: rawg.rating ?? null,
-        metacritic: rawg.metacritic ?? null,
-        platforms: mergePlatforms(rawgPlatforms, Boolean(media.steam_app_id)),
-        genres: rawg.genres?.map(item => item.name) ?? [],
-        developer: rawg.developers?.[0]?.name ?? null,
-        publisher: rawg.publishers?.[0]?.name ?? null,
-        esrb_rating: rawg.esrb_rating?.name ?? null,
-        runtime: rawg.playtime ?? null,
-        steam_app_id: media.steam_app_id ?? null,
-      };
 
       const { data: updated, error: updateError } = await admin
         .from('media_items')

@@ -9,10 +9,7 @@ import { fail, ok, okWithMeta } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
 import { hasAnyRole } from '@/lib/roles';
 // GET - Fetch comments for an article
-async function GETHandler(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function GETHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
@@ -22,7 +19,11 @@ async function GETHandler(
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), MAX_LIMIT);
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0);
 
-    const { data: comments, error, count } = await supabase
+    const {
+      data: comments,
+      error,
+      count,
+    } = await supabase
       .from('article_comments')
       .select('*, users!user_id(username, display_name, avatar_url)', { count: 'exact' })
       .eq('article_id', Number.parseInt(id, 10))
@@ -42,10 +43,7 @@ async function GETHandler(
 }
 
 // POST - Add a comment to an article
-async function POSTHandler(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function POSTHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
@@ -119,10 +117,7 @@ async function POSTHandler(
 }
 
 // DELETE - Delete a comment (own comments only or admin)
-async function DELETEHandler(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function DELETEHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: articleId } = await params;
     const supabase = await createRouteHandlerClient();
@@ -172,20 +167,17 @@ async function DELETEHandler(
     revalidateCache.articleComment(comment.article_id);
 
     return ok({ message: 'Το σχόλιο διαγράφηκε επιτυχώς' });
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      if (error instanceof UnauthorizedError) {
-        return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
-      }
-      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    if (error instanceof UnauthorizedError) {
+      return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
     }
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+  }
 }
 
 // PATCH - Update a comment (own or admin)
-async function PATCHHandler(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function PATCHHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: articleId } = await params;
     const supabase = await createRouteHandlerClient();

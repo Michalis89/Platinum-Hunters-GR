@@ -4,7 +4,7 @@ import { ArrowRight, LogIn } from 'lucide-react';
 export function HomeFinalCTA() {
   return (
     <section className="relative px-4 pb-8 pt-14 md:px-6 md:pb-12 md:pt-16">
-      <div className="from-primary/5 pointer-events-none absolute inset-0 bg-gradient-to-t to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent" />
 
       <div className="relative mx-auto max-w-3xl rounded-xl p-7 text-center md:p-10">
         <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
@@ -17,7 +17,7 @@ export function HomeFinalCTA() {
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <Link
             href="/auth/register"
-            className="bg-info group inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-info px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
           >
             Create account
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -25,7 +25,7 @@ export function HomeFinalCTA() {
 
           <Link
             href="/auth/login"
-            className="hover:border-primary/20 hover:bg-accent/10 inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold text-foreground transition sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold text-foreground transition hover:border-primary/20 hover:bg-accent/10 sm:w-auto"
           >
             <LogIn className="h-4 w-4" />I already have an account
           </Link>

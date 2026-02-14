@@ -1,12 +1,10 @@
 import AppShell from '@/app/components/AppShell';
-import { PageContainer } from '@/app/components/layout';
+import MainRouteContainer from '@/app/components/layout/MainRouteContainer.client';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <AppShell>
-      <PageContainer size="lg" noPadding>
-        {children}
-      </PageContainer>
+      <MainRouteContainer>{children}</MainRouteContainer>
     </AppShell>
   );
 }

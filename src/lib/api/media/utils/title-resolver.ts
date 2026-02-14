@@ -16,10 +16,7 @@ import type { TitlePriority } from '../types';
  * )
  * // Returns: 'Attack on Titan'
  */
-export function resolveTitle(
-  mediaRow: Record<string, unknown>,
-  priorities: TitlePriority,
-): string {
+export function resolveTitle(mediaRow: Record<string, unknown>, priorities: TitlePriority): string {
   for (const field of priorities) {
     const value = mediaRow[field];
     if (typeof value === 'string' && value.length > 0) {

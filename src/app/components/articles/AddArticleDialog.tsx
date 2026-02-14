@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Eye, ImageIcon } from 'lucide-react';
-import Image from 'next/image';
+import { CoverThumbImage, THUMB_SIZES_SM } from '@/components/ui/cover-image';
 import { useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -397,7 +397,7 @@ export default function AddArticleDialog({
                     <ErrorAlert message="Δεν έχεις δικαίωμα να δημιουργήσεις άρθρο ή review." />
                   )}
                   {warning && (
-                    <div className="bg-warning/10 rounded-lg border border-amber-500/30 px-4 py-3 text-sm text-amber-300">
+                    <div className="rounded-lg border border-amber-500/30 bg-warning/10 px-4 py-3 text-sm text-amber-300">
                       {warning}
                     </div>
                   )}
@@ -411,7 +411,7 @@ export default function AddArticleDialog({
                         value={contentType}
                         onChange={e => setContentType(e.target.value as ContentType)}
                         disabled={availableContentTypes.length <= 1}
-                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
+                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                       >
                         {availableContentTypes.map(type => (
                           <option key={type.value} value={type.value}>
@@ -427,7 +427,7 @@ export default function AddArticleDialog({
                       <select
                         value={category}
                         onChange={e => setCategory(e.target.value as ArticleCategory)}
-                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
+                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                       >
                         <option value="">-- Επιλέξτε --</option>
                         {availableCategories.map(cat => (
@@ -445,7 +445,7 @@ export default function AddArticleDialog({
                         value={topic}
                         onChange={e => setTopic(e.target.value as ArticleTopic)}
                         disabled={!category || contentType === 'review'}
-                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2 disabled:opacity-50"
+                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
                       >
                         {availableTopics.map(t => (
                           <option key={t.value} value={t.value}>
@@ -520,14 +520,12 @@ export default function AddArticleDialog({
                       </div>
                       <div className="relative h-12 w-12 rounded-lg border border-border">
                         {coverImage && isCoverPreviewValid ? (
-                          <Image
+                          <CoverThumbImage
                             src={coverImage}
                             alt="Preview"
-                            fill
-                            sizes="48px"
+                            sizes={THUMB_SIZES_SM}
                             className="object-cover"
                             onError={() => setIsCoverPreviewValid(false)}
-                            unoptimized
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-card">

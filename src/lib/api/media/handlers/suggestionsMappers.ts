@@ -144,11 +144,7 @@ export function mapBooksSuggestion(media: BooksMediaItem, average: number) {
 /**
  * Games mapper
  */
-export function mapGamesSuggestion(
-  media: GamesMediaItem,
-  average: number,
-  userCount?: number,
-) {
+export function mapGamesSuggestion(media: GamesMediaItem, average: number, userCount?: number) {
   const title = media.title || media.title_english || UNTITLED_FALLBACK;
   const year = media.season_year?.toString() || media.release_date?.slice(0, 4) || undefined;
 
@@ -180,8 +176,7 @@ export function mapMoviesSuggestion(media: MoviesMediaItem, average: number) {
     UNTITLED_FALLBACK;
   const subtitle =
     media.original_title && media.original_title !== title ? media.original_title : '';
-  const year =
-    media.release_date?.slice(0, 4) || media.first_air_date?.slice(0, 4) || undefined;
+  const year = media.release_date?.slice(0, 4) || media.first_air_date?.slice(0, 4) || undefined;
 
   return {
     source: 'local',
@@ -209,9 +204,7 @@ export function mapTmdbPopularItem(media: TmdbMedia, category: 'movies' | 'tv') 
   const year = (media.release_date || media.first_air_date || '').slice(0, 4) || undefined;
   const poster = media.poster_path ? `${TMDB_IMAGE_BASE}w780${media.poster_path}` : null;
   const posterSmall = media.poster_path ? `${TMDB_IMAGE_BASE}w342${media.poster_path}` : null;
-  const backdrop = media.backdrop_path
-    ? `${TMDB_IMAGE_BASE}w1280${media.backdrop_path}`
-    : null;
+  const backdrop = media.backdrop_path ? `${TMDB_IMAGE_BASE}w1280${media.backdrop_path}` : null;
 
   return {
     source: 'external',

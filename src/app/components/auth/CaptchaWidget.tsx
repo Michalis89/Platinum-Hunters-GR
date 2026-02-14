@@ -209,7 +209,7 @@ export default function CaptchaWidget({
           <button
             type="button"
             onClick={retryCaptcha}
-            className="hover:border-info/55 border-border px-2.5 py-1 text-xs text-foreground transition"
+            className="border-border px-2.5 py-1 text-xs text-foreground transition hover:border-info/55"
           >
             Retry CAPTCHA
           </button>

@@ -1,6 +1,6 @@
 import React from 'react';
 import NavbarWrapper from './NavbarWrapper';
-import { Footer } from './layout/Footer';
+import FooterWrapper from './layout/FooterWrapper';
 import MobileTabBar from './navbar/MobileTabBar';
 
 type Props = {
@@ -44,7 +44,7 @@ export default function AppShell({ children }: Props) {
         >
           {children}
         </main>
-        <Footer />
+        <FooterWrapper />
         <MobileTabBar />
       </div>
     </div>

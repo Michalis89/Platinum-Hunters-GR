@@ -62,7 +62,7 @@ function ProfilePageSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ProfilePage() {

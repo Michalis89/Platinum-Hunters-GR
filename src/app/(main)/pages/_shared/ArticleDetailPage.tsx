@@ -1,4 +1,5 @@
-﻿import Image from 'next/image';
+import { CoverHeroImage, CoverThumbImage } from '@/components/ui/cover-image';
+import { AvatarImage } from '@/components/ui/avatar-image';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -215,8 +216,8 @@ export async function buildArticleDetailMetadata({
 
   if (!article) {
     return buildMetadata({
-      title: 'Άρθρο | Hobbistas',
-      description: 'Το άρθρο που ζήτησες δεν είναι διαθέσιμο αυτή τη στιγμή.',
+      title: 'Article Not Found | Hobbistas',
+      description: 'The article you requested was not found or it has been removed.',
       path: defaultPath,
     });
   }
@@ -227,7 +228,7 @@ export async function buildArticleDetailMetadata({
   const metaDescription =
     article.meta_description ||
     article.description ||
-    'Διάβασε το άρθρο και ανακάλυψε ιδέες, εμπειρίες και πρακτικά άρθρα στον Χομπίστα.';
+    'Stay tuned for updates or explore another story while we resolve this.';
   const normalizedSlug = normalizeSlug(article.slug);
   const canonicalPath = `${basePath}/${normalizedSlug}`;
   const modifiedTime = article.updated_at ?? article.published_at ?? undefined;
@@ -251,11 +252,17 @@ export default async function ArticleDetailPage({
   topicFilter,
 }: ArticleDetailPageProps) {
   const { slug } = await params;
-  const sessionClient = await createRouteHandlerClient();
-  const {
-    data: { session },
-  } = await sessionClient.auth.getSession();
-  const currentUserId = session?.user.id ?? null;
+  let currentUserId: string | null = null;
+  try {
+    const sessionClient = await createRouteHandlerClient();
+    const {
+      data: { session },
+    } = await sessionClient.auth.getSession();
+    currentUserId = session?.user.id ?? null;
+  } catch {
+    // Public article rendering should not fail when auth cookies are stale/expired.
+    currentUserId = null;
+  }
   const article = await fetchArticle(slug, topicFilter);
 
   if (!article) {
@@ -297,7 +304,7 @@ export default async function ArticleDetailPage({
     day: 'numeric',
   };
 
-  const readTime = article.reading_time_minutes ? `${article.reading_time_minutes} λεπτά` : null;
+  const readTime = article.reading_time_minutes ? `${article.reading_time_minutes} min read` : null;
   const articleSlug = normalizeSlug(article.slug);
   const articlePath = `${basePath}/${articleSlug}`;
   const articleUrl = `${SITE_URL}${articlePath}`;
@@ -307,7 +314,7 @@ export default async function ArticleDetailPage({
   const relatedArticles = await fetchRelatedArticles(article);
   const categoryLabel = CATEGORY_LABELS[article.category] ?? article.category;
   const breadcrumbItems = [
-    { name: 'Αρχική', url: `${SITE_URL}/` },
+    { name: 'Home', url: `${SITE_URL}/` },
     { name: breadcrumbLabel, url: `${SITE_URL}${basePath}` },
     { name: categoryLabel, url: `${SITE_URL}${basePath}?category=${article.category}` },
     { name: article.title, url: articleUrl },
@@ -332,10 +339,9 @@ export default async function ArticleDetailPage({
       {/* Hero */}
       <div className="relative h-[clamp(280px,45vh,480px)] w-full">
         {article.cover_image ? (
-          <Image
+          <CoverHeroImage
             src={article.cover_image}
             alt={article.title}
-            fill
             priority
             sizes="(min-width: 1280px) 1120px, 100vw"
             className="object-cover object-[center_35%]"
@@ -343,34 +349,34 @@ export default async function ArticleDetailPage({
         ) : (
           <div className="h-full w-full bg-card" />
         )}
-        <div className="via-background/60 absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
 
         <div className="absolute left-4 top-4 z-10">
           <Button href={backHref} variant="secondary" icon={<ArrowLeft size={16} />}>
-            Πίσω
+            Back
           </Button>
         </div>
       </div>
 
       {/* Masthead + Body */}
       <div className="relative mx-auto -mt-14 max-w-5xl px-3 pb-16 sm:px-4 md:-mt-20">
-        <article className="rounded-3xl border border-border bg-card p-4 shadow-2xl  sm:p-6 md:p-10">
+        <article className="rounded-3xl border border-border bg-card p-4 shadow-2xl sm:p-6 md:p-10">
           <header className="mx-auto max-w-[760px]">
             <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              <span className="bg-card/80 rounded-full border border-border px-3 py-1">
+              <span className="rounded-full border border-border bg-card/80 px-3 py-1">
                 {categoryLabel}
               </span>
-              <span className="bg-card/80 rounded-full border border-border px-3 py-1">
+              <span className="rounded-full border border-border bg-card/80 px-3 py-1">
                 {TOPIC_LABELS[article.topic]}
               </span>
             </div>
 
-            <h1 className="mt-4 text-[24px] leading-[1.15] sm:text-[28px] md:text-[38px] font-bold tracking-tight text-foreground">
+            <h1 className="mt-4 text-[24px] font-bold leading-[1.15] tracking-tight text-foreground sm:text-[28px] md:text-[38px]">
               {article.title}
             </h1>
 
             {article.description && (
-              <p className="mt-4 text-base leading-relaxed md:text-lg text-muted-foreground">
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
                 {article.description}
               </p>
             )}
@@ -378,7 +384,7 @@ export default async function ArticleDetailPage({
 
           <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div>
-              <div className="bg-card/60 mt-6 rounded-3xl border border-border p-4 text-muted-foreground shadow-md">
+              <div className="mt-6 rounded-3xl border border-border bg-card/60 p-4 text-muted-foreground shadow-md">
                 <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.2em]">
                   <span className="flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1">
                     {categoryLabel}
@@ -408,13 +414,12 @@ export default async function ArticleDetailPage({
                   {article.users && (
                     <div className="flex items-center gap-2 rounded-full border border-border px-3 py-1 text-muted-foreground">
                       {article.users.avatar_url ? (
-                        <div className="relative h-5 w-5 rounded-full">
-                          <Image
+                        <div className="h-5 w-5 rounded-full">
+                          <AvatarImage
                             src={article.users.avatar_url}
                             alt={article.users.username}
-                            fill
-                            sizes="20px"
-                            className="object-cover"
+                            size={20}
+                            className="rounded-full"
                           />
                         </div>
                       ) : (
@@ -425,7 +430,7 @@ export default async function ArticleDetailPage({
                   )}
                   <div className="flex items-center gap-1 rounded-full border border-border px-3 py-1">
                     <Eye size={12} />
-                    <span>{article.views ?? 0} προβολές</span>
+                    <span>{article.views ?? 0} views</span>
                   </div>
                   <div className="flex items-center gap-1 rounded-full border border-border px-3 py-1">
                     <Heart size={12} />
@@ -438,13 +443,13 @@ export default async function ArticleDetailPage({
                 <section className="mt-8 w-full">
                   <div className="w-full rounded-3xl border border-border bg-card shadow-md">
                     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                      <span>Πίνακας περιεχομένων</span>
-                      <span>{headings.length} ενότητες</span>
+                      <span>Table of Contents</span>
+                      <span>{headings.length} sections</span>
                     </div>
                     <div className="px-5 py-4">
                       <details className="md:hidden">
                         <summary className="cursor-pointer rounded-2xl border border-border px-3 py-2 text-sm font-semibold text-foreground transition hover:border-primary">
-                          Εμφάνιση
+                          Show contents
                         </summary>
                         <ul className="mt-3 space-y-2">
                           {headings.map(heading => (
@@ -480,7 +485,7 @@ export default async function ArticleDetailPage({
 
               {contentWithHeadingIds && (
                 <section
-                  className="article-content [&_blockquote]:bg-primary/5 mx-auto max-w-[760px] pt-8 text-base leading-[1.8] text-foreground sm:text-[17px] [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-primary [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:px-4 [&_blockquote]:py-2 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-card [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-primary [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground sm:[&_h1]:text-3xl [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-xl [&_h2]:font-semibold sm:[&_h2]:text-2xl [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-lg [&_h3]:font-semibold sm:[&_h3]:text-xl [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:bg-card [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
+                  className="article-content mx-auto max-w-[760px] pt-8 text-base leading-[1.8] text-foreground sm:text-[17px] [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-primary [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:bg-primary/5 [&_blockquote]:px-4 [&_blockquote]:py-2 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-card [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-primary [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground sm:[&_h1]:text-3xl [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-xl [&_h2]:font-semibold sm:[&_h2]:text-2xl [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-lg [&_h3]:font-semibold sm:[&_h3]:text-xl [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:bg-card [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
                   dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
                 />
               )}
@@ -498,13 +503,13 @@ export default async function ArticleDetailPage({
           <div className="mt-12 border-t border-border pt-10">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-tight text-foreground">
-                Σχετικά άρθρα
+                Related articles
               </h2>
               <Link
                 href={basePath}
                 className="text-sm font-semibold text-primary underline-offset-4 transition hover:underline"
               >
-                Δες όλα
+                See all
               </Link>
             </div>
             {relatedArticles.length > 0 ? (
@@ -520,15 +525,14 @@ export default async function ArticleDetailPage({
                       <Link href={relatedHref} className="block">
                         <div className="relative h-36 w-full bg-muted">
                           {related.cover_image ? (
-                            <Image
+                            <CoverThumbImage
                               src={related.cover_image}
                               alt={related.title}
-                              fill
                               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                               className="object-cover transition duration-300 group-hover:scale-[1.02]"
                             />
                           ) : (
-                            <div className="bg-primary/20 flex h-full items-center justify-center">
+                            <div className="flex h-full items-center justify-center bg-primary/20">
                               <FileText size={32} className="text-primary" />
                             </div>
                           )}
@@ -573,8 +577,8 @@ export default async function ArticleDetailPage({
             ) : (
               <div className="mt-4 rounded-2xl border border-border bg-card p-6">
                 <EmptyState
-                  title="Δεν υπάρχουν σχετικά άρθρα"
-                  description="Δοκίμασε ξανά αργότερα ή επέλεξε άλλη κατηγορία."
+                  title="No related articles yet"
+                  description="Try refreshing the page or explore a different topic."
                 />
               </div>
             )}

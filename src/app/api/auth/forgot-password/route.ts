@@ -17,11 +17,9 @@ async function POSTHandler(req: Request) {
     const rateLimitResult = await rateLimit('forgotIp', clientIp);
 
     if (!rateLimitResult.success) {
-      return fail(
-        { error: 'Too many attempts. Please try again later.' },
-        429,
-        { headers: rateLimitHeaders(rateLimitResult) },
-      );
+      return fail({ error: 'Too many attempts. Please try again later.' }, 429, {
+        headers: rateLimitHeaders(rateLimitResult),
+      });
     }
   }
 

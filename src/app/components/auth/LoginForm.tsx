@@ -97,7 +97,11 @@ export default function LoginForm() {
             }}
           />
 
-          <LoginSubmitButton loading={loading} isRedirecting={isRedirecting} canSubmit={canSubmit} />
+          <LoginSubmitButton
+            loading={loading}
+            isRedirecting={isRedirecting}
+            canSubmit={canSubmit}
+          />
 
           <SignUpPrompt redirectParam={redirectParam} />
         </form>

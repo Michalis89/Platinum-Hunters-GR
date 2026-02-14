@@ -21,9 +21,7 @@ const normalizeRole = (role: string | null | undefined): UserRole | null => {
 };
 
 const normalizeRoles = (roles: (string | null | undefined)[]) =>
-  roles
-    .map(normalizeRole)
-    .filter((role): role is UserRole => role !== null);
+  roles.map(normalizeRole).filter((role): role is UserRole => role !== null);
 
 export const getUserRoles = (user: RoleCarrier): UserRole[] => {
   if (!user) return [];

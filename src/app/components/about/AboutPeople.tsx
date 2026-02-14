@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import { AvatarImage } from '@/components/ui/avatar-image';
 import { User2, MapPin, Gamepad2 } from 'lucide-react';
 import EmptyState from '@/components/ui/empty';
 
@@ -82,16 +82,15 @@ export function AboutPeople({ team }: AboutPeopleProps) {
             {sortedTeam.map(member => (
               <div
                 key={member.id}
-                className="hover:border-primary/40 group flex gap-4 rounded-2xl border border-border bg-card p-5 transition"
+                className="group flex gap-4 rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40"
               >
                 <div className="relative h-16 w-16 shrink-0 rounded-xl bg-white/5">
                   {member.avatar_url ? (
-                    <Image
+                    <AvatarImage
                       src={member.avatar_url}
                       alt={member.display_name || member.username}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
+                      className="rounded-xl"
+                      size={64}
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-muted-foreground">

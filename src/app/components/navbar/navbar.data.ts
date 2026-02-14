@@ -260,10 +260,7 @@ export type NavbarFeatureFilters = {
   reviews?: boolean;
 };
 
-const featureEnabled = (
-  feature: NavbarFeatureName | undefined,
-  filters: NavbarFeatureFilters,
-) => {
+const featureEnabled = (feature: NavbarFeatureName | undefined, filters: NavbarFeatureFilters) => {
   if (!feature) return true;
   if (feature === 'articles') return filters.articles ?? true;
   if (feature === 'reviews') return filters.reviews ?? true;

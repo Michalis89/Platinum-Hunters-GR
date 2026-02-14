@@ -95,7 +95,7 @@ export const sanitizeHtmlContent = (html: string | null | undefined) => {
         };
       },
     },
-    exclusiveFilter: (frame) => {
+    exclusiveFilter: frame => {
       if (frame.tag === 'img') {
         const src = frame.attribs?.src || '';
         return !isSafeUrl(src, false);

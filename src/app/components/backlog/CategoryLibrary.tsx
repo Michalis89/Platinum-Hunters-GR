@@ -1,11 +1,18 @@
 'use client';
 
-import { useEffect, useMemo, useReducer, useCallback, useState, useTransition, useRef } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useReducer,
+  useCallback,
+  useState,
+  useTransition,
+  useRef,
+} from 'react';
 import { mutate } from 'swr';
 import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
 import { apiClient } from '@/lib/api/client';
-import { Progress } from '@/components/ui/progress';
 import { yieldToMain } from '@/lib/performance';
 
 import CategoryHeader from './CategoryHeader';
@@ -530,7 +537,9 @@ export default function CategoryLibrary({
         ? totalCount
         : nextProgress;
     const hasPlayedHours =
-      typeof nextProgressValue === 'number' && Number.isFinite(nextProgressValue) && nextProgressValue > 0;
+      typeof nextProgressValue === 'number' &&
+      Number.isFinite(nextProgressValue) &&
+      nextProgressValue > 0;
     let finalStatus = nextStatus;
     if (category === 'games' && nextStatus === 'current' && !hasPlayedHours) {
       finalStatus = 'planned';
@@ -868,13 +877,12 @@ export default function CategoryLibrary({
     }
   };
 
-
-    return (
-      <div className="relative min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
-        {alert && (
-          <Alert
-            key={alertKey}
-            variant={
+  return (
+    <div className="relative min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
+      {alert && (
+        <Alert
+          key={alertKey}
+          variant={
             alert.type === 'error'
               ? 'destructive'
               : alert.type === 'success'
@@ -891,10 +899,10 @@ export default function CategoryLibrary({
           {alert.type === 'info' && <Info className="h-4 w-4" />}
           {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
           <AlertDescription>{alert.message}</AlertDescription>
-          </Alert>
-        )}
+        </Alert>
+      )}
 
-        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
         <div className="pointer-events-none absolute inset-0 -z-10 opacity-30">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,hsl(var(--primary)/0.2),transparent_52%)]" />
           <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--success)/0.15),transparent_58%)]" />
@@ -969,64 +977,77 @@ export default function CategoryLibrary({
           onDelete={handleDeleteEntry}
           onRefreshEntry={loadLibraryEntries}
         />
-        </div>
+      </div>
 
-        {steamSyncing && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
-            <div className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/90 p-6 text-white shadow-2xl shadow-violet-500/20">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-lg font-semibold text-white">
-                    Συγχρονισμός Steam με RAWG metadata
-                  </p>
-                  <p className="text-sm text-slate-300">
-                    {steamSyncProgress?.message ??
-                      'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
-                  </p>
-                </div>
-                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-100">
-                  {statusLabel}
-                </span>
+      {steamSyncing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
+          <div className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/90 p-6 text-white shadow-2xl shadow-violet-500/20">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-lg font-semibold text-white">
+                  Συγχρονισμός Steam με RAWG metadata
+                </p>
+                <p className="text-sm text-slate-300">
+                  {steamSyncProgress?.message ??
+                    'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
+                </p>
               </div>
-              <div className="mt-4 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-100">
+                {statusLabel}
+              </span>
+            </div>
+            <div className="mt-5 space-y-3">
+              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 <span>Πρόοδος</span>
                 <span>{normalizedProgressPercent}%</span>
               </div>
-              <Progress value={normalizedProgressPercent} className="mt-1 h-3 rounded-full" />
-              <p className="mt-3 text-xs text-slate-300">{stepLabel}</p>
-              {steamSyncProgress?.error && (
-                <p className="mt-2 text-xs font-semibold text-rose-400">
-                  Σφάλμα: {steamSyncProgress.error}
-                </p>
-              )}
-              {steamSyncProgress?.result && (
-                <div className="mt-4 grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 sm:grid-cols-3">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Παιχνίδια</p>
-                    <p className="text-lg font-semibold text-white">
-                      {steamSyncProgress.result.totalFetched ?? 0}
-                    </p>
-                    <p className="text-xs text-slate-400">συνολικά</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Εισαγωγές</p>
-                    <p className="text-lg font-semibold text-white">
-                      {steamSyncProgress.result.mediaInserted ?? 0}
-                    </p>
-                    <p className="text-xs text-slate-400">νέα entries</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Ενημερώσεις</p>
-                    <p className="text-lg font-semibold text-white">
-                      {steamSyncProgress.result.mediaUpdated ?? 0}
-                    </p>
-                    <p className="text-xs text-slate-400">ρυθμίστηκαν</p>
-                  </div>
-                </div>
-              )}
+              <div className="overflow-hidden rounded-full border border-white/10 bg-slate-900/70">
+                <div
+                  className="h-3 rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 shadow-[0_0_18px_rgba(192,132,252,0.65)] transition-[width] duration-700 ease-out"
+                  style={{ width: `${normalizedProgressPercent}%` }}
+                />
+              </div>
+              <p className="text-xs text-slate-300">{stepLabel}</p>
             </div>
+            {steamSyncProgress?.error && (
+              <p className="mt-2 text-xs font-semibold text-rose-400">
+                Σφάλμα: {steamSyncProgress.error}
+              </p>
+            )}
+            {steamSyncProgress?.result && (
+              <div className="mt-4 grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 sm:grid-cols-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
+                    Παιχνίδια
+                  </p>
+                  <p className="text-lg font-semibold text-white">
+                    {steamSyncProgress.result.totalFetched ?? 0}
+                  </p>
+                  <p className="text-xs text-slate-400">συνολικά</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
+                    Εισαγωγές
+                  </p>
+                  <p className="text-lg font-semibold text-white">
+                    {steamSyncProgress.result.mediaInserted ?? 0}
+                  </p>
+                  <p className="text-xs text-slate-400">νέα entries</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
+                    Ενημερώσεις
+                  </p>
+                  <p className="text-lg font-semibold text-white">
+                    {steamSyncProgress.result.mediaUpdated ?? 0}
+                  </p>
+                  <p className="text-xs text-slate-400">ρυθμίστηκαν</p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    );
-  }
+        </div>
+      )}
+    </div>
+  );
+}

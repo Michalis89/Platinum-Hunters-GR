@@ -1,16 +1,9 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 import { MEDIA_CATEGORY_CONFIGS, type MediaCategoryKey } from './config';
 import { handleMediaAdd } from './handlers/add';
-import {
-  handleLibraryGet,
-  handleLibraryPatch,
-  handleLibraryDelete,
-} from './handlers/library';
+import { handleLibraryGet, handleLibraryPatch, handleLibraryDelete } from './handlers/library';
 import { handleMediaSearch, type MediaSearchConfig } from './handlers/search';
-import {
-  handleSuggestionsGet,
-  type SuggestionsConfig,
-} from './handlers/suggestions';
+import { handleSuggestionsGet, type SuggestionsConfig } from './handlers/suggestions';
 
 /**
  * Creates a complete add route with POST handler

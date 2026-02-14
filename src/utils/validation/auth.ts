@@ -83,7 +83,10 @@ export function validatePassword(password: string): { isValid: boolean; error?: 
   }
 
   if (!/[A-Z]/.test(password)) {
-    return { isValid: false, error: 'Ο κωδικός πρέπει να περιέχει τουλάχιστον ένα κεφαλαίο γράμμα' };
+    return {
+      isValid: false,
+      error: 'Ο κωδικός πρέπει να περιέχει τουλάχιστον ένα κεφαλαίο γράμμα',
+    };
   }
 
   if (!/[0-9]/.test(password)) {
@@ -91,7 +94,10 @@ export function validatePassword(password: string): { isValid: boolean; error?: 
   }
 
   if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-    return { isValid: false, error: 'Ο κωδικός πρέπει να περιέχει τουλάχιστον έναν ειδικό χαρακτήρα' };
+    return {
+      isValid: false,
+      error: 'Ο κωδικός πρέπει να περιέχει τουλάχιστον έναν ειδικό χαρακτήρα',
+    };
   }
 
   return { isValid: true };
@@ -140,7 +146,12 @@ export function getPasswordStrength(password: string): PasswordStrength {
 
   // Avoid common patterns
   if (/(012|123|234|345|456|567|678|789|890)/.test(password)) score--;
-  if (/(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(password)) score--;
+  if (
+    /(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(
+      password,
+    )
+  )
+    score--;
   if (/(.)\1{2,}/.test(password)) score--; // Repeated characters
 
   // Clamp score between 0-4
@@ -192,7 +203,10 @@ export function validateFullName(name: string): { isValid: boolean; error?: stri
   }
 
   if (name.length > 100) {
-    return { isValid: false, error: 'Το ονοματεπώνυμο δεν μπορεί να υπερβαίνει τους 100 χαρακτήρες' };
+    return {
+      isValid: false,
+      error: 'Το ονοματεπώνυμο δεν μπορεί να υπερβαίνει τους 100 χαρακτήρες',
+    };
   }
 
   // Letters, spaces, hyphens only

@@ -79,9 +79,7 @@ export function HomeContinue() {
         <div className="mb-5 flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
           <div>
-            <h2 className="text-lg font-semibold text-foreground">
-              Άλλα που έχεις ανοιχτά
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">Άλλα που έχεις ανοιχτά</h2>
             <p className="text-xs text-muted-foreground">Μικρά reminders για να αποφασίσεις</p>
           </div>
         </div>
@@ -91,9 +89,9 @@ export function HomeContinue() {
             <Link
               key={item.category}
               href={item.href}
-              className="hover:border-primary/40 group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:-translate-y-0.5"
+              className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/40"
             >
-              <div className="group-hover:bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-muted-foreground transition group-hover:text-primary">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-muted-foreground transition group-hover:bg-primary/10 group-hover:text-primary">
                 {item.icon}
               </div>
               <div className="min-w-0 flex-1">

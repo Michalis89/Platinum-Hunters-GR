@@ -8,14 +8,18 @@ const AUTH_ROUTES = [
   '/auth/confirm-email',
 ];
 
-const matchesRoute = (route: string, pathname: string) => pathname === route || pathname.startsWith(`${route}/`);
+const matchesRoute = (route: string, pathname: string) =>
+  pathname === route || pathname.startsWith(`${route}/`);
 
 export const isProtectedRoute = (pathname: string) =>
-  LOGIN_REQUIRED_PREFIXES.some(route => matchesRoute(route, pathname)) || pathname === DASHBOARD_PATH;
+  LOGIN_REQUIRED_PREFIXES.some(route => matchesRoute(route, pathname)) ||
+  pathname === DASHBOARD_PATH;
 
-export const isAuthRoute = (pathname: string) => AUTH_ROUTES.some(route => matchesRoute(route, pathname));
+export const isAuthRoute = (pathname: string) =>
+  AUTH_ROUTES.some(route => matchesRoute(route, pathname));
 
-export const shouldRedirectToLogin = (pathname: string) => isProtectedRoute(pathname) && !isAuthRoute(pathname);
+export const shouldRedirectToLogin = (pathname: string) =>
+  isProtectedRoute(pathname) && !isAuthRoute(pathname);
 
 export const getLoginUrl = (redirectTo?: string) =>
   redirectTo ? `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}` : '/auth/login';

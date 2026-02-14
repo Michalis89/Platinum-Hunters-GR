@@ -41,13 +41,16 @@ export function useResetPasswordForm({
         valid: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
       },
     ],
-    [password]
+    [password],
   );
 
-  const passedRequirementCount = passwordRequirements.filter(requirement => requirement.valid).length;
+  const passedRequirementCount = passwordRequirements.filter(
+    requirement => requirement.valid,
+  ).length;
   const passwordStrengthProgress = (passedRequirementCount / passwordRequirements.length) * 100;
   const passwordsMatch = password.length > 0 && password === confirmPassword;
-  const canSubmit = passedRequirementCount === passwordRequirements.length && passwordsMatch && !submitting;
+  const canSubmit =
+    passedRequirementCount === passwordRequirements.length && passwordsMatch && !submitting;
 
   useEffect(() => {
     const ensureSession = async () => {

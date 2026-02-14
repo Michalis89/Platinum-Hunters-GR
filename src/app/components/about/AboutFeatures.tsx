@@ -78,7 +78,8 @@ export function AboutFeatures() {
             Core features available today
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            These are the features that exist and work right now. Not a roadmap—actual functionality.
+            These are the features that exist and work right now. Not a roadmap—actual
+            functionality.
           </p>
         </div>
 
@@ -86,17 +87,13 @@ export function AboutFeatures() {
           {features.map(feature => (
             <div
               key={feature.title}
-              className="hover:border-primary/50 group relative rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+              className="group relative rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
             >
-              <div className="bg-primary/10 group-hover:bg-primary/20 mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-primary transition-colors">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
                 {feature.icon}
               </div>
-              <h3 className="mb-2 text-base font-semibold text-foreground">
-                {feature.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
+              <h3 className="mb-2 text-base font-semibold text-foreground">{feature.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>

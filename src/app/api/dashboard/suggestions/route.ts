@@ -28,13 +28,11 @@ type EntryRow = {
   is_favorite: boolean | null;
   created_at: string | null;
   updated_at: string | null;
-  media_items:
-    | {
-        category: string | null;
-        genres: string[] | null;
-        tags: string[] | null;
-      }
-    | null;
+  media_items: {
+    category: string | null;
+    genres: string[] | null;
+    tags: string[] | null;
+  } | null;
 };
 
 type DashboardResponse = {
@@ -99,10 +97,7 @@ async function GETHandler() {
     let last60Completed = 0;
     let last60Dropped = 0;
 
-    const platformStats = new Map<
-      string,
-      { completed: number; dropped: number; total: number }
-    >();
+    const platformStats = new Map<string, { completed: number; dropped: number; total: number }>();
     const categoryRatings = new Map<
       string,
       { scoreSum: number; scoreCount: number; completed: number; dropped: number }
@@ -250,8 +245,7 @@ async function GETHandler() {
         return b.avgScore - a.avgScore;
       })[0];
 
-    const fallbackCategory = categoryScoreEntries
-      .sort((a, b) => b.completed - a.completed)[0];
+    const fallbackCategory = categoryScoreEntries.sort((a, b) => b.completed - a.completed)[0];
 
     const categoryCandidate = scoredCategory ?? fallbackCategory;
 
@@ -274,12 +268,12 @@ async function GETHandler() {
           best: platformBest,
         }
       : hasCategorySignal
-      ? {
-          type: 'category' as const,
-          best: bestCategory,
-          worst: worstCategory,
-        }
-      : null;
+        ? {
+            type: 'category' as const,
+            best: bestCategory,
+            worst: worstCategory,
+          }
+        : null;
 
     const getMomentumSuggestion = (): SuggestionCard => {
       const currentLabel = `${counts.current} current`;
@@ -342,7 +336,8 @@ async function GETHandler() {
         type: 'format',
         icon: 'monitor',
         title: 'Track format drops',
-        explanation: 'Platform and category drop data are still warming up; keep logging completions to surface steady formats.',
+        explanation:
+          'Platform and category drop data are still warming up; keep logging completions to surface steady formats.',
         stat: 'Awaiting drop patterns',
       };
     };
@@ -381,7 +376,8 @@ async function GETHandler() {
         type: 'taste',
         icon: 'heart',
         title: 'Refine your taste',
-        explanation: 'Complete a few entries and add scores to surface the strongest genre or category for you right now.',
+        explanation:
+          'Complete a few entries and add scores to surface the strongest genre or category for you right now.',
         stat: 'Awaiting scored completions',
       };
     };

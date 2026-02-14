@@ -26,9 +26,7 @@ export default function PageHero({
     <section className={cn('relative px-4 py-2 md:px-6', sectionClassName)}>
       <div className="mx-auto max-w-4xl text-center">
         {eyebrow ? (
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-primary">
-            {eyebrow}
-          </p>
+          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-primary">{eyebrow}</p>
         ) : null}
 
         <h1 className={cn('font-extrabold leading-tight', titleClassName)}>{title}</h1>
@@ -44,7 +42,11 @@ export default function PageHero({
           </p>
         ) : null}
 
-        {actions ? <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">{actions}</div> : null}
+        {actions ? (
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            {actions}
+          </div>
+        ) : null}
 
         {badges ? (
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">

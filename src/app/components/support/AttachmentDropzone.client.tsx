@@ -133,7 +133,7 @@ export default function AttachmentDropzone({
         onDrop={handleDrop}
         onDragOver={event => event.preventDefault()}
       >
-        <span className="text-info flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-info">
           +
         </span>
         <div className="text-sm font-semibold text-foreground">Σύρε εδώ screenshots ή αρχεία</div>

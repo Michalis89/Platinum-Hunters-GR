@@ -1,5 +1,13 @@
 export const COUNTRIES = ['GR', 'US', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'Other'];
-export const PLATFORMS = ['PS5', 'PS4', 'PS3', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC'];
+export const PLATFORMS = [
+  'PS5',
+  'PS4',
+  'PS3',
+  'Xbox Series X/S',
+  'Xbox One',
+  'Nintendo Switch',
+  'PC',
+];
 
 export const GENRES = [
   'Action',

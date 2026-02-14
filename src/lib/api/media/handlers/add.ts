@@ -25,10 +25,7 @@ import '../handlers/enrichers'; // Import to initialize enricher functions in co
  * @param config - Category configuration
  * @returns Response with created entry
  */
-export async function handleMediaAdd(
-  req: Request,
-  config: MediaCategoryConfig,
-): Promise<Response> {
+export async function handleMediaAdd(req: Request, config: MediaCategoryConfig): Promise<Response> {
   try {
     // 1. Auth check
     const supabase = await createRouteHandlerClient();
@@ -76,8 +73,14 @@ async function handleLocalSource(
     .eq('id', body.mediaId!)
     .maybeSingle();
 
-  const mediaTitle = mediaRow && !mediaError ? resolveTitle(mediaRow as unknown as Record<string, unknown>, config.titlePriority) : UNTITLED_FALLBACK;
-  const mediaCategory = (mediaRow && !mediaError ? (mediaRow as unknown as Record<string, unknown>).category as string : null) ?? config.defaultCategory;
+  const mediaTitle =
+    mediaRow && !mediaError
+      ? resolveTitle(mediaRow as unknown as Record<string, unknown>, config.titlePriority)
+      : UNTITLED_FALLBACK;
+  const mediaCategory =
+    (mediaRow && !mediaError
+      ? ((mediaRow as unknown as Record<string, unknown>).category as string)
+      : null) ?? config.defaultCategory;
 
   // Upsert user media entry
   const updatedAt = new Date().toISOString();
@@ -160,10 +163,7 @@ async function handleExternalSource(
 
     // Enrich payload if configured (e.g., for movies)
     if (config.enricher && typeof externalIdValue === 'number') {
-      const enrichedData = await config.enricher(
-        payload!.category as string,
-        externalIdValue,
-      );
+      const enrichedData = await config.enricher(payload!.category as string, externalIdValue);
       insertPayload = { ...insertPayload, ...enrichedData };
     }
 

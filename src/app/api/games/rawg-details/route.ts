@@ -26,7 +26,7 @@ async function GETHandler(req: Request) {
     return NextResponse.json({
       description: payload.description,
       platforms: payload.platforms,
-      payload
+      payload,
     });
   } catch (error) {
     console.error('RAWG details fetch error:', error);

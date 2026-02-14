@@ -20,10 +20,6 @@ export function okWithPagination<T>(
   return NextResponse.json({ data, pagination }, init);
 }
 
-export function fail(
-  error: { error: string; code?: string },
-  status: number,
-  init?: ResponseInit,
-) {
+export function fail(error: { error: string; code?: string }, status: number, init?: ResponseInit) {
   return NextResponse.json(error, { ...init, status });
 }

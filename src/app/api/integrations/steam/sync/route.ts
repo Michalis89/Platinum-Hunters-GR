@@ -5,11 +5,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import type { Database } from '@/lib/supabase/database.types';
 import { randomUUID } from 'crypto';
-import {
-  searchRawgGames,
-  fetchRawgGameDetails,
-  type RawgGame,
-} from '@/lib/services/rawgService';
+import { searchRawgGames, fetchRawgGameDetails, type RawgGame } from '@/lib/services/rawgService';
 import {
   fetchSteamOwnedGames,
   fetchSteamAchievements,
@@ -64,7 +60,6 @@ type SyncResult = {
   };
 };
 
-
 async function createSyncJob(userId: string): Promise<string> {
   const supabase = await createRouteHandlerClient();
   const jobId = randomUUID();
@@ -96,10 +91,15 @@ async function updateSyncJob(jobId: string, updates: JobUpdate): Promise<void> {
       ...(updates.status && { status: updates.status }),
       ...(updates.message && { message: updates.message }),
       ...(typeof updates.percent === 'number' && { percent: updates.percent }),
-      ...(typeof updates.completedSteps === 'number' && { completed_steps: updates.completedSteps }),
+      ...(typeof updates.completedSteps === 'number' && {
+        completed_steps: updates.completedSteps,
+      }),
       ...(typeof updates.totalSteps === 'number' && { total_steps: updates.totalSteps }),
       ...(updates.error !== undefined && { error: updates.error }),
-      ...(updates.result !== undefined && { result: updates.result as unknown as Database['public']['Tables']['steam_sync_jobs']['Update']['result'] }),
+      ...(updates.result !== undefined && {
+        result:
+          updates.result as unknown as Database['public']['Tables']['steam_sync_jobs']['Update']['result'],
+      }),
       ...(updates.finishedAt !== undefined && { finished_at: updates.finishedAt }),
     })
     .eq('id', jobId);
@@ -179,7 +179,12 @@ function deriveStatusFromSteamData(params: {
   achievementsPercent?: number;
   droppedThresholdDays?: number;
 }): 'planned' | 'current' | 'completed' | 'dropped' {
-  const { playtimeMinutes = 0, lastPlayedUnix = 0, achievementsPercent, droppedThresholdDays = 90 } = params;
+  const {
+    playtimeMinutes = 0,
+    lastPlayedUnix = 0,
+    achievementsPercent,
+    droppedThresholdDays = 90,
+  } = params;
 
   // Never played => planned (backlog)
   if (playtimeMinutes === 0 && lastPlayedUnix === 0) {
@@ -275,7 +280,8 @@ async function matchSteamGamesToRawg(
 
       try {
         const candidates = await searchRawgGames(title, 8);
-        const matched = candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
+        const matched =
+          candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
 
         cache.set(key, matched);
         return [game.appid, matched] as const;
@@ -433,9 +439,12 @@ async function syncSteamForUser(options?: {
   let totalSteps = 1;
   const updateProgress = async (message: string, stepDelta = 0) => {
     completedSteps += stepDelta;
-    const percent = totalSteps > 0 ? Math.min(100, Math.round((completedSteps / totalSteps) * 100)) : 0;
+    const percent =
+      totalSteps > 0 ? Math.min(100, Math.round((completedSteps / totalSteps) * 100)) : 0;
 
-    console.log(`📊 [Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`);
+    console.log(
+      `📊 [Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`,
+    );
 
     // Update job record if jobId provided
     if (options?.jobId) {
@@ -472,7 +481,9 @@ async function syncSteamForUser(options?: {
   const steamInput = userData?.steam_id?.trim();
   if (!steamInput) {
     console.error('❌ [Steam Sync] No steam_id in user profile');
-    throw new Error('Δεν έχεις ορίσει Steam ID στο προφίλ σου. Πήγαινε στις ρυθμίσεις για να το προσθέσεις.');
+    throw new Error(
+      'Δεν έχεις ορίσει Steam ID στο προφίλ σου. Πήγαινε στις ρυθμίσεις για να το προσθέσεις.',
+    );
   }
 
   console.log('🔑 [Steam Sync] Fetching Steam API key...');
@@ -578,9 +589,7 @@ async function syncSteamForUser(options?: {
 
     const existingMedia = mediaByAppId.get(appid);
     const alreadyEnriched =
-      existingMedia &&
-      existingMedia.rawg_id === rawgMatch.id &&
-      existingMedia.source === 'rawg';
+      existingMedia && existingMedia.rawg_id === rawgMatch.id && existingMedia.source === 'rawg';
 
     if (alreadyEnriched) {
       // Already have enriched data for this RAWG ID - reuse the basic match
@@ -591,12 +600,17 @@ async function syncSteamForUser(options?: {
     }
   }
 
-  const needsEnrichmentCount = Array.from(rawgMatchesNeedingEnrichment.values()).filter(Boolean).length;
+  const needsEnrichmentCount = Array.from(rawgMatchesNeedingEnrichment.values()).filter(
+    Boolean,
+  ).length;
   totalSteps += needsEnrichmentCount;
 
-  const enrichedRawgByAppId = await enrichRawgMatches(rawgMatchesNeedingEnrichment, async (done, total) => {
-    await updateProgress(`RAWG metadata ${done}/${total}`, 1);
-  });
+  const enrichedRawgByAppId = await enrichRawgMatches(
+    rawgMatchesNeedingEnrichment,
+    async (done, total) => {
+      await updateProgress(`RAWG metadata ${done}/${total}`, 1);
+    },
+  );
 
   // Merge already-enriched items back in
   for (const [appid, match] of rawgMatchesAlreadyEnriched.entries()) {
@@ -630,7 +644,10 @@ async function syncSteamForUser(options?: {
   }
 
   const mediaIdByAppId = new Map<number, number>();
-  const insertTasks: Array<{ appid: number; payload: Database['public']['Tables']['media_items']['Insert'] }> = [];
+  const insertTasks: Array<{
+    appid: number;
+    payload: Database['public']['Tables']['media_items']['Insert'];
+  }> = [];
   const updateByMediaId = new Map<number, Database['public']['Tables']['media_items']['Update']>();
 
   await updateProgress('Συγχρονισμός catalog media...', 1);
@@ -648,14 +665,18 @@ async function syncSteamForUser(options?: {
 
       if (isAlreadyEnriched) {
         // ✅ PRESERVING EXISTING RAWG DATA (images, platforms, etc.)
-        console.log(`✅ [Steam Sync] Preserving RAWG data for: ${game.name} (RAWG ID: ${existingByAppId.rawg_id})`);
+        console.log(
+          `✅ [Steam Sync] Preserving RAWG data for: ${game.name} (RAWG ID: ${existingByAppId.rawg_id})`,
+        );
         updateByMediaId.set(existingByAppId.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
         });
       } else if (matchedRawg) {
         // 🆕 NEW RAWG ENRICHMENT (item has no RAWG data yet)
-        console.log(`🆕 [Steam Sync] Enriching with RAWG: ${game.name} (RAWG ID: ${matchedRawg.id})`);
+        console.log(
+          `🆕 [Steam Sync] Enriching with RAWG: ${game.name} (RAWG ID: ${matchedRawg.id})`,
+        );
         updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedRawg));
       } else {
         // No RAWG match found, just update Steam fields
@@ -673,7 +694,9 @@ async function syncSteamForUser(options?: {
       if (existingRawgMedia) {
         mediaIdByAppId.set(game.appid, existingRawgMedia.id);
         // ✅ PRESERVING: Game exists with same RAWG ID (already enriched)
-        console.log(`✅ [Steam Sync] Preserving existing RAWG media: ${game.name} (RAWG ID: ${matchedRawg.id})`);
+        console.log(
+          `✅ [Steam Sync] Preserving existing RAWG media: ${game.name} (RAWG ID: ${matchedRawg.id})`,
+        );
         updateByMediaId.set(existingRawgMedia.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
@@ -696,7 +719,10 @@ async function syncSteamForUser(options?: {
       });
     }
 
-    await updateProgress(`Catalog ενημέρωση ${mediaIdByAppId.size + insertTasks.length}/${uniqueGames.length}`, 1);
+    await updateProgress(
+      `Catalog ενημέρωση ${mediaIdByAppId.size + insertTasks.length}/${uniqueGames.length}`,
+      1,
+    );
   }
 
   let insertedMediaCount = 0;
@@ -795,7 +821,10 @@ async function syncSteamForUser(options?: {
 
   const userTitleSet = new Set<string>();
   for (const row of userGameRows ?? []) {
-    const media = row.media_items as { title?: string | null; title_english?: string | null } | null;
+    const media = row.media_items as {
+      title?: string | null;
+      title_english?: string | null;
+    } | null;
     const normalizedTitle = normalizeTitle(media?.title);
     const normalizedEnglishTitle = normalizeTitle(media?.title_english);
     if (normalizedTitle) userTitleSet.add(normalizedTitle);
@@ -833,14 +862,20 @@ async function syncSteamForUser(options?: {
           selected_platform: 'PC',
         });
       }
-      await updateProgress(`Entries ${userEntryPayload.length + userEntryUpdates.length}/${uniqueGames.length}`, 1);
+      await updateProgress(
+        `Entries ${userEntryPayload.length + userEntryUpdates.length}/${uniqueGames.length}`,
+        1,
+      );
       continue;
     }
 
     const normalizedSteamTitle = normalizeTitle(game.name);
     if (normalizedSteamTitle && userTitleSet.has(normalizedSteamTitle)) {
       skippedPotentialDuplicate += 1;
-      await updateProgress(`Entries ${userEntryPayload.length + userEntryUpdates.length}/${uniqueGames.length}`, 1);
+      await updateProgress(
+        `Entries ${userEntryPayload.length + userEntryUpdates.length}/${uniqueGames.length}`,
+        1,
+      );
       continue;
     }
 
@@ -856,7 +891,10 @@ async function syncSteamForUser(options?: {
     if (normalizedSteamTitle) {
       userTitleSet.add(normalizedSteamTitle);
     }
-    await updateProgress(`Entries ${userEntryPayload.length + userEntryUpdates.length}/${uniqueGames.length}`, 1);
+    await updateProgress(
+      `Entries ${userEntryPayload.length + userEntryUpdates.length}/${uniqueGames.length}`,
+      1,
+    );
   }
 
   let failedEntryUpsertCount = 0;
@@ -881,8 +919,10 @@ async function syncSteamForUser(options?: {
   await updateProgress('Ολοκλήρωση συγχρονισμού...', totalSteps - completedSteps);
 
   const warnings: string[] = [];
-  if (failedMediaInsertCount > 0) warnings.push(`Αποτυχημένες εισαγωγές media: ${failedMediaInsertCount}`);
-  if (failedMediaUpdateCount > 0) warnings.push(`Αποτυχημένα updates media: ${failedMediaUpdateCount}`);
+  if (failedMediaInsertCount > 0)
+    warnings.push(`Αποτυχημένες εισαγωγές media: ${failedMediaInsertCount}`);
+  if (failedMediaUpdateCount > 0)
+    warnings.push(`Αποτυχημένα updates media: ${failedMediaUpdateCount}`);
   if (failedEntryUpsertCount > 0)
     warnings.push(`Αποτυχημένα inserts/updates entries: ${failedEntryUpsertCount}`);
 
@@ -1000,7 +1040,9 @@ async function GETHandler(req: Request) {
     }
 
     if (error instanceof UnauthorizedError) {
-      return NextResponse.redirect(buildBacklogRedirect(req.url, 'error', 'unauthorized').toString());
+      return NextResponse.redirect(
+        buildBacklogRedirect(req.url, 'error', 'unauthorized').toString(),
+      );
     }
 
     const message = error instanceof Error ? error.message : 'steam_sync_failed';

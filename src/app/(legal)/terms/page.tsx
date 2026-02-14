@@ -57,9 +57,7 @@ export default function TermsPage() {
             <div className="space-y-6">
               {/* 1. Service Identity */}
               <section>
-                <h2 className="mb-2 text-lg font-semibold text-foreground">
-                  1. Service Identity
-                </h2>
+                <h2 className="mb-2 text-lg font-semibold text-foreground">1. Service Identity</h2>
                 <p>
                   <span className="font-semibold text-primary">{SITE_NAME}</span> is a web platform
                   for tracking backlog, reviews, and related content around hobbies. The Service is
@@ -113,9 +111,7 @@ export default function TermsPage() {
 
               {/* 4. User Content */}
               <section>
-                <h2 className="mb-2 text-lg font-semibold text-foreground">
-                  4. User Content
-                </h2>
+                <h2 className="mb-2 text-lg font-semibold text-foreground">4. User Content</h2>
                 <p>
                   The Service may allow you to create or submit content, such as text, comments,
                   ratings, and similar materials (&quot;User Content&quot;). You retain ownership of
@@ -139,9 +135,7 @@ export default function TermsPage() {
 
               {/* 5. Acceptable Use */}
               <section>
-                <h2 className="mb-2 text-lg font-semibold text-foreground">
-                  5. Acceptable Use
-                </h2>
+                <h2 className="mb-2 text-lg font-semibold text-foreground">5. Acceptable Use</h2>
                 <p>You may not use the Service to:</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>engage in illegal activities or violate the rights of others,</li>
@@ -261,9 +255,7 @@ export default function TermsPage() {
 
               {/* 12. Contact */}
               <section>
-                <h2 className="mb-2 text-lg font-semibold text-foreground">
-                  12. Contact
-                </h2>
+                <h2 className="mb-2 text-lg font-semibold text-foreground">12. Contact</h2>
                 <p>
                   For any questions regarding these Terms of Service or the Service itself, you may
                   contact us at:

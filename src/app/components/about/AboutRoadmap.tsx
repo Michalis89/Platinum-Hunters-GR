@@ -22,7 +22,7 @@ export function AboutRoadmap() {
           {ROADMAP_ITEMS.map((item, index) => (
             <div
               key={`${item.title}-${index}`}
-              className="hover:border-primary/40 group rounded-2xl border border-border bg-card p-5 transition"
+              className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40"
             >
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-muted-foreground transition-colors group-hover:text-primary">

@@ -88,13 +88,7 @@ export const MEDIA_CATEGORY_CONFIGS: Record<MediaCategoryKey, MediaCategoryConfi
     key: 'movies',
     subcategories: ['movies', 'tv'],
     externalId: { field: 'tmdb_id', type: 'number' },
-    titlePriority: [
-      'title',
-      'original_title',
-      'title_english',
-      'title_romaji',
-      'title_native',
-    ],
+    titlePriority: ['title', 'original_title', 'title_english', 'title_romaji', 'title_native'],
     logPrefix: 'Movies',
     defaultCategory: 'movies',
     librarySelectFields:

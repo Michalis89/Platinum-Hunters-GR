@@ -85,26 +85,44 @@ async function GETHandler() {
 
     const statsEntries = Array.isArray(entries) ? (entries as StatsEntry[]) : [];
 
-  const gameStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
-  const animeStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
-  const mangaStats: CategoryStats & { chapters: number } = {
-    total: 0,
-    in_progress: 0,
-    completed: 0,
-    dropped: 0,
-    hours: 0,
-    chapters: 0,
-  };
-    const movieStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
+    const gameStats: CategoryStats = {
+      total: 0,
+      in_progress: 0,
+      completed: 0,
+      dropped: 0,
+      hours: 0,
+    };
+    const animeStats: CategoryStats = {
+      total: 0,
+      in_progress: 0,
+      completed: 0,
+      dropped: 0,
+      hours: 0,
+    };
+    const mangaStats: CategoryStats & { chapters: number } = {
+      total: 0,
+      in_progress: 0,
+      completed: 0,
+      dropped: 0,
+      hours: 0,
+      chapters: 0,
+    };
+    const movieStats: CategoryStats = {
+      total: 0,
+      in_progress: 0,
+      completed: 0,
+      dropped: 0,
+      hours: 0,
+    };
     const tvStats: CategoryStats = { total: 0, in_progress: 0, completed: 0, dropped: 0, hours: 0 };
-  const bookStats: CategoryStats & { pages: number } = {
-    total: 0,
-    in_progress: 0,
-    completed: 0,
-    dropped: 0,
-    hours: 0,
-    pages: 0,
-  };
+    const bookStats: CategoryStats & { pages: number } = {
+      total: 0,
+      in_progress: 0,
+      completed: 0,
+      dropped: 0,
+      hours: 0,
+      pages: 0,
+    };
 
     for (const entry of statsEntries) {
       const media = entry.media_items;
@@ -116,8 +134,8 @@ async function GETHandler() {
       const isInProgress =
         normalizedCategory === 'movies' ? status === 'planned' : status === 'current';
 
-       const isDropped = status === 'dropped';
-       switch (normalizedCategory) {
+      const isDropped = status === 'dropped';
+      switch (normalizedCategory) {
         case 'games': {
           gameStats.total++;
           if (isInProgress) gameStats.in_progress++;

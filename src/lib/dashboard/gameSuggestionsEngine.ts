@@ -283,7 +283,10 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
   const eligibleGenresSet = new Set(genreRanking.map(([genre]) => genre));
 
   // Debug: Log tracked titles
-  console.log(`📚 Tracked titles (${trackedTitles.size}):`, Array.from(trackedTitles).slice(0, 20).join(', '));
+  console.log(
+    `📚 Tracked titles (${trackedTitles.size}):`,
+    Array.from(trackedTitles).slice(0, 20).join(', '),
+  );
 
   if (!genreRanking.length) {
     return Array.from({ length: 4 }).map((_, index) => ({
@@ -328,7 +331,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
     // Debug log to trace title checking
     if (game.name.toLowerCase().includes('horizon')) {
-      console.log(`🔍 Checking "${game.name}" → normalized: "${title}" | In tracked? ${trackedTitles.has(title)}`);
+      console.log(
+        `🔍 Checking "${game.name}" → normalized: "${title}" | In tracked? ${trackedTitles.has(title)}`,
+      );
     }
 
     // Also check for partial matches (e.g., both contain "walking-dead")
@@ -379,7 +384,17 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
     // STRICT FILTER 2: Reject games with problematic unfamiliar tags
     // Focus on key experience-defining tags (Multiplayer, Co-op, VR, etc.)
-    const problematicUnknownTags = ['multiplayer', 'co-op', 'pvp', 'competitive', 'mmo', 'mmorpg', 'battle royale', 'vr', 'online co-op'];
+    const problematicUnknownTags = [
+      'multiplayer',
+      'co-op',
+      'pvp',
+      'competitive',
+      'mmo',
+      'mmorpg',
+      'battle royale',
+      'vr',
+      'online co-op',
+    ];
     const foundProblematicUnknownTags = candidateTags.filter(tag => {
       const isProblematic = problematicUnknownTags.includes(tag);
       const isUnknown = !genreHours.has(tag) && !goodHours.has(tag) && !badHours.has(tag);
@@ -451,7 +466,11 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       dropRateValue * 100
     ).toFixed(1)}%.`;
 
-    const signals = [primaryGenre, hoursSpent ? `${hoursSpent}h` : null, favoriteCount ? 'favorite' : null]
+    const signals = [
+      primaryGenre,
+      hoursSpent ? `${hoursSpent}h` : null,
+      favoriteCount ? 'favorite' : null,
+    ]
       .filter(Boolean)
       .join(' · ');
 

@@ -5,7 +5,7 @@
 
 const REVIEW_DETAIL_OPTIONS: ArticleDetailPageOptions = {
   basePath: '/pages/reviews',
-  breadcrumbLabel: 'Κριτικές',
+  breadcrumbLabel: 'Reviews',
   topicFilter: 'reviews',
 };
 

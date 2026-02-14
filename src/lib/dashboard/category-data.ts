@@ -2,7 +2,14 @@ import { subDays, formatDistanceToNowStrict, format } from 'date-fns';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { DEFAULT_COVER } from '@/lib/constants/messages';
 
-export const DASHBOARD_TAB_CATEGORIES = ['games', 'anime', 'manga', 'movies', 'tv', 'books'] as const;
+export const DASHBOARD_TAB_CATEGORIES = [
+  'games',
+  'anime',
+  'manga',
+  'movies',
+  'tv',
+  'books',
+] as const;
 export type DashboardCategoryKey = (typeof DASHBOARD_TAB_CATEGORIES)[number];
 
 export type DashboardTopFiveItem = {
@@ -45,6 +52,21 @@ export type CategoryChartPayload = {
   insight: string;
 };
 
+export type PlatformInsightRow = {
+  platform: string;
+  total: number;
+  completed: number;
+  dropped: number;
+  completionRate: number;
+};
+
+export type PlatformInsightPayload = {
+  rows: PlatformInsightRow[];
+  best: PlatformInsightRow | null;
+  worst: PlatformInsightRow | null;
+  summary: string;
+};
+
 export type PersonalSuggestionCard = {
   id: string;
   icon: string;
@@ -71,6 +93,7 @@ export type CategoryDashboardSection = {
   topFive: DashboardTopFiveItem[];
   spotlights: CategorySpotlightCard[];
   chart: CategoryChartPayload;
+  platformInsight: PlatformInsightPayload | null;
   suggestions: PersonalSuggestionCard[];
   favorites: DashboardTopFiveItem[];
   mediaSuggestions: MediaSuggestion[];
@@ -165,6 +188,7 @@ const CATEGORY_ENTRY_SELECT_LEGACY = `
 `;
 
 const DEFAULT_CHART_DAYS = 16;
+const CATEGORY_ENTRY_PAGE_SIZE = 200;
 
 type CategoryEntryRow = {
   id: number;
@@ -178,33 +202,31 @@ type CategoryEntryRow = {
   updated_at: string | null;
   notes?: string | null;
   is_favorite?: boolean | null;
-  media_items:
-    | {
-        id: number;
-        category: string | null;
-        title?: string | null;
-        title_english?: string | null;
-        title_romaji?: string | null;
-        title_native?: string | null;
-        original_title?: string | null;
-        format?: string | null;
-        season_year?: number | null;
-        episodes?: number | null;
-        number_of_episodes?: number | null;
-        chapters?: number | null;
-        volumes?: number | null;
-        page_count?: number | null;
-        runtime?: number | null;
-        duration?: number | null;
-        genres?: string[] | null;
-        tags?: string[] | null;
-        platforms?: string[] | null;
-        release_date?: string | null;
-        cover_image_large?: string | null;
-        cover_image_medium?: string | null;
-        studios?: string[] | null;
-      }
-    | null;
+  media_items: {
+    id: number;
+    category: string | null;
+    title?: string | null;
+    title_english?: string | null;
+    title_romaji?: string | null;
+    title_native?: string | null;
+    original_title?: string | null;
+    format?: string | null;
+    season_year?: number | null;
+    episodes?: number | null;
+    number_of_episodes?: number | null;
+    chapters?: number | null;
+    volumes?: number | null;
+    page_count?: number | null;
+    runtime?: number | null;
+    duration?: number | null;
+    genres?: string[] | null;
+    tags?: string[] | null;
+    platforms?: string[] | null;
+    release_date?: string | null;
+    cover_image_large?: string | null;
+    cover_image_medium?: string | null;
+    studios?: string[] | null;
+  } | null;
 };
 
 type CategoryChartRow = {
@@ -220,6 +242,7 @@ const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSe
     data: [],
     insight: `Add ${CATEGORY_LABELS[category]} entries to unlock completion trends.`,
   },
+  platformInsight: null,
   suggestions: buildEmptySuggestions(category),
   favorites: [],
   mediaSuggestions: [],
@@ -321,6 +344,7 @@ export async function fetchCategoryDashboardData(
       topFive,
       spotlights: buildSpotlights(category, entries),
       chart: buildCategoryChart(category, chartRows),
+      platformInsight: category === 'games' ? buildGamePlatformInsight(entries) : null,
       suggestions: buildCategorySuggestions(category, entries),
       favorites: buildFavoriteEntryCards(entries, excludedIds, category),
       mediaSuggestions: mediaSuggestionsResults[index] ?? [],
@@ -336,21 +360,37 @@ async function fetchCategoryEntries(
   category: DashboardCategoryKey,
 ): Promise<CategoryEntryRow[]> {
   const runQuery = async (selectStatement: string) => {
-    const { data, error } = await supabase
-      .from('user_media_entries')
-      .select(selectStatement)
-      .eq('user_id', userId)
-      .eq('media_items.category', category)
-      .order('priority', { ascending: false })
-      .order('updated_at', { ascending: false })
-      .limit(80);
+    const rows: CategoryEntryRow[] = [];
+    let page = 0;
 
-    if (error) {
-      throw error;
+    while (true) {
+      const from = page * CATEGORY_ENTRY_PAGE_SIZE;
+      const to = from + CATEGORY_ENTRY_PAGE_SIZE - 1;
+
+      const { data, error } = await supabase
+        .from('user_media_entries')
+        .select(selectStatement)
+        .eq('user_id', userId)
+        .eq('media_items.category', category)
+        .order('priority', { ascending: false })
+        .order('updated_at', { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        throw error;
+      }
+
+      const pageRows = Array.isArray(data) ? (data as unknown as CategoryEntryRow[]) : [];
+      rows.push(...pageRows.filter(row => row.media_items?.category === category));
+
+      if (pageRows.length < CATEGORY_ENTRY_PAGE_SIZE) {
+        break;
+      }
+
+      page += 1;
     }
 
-    const rows = Array.isArray(data) ? (data as unknown as CategoryEntryRow[]) : [];
-    return rows.filter(row => row.media_items?.category === category);
+    return rows;
   };
 
   try {
@@ -472,13 +512,17 @@ function formatRelativeDistance(timestamp?: string | null): string {
   return formatDistanceToNowStrict(new Date(timestamp), { addSuffix: true });
 }
 
-function enrichEntry(entry: CategoryEntryRow, category: DashboardCategoryKey): DashboardTopFiveItem {
+function enrichEntry(
+  entry: CategoryEntryRow,
+  category: DashboardCategoryKey,
+): DashboardTopFiveItem {
   const media = entry.media_items!;
   const title = resolveTitle(media) ?? CATEGORY_LABELS[category];
   const cover = getCover(media);
   const subtitle = deriveSubtitle(entry, category);
   const progressPercent = computeProgressPercent(entry, media, category);
-  const rating = entry.score !== null && entry.score !== undefined ? entry.score.toFixed(1) : undefined;
+  const rating =
+    entry.score !== null && entry.score !== undefined ? entry.score.toFixed(1) : undefined;
   const lastActivity = entry.updated_at ?? entry.created_at ?? undefined;
 
   return {
@@ -497,7 +541,10 @@ function enrichEntry(entry: CategoryEntryRow, category: DashboardCategoryKey): D
 
 const PINNED_PRIORITY_THRESHOLD = 50;
 
-function buildTopFive(entries: CategoryEntryRow[], category: DashboardCategoryKey): DashboardTopFiveItem[] {
+function buildTopFive(
+  entries: CategoryEntryRow[],
+  category: DashboardCategoryKey,
+): DashboardTopFiveItem[] {
   const pinnedEntries = entries
     .filter(entry => entry.pinned_rank !== null && entry.pinned_rank !== undefined)
     .sort((a, b) => (a.pinned_rank ?? Infinity) - (b.pinned_rank ?? Infinity));
@@ -517,8 +564,8 @@ function buildTopFive(entries: CategoryEntryRow[], category: DashboardCategoryKe
 
 function sortEntries(entries: CategoryEntryRow[], category: DashboardCategoryKey) {
   return [...entries].sort((a, b) => {
-    const pinnedA = ((a.priority ?? 0) >= PINNED_PRIORITY_THRESHOLD) ? 1 : 0;
-    const pinnedB = ((b.priority ?? 0) >= PINNED_PRIORITY_THRESHOLD) ? 1 : 0;
+    const pinnedA = (a.priority ?? 0) >= PINNED_PRIORITY_THRESHOLD ? 1 : 0;
+    const pinnedB = (b.priority ?? 0) >= PINNED_PRIORITY_THRESHOLD ? 1 : 0;
     if (pinnedA !== pinnedB) {
       return pinnedB - pinnedA;
     }
@@ -534,7 +581,7 @@ function sortEntries(entries: CategoryEntryRow[], category: DashboardCategoryKey
     }
     const updatedA = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
     const updatedB = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
-  return updatedB - updatedA;
+    return updatedB - updatedA;
   });
 }
 
@@ -543,9 +590,10 @@ function buildFavoriteEntryCards(
   excludedIds: Set<number>,
   category: DashboardCategoryKey,
 ): DashboardTopFiveItem[] {
-  return sortEntries(entries.filter(entry => entry.is_favorite && !excludedIds.has(entry.id)), category).map(entry =>
-    enrichEntry(entry, category),
-  );
+  return sortEntries(
+    entries.filter(entry => entry.is_favorite && !excludedIds.has(entry.id)),
+    category,
+  ).map(entry => enrichEntry(entry, category));
 }
 
 function buildSpotlights(
@@ -611,6 +659,72 @@ function ensureFourSpotlights(
   return picked;
 }
 
+const GAMES_PLATFORM_INSUFFICIENT_DATA = 'Not enough data to compare platforms yet.';
+const MIN_PLATFORM_ENTRIES_FOR_COMPARISON = 3;
+
+function normalizePlatformLabel(platform: string | null | undefined): string {
+  const value = platform?.trim();
+  return value ? value : 'Unspecified';
+}
+
+function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightPayload {
+  const platformMap = new Map<string, { total: number; completed: number; dropped: number }>();
+
+  for (const entry of entries) {
+    const platform = normalizePlatformLabel(entry.selected_platform);
+    const current = platformMap.get(platform) ?? { total: 0, completed: 0, dropped: 0 };
+
+    current.total += 1;
+    if (entry.status === 'completed') current.completed += 1;
+    if (entry.status === 'dropped') current.dropped += 1;
+
+    platformMap.set(platform, current);
+  }
+
+  const rows: PlatformInsightRow[] = Array.from(platformMap.entries())
+    .map(([platform, counts]) => ({
+      platform,
+      total: counts.total,
+      completed: counts.completed,
+      dropped: counts.dropped,
+      completionRate: counts.total > 0 ? Math.round((counts.completed / counts.total) * 100) : 0,
+    }))
+    .sort((a, b) => {
+      if (b.completionRate !== a.completionRate) return b.completionRate - a.completionRate;
+      if (b.total !== a.total) return b.total - a.total;
+      return a.platform.localeCompare(b.platform);
+    });
+
+  const comparableRows = rows.filter(row => row.total >= MIN_PLATFORM_ENTRIES_FOR_COMPARISON);
+  if (comparableRows.length < 2) {
+    return {
+      rows,
+      best: null,
+      worst: null,
+      summary: GAMES_PLATFORM_INSUFFICIENT_DATA,
+    };
+  }
+
+  const best = [...comparableRows].sort((a, b) => {
+    if (b.completionRate !== a.completionRate) return b.completionRate - a.completionRate;
+    if (b.total !== a.total) return b.total - a.total;
+    return a.platform.localeCompare(b.platform);
+  })[0];
+
+  const worst = [...comparableRows].sort((a, b) => {
+    if (a.completionRate !== b.completionRate) return a.completionRate - b.completionRate;
+    if (b.total !== a.total) return b.total - a.total;
+    return a.platform.localeCompare(b.platform);
+  })[0];
+
+  const summary =
+    best.completionRate === worst.completionRate
+      ? `You complete titles at a similar rate on ${best.platform} and ${worst.platform} (${best.completionRate}%).`
+      : `You complete more titles on ${best.platform} (${best.completionRate}%) than ${worst.platform} (${worst.completionRate}%).`;
+
+  return { rows, best, worst, summary };
+}
+
 function buildGameSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[] {
   const current = entries.filter(entry => entry.status === 'current');
   const completed = entries
@@ -635,34 +749,15 @@ function buildGameSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard
   });
 
   const recent = completed[0];
-
-  const platformCounts = completed.reduce(
-    (acc, entry) => {
-      const platform = (entry.selected_platform ?? '').toLowerCase();
-      if (platform.includes('ps5')) {
-        acc.ps5 += 1;
-      } else if (platform.includes('pc')) {
-        acc.pc += 1;
-      }
-      return acc;
-    },
-    { ps5: 0, pc: 0 },
-  );
-
-  const platformSubtitle =
-    platformCounts.pc === 0 && platformCounts.ps5 === 0
-      ? 'No platform completions yet'
-      : `${platformCounts.ps5} PS5 · ${platformCounts.pc} PC`;
-
   const cards: CategorySpotlightCard[] = [];
 
   if (closest) {
     cards.push({
       id: 'games-closest',
       title: 'Closest to finish',
-      explanation: `You are ${closest.percent}% through ${resolveTitle(
-        closest.entry.media_items!,
-      ) ?? 'this game'}.`,
+      explanation: `You are ${closest.percent}% through ${
+        resolveTitle(closest.entry.media_items!) ?? 'this game'
+      }.`,
       dataSubtitle: formatRelativeDistance(closest.entry.updated_at),
       entry: buildSpotlightEntry(closest.entry, 'games', closest.percent),
       ctaLabel: 'Continue playing',
@@ -711,13 +806,6 @@ function buildGameSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard
     });
   }
 
-  cards.push({
-    id: 'games-platform',
-    title: 'Platform insight',
-    explanation: 'Platform choices influence how often you finish titles.',
-    dataSubtitle: platformSubtitle,
-  });
-
   return ensureFourSpotlights(cards, 'games');
 }
 
@@ -741,10 +829,7 @@ function buildBookSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard
 
   const longestRead = current
     .filter(entry => entry.created_at)
-    .sort(
-      (a, b) =>
-        Number(new Date(a.created_at!)) - Number(new Date(b.created_at!)),
-    )[0];
+    .sort((a, b) => Number(new Date(a.created_at!)) - Number(new Date(b.created_at!)))[0];
 
   const recent = completed[0];
 
@@ -764,9 +849,9 @@ function buildBookSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard
     cards.push({
       id: 'books-closest',
       title: 'Closest to finish',
-      explanation: `You are ${closest.percent}% through ${resolveTitle(
-        closest.entry.media_items!,
-      ) ?? 'this book'}.`,
+      explanation: `You are ${closest.percent}% through ${
+        resolveTitle(closest.entry.media_items!) ?? 'this book'
+      }.`,
       dataSubtitle: formatRelativeDistance(closest.entry.updated_at),
       entry: buildSpotlightEntry(closest.entry, 'books', closest.percent),
     });
@@ -827,7 +912,8 @@ function buildBookSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard
     cards.push({
       id: 'books-series-empty',
       title: 'Series continuation reminder',
-      explanation: 'Series data not yet available. Complete or add a series entry to fill this slot.',
+      explanation:
+        'Series data not yet available. Complete or add a series entry to fill this slot.',
       dataSubtitle: 'No eligible series entries.',
     });
   }
@@ -850,7 +936,7 @@ function buildAnimeSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
       entry,
       percent: computeProgressPercent(entry, entry.media_items!, 'anime') ?? 0,
     }))
-    .filter(item => (entryHasEpisodes(item.entry, 'anime') && item.percent < 100))
+    .filter(item => entryHasEpisodes(item.entry, 'anime') && item.percent < 100)
     .sort((a, b) => b.percent - a.percent)[0];
 
   const almostFinished = current
@@ -880,7 +966,8 @@ function buildAnimeSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
     cards.push({
       id: 'anime-next-empty',
       title: 'Next episode ready',
-      explanation: 'No current anime with enough progress yet. Keep watching to unlock this insight.',
+      explanation:
+        'No current anime with enough progress yet. Keep watching to unlock this insight.',
       dataSubtitle: 'No entries need a next episode reminder.',
     });
   }
@@ -957,7 +1044,13 @@ function buildMangaSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
   const completionRatio =
     completed.length === 0
       ? 0
-      : Math.round((completed.length / (completed.length + current.length + entries.filter(e => e.status === 'dropped').length)) * 100);
+      : Math.round(
+          (completed.length /
+            (completed.length +
+              current.length +
+              entries.filter(e => e.status === 'dropped').length)) *
+            100,
+        );
 
   const cards: CategorySpotlightCard[] = [];
 
@@ -1110,7 +1203,8 @@ function buildMovieSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
     cards.push({
       id: 'movies-rewatch-empty',
       title: 'Rewatch trend',
-      explanation: 'No explicit rewatch notes yet. Note when you revisit a movie to track the trend.',
+      explanation:
+        'No explicit rewatch notes yet. Note when you revisit a movie to track the trend.',
       dataSubtitle: 'No rewatch notes found.',
     });
   }
@@ -1148,9 +1242,7 @@ function buildTvSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[]
 
   const serviceCounts: Record<string, number> = {};
   completed.forEach(entry => {
-    const service =
-      entry.selected_platform?.trim() ??
-      entry.media_items?.platforms?.find(Boolean);
+    const service = entry.selected_platform?.trim() ?? entry.media_items?.platforms?.find(Boolean);
     if (!service) return;
     serviceCounts[service] = (serviceCounts[service] ?? 0) + 1;
   });
@@ -1163,9 +1255,9 @@ function buildTvSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[]
     cards.push({
       id: 'tv-next',
       title: 'Next episode ready',
-      explanation: `You left ${resolveTitle(
-        nextEpisodeReady.entry.media_items!,
-      ) ?? 'this show'} with ${nextEpisodeReady.percent}% viewed, so another episode is queued.`,
+      explanation: `You left ${
+        resolveTitle(nextEpisodeReady.entry.media_items!) ?? 'this show'
+      } with ${nextEpisodeReady.percent}% viewed, so another episode is queued.`,
       dataSubtitle: formatRelativeDistance(nextEpisodeReady.entry.updated_at),
       entry: buildSpotlightEntry(nextEpisodeReady.entry, 'tv', nextEpisodeReady.percent),
       ctaLabel: 'Continue the season',
@@ -1183,9 +1275,9 @@ function buildTvSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[]
     cards.push({
       id: 'tv-almost',
       title: 'Almost finished',
-      explanation: `You are ${almostFinished.percent}% through ${resolveTitle(
-        almostFinished.entry.media_items!,
-      ) ?? 'a show'}—close the season to lock it in.`,
+      explanation: `You are ${almostFinished.percent}% through ${
+        resolveTitle(almostFinished.entry.media_items!) ?? 'a show'
+      }—close the season to lock it in.`,
       dataSubtitle: formatRelativeDistance(almostFinished.entry.updated_at),
       entry: buildSpotlightEntry(almostFinished.entry, 'tv', almostFinished.percent),
     });
@@ -1221,7 +1313,9 @@ function buildTvSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[]
     explanation: topService
       ? `You finish ${topService[1]} shows on ${topService[0]}, so that service keeps you watching.`
       : 'Track more completions to spotlight your go-to service.',
-    dataSubtitle: topService ? `${topService[0]} · ${topService[1]} completions` : 'Awaiting service data',
+    dataSubtitle: topService
+      ? `${topService[0]} · ${topService[1]} completions`
+      : 'Awaiting service data',
   });
 
   return ensureFourSpotlights(cards, 'tv');
@@ -1262,7 +1356,10 @@ function buildCompletionByGenre(entries: CategoryEntryRow[]): DropPattern {
   };
 }
 
-function buildCategoryChart(category: DashboardCategoryKey, rows: CategoryChartRow[]): CategoryChartPayload {
+function buildCategoryChart(
+  category: DashboardCategoryKey,
+  rows: CategoryChartRow[],
+): CategoryChartPayload {
   const data = rows.map(row => ({
     label: row.day ? format(new Date(row.day), 'MMM d') : 'Unknown',
     completed: row.completed ?? 0,
@@ -1284,7 +1381,10 @@ function buildCategoryChart(category: DashboardCategoryKey, rows: CategoryChartR
   };
 }
 
-function buildCategorySuggestions(category: DashboardCategoryKey, entries: CategoryEntryRow[]): PersonalSuggestionCard[] {
+function buildCategorySuggestions(
+  category: DashboardCategoryKey,
+  entries: CategoryEntryRow[],
+): PersonalSuggestionCard[] {
   if (!entries.length) {
     return buildEmptySuggestions(category);
   }
@@ -1312,9 +1412,7 @@ function buildGameSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCa
   const current = entries.filter(entry => entry.status === 'current');
   const dropped = entries.filter(entry => entry.status === 'dropped');
 
-  const shortCompletions = completed.filter(
-    entry => (entry.media_items?.runtime ?? 0) <= 900,
-  );
+  const shortCompletions = completed.filter(entry => (entry.media_items?.runtime ?? 0) <= 900);
   const shortRate = completed.length
     ? Math.round((shortCompletions.length / completed.length) * 100)
     : 0;
@@ -1462,7 +1560,8 @@ function buildMangaSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionC
   });
   const current = entries.filter(entry => entry.status === 'current');
 
-  const totalEntries = completed.length + current.length + entries.filter(entry => entry.status === 'dropped').length;
+  const totalEntries =
+    completed.length + current.length + entries.filter(entry => entry.status === 'dropped').length;
   const completionRate = totalEntries ? Math.round((completed.length / totalEntries) * 100) : 0;
 
   return [
@@ -1566,17 +1665,13 @@ function buildTvSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard
     const media = entry.media_items;
     const totalEpisodes = media?.number_of_episodes ?? media?.episodes;
     return (
-      totalEpisodes !== null &&
-      totalEpisodes !== undefined &&
-      (entry.progress ?? 0) < totalEpisodes
+      totalEpisodes !== null && totalEpisodes !== undefined && (entry.progress ?? 0) < totalEpisodes
     );
   });
 
   const serviceCounts: Record<string, number> = {};
   completed.forEach(entry => {
-    const service =
-      entry.selected_platform?.trim() ??
-      entry.media_items?.platforms?.find(Boolean);
+    const service = entry.selected_platform?.trim() ?? entry.media_items?.platforms?.find(Boolean);
     if (!service) return;
     serviceCounts[service] = (serviceCounts[service] ?? 0) + 1;
   });
@@ -1609,7 +1704,9 @@ function buildTvSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard
       explanation: topService
         ? `You complete ${topService[1]} shows on ${topService[0]}, highlighting that platform as your go-to.`
         : 'Complete a few shows to reveal your go-to service.',
-      stat: topService ? `${topService[0]} · ${topService[1]} completions` : 'Awaiting service data',
+      stat: topService
+        ? `${topService[0]} · ${topService[1]} completions`
+        : 'Awaiting service data',
     },
     {
       id: 'tv-rate',
@@ -1689,16 +1786,21 @@ function buildDropPattern(entries: CategoryEntryRow[]): DropPattern {
  * This helps detect similar games (e.g., "Alan Wake" vs "Alan Wake Remastered")
  */
 function normalizeTitle(title: string): string {
-  return title
-    .toLowerCase()
-    .trim()
-    // Remove common version keywords at the end
-    .replace(/\s*:?\s*(remastered|remake|definitive edition|complete edition|enhanced edition|royal edition|scholar of the first sin|goty|game of the year edition|deluxe edition|ultimate edition)\s*$/i, '')
-    // Remove "Part X" or "Part I/II/III"
-    .replace(/\s*:?\s*part\s+(\d+|i+|v+)\s*$/i, '')
-    // Remove year editions like "2023" or "(2023)"
-    .replace(/\s*[\(\[]?\d{4}[\)\]]?\s*$/i, '')
-    .trim();
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      // Remove common version keywords at the end
+      .replace(
+        /\s*:?\s*(remastered|remake|definitive edition|complete edition|enhanced edition|royal edition|scholar of the first sin|goty|game of the year edition|deluxe edition|ultimate edition)\s*$/i,
+        '',
+      )
+      // Remove "Part X" or "Part I/II/III"
+      .replace(/\s*:?\s*part\s+(\d+|i+|v+)\s*$/i, '')
+      // Remove year editions like "2023" or "(2023)"
+      .replace(/\s*[\(\[]?\d{4}[\)\]]?\s*$/i, '')
+      .trim()
+  );
 }
 
 /**
@@ -1755,7 +1857,8 @@ function detectSeries(title: string): SeriesInfo {
   if (arabicMatch) {
     const seriesName = arabicMatch[1].trim();
     const number = parseInt(arabicMatch[2], 10);
-    if (number > 1 && number <= 10) { // Reasonable range for sequels
+    if (number > 1 && number <= 10) {
+      // Reasonable range for sequels
       return { isSeries: true, seriesName, sequenceNumber: number };
     }
   }
@@ -1767,8 +1870,17 @@ function detectSeries(title: string): SeriesInfo {
     const seriesName = romanMatch[1].trim();
     const romanNumeral = romanMatch[2].toUpperCase();
     const romanToArabic: Record<string, number> = {
-      'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6,
-      'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10, 'XI': 11, 'XII': 12
+      II: 2,
+      III: 3,
+      IV: 4,
+      V: 5,
+      VI: 6,
+      VII: 7,
+      VIII: 8,
+      IX: 9,
+      X: 10,
+      XI: 11,
+      XII: 12,
     };
     const number = romanToArabic[romanNumeral];
     if (number && number > 1) {
@@ -1803,7 +1915,7 @@ type PrerequisiteCheckResult = {
 function checkSeriesPrerequisites(
   title: string,
   seriesInfo: SeriesInfo,
-  userEntries: CategoryEntryRow[]
+  userEntries: CategoryEntryRow[],
 ): PrerequisiteCheckResult {
   // If it's not a series, allow it
   if (!seriesInfo.isSeries) {
@@ -1823,14 +1935,13 @@ function checkSeriesPrerequisites(
       const media = entry.media_items;
       if (!media) continue;
 
-      const entryTitle = (
+      const entryTitle =
         media.title ??
         media.title_english ??
         media.title_romaji ??
         media.title_native ??
         media.original_title ??
-        ''
-      );
+        '';
 
       if (!entryTitle) continue;
 
@@ -1908,7 +2019,7 @@ function checkSeriesPrerequisites(
  */
 function generateBacklogReason(
   media: NonNullable<CategoryEntryRow['media_items']>,
-  userEntries: CategoryEntryRow[]
+  userEntries: CategoryEntryRow[],
 ): string {
   const genres = media.genres ?? [];
   const tags = media.tags ?? [];
@@ -1935,7 +2046,7 @@ function generateBacklogReason(
     const hours = Math.max(0, entry.progress ?? 0);
     // Hours multiplier: 10h=1.5x, 20h=2x, 50h=3.5x, 100h=6x, 200h=11x
     // This heavily boosts genres from games you spent a lot of time in
-    const hoursMultiplier = 1 + (hours / 20);
+    const hoursMultiplier = 1 + hours / 20;
     weight *= hoursMultiplier;
 
     // Count genres
@@ -1974,9 +2085,7 @@ function generateBacklogReason(
   const topTagWeight = sortedTags.length > 0 ? (tagCounts.get(sortedTags[0]) ?? 0) : 0;
   const tagThreshold = topTagWeight * 0.5;
 
-  const matchingTags = sortedTags
-    .filter(t => (tagCounts.get(t) ?? 0) >= tagThreshold)
-    .slice(0, 2);
+  const matchingTags = sortedTags.filter(t => (tagCounts.get(t) ?? 0) >= tagThreshold).slice(0, 2);
 
   // Generate reason based on matches
   if (matchingGenres.length > 0 && matchingTags.length > 0) {
@@ -2051,7 +2160,7 @@ function analyzeUserPreferences(entries: CategoryEntryRow[]): UserPreferences {
 
     // Higher rating = more weight
     if (entry.score !== null && entry.score !== undefined && !isDropped) {
-      weight *= (entry.score / 5); // Normalize to 0-2 range
+      weight *= entry.score / 5; // Normalize to 0-2 range
       totalRating += entry.score;
       ratingCount++;
     }
@@ -2085,10 +2194,7 @@ function analyzeUserPreferences(entries: CategoryEntryRow[]): UserPreferences {
 /**
  * Scores a candidate item based on user preferences
  */
-function scoreCandidateItem(
-  candidate: CandidateItem,
-  preferences: UserPreferences,
-): number {
+function scoreCandidateItem(candidate: CandidateItem, preferences: UserPreferences): number {
   const candidateGenres = (candidate.genres ?? []).filter(Boolean);
   const candidateTags = (candidate.tags ?? []).filter(Boolean);
 
@@ -2208,14 +2314,13 @@ async function buildMediaSuggestions(
       const media = entry.media_items;
       if (!media) continue;
 
-      const title = (
+      const title =
         media.title ??
         media.title_english ??
         media.title_romaji ??
         media.title_native ??
         media.original_title ??
-        'Untitled'
-      );
+        'Untitled';
 
       // Check if this is a sequel that requires previous games
       const seriesInfo = detectSeries(title);
@@ -2232,7 +2337,10 @@ async function buildMediaSuggestions(
       if (prerequisiteCheck.reason) {
         // If it's a sequel, use the series-specific reason
         reason = prerequisiteCheck.reason;
-      } else if ((entry as unknown as { priority?: number }).priority && (entry as unknown as { priority?: number }).priority! >= 50) {
+      } else if (
+        (entry as unknown as { priority?: number }).priority &&
+        (entry as unknown as { priority?: number }).priority! >= 50
+      ) {
         // High priority item
         reason = 'High priority in your backlog';
       } else {
@@ -2271,13 +2379,15 @@ async function buildMediaSuggestions(
       const existingMediaIds = new Set(
         allUserEntries
           .map(entry => entry.media_id)
-          .filter((id): id is number => id !== null && id !== undefined)
+          .filter((id): id is number => id !== null && id !== undefined),
       );
 
       // 2. Fetch ALL existing titles for similarity check (no limit!)
       const { data: allUserMedia, error: mediaError } = await supabase
         .from('user_media_entries')
-        .select('media_items!inner(title, title_english, title_romaji, title_native, original_title)')
+        .select(
+          'media_items!inner(title, title_english, title_romaji, title_native, original_title)',
+        )
         .eq('user_id', userId)
         .eq('media_items.category', category);
 
@@ -2287,13 +2397,17 @@ async function buildMediaSuggestions(
 
       const existingTitles = allUserMedia
         .map(entry => {
-          const media = (entry as unknown as { media_items: {
-            title: string | null;
-            title_english: string | null;
-            title_romaji: string | null;
-            title_native: string | null;
-            original_title: string | null;
-          } }).media_items;
+          const media = (
+            entry as unknown as {
+              media_items: {
+                title: string | null;
+                title_english: string | null;
+                title_romaji: string | null;
+                title_native: string | null;
+                original_title: string | null;
+              };
+            }
+          ).media_items;
           if (!media) return null;
           return (
             media.title ??
@@ -2312,7 +2426,8 @@ async function buildMediaSuggestions(
         // 4. Fetch candidate items from database (exclude user's items)
         const { data: candidates, error } = await supabase
           .from('media_items')
-          .select(`
+          .select(
+            `
             id,
             category,
             title,
@@ -2324,7 +2439,8 @@ async function buildMediaSuggestions(
             cover_image_medium,
             genres,
             tags
-          `)
+          `,
+          )
           .eq('category', category)
           .not('id', 'in', `(${Array.from(existingMediaIds).join(',')})`)
           .limit(100);
@@ -2343,33 +2459,33 @@ async function buildMediaSuggestions(
           for (const { candidate, score } of scoredCandidates) {
             if (suggestions.length >= 4) break; // Already have 4 suggestions
 
-            const title = (
+            const title =
               candidate.title ??
               candidate.title_english ??
               candidate.title_romaji ??
               candidate.title_native ??
               candidate.original_title ??
-              'Untitled'
-            );
+              'Untitled';
 
             // Skip if user already has a similar title
             // (e.g., "Alan Wake" if they have "Alan Wake Remastered")
             const hasSimilarTitle = existingTitles.some(existingTitle =>
-              areTitlesSimilar(title, existingTitle)
+              areTitlesSimilar(title, existingTitle),
             );
 
             if (hasSimilarTitle) {
               continue; // Skip this candidate
             }
 
-            const cover = candidate.cover_image_large ?? candidate.cover_image_medium ?? DEFAULT_COVER;
+            const cover =
+              candidate.cover_image_large ?? candidate.cover_image_medium ?? DEFAULT_COVER;
 
             // Generate reason based on matching genres/tags (ONLY positive weights)
-            const matchingGenres = (candidate.genres ?? []).filter(g =>
-              g && (preferences.favoriteGenres.get(g) ?? 0) > 0
+            const matchingGenres = (candidate.genres ?? []).filter(
+              g => g && (preferences.favoriteGenres.get(g) ?? 0) > 0,
             );
-            const matchingTags = (candidate.tags ?? []).filter(t =>
-              t && (preferences.favoriteTags.get(t) ?? 0) > 0
+            const matchingTags = (candidate.tags ?? []).filter(
+              t => t && (preferences.favoriteTags.get(t) ?? 0) > 0,
             );
 
             let reason = '';

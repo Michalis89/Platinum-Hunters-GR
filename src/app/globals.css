@@ -119,6 +119,14 @@
     --chart-3: 142 76% 36%;
     --chart-4: 38 92% 50%;
     --chart-5: 0 84% 60%;
+    --sidebar-background: var(--surface-raised);
+    --sidebar-foreground: var(--text-primary);
+    --sidebar-primary: var(--accent-primary);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--accent-muted);
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--border-default);
+    --sidebar-ring: var(--accent-primary);
   }
 
   /* LIGHT THEME */
@@ -188,6 +196,16 @@
   video,
   canvas {
     max-width: 100%;
+  }
+  .dark {
+    --sidebar-background: var(--surface-raised);
+    --sidebar-foreground: var(--text-primary);
+    --sidebar-primary: var(--accent-primary);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--accent-muted);
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--border-default);
+    --sidebar-ring: var(--accent-primary);
   }
 }
 
@@ -347,5 +365,14 @@
   .animate-in,
   .animate-slide-in-bottom {
     animation: none !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

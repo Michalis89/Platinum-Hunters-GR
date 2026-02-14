@@ -98,7 +98,8 @@ async function main() {
 
   const { data: entries } = await supabase
     .from('user_media_entries')
-    .select(`
+    .select(
+      `
       id,
       created_at,
       updated_at,
@@ -127,7 +128,8 @@ async function main() {
         title_native,
         title_romaji
       )
-    `)
+    `,
+    )
     .eq('user_id', user.id);
 
   if (!entries) {
@@ -254,10 +256,7 @@ async function main() {
   const rateRange =
     completionRates.length > 0 ? Math.max(...completionRates) - Math.min(...completionRates) : 0;
 
-  const weightCompletionPattern = Math.min(
-    1,
-    0.3 + rateRange * 0.7 + completionRateTotal * 0.2,
-  );
+  const weightCompletionPattern = Math.min(1, 0.3 + rateRange * 0.7 + completionRateTotal * 0.2);
   const weightDropPattern = Math.min(1, dropRateLast60 * 1.1);
   const weightRecentBehavior = Math.min(1, 0.4 + (recentDrops + recentCompletes) / 100);
 

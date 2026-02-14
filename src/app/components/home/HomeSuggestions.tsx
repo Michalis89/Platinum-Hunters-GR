@@ -175,7 +175,7 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
 
             <Link
               href={activeConfig?.addPath ?? '/pages/backlog'}
-              className="hover:text-info mt-5 inline-flex items-center gap-1 text-sm font-medium transition"
+              className="mt-5 inline-flex items-center gap-1 text-sm font-medium transition hover:text-info"
             >
               Browse backlog
               <ChevronRight className="h-4 w-4" />
@@ -194,7 +194,7 @@ type SuggestionCardProps = {
 
 function SuggestionCard({ item, addPath }: SuggestionCardProps) {
   return (
-    <Link href={addPath} className="hover:border-info/55 group transition duration-200">
+    <Link href={addPath} className="group transition duration-200 hover:border-info/55">
       <div className="relative aspect-[2/3]">
         <Image
           src={item.cover}

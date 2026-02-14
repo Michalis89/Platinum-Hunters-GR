@@ -63,7 +63,10 @@ export default function GameSuggestions() {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {data.slice(0, 4).map(suggestion => (
-            <Card key={`${suggestion.rawgId}-${suggestion.title}`} className="flex flex-col gap-4 border bg-card p-4">
+            <Card
+              key={`${suggestion.rawgId}-${suggestion.title}`}
+              className="flex flex-col gap-4 border bg-card p-4"
+            >
               <div>
                 <p className="text-sm font-semibold text-foreground">{suggestion.title}</p>
                 <p className="text-xs text-muted-foreground">{suggestion.reason}</p>
@@ -77,9 +80,7 @@ export default function GameSuggestions() {
               <div className="mt-auto">
                 {suggestion.slug && (
                   <Button size="sm" variant="outline" asChild>
-                    <Link href={`/media/games/${suggestion.slug}`}>
-                      View details
-                    </Link>
+                    <Link href={`/media/games/${suggestion.slug}`}>View details</Link>
                   </Button>
                 )}
               </div>

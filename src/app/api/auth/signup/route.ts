@@ -91,9 +91,7 @@ async function POSTHandler(req: Request) {
     const acceptedAt =
       typeof acceptedPolicies?.acceptedAt === 'string' ? acceptedPolicies.acceptedAt : null;
     const acceptedAtDate = acceptedAt ? new Date(acceptedAt) : null;
-    const acceptedAtValid = Boolean(
-      acceptedAtDate && Number.isFinite(acceptedAtDate.getTime()),
-    );
+    const acceptedAtValid = Boolean(acceptedAtDate && Number.isFinite(acceptedAtDate.getTime()));
 
     const hasValidPolicyVersions =
       acceptedPolicies?.termsVersion === TERMS_OF_USE_VERSION &&
@@ -149,7 +147,8 @@ async function POSTHandler(req: Request) {
       }
     }
 
-    const safeFullName = typeof full_name === 'string' && full_name.trim().length > 0 ? full_name.trim() : username;
+    const safeFullName =
+      typeof full_name === 'string' && full_name.trim().length > 0 ? full_name.trim() : username;
     const normalizedCategories = Array.isArray(categories)
       ? Array.from(
           new Set(
@@ -301,7 +300,10 @@ async function POSTHandler(req: Request) {
     if (linkError || !actionLink) {
       console.error('Signup link generation failed:', linkError);
       return fail(
-        { error: 'Ο λογαριασμός δημιουργήθηκε, αλλά δεν στάλθηκε email επιβεβαίωσης. Προσπάθησε ξανά.' },
+        {
+          error:
+            'Ο λογαριασμός δημιουργήθηκε, αλλά δεν στάλθηκε email επιβεβαίωσης. Προσπάθησε ξανά.',
+        },
         500,
       );
     }
@@ -330,4 +332,3 @@ async function POSTHandler(req: Request) {
 }
 
 export const POST = withApiRoute(POSTHandler);
-

@@ -406,7 +406,10 @@ export default function SupportForm({}: Readonly<{
                       {result.type === 'success' && ticketId ? (
                         <>
                           {result.message}{' '}
-                          <Link className="underline transition-colors hover:text-primary" href={`/pages/support/tickets/${ticketId}`}>
+                          <Link
+                            className="underline transition-colors hover:text-primary"
+                            href={`/pages/support/tickets/${ticketId}`}
+                          >
                             Δες το ticket σου
                           </Link>
                         </>
@@ -465,7 +468,9 @@ export default function SupportForm({}: Readonly<{
                       rows={4}
                       disabled={submitting}
                       required
-                      className={errors.description ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                      className={
+                        errors.description ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                      }
                     />
                   </div>
                   <FieldError>{errors.description}</FieldError>
@@ -474,21 +479,25 @@ export default function SupportForm({}: Readonly<{
                 {category === 'bug' ? (
                   <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
                         {categoryIcons.bug}
                       </span>
                       Στοιχεία bug
                     </div>
                     <div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">Βήματα αναπαραγωγής</label>
+                        <label className="text-sm font-medium text-foreground">
+                          Βήματα αναπαραγωγής
+                        </label>
                         <Textarea
                           value={formData.steps}
                           onChange={handleChange('steps')}
                           placeholder="1. ...\n2. ..."
                           rows={3}
                           disabled={submitting}
-                          className={errors.steps ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                          className={
+                            errors.steps ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                          }
                         />
                       </div>
                       <FieldError>{errors.steps}</FieldError>
@@ -496,28 +505,36 @@ export default function SupportForm({}: Readonly<{
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">Αναμενόμενο αποτέλεσμα</label>
+                          <label className="text-sm font-medium text-foreground">
+                            Αναμενόμενο αποτέλεσμα
+                          </label>
                           <Textarea
                             value={formData.expected}
                             onChange={handleChange('expected')}
                             placeholder="Τι έπρεπε να συμβεί"
                             rows={2}
                             disabled={submitting}
-                            className={errors.expected ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                            className={
+                              errors.expected ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                            }
                           />
                         </div>
                         <FieldError>{errors.expected}</FieldError>
                       </div>
                       <div>
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">Πραγματικό αποτέλεσμα</label>
+                          <label className="text-sm font-medium text-foreground">
+                            Πραγματικό αποτέλεσμα
+                          </label>
                           <Textarea
                             value={formData.actual}
                             onChange={handleChange('actual')}
                             placeholder="Τι συνέβη"
                             rows={2}
                             disabled={submitting}
-                            className={errors.actual ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                            className={
+                              errors.actual ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                            }
                           />
                         </div>
                         <FieldError>{errors.actual}</FieldError>
@@ -575,7 +592,7 @@ export default function SupportForm({}: Readonly<{
                                   type="button"
                                   variant="secondary"
                                   aria-label="Πληροφορίες υπολογισμού"
-                                  className="hover:bg-primary/10 grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary"
+                                  className="grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary hover:bg-primary/10"
                                 >
                                   <Info className="h-4 w-4" />
                                 </Button>
@@ -586,7 +603,8 @@ export default function SupportForm({}: Readonly<{
                                 sideOffset={8}
                                 className="z-[9999] w-[min(280px,80vw)] rounded-2xl border border-border bg-card p-3 text-xs leading-relaxed text-foreground shadow-md"
                               >
-                                Η έκδοση της εφαρμογής φαίνεται στο footer Personal Hobby Hub: x.x.x.
+                                Η έκδοση της εφαρμογής φαίνεται στο footer Personal Hobby Hub:
+                                x.x.x.
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -610,21 +628,25 @@ export default function SupportForm({}: Readonly<{
                 {category === 'feature' ? (
                   <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
                         {categoryIcons.feature}
                       </span>
                       Πρόταση λειτουργίας
                     </div>
                     <div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">Περίπτωση χρήσης</label>
+                        <label className="text-sm font-medium text-foreground">
+                          Περίπτωση χρήσης
+                        </label>
                         <Textarea
                           value={formData.useCase}
                           onChange={handleChange('useCase')}
                           placeholder="Ποιο πρόβλημα λύνει;"
                           rows={3}
                           disabled={submitting}
-                          className={errors.useCase ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                          className={
+                            errors.useCase ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                          }
                         />
                       </div>
                       <FieldError>{errors.useCase}</FieldError>
@@ -638,7 +660,9 @@ export default function SupportForm({}: Readonly<{
                           placeholder="Πώς θα βοηθήσει την κοινότητα;"
                           rows={3}
                           disabled={submitting}
-                          className={errors.value ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                          className={
+                            errors.value ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                          }
                         />
                       </div>
                       <FieldError>{errors.value}</FieldError>
@@ -663,7 +687,7 @@ export default function SupportForm({}: Readonly<{
                 {category === 'author_rights' ? (
                   <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
                         {categoryIcons.author_rights}
                       </span>
                       Αίτημα author δικαιωμάτων
@@ -686,14 +710,18 @@ export default function SupportForm({}: Readonly<{
                     </div>
                     <div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">Λόγος αιτήματος</label>
+                        <label className="text-sm font-medium text-foreground">
+                          Λόγος αιτήματος
+                        </label>
                         <Textarea
                           value={formData.reason}
                           onChange={handleChange('reason')}
                           placeholder="Γιατί θέλεις author rights;"
                           rows={3}
                           disabled={submitting}
-                          className={errors.reason ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+                          className={
+                            errors.reason ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                          }
                         />
                       </div>
                       <FieldError>{errors.reason}</FieldError>
@@ -726,7 +754,7 @@ export default function SupportForm({}: Readonly<{
                 {category === 'general' ? (
                   <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="bg-primary/20 flex h-7 w-7 items-center justify-center rounded-full text-primary">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
                         {categoryIcons.general}
                       </span>
                       Γενικό θέμα
@@ -760,28 +788,32 @@ export default function SupportForm({}: Readonly<{
                       }}
                     />
                     <span className="flex flex-col gap-1">
-                      <span className="font-medium text-foreground">Συμφωνώ να αποθηκευτούν τα στοιχεία του αιτήματος</span>
-                      <span className="text-muted-foreground">Χρειαζόμαστε τα στοιχεία σου μόνο για την υποστήριξη.</span>
+                      <span className="font-medium text-foreground">
+                        Συμφωνώ να αποθηκευτούν τα στοιχεία του αιτήματος
+                      </span>
+                      <span className="text-muted-foreground">
+                        Χρειαζόμαστε τα στοιχεία σου μόνο για την υποστήριξη.
+                      </span>
                     </span>
                   </label>
                   <FieldError>{errors.consent}</FieldError>
 
-                <label className="flex items-start justify-between gap-4">
-                  <span className="flex flex-col gap-1">
-                    <span className="text-sm font-medium text-[var(--hb-headline)]">
-                      Επιτρέπω follow-up email
+                  <label className="flex items-start justify-between gap-4">
+                    <span className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-[var(--hb-headline)]">
+                        Επιτρέπω follow-up email
+                      </span>
+                      <span className="text-xs text-[var(--hb-muted)]">
+                        Θα λάβεις ενημερώσεις για την πορεία του ticket.
+                      </span>
                     </span>
-                    <span className="text-xs text-[var(--hb-muted)]">
-                      Θα λάβεις ενημερώσεις για την πορεία του ticket.
-                    </span>
-                  </span>
-                  <Switch
-                    checked={formData.allowFollowUp}
-                    onCheckedChange={value =>
-                      setFormData(prev => ({ ...prev, allowFollowUp: value }))
-                    }
-                  />
-                </label>
+                    <Switch
+                      checked={formData.allowFollowUp}
+                      onCheckedChange={value =>
+                        setFormData(prev => ({ ...prev, allowFollowUp: value }))
+                      }
+                    />
+                  </label>
                 </div>
 
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

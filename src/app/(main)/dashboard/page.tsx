@@ -14,7 +14,8 @@ import {
 
 export const metadata = buildMetadata({
   title: 'Dashboard | Hobbistas',
-  description: 'Personal dashboard for managing your backlog, tracking progress, and exploring tailored suggestions.',
+  description:
+    'Personal dashboard for managing your backlog, tracking progress, and exploring tailored suggestions.',
   path: '/dashboard',
   noindex: true,
 });
@@ -27,7 +28,7 @@ function DashboardContentSkeleton() {
         <div className="mx-auto max-w-7xl">
           <div className="animate-pulse space-y-3">
             <div className="h-4 w-20 rounded bg-muted" />
-            <div className="bg-muted/80 h-10 w-72 rounded" />
+            <div className="h-10 w-72 rounded bg-muted/80" />
             <div className="h-4 w-96 max-w-full rounded bg-muted" />
           </div>
         </div>
@@ -39,7 +40,7 @@ function DashboardContentSkeleton() {
             <div className="grid min-h-[260px] items-center gap-7 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">
                 <div className="h-4 w-24 rounded bg-muted" />
-                <div className="bg-muted/80 h-8 w-3/4 rounded" />
+                <div className="h-8 w-3/4 rounded bg-muted/80" />
                 <div className="h-4 w-1/2 rounded bg-muted" />
                 <div className="flex gap-3 pt-4">
                   <div className="h-11 w-28 rounded-full bg-muted" />
@@ -94,15 +95,15 @@ async function DashboardData() {
     fetchContinueData(userId),
   ]);
 
-  const requestedCategories =
-    (continueData.enabledCategories ?? []).filter((category): category is DashboardCategoryKey =>
+  const requestedCategories = (continueData.enabledCategories ?? []).filter(
+    (category): category is DashboardCategoryKey =>
       DASHBOARD_TAB_CATEGORIES.includes(category as DashboardCategoryKey),
-    );
-  const fallbackCategories = (stats.active_categories ?? []).filter((category): category is DashboardCategoryKey =>
-    DASHBOARD_TAB_CATEGORIES.includes(category as DashboardCategoryKey),
   );
-  const mediaCategories =
-    requestedCategories.length > 0 ? requestedCategories : fallbackCategories;
+  const fallbackCategories = (stats.active_categories ?? []).filter(
+    (category): category is DashboardCategoryKey =>
+      DASHBOARD_TAB_CATEGORIES.includes(category as DashboardCategoryKey),
+  );
+  const mediaCategories = requestedCategories.length > 0 ? requestedCategories : fallbackCategories;
 
   const categorySections = await fetchCategoryDashboardData(userId, mediaCategories);
 
@@ -123,7 +124,7 @@ export default function DashboardPage() {
     <section className="relative isolate min-h-screen text-foreground">
       <h1 className="sr-only">Dashboard</h1>
       <div className="pointer-events-none absolute inset-0">
-        <div className="bg-primary/10 absolute -top-20 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full blur-3xl" />
+        <div className="absolute -top-20 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       </div>
       <div className="relative px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
         <div className="mx-auto max-w-[1280px]">

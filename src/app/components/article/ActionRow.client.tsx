@@ -151,9 +151,9 @@ export default function ActionRow({ article }: ActionRowProps) {
     } catch (deleteError) {
       console.error('Error deleting article:', deleteError);
       window.alert(
-          deleteError instanceof Error
-            ? deleteError.message
-            : 'Something went wrong while deleting. Please try again.',
+        deleteError instanceof Error
+          ? deleteError.message
+          : 'Something went wrong while deleting. Please try again.',
       );
     } finally {
       setIsDeleteLoading(false);
@@ -226,7 +226,7 @@ export default function ActionRow({ article }: ActionRowProps) {
             size="icon"
             onClick={handleDelete}
             disabled={isDeleteLoading}
-            className="hover:bg-destructive/10 h-12 w-12 rounded-full border border-border bg-card text-destructive shadow-sm transition-all active:scale-95"
+            className="h-12 w-12 rounded-full border border-border bg-card text-destructive shadow-sm transition-all hover:bg-destructive/10 active:scale-95"
           >
             {isDeleteLoading ? (
               <Spinner className="size-4 text-destructive" />

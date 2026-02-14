@@ -26,8 +26,7 @@ export async function createRouteHandlerClient(
 
   // Get auth tokens from cookies (unless an override is provided)
   const accessToken =
-    accessTokenOverride ??
-    (ignoreCookies ? undefined : cookieStore?.get('sb-access-token')?.value);
+    accessTokenOverride ?? (ignoreCookies ? undefined : cookieStore?.get('sb-access-token')?.value);
   const refreshToken =
     accessTokenOverride !== undefined || ignoreCookies
       ? undefined

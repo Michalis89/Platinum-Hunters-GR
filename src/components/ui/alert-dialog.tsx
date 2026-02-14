@@ -224,7 +224,8 @@ AlertDialogDescription.displayName = 'AlertDialogDescription';
 type ButtonVariantProps = VariantProps<typeof buttonVariants>;
 
 interface AlertDialogActionProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     Pick<ButtonVariantProps, 'variant' | 'size'> {}
 
 export const AlertDialogAction = React.forwardRef<HTMLButtonElement, AlertDialogActionProps>(
@@ -250,7 +251,8 @@ export const AlertDialogAction = React.forwardRef<HTMLButtonElement, AlertDialog
 AlertDialogAction.displayName = 'AlertDialogAction';
 
 interface AlertDialogCancelProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     Pick<ButtonVariantProps, 'variant' | 'size'> {}
 
 export const AlertDialogCancel = React.forwardRef<HTMLButtonElement, AlertDialogCancelProps>(

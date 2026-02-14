@@ -79,9 +79,7 @@ function ProfileFavoritesComponent({
             setDragIndex(null);
           }}
           className={`group flex min-w-0 cursor-grab items-center gap-3 rounded-[18px] border bg-card p-3 transition-colors active:cursor-grabbing sm:gap-4 sm:p-4 ${
-            dragIndex === idx
-              ? 'border-info/55 bg-background'
-              : 'hover:border-info/35'
+            dragIndex === idx ? 'border-info/55 bg-background' : 'hover:border-info/35'
           }`}
         >
           {/* Drag handle + Rank */}
@@ -99,10 +97,11 @@ function ProfileFavoritesComponent({
               alt={fav.game?.title || 'Item'}
               width={48}
               height={48}
+              unoptimized
               className="h-full w-full object-cover"
             />
             {/* Favorite heart overlay */}
-            <div className="bg-background/80 absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full">
+            <div className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
               <Heart className="h-3 w-3 fill-primary text-info" />
             </div>
           </div>

@@ -70,8 +70,7 @@ export type LibraryRow = {
 /**
  * User media entry data for upsert operations
  */
-export type UserMediaEntryData =
-  Database['public']['Tables']['user_media_entries']['Insert'];
+export type UserMediaEntryData = Database['public']['Tables']['user_media_entries']['Insert'];
 
 /**
  * Media item insert data

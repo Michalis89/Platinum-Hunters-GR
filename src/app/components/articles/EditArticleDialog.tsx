@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, ImageIcon } from 'lucide-react';
-import Image from 'next/image';
+import { CoverThumbImage, THUMB_SIZES_SM } from '@/components/ui/cover-image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
@@ -349,7 +349,7 @@ export default function EditArticleDialog({
                 <div className="space-y-6">
                   {error && <ErrorAlert message={error} />}
                   {warning && (
-                    <div className="bg-warning/10 rounded-lg border border-amber-500/30 px-4 py-3 text-sm text-amber-300">
+                    <div className="rounded-lg border border-amber-500/30 bg-warning/10 px-4 py-3 text-sm text-amber-300">
                       {warning}
                     </div>
                   )}
@@ -360,7 +360,7 @@ export default function EditArticleDialog({
                       <select
                         value={category}
                         onChange={event => setCategory(event.target.value as ArticleCategory)}
-                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
+                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                       >
                         {(Object.keys(CATEGORIES) as ArticleCategory[]).map(cat => (
                           <option key={cat} value={cat}>
@@ -375,7 +375,7 @@ export default function EditArticleDialog({
                       <select
                         value={topic}
                         onChange={event => setTopic(event.target.value as ArticleTopic)}
-                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
+                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                       >
                         {availableTopics.map(item => (
                           <option key={item.value} value={item.value}>
@@ -390,7 +390,7 @@ export default function EditArticleDialog({
                       <select
                         value={status}
                         onChange={event => setStatus(event.target.value as ArticleStatus)}
-                        className="hover:border-primary/70 focus:ring-primary/50 w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition focus:border-primary focus:outline-none focus:ring-2"
+                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                       >
                         {STATUS_OPTIONS.map(item => (
                           <option key={item.value} value={item.value}>
@@ -462,14 +462,12 @@ export default function EditArticleDialog({
                       </div>
                       <div className="relative h-12 w-12 rounded-lg border border-border">
                         {coverImage && isCoverPreviewValid ? (
-                          <Image
+                          <CoverThumbImage
                             src={coverImage}
                             alt="Preview"
-                            fill
-                            sizes="48px"
+                            sizes={THUMB_SIZES_SM}
                             className="object-cover"
                             onError={() => setIsCoverPreviewValid(false)}
-                            unoptimized
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-card">

@@ -16,7 +16,10 @@ import {
 /**
  * Anime/Manga suggestions config
  */
-export const animeSuggestionsConfig: SuggestionsConfig<AnimeMediaItem, ReturnType<typeof mapAnimeSuggestion>> = {
+export const animeSuggestionsConfig: SuggestionsConfig<
+  AnimeMediaItem,
+  ReturnType<typeof mapAnimeSuggestion>
+> = {
   allowedCategories: MEDIA_CATEGORY_CONFIGS.anime.subcategories,
   defaultCategory: MEDIA_CATEGORY_CONFIGS.anime.defaultCategory,
   selectFields: MEDIA_CATEGORY_CONFIGS.anime.suggestionsSelectFields,
@@ -27,7 +30,10 @@ export const animeSuggestionsConfig: SuggestionsConfig<AnimeMediaItem, ReturnTyp
 /**
  * Books suggestions config
  */
-export const booksSuggestionsConfig: SuggestionsConfig<BooksMediaItem, ReturnType<typeof mapBooksSuggestion>> = {
+export const booksSuggestionsConfig: SuggestionsConfig<
+  BooksMediaItem,
+  ReturnType<typeof mapBooksSuggestion>
+> = {
   allowedCategories: MEDIA_CATEGORY_CONFIGS.books.subcategories,
   defaultCategory: MEDIA_CATEGORY_CONFIGS.books.defaultCategory,
   selectFields: MEDIA_CATEGORY_CONFIGS.books.suggestionsSelectFields,
@@ -38,7 +44,10 @@ export const booksSuggestionsConfig: SuggestionsConfig<BooksMediaItem, ReturnTyp
 /**
  * Games suggestions config
  */
-export const gamesSuggestionsConfig: SuggestionsConfig<GamesMediaItem, ReturnType<typeof mapGamesSuggestion>> = {
+export const gamesSuggestionsConfig: SuggestionsConfig<
+  GamesMediaItem,
+  ReturnType<typeof mapGamesSuggestion>
+> = {
   allowedCategories: MEDIA_CATEGORY_CONFIGS.games.subcategories,
   defaultCategory: MEDIA_CATEGORY_CONFIGS.games.defaultCategory,
   selectFields: MEDIA_CATEGORY_CONFIGS.games.suggestionsSelectFields,
@@ -49,7 +58,10 @@ export const gamesSuggestionsConfig: SuggestionsConfig<GamesMediaItem, ReturnTyp
 /**
  * Movies/TV suggestions config (with TMDB fallback)
  */
-export const moviesSuggestionsConfig: SuggestionsConfig<MoviesMediaItem, ReturnType<typeof mapMoviesSuggestion> | ReturnType<typeof mapTmdbPopularItem>> = {
+export const moviesSuggestionsConfig: SuggestionsConfig<
+  MoviesMediaItem,
+  ReturnType<typeof mapMoviesSuggestion> | ReturnType<typeof mapTmdbPopularItem>
+> = {
   allowedCategories: MEDIA_CATEGORY_CONFIGS.movies.subcategories,
   defaultCategory: MEDIA_CATEGORY_CONFIGS.movies.defaultCategory,
   selectFields: MEDIA_CATEGORY_CONFIGS.movies.suggestionsSelectFields,
@@ -58,9 +70,7 @@ export const moviesSuggestionsConfig: SuggestionsConfig<MoviesMediaItem, ReturnT
   // Fallback to TMDB popular when no suggestions found
   fallback: async (category, userMediaIds) => {
     const popular = await fetchTmdbPopular(category as 'movies' | 'tv', 8);
-    const filteredPopular = popular
-      .filter(item => !userMediaIds.has(item.id))
-      .slice(0, 4);
+    const filteredPopular = popular.filter(item => !userMediaIds.has(item.id)).slice(0, 4);
     return filteredPopular.map(item => mapTmdbPopularItem(item, category as 'movies' | 'tv'));
   },
 };

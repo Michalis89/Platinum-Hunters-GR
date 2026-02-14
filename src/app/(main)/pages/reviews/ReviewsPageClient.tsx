@@ -3,7 +3,7 @@
 import { Suspense, memo, useEffect, useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { CoverThumbImage } from '@/components/ui/cover-image';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Eye, Heart, Star, Tag, User } from 'lucide-react';
 import type { ArticleCategory, ArticleRow } from '@/types/database';
@@ -56,10 +56,9 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
       <Link href={`/pages/reviews/${normalizedSlug}`} className="block">
         <div className="relative aspect-[16/10] bg-muted">
           {article.cover_image ? (
-            <Image
+            <CoverThumbImage
               src={article.cover_image}
               alt={article.title}
-              fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition duration-300 [transition-timing-function:cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.015]"
             />

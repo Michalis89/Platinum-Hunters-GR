@@ -21,7 +21,7 @@ export function HomeHero() {
         <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center gap-3 rounded-3xl px-3 py-3 sm:flex-row sm:gap-4 sm:px-4 sm:py-4">
           <Link
             href="/auth/register"
-            className="bg-info group inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-info px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
           >
             <Sparkles className="h-5 w-5" />
             Start now
@@ -30,7 +30,7 @@ export function HomeHero() {
 
           <Link
             href="/pages/backlog"
-            className="hover:border-primary/20 hover:bg-accent/10 inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold text-foreground transition sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold text-foreground transition hover:border-primary/20 hover:bg-accent/10 sm:w-auto"
           >
             Browse backlog
           </Link>

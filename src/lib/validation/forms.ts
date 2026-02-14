@@ -1,16 +1,13 @@
 import { z } from 'zod';
 
 const optionalTrimmedString = () =>
-  z.preprocess(
-    (value: unknown) => {
-      if (typeof value === 'string') {
-        const trimmed = value.trim();
-        return trimmed === '' ? undefined : trimmed;
-      }
-      return value;
-    },
-    z.string().min(1).optional(),
-  );
+  z.preprocess((value: unknown) => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed === '' ? undefined : trimmed;
+    }
+    return value;
+  }, z.string().min(1).optional());
 
 export const GeneralQuestionCategory = z.enum(['Support', 'Info', 'Feedback', 'Other']);
 

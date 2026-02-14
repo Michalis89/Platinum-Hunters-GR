@@ -35,7 +35,7 @@ export function LoadingState() {
           <Skeleton className="h-24 w-full rounded-xl" />
           <Skeleton className="h-12 w-full" />
           <div className="flex justify-center pt-1">
-            <Spinner className="text-info h-5 w-5" />
+            <Spinner className="h-5 w-5 text-info" />
           </div>
         </CardContent>
       </Card>
@@ -55,7 +55,7 @@ export function StatusAlerts({ error, success }: StatusAlertsProps) {
       )}
       {success && (
         <Alert className="border-success/40 bg-success/10 text-foreground">
-          <CheckCircle2 className="text-success h-4 w-4" />
+          <CheckCircle2 className="h-4 w-4 text-success" />
           <AlertTitle>Password updated</AlertTitle>
           <AlertDescription>{success}</AlertDescription>
         </Alert>
@@ -117,7 +117,7 @@ export function PasswordStrengthCard({
   passwordStrengthProgress,
 }: PasswordStrengthProps) {
   return (
-    <div className="bg-card/60 rounded-xl border-border p-4">
+    <div className="rounded-xl border-border bg-card/60 p-4">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Password strength
@@ -222,7 +222,7 @@ export function ResetPasswordCard({
       <div className="w-full max-w-md">
         <Card className="bg-card/84">
           <CardHeader className="bg-transparent pb-4 pt-7 text-center">
-            <div className="bg-info/14 text-info mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+            <div className="bg-info/14 mx-auto mb-4 flex h-12 w-12 items-center justify-center text-info">
               <Lock className="h-6 w-6" />
             </div>
             <CardTitle className="text-2xl font-semibold text-foreground">

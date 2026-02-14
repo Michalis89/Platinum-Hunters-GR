@@ -24,7 +24,7 @@ export function validatePlainTextArray(
   fieldLabel: string,
 ): PlainTextValidationResult {
   if (!values || values.length === 0) return { isValid: true };
-  const invalid = values.find((item) => HTML_ANGLE_PATTERN.test(item));
+  const invalid = values.find(item => HTML_ANGLE_PATTERN.test(item));
   if (invalid !== undefined) {
     return {
       isValid: false,

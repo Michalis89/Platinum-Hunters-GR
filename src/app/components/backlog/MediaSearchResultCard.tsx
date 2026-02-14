@@ -37,6 +37,7 @@ export default function MediaSearchResultCard({
           alt={entry.title}
           width={48}
           height={64}
+          unoptimized
           className="h-full w-full object-cover"
         />
       </div>

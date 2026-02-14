@@ -1,6 +1,6 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { isMediaCategory } from '@/app/components/backlog/types';
 import type { MediaItem } from '@/lib/media/types';

@@ -9,11 +9,7 @@ import {
 
 type GamesCategory = 'games';
 
-export const gamesSearchConfig: MediaSearchConfig<
-  GamesCategory,
-  RawgGame,
-  GameSearchResult
-> = {
+export const gamesSearchConfig: MediaSearchConfig<GamesCategory, RawgGame, GameSearchResult> = {
   defaultCategory: 'games',
   supportedCategories: ['games'],
   limit: 12,

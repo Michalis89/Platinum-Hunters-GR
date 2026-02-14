@@ -28,11 +28,9 @@ async function POSTHandler(req: Request) {
   const rateLimitResult = await rateLimit('loginIp', clientIp);
 
   if (!rateLimitResult.success) {
-    return fail(
-      { error: 'Too many login attempts. Please try again later.' },
-      429,
-      { headers: rateLimitHeaders(rateLimitResult) },
-    );
+    return fail({ error: 'Too many login attempts. Please try again later.' }, 429, {
+      headers: rateLimitHeaders(rateLimitResult),
+    });
   }
 
   try {
@@ -113,7 +111,8 @@ async function POSTHandler(req: Request) {
       if (authError.message === 'Email not confirmed') {
         return fail(
           {
-            error: 'Your email is not confirmed yet. Check your inbox and click the confirmation link.',
+            error:
+              'Your email is not confirmed yet. Check your inbox and click the confirmation link.',
           },
           401,
         );
@@ -188,7 +187,8 @@ async function POSTHandler(req: Request) {
     }
 
     // DETERMINE REDIRECT URL based on profile completeness
-    const hasCategories = resolvedUserProfile.categories && resolvedUserProfile.categories.length > 0;
+    const hasCategories =
+      resolvedUserProfile.categories && resolvedUserProfile.categories.length > 0;
     const redirectUrl = hasCategories ? '/dashboard' : '/pages/profile/edit';
 
     // RETURN SUCCESS

@@ -45,17 +45,25 @@ export const DesktopNav = React.memo(function DesktopNav({
         <Menubar className="pointer-events-auto flex h-11 items-center justify-center gap-1 rounded-[20px] border-border bg-card px-1.5 py-1 text-foreground shadow-none">
           {navItems.slice(0, 2).map(item => (
             <MenubarMenu key={item.href}>
-              <MenubarTrigger asChild className={desktopLinkClass(isHrefActive(pathname, item.href))}>
+              <MenubarTrigger
+                asChild
+                className={desktopLinkClass(isHrefActive(pathname, item.href))}
+              >
                 <Link href={item.href}>
                   <NavItemContent icon={item.icon} label={item.label} />
                 </Link>
               </MenubarTrigger>
             </MenubarMenu>
           ))}
-          {hobbyItems.length > 0 ? <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} /> : null}
+          {hobbyItems.length > 0 ? (
+            <LibraryMenu hobbyItems={hobbyItems} pathname={pathname} />
+          ) : null}
           {navItems.slice(2).map(item => (
             <MenubarMenu key={item.href}>
-              <MenubarTrigger asChild className={desktopLinkClass(isHrefActive(pathname, item.href))}>
+              <MenubarTrigger
+                asChild
+                className={desktopLinkClass(isHrefActive(pathname, item.href))}
+              >
                 <Link href={item.href}>
                   <NavItemContent icon={item.icon} label={item.label} />
                 </Link>

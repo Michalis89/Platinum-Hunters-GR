@@ -57,7 +57,9 @@ async function POSTHandler() {
     const steamInput = userData?.steam_id?.trim();
     if (!steamInput) {
       console.error('❌ [Steam Sync Start] No steam_id in user profile');
-      throw new Error('Δεν έχεις ορίσει Steam ID στο προφίλ σου. Πήγαινε στις ρυθμίσεις για να το προσθέσεις.');
+      throw new Error(
+        'Δεν έχεις ορίσει Steam ID στο προφίλ σου. Πήγαινε στις ρυθμίσεις για να το προσθέσεις.',
+      );
     }
 
     console.log('🔑 [Steam Sync Start] Fetching Steam API key...');

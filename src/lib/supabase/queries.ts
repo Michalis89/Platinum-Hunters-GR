@@ -25,7 +25,11 @@ type GetArticlesParams = {
 export async function getArticlesWithFilters(
   supabase: DbClient,
   params: GetArticlesParams,
-): Promise<{ data: ArticleWithAuthor[] | null; error: PostgrestError | null; count: number | null }> {
+): Promise<{
+  data: ArticleWithAuthor[] | null;
+  error: PostgrestError | null;
+  count: number | null;
+}> {
   const { category, topic, status, authorId, featured, limit, offset, tag } = params;
   const resolvedStatus = status ?? 'published';
 

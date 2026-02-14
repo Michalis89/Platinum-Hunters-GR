@@ -31,9 +31,7 @@ const mapLocalItem = (item: SearchLocalItem) => {
     (item.title_native as string | undefined) ||
     UNTITLED_FALLBACK;
   const subtitle =
-    (item.original_title as string | undefined) ||
-    (item.title_english as string | undefined) ||
-    '';
+    (item.original_title as string | undefined) || (item.title_english as string | undefined) || '';
   const tmdbId = item.tmdb_id as number | undefined;
   const year =
     (item.release_date as string | undefined)?.slice(0, 4) ||

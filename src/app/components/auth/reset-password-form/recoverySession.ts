@@ -63,4 +63,3 @@ export function clearRecoveryParamsFromUrl() {
 
 // Re-export isSessionError from shared utility for backwards compatibility
 export { isSessionError };
-

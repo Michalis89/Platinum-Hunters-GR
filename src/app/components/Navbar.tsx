@@ -55,13 +55,7 @@ export default function Navbar() {
   );
 
   const navItems = useMemo(
-    () =>
-      getVisibleNavItems(
-        isDev,
-        isAuthenticated,
-        authResolved,
-        featureFilters,
-      ),
+    () => getVisibleNavItems(isDev, isAuthenticated, authResolved, featureFilters),
     [isDev, isAuthenticated, authResolved, featureFilters],
   );
   const hobbyItems = useMemo(

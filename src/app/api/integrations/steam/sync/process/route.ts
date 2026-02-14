@@ -95,7 +95,9 @@ async function POSTHandler(req: Request) {
       } satisfies ProcessResult);
     }
 
-    console.log(`📦 [Steam Sync Process] Processing ${batch.length} games (${processedCount + 1}-${processedCount + batch.length} of ${allGames.length})`);
+    console.log(
+      `📦 [Steam Sync Process] Processing ${batch.length} games (${processedCount + 1}-${processedCount + batch.length} of ${allGames.length})`,
+    );
 
     // Update job status
     await supabase
@@ -138,9 +140,7 @@ async function POSTHandler(req: Request) {
 
       const existingMedia = mediaByAppId.get(appid);
       const alreadyEnriched =
-        existingMedia &&
-        existingMedia.rawg_id === rawgMatch.id &&
-        existingMedia.source === 'rawg';
+        existingMedia && existingMedia.rawg_id === rawgMatch.id && existingMedia.source === 'rawg';
 
       if (alreadyEnriched) {
         rawgMatchesAlreadyEnriched.set(appid, rawgMatch);
@@ -183,8 +183,14 @@ async function POSTHandler(req: Request) {
 
     // Prepare media updates and inserts
     const mediaIdByAppId = new Map<number, number>();
-    const insertTasks: Array<{ appid: number; payload: Database['public']['Tables']['media_items']['Insert'] }> = [];
-    const updateByMediaId = new Map<number, Database['public']['Tables']['media_items']['Update']>();
+    const insertTasks: Array<{
+      appid: number;
+      payload: Database['public']['Tables']['media_items']['Insert'];
+    }> = [];
+    const updateByMediaId = new Map<
+      number,
+      Database['public']['Tables']['media_items']['Update']
+    >();
 
     for (const game of batch) {
       const matchedRawg = enrichedRawgByAppId.get(game.appid) ?? null;
@@ -277,10 +283,7 @@ async function POSTHandler(req: Request) {
         Array.from(updateByMediaId.entries()),
         8,
         async ([mediaId, updatePayload]) => {
-          await adminSupabase
-            .from('media_items')
-            .update(updatePayload)
-            .eq('id', mediaId);
+          await adminSupabase.from('media_items').update(updatePayload).eq('id', mediaId);
           return true;
         },
       );
@@ -315,7 +318,10 @@ async function POSTHandler(req: Request) {
 
     const userTitleSet = new Set<string>();
     for (const row of userGameRows ?? []) {
-      const media = row.media_items as { title?: string | null; title_english?: string | null } | null;
+      const media = row.media_items as {
+        title?: string | null;
+        title_english?: string | null;
+      } | null;
       const normalizedTitle = normalizeTitle(media?.title);
       const normalizedEnglishTitle = normalizeTitle(media?.title_english);
       if (normalizedTitle) userTitleSet.add(normalizedTitle);
@@ -406,7 +412,9 @@ async function POSTHandler(req: Request) {
       })
       .eq('id', jobId);
 
-    console.log(`✅ [Steam Sync Process] Batch complete: ${newProcessedCount}/${allGames.length} (${newPercent}%)`);
+    console.log(
+      `✅ [Steam Sync Process] Batch complete: ${newProcessedCount}/${allGames.length} (${newPercent}%)`,
+    );
 
     return NextResponse.json({
       processed: newProcessedCount,

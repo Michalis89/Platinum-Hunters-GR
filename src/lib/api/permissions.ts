@@ -21,9 +21,10 @@ export class ForbiddenError extends Error {
  * Require admin/owner/moderator roles
  * Throws ForbiddenError if user doesn't have required role
  */
-export async function requireAdminRole(
-  supabase: SupabaseClient,
-): Promise<{ session: Awaited<ReturnType<typeof requireAuth>>; user: NonNullable<Awaited<ReturnType<typeof getUserFullInfo>>> }> {
+export async function requireAdminRole(supabase: SupabaseClient): Promise<{
+  session: Awaited<ReturnType<typeof requireAuth>>;
+  user: NonNullable<Awaited<ReturnType<typeof getUserFullInfo>>>;
+}> {
   const session = await requireAuth(supabase);
   const user = await getUserFullInfo(supabase, session.user.id);
 
@@ -37,9 +38,10 @@ export async function requireAdminRole(
 /**
  * Require author-level permissions (admin, owner, author, reviewer)
  */
-export async function requireAuthorRole(
-  supabase: SupabaseClient,
-): Promise<{ session: Awaited<ReturnType<typeof requireAuth>>; user: NonNullable<Awaited<ReturnType<typeof getUserFullInfo>>> }> {
+export async function requireAuthorRole(supabase: SupabaseClient): Promise<{
+  session: Awaited<ReturnType<typeof requireAuth>>;
+  user: NonNullable<Awaited<ReturnType<typeof getUserFullInfo>>>;
+}> {
   const session = await requireAuth(supabase);
   const user = await getUserFullInfo(supabase, session.user.id);
 

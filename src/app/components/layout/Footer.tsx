@@ -1,14 +1,13 @@
+'use client';
+
 import Link from 'next/link';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { selectNavbarAuth } from '@/store/slices/authSlice';
+import { useUserSettings } from '@/lib/settings/useUserSettings';
 import { PageContainer } from './PageContainer';
 import VersionBadge from '@/utils/components/VersionBadge';
-
-const NAV_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Articles', href: '/pages/news' },
-  { label: 'Reviews', href: '/pages/reviews' },
-  { label: 'Support', href: '/pages/support' },
-];
+import { getVisibleNavItems, type NavbarFeatureFilters } from '@/app/components/navbar/navbar.data';
 
 const LEGAL_LINKS = [
   { label: 'Terms of Service', href: '/terms' },
@@ -30,6 +29,27 @@ function FooterTextLink({ href, children }: { href: string; children: React.Reac
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useSelector(selectNavbarAuth);
+  const authResolved = !isAuthLoading && (!isAuthenticated || Boolean(user));
+  const { settings } = useUserSettings(isAuthenticated && authResolved);
+  const isDev = process.env.NODE_ENV === 'development';
+
+  const featureFilters = useMemo<NavbarFeatureFilters>(
+    () => ({
+      articles: settings?.articles_enabled ?? true,
+      reviews: settings?.reviews_enabled ?? true,
+    }),
+    [settings?.articles_enabled, settings?.reviews_enabled],
+  );
+
+  const navLinks = useMemo(
+    () =>
+      getVisibleNavItems(isDev, isAuthenticated, authResolved, featureFilters).map(item => ({
+        label: item.label,
+        href: item.href,
+      })),
+    [isDev, isAuthenticated, authResolved, featureFilters],
+  );
 
   return (
     <footer className="relative mt-auto pt-6">
@@ -76,7 +96,7 @@ export function Footer() {
               </h2>
 
               <ul className="space-y-3">
-                {NAV_LINKS.map(link => (
+                {navLinks.map(link => (
                   <li key={link.href}>
                     <FooterTextLink href={link.href}>{link.label}</FooterTextLink>
                   </li>

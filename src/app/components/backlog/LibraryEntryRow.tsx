@@ -73,6 +73,7 @@ function LibraryEntryRow({
                 alt={entry.title}
                 width={56}
                 height={80}
+                unoptimized
                 className="h-full w-full object-cover"
               />
             </div>
@@ -152,6 +153,7 @@ function LibraryEntryRow({
                 alt={entry.title}
                 width={56}
                 height={80}
+                unoptimized
                 className="h-full w-full object-cover"
               />
             </div>

@@ -24,7 +24,7 @@ const SelectTrigger = React.forwardRef<
       'text-sm text-foreground',
       'min-h-[44px]',
       'transition-colors duration-150',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 ring-offset-background',
+      'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2',
       'hover:border-primary/50',
       'active:border-primary/70 active:text-foreground',
       'disabled:cursor-not-allowed disabled:opacity-50',

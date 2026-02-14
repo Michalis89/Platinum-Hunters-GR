@@ -53,9 +53,7 @@ export function AboutFAQ() {
     <section className="px-4 py-20 md:px-6 md:py-28">
       <div className="mx-auto max-w-3xl">
         <div className="mb-12 text-center md:mb-16">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">
-            FAQ
-          </p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">FAQ</p>
           <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
             Frequently asked questions
           </h2>
@@ -68,7 +66,7 @@ export function AboutFAQ() {
           {faqItems.map((item, index) => (
             <div
               key={index}
-              className="hover:border-primary/30 rounded-xl border border-border bg-card transition-colors"
+              className="rounded-xl border border-border bg-card transition-colors hover:border-primary/30"
             >
               <Button
                 onClick={() => toggleFAQ(index)}

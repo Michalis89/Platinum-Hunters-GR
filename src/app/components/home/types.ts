@@ -19,4 +19,3 @@ export type PersonalStats = {
   books: CategoryStats & { pages: number };
   active_categories: string[];
 };
-

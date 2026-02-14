@@ -83,7 +83,7 @@ export function AuthPasswordField({
               className={`absolute right-1.5 top-1/2 z-20 h-8 w-8 -translate-y-1/2 rounded-[10px] border ${
                 showPassword
                   ? 'border-primary bg-primary text-white hover:bg-primary'
-                  : 'hover:bg-accent/10 bg-card text-foreground'
+                  : 'bg-card text-foreground hover:bg-accent/10'
               }`}
               ariaLabel={showPassword ? 'Hide password' : 'Show password'}
             >

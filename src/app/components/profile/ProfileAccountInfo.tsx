@@ -28,7 +28,7 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
             {/* Member since */}
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <Calendar className="text-info h-5 w-5" />
+                <Calendar className="h-5 w-5 text-info" />
               </div>
               <div>
                 <p className="text-xs">Μέλος από</p>
@@ -46,7 +46,7 @@ export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) 
             {user.last_login && (
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                  <Clock className="text-info h-5 w-5" />
+                  <Clock className="h-5 w-5 text-info" />
                 </div>
                 <div>
                   <p className="text-xs">Τελευταία σύνδεση</p>

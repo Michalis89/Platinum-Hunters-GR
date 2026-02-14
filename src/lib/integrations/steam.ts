@@ -1,7 +1,5 @@
-const STEAM_RESOLVE_VANITY_URL =
-  'https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/';
-const STEAM_OWNED_GAMES_URL =
-  'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/';
+const STEAM_RESOLVE_VANITY_URL = 'https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/';
+const STEAM_OWNED_GAMES_URL = 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/';
 const STEAM_PLAYER_ACHIEVEMENTS_URL =
   'https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/';
 

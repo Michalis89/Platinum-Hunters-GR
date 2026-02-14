@@ -51,9 +51,7 @@ export function SelectField({
   return (
     <div className="space-y-1">
       {label && (
-        <label className={cn('text-sm font-medium text-foreground', labelClassName)}>
-          {label}
-        </label>
+        <label className={cn('text-sm font-medium text-foreground', labelClassName)}>{label}</label>
       )}
       <FloatingSelect
         value={normalizedValue}
@@ -64,7 +62,7 @@ export function SelectField({
       >
         <SelectTrigger
           className={cn(
-            'flex h-10 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] border-[var(--hb-input-border)] bg-[var(--hb-input-bg)] px-3 py-2 text-sm text-foreground min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-10 min-h-[44px] w-full items-center justify-between gap-2 rounded-[var(--radius-md)] border-[var(--hb-input-border)] bg-[var(--hb-input-bg)] px-3 py-2 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
             error
               ? 'border-red-500 focus:border-red-500 focus:ring-red-500/30'
               : 'border-[var(--hb-input-border)] focus:border-[var(--hb-primary)] focus:ring-2 focus:ring-[var(--hb-ring)]',
@@ -85,7 +83,7 @@ export function SelectField({
               value={option || '__placeholder__'}
               className="text-foreground"
             >
-              {option === '' ? placeholderLabel : optionLabels?.[option] ?? option}
+              {option === '' ? placeholderLabel : (optionLabels?.[option] ?? option)}
             </SelectItem>
           ))}
         </SelectContent>

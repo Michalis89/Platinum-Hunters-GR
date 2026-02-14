@@ -12,7 +12,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { MediaCategory, CATEGORY_CONFIG } from './types';
 
@@ -51,7 +56,7 @@ export default function CategoryHeader({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex items-start gap-4">
-          <div className="text-info flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] sm:h-16 sm:w-16">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-info sm:h-16 sm:w-16">
             <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
           <div className="space-y-1">
