@@ -44,6 +44,11 @@ export default function CategoryInsightChart({ payload, category }: CategoryInsi
   const totalDropped = dataPoints.reduce((sum, point) => sum + (point.dropped ?? 0), 0);
   const totalAttempts = totalCompleted + totalDropped;
   const completionRate = totalAttempts ? Math.round((totalCompleted / totalAttempts) * 100) : 0;
+  const hasMeaningfulData = totalAttempts > 0;
+
+  if (!hasMeaningfulData) {
+    return null;
+  }
 
   const summaryLine = totalAttempts
     ? `Completion rate ${completionRate}%`

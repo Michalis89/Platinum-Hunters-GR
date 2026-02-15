@@ -28,13 +28,14 @@ export type MediaEntry = {
   totalPages?: number;
   mediaId?: number;
   entryId?: number;
-  rawgId?: number;
+  igdbId?: number;
   // Game-specific fields
   platforms?: string[];
   developer?: string;
   publisher?: string;
   metacritic?: number;
   runtime?: number; // Hours for games
+  igdbCategory?: number;
 };
 
 export type SearchResult = MediaEntry & {

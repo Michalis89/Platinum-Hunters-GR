@@ -71,7 +71,7 @@ export async function fetchTmdbDetails(
  * Maps game payload with category-specific fields
  * Ensures all game-specific fields are properly mapped to media_items schema
  *
- * @param payload - Raw game payload from RAWG API
+ * @param payload - Raw game payload from IGDB API
  * @returns Mapped payload ready for database insert
  *
  * Extracted from games/add/route.ts (lines 112-131)
@@ -79,22 +79,39 @@ export async function fetchTmdbDetails(
 export function mapGamePayload(payload: Record<string, unknown>): Record<string, unknown> {
   return {
     category: 'games',
+    source: 'igdb',
     title: payload.title,
-    title_english: payload.title,
+    title_english: payload.title_english ?? payload.title,
     description: payload.description,
-    cover_image_large: payload.cover_image_large,
-    cover_image_medium: payload.cover_image_medium,
+    summary: payload.summary,
+    storyline: payload.storyline,
+    cover_image_id: payload.cover_image_id,
+    cover_url_thumb: payload.cover_url_thumb,
+    cover_url_big: payload.cover_url_big,
+    cover_image_large: payload.cover_image_large ?? payload.cover_url_big,
+    cover_image_medium: payload.cover_image_medium ?? payload.cover_url_thumb,
     season_year: payload.season_year,
+    first_release_date: payload.first_release_date,
     release_date: payload.release_date,
     rating: payload.rating,
+    rating_count: payload.rating_count,
+    aggregated_rating: payload.aggregated_rating,
+    aggregated_rating_count: payload.aggregated_rating_count,
+    igdb_themes: payload.igdb_themes,
+    igdb_game_modes: payload.igdb_game_modes,
+    igdb_player_perspectives: payload.igdb_player_perspectives,
+    igdb_artwork_image_ids: payload.igdb_artwork_image_ids,
+    igdb_screenshot_image_ids: payload.igdb_screenshot_image_ids,
+    official_website: payload.official_website,
     genres: payload.genres,
     // Game-specific fields
-    rawg_id: payload.rawg_id,
-    metacritic: payload.metacritic,
+    igdb_id: payload.igdb_id,
+    igdb_category: payload.igdb_category,
+    igdb_slug: payload.igdb_slug,
+    igdb_updated_at: new Date().toISOString(),
     platforms: payload.platforms,
     developer: payload.developer,
     publisher: payload.publisher,
-    esrb_rating: payload.esrb_rating,
     runtime: payload.runtime,
   };
 }

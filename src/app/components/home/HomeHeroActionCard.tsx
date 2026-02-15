@@ -91,7 +91,7 @@ export function HomeHeroActionCard({ stats }: HomeHeroActionCardProps) {
 
   return (
     <section className="px-4 md:px-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-screen-2xl">
         <div className="grid gap-6 rounded-3xl border border-border bg-card p-6 shadow-md md:grid-cols-[minmax(0,1fr)_260px]">
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground">

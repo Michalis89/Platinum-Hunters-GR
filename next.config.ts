@@ -36,6 +36,10 @@ const nextConfig: NextConfigWithInstrumentation = {
       },
       {
         protocol: 'https',
+        hostname: 'images.igdb.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'cdn.cloudflare.steamstatic.com',
       },
       {

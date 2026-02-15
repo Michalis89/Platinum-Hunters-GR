@@ -16,6 +16,7 @@ import type { AddMediaRequestBody, UserProfile } from '../types';
 import { resolveTitle } from '../utils/title-resolver';
 import { findExistingMedia } from '../utils/media-lookup';
 import '../handlers/enrichers'; // Import to initialize enricher functions in configs
+import { isAllowedIgdbGameCandidate } from '@/lib/igdb/categories';
 
 /**
  * Generic handler for POST /api/{category}/add
@@ -136,6 +137,22 @@ async function handleExternalSource(
   const externalIdValue = payload![externalIdField];
   if (!externalIdValue || !payload!.category) {
     return NextResponse.json({ error: MISSING_PAYLOAD }, { status: 400 });
+  }
+  if (config.key === 'games' && typeof payload?.igdb_id === 'number') {
+    if (
+      !isAllowedIgdbGameCandidate({
+        category: typeof payload?.igdb_category === 'number' ? payload.igdb_category : null,
+        name:
+          typeof payload?.title_english === 'string'
+            ? payload.title_english
+            : typeof payload?.title === 'string'
+              ? payload.title
+              : null,
+        slug: typeof payload?.igdb_slug === 'string' ? payload.igdb_slug : null,
+      })
+    ) {
+      return NextResponse.json({ ok: false, error: 'Unsupported IGDB category' }, { status: 422 });
+    }
   }
 
   // Fetch user profile for activity logging

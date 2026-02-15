@@ -92,7 +92,7 @@ export default function MobileTabBar() {
                   key={tab.href}
                   href={tab.href}
                   className={`flex min-w-[64px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-colors duration-150 ${
-                    active ? 'text-info' : 'text-muted-foreground active:text-foreground'
+                    active ? 'text-primary' : 'text-muted-foreground active:text-foreground'
                   } `}
                   aria-label={tab.label}
                   aria-current={active ? 'page' : undefined}

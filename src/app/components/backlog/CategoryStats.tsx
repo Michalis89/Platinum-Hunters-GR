@@ -101,7 +101,7 @@ export default function CategoryStats({
           </p>
           <p
             className={`mt-2 text-3xl font-semibold ${
-              card.accent ? 'text-info' : 'text-foreground'
+              card.accent ? 'text-primary' : 'text-foreground'
             }`}
           >
             {card.value}

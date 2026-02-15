@@ -55,7 +55,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
           <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             {/* Role badge */}
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-foreground">
-              {showShield && <ShieldCheck className="h-3.5 w-3.5 text-info" />}
+              {showShield && <ShieldCheck className="h-3.5 w-3.5 text-primary" />}
               {user.role}
             </span>
 

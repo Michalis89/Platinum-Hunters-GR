@@ -10,7 +10,7 @@ export const metadata = buildMetadata({
 
 export default function AdminSupportLogsPage() {
   return (
-    <PageContainer size="xl" className="max-w-none py-4 md:py-6">
+    <PageContainer size="full" className="py-4 md:py-6">
       <AdminApplicationLogsPane />
     </PageContainer>
   );

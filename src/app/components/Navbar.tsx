@@ -1,13 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '@/store/store';
 import { logout, selectNavbarAuth } from '@/store/slices/authSlice';
 import { getLoginUrl, shouldRedirectToLogin } from '@/lib/routes/authRoutes';
 import { useTheme } from '@/context/ThemeContext';
+import { Skeleton } from '@/components/ui/skeleton';
 import { DesktopNav } from './navbar/DesktopNav';
 import { LogoBrand } from './navbar/LogoBrand';
 import { MobileNavSheet } from './navbar/MobileNavSheet';
@@ -35,17 +36,26 @@ export default function Navbar() {
     canQuickAdd,
     canAccessAdminPanel,
   } = useSelector(selectNavbarAuth);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
 
   const isDev = process.env.NODE_ENV === 'development';
   const authResolved = !isAuthLoading && (!isAuthenticated || Boolean(user));
   const logoHref = authResolved && isAuthenticated ? '/dashboard' : '/home';
   const userCategories = useMemo(() => user?.categories ?? [], [user?.categories]);
 
-  const { settings } = useUserSettings(isAuthenticated && authResolved);
+  const shouldLoadSettings = isAuthenticated && authResolved;
+  const {
+    settings,
+    isLoading: isSettingsLoading,
+    mutate: mutateSettings,
+  } = useUserSettings(shouldLoadSettings);
+  const [isThemeSaving, setIsThemeSaving] = useState(false);
+
+  const isNavbarLoading = !authResolved || (shouldLoadSettings && isSettingsLoading);
   const featureFilters = useMemo<NavbarFeatureFilters>(
     () => ({
       articles: settings?.articles_enabled ?? true,
@@ -74,6 +84,51 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname, queryKey]);
 
+  const handleThemeToggle = useCallback(async () => {
+    if (isThemeSaving) {
+      return;
+    }
+
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    const previousTheme = theme;
+    setTheme(nextTheme);
+
+    if (!shouldLoadSettings) {
+      return;
+    }
+
+    const previousSettings = settings;
+    setIsThemeSaving(true);
+
+    if (previousSettings) {
+      mutateSettings({ ...previousSettings, theme: nextTheme }, false);
+    }
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme: nextTheme }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? 'Unable to update theme setting');
+      }
+
+      if (payload?.data) {
+        mutateSettings(payload.data, false);
+      }
+    } catch {
+      setTheme(previousTheme);
+      if (previousSettings) {
+        mutateSettings(previousSettings, false);
+      }
+    } finally {
+      setIsThemeSaving(false);
+    }
+  }, [isThemeSaving, mutateSettings, setTheme, settings, shouldLoadSettings, theme]);
+
   const handleLogout = async () => {
     await dispatch(logout());
     if (shouldRedirectToLogin(pathname)) {
@@ -81,9 +136,17 @@ export default function Navbar() {
     }
   };
 
+  if (isNavbarLoading) {
+    return <NavbarLoadingSkeleton isAdminRoute={isAdminRoute} />;
+  }
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 md:px-4 md:pt-4">
-      <nav className="relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-2 px-2 md:px-4">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[hsl(var(--border-default))] bg-[hsl(var(--surface-base))/0.95]">
+      <nav
+        className={`relative mx-auto flex h-16 w-full items-center gap-4 px-6 md:px-10 ${
+          isAdminRoute ? 'max-w-none' : 'max-w-screen-2xl'
+        }`}
+      >
         <LogoBrand href={logoHref} />
 
         <DesktopNav
@@ -98,7 +161,8 @@ export default function Navbar() {
           onAdd={() => setAddDialogOpen(true)}
           onLogout={handleLogout}
           theme={theme}
-          onToggleTheme={toggleTheme}
+          onToggleTheme={handleThemeToggle}
+          isThemeSaving={isThemeSaving}
         />
 
         <MobileNavSheet
@@ -115,7 +179,7 @@ export default function Navbar() {
           onAdd={() => setAddDialogOpen(true)}
           onLogout={handleLogout}
           theme={theme}
-          onToggleTheme={toggleTheme}
+          onToggleTheme={handleThemeToggle}
         />
       </nav>
 
@@ -126,6 +190,32 @@ export default function Navbar() {
           onSuccess={() => {}}
         />
       ) : null}
+    </header>
+  );
+}
+
+function NavbarLoadingSkeleton({ isAdminRoute }: { isAdminRoute: boolean }) {
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[hsl(var(--border-default))] bg-[hsl(var(--surface-base))/0.95]">
+      <div
+        className={`mx-auto flex h-16 items-center justify-between gap-4 px-6 md:px-10 ${
+          isAdminRoute ? 'max-w-none' : 'max-w-screen-2xl'
+        }`}
+      >
+        <div className="flex items-center gap-2.5">
+          <Skeleton className="h-9 w-9 rounded-lg" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+
+        <div className="hidden flex-1 px-8 md:block">
+          <Skeleton className="mx-auto h-5 max-w-xl rounded" />
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Skeleton className="hidden h-9 w-9 rounded-md md:block" />
+          <Skeleton className="h-9 w-9 rounded-md md:w-36" />
+        </div>
+      </div>
     </header>
   );
 }

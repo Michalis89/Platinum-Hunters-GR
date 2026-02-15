@@ -6,6 +6,7 @@ import { AuthButtons } from './AuthButtons';
 import { LibraryMenu } from './LibraryMenu';
 import { NavItemContent, desktopLinkClass } from './navbar.helpers';
 import { isHrefActive, type HobbyItem, type NavbarLinkItem } from './navbar.data';
+import { ThemeToggleButton } from './ThemeToggleButton';
 import { UserMenu } from './UserMenu';
 
 type Theme = 'dark' | 'light';
@@ -23,6 +24,7 @@ type DesktopNavProps = {
   onLogout: () => Promise<void>;
   theme: Theme;
   onToggleTheme: () => void;
+  isThemeSaving: boolean;
 };
 
 export const DesktopNav = React.memo(function DesktopNav({
@@ -38,11 +40,12 @@ export const DesktopNav = React.memo(function DesktopNav({
   onLogout,
   theme,
   onToggleTheme,
+  isThemeSaving,
 }: DesktopNavProps) {
   return (
-    <div className="hidden w-full items-center justify-between gap-4 md:flex">
-      <div className="flex flex-1 items-center justify-center">
-        <Menubar className="pointer-events-auto flex h-11 items-center justify-center gap-1 rounded-[20px] border-border bg-card px-1.5 py-1 text-foreground shadow-none">
+    <div className="hidden w-full items-center gap-6 md:flex">
+      <div className="flex min-w-0 flex-1 items-center justify-center">
+        <Menubar className="pointer-events-auto flex h-auto items-center justify-center gap-6 rounded-none border-0 bg-transparent p-0 text-foreground shadow-none">
           {navItems.slice(0, 2).map(item => (
             <MenubarMenu key={item.href}>
               <MenubarTrigger
@@ -73,17 +76,25 @@ export const DesktopNav = React.memo(function DesktopNav({
         </Menubar>
       </div>
 
-      <div className="pointer-events-auto relative z-20 flex h-11 items-center rounded-[20px] border border-border bg-card px-1.5 text-foreground">
+      <div className="pointer-events-auto relative z-20 flex h-10 shrink-0 items-center gap-2 text-foreground">
         {!authResolved ? (
           <NavbarAuthSkeleton />
         ) : isAuthenticated && user ? (
-          <UserMenu
-            user={user}
-            canQuickAdd={canQuickAdd}
-            canAccessAdminPanel={canAccessAdminPanel}
-            onAdd={onAdd}
-            onLogout={onLogout}
-          />
+          <>
+            <ThemeToggleButton
+              theme={theme}
+              onToggle={onToggleTheme}
+              disabled={isThemeSaving}
+              className="h-8 w-8"
+            />
+            <UserMenu
+              user={user}
+              canQuickAdd={canQuickAdd}
+              canAccessAdminPanel={canAccessAdminPanel}
+              onAdd={onAdd}
+              onLogout={onLogout}
+            />
+          </>
         ) : (
           <AuthButtons theme={theme} onToggleTheme={onToggleTheme} />
         )}
@@ -94,10 +105,10 @@ export const DesktopNav = React.memo(function DesktopNav({
 
 function NavbarAuthSkeleton() {
   return (
-    <div className="flex h-9 items-center gap-2 px-1">
-      <div className="h-7 w-7 animate-pulse rounded-full bg-[hsl(var(--accent))/10]" />
+    <div className="flex h-9 items-center gap-2">
+      <div className="h-9 w-9 animate-pulse rounded-md bg-[hsl(var(--accent))/10]" />
       <div className="h-4 w-24 animate-pulse rounded bg-[hsl(var(--accent))/10]" />
-      <div className="h-9 w-9 animate-pulse bg-[hsl(var(--accent))/10]" />
+      <div className="h-9 w-9 animate-pulse rounded-md bg-[hsl(var(--accent))/10]" />
     </div>
   );
 }

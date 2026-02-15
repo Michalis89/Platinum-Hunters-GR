@@ -7,18 +7,22 @@ import { fail, ok } from '@/lib/api/response';
 import { UnauthorizedError } from '@/lib/api/auth';
 import { ForbiddenError, requireAdminRole } from '@/lib/api/permissions';
 import { logApplicationEvent } from '@/lib/observability/applicationLogger';
-import type { Database } from '@/lib/supabase/database.types';
-
-type MediaUpdate = Database['public']['Tables']['media_items']['Update'];
 
 const EDITABLE_KEYS = new Set([
   'source',
   'rawg_id',
+  'igdb_id',
+  'igdb_slug',
   'title',
   'title_english',
   'title_romaji',
   'title_native',
   'description',
+  'summary',
+  'storyline',
+  'cover_image_id',
+  'cover_url_thumb',
+  'cover_url_big',
   'cover_image_large',
   'cover_image_medium',
   'format',
@@ -27,11 +31,21 @@ const EDITABLE_KEYS = new Set([
   'episodes',
   'start_date',
   'end_date',
+  'first_release_date',
   'release_date',
   'rating',
+  'rating_count',
+  'aggregated_rating',
+  'aggregated_rating_count',
   'metacritic',
   'platforms',
   'genres',
+  'igdb_themes',
+  'igdb_game_modes',
+  'igdb_player_perspectives',
+  'igdb_artwork_image_ids',
+  'igdb_screenshot_image_ids',
+  'official_website',
   'developer',
   'publisher',
   'esrb_rating',
@@ -88,7 +102,7 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
       return fail(API_ERRORS.BAD_REQUEST, API_ERRORS.BAD_REQUEST.status);
     }
 
-    const updates: MediaUpdate = {};
+    const updates: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(input)) {
       if (!EDITABLE_KEYS.has(key)) continue;
@@ -99,6 +113,12 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
           break;
         case 'rawg_id':
           updates.rawg_id = normalizeNumber(value);
+          break;
+        case 'igdb_id':
+          updates.igdb_id = normalizeNumber(value);
+          break;
+        case 'igdb_slug':
+          updates.igdb_slug = normalizeText(value);
           break;
         case 'title':
           updates.title = normalizeText(value);
@@ -114,6 +134,21 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
           break;
         case 'description':
           updates.description = normalizeText(value);
+          break;
+        case 'summary':
+          updates.summary = normalizeText(value);
+          break;
+        case 'storyline':
+          updates.storyline = normalizeText(value);
+          break;
+        case 'cover_image_id':
+          updates.cover_image_id = normalizeText(value);
+          break;
+        case 'cover_url_thumb':
+          updates.cover_url_thumb = normalizeText(value);
+          break;
+        case 'cover_url_big':
+          updates.cover_url_big = normalizeText(value);
           break;
         case 'cover_image_large':
           updates.cover_image_large = normalizeText(value);
@@ -139,11 +174,23 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
         case 'end_date':
           updates.end_date = normalizeText(value);
           break;
+        case 'first_release_date':
+          updates.first_release_date = normalizeText(value);
+          break;
         case 'release_date':
           updates.release_date = normalizeText(value);
           break;
         case 'rating':
           updates.rating = normalizeNumber(value);
+          break;
+        case 'rating_count':
+          updates.rating_count = normalizeNumber(value);
+          break;
+        case 'aggregated_rating':
+          updates.aggregated_rating = normalizeNumber(value);
+          break;
+        case 'aggregated_rating_count':
+          updates.aggregated_rating_count = normalizeNumber(value);
           break;
         case 'metacritic':
           updates.metacritic = normalizeNumber(value);
@@ -153,6 +200,24 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
           break;
         case 'genres':
           updates.genres = normalizeStringArray(value);
+          break;
+        case 'igdb_themes':
+          updates.igdb_themes = normalizeStringArray(value);
+          break;
+        case 'igdb_game_modes':
+          updates.igdb_game_modes = normalizeStringArray(value);
+          break;
+        case 'igdb_player_perspectives':
+          updates.igdb_player_perspectives = normalizeStringArray(value);
+          break;
+        case 'igdb_artwork_image_ids':
+          updates.igdb_artwork_image_ids = normalizeStringArray(value);
+          break;
+        case 'igdb_screenshot_image_ids':
+          updates.igdb_screenshot_image_ids = normalizeStringArray(value);
+          break;
+        case 'official_website':
+          updates.official_website = normalizeText(value);
           break;
         case 'developer':
           updates.developer = normalizeText(value);
@@ -180,10 +245,10 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
 
     const { data, error } = await admin
       .from('media_items')
-      .update(updates)
+      .update(updates as never)
       .eq('id', mediaId)
       .select(
-        'id,mal_id,category,source,title,title_english,title_romaji,title_native,description,format,status,season_year,episodes,start_date,end_date,release_date,runtime,rating,metacritic,esrb_rating,rawg_id,steam_app_id,developer,publisher,platforms,genres,cover_image_large,cover_image_medium,updated_at',
+        'id,mal_id,category,source,title,title_english,title_romaji,title_native,description,summary,storyline,format,status,season_year,episodes,start_date,end_date,first_release_date,release_date,runtime,rating,rating_count,aggregated_rating,aggregated_rating_count,metacritic,esrb_rating,rawg_id,igdb_id,igdb_category,igdb_slug,steam_app_id,developer,publisher,platforms,genres,igdb_themes,igdb_game_modes,igdb_player_perspectives,igdb_artwork_image_ids,igdb_screenshot_image_ids,official_website,cover_image_id,cover_url_thumb,cover_url_big,cover_image_large,cover_image_medium,igdb_updated_at,updated_at',
       )
       .maybeSingle();
 
@@ -191,15 +256,15 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
       console.error('Admin media entry update error:', error);
       const dbError = formatDbError(error);
       if (dbError?.code === '23505') {
-        const duplicateRawgConstraint =
-          dbError.details?.includes('(rawg_id, category)') ||
-          dbError.message?.includes('media_items_rawg_category_uq');
+        const duplicateIgdbConstraint =
+          dbError.details?.includes('(igdb_id, category)') ||
+          dbError.message?.includes('media_items_igdb_category_uq');
 
         await logApplicationEvent({
           level: 'error',
           source: 'api/admin/media/entries/[id]',
-          message: duplicateRawgConstraint
-            ? 'Duplicate RAWG/category conflict on media update'
+          message: duplicateIgdbConstraint
+            ? 'Duplicate IGDB/category conflict on media update'
             : `Duplicate value conflict while saving row ${mediaId}`,
           path: `/api/admin/media/entries/${mediaId}`,
           method: 'PATCH',
@@ -214,11 +279,11 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
         });
 
         return fail(
-          duplicateRawgConstraint
+          duplicateIgdbConstraint
             ? {
                 error:
-                  'Duplicate RAWG entry: this RAWG ID already exists for games. Delete one duplicate row (or clear rawg_id) and try again.',
-                code: 'CONFLICT_DUPLICATE_RAWG',
+                  'Duplicate IGDB entry: this IGDB ID already exists for games. Delete one duplicate row (or clear igdb_id) and try again.',
+                code: 'CONFLICT_DUPLICATE_IGDB',
               }
             : {
                 error: `Duplicate value conflict while saving row ${mediaId}.`,

@@ -23,7 +23,10 @@ type AboutSectionShellProps = {
   maxWidthClass?: string;
 };
 
-function AboutSectionShell({ children, maxWidthClass = 'max-w-7xl' }: AboutSectionShellProps) {
+function AboutSectionShell({
+  children,
+  maxWidthClass = 'max-w-screen-2xl',
+}: AboutSectionShellProps) {
   return (
     <div className={`mx-auto w-full px-3 md:px-6 ${maxWidthClass}`}>
       <div className="">{children}</div>

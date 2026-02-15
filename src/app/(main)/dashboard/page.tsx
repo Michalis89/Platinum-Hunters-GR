@@ -25,7 +25,7 @@ function DashboardContentSkeleton() {
   return (
     <div className="min-h-[80vh] pb-14 pt-2 md:pb-16 md:pt-3">
       <section className="px-4 pb-8 pt-12 md:px-6 md:pb-8 md:pt-16">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="animate-pulse space-y-3">
             <div className="h-4 w-20 rounded bg-muted" />
             <div className="h-10 w-72 rounded bg-muted/80" />
@@ -35,7 +35,7 @@ function DashboardContentSkeleton() {
       </section>
 
       <section className="px-4 py-8 md:px-6 md:py-10">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="min-h-[304px] animate-pulse p-6 md:p-8">
             <div className="grid min-h-[260px] items-center gap-7 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">
@@ -126,14 +126,10 @@ export default function DashboardPage() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-20 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       </div>
-      <div className="relative px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
-        <div className="mx-auto max-w-[1280px]">
-          <div className="">
-            <Suspense fallback={<DashboardContentSkeleton />}>
-              <DashboardData />
-            </Suspense>
-          </div>
-        </div>
+      <div className="relative w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
+        <Suspense fallback={<DashboardContentSkeleton />}>
+          <DashboardData />
+        </Suspense>
       </div>
     </section>
   );

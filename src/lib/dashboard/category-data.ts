@@ -77,6 +77,41 @@ export type PersonalSuggestionCard = {
   ctaLabel?: string;
 };
 
+export type TasteProfileStatus = 'planned' | 'current' | 'completed' | 'dropped';
+
+export type CategoryTasteProfileItem = {
+  status: TasteProfileStatus;
+  score: number | null;
+  isFavorite?: boolean;
+  genres: string[];
+  tags: string[];
+  bucketTags?: Partial<Record<InsightTagBucket, string[]>>;
+};
+
+export const INSIGHT_TAG_BUCKETS = ['subgenre', 'mechanic', 'mood', 'theme', 'structure'] as const;
+export type InsightTagBucket = (typeof INSIGHT_TAG_BUCKETS)[number];
+
+export type TasteProfileGenre = {
+  name: string;
+  count: number;
+  weightSum: number;
+  percent: number;
+};
+
+export type TasteProfileResult = {
+  totalItems: number;
+  totalWeight: number;
+  ratedCount: number;
+  unratedCount: number;
+  ratedRatio: number;
+  favoriteCount: number;
+  completedItems: number;
+  completedRatedCount: number;
+  completedRatedRatio: number;
+  topGenres: TasteProfileGenre[];
+  topBuckets: Partial<Record<InsightTagBucket, TasteProfileGenre[]>>;
+};
+
 export type MediaSuggestion = {
   mediaId: number;
   category: DashboardCategoryKey;
@@ -87,6 +122,7 @@ export type MediaSuggestion = {
   confidence: number;
   genres?: string[];
   tags?: string[];
+  bucketTags?: Partial<Record<InsightTagBucket, string[]>>;
 };
 
 export type CategoryDashboardSection = {
@@ -94,7 +130,7 @@ export type CategoryDashboardSection = {
   spotlights: CategorySpotlightCard[];
   chart: CategoryChartPayload;
   platformInsight: PlatformInsightPayload | null;
-  suggestions: PersonalSuggestionCard[];
+  tasteProfileItems: CategoryTasteProfileItem[];
   favorites: DashboardTopFiveItem[];
   mediaSuggestions: MediaSuggestion[];
 };
@@ -107,6 +143,21 @@ const CATEGORY_LABELS: Record<DashboardCategoryKey, string> = {
   movies: 'Movies',
   tv: 'TV',
 };
+
+const TASTE_PROFILE_INCLUDED_STATUSES = new Set<TasteProfileStatus>(['completed', 'current']);
+const DEFAULT_TASTE_PROFILE_TOP_GENRES = 5;
+const DEFAULT_TASTE_PROFILE_TOP_BUCKET_TRAITS = 5;
+const TASTE_PROFILE_UNKNOWN_GENRE_KEY = '__unknown__';
+const TASTE_PROFILE_UNKNOWN_BUCKET_KEY = '__unknown_bucket__';
+export const DEFAULT_TASTE_PROFILE_MIN_ITEMS_THRESHOLD = 8;
+export const TASTE_PROFILE_SCORE_MIN = 0;
+export const TASTE_PROFILE_SCORE_MAX = 10;
+export const TASTE_PROFILE_BASE_WEIGHT = 0.25;
+export const TASTE_PROFILE_RATING_BOOST = 1.0;
+export const TASTE_PROFILE_UNRATED_WEIGHT = 0.35;
+export const TASTE_PROFILE_FAVORITE_MULT = 1.35;
+export const TASTE_PROFILE_MAX_WEIGHT =
+  (TASTE_PROFILE_BASE_WEIGHT + TASTE_PROFILE_RATING_BOOST) * TASTE_PROFILE_FAVORITE_MULT;
 
 const CATEGORY_ENTRY_SELECT = `
   id,
@@ -140,6 +191,9 @@ const CATEGORY_ENTRY_SELECT = `
     duration,
     genres,
     tags,
+    igdb_themes,
+    igdb_game_modes,
+    igdb_player_perspectives,
     platforms,
     release_date,
     cover_image_large,
@@ -179,6 +233,9 @@ const CATEGORY_ENTRY_SELECT_LEGACY = `
     duration,
     genres,
     tags,
+    igdb_themes,
+    igdb_game_modes,
+    igdb_player_perspectives,
     platforms,
     release_date,
     cover_image_large,
@@ -221,6 +278,9 @@ type CategoryEntryRow = {
     duration?: number | null;
     genres?: string[] | null;
     tags?: string[] | null;
+    igdb_themes?: string[] | null;
+    igdb_game_modes?: string[] | null;
+    igdb_player_perspectives?: string[] | null;
     platforms?: string[] | null;
     release_date?: string | null;
     cover_image_large?: string | null;
@@ -237,13 +297,13 @@ type CategoryChartRow = {
 
 const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSection => ({
   topFive: [],
-  spotlights: buildEmptySpotlights(category),
+  spotlights: [],
   chart: {
     data: [],
     insight: `Add ${CATEGORY_LABELS[category]} entries to unlock completion trends.`,
   },
   platformInsight: null,
-  suggestions: buildEmptySuggestions(category),
+  tasteProfileItems: [],
   favorites: [],
   mediaSuggestions: [],
 });
@@ -258,38 +318,280 @@ function buildEmptySpotlights(category: DashboardCategoryKey): CategorySpotlight
   }));
 }
 
-function buildEmptySuggestions(category: DashboardCategoryKey): PersonalSuggestionCard[] {
-  const label = CATEGORY_LABELS[category];
-  return [
-    {
-      id: `empty-suggest-${category}-1`,
-      icon: 'sparkles',
-      title: `${label} patterns pending`,
-      explanation: `This panel will show habits once we see a few ${label.toLowerCase()} completions.`,
-      stat: 'No data yet',
-    },
-    {
-      id: `empty-suggest-${category}-2`,
-      icon: 'chart-line',
-      title: 'Need more updates',
-      explanation: 'Fill out progress to help us measure momentum.',
-      stat: '0 in-progress entries',
-    },
-    {
-      id: `empty-suggest-${category}-3`,
-      icon: 'clock-4',
-      title: 'Signal locked',
-      explanation: 'Persist with your current entries to unlock richer advice.',
-      stat: 'Awaiting history',
-    },
-    {
-      id: `empty-suggest-${category}-4`,
-      icon: 'lightbulb',
-      title: 'Self-tracking only',
-      explanation: 'These cards are strictly derived from your library.',
-      stat: 'Private data only',
-    },
-  ];
+function normalizeTasteProfileLabels(item: CategoryTasteProfileItem): string[] {
+  const source = item.genres.length > 0 ? item.genres : item.tags;
+  const normalized = new Set<string>();
+
+  for (const value of source) {
+    const label = value?.trim().replace(/\s+/g, ' ').toLowerCase();
+    if (!label) continue;
+    normalized.add(label);
+  }
+
+  return Array.from(normalized);
+}
+
+function normalizeBucketLabels(item: CategoryTasteProfileItem, bucket: InsightTagBucket): string[] {
+  const values = item.bucketTags?.[bucket] ?? [];
+  const normalized = new Set<string>();
+  for (const value of values) {
+    const label = canonicalizeBucketLabel(
+      bucket,
+      value?.trim().replace(/\s+/g, ' ').toLowerCase() ?? '',
+    );
+    if (!label) continue;
+    normalized.add(label);
+  }
+  return Array.from(normalized);
+}
+
+function canonicalizeBucketLabel(bucket: InsightTagBucket, label: string): string {
+  if (!label) return '';
+  if (bucket === 'subgenre') {
+    const normalizedKey = label.replace(/[_\s]+/g, '-').replace(/-+/g, '-');
+    if (normalizedKey === 'role-playing-game' || normalizedKey === 'rpg') {
+      return 'rpg';
+    }
+    return label;
+  }
+  if (bucket !== 'structure') return label;
+
+  const compact = label.replace(/[_\s]+/g, '-');
+  if (/^(third|3rd)-person(?:-[a-z0-9]+)*$/.test(compact)) {
+    return 'third-person';
+  }
+
+  return label;
+}
+
+function extractTasteTagLabelsFromMediaTags(tags: unknown): string[] {
+  if (!Array.isArray(tags)) return [];
+
+  const result: string[] = [];
+  for (const entry of tags) {
+    if (typeof entry === 'string') {
+      const label = entry.trim();
+      if (label) result.push(label);
+      continue;
+    }
+
+    if (!entry || typeof entry !== 'object') continue;
+    const tag = entry as Record<string, unknown>;
+    const bucket = tag.bucket;
+    const type = tag.type;
+    if (bucket === 'playstyle' || bucket === 'noise' || bucket === 'unknown') continue;
+    if (type === 'noise' || type === 'playstyle') continue;
+
+    const name =
+      typeof tag.name === 'string' && tag.name.trim()
+        ? tag.name.trim()
+        : typeof tag.slug === 'string' && tag.slug.trim()
+          ? tag.slug.trim()
+          : '';
+    if (name) result.push(name);
+  }
+
+  return Array.from(new Set(result));
+}
+
+function formatTasteProfileLabel(label: string): string {
+  if (label === TASTE_PROFILE_UNKNOWN_GENRE_KEY || label === TASTE_PROFILE_UNKNOWN_BUCKET_KEY) {
+    return 'Unknown';
+  }
+  if (label === 'rpg') return 'RPG';
+
+  return label.replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function isValidTasteProfileScore(score: number | null | undefined): score is number {
+  return (
+    typeof score === 'number' &&
+    Number.isFinite(score) &&
+    score >= TASTE_PROFILE_SCORE_MIN &&
+    score <= TASTE_PROFILE_SCORE_MAX
+  );
+}
+
+function getTasteProfileWeight(score: number | null | undefined): {
+  weight: number;
+  rated: boolean;
+} {
+  if (!isValidTasteProfileScore(score)) {
+    return { weight: TASTE_PROFILE_UNRATED_WEIGHT, rated: false };
+  }
+
+  const scoreRange = TASTE_PROFILE_SCORE_MAX - TASTE_PROFILE_SCORE_MIN;
+  if (scoreRange <= 0) {
+    return { weight: TASTE_PROFILE_BASE_WEIGHT, rated: true };
+  }
+
+  const normalized = (score - TASTE_PROFILE_SCORE_MIN) / scoreRange;
+  return {
+    weight: TASTE_PROFILE_BASE_WEIGHT + normalized * TASTE_PROFILE_RATING_BOOST,
+    rated: true,
+  };
+}
+
+function applyFavoriteTasteProfileBoost(baseWeight: number, isFavorite?: boolean): number {
+  const boostedWeight = isFavorite ? baseWeight * TASTE_PROFILE_FAVORITE_MULT : baseWeight;
+  return Math.min(boostedWeight, TASTE_PROFILE_MAX_WEIGHT);
+}
+
+export function buildTasteProfile(
+  items: CategoryTasteProfileItem[],
+  category?: DashboardCategoryKey,
+): TasteProfileResult {
+  const trackedItems = items.filter(item => TASTE_PROFILE_INCLUDED_STATUSES.has(item.status));
+  const totalItems = trackedItems.length;
+  const completedItems = trackedItems.filter(item => item.status === 'completed');
+  const completedItemsCount = completedItems.length;
+
+  if (!totalItems) {
+    return {
+      totalItems: 0,
+      totalWeight: 0,
+      ratedCount: 0,
+      unratedCount: 0,
+      ratedRatio: 0,
+      favoriteCount: 0,
+      completedItems: 0,
+      completedRatedCount: 0,
+      completedRatedRatio: 0,
+      topGenres: [],
+      topBuckets: {},
+    };
+  }
+
+  const genreCounts = new Map<string, number>();
+  const genreWeightSums = new Map<string, number>();
+  const bucketCounts: Record<InsightTagBucket, Map<string, number>> = {
+    subgenre: new Map(),
+    mechanic: new Map(),
+    mood: new Map(),
+    theme: new Map(),
+    structure: new Map(),
+  };
+  const bucketWeightSums: Record<InsightTagBucket, Map<string, number>> = {
+    subgenre: new Map(),
+    mechanic: new Map(),
+    mood: new Map(),
+    theme: new Map(),
+    structure: new Map(),
+  };
+  const bucketTotals: Record<InsightTagBucket, number> = {
+    subgenre: 0,
+    mechanic: 0,
+    mood: 0,
+    theme: 0,
+    structure: 0,
+  };
+
+  let totalWeight = 0;
+  let ratedCount = 0;
+  let favoriteCount = 0;
+  const useBucketMode = category === 'games';
+
+  for (const item of trackedItems) {
+    const { weight: baseWeight, rated } = getTasteProfileWeight(item.score);
+    const weight = applyFavoriteTasteProfileBoost(baseWeight, item.isFavorite);
+    totalWeight += weight;
+    if (rated) {
+      ratedCount += 1;
+    }
+    if (item.isFavorite) {
+      favoriteCount += 1;
+    }
+
+    if (useBucketMode) {
+      for (const bucket of INSIGHT_TAG_BUCKETS) {
+        const labels = normalizeBucketLabels(item, bucket);
+        const distributionLabels = labels.length > 0 ? labels : [TASTE_PROFILE_UNKNOWN_BUCKET_KEY];
+        const distributedWeight =
+          distributionLabels.length > 0 ? weight / distributionLabels.length : 0;
+        bucketTotals[bucket] += weight;
+        for (const label of distributionLabels) {
+          bucketCounts[bucket].set(label, (bucketCounts[bucket].get(label) ?? 0) + 1);
+          bucketWeightSums[bucket].set(
+            label,
+            (bucketWeightSums[bucket].get(label) ?? 0) + distributedWeight,
+          );
+        }
+      }
+      continue;
+    }
+
+    const labels = normalizeTasteProfileLabels(item);
+    const distributionLabels = labels.length > 0 ? labels : [TASTE_PROFILE_UNKNOWN_GENRE_KEY];
+    const distributedWeight =
+      distributionLabels.length > 0 ? weight / distributionLabels.length : 0;
+    for (const label of distributionLabels) {
+      genreCounts.set(label, (genreCounts.get(label) ?? 0) + 1);
+      genreWeightSums.set(label, (genreWeightSums.get(label) ?? 0) + distributedWeight);
+    }
+  }
+
+  const unratedCount = totalItems - ratedCount;
+  const ratedRatio = totalItems > 0 ? ratedCount / totalItems : 0;
+  const completedRatedCount = completedItems.reduce(
+    (count, item) => count + (isValidTasteProfileScore(item.score) ? 1 : 0),
+    0,
+  );
+  const completedRatedRatio =
+    completedItemsCount > 0 ? completedRatedCount / completedItemsCount : 0;
+
+  const topGenres = useBucketMode
+    ? []
+    : Array.from(genreWeightSums.entries())
+        .sort((a, b) => {
+          if (b[1] !== a[1]) return b[1] - a[1];
+          return a[0].localeCompare(b[0]);
+        })
+        .slice(0, DEFAULT_TASTE_PROFILE_TOP_GENRES)
+        .map(([name, weightSum]) => ({
+          name: formatTasteProfileLabel(name),
+          count: genreCounts.get(name) ?? 0,
+          weightSum,
+          percent: totalWeight > 0 ? Number(((weightSum / totalWeight) * 100).toFixed(1)) : 0,
+        }));
+
+  const topBuckets = useBucketMode
+    ? INSIGHT_TAG_BUCKETS.reduce(
+        (acc, bucket) => {
+          acc[bucket] = Array.from(bucketWeightSums[bucket].entries())
+            .filter(([name]) => name !== TASTE_PROFILE_UNKNOWN_BUCKET_KEY)
+            .sort((a, b) => {
+              if (b[1] !== a[1]) return b[1] - a[1];
+              return a[0].localeCompare(b[0]);
+            })
+            .slice(0, DEFAULT_TASTE_PROFILE_TOP_BUCKET_TRAITS)
+            .map(([name, weightSum]) => ({
+              name: formatTasteProfileLabel(name),
+              count: bucketCounts[bucket].get(name) ?? 0,
+              weightSum,
+              percent:
+                bucketTotals[bucket] > 0
+                  ? Number(((weightSum / bucketTotals[bucket]) * 100).toFixed(1))
+                  : 0,
+            }));
+          return acc;
+        },
+        {} as Partial<Record<InsightTagBucket, TasteProfileGenre[]>>,
+      )
+    : {};
+
+  return {
+    totalItems,
+    totalWeight,
+    ratedCount,
+    unratedCount,
+    ratedRatio,
+    favoriteCount,
+    completedItems: completedItemsCount,
+    completedRatedCount,
+    completedRatedRatio,
+    topGenres,
+    topBuckets,
+  };
 }
 
 type DashboardSupabaseClient = Awaited<ReturnType<typeof createRouteHandlerClient>>;
@@ -333,6 +635,22 @@ export async function fetchCategoryDashboardData(
   });
 
   const mediaSuggestionsResults = await Promise.all(mediaSuggestionsPromises);
+  const gameTagMapByCategory = new Map<
+    DashboardCategoryKey,
+    Map<number, Partial<Record<InsightTagBucket, string[]>>>
+  >();
+
+  await Promise.all(
+    requestedCategories.map(async (category, index) => {
+      if (category !== 'games') return;
+      const entries = entryResults[index] ?? [];
+      const mediaIds = entries
+        .map(entry => entry.media_items?.id)
+        .filter((mediaId): mediaId is number => typeof mediaId === 'number');
+      const tagMap = await fetchGameInsightTagMap(supabase, mediaIds);
+      gameTagMapByCategory.set(category, tagMap);
+    }),
+  );
 
   requestedCategories.forEach((category, index) => {
     const entries = entryResults[index] ?? [];
@@ -342,16 +660,83 @@ export async function fetchCategoryDashboardData(
 
     sections[category] = {
       topFive,
-      spotlights: buildSpotlights(category, entries),
+      spotlights: [],
       chart: buildCategoryChart(category, chartRows),
       platformInsight: category === 'games' ? buildGamePlatformInsight(entries) : null,
-      suggestions: buildCategorySuggestions(category, entries),
+      tasteProfileItems: buildCategoryTasteProfileItems(
+        entries,
+        category,
+        gameTagMapByCategory.get(category),
+      ),
       favorites: buildFavoriteEntryCards(entries, excludedIds, category),
       mediaSuggestions: mediaSuggestionsResults[index] ?? [],
     };
   });
 
   return sections;
+}
+
+async function fetchGameInsightTagMap(
+  supabase: DashboardSupabaseClient,
+  mediaIds: number[],
+): Promise<Map<number, Partial<Record<InsightTagBucket, string[]>>>> {
+  if (mediaIds.length === 0) return new Map();
+  const uniqueMediaIds = Array.from(new Set(mediaIds));
+  const { data, error } = await supabase
+    .from('media_items')
+    .select('id,genres,igdb_themes,igdb_game_modes,igdb_player_perspectives')
+    .in('id', uniqueMediaIds);
+
+  if (error || !Array.isArray(data)) {
+    return new Map();
+  }
+
+  const normalizeArray = (input: unknown): string[] => {
+    if (!Array.isArray(input)) return [];
+    return Array.from(
+      new Set(input.map(item => (typeof item === 'string' ? item.trim() : '')).filter(Boolean)),
+    );
+  };
+
+  const result = new Map<number, Partial<Record<InsightTagBucket, string[]>>>();
+  for (const row of data as unknown as Array<Record<string, unknown>>) {
+    const id = typeof row.id === 'number' ? row.id : null;
+    if (!id) continue;
+
+    const genres = normalizeArray(row.genres);
+    const themes = normalizeArray(row.igdb_themes);
+    const modes = normalizeArray(row.igdb_game_modes);
+    const perspectives = normalizeArray(row.igdb_player_perspectives);
+
+    result.set(id, {
+      subgenre: genres,
+      mechanic: modes,
+      theme: themes,
+      structure: perspectives,
+    });
+  }
+
+  return result;
+}
+
+function buildCategoryTasteProfileItems(
+  entries: CategoryEntryRow[],
+  category: DashboardCategoryKey,
+  gameTagMap?: Map<number, Partial<Record<InsightTagBucket, string[]>>>,
+): CategoryTasteProfileItem[] {
+  return entries.map(entry => ({
+    status: entry.status,
+    score: typeof entry.score === 'number' && Number.isFinite(entry.score) ? entry.score : null,
+    isFavorite: Boolean(entry.is_favorite),
+    genres: Array.isArray(entry.media_items?.genres)
+      ? entry.media_items?.genres.filter((genre): genre is string => Boolean(genre?.trim()))
+      : [],
+    tags: category === 'games' ? [] : extractTasteTagLabelsFromMediaTags(entry.media_items?.tags),
+    bucketTags:
+      category === 'games' && entry.media_items?.id
+        ? (gameTagMap?.get(entry.media_items.id) ?? {})
+        : undefined,
+  }));
 }
 
 async function fetchCategoryEntries(
@@ -617,6 +1002,7 @@ function buildSpotlights(
       return buildEmptySpotlights(category);
   }
 }
+void buildSpotlights;
 
 function buildSpotlightEntry(
   entry: CategoryEntryRow,
@@ -1381,344 +1767,6 @@ function buildCategoryChart(
   };
 }
 
-function buildCategorySuggestions(
-  category: DashboardCategoryKey,
-  entries: CategoryEntryRow[],
-): PersonalSuggestionCard[] {
-  if (!entries.length) {
-    return buildEmptySuggestions(category);
-  }
-
-  switch (category) {
-    case 'games':
-      return buildGameSuggestions(entries);
-    case 'books':
-      return buildBookSuggestions(entries);
-    case 'anime':
-      return buildAnimeSuggestions(entries);
-    case 'manga':
-      return buildMangaSuggestions(entries);
-    case 'movies':
-      return buildMovieSuggestions(entries);
-    case 'tv':
-      return buildTvSuggestions(entries);
-    default:
-      return buildEmptySuggestions(category);
-  }
-}
-
-function buildGameSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard[] {
-  const completed = entries.filter(entry => entry.status === 'completed');
-  const current = entries.filter(entry => entry.status === 'current');
-  const dropped = entries.filter(entry => entry.status === 'dropped');
-
-  const shortCompletions = completed.filter(entry => (entry.media_items?.runtime ?? 0) <= 900);
-  const shortRate = completed.length
-    ? Math.round((shortCompletions.length / completed.length) * 100)
-    : 0;
-
-  const pcDrops = dropped.filter(entry =>
-    (entry.selected_platform ?? '').toLowerCase().includes('pc'),
-  );
-
-  const statA = `${shortCompletions.length}/${completed.length} short completions`;
-  const statB = `${pcDrops.length} PC drops`;
-
-  return [
-    {
-      id: 'games-short',
-      icon: 'sparkles',
-      title: 'Short game wins',
-      explanation: `You complete ${shortRate}% of games under 15h, so shorter adventures tend to stick.`,
-      stat: statA,
-      supportingText: 'Shorter runtimes are where you actually finish titles.',
-    },
-    {
-      id: 'games-pc-drop',
-      icon: 'gamepad-2',
-      title: 'PC open-world drops',
-      explanation: `You drop ${pcDrops.length} PC sessions, so open-world workloads may need buffering.`,
-      stat: statB,
-      supportingText: 'Drop data shows PC entries stall earlier than other platforms.',
-    },
-    {
-      id: 'games-in-progress',
-      icon: 'clock-4',
-      title: 'Current cadence',
-      explanation: `You juggle ${current.length} games right now.`,
-      stat: `${current.length} in-progress`,
-    },
-    {
-      id: 'games-completions',
-      icon: 'check-circle-2',
-      title: 'Completion focus',
-      explanation: `You have completed ${completed.length} games and dropped ${dropped.length}, so cut down on drops for a smoother run.`,
-      stat: `${completed.length} completed`,
-    },
-  ];
-}
-
-function isWeekend(dateTime?: string | null): boolean {
-  if (!dateTime) return false;
-  const day = new Date(dateTime).getDay();
-  return day === 0 || day === 6;
-}
-
-function buildBookSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard[] {
-  const completed = entries.filter(entry => entry.status === 'completed');
-  const longReads = completed.filter(entry => (entry.media_items?.page_count ?? 0) >= 400);
-  const weekendUpdates = entries.filter(entry => isWeekend(entry.updated_at));
-  const seriesEntries = entries.filter(entry => {
-    const volumes = entry.media_items?.volumes ?? 0;
-    return volumes > 1 && entry.status === 'current';
-  });
-
-  return [
-    {
-      id: 'books-long-reads',
-      icon: 'book-open',
-      title: 'Long read wins',
-      explanation: `You finish ${longReads.length} hefty books (400+ pages), showing stamina for long formats.`,
-      stat: `${longReads.length} long completions`,
-    },
-    {
-      id: 'books-weekend',
-      icon: 'sun',
-      title: 'Weekend momentum',
-      explanation: `You update ${weekendUpdates.length} entries on weekends, meaning weekend sessions drive your reading pace.`,
-      stat: `${weekendUpdates.length} weekend updates`,
-    },
-    {
-      id: 'books-series',
-      icon: 'layers',
-      title: 'Series momentum',
-      explanation: `You are mid-series on ${seriesEntries.length} books—keep going to keep the chain alive.`,
-      stat: `${seriesEntries.length} series in-progress`,
-      ctaLabel: 'Continue the series',
-    },
-    {
-      id: 'books-completion',
-      icon: 'book',
-      title: 'Completion focus',
-      explanation: `You completed ${completed.length} books overall, so keep balancing new starts with finishes.`,
-      stat: `${completed.length} completions total`,
-    },
-  ];
-}
-
-function buildAnimeSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard[] {
-  const completed = entries.filter(entry => entry.status === 'completed');
-  const twelveEpisodeCompletes = completed.filter(entry => {
-    const episodes = entry.media_items?.number_of_episodes ?? entry.media_items?.episodes ?? 0;
-    return episodes > 0 && episodes <= 12;
-  });
-  const weekendUpdates = entries.filter(entry => isWeekend(entry.updated_at));
-  const current = entries.filter(entry => entry.status === 'current');
-  const dropInsight = buildDropPattern(entries);
-
-  return [
-    {
-      id: 'anime-twelve',
-      icon: 'film',
-      title: '12-episode completions',
-      explanation: `You completed ${twelveEpisodeCompletes.length} short series (≤12 eps), so short-season anime are a strength.`,
-      stat: `${twelveEpisodeCompletes.length} short completions`,
-    },
-    {
-      id: 'anime-drop-signal',
-      icon: 'alert',
-      title: 'Drop pattern',
-      explanation: dropInsight.explanation,
-      stat: dropInsight.subtitle,
-    },
-    {
-      id: 'anime-weekend',
-      icon: 'sparkles',
-      title: 'Weekend watchlist',
-      explanation: `You update ${weekendUpdates.length} shows on weekends, which keeps your cadence steady.`,
-      stat: `${weekendUpdates.length} weekend updates`,
-    },
-    {
-      id: 'anime-current',
-      icon: 'clock-4',
-      title: 'In-progress focus',
-      explanation: `You have ${current.length} anime currently running. Prioritize one to avoid fatigue.`,
-      stat: `${current.length} in-progress`,
-    },
-  ];
-}
-
-function buildMangaSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard[] {
-  const completed = entries.filter(entry => entry.status === 'completed');
-  const shortVolumes = completed.filter(entry => {
-    const volumes = entry.media_items?.volumes ?? 0;
-    return volumes && volumes <= 6;
-  });
-  const hiatus = entries.filter(entry => {
-    if (entry.status !== 'current' || !entry.updated_at) return false;
-    return new Date(entry.updated_at) < subDays(new Date(), 21);
-  });
-  const current = entries.filter(entry => entry.status === 'current');
-
-  const totalEntries =
-    completed.length + current.length + entries.filter(entry => entry.status === 'dropped').length;
-  const completionRate = totalEntries ? Math.round((completed.length / totalEntries) * 100) : 0;
-
-  return [
-    {
-      id: 'manga-short',
-      icon: 'volume',
-      title: 'Short volume strength',
-      explanation: `You complete ${shortVolumes.length} entries with 6 volumes or fewer—short runs are reliable.`,
-      stat: `${shortVolumes.length} compact completions`,
-    },
-    {
-      id: 'manga-hiatus',
-      icon: 'clock-4',
-      title: 'Hiatus reads',
-      explanation: `You have ${hiatus.length} entries idle for 3+ weeks; revive them to maintain flow.`,
-      stat: `${hiatus.length} long pauses`,
-    },
-    {
-      id: 'manga-current',
-      icon: 'layers',
-      title: 'Current lineup',
-      explanation: `You juggle ${current.length} manga right now. Finishing one reduces clutter.`,
-      stat: `${current.length} in-progress`,
-    },
-    {
-      id: 'manga-rate',
-      icon: 'check-circle-2',
-      title: 'Completion rate',
-      explanation: `You complete ${completionRate}% of manga you start, so the ratio is leaning positive.`,
-      stat: `${completionRate}% completion`,
-    },
-  ];
-}
-
-function buildMovieSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard[] {
-  const completed = entries.filter(entry => entry.status === 'completed');
-  const planned = entries.filter(entry => entry.status === 'planned');
-  const shortFilms = completed.filter(entry => (entry.media_items?.runtime ?? 0) <= 90);
-  const rewatchCount = entries.filter(entry =>
-    entry.notes?.toLowerCase().includes('rewatch'),
-  ).length;
-
-  const studioCounts: Record<string, number> = {};
-  completed.forEach(entry => {
-    const studios = entry.media_items?.studios ?? [];
-    studios.forEach(studio => {
-      if (!studio) return;
-      studioCounts[studio] = (studioCounts[studio] ?? 0) + 1;
-    });
-  });
-  const topStudio = Object.entries(studioCounts).sort(([, a], [, b]) => b - a)[0];
-
-  return [
-    {
-      id: 'movies-short',
-      icon: 'film',
-      title: 'Short film streak',
-      explanation: `You complete ${shortFilms.length} movies under 90 minutes, so short features stay finished.`,
-      stat: `${shortFilms.length} short completions`,
-    },
-    {
-      id: 'movies-studio',
-      icon: 'star',
-      title: 'Studio focus',
-      explanation: topStudio
-        ? `You complete ${topStudio[1]} titles from ${topStudio[0]}, indicating a studio you revisit.`
-        : 'Studio pattern will appear once you finish more titles.',
-      stat: topStudio ? `${topStudio[0]} ${topStudio[1]}x` : 'Awaiting completions',
-    },
-    {
-      id: 'movies-rewatch',
-      icon: 'refresh-cw',
-      title: 'Rewatch trend',
-      explanation: rewatchCount
-        ? `You noted ${rewatchCount} rewatches, so you revisit favorites regularly.`
-        : 'No rewatch notes yet—log them to track repeats.',
-      stat: `${rewatchCount} rewatch notes`,
-    },
-    {
-      id: 'movies-planned',
-      icon: 'clock-4',
-      title: 'Planned backlog',
-      explanation: `You have ${planned.length} planned movies waiting, so prioritize one for a quick win.`,
-      stat: `${planned.length} planned`,
-    },
-  ];
-}
-
-function buildTvSuggestions(entries: CategoryEntryRow[]): PersonalSuggestionCard[] {
-  const completed = entries.filter(entry => entry.status === 'completed');
-  const current = entries.filter(entry => entry.status === 'current');
-  const dropped = entries.filter(entry => entry.status === 'dropped');
-
-  const shortSeasons = completed.filter(entry => {
-    const media = entry.media_items;
-    const totalEpisodes = media?.number_of_episodes ?? media?.episodes;
-    return totalEpisodes !== null && totalEpisodes !== undefined && totalEpisodes <= 10;
-  });
-
-  const nextEpisodeReady = current.filter(entry => {
-    const media = entry.media_items;
-    const totalEpisodes = media?.number_of_episodes ?? media?.episodes;
-    return (
-      totalEpisodes !== null && totalEpisodes !== undefined && (entry.progress ?? 0) < totalEpisodes
-    );
-  });
-
-  const serviceCounts: Record<string, number> = {};
-  completed.forEach(entry => {
-    const service = entry.selected_platform?.trim() ?? entry.media_items?.platforms?.find(Boolean);
-    if (!service) return;
-    serviceCounts[service] = (serviceCounts[service] ?? 0) + 1;
-  });
-
-  const topService = Object.entries(serviceCounts).sort(([, a], [, b]) => b - a)[0];
-
-  const totalTracked = completed.length + current.length + dropped.length;
-  const completionRate = totalTracked ? Math.round((completed.length / totalTracked) * 100) : 0;
-
-  return [
-    {
-      id: 'tv-short',
-      icon: 'film',
-      title: 'Short season wins',
-      explanation: `You finish ${shortSeasons.length} seasons with 10 episodes or fewer, so short broadcasts stick.`,
-      stat: `${shortSeasons.length} short completions`,
-      supportingText: 'Short runs are where you build momentum.',
-    },
-    {
-      id: 'tv-next-queue',
-      icon: 'clock-4',
-      title: 'Next episode queue',
-      explanation: `You have ${nextEpisodeReady.length} shows that still have episodes to catch up on.`,
-      stat: `${nextEpisodeReady.length} next episodes`,
-    },
-    {
-      id: 'tv-service',
-      icon: 'star',
-      title: 'Service focus',
-      explanation: topService
-        ? `You complete ${topService[1]} shows on ${topService[0]}, highlighting that platform as your go-to.`
-        : 'Complete a few shows to reveal your go-to service.',
-      stat: topService
-        ? `${topService[0]} · ${topService[1]} completions`
-        : 'Awaiting service data',
-    },
-    {
-      id: 'tv-rate',
-      icon: 'check-circle-2',
-      title: 'Completion rate',
-      explanation: `You finish ${completionRate}% of the TV entries you track, so keep balancing starts with finishes.`,
-      stat: `${completionRate}% completion`,
-      supportingText: `${completed.length} completed · ${dropped.length} dropped`,
-    },
-  ];
-}
-
 function entryHasEpisodes(entry: CategoryEntryRow, category: DashboardCategoryKey): boolean {
   const media = entry.media_items;
   if (!media) return false;
@@ -2107,7 +2155,10 @@ function generateBacklogReason(
 type UserPreferences = {
   favoriteGenres: Map<string, number>; // genre -> weight (can be negative for dropped)
   favoriteTags: Map<string, number>; // tag -> weight
+  userBucketWeights: Record<InsightTagBucket, Map<string, number>>;
   droppedGenreCombinations: Set<string>; // stringified genre arrays from dropped games
+  droppedSubgenreCombinations: Set<string>;
+  droppedSubgenreCounts: Map<string, number>;
   averageRating: number;
   completedCount: number;
   totalEntries: number;
@@ -2125,15 +2176,147 @@ type CandidateItem = {
   cover_image_medium: string | null;
   genres: string[] | null;
   tags: string[] | null;
+  candidateBucketTags?: Partial<Record<InsightTagBucket, string[]>>;
 };
+
+type GameSuggestionContributor = {
+  bucket: InsightTagBucket | 'genre';
+  label: string;
+  weightedScore: number;
+};
+
+type GameScoreResult = {
+  score: number;
+  contributors: GameSuggestionContributor[];
+};
+
+const GAME_BUCKET_CHANNEL_WEIGHTS: Record<InsightTagBucket, number> = {
+  subgenre: 0,
+  mechanic: 0,
+  mood: 0,
+  theme: 0,
+  structure: 0,
+};
+const GAME_GENRE_FALLBACK_WEIGHT = 0.05;
+const GAME_DROPPED_SUBGENRE_BLOCK_THRESHOLD = 2;
+const GAME_DROPPED_SUBGENRE_PENALTY = 0.35;
+const GAME_REQUIRED_SUBGENRE_POSITIVE_MATCH = 0.2;
+const GAME_MIN_EXTERNAL_CONFIDENCE = 0.5;
+const DEBUG_GAME_SUGGESTIONS = process.env.DEBUG_GAME_SUGGESTIONS === '1';
+const DASHBOARD_SUGGESTIONS_DEBUG =
+  process.env.DASHBOARD_SUGGESTIONS_DEBUG === '1' || DEBUG_GAME_SUGGESTIONS;
+const DASHBOARD_SUGGESTIONS_TARGET_TITLE = (
+  process.env.DASHBOARD_SUGGESTIONS_TARGET_TITLE ?? ''
+).trim();
+
+function truncateDebugString(value: string, maxLen = 240): string {
+  return value.length > maxLen ? `${value.slice(0, maxLen)}...` : value;
+}
+
+function safeDebugJson(value: unknown): string {
+  try {
+    return JSON.stringify(
+      value,
+      (_key, val) => {
+        if (typeof val === 'string') return truncateDebugString(val, 180);
+        return val;
+      },
+      2,
+    );
+  } catch {
+    return '[unserializable]';
+  }
+}
+
+function dbg(...args: unknown[]) {
+  if (!DASHBOARD_SUGGESTIONS_DEBUG) return;
+  console.log('[DashboardSuggestionsDebug]', ...args);
+}
+
+function dbgTable(label: string, rows: Array<Record<string, unknown>>) {
+  if (!DASHBOARD_SUGGESTIONS_DEBUG) return;
+  console.log(`[DashboardSuggestionsDebug] ${label} (rows=${rows.length})`);
+  console.table(rows);
+}
+
+function toSafeListPreview(values: string[], max = 5): string[] {
+  return values.slice(0, max).map(value => truncateDebugString(value, 120));
+}
+
+function formatTagsForDebug(tags: unknown): string {
+  if (!Array.isArray(tags)) return '';
+  const values: string[] = [];
+  for (const tag of tags) {
+    if (typeof tag === 'string') {
+      const value = tag.trim();
+      if (value) values.push(value);
+      continue;
+    }
+    if (!tag || typeof tag !== 'object') continue;
+    const record = tag as Record<string, unknown>;
+    const value =
+      typeof record.name === 'string' && record.name.trim()
+        ? record.name.trim()
+        : typeof record.slug === 'string' && record.slug.trim()
+          ? record.slug.trim()
+          : '';
+    if (value) values.push(value);
+  }
+  return Array.from(new Set(values)).join(', ');
+}
+
+function resolveCandidateTitle(candidate: CandidateItem): string {
+  return (
+    candidate.title ??
+    candidate.title_english ??
+    candidate.title_romaji ??
+    candidate.title_native ??
+    candidate.original_title ??
+    'Untitled'
+  );
+}
+
+function isTargetTitleMatch(title: string): boolean {
+  if (!DASHBOARD_SUGGESTIONS_TARGET_TITLE) return false;
+  return title.toLowerCase().includes(DASHBOARD_SUGGESTIONS_TARGET_TITLE.toLowerCase());
+}
+
+function normalizePreferenceLabel(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function createEmptyBucketWeightMaps(): Record<InsightTagBucket, Map<string, number>> {
+  return {
+    subgenre: new Map(),
+    mechanic: new Map(),
+    mood: new Map(),
+    theme: new Map(),
+    structure: new Map(),
+  };
+}
+
+function getFavoriteRankMultiplier(pinnedRank?: number | null): number {
+  if (typeof pinnedRank !== 'number' || !Number.isFinite(pinnedRank) || pinnedRank <= 0) {
+    return 1.1;
+  }
+  const rank = Math.min(10, Math.max(1, Math.round(pinnedRank)));
+  return 1.35 - (rank - 1) * 0.035;
+}
 
 /**
  * Analyzes user's entries to extract preferences
  */
-function analyzeUserPreferences(entries: CategoryEntryRow[]): UserPreferences {
+function analyzeUserPreferences(
+  entries: CategoryEntryRow[],
+  gameTagMap?: Map<number, Partial<Record<InsightTagBucket, string[]>>>,
+): UserPreferences {
+  const isGamesMode = Boolean(gameTagMap);
   const genreWeights = new Map<string, number>();
   const tagWeights = new Map<string, number>();
+  const userBucketWeights = createEmptyBucketWeightMaps();
   const droppedGenreCombinations = new Set<string>();
+  const droppedSubgenreCombinations = new Set<string>();
+  const droppedSubgenreCounts = new Map<string, number>();
   let totalRating = 0;
   let ratingCount = 0;
   const completedCount = entries.filter(e => e.status === 'completed').length;
@@ -2151,18 +2334,30 @@ function analyzeUserPreferences(entries: CategoryEntryRow[]): UserPreferences {
       droppedGenreCombinations.add(genreKey);
     }
 
+    const isPositiveTaste = entry.status === 'completed' || entry.status === 'current';
+    if (!isPositiveTaste && !isDropped) {
+      continue;
+    }
+
     // Weight based on status and rating
     let weight = 1;
-    if (entry.status === 'completed') weight = 3;
-    else if (entry.status === 'current') weight = 2;
-    else if (entry.is_favorite) weight = 4;
-    else if (isDropped) weight = -2; // NEGATIVE weight for dropped
+    if (entry.status === 'completed') {
+      weight = entry.is_favorite ? 4 : 3;
+    } else if (entry.status === 'current') {
+      weight = entry.is_favorite ? 3 : 2;
+    } else if (isDropped) {
+      weight = -2; // NEGATIVE weight for dropped
+    }
 
     // Higher rating = more weight
-    if (entry.score !== null && entry.score !== undefined && !isDropped) {
+    if (entry.score !== null && entry.score !== undefined && isPositiveTaste) {
       weight *= entry.score / 5; // Normalize to 0-2 range
       totalRating += entry.score;
       ratingCount++;
+    }
+
+    if (isPositiveTaste && entry.is_favorite) {
+      weight *= getFavoriteRankMultiplier(entry.pinned_rank);
     }
 
     // Count genres (can be negative for dropped)
@@ -2171,12 +2366,32 @@ function analyzeUserPreferences(entries: CategoryEntryRow[]): UserPreferences {
       genreWeights.set(genre, (genreWeights.get(genre) ?? 0) + weight);
     }
 
-    // Count tags (only if not empty array)
-    const tags = media.tags ?? [];
-    if (Array.isArray(tags) && tags.length > 0) {
+    // For games, tags come from bucket links and should not contribute to favoriteTags.
+    if (!isGamesMode) {
+      const tags = extractTasteTagLabelsFromMediaTags(media.tags);
       for (const tag of tags) {
-        if (!tag) continue;
         tagWeights.set(tag, (tagWeights.get(tag) ?? 0) + weight);
+      }
+    }
+
+    const mediaId = entry.media_items?.id;
+    if (typeof mediaId === 'number' && gameTagMap?.has(mediaId)) {
+      const bucketTags = gameTagMap.get(mediaId) ?? {};
+      const normalizedSubgenres = (bucketTags.subgenre ?? [])
+        .map(normalizePreferenceLabel)
+        .filter(Boolean);
+      if (isDropped && normalizedSubgenres.length > 0) {
+        droppedSubgenreCombinations.add([...normalizedSubgenres].sort().join('|'));
+      }
+      for (const bucket of INSIGHT_TAG_BUCKETS) {
+        const labels = (bucketTags[bucket] ?? []).map(normalizePreferenceLabel).filter(Boolean);
+        for (const label of labels) {
+          const map = userBucketWeights[bucket];
+          map.set(label, (map.get(label) ?? 0) + weight);
+          if (isDropped && bucket === 'subgenre') {
+            droppedSubgenreCounts.set(label, (droppedSubgenreCounts.get(label) ?? 0) + 1);
+          }
+        }
       }
     }
   }
@@ -2184,7 +2399,10 @@ function analyzeUserPreferences(entries: CategoryEntryRow[]): UserPreferences {
   return {
     favoriteGenres: genreWeights,
     favoriteTags: tagWeights,
+    userBucketWeights,
     droppedGenreCombinations,
+    droppedSubgenreCombinations,
+    droppedSubgenreCounts,
     averageRating: ratingCount > 0 ? totalRating / ratingCount : 0,
     completedCount,
     totalEntries: entries.length,
@@ -2274,9 +2492,232 @@ function scoreCandidateItem(candidate: CandidateItem, preferences: UserPreferenc
   return Math.max(0, Math.min(1, score / maxScore));
 }
 
+function hasPositiveBucketPreference(preferences: UserPreferences): boolean {
+  return INSIGHT_TAG_BUCKETS.some(bucket =>
+    Array.from(preferences.userBucketWeights[bucket].values()).some(weight => weight > 0),
+  );
+}
+
+function scoreLabelsAgainstPreferenceMap(
+  labels: string[],
+  preferenceMap: Map<string, number>,
+): { positive: number; negative: number; contributors: Array<{ label: string; score: number }> } {
+  if (labels.length === 0) {
+    return { positive: 0, negative: 0, contributors: [] };
+  }
+
+  const uniqueLabels = Array.from(new Set(labels.map(normalizePreferenceLabel).filter(Boolean)));
+  if (uniqueLabels.length === 0) {
+    return { positive: 0, negative: 0, contributors: [] };
+  }
+
+  const positiveWeights = Array.from(preferenceMap.values()).filter(weight => weight > 0);
+  const negativeWeights = Array.from(preferenceMap.values()).filter(weight => weight < 0);
+  const maxPositiveWeight = positiveWeights.length > 0 ? Math.max(...positiveWeights) : 0;
+  const maxNegativeWeight =
+    negativeWeights.length > 0 ? Math.max(...negativeWeights.map(weight => Math.abs(weight))) : 0;
+
+  let positiveRaw = 0;
+  let negativeRaw = 0;
+  const contributors: Array<{ label: string; score: number }> = [];
+
+  for (const label of uniqueLabels) {
+    const weight = preferenceMap.get(label) ?? 0;
+    if (weight > 0 && maxPositiveWeight > 0) {
+      const normalizedScore = Math.min(1, weight / maxPositiveWeight);
+      positiveRaw += normalizedScore;
+      contributors.push({ label, score: normalizedScore });
+      continue;
+    }
+    if (weight < 0 && maxNegativeWeight > 0) {
+      negativeRaw += Math.min(1, Math.abs(weight) / maxNegativeWeight);
+    }
+  }
+
+  const normalizationBase = Math.max(1, Math.min(uniqueLabels.length, 2));
+  return {
+    positive: Math.min(1, positiveRaw / normalizationBase),
+    negative: Math.min(1, negativeRaw / normalizationBase),
+    contributors,
+  };
+}
+
+function scoreCandidateItemGames(
+  candidate: CandidateItem,
+  preferences: UserPreferences,
+  candidateBucketTags: Partial<Record<InsightTagBucket, string[]>>,
+): GameScoreResult {
+  const candidateTitle = resolveCandidateTitle(candidate);
+  const targetMatch = isTargetTitleMatch(candidateTitle);
+  const candidateGenres = (candidate.genres ?? []).filter(Boolean);
+  const subgenres = (candidateBucketTags.subgenre ?? [])
+    .map(normalizePreferenceLabel)
+    .filter(Boolean);
+  const subgenreKey = subgenres.length > 0 ? [...subgenres].sort().join('|') : '';
+  if (targetMatch) {
+    const bucketSummary = INSIGHT_TAG_BUCKETS.map(bucket => ({
+      bucket,
+      count: (candidateBucketTags[bucket] ?? []).length,
+      sample: toSafeListPreview(candidateBucketTags[bucket] ?? [], 3),
+    }));
+    dbg(
+      `[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] bucket summary for "${candidateTitle}"`,
+      safeDebugJson(bucketSummary),
+    );
+  }
+  if (subgenreKey && preferences.droppedSubgenreCombinations.has(subgenreKey)) {
+    if (targetMatch) {
+      dbg(
+        `[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] excluded by droppedSubgenreCombinations`,
+        { candidateTitle, subgenreKey },
+      );
+    }
+    return { score: 0, contributors: [] };
+  }
+  const blockedDroppedSubgenres = Array.from(new Set(subgenres)).filter(
+    subgenre =>
+      (preferences.droppedSubgenreCounts.get(subgenre) ?? 0) >=
+      GAME_DROPPED_SUBGENRE_BLOCK_THRESHOLD,
+  );
+  if (targetMatch) {
+    dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] dropped subgenre checks`, {
+      candidateTitle,
+      blockedDroppedSubgenres,
+      droppedSubgenreCombinationHit: Boolean(
+        subgenreKey && preferences.droppedSubgenreCombinations.has(subgenreKey),
+      ),
+    });
+  }
+  if (subgenres.length > 0 && blockedDroppedSubgenres.length === subgenres.length) {
+    if (targetMatch) {
+      dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] excluded by blockedDroppedSubgenres`, {
+        candidateTitle,
+        subgenres,
+        blockedDroppedSubgenres,
+      });
+    }
+    return { score: 0, contributors: [] };
+  }
+
+  let positiveScore = 0;
+  let negativePenalty = 0;
+  const contributors: GameSuggestionContributor[] = [];
+  let subgenrePositiveSignal = 0;
+
+  for (const bucket of INSIGHT_TAG_BUCKETS) {
+    const channelWeight = GAME_BUCKET_CHANNEL_WEIGHTS[bucket];
+    const bucketLabels = candidateBucketTags[bucket] ?? [];
+    const channelResult = scoreLabelsAgainstPreferenceMap(
+      bucketLabels,
+      preferences.userBucketWeights[bucket],
+    );
+    if (bucket === 'subgenre') {
+      subgenrePositiveSignal = channelResult.positive;
+    }
+    positiveScore += channelResult.positive * channelWeight;
+    negativePenalty += channelResult.negative * channelWeight;
+    for (const contributor of channelResult.contributors) {
+      contributors.push({
+        bucket,
+        label: contributor.label,
+        weightedScore: contributor.score * channelWeight,
+      });
+    }
+  }
+
+  if (candidateGenres.length > 0) {
+    const genreResult = scoreLabelsAgainstPreferenceMap(
+      candidateGenres,
+      preferences.favoriteGenres,
+    );
+    positiveScore += genreResult.positive * GAME_GENRE_FALLBACK_WEIGHT;
+    negativePenalty += genreResult.negative * GAME_GENRE_FALLBACK_WEIGHT;
+    for (const contributor of genreResult.contributors) {
+      contributors.push({
+        bucket: 'genre',
+        label: contributor.label,
+        weightedScore: contributor.score * GAME_GENRE_FALLBACK_WEIGHT,
+      });
+    }
+  }
+
+  if (blockedDroppedSubgenres.length > 0) {
+    const severity = blockedDroppedSubgenres.length / Math.max(1, subgenres.length);
+    negativePenalty += GAME_DROPPED_SUBGENRE_PENALTY * severity;
+  }
+
+  const hasSubgenreData = subgenres.length > 0;
+  if (hasSubgenreData && subgenrePositiveSignal < GAME_REQUIRED_SUBGENRE_POSITIVE_MATCH) {
+    if (targetMatch) {
+      dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] excluded by subgenre threshold`, {
+        candidateTitle,
+        hasSubgenreData,
+        subgenrePositiveSignal,
+        required: GAME_REQUIRED_SUBGENRE_POSITIVE_MATCH,
+      });
+    }
+    return { score: 0, contributors: [] };
+  }
+
+  const score = Math.max(0, Math.min(1, positiveScore - negativePenalty));
+  const rankedContributors = contributors
+    .filter(contributor => contributor.weightedScore > 0)
+    .sort((a, b) => {
+      const bucketPriorityA = a.bucket === 'subgenre' ? 1 : 0;
+      const bucketPriorityB = b.bucket === 'subgenre' ? 1 : 0;
+      if (bucketPriorityB !== bucketPriorityA) return bucketPriorityB - bucketPriorityA;
+      return b.weightedScore - a.weightedScore;
+    });
+
+  if (targetMatch) {
+    dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] scoreCandidateItemGames result`, {
+      candidateTitle,
+      subgenrePositiveSignal,
+      hasSubgenreData,
+      blockedDroppedSubgenres,
+      score: Number(score.toFixed(4)),
+      topContributors: rankedContributors.slice(0, 5).map(item => ({
+        bucket: item.bucket,
+        label: item.label,
+        weightedScore: Number(item.weightedScore.toFixed(4)),
+      })),
+    });
+  }
+
+  return { score, contributors: rankedContributors };
+}
+
+function buildGameRecommendationReason(contributors: GameSuggestionContributor[]): string {
+  if (contributors.length === 0) {
+    return 'Based on your game taste profile';
+  }
+
+  const uniqueByLabel = new Set<string>();
+  const selected: string[] = [];
+
+  for (const contributor of contributors) {
+    const key = `${contributor.bucket}:${contributor.label}`;
+    if (uniqueByLabel.has(key)) continue;
+    uniqueByLabel.add(key);
+    selected.push(formatTasteProfileLabel(contributor.label));
+    if (selected.length >= 2) break;
+  }
+
+  if (selected.length === 0) {
+    return 'Based on your game taste profile';
+  }
+  if (selected.length === 1) {
+    return `Because you love ${selected[0]}`;
+  }
+  return `Because you love ${selected[0]} + ${selected[1]}`;
+}
+
 /**
  * Builds media suggestions for a category
- * Strategy: First 2 from user's backlog, last 2 from external recommendations
+ * Strategy:
+ * - exactly 4 items total when possible
+ * - 2 items from user's backlog
+ * - 2 common-knowledge picks from the global database, excluding user's own lists
  */
 async function buildMediaSuggestions(
   supabase: DashboardSupabaseClient,
@@ -2284,9 +2725,84 @@ async function buildMediaSuggestions(
   category: DashboardCategoryKey,
   userEntries: CategoryEntryRow[],
 ): Promise<MediaSuggestion[]> {
-  // Need at least 3 entries to generate meaningful suggestions
-  if (userEntries.length < 3) {
-    return [];
+  const targetTitle = DASHBOARD_SUGGESTIONS_TARGET_TITLE.toLowerCase();
+  const hasTarget = targetTitle.length > 0;
+  dbg('buildMediaSuggestions:start', {
+    category,
+    userId,
+    userEntriesCount: userEntries.length,
+    targetTitle: hasTarget ? DASHBOARD_SUGGESTIONS_TARGET_TITLE : '(none)',
+  });
+
+  if (category === 'games') {
+    const completedGames = userEntries
+      .filter(entry => entry.status === 'completed')
+      .map(entry => {
+        const media = entry.media_items;
+        const title =
+          media?.title ??
+          media?.title_english ??
+          media?.title_romaji ??
+          media?.title_native ??
+          media?.original_title ??
+          `media_id:${entry.media_items?.id ?? 'unknown'}`;
+
+        return {
+          mediaId: media?.id ?? null,
+          title,
+          isFavorite: Boolean(entry.is_favorite),
+          favoriteRank: entry.pinned_rank ?? null,
+          score: entry.score ?? null,
+          hours: entry.progress ?? 0,
+          genres: media?.genres ?? [],
+          tags: media?.tags ?? [],
+        };
+      });
+
+    dbg('[Games Suggestions] Completed games count', completedGames.length);
+    dbgTable(
+      '[Games Suggestions] Completed games table',
+      completedGames.map(game => ({
+        mediaId: game.mediaId,
+        title: game.title,
+        isFavorite: game.isFavorite,
+        favoriteRank: game.favoriteRank,
+        score: game.score,
+        hours: game.hours,
+        genres: game.genres.join(', '),
+        tags: formatTagsForDebug(game.tags),
+      })),
+    );
+
+    dbgTable(
+      'User entries data-shape sanity (first 5)',
+      userEntries.slice(0, 5).map(entry => {
+        const media = entry.media_items;
+        const firstTag = Array.isArray(media?.tags) ? media?.tags[0] : undefined;
+        return {
+          title:
+            media?.title ??
+            media?.title_english ??
+            media?.title_romaji ??
+            media?.title_native ??
+            media?.original_title ??
+            '(untitled)',
+          genresType: typeof media?.genres,
+          genresIsArray: Array.isArray(media?.genres),
+          genresSample: Array.isArray(media?.genres) ? safeDebugJson(media.genres.slice(0, 2)) : '',
+          tagsType: typeof media?.tags,
+          tagsIsArray: Array.isArray(media?.tags),
+          tagsSample:
+            Array.isArray(media?.tags) && media.tags.length > 0 ? safeDebugJson(media.tags[0]) : '',
+          tagObjectKeys:
+            firstTag && typeof firstTag === 'object' && !Array.isArray(firstTag)
+              ? Object.keys(firstTag as Record<string, unknown>)
+                  .slice(0, 12)
+                  .join(',')
+              : '',
+        };
+      }),
+    );
   }
 
   const suggestions: MediaSuggestion[] = [];
@@ -2295,8 +2811,9 @@ async function buildMediaSuggestions(
   // PART 1: Backlog suggestions (first 2)
   // ============================================================================
   const backlogEntries = userEntries.filter(entry => entry.status === 'planned');
+  const maxBacklogSuggestions = 2;
 
-  if (backlogEntries.length > 0) {
+  if (backlogEntries.length > 0 && maxBacklogSuggestions > 0) {
     // Sort by priority (if exists) or updated_at
     const sortedBacklog = backlogEntries.sort((a, b) => {
       const priorityA = (a as unknown as { priority?: number }).priority ?? 0;
@@ -2309,7 +2826,7 @@ async function buildMediaSuggestions(
 
     // Take up to 2 from backlog, but filter out sequels without prerequisites
     for (const entry of sortedBacklog) {
-      if (suggestions.length >= 2) break; // Already have 2 backlog suggestions
+      if (suggestions.length >= maxBacklogSuggestions) break;
 
       const media = entry.media_items;
       if (!media) continue;
@@ -2325,10 +2842,17 @@ async function buildMediaSuggestions(
       // Check if this is a sequel that requires previous games
       const seriesInfo = detectSeries(title);
       const prerequisiteCheck = checkSeriesPrerequisites(title, seriesInfo, userEntries);
+      if (hasTarget && title.toLowerCase().includes(targetTitle)) {
+        dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] backlog series check`, {
+          title,
+          seriesInfo,
+          prerequisiteCheck,
+        });
+      }
 
       // Skip if it's a sequel without prerequisites played
       if (!prerequisiteCheck.canRecommend) {
-        console.log(`⚠️ Skipping "${title}" - previous game in series not played/completed`);
+        dbg(`Skipping "${title}" - previous game in series not played/completed`);
         continue;
       }
 
@@ -2362,8 +2886,36 @@ async function buildMediaSuggestions(
     }
   }
 
+  const normalizeGenreKey = (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase();
+  const droppedGenreCounts = new Map<string, number>();
+  const activeGenreCounts = new Map<string, number>();
+
+  for (const entry of userEntries) {
+    const genres = entry.media_items?.genres ?? [];
+    for (const genre of genres) {
+      if (!genre) continue;
+      const key = normalizeGenreKey(genre);
+      if (!key) continue;
+      if (entry.status === 'dropped') {
+        droppedGenreCounts.set(key, (droppedGenreCounts.get(key) ?? 0) + 1);
+        continue;
+      }
+      if (entry.status === 'current' || entry.status === 'completed') {
+        activeGenreCounts.set(key, (activeGenreCounts.get(key) ?? 0) + 1);
+      }
+    }
+  }
+
+  const resilientDroppedGenres = new Set(
+    Array.from(droppedGenreCounts.entries())
+      .filter(
+        ([genre, droppedCount]) => droppedCount >= 1 && (activeGenreCounts.get(genre) ?? 0) >= 1,
+      )
+      .map(([genre]) => genre),
+  );
+
   // ============================================================================
-  // PART 2: External suggestions (up to 2 more)
+  // PART 2: External suggestions (up to 3 more)
   // ============================================================================
   const neededExternal = 4 - suggestions.length; // Fill up to 4 total
 
@@ -2381,6 +2933,10 @@ async function buildMediaSuggestions(
           .map(entry => entry.media_id)
           .filter((id): id is number => id !== null && id !== undefined),
       );
+      dbg('external-pool:existingMediaIds', {
+        count: existingMediaIds.size,
+        sample: Array.from(existingMediaIds).slice(0, 12),
+      });
 
       // 2. Fetch ALL existing titles for similarity check (no limit!)
       const { data: allUserMedia, error: mediaError } = await supabase
@@ -2418,16 +2974,46 @@ async function buildMediaSuggestions(
           );
         })
         .filter((title): title is string => title !== null && title !== undefined);
+      dbg('external-pool:existingTitles', {
+        count: existingTitles.length,
+        sample: toSafeListPreview(existingTitles, 8),
+      });
+
+      let userGameTagMap: Map<number, Partial<Record<InsightTagBucket, string[]>>> | undefined;
+      if (category === 'games') {
+        const userMediaIds = userEntries
+          .map(entry => entry.media_items?.id)
+          .filter((mediaId): mediaId is number => typeof mediaId === 'number');
+        userGameTagMap = await fetchGameInsightTagMap(supabase, userMediaIds);
+      }
 
       // 3. Analyze user preferences
-      const preferences = analyzeUserPreferences(userEntries);
+      const preferences = analyzeUserPreferences(userEntries, userGameTagMap);
+      if (category === 'games' && DASHBOARD_SUGGESTIONS_DEBUG) {
+        const tagWeightKeys = Array.from(preferences.favoriteTags.keys());
+        const objectObjectCount = tagWeightKeys.filter(
+          key => key === '[object Object]' || /object Object/i.test(key),
+        ).length;
+        dbg('[Games Suggestions] tagWeights guard', {
+          tagWeightsSize: preferences.favoriteTags.size,
+          objectObjectCount,
+        });
+      }
+      const hasPreferenceSignal =
+        preferences.favoriteGenres.size > 0 ||
+        preferences.favoriteTags.size > 0 ||
+        (category === 'games' && hasPositiveBucketPreference(preferences));
+      dbg('preference-signal', {
+        category,
+        hasPreferenceSignal,
+        favoriteGenresCount: preferences.favoriteGenres.size,
+        favoriteTagsCount: preferences.favoriteTags.size,
+      });
 
-      if (preferences.favoriteGenres.size > 0 || preferences.favoriteTags.size > 0) {
+      if (hasPreferenceSignal || category.length > 0) {
         // 4. Fetch candidate items from database (exclude user's items)
-        const { data: candidates, error } = await supabase
-          .from('media_items')
-          .select(
-            `
+        let candidatesQuery = supabase.from('media_items').select(
+          `
             id,
             category,
             title,
@@ -2440,23 +3026,265 @@ async function buildMediaSuggestions(
             genres,
             tags
           `,
-          )
-          .eq('category', category)
-          .not('id', 'in', `(${Array.from(existingMediaIds).join(',')})`)
-          .limit(100);
+        );
+
+        candidatesQuery = candidatesQuery.eq('category', category).limit(300);
+        if (existingMediaIds.size > 0) {
+          candidatesQuery = candidatesQuery.not(
+            'id',
+            'in',
+            `(${Array.from(existingMediaIds).join(',')})`,
+          );
+        }
+
+        const { data: candidates, error } = await candidatesQuery;
 
         if (!error && candidates && candidates.length > 0) {
-          // 5. Score and rank candidates with 50% minimum confidence
-          const scoredCandidates = candidates
-            .map(candidate => ({
-              candidate: candidate as CandidateItem,
-              score: scoreCandidateItem(candidate as CandidateItem, preferences),
-            }))
-            .filter(item => item.score >= 0.5) // Minimum 50% confidence
+          const candidateIds = candidates
+            .map(candidate => candidate.id)
+            .filter((candidateId): candidateId is number => typeof candidateId === 'number');
+          const { data: popularityRows } = await supabase
+            .from('user_media_entries')
+            .select('media_id,status,is_favorite,score')
+            .in('media_id', candidateIds);
+
+          const popularityByMediaId = new Map<
+            number,
+            {
+              tracked: number;
+              completed: number;
+              favorites: number;
+              scoreSum: number;
+              scoreCount: number;
+            }
+          >();
+          for (const row of popularityRows ?? []) {
+            const mediaId = (row as { media_id: number | null }).media_id;
+            if (typeof mediaId !== 'number') continue;
+            const stats = popularityByMediaId.get(mediaId) ?? {
+              tracked: 0,
+              completed: 0,
+              favorites: 0,
+              scoreSum: 0,
+              scoreCount: 0,
+            };
+            stats.tracked += 1;
+            if ((row as { status?: string | null }).status === 'completed') {
+              stats.completed += 1;
+            }
+            if ((row as { is_favorite?: boolean | null }).is_favorite) {
+              stats.favorites += 1;
+            }
+            const rawScore = (row as { score?: number | string | null }).score;
+            const parsedScore =
+              typeof rawScore === 'number'
+                ? rawScore
+                : typeof rawScore === 'string' && rawScore.trim() !== ''
+                  ? Number(rawScore)
+                  : null;
+            if (parsedScore !== null && Number.isFinite(parsedScore)) {
+              stats.scoreSum += parsedScore;
+              stats.scoreCount += 1;
+            }
+            popularityByMediaId.set(mediaId, stats);
+          }
+
+          const candidateTitles = candidates.map(candidate =>
+            resolveCandidateTitle(candidate as CandidateItem),
+          );
+          const targetInCandidates = hasTarget
+            ? candidateTitles.some(title => title.toLowerCase().includes(targetTitle))
+            : false;
+          dbg('candidate-pool:after-sql', {
+            fetchedCount: candidates.length,
+            candidateIdListSize: candidateIds.length,
+            targetInCandidates,
+            sampleTitles: toSafeListPreview(candidateTitles, 10),
+          });
+
+          if (hasTarget) {
+            const targetLookupPattern = `%${DASHBOARD_SUGGESTIONS_TARGET_TITLE}%`;
+            const { data: targetRows, error: targetRowsError } = await supabase
+              .from('media_items')
+              .select('id,title,title_english,title_romaji,title_native,original_title,category')
+              .eq('category', category)
+              .or(
+                `title.ilike.${targetLookupPattern},title_english.ilike.${targetLookupPattern},title_romaji.ilike.${targetLookupPattern},title_native.ilike.${targetLookupPattern},original_title.ilike.${targetLookupPattern}`,
+              )
+              .limit(25);
+
+            if (targetRowsError) {
+              dbg(
+                `[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] lookup-error`,
+                targetRowsError.message,
+              );
+            } else {
+              const targetLookup = (targetRows ?? []).map(row => {
+                const typedRow = row as unknown as CandidateItem;
+                return {
+                  id: typedRow.id,
+                  title: resolveCandidateTitle(typedRow),
+                  excludedByExistingMediaIds: existingMediaIds.has(typedRow.id),
+                  presentInFetchedCandidates: candidateIds.includes(typedRow.id),
+                };
+              });
+              dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] candidate presence diagnostics`, {
+                foundInMediaItemsForCategory: targetLookup.length > 0,
+                targetLookupCount: targetLookup.length,
+                targetLookupSample: targetLookup.slice(0, 10),
+                inferredFilteredByLimit:
+                  targetLookup.length > 0 &&
+                  targetLookup.every(
+                    item => !item.presentInFetchedCandidates && !item.excludedByExistingMediaIds,
+                  ) &&
+                  candidateIds.length >= 100,
+                sqlNotInApplied: true,
+                sqlLimitApplied: 100,
+              });
+            }
+          }
+
+          dbgTable(
+            'Candidates data-shape sanity (first 5)',
+            candidates.slice(0, 5).map(candidate => {
+              const typed = candidate as CandidateItem;
+              const firstTag = Array.isArray(typed.tags) ? typed.tags[0] : undefined;
+              return {
+                title: resolveCandidateTitle(typed),
+                genresType: typeof typed.genres,
+                genresIsArray: Array.isArray(typed.genres),
+                genresSample:
+                  Array.isArray(typed.genres) && typed.genres.length > 0
+                    ? safeDebugJson(typed.genres.slice(0, 2))
+                    : '',
+                tagsType: typeof typed.tags,
+                tagsIsArray: Array.isArray(typed.tags),
+                tagsSample:
+                  Array.isArray(typed.tags) && typed.tags.length > 0
+                    ? safeDebugJson(typed.tags[0])
+                    : '',
+                tagObjectKeys:
+                  firstTag && typeof firstTag === 'object' && !Array.isArray(firstTag)
+                    ? Object.keys(firstTag as Record<string, unknown>)
+                        .slice(0, 12)
+                        .join(',')
+                    : '',
+              };
+            }),
+          );
+          const candidateGameTagMap =
+            category === 'games'
+              ? await fetchGameInsightTagMap(supabase, candidateIds)
+              : new Map<number, Partial<Record<InsightTagBucket, string[]>>>();
+
+          // 5. Score and rank candidates
+          const rankedCandidates = candidates
+            .map(candidate => {
+              const typedCandidate = candidate as CandidateItem;
+              const resolvedTitle = resolveCandidateTitle(typedCandidate);
+              const targetMatch = isTargetTitleMatch(resolvedTitle);
+              const candidateBucketTags =
+                category === 'games'
+                  ? (candidateGameTagMap.get(typedCandidate.id) ?? {})
+                  : undefined;
+              const hasAnyBucketSignal =
+                category === 'games' &&
+                INSIGHT_TAG_BUCKETS.some(
+                  bucket => (candidateBucketTags?.[bucket] ?? []).length > 0,
+                );
+              if (targetMatch) {
+                dbg(
+                  `[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] candidate bucket gate pre-check`,
+                  {
+                    id: typedCandidate.id,
+                    title: resolvedTitle,
+                    hasAnyBucketSignal,
+                    bucketSummary: INSIGHT_TAG_BUCKETS.map(bucket => ({
+                      bucket,
+                      count: (candidateBucketTags?.[bucket] ?? []).length,
+                      sample: toSafeListPreview(candidateBucketTags?.[bucket] ?? [], 3),
+                    })),
+                  },
+                );
+              }
+              const gameScoreResult =
+                category === 'games'
+                  ? scoreCandidateItemGames(typedCandidate, preferences, candidateBucketTags ?? {})
+                  : null;
+              const personalScore =
+                category === 'games'
+                  ? gameScoreResult
+                    ? gameScoreResult.score
+                    : scoreCandidateItem(typedCandidate, preferences)
+                  : scoreCandidateItem(typedCandidate, preferences);
+              const popularity = popularityByMediaId.get(typedCandidate.id) ?? {
+                tracked: 0,
+                completed: 0,
+                favorites: 0,
+                scoreSum: 0,
+                scoreCount: 0,
+              };
+              const trackedScore = Math.min(1, popularity.tracked / 20);
+              const completionScore =
+                popularity.tracked > 0 ? popularity.completed / popularity.tracked : 0;
+              const favoriteScore =
+                popularity.tracked > 0 ? popularity.favorites / popularity.tracked : 0;
+              const avgScore =
+                popularity.scoreCount > 0 ? popularity.scoreSum / popularity.scoreCount : 0;
+              const ratingScore = avgScore > 0 ? Math.min(1, avgScore / 10) : 0;
+              const commonKnowledgeScore =
+                trackedScore * 0.5 +
+                completionScore * 0.25 +
+                favoriteScore * 0.15 +
+                ratingScore * 0.1;
+              const combinedScore = hasPreferenceSignal
+                ? personalScore * 0.45 + commonKnowledgeScore * 0.55
+                : commonKnowledgeScore;
+              return {
+                candidate: {
+                  ...typedCandidate,
+                  candidateBucketTags,
+                },
+                score: combinedScore,
+                personalScore,
+                commonKnowledgeScore,
+                popularity,
+                gameContributors: gameScoreResult?.contributors ?? [],
+              };
+            })
             .sort((a, b) => b.score - a.score);
 
+          const commonKnowledgeCandidates = rankedCandidates.filter(
+            item =>
+              item.commonKnowledgeScore >=
+                (category === 'games' ? GAME_MIN_EXTERNAL_CONFIDENCE * 0.24 : 0.12) &&
+              item.popularity.tracked >= 2,
+          );
+          if (hasTarget) {
+            const targetRanked = rankedCandidates.find(item =>
+              resolveCandidateTitle(item.candidate).toLowerCase().includes(targetTitle),
+            );
+            dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] final scoring checkpoint`, {
+              foundInRankedCandidates: Boolean(targetRanked),
+              finalScore: targetRanked ? Number(targetRanked.score.toFixed(4)) : null,
+              commonKnowledgeScore: targetRanked
+                ? Number(targetRanked.commonKnowledgeScore.toFixed(4))
+                : null,
+              trackedByUsers: targetRanked ? targetRanked.popularity.tracked : 0,
+              topContributors: (targetRanked?.gameContributors ?? []).slice(0, 5).map(item => ({
+                bucket: item.bucket,
+                label: item.label,
+                weightedScore: Number(item.weightedScore.toFixed(4)),
+              })),
+            });
+          }
+          const scoredCandidates =
+            commonKnowledgeCandidates.length > 0
+              ? commonKnowledgeCandidates
+              : rankedCandidates.filter(item => item.score > 0);
+
           // 6. Build external suggestion objects (skip similar titles)
-          for (const { candidate, score } of scoredCandidates) {
+          for (const { candidate, score, gameContributors, popularity } of scoredCandidates) {
             if (suggestions.length >= 4) break; // Already have 4 suggestions
 
             const title =
@@ -2472,6 +3300,16 @@ async function buildMediaSuggestions(
             const hasSimilarTitle = existingTitles.some(existingTitle =>
               areTitlesSimilar(title, existingTitle),
             );
+            if (hasTarget && title.toLowerCase().includes(targetTitle)) {
+              const matchedExistingTitle = existingTitles.find(existingTitle =>
+                areTitlesSimilar(title, existingTitle),
+              );
+              dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] similar-title filter`, {
+                title,
+                hasSimilarTitle,
+                matchedExistingTitle: matchedExistingTitle ?? null,
+              });
+            }
 
             if (hasSimilarTitle) {
               continue; // Skip this candidate
@@ -2480,24 +3318,45 @@ async function buildMediaSuggestions(
             const cover =
               candidate.cover_image_large ?? candidate.cover_image_medium ?? DEFAULT_COVER;
 
-            // Generate reason based on matching genres/tags (ONLY positive weights)
+            // Generate reason based on bucket/genre matches (ONLY positive weights)
             const matchingGenres = (candidate.genres ?? []).filter(
               g => g && (preferences.favoriteGenres.get(g) ?? 0) > 0,
             );
-            const matchingTags = (candidate.tags ?? []).filter(
-              t => t && (preferences.favoriteTags.get(t) ?? 0) > 0,
-            );
+            const matchingTags =
+              category === 'games'
+                ? []
+                : (candidate.tags ?? []).filter(
+                    t => t && (preferences.favoriteTags.get(t) ?? 0) > 0,
+                  );
+            const droppedGenreMatch = (candidate.genres ?? [])
+              .filter(genre => genre && resilientDroppedGenres.has(normalizeGenreKey(genre)))
+              .slice(0, 1);
 
-            let reason = '';
-            if (matchingGenres.length > 0) {
-              reason = `You enjoy ${matchingGenres.slice(0, 2).join(' & ')}`;
-              if (matchingTags.length > 0) {
-                reason += ` with ${matchingTags[0]}`;
-              }
-            } else if (matchingTags.length > 0) {
-              reason = `Matches your interest in ${matchingTags.slice(0, 2).join(' & ')}`;
-            } else {
-              reason = 'Based on your library preferences';
+            const reason =
+              droppedGenreMatch.length > 0
+                ? `Second-chance pick: you still play a lot of ${droppedGenreMatch[0]} even after some drops.`
+                : category === 'games'
+                  ? buildGameRecommendationReason(gameContributors)
+                  : matchingGenres.length > 0 && popularity.tracked >= 3
+                    ? `Popular ${matchingGenres.slice(0, 2).join(' & ')} pick (${popularity.tracked} users tracked it)`
+                    : matchingGenres.length > 0
+                      ? `You enjoy ${matchingGenres.slice(0, 2).join(' & ')}${
+                          matchingTags.length > 0 ? ` with ${matchingTags[0]}` : ''
+                        }`
+                      : matchingTags.length > 0
+                        ? `Matches your interest in ${matchingTags.slice(0, 2).join(' & ')}`
+                        : popularity.tracked >= 5
+                          ? `Common knowledge pick from the database (${popularity.tracked} users tracked it)`
+                          : 'Based on your library preferences';
+
+            if (DEBUG_GAME_SUGGESTIONS && category === 'games') {
+              dbg(`[Games Suggestion Debug] ${title}`, {
+                contributors: gameContributors.slice(0, 3).map(item => ({
+                  bucket: item.bucket,
+                  label: item.label,
+                  score: Number(item.weightedScore.toFixed(3)),
+                })),
+              });
             }
 
             suggestions.push({
@@ -2507,15 +3366,36 @@ async function buildMediaSuggestions(
               cover,
               slug: titleToSlug(title),
               reason,
-              confidence: score,
+              confidence: Math.max(0.35, Math.min(0.99, score)),
               genres: candidate.genres ?? [],
               tags: candidate.tags ?? [],
+              bucketTags: category === 'games' ? candidate.candidateBucketTags : undefined,
             });
           }
+        } else {
+          dbg('candidate-pool:empty-or-error', {
+            hasError: Boolean(error),
+            errorMessage: error?.message ?? null,
+            candidatesCount: candidates?.length ?? 0,
+          });
         }
+      } else {
+        dbg('external-pool:skipped-no-preference-signal', { category });
       }
     }
   }
+
+  dbg('buildMediaSuggestions:end', {
+    category,
+    totalSuggestions: suggestions.length,
+    titlesWithScores: suggestions.map(item => ({
+      title: item.title,
+      confidence: Number(item.confidence.toFixed(4)),
+    })),
+    targetAppearsInFinalList: hasTarget
+      ? suggestions.some(item => item.title.toLowerCase().includes(targetTitle))
+      : null,
+  });
 
   return suggestions;
 }

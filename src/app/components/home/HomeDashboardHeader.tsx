@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -23,7 +23,7 @@ export function HomeDashboardHeader({ username, displayName }: HomeDashboardHead
 
   return (
     <section className="px-4 pb-8 pt-12 md:px-6 md:pb-8 md:pt-16">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-screen-2xl">
         <div className="max-w-3xl space-y-4">
           <p
             className="min-h-[1.25rem] text-sm font-medium tracking-normal text-muted-foreground"

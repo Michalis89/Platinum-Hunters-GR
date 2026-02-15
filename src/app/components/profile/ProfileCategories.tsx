@@ -111,7 +111,7 @@ export function ProfileCategories({
               >
                 <span
                   className={`transition-colors ${
-                    isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-info'
+                    isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-primary'
                   }`}
                 >
                   {meta.icon}
@@ -127,14 +127,14 @@ export function ProfileCategories({
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 p-4 sm:p-5">
             <a
               href={categoryMeta[activeCategory].href}
-              className="inline-flex items-center gap-2 rounded-full border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-info/40 hover:text-info"
+              className="inline-flex items-center gap-2 rounded-full border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-info/40 hover:text-primary"
             >
               Άνοιγμα Library
             </a>
             {['anime', 'manga', 'books', 'movies', 'tv', 'vape'].includes(activeCategory) && (
               <a
                 href={`/pages/reviews?category=${activeCategory}`}
-                className="inline-flex items-center gap-2 rounded-full border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-info/40 hover:text-info"
+                className="inline-flex items-center gap-2 rounded-full border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-info/40 hover:text-primary"
               >
                 Δες Reviews
               </a>

@@ -21,7 +21,7 @@ import {
 const fetcher = apiClient.swrFetcher;
 const noStoreFetcher = apiClient.swrNoStoreFetcher;
 const SECTION_SPACING = 'pt-10 md:pt-12';
-const DIVIDER_WRAP = 'mx-auto mt-8 max-w-7xl px-4 md:mt-10 md:px-6';
+const DIVIDER_WRAP = 'mx-auto mt-8 max-w-screen-2xl px-4 md:mt-10 md:px-6';
 const DIVIDER_STYLE = '';
 
 type DashboardViewProps = {
@@ -102,12 +102,12 @@ export default function HomeDashboardPageClient() {
 
       {mediaCategories.length === 0 && (
         <section className={SECTION_SPACING}>
-          <div className="mx-auto max-w-7xl px-4 md:px-6">
+          <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
             <div className="rounded-lg border p-5 md:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-foreground">
-                    <Sparkles className="h-4 w-4 text-info" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     <h3 className="text-base font-semibold tracking-[-0.01em]">
                       Turn on categories to activate your dashboard
                     </h3>
@@ -163,7 +163,7 @@ function HomeDashboardLoadingShell() {
   return (
     <div className="min-h-[80vh] pb-14 pt-2 md:pb-16 md:pt-3">
       <section className="px-4 pb-8 pt-12 md:px-6 md:pb-8 md:pt-16">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="animate-pulse space-y-3">
             <div className="h-4 w-20 rounded bg-card" />
             <div className="h-10 w-72 rounded bg-accent/15" />
@@ -173,7 +173,7 @@ function HomeDashboardLoadingShell() {
       </section>
 
       <section className="px-4 py-8 md:px-6 md:py-10">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="min-h-[304px] animate-pulse p-6 md:p-8">
             <div className="grid min-h-[260px] items-center gap-7 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">

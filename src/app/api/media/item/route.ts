@@ -6,7 +6,7 @@ import { isMediaCategory } from '@/app/components/backlog/types';
 import type { MediaItem } from '@/lib/media/types';
 
 const selectFields =
-  'id,category,title,original_title,title_english,title_romaji,title_native,description,format,season_year,start_date,release_date,first_air_date,cover_image_large,cover_image_medium,banner_image,genres,episodes,chapters,volumes,runtime,number_of_episodes,page_count,rating,popularity,mal_id,tmdb_id,google_books_id,rawg_id,platforms,developer,publisher,metacritic,esrb_rating';
+  'id,category,title,original_title,title_english,title_romaji,title_native,description,summary,storyline,format,season_year,start_date,first_release_date,release_date,first_air_date,cover_image_id,cover_url_thumb,cover_url_big,cover_image_large,cover_image_medium,banner_image,genres,episodes,chapters,volumes,runtime,number_of_episodes,page_count,rating,rating_count,aggregated_rating,aggregated_rating_count,popularity,mal_id,tmdb_id,google_books_id,rawg_id,igdb_id,igdb_category,igdb_slug,platforms,developer,publisher,metacritic,esrb_rating,igdb_themes,igdb_game_modes,igdb_player_perspectives,igdb_artwork_image_ids,igdb_screenshot_image_ids,official_website,igdb_updated_at,websites';
 
 const isNumeric = (value: string) => /^\d+$/.test(value);
 
@@ -59,7 +59,9 @@ async function fetchByExternalId(category: string, externalId: number | string) 
   } else if (category === 'movies' || category === 'tv') {
     query = query.eq('tmdb_id', Number(externalId));
   } else if (category === 'games') {
-    query = query.eq('rawg_id', Number(externalId));
+    const numericId = Number(externalId);
+    if (!Number.isFinite(numericId)) return null;
+    query = query.eq('igdb_id', numericId);
   } else if (category === 'books') {
     query = query.eq('google_books_id', String(externalId));
   }

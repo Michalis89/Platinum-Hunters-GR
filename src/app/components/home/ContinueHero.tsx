@@ -324,7 +324,7 @@ export function ContinueHero() {
   if (isInitialLoading) {
     return (
       <section className="px-4 py-6 md:px-6">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="min-h-[304px] animate-pulse p-6">
             <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">
@@ -347,7 +347,7 @@ export function ContinueHero() {
   if (slideItems.length === 0) {
     return (
       <section className="px-4 py-6 md:px-6">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="p-7">
             <h2 className="text-3xl font-semibold tracking-[-0.03em]">
               Continue where you left off
@@ -370,7 +370,7 @@ export function ContinueHero() {
 
   return (
     <section className="px-4 py-6 md:px-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-screen-2xl">
         <div className="p-7">
           <Carousel
             setApi={setCarouselApi}

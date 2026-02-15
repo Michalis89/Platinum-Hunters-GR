@@ -5,7 +5,12 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import type { Database } from '@/lib/supabase/database.types';
 import { randomUUID } from 'crypto';
-import { searchRawgGames, fetchRawgGameDetails, type RawgGame } from '@/lib/services/rawgService';
+import {
+  searchIgdbGames,
+  fetchIgdbGameDetails,
+  mapIgdbToPayload,
+  type IgdbGame,
+} from '@/lib/services/igdbService';
 import {
   fetchSteamOwnedGames,
   fetchSteamAchievements,
@@ -68,7 +73,7 @@ async function createSyncJob(userId: string): Promise<string> {
     id: jobId,
     user_id: userId,
     status: 'running',
-    message: 'Ξεκινά ο συγχρονισμός Steam...',
+    message: 'Starting Steam sync...',
     percent: 0,
     completed_steps: 0,
     total_steps: 1,
@@ -120,8 +125,8 @@ function normalizeTitle(value?: string | null): string {
  */
 function cleanTitleForStorage(value?: string | null): string {
   if (!value) return '';
-  // Remove trademark symbols (™, ®, ©)
-  return value.replace(/[™®©]/g, '').trim();
+  // Remove trademark symbols.
+  return value.replace(/[\u2122\u00AE\u00A9]/g, '').trim();
 }
 
 /**
@@ -131,10 +136,10 @@ function cleanTitleForStorage(value?: string | null): string {
 function normalizeForMatch(value?: string | null): string {
   let normalized = (value ?? '').trim();
 
-  // Remove trademark symbols (™, ®, ©)
-  normalized = normalized.replace(/[™®©]/g, '');
+  // Remove trademark symbols.
+  normalized = normalized.replace(/[\u2122\u00AE\u00A9]/g, '');
 
-  // Remove edition tokens that break RAWG matching
+  // Remove edition tokens that break IGDB matching
   const editionTokens = [
     /\s*-?\s*Complete Edition/gi,
     /\s*-?\s*Definitive Edition/gi,
@@ -258,11 +263,11 @@ async function mapWithConcurrency<TInput, TOutput>(
   return results;
 }
 
-async function matchSteamGamesToRawg(
+async function matchSteamGamesToIgdb(
   games: SteamOwnedGame[],
   onItemComplete?: (completed: number, total: number) => Promise<void> | void,
 ) {
-  const cache = new Map<string, RawgGame | null>();
+  const cache = new Map<string, IgdbGame | null>();
 
   const pairs = await mapWithConcurrency(
     games,
@@ -279,14 +284,14 @@ async function matchSteamGamesToRawg(
       }
 
       try {
-        const candidates = await searchRawgGames(title, 8);
+        const candidates = await searchIgdbGames(title, 8);
         const matched =
           candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
 
         cache.set(key, matched);
         return [game.appid, matched] as const;
       } catch (error) {
-        console.warn(`RAWG search failed for "${title}":`, error);
+        console.warn(`IGDB search failed for "${title}":`, error);
         cache.set(key, null);
         return [game.appid, null] as const;
       }
@@ -294,44 +299,44 @@ async function matchSteamGamesToRawg(
     onItemComplete,
   );
 
-  return new Map<number, RawgGame | null>(pairs);
+  return new Map<number, IgdbGame | null>(pairs);
 }
 
-async function enrichRawgMatches(
-  matchByAppId: Map<number, RawgGame | null>,
+async function enrichIgdbMatches(
+  matchByAppId: Map<number, IgdbGame | null>,
   onItemComplete?: (completed: number, total: number) => Promise<void> | void,
 ) {
-  const matchedRawgIds = Array.from(
+  const matchedIgdbIds = Array.from(
     new Set(
       Array.from(matchByAppId.values())
         .map(item => item?.id)
         .filter((id): id is number => typeof id === 'number'),
     ),
   );
-  const detailsCache = new Map<number, RawgGame | null>();
+  const detailsCache = new Map<number, IgdbGame | null>();
 
-  if (matchedRawgIds.length === 0) {
-    return new Map<number, RawgGame | null>();
+  if (matchedIgdbIds.length === 0) {
+    return new Map<number, IgdbGame | null>();
   }
 
   await mapWithConcurrency(
-    matchedRawgIds,
+    matchedIgdbIds,
     3,
-    async rawgId => {
+    async igdbId => {
       try {
-        const details = await fetchRawgGameDetails(rawgId);
-        detailsCache.set(rawgId, details);
+        const details = await fetchIgdbGameDetails(igdbId, { mainGameOnly: false });
+        detailsCache.set(igdbId, details);
         return details;
       } catch (error) {
-        console.warn(`RAWG details fetch failed for ID ${rawgId}:`, error);
-        detailsCache.set(rawgId, null);
+        console.warn(`IGDB details fetch failed for ID ${igdbId}:`, error);
+        detailsCache.set(igdbId, null);
         return null;
       }
     },
     onItemComplete,
   );
 
-  const enrichedByAppId = new Map<number, RawgGame | null>();
+  const enrichedByAppId = new Map<number, IgdbGame | null>();
   for (const [appid, matched] of matchByAppId.entries()) {
     if (!matched) {
       enrichedByAppId.set(appid, null);
@@ -347,8 +352,8 @@ async function enrichRawgMatches(
  * Merge platforms ensuring PC is included for Steam games.
  * Matches EditEntryDialog behavior.
  */
-function mergePlatforms(rawgPlatforms: string[] | null | undefined): string[] {
-  const ordered = ['PC', ...(rawgPlatforms ?? [])].filter(Boolean) as string[];
+function mergePlatforms(igdbPlatforms: string[] | null | undefined): string[] {
+  const ordered = ['PC', ...(igdbPlatforms ?? [])].filter(Boolean) as string[];
   return Array.from(new Set(ordered));
 }
 
@@ -360,42 +365,29 @@ function getSteamHours(game: SteamOwnedGame): number | null {
 }
 
 /**
- * Build RAWG metadata patch for a Steam game.
- * EXACTLY like EditEntryDialog's sync_rawg_metadata action.
+ * Build IGDB metadata patch for a Steam game.
  * This should ONLY be called for NEW enrichment, NOT for already-enriched items.
  */
-function buildGameMetadataPatch(game: SteamOwnedGame, rawg: RawgGame) {
-  const rawgGenres = rawg.genres?.map(item => item.name) ?? [];
-  const rawgPlatforms = rawg.platforms?.map(item => item.platform.name) ?? [];
-  const year = rawg.released ? Number.parseInt(rawg.released.slice(0, 4), 10) : null;
-
-  // Safety: Ensure we have full RAWG data (not just search result)
-  if (!rawg.background_image && !rawg.description_raw) {
-    console.warn(`⚠️ buildGameMetadataPatch called with incomplete RAWG data for ${rawg.name}`);
-  }
-
-  // Clean titles: remove trademark symbols (™, ®, ©)
-  const cleanTitle = cleanTitleForStorage(rawg.name ?? game.name ?? `Steam App ${game.appid}`);
+function buildGameMetadataPatch(game: SteamOwnedGame, igdb: IgdbGame) {
+  const payload = mapIgdbToPayload(igdb);
+  const cleanTitle = cleanTitleForStorage(payload.title ?? game.name ?? `Steam App ${game.appid}`);
 
   return {
-    source: 'rawg',
-    rawg_id: rawg.id,
+    source: 'igdb',
+    rawg_id: payload.igdb_id,
     steam_app_id: game.appid,
     title: cleanTitle,
     title_english: cleanTitle,
-    description: rawg.description_raw ?? null,
-    cover_image_large: rawg.background_image ?? getSteamCoverUrls(game).large,
-    cover_image_medium: rawg.background_image ?? getSteamCoverUrls(game).medium,
-    season_year: Number.isFinite(year) ? year : null,
-    release_date: rawg.released ?? null,
-    rating: rawg.rating ?? null,
-    metacritic: rawg.metacritic ?? null,
-    platforms: mergePlatforms(rawgPlatforms), // PC + RAWG platforms (merged like EditEntryDialog)
-    genres: rawgGenres,
-    developer: rawg.developers?.[0]?.name ?? null,
-    publisher: rawg.publishers?.[0]?.name ?? null,
-    esrb_rating: rawg.esrb_rating?.name ?? null,
-    runtime: rawg.playtime ?? null,
+    description: payload.description,
+    cover_image_large: payload.cover_image_large ?? getSteamCoverUrls(game).large,
+    cover_image_medium: payload.cover_image_medium ?? getSteamCoverUrls(game).medium,
+    season_year: payload.season_year,
+    release_date: payload.release_date,
+    rating: payload.rating,
+    platforms: mergePlatforms(payload.platforms),
+    genres: payload.genres,
+    developer: payload.developer,
+    publisher: payload.publisher,
   } satisfies Database['public']['Tables']['media_items']['Update'];
 }
 
@@ -429,7 +421,7 @@ async function syncSteamForUser(options?: {
   jobId?: string;
   onProgress?: (progress: SyncProgress) => Promise<void> | void;
 }): Promise<SyncResult> {
-  console.log('🚀 [Steam Sync] Starting sync...', { jobId: options?.jobId });
+  console.log('ðŸš€ [Steam Sync] Starting sync...', { jobId: options?.jobId });
 
   const supabase = await createRouteHandlerClient();
   const adminSupabase = createSupabaseAdminClient();
@@ -443,7 +435,7 @@ async function syncSteamForUser(options?: {
       totalSteps > 0 ? Math.min(100, Math.round((completedSteps / totalSteps) * 100)) : 0;
 
     console.log(
-      `📊 [Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`,
+      `ðŸ“Š [Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`,
     );
 
     // Update job record if jobId provided
@@ -465,7 +457,7 @@ async function syncSteamForUser(options?: {
     });
   };
 
-  await updateProgress('Σύνδεση με Steam προφίλ...');
+  await updateProgress('Î£ÏÎ½Î´ÎµÏƒÎ· Î¼Îµ Steam Ï€ÏÎ¿Ï†Î¯Î»...');
 
   const { data: userData, error: userError } = await supabase
     .from('users')
@@ -474,25 +466,25 @@ async function syncSteamForUser(options?: {
     .maybeSingle();
 
   if (userError) {
-    console.error('❌ [Steam Sync] User fetch error:', userError);
+    console.error('âŒ [Steam Sync] User fetch error:', userError);
     throw userError;
   }
 
   const steamInput = userData?.steam_id?.trim();
   if (!steamInput) {
-    console.error('❌ [Steam Sync] No steam_id in user profile');
+    console.error('âŒ [Steam Sync] No steam_id in user profile');
     throw new Error(
-      'Δεν έχεις ορίσει Steam ID στο προφίλ σου. Πήγαινε στις ρυθμίσεις για να το προσθέσεις.',
+      'Î”ÎµÎ½ Î­Ï‡ÎµÎ¹Ï‚ Î¿ÏÎ¯ÏƒÎµÎ¹ Steam ID ÏƒÏ„Î¿ Ï€ÏÎ¿Ï†Î¯Î» ÏƒÎ¿Ï…. Î Î®Î³Î±Î¹Î½Îµ ÏƒÏ„Î¹Ï‚ ÏÏ…Î¸Î¼Î¯ÏƒÎµÎ¹Ï‚ Î³Î¹Î± Î½Î± Ï„Î¿ Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÎ¹Ï‚.',
     );
   }
 
-  console.log('🔑 [Steam Sync] Fetching Steam API key...');
+  console.log('ðŸ”‘ [Steam Sync] Fetching Steam API key...');
   const apiKey = getSteamApiKey();
 
-  console.log('🎮 [Steam Sync] Resolving Steam ID64...');
+  console.log('ðŸŽ® [Steam Sync] Resolving Steam ID64...');
   const steamId64 = await resolveSteamId64({ apiKey, steamInput });
 
-  console.log('📚 [Steam Sync] Fetching owned games...');
+  console.log('ðŸ“š [Steam Sync] Fetching owned games...');
   const steamGames = await fetchSteamOwnedGames({ apiKey, steamId64 });
 
   const uniqueGames = Array.from(
@@ -500,7 +492,7 @@ async function syncSteamForUser(options?: {
   ).filter(game => typeof game.appid === 'number' && game.appid > 0 && game.name);
 
   totalSteps = Math.max(12, uniqueGames.length * 4 + 8);
-  await updateProgress(`Βρέθηκαν ${uniqueGames.length} παιχνίδια από Steam.`, 1);
+  await updateProgress(`Î’ÏÎ­Î¸Î·ÎºÎ±Î½ ${uniqueGames.length} Ï€Î±Î¹Ï‡Î½Î¯Î´Î¹Î± Î±Ï€ÏŒ Steam.`, 1);
 
   if (uniqueGames.length === 0) {
     return {
@@ -526,7 +518,7 @@ async function syncSteamForUser(options?: {
   }
 
   // Fetch achievements for games with stats (throttled to avoid rate limits)
-  await updateProgress('Ανάκτηση achievements...', 1);
+  await updateProgress('Î‘Î½Î¬ÎºÏ„Î·ÏƒÎ· achievements...', 1);
   const achievementsPercentByAppId = new Map<number, number>();
   const gamesWithStats = uniqueGames.filter(g => g.has_community_visible_stats);
 
@@ -548,9 +540,9 @@ async function syncSteamForUser(options?: {
     );
   }
 
-  await updateProgress('Αντιστοίχιση τίτλων Steam με RAWG...', 1);
-  const rawgMatchByAppId = await matchSteamGamesToRawg(uniqueGames, async (done, total) => {
-    await updateProgress(`Αντιστοίχιση RAWG ${done}/${total}`, 1);
+  await updateProgress('Î‘Î½Ï„Î¹ÏƒÏ„Î¿Î¯Ï‡Î¹ÏƒÎ· Ï„Î¯Ï„Î»Ï‰Î½ Steam Î¼Îµ IGDB...', 1);
+  const igdbMatchByAppId = await matchSteamGamesToIgdb(uniqueGames, async (done, total) => {
+    await updateProgress(`Î‘Î½Ï„Î¹ÏƒÏ„Î¿Î¯Ï‡Î¹ÏƒÎ· IGDB ${done}/${total}`, 1);
   });
 
   // Fetch existing media items first (needed for enrichment filtering)
@@ -575,70 +567,70 @@ async function syncSteamForUser(options?: {
     }
   }
 
-  await updateProgress('Ανάκτηση RAWG metadata...', 0);
+  await updateProgress('Î‘Î½Î¬ÎºÏ„Î·ÏƒÎ· IGDB metadata...', 0);
 
-  // Filter matches: skip enrichment for items that already have RAWG metadata
-  const rawgMatchesNeedingEnrichment = new Map<number, RawgGame | null>();
-  const rawgMatchesAlreadyEnriched = new Map<number, RawgGame | null>();
+  // Filter matches: skip enrichment for items that already have IGDB metadata
+  const igdbMatchesNeedingEnrichment = new Map<number, IgdbGame | null>();
+  const igdbMatchesAlreadyEnriched = new Map<number, IgdbGame | null>();
 
-  for (const [appid, rawgMatch] of rawgMatchByAppId.entries()) {
-    if (!rawgMatch) {
-      rawgMatchesNeedingEnrichment.set(appid, null);
+  for (const [appid, igdbMatch] of igdbMatchByAppId.entries()) {
+    if (!igdbMatch) {
+      igdbMatchesNeedingEnrichment.set(appid, null);
       continue;
     }
 
     const existingMedia = mediaByAppId.get(appid);
     const alreadyEnriched =
-      existingMedia && existingMedia.rawg_id === rawgMatch.id && existingMedia.source === 'rawg';
+      existingMedia && existingMedia.rawg_id === igdbMatch.id && existingMedia.source === 'igdb';
 
     if (alreadyEnriched) {
-      // Already have enriched data for this RAWG ID - reuse the basic match
-      rawgMatchesAlreadyEnriched.set(appid, rawgMatch);
+      // Already have enriched data for this IGDB ID - reuse the basic match
+      igdbMatchesAlreadyEnriched.set(appid, igdbMatch);
     } else {
       // Need to fetch details
-      rawgMatchesNeedingEnrichment.set(appid, rawgMatch);
+      igdbMatchesNeedingEnrichment.set(appid, igdbMatch);
     }
   }
 
-  const needsEnrichmentCount = Array.from(rawgMatchesNeedingEnrichment.values()).filter(
+  const needsEnrichmentCount = Array.from(igdbMatchesNeedingEnrichment.values()).filter(
     Boolean,
   ).length;
   totalSteps += needsEnrichmentCount;
 
-  const enrichedRawgByAppId = await enrichRawgMatches(
-    rawgMatchesNeedingEnrichment,
+  const enrichedIgdbByAppId = await enrichIgdbMatches(
+    igdbMatchesNeedingEnrichment,
     async (done, total) => {
-      await updateProgress(`RAWG metadata ${done}/${total}`, 1);
+      await updateProgress(`IGDB metadata ${done}/${total}`, 1);
     },
   );
 
   // Merge already-enriched items back in
-  for (const [appid, match] of rawgMatchesAlreadyEnriched.entries()) {
-    enrichedRawgByAppId.set(appid, match);
+  for (const [appid, match] of igdbMatchesAlreadyEnriched.entries()) {
+    enrichedIgdbByAppId.set(appid, match);
   }
 
-  const allMatchedRawgIds = Array.from(
+  const allMatchedIgdbIds = Array.from(
     new Set(
       uniqueGames
-        .map(game => enrichedRawgByAppId.get(game.appid)?.id)
+        .map(game => enrichedIgdbByAppId.get(game.appid)?.id)
         .filter((id): id is number => typeof id === 'number'),
     ),
   );
-  const existingRawgMediaByRawgId = new Map<number, { id: number; rawg_id: number | null }>();
-  if (allMatchedRawgIds.length > 0) {
-    const { data: rawgRows, error: rawgRowsError } = await adminSupabase
+  const existingIgdbMediaByIgdbId = new Map<number, { id: number; rawg_id: number | null }>();
+  if (allMatchedIgdbIds.length > 0) {
+    const { data: igdbRows, error: igdbRowsError } = await adminSupabase
       .from('media_items')
       .select('id,rawg_id')
       .eq('category', 'games')
-      .in('rawg_id', allMatchedRawgIds);
+      .in('rawg_id', allMatchedIgdbIds);
 
-    if (rawgRowsError) {
-      throw rawgRowsError;
+    if (igdbRowsError) {
+      throw igdbRowsError;
     }
 
-    for (const row of rawgRows ?? []) {
+    for (const row of igdbRows ?? []) {
       if (typeof row.rawg_id === 'number') {
-        existingRawgMediaByRawgId.set(row.rawg_id, row);
+        existingIgdbMediaByIgdbId.set(row.rawg_id, row);
       }
     }
   }
@@ -650,58 +642,64 @@ async function syncSteamForUser(options?: {
   }> = [];
   const updateByMediaId = new Map<number, Database['public']['Tables']['media_items']['Update']>();
 
-  await updateProgress('Συγχρονισμός catalog media...', 1);
+  await updateProgress('Î£Ï…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼ÏŒÏ‚ catalog media...', 1);
   for (const game of uniqueGames) {
-    const matchedRawg = enrichedRawgByAppId.get(game.appid) ?? null;
+    const matchedIgdb = enrichedIgdbByAppId.get(game.appid) ?? null;
     const existingByAppId = mediaByAppId.get(game.appid);
 
     if (existingByAppId) {
       mediaIdByAppId.set(game.appid, existingByAppId.id);
 
-      // CRITICAL: Check if this item is already RAWG-enriched
+      // CRITICAL: Check if this item is already IGDB-enriched
       // If yes, ONLY update steam_app_id + runtime
       // NEVER touch: images, platforms, description, genres, developer, publisher, etc.
-      const isAlreadyEnriched = existingByAppId.source === 'rawg' && existingByAppId.rawg_id;
+      const isAlreadyEnriched = existingByAppId.source === 'igdb' && existingByAppId.rawg_id;
 
       if (isAlreadyEnriched) {
-        // ✅ PRESERVING EXISTING RAWG DATA (images, platforms, etc.)
+        // âœ… PRESERVING EXISTING IGDB DATA (images, platforms, etc.)
         console.log(
-          `✅ [Steam Sync] Preserving RAWG data for: ${game.name} (RAWG ID: ${existingByAppId.rawg_id})`,
+          `âœ… [Steam Sync] Preserving IGDB data for: ${game.name} (IGDB ID: ${existingByAppId.rawg_id})`,
         );
         updateByMediaId.set(existingByAppId.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
         });
-      } else if (matchedRawg) {
-        // 🆕 NEW RAWG ENRICHMENT (item has no RAWG data yet)
+      } else if (matchedIgdb) {
+        // ðŸ†• NEW IGDB ENRICHMENT (item has no IGDB data yet)
         console.log(
-          `🆕 [Steam Sync] Enriching with RAWG: ${game.name} (RAWG ID: ${matchedRawg.id})`,
+          `ðŸ†• [Steam Sync] Enriching with IGDB: ${game.name} (IGDB ID: ${matchedIgdb.id})`,
         );
-        updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedRawg));
+        updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedIgdb));
       } else {
-        // No RAWG match found, just update Steam fields
+        // No IGDB match found, just update Steam fields
         updateByMediaId.set(existingByAppId.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
         });
       }
-      await updateProgress(`Catalog ενημέρωση ${mediaIdByAppId.size}/${uniqueGames.length}`, 1);
+      await updateProgress(
+        `Catalog ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ· ${mediaIdByAppId.size}/${uniqueGames.length}`,
+        1,
+      );
       continue;
     }
 
-    if (matchedRawg) {
-      const existingRawgMedia = existingRawgMediaByRawgId.get(matchedRawg.id);
-      if (existingRawgMedia) {
-        mediaIdByAppId.set(game.appid, existingRawgMedia.id);
-        // ✅ PRESERVING: Game exists with same RAWG ID (already enriched)
+    if (matchedIgdb) {
+      const existingIgdbMedia = existingIgdbMediaByIgdbId.get(matchedIgdb.id);
+      if (existingIgdbMedia) {
+        mediaIdByAppId.set(game.appid, existingIgdbMedia.id);
+        // âœ… PRESERVING: Game exists with same IGDB ID (already enriched)
         console.log(
-          `✅ [Steam Sync] Preserving existing RAWG media: ${game.name} (RAWG ID: ${matchedRawg.id})`,
+          `âœ… [Steam Sync] Preserving existing IGDB media: ${game.name} (IGDB ID: ${matchedIgdb.id})`,
         );
-        updateByMediaId.set(existingRawgMedia.id, {
+        updateByMediaId.set(existingIgdbMedia.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
         });
-        await updateProgress(`Catalog ενημέρωση ${mediaIdByAppId.size}/${uniqueGames.length}`, 1);
+        await updateProgress(
+          `Catalog ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ· ${mediaIdByAppId.size}/${uniqueGames.length}`,
+          1,
+        );
         continue;
       }
 
@@ -709,7 +707,7 @@ async function syncSteamForUser(options?: {
         appid: game.appid,
         payload: {
           category: 'games',
-          ...buildGameMetadataPatch(game, matchedRawg),
+          ...buildGameMetadataPatch(game, matchedIgdb),
         },
       });
     } else {
@@ -720,7 +718,7 @@ async function syncSteamForUser(options?: {
     }
 
     await updateProgress(
-      `Catalog ενημέρωση ${mediaIdByAppId.size + insertTasks.length}/${uniqueGames.length}`,
+      `Catalog ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ· ${mediaIdByAppId.size + insertTasks.length}/${uniqueGames.length}`,
       1,
     );
   }
@@ -773,7 +771,7 @@ async function syncSteamForUser(options?: {
           .eq('id', mediaId);
 
         if (error) {
-          console.error(`❌ Media update failed for ID ${mediaId}:`, error);
+          console.error(`âŒ Media update failed for ID ${mediaId}:`, error);
           console.error(`   Payload:`, JSON.stringify(updatePayload, null, 2));
           failedMediaUpdateCount += 1;
           return false;
@@ -781,7 +779,7 @@ async function syncSteamForUser(options?: {
         return true;
       },
       async (done, total) => {
-        await updateProgress(`RAWG enrichment ${done}/${total}`, 1);
+        await updateProgress(`IGDB enrichment ${done}/${total}`, 1);
       },
     );
   }
@@ -835,7 +833,7 @@ async function syncSteamForUser(options?: {
   const userEntryUpdates: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
   let skippedPotentialDuplicate = 0;
 
-  await updateProgress('Συγχρονισμός user entries...', 1);
+  await updateProgress('Î£Ï…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼ÏŒÏ‚ user entries...', 1);
   for (const game of uniqueGames) {
     const mediaId = mediaIdByAppId.get(game.appid);
     if (!mediaId) {
@@ -916,15 +914,18 @@ async function syncSteamForUser(options?: {
     }
   }
 
-  await updateProgress('Ολοκλήρωση συγχρονισμού...', totalSteps - completedSteps);
+  await updateProgress(
+    'ÎŸÎ»Î¿ÎºÎ»Î®ÏÏ‰ÏƒÎ· ÏƒÏ…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼Î¿Ï...',
+    totalSteps - completedSteps,
+  );
 
   const warnings: string[] = [];
   if (failedMediaInsertCount > 0)
-    warnings.push(`Αποτυχημένες εισαγωγές media: ${failedMediaInsertCount}`);
+    warnings.push(`Î‘Ï€Î¿Ï„Ï…Ï‡Î·Î¼Î­Î½ÎµÏ‚ ÎµÎ¹ÏƒÎ±Î³Ï‰Î³Î­Ï‚ media: ${failedMediaInsertCount}`);
   if (failedMediaUpdateCount > 0)
-    warnings.push(`Αποτυχημένα updates media: ${failedMediaUpdateCount}`);
+    warnings.push(`Î‘Ï€Î¿Ï„Ï…Ï‡Î·Î¼Î­Î½Î± updates media: ${failedMediaUpdateCount}`);
   if (failedEntryUpsertCount > 0)
-    warnings.push(`Αποτυχημένα inserts/updates entries: ${failedEntryUpsertCount}`);
+    warnings.push(`Î‘Ï€Î¿Ï„Ï…Ï‡Î·Î¼Î­Î½Î± inserts/updates entries: ${failedEntryUpsertCount}`);
 
   const result: SyncResult = {
     totalFetched: uniqueGames.length,
@@ -968,7 +969,7 @@ async function POSTHandler(req: Request) {
     // Mark job as completed
     await updateSyncJob(jobId, {
       status: 'completed',
-      message: 'Ο συγχρονισμός ολοκληρώθηκε επιτυχώς',
+      message: 'ÎŸ ÏƒÏ…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼ÏŒÏ‚ Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚',
       percent: 100,
       result: result,
       finishedAt: new Date().toISOString(),
@@ -978,10 +979,10 @@ async function POSTHandler(req: Request) {
   } catch (error) {
     // Mark job as failed if we created one
     if (jobId) {
-      const errorMessage = error instanceof Error ? error.message : 'Άγνωστο σφάλμα';
+      const errorMessage = error instanceof Error ? error.message : 'Î†Î³Î½Ï‰ÏƒÏ„Î¿ ÏƒÏ†Î¬Î»Î¼Î±';
       await updateSyncJob(jobId, {
         status: 'failed',
-        message: 'Ο συγχρονισμός απέτυχε',
+        message: 'ÎŸ ÏƒÏ…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼ÏŒÏ‚ Î±Ï€Î­Ï„Ï…Ï‡Îµ',
         error: errorMessage,
         finishedAt: new Date().toISOString(),
       }).catch(console.error);
@@ -992,7 +993,9 @@ async function POSTHandler(req: Request) {
     }
 
     const message =
-      error instanceof Error ? error.message : 'Αποτυχία συγχρονισμού βιβλιοθήκης Steam';
+      error instanceof Error
+        ? error.message
+        : 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÏƒÏ…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼Î¿Ï Î²Î¹Î²Î»Î¹Î¿Î¸Î®ÎºÎ·Ï‚ Steam';
     console.error('Steam sync error:', error);
     return NextResponse.json({ error: message, jobId }, { status: 500 });
   }
@@ -1016,7 +1019,7 @@ async function GETHandler(req: Request) {
     // Mark job as completed
     await updateSyncJob(jobId, {
       status: 'completed',
-      message: 'Ο συγχρονισμός ολοκληρώθηκε επιτυχώς',
+      message: 'ÎŸ ÏƒÏ…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼ÏŒÏ‚ Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚',
       percent: 100,
       result: result,
       finishedAt: new Date().toISOString(),
@@ -1030,10 +1033,10 @@ async function GETHandler(req: Request) {
   } catch (error) {
     // Mark job as failed if we created one
     if (jobId) {
-      const errorMessage = error instanceof Error ? error.message : 'Άγνωστο σφάλμα';
+      const errorMessage = error instanceof Error ? error.message : 'Î†Î³Î½Ï‰ÏƒÏ„Î¿ ÏƒÏ†Î¬Î»Î¼Î±';
       await updateSyncJob(jobId, {
         status: 'failed',
-        message: 'Ο συγχρονισμός απέτυχε',
+        message: 'ÎŸ ÏƒÏ…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼ÏŒÏ‚ Î±Ï€Î­Ï„Ï…Ï‡Îµ',
         error: errorMessage,
         finishedAt: new Date().toISOString(),
       }).catch(console.error);

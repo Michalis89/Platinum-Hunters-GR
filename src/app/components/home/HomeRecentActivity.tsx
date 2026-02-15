@@ -44,7 +44,7 @@ type HomeRecentActivityProps = {
 export function HomeRecentActivity({ scope = 'global' }: HomeRecentActivityProps) {
   return (
     <section className="px-4 py-10 md:px-6">
-      <div className="mx-auto max-w-7xl space-y-4">
+      <div className="mx-auto max-w-screen-2xl space-y-4">
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold tracking-[-0.02em]">
             {scope === 'me' ? 'My activity' : 'Recent activity'}

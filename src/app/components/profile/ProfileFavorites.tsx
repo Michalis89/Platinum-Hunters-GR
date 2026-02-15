@@ -102,13 +102,13 @@ function ProfileFavoritesComponent({
             />
             {/* Favorite heart overlay */}
             <div className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
-              <Heart className="h-3 w-3 fill-primary text-info" />
+              <Heart className="h-3 w-3 fill-primary text-primary" />
             </div>
           </div>
 
           {/* Title + meta */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-info">
+            <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
               {fav.game?.title || '—'}
             </p>
             <p className="truncate text-xs text-muted-foreground">

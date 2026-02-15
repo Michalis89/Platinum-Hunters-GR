@@ -37,6 +37,7 @@ import { Slider } from '@/components/ui/slider';
 import { apiClient } from '@/lib/api/client';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
+import { isAllowedIgdbCategory } from '@/lib/igdb/categories';
 import {
   MediaCategory,
   MediaEntry,
@@ -82,7 +83,7 @@ export default function EntryEditDialog({
   const [descriptionDraft, setDescriptionDraft] = useState('');
   const [descriptionValue, setDescriptionValue] = useState('');
   const [isSavingDescription, setIsSavingDescription] = useState(false);
-  const [isSyncingRawgMetadata, setIsSyncingRawgMetadata] = useState(false);
+  const [isSyncingIgdbMetadata, setIsSyncingIgdbMetadata] = useState(false);
   const [catalogMessage, setCatalogMessage] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -120,7 +121,11 @@ export default function EntryEditDialog({
       isFavorite: entry.isFavorite ?? false,
       selectedPlatform:
         entry.selectedPlatform ??
-        (category === 'games' && (entry.platforms ?? []).includes('PC') ? 'PC' : ''),
+        (category === 'games'
+          ? (entry.platforms ?? []).includes('PC')
+            ? 'PC'
+            : ((entry.platforms ?? [])[0] ?? '')
+          : ''),
     });
   }, [category, entry]);
 
@@ -128,6 +133,10 @@ export default function EntryEditDialog({
   const shouldAutoCompleteProgress = category !== 'games';
   const descriptionText = entry ? descriptionValue || entry.description || '' : '';
   const showDescriptionTools = canManageCatalog && Boolean(entry?.mediaId);
+  const isExcludedIgdbType =
+    category === 'games' &&
+    typeof entry?.igdbCategory === 'number' &&
+    !isAllowedIgdbCategory(entry.igdbCategory);
   const isDescriptionCollapsed = !descriptionExpanded && !isDescriptionEditing && !!descriptionText;
   const descriptionContainerClassName = [
     'relative text-sm leading-relaxed text-foreground/90',
@@ -166,32 +175,32 @@ export default function EntryEditDialog({
     }
   };
 
-  const handleSyncRawgMetadata = async () => {
+  const handleSyncIgdbMetadata = async () => {
     if (!entry?.mediaId || category !== 'games' || !showDescriptionTools) return;
     try {
-      setIsSyncingRawgMetadata(true);
+      setIsSyncingIgdbMetadata(true);
       setCatalogMessage(null);
       const response = await apiClient.request('/api/media/entry', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'sync_rawg_metadata', category, mediaId: entry.mediaId }),
+        body: JSON.stringify({ action: 'sync_igdb_metadata', category, mediaId: entry.mediaId }),
       });
       const data = (await response.json()) as { error?: string; description?: string };
-      if (!response.ok) throw new Error(data.error || 'RAWG metadata sync failed');
+      if (!response.ok) throw new Error(data.error || 'IGDB metadata sync failed');
       if (typeof data.description === 'string') {
         setDescriptionValue(data.description);
         setDescriptionDraft(data.description);
       }
       await onRefreshEntry?.();
-      setCatalogMessage({ type: 'success', message: 'Το metadata sync από RAWG ολοκληρώθηκε.' });
+      setCatalogMessage({ type: 'success', message: 'Το metadata sync από IGDB ολοκληρώθηκε.' });
     } catch (error) {
-      console.warn('RAWG metadata sync failed:', error);
+      console.warn('IGDB metadata sync failed:', error);
       setCatalogMessage({
         type: 'error',
-        message: error instanceof Error ? error.message : 'Αποτυχία sync metadata από RAWG.',
+        message: error instanceof Error ? error.message : 'Αποτυχία sync metadata από IGDB.',
       });
     } finally {
-      setIsSyncingRawgMetadata(false);
+      setIsSyncingIgdbMetadata(false);
     }
   };
 
@@ -394,10 +403,14 @@ export default function EntryEditDialog({
                                 <Button
                                   type="button"
                                   variant="outline"
-                                  onClick={handleSyncRawgMetadata}
-                                  disabled={isSyncingRawgMetadata}
+                                  onClick={handleSyncIgdbMetadata}
+                                  disabled={isSyncingIgdbMetadata || isExcludedIgdbType}
                                 >
-                                  {isSyncingRawgMetadata ? 'Syncing...' : 'Sync RAWG metadata'}
+                                  {isSyncingIgdbMetadata
+                                    ? 'Syncing...'
+                                    : isExcludedIgdbType
+                                      ? 'IGDB sync disabled for excluded type'
+                                      : 'Sync IGDB metadata'}
                                 </Button>
                               )}
                             </>
@@ -597,7 +610,7 @@ export default function EntryEditDialog({
                           }))
                         }
                         data-empty={editState.score === ''}
-                        className="mt-3 [&_[data-slot=slider-range]]:bg-info [&_[data-slot=slider-thumb]]:h-5 [&_[data-slot=slider-thumb]]:w-5 [&_[data-slot=slider-thumb]]:border-info/35 [&_[data-slot=slider-thumb]]:bg-card [&_[data-slot=slider-thumb]]:shadow-[0_2px_10px_rgba(0,122,255,0.35)] [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:rounded-full [&_[data-slot=slider-track]]:border [&_[data-slot=slider-track]]:border-border/60 [&_[data-slot=slider-track]]:bg-border/20"
+                        className="mt-3 [&_[data-slot=slider-range]]:bg-accent [&_[data-slot=slider-thumb]]:h-5 [&_[data-slot=slider-thumb]]:w-5 [&_[data-slot=slider-thumb]]:border-info/35 [&_[data-slot=slider-thumb]]:bg-card [&_[data-slot=slider-thumb]]:shadow-[0_2px_10px_rgba(0,122,255,0.35)] [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:rounded-full [&_[data-slot=slider-track]]:border [&_[data-slot=slider-track]]:border-border/60 [&_[data-slot=slider-track]]:bg-border/20"
                         aria-label="Βαθμολογία slider"
                       />
 

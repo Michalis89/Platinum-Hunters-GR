@@ -22,12 +22,15 @@ export function NavItemContent({
 
 export const desktopLinkClass = (isActive: boolean) =>
   cn(
-    'h-9  border border-transparent px-3 text-[13px] font-medium tracking-[-0.01em]',
-    'transition-[background-color,color,box-shadow,transform] duration-200 [transition-timing-function:var(--easing-default)] active:scale-[0.98]',
+    'relative h-10 border border-transparent px-1 text-[13px] tracking-[-0.01em]',
+    'rounded-none bg-transparent',
+    'after:absolute after:bottom-[2px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-primary after:transition-transform after:duration-200 [transition-timing-function:var(--easing-default)]',
+    'transition-[color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] active:scale-[0.99]',
     'focus-visible:ring-2 focus-visible:ring-[var(--ring)]/40 focus-visible:ring-offset-0',
+    'focus:bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-foreground',
     isActive
-      ? 'bg-[hsl(var(--accent-muted))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border))]'
-      : 'text-muted-foreground hover:bg-[hsl(var(--accent))/10] hover:text-foreground',
+      ? 'font-semibold text-foreground after:scale-x-100'
+      : 'font-medium text-muted-foreground hover:text-primary hover:after:scale-x-100',
   );
 
 export const mobileChipClass = (isActive: boolean, fullWidth = false) =>

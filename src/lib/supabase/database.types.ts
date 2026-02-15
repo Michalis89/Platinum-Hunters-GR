@@ -451,6 +451,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      media_item_tag_links: {
+        Row: {
+          media_item_id: number;
+          tag_key: string;
+        };
+        Insert: {
+          media_item_id: number;
+          tag_key: string;
+        };
+        Update: {
+          media_item_id?: number;
+          tag_key?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'media_item_tag_links_media_item_id_fkey';
+            columns: ['media_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'media_items';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'media_item_tag_links_tag_key_fkey';
+            columns: ['tag_key'];
+            isOneToOne: false;
+            referencedRelation: 'tag_definitions';
+            referencedColumns: ['key'];
+          },
+        ];
+      };
       steam_sync_jobs: {
         Row: {
           completed_steps: number;
@@ -727,6 +757,42 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      tag_definitions: {
+        Row: {
+          bucket: string;
+          created_at: string;
+          games_count: number | null;
+          is_manual_override: boolean;
+          key: string;
+          name: string;
+          rawg_tag_id: number | null;
+          source: string;
+          updated_at: string;
+        };
+        Insert: {
+          bucket: string;
+          created_at?: string;
+          games_count?: number | null;
+          is_manual_override?: boolean;
+          key: string;
+          name: string;
+          rawg_tag_id?: number | null;
+          source?: string;
+          updated_at?: string;
+        };
+        Update: {
+          bucket?: string;
+          created_at?: string;
+          games_count?: number | null;
+          is_manual_override?: boolean;
+          key?: string;
+          name?: string;
+          rawg_tag_id?: number | null;
+          source?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       user_integrations: {
         Row: {

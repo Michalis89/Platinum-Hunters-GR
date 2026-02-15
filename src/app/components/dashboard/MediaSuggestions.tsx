@@ -42,7 +42,7 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
         <h3 className="text-base font-semibold">Recommended for you</h3>
         {visibleSuggestions.length > 0 && (
           <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
-            Based on your library
+            2 backlog + 2 database picks
           </span>
         )}
       </div>

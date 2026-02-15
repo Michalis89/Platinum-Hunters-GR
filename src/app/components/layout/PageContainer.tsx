@@ -13,8 +13,8 @@ interface PageContainerProps {
 const sizeClasses: Record<ContainerSize, string> = {
   sm: 'max-w-4xl',
   md: 'max-w-5xl',
-  lg: 'max-w-7xl',
-  xl: 'max-w-7xl',
+  lg: 'max-w-screen-2xl',
+  xl: 'max-w-screen-2xl',
   full: 'max-w-none',
 };
 

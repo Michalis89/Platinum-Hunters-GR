@@ -37,6 +37,7 @@ export type MappedLibraryEntry = {
   publisher?: string;
   metacritic?: number;
   runtime?: number;
+  igdbCategory?: number;
 };
 
 function normalizeSteamCoverUrl(url: string | undefined, steamAppId?: number): string | undefined {
@@ -104,6 +105,12 @@ export function mapLibraryEntry(
 
   // Genres/tags
   const tags = Array.isArray(media.genres) ? media.genres.map(String) : [];
+  const platforms = Array.isArray(media.platforms) ? media.platforms.map(String) : [];
+  const defaultPlatform = platforms.includes('PC')
+    ? 'PC'
+    : platforms.length > 0
+      ? platforms[0]
+      : undefined;
 
   // Cover image
   const mediaSource = (media.source as string | null) ?? undefined;
@@ -111,19 +118,23 @@ export function mapLibraryEntry(
     mediaSource ||
     (typeof media.steam_app_id === 'number'
       ? 'steam'
-      : typeof media.rawg_id === 'number'
-        ? 'rawg'
-        : undefined);
+      : typeof media.igdb_id === 'number'
+        ? 'igdb'
+        : typeof media.rawg_id === 'number'
+          ? 'rawg'
+          : undefined);
   const steamAppId = (media.steam_app_id as number | null) ?? undefined;
   const rawLarge = (media.cover_image_large as string) || undefined;
   const rawMedium = (media.cover_image_medium as string) || undefined;
+  const igdbCoverBig = (media.cover_url_big as string) || undefined;
+  const igdbCoverThumb = (media.cover_url_thumb as string) || undefined;
 
   const coverLarge =
     mediaSource === 'steam' ? normalizeSteamCoverUrl(rawLarge, steamAppId) : rawLarge;
   const coverMedium =
     mediaSource === 'steam' ? normalizeSteamCoverUrl(rawMedium, steamAppId) : rawMedium;
 
-  const cover = coverLarge || coverMedium || DEFAULT_COVER;
+  const cover = igdbCoverBig || coverLarge || igdbCoverThumb || coverMedium || DEFAULT_COVER;
 
   // Base mapped entry
   const baseEntry: MappedLibraryEntry = {
@@ -138,7 +149,9 @@ export function mapLibraryEntry(
     score: row.score?.toString() ?? undefined,
     progress: row.progress ?? undefined,
     notes: row.notes ?? undefined,
-    selectedPlatform: row.selected_platform ?? (inferredSource === 'steam' ? 'PC' : undefined),
+    selectedPlatform:
+      row.selected_platform ??
+      (inferredSource === 'steam' ? 'PC' : config.key === 'games' ? defaultPlatform : undefined),
     title,
     subtitle,
     year,
@@ -176,11 +189,12 @@ export function mapLibraryEntry(
   if (config.key === 'games') {
     return {
       ...baseEntry,
-      platforms: Array.isArray(media.platforms) ? media.platforms.map(String) : [],
+      platforms,
       developer: (media.developer as string) ?? undefined,
       publisher: (media.publisher as string) ?? undefined,
       metacritic: (media.metacritic as number) ?? undefined,
       runtime: (media.runtime as number) ?? undefined,
+      igdbCategory: (media.igdb_category as number | undefined) ?? undefined,
     };
   }
 

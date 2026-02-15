@@ -17,7 +17,7 @@ export function HomeFinalCTA() {
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <Link
             href="/auth/register"
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-info px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
           >
             Create account
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

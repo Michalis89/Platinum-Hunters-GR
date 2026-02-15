@@ -727,7 +727,7 @@ export default function EditProfilePage() {
       </div>
 
       <div className="relative px-4 py-10 md:px-6">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6">
           <Breadcrumbs
             items={[
               { label: 'Home', href: '/dashboard' },

@@ -37,7 +37,7 @@ export default function GameSuggestions() {
   if (!data) {
     return (
       <section className="pt-10 md:pt-12">
-        <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
           <div className="flex items-center justify-between pb-4">
             <h2 className="text-lg font-semibold">Game picks based on your history</h2>
           </div>
@@ -57,14 +57,14 @@ export default function GameSuggestions() {
 
   return (
     <section className="pt-10 md:pt-12">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
+      <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
         <div className="flex items-center justify-between pb-4">
           <h2 className="text-lg font-semibold">Game picks based on your history</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {data.slice(0, 4).map(suggestion => (
             <Card
-              key={`${suggestion.rawgId}-${suggestion.title}`}
+              key={`${suggestion.igdbId}-${suggestion.title}`}
               className="flex flex-col gap-4 border bg-card p-4"
             >
               <div>

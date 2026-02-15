@@ -97,7 +97,7 @@ export default function AdminSupportTicketsPane() {
           }
         />
 
-        <PageContainer size="lg" className="mt-10 max-w-none pb-20">
+        <PageContainer size="full" className="mt-10 pb-20">
           {alert && (
             <div className="mb-4">
               <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">

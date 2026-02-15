@@ -10,7 +10,7 @@ import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashb
 import { HomeDashboardHeader, ContinueHero } from '@/app/components/home';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
 
-const DIVIDER_WRAP = 'mx-auto mt-8 max-w-7xl px-4 md:mt-10 md:px-6';
+const DIVIDER_WRAP = 'mx-auto mt-8 max-w-screen-2xl px-4 md:mt-10 md:px-6';
 const DIVIDER_STYLE = '';
 const HomeSocialSection = dynamic(
   () => import('./HomeSocialSection').then(mod => mod.HomeSocialSection),
@@ -37,6 +37,7 @@ type HomeDashboardContentProps = {
 export default function HomeDashboardContent({
   username,
   displayName,
+  stats,
   mediaCategories,
   categorySections,
   socialPreferences,
@@ -53,12 +54,12 @@ export default function HomeDashboardContent({
 
       {mediaCategories.length === 0 && (
         <section>
-          <div className="mx-auto max-w-7xl px-4 md:px-6">
+          <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
             <div className="rounded-lg border p-5 md:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-foreground">
-                    <Sparkles className="h-4 w-4 text-info" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     <h3 className="text-base font-semibold tracking-[-0.01em]">
                       Turn on categories to activate your dashboard
                     </h3>
@@ -90,6 +91,7 @@ export default function HomeDashboardContent({
             <CategoryDashboardTabs
               enabledCategories={mediaCategories}
               sections={categorySections}
+              stats={stats}
             />
           </section>
         </>

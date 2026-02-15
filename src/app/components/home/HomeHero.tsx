@@ -10,7 +10,7 @@ export function HomeHero() {
         <>
           <span className="text-foreground">Your hobbies.</span>
           <br />
-          <span className="text-info">Your space.</span>
+          <span className="text-primary">Your space.</span>
         </>
       }
       subtitle="Track games, anime, manga, movies, series, and books. Update progress, add notes, and see your stats—all in one place."
@@ -21,7 +21,7 @@ export function HomeHero() {
         <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center gap-3 rounded-3xl px-3 py-3 sm:flex-row sm:gap-4 sm:px-4 sm:py-4">
           <Link
             href="/auth/register"
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-info px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
           >
             <Sparkles className="h-5 w-5" />
             Start now

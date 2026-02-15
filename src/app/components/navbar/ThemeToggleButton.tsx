@@ -10,6 +10,7 @@ type ThemeToggleButtonProps = {
   iconOnly?: boolean;
   className?: string;
   labelClassName?: string;
+  disabled?: boolean;
 };
 
 export function ThemeToggleButton({
@@ -18,6 +19,7 @@ export function ThemeToggleButton({
   iconOnly = true,
   className,
   labelClassName,
+  disabled = false,
 }: ThemeToggleButtonProps) {
   const isDark = theme === 'dark';
 
@@ -27,9 +29,10 @@ export function ThemeToggleButton({
       onClick={onToggle}
       variant={iconOnly ? 'ghost' : 'secondary'}
       size={iconOnly ? 'icon' : 'default'}
+      disabled={disabled}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={cn(
-        'h-11 w-11 border border-transparent text-[13px] font-medium tracking-[-0.01em] text-muted-foreground transition-[background-color,color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-accent/10 hover:text-foreground active:scale-[0.98]',
+        'h-9 w-9 rounded-md border border-transparent bg-transparent text-[13px] font-medium tracking-[-0.01em] text-muted-foreground shadow-none transition-[background-color,color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent-muted))/0.5] hover:text-primary active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60',
         className,
       )}
     >

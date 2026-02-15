@@ -32,6 +32,7 @@ function SortableFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank
   });
 
   const isTopFive = rank <= TOP_FIVE_LIMIT;
+  const isPriorityImage = rank === 1;
 
   return (
     <article
@@ -55,7 +56,8 @@ function SortableFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank
           alt={item.title}
           sizes="(max-width: 768px) 90vw, 200px"
           className="object-cover"
-          loading="lazy"
+          priority={isPriorityImage}
+          loading={isPriorityImage ? undefined : 'lazy'}
         />
       </div>
       <div className="space-y-1.5 text-sm">

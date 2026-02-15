@@ -47,7 +47,7 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
       >
         <Layers className="size-4" />
         <span>Library</span>
-        <ChevronDown className="ml-0.5 size-4" />
+        <ChevronDown className="ml-1 size-4 text-muted-foreground/90 transition-opacity duration-200" />
       </MenubarTrigger>
       <MenubarContent className="w-64 p-1.5 text-foreground">
         <MenubarItem

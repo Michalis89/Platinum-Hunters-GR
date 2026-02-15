@@ -33,7 +33,7 @@ const highlights = [
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PageWrapper className="py-5 md:py-12">
+      <PageWrapper className="mt-8">
         <section
           className={[
             // “Hero card”

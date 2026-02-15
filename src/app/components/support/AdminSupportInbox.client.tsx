@@ -79,7 +79,7 @@ export default function AdminSupportInbox() {
         {activeView === 'tickets' ? (
           <AdminSupportTicketsPane />
         ) : (
-          <PageContainer size="xl" className="py-10">
+          <PageContainer size="full" className="py-10">
             <AdminMediaCurationTable />
           </PageContainer>
         )}

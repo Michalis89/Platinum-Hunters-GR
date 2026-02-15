@@ -475,7 +475,7 @@ export default function CategoryLibrary({
           });
       }
 
-      // Fetch RAWG details for games from external source
+      // Fetch IGDB details for games from external source
       if (
         category === 'games' &&
         entry.source === 'external' &&
@@ -483,7 +483,7 @@ export default function CategoryLibrary({
         !entry.description
       ) {
         apiClient
-          .request(`/api/games/rawg-details?rawgId=${entry.externalId}`)
+          .request(`/api/games/igdb-details?igdbId=${entry.externalId}`)
           .then(async response => {
             if (!response.ok) {
               return null;
@@ -513,7 +513,7 @@ export default function CategoryLibrary({
             });
           })
           .catch(error => {
-            console.warn('RAWG details fetch failed:', error);
+            console.warn('IGDB details fetch failed:', error);
           });
       }
     },
@@ -902,7 +902,7 @@ export default function CategoryLibrary({
         </Alert>
       )}
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
+      <div className="relative mx-auto flex w-full max-w-screen-2xl flex-col gap-6 sm:gap-8">
         <div className="pointer-events-none absolute inset-0 -z-10 opacity-30">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,hsl(var(--primary)/0.2),transparent_52%)]" />
           <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--success)/0.15),transparent_58%)]" />
@@ -985,7 +985,7 @@ export default function CategoryLibrary({
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-lg font-semibold text-white">
-                  Συγχρονισμός Steam με RAWG metadata
+                  Συγχρονισμός Steam με IGDB metadata
                 </p>
                 <p className="text-sm text-slate-300">
                   {steamSyncProgress?.message ??

@@ -286,7 +286,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                     <Button
                       asChild
                       variant="primary"
-                      className="h-11 border border-transparent bg-info text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:brightness-110 active:scale-[0.98]"
+                      className="h-11 border border-transparent bg-accent text-[13px] font-medium tracking-[-0.01em] transition-[filter,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:brightness-110 active:scale-[0.98]"
                     >
                       <Link href="/auth/register">
                         <UserPlus className="size-4" />

@@ -229,7 +229,7 @@ export default function SupportTicketDetail() {
           <Card className={`${UI_CLASSNAMES.panelCard} `}>
             <CardHeader className="bg-transparent">
               <CardTitle className="flex items-center gap-2 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full bg-info" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden />
                 Ιστορικό συνομιλίας
               </CardTitle>
             </CardHeader>
@@ -246,7 +246,7 @@ export default function SupportTicketDetail() {
                       <span
                         className={`h-2 w-2 rounded-full ${
                           message.author_role === 'admin'
-                            ? 'bg-info'
+                            ? 'bg-accent'
                             : 'bg-[hsl(var(--muted-foreground))]'
                         }`}
                         aria-hidden

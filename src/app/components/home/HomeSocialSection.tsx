@@ -5,7 +5,7 @@ import { HomeRecentActivity } from './HomeRecentActivity';
 import { HomeSuggestions } from './HomeSuggestions';
 
 const SECTION_SPACING = 'pt-10 md:pt-12';
-const DIVIDER_WRAP = 'mx-auto mt-8 max-w-7xl px-4 md:mt-10 md:px-6';
+const DIVIDER_WRAP = 'mx-auto mt-8 max-w-screen-2xl px-4 md:mt-10 md:px-6';
 const DIVIDER_STYLE = '';
 
 type HomeSocialSectionProps = {

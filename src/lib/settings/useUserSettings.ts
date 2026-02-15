@@ -1,4 +1,4 @@
-import useSWRImmutable from 'swr';
+import useSWRImmutable from 'swr/immutable';
 import type { UserSettingsData } from './types';
 
 const fetcher = async (url: string) => {
@@ -17,6 +17,7 @@ export function useUserSettings(enabled: boolean) {
   const { data, error, mutate } = useSWRImmutable<UserSettingsData>(
     enabled ? '/api/settings' : null,
     fetcher,
+    { shouldRetryOnError: false },
   );
 
   return {

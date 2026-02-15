@@ -158,7 +158,7 @@ export default function SupportTicketsList() {
       return (
         <EmptyState
           icon={
-            <span className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-info">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-primary">
               0
             </span>
           }
@@ -197,7 +197,7 @@ export default function SupportTicketsList() {
             }
             updatedAt={ticket.updated_at}
             updatedLabel="Τελευταία ενημέρωση:"
-            titleIcon={<span className="h-2.5 w-2.5 rounded-full bg-info" aria-hidden />}
+            titleIcon={<span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden />}
             actions={
               <>
                 <Button href={`/pages/support/tickets/${ticket.id}`} variant="secondary">

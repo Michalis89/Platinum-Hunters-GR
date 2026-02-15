@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Search, Pencil, Save, X, RefreshCw, Trash2 } from 'lucide-react';
+import { RefreshCw, Pencil, Save, Trash2, X } from 'lucide-react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { SelectField as Select } from '@/components/ui/select-field';
@@ -29,36 +30,41 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  getIgdbCategoryLabel,
+  isExcludedByTitleOrSlug,
+  isAllowedIgdbCategory,
+} from '@/lib/igdb/categories';
 
 type MediaRow = {
   id: number;
-  mal_id: number | null;
   category: string;
   source: string | null;
   title: string | null;
   title_english: string | null;
-  title_romaji: string | null;
-  title_native: string | null;
   description: string | null;
-  format: string | null;
   status: string | null;
   season_year: number | null;
-  episodes: number | null;
-  start_date: string | null;
-  end_date: string | null;
   release_date: string | null;
-  runtime: number | null;
-  rating: number | null;
-  metacritic: number | null;
-  esrb_rating: string | null;
-  rawg_id: number | null;
+  first_release_date: string | null;
+  igdb_id: number | null;
+  igdb_category: number | null;
+  igdb_slug: string | null;
   steam_app_id: number | null;
   developer: string | null;
   publisher: string | null;
   platforms: string[] | null;
   genres: string[] | null;
-  cover_image_large: string | null;
+  igdb_themes: string[] | null;
+  igdb_game_modes: string[] | null;
+  igdb_player_perspectives: string[] | null;
+  igdb_artwork_image_ids: string[] | null;
+  igdb_screenshot_image_ids: string[] | null;
+  official_website: string | null;
+  cover_url_thumb: string | null;
+  cover_url_big: string | null;
   cover_image_medium: string | null;
+  cover_image_large: string | null;
   updated_at: string | null;
 };
 
@@ -89,40 +95,26 @@ type EditingState = Partial<
     MediaRow,
     | 'source'
     | 'title_english'
-    | 'title_romaji'
-    | 'title_native'
     | 'description'
-    | 'format'
     | 'status'
     | 'season_year'
-    | 'episodes'
-    | 'start_date'
-    | 'end_date'
+    | 'release_date'
+    | 'igdb_id'
+    | 'igdb_slug'
   >
 >;
 
 type AdminRowUpdate = EditingState & {
-  rawg_id?: number | null;
-  title?: string | null;
-  cover_image_large?: string | null;
-  cover_image_medium?: string | null;
-  release_date?: string | null;
-  rating?: number | null;
-  metacritic?: number | null;
-  platforms?: string[];
-  genres?: string[];
   developer?: string | null;
   publisher?: string | null;
-  esrb_rating?: string | null;
-  runtime?: number | null;
-  steam_app_id?: number | null;
+  platforms?: string[];
+  genres?: string[];
+  cover_url_big?: string | null;
+  cover_url_thumb?: string | null;
+  cover_image_large?: string | null;
+  cover_image_medium?: string | null;
+  official_website?: string | null;
 };
-
-const hasTextValue = (value: unknown): value is string =>
-  typeof value === 'string' && value.trim().length > 0;
-
-const hasTextArrayValue = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.some(item => typeof item === 'string' && item.trim().length > 0);
 
 const DEFAULT_LIMIT = 20;
 
@@ -141,6 +133,33 @@ const emptyOptions: FilterOptions = {
   format: [],
 };
 
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size));
+  }
+  return out;
+}
+
+function summarizeFacet(values: string[] | null | undefined): string {
+  const list = Array.isArray(values) ? values.filter(Boolean) : [];
+  if (list.length === 0) return '-';
+  const preview = list.slice(0, 3);
+  const overflow = list.length - preview.length;
+  return overflow > 0 ? `${preview.join(', ')} +${overflow}` : preview.join(', ');
+}
+
+function getExcludedReason(row: MediaRow): string | null {
+  if (row.category !== 'games') return null;
+  if (typeof row.igdb_category === 'number' && !isAllowedIgdbCategory(row.igdb_category)) {
+    return getIgdbCategoryLabel(row.igdb_category);
+  }
+  if (isExcludedByTitleOrSlug(row.title_english ?? row.title, row.igdb_slug)) {
+    return 'heuristic';
+  }
+  return null;
+}
+
 export default function AdminMediaCurationTable() {
   const [rows, setRows] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,6 +172,8 @@ export default function AdminMediaCurationTable() {
   const [editingState, setEditingState] = useState<EditingState>({});
   const [savingId, setSavingId] = useState<number | null>(null);
   const [syncingIds, setSyncingIds] = useState<number[]>([]);
+  const [syncingSelected, setSyncingSelected] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<string | null>(null);
   const [savingAll, setSavingAll] = useState(false);
   const [draftUpdatesById, setDraftUpdatesById] = useState<Record<number, AdminRowUpdate>>({});
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
@@ -165,9 +186,7 @@ export default function AdminMediaCurationTable() {
     params.set('limit', `${DEFAULT_LIMIT}`);
     params.set('offset', `${(page - 1) * DEFAULT_LIMIT}`);
     for (const [key, value] of Object.entries(filters)) {
-      if (value.trim()) {
-        params.set(key, value.trim());
-      }
+      if (value.trim()) params.set(key, value.trim());
     }
     return params.toString();
   }, [filters, page]);
@@ -175,22 +194,27 @@ export default function AdminMediaCurationTable() {
   const totalPages = Math.max(1, Math.ceil((meta?.total ?? 0) / DEFAULT_LIMIT));
   const draftCount = Object.keys(draftUpdatesById).length;
   const selectedCount = selectedRowIds.length;
+  const selectedSyncableGameRows = useMemo(
+    () =>
+      rows.filter(
+        row =>
+          selectedRowIds.includes(row.id) &&
+          row.category === 'games' &&
+          getExcludedReason(row) === null,
+      ),
+    [rows, selectedRowIds],
+  );
 
   const fetchRows = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await fetch(`/api/admin/media/entries?${queryString}`);
       const payload = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Failed to fetch media entries');
-      }
+      if (!response.ok) throw new Error(payload?.error || 'Failed to fetch media entries');
 
       const nextRows = Array.isArray(payload?.data) ? (payload.data as MediaRow[]) : [];
       const nextMeta = payload?.meta as MetaState | undefined;
-
       setRows(nextRows);
       setMeta(
         nextMeta
@@ -227,15 +251,12 @@ export default function AdminMediaCurationTable() {
     setEditingState({
       source: row.source,
       title_english: row.title_english,
-      title_romaji: row.title_romaji,
-      title_native: row.title_native,
       description: row.description,
-      format: row.format,
       status: row.status,
       season_year: row.season_year,
-      episodes: row.episodes,
-      start_date: row.start_date,
-      end_date: row.end_date,
+      release_date: row.release_date,
+      igdb_id: row.igdb_id,
+      igdb_slug: row.igdb_slug,
     });
   };
 
@@ -243,7 +264,6 @@ export default function AdminMediaCurationTable() {
     setSavingId(rowId);
     setError(null);
     setSuccessMessage(null);
-
     try {
       const mergedUpdates: AdminRowUpdate = {
         ...(draftUpdatesById[rowId] ?? {}),
@@ -256,10 +276,7 @@ export default function AdminMediaCurationTable() {
         body: JSON.stringify({ updates: mergedUpdates }),
       });
       const payload = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Failed to update entry');
-      }
+      if (!response.ok) throw new Error(payload?.error || 'Failed to update entry');
 
       const updated = payload?.data as MediaRow | undefined;
       if (updated) {
@@ -279,83 +296,89 @@ export default function AdminMediaCurationTable() {
     }
   };
 
-  const syncRawgPreviewForRow = async (row: MediaRow) => {
-    if (row.category !== 'games') return;
-
+  const syncIgdbForRow = async (row: MediaRow) => {
+    if (row.category !== 'games' || getExcludedReason(row) !== null) return;
     setError(null);
     setSuccessMessage(null);
     setSyncingIds(prev => (prev.includes(row.id) ? prev : [...prev, row.id]));
-
     try {
       const response = await fetch('/api/media/entry', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'preview_rawg_metadata',
+          action: 'apply_igdb_metadata_patch',
           category: 'games',
           mediaId: row.id,
         }),
       });
-      const payload = (await response.json().catch(() => null)) as {
-        error?: string;
-        patch?: AdminRowUpdate;
-      } | null;
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || 'Failed to sync from IGDB');
 
-      if (!response.ok || !payload?.patch) {
-        throw new Error(payload?.error || 'Failed to sync RAWG metadata');
-      }
-
-      const patch: AdminRowUpdate = { ...payload.patch };
-
-      // Keep existing values when RAWG does not provide meaningful text.
-      if (!hasTextValue(patch.developer)) {
-        delete patch.developer;
-      }
-      if (!hasTextValue(patch.publisher)) {
-        delete patch.publisher;
-      }
-      if (!hasTextArrayValue(patch.platforms)) {
-        delete patch.platforms;
-      }
-
-      setDraftUpdatesById(prev => ({
-        ...prev,
-        [row.id]: {
-          ...(prev[row.id] ?? {}),
-          ...patch,
-        },
-      }));
-
-      setRows(prev =>
-        prev.map(entry =>
-          entry.id === row.id
-            ? {
-                ...entry,
-                source: patch.source ?? entry.source,
-                title_english: patch.title_english ?? entry.title_english,
-                description: patch.description ?? entry.description,
-                season_year: patch.season_year ?? entry.season_year,
-                developer: patch.developer ?? entry.developer,
-                publisher: patch.publisher ?? entry.publisher,
-                platforms: patch.platforms ?? entry.platforms,
-              }
-            : entry,
-        ),
-      );
-
-      if (editingId === row.id) {
-        setEditingState(prev => ({
-          ...prev,
-          source: patch.source ?? prev.source,
-          title_english: patch.title_english ?? prev.title_english,
-          description: patch.description ?? prev.description,
-          season_year: patch.season_year ?? prev.season_year,
-        }));
-      }
+      await fetchRows();
+      setSuccessMessage(`Synced game #${row.id} from IGDB.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sync RAWG metadata');
+      setError(err instanceof Error ? err.message : 'Failed to sync from IGDB');
     } finally {
       setSyncingIds(prev => prev.filter(id => id !== row.id));
+    }
+  };
+
+  const syncSelectedFromIgdb = async () => {
+    if (selectedSyncableGameRows.length === 0) return;
+    setSyncingSelected(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    const ids = selectedSyncableGameRows.map(row => row.id);
+    const batches = chunk(ids, 10);
+    let completed = 0;
+    let failed = 0;
+
+    try {
+      for (const batch of batches) {
+        const queue = [...batch];
+        const workers = [0, 1].map(async () => {
+          while (queue.length > 0) {
+            const mediaId = queue.shift();
+            if (!mediaId) return;
+            setSyncingIds(prev => (prev.includes(mediaId) ? prev : [...prev, mediaId]));
+
+            try {
+              const response = await fetch('/api/media/entry', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  action: 'apply_igdb_metadata_patch',
+                  category: 'games',
+                  mediaId,
+                }),
+              });
+              if (!response.ok) {
+                failed += 1;
+              }
+            } catch {
+              failed += 1;
+            } finally {
+              completed += 1;
+              setSyncProgress(`Synced ${completed}/${ids.length} selected games...`);
+              setSyncingIds(prev => prev.filter(id => id !== mediaId));
+            }
+          }
+        });
+        await Promise.all(workers);
+      }
+
+      await fetchRows();
+      if (failed > 0) {
+        setError(
+          `IGDB sync finished with failures. Success: ${completed - failed}, Failed: ${failed}.`,
+        );
+      } else {
+        setSuccessMessage(`Synced ${completed} selected game(s) from IGDB.`);
+      }
+    } finally {
+      setSyncProgress(null);
+      setSyncingSelected(false);
     }
   };
 
@@ -372,8 +395,6 @@ export default function AdminMediaCurationTable() {
 
     let successCount = 0;
     const failedRows: number[] = [];
-    const failureMessages: string[] = [];
-
     for (const { rowId, updates } of entries) {
       try {
         const response = await fetch(`/api/admin/media/entries/${rowId}`, {
@@ -382,42 +403,25 @@ export default function AdminMediaCurationTable() {
           body: JSON.stringify({ updates }),
         });
         const payload = await response.json().catch(() => null);
-
         if (!response.ok) {
-          const message = payload?.error || `Failed to update entry ${rowId}`;
           failedRows.push(rowId);
-          failureMessages.push(`#${rowId}: ${message}`);
+          setError(payload?.error || `Failed row #${rowId}`);
           continue;
         }
-
         const updated = payload?.data as MediaRow | undefined;
-        if (updated) {
-          setRows(prev => prev.map(row => (row.id === rowId ? updated : row)));
-        }
-
-        setDraftUpdatesById(prev => {
-          const next = { ...prev };
-          delete next[rowId];
-          return next;
-        });
-
+        if (updated) setRows(prev => prev.map(row => (row.id === rowId ? updated : row)));
         successCount += 1;
-      } catch (err) {
+      } catch {
         failedRows.push(rowId);
-        failureMessages.push(
-          `#${rowId}: ${err instanceof Error ? err.message : 'Unexpected save error'}`,
-        );
       }
     }
 
+    setDraftUpdatesById({});
     if (failedRows.length > 0) {
-      setError(
-        `Saved ${successCount} rows. Failed rows: ${failedRows.join(', ')}. ${failureMessages.join(' | ')}`,
-      );
+      setError(`Saved ${successCount} rows. Failed rows: ${failedRows.join(', ')}.`);
     } else {
       setSuccessMessage(`Saved ${successCount} row(s) successfully.`);
     }
-
     setSavingAll(false);
   };
 
@@ -426,48 +430,25 @@ export default function AdminMediaCurationTable() {
     setIsDeleting(true);
     setError(null);
     setSuccessMessage(null);
-
     try {
       const failedRows: number[] = [];
-      const failureMessages: string[] = [];
       let deletedCount = 0;
-
       for (const rowId of rowIds) {
-        const response = await fetch(`/api/admin/media/entries/${rowId}`, {
-          method: 'DELETE',
-        });
-        const payload = await response.json().catch(() => null);
-
+        const response = await fetch(`/api/admin/media/entries/${rowId}`, { method: 'DELETE' });
         if (!response.ok) {
           failedRows.push(rowId);
-          failureMessages.push(`#${rowId}: ${payload?.error || `Failed to delete entry ${rowId}`}`);
           continue;
         }
-
         deletedCount += 1;
       }
 
       const deletedSet = new Set(rowIds.filter(id => !failedRows.includes(id)));
       if (deletedSet.size > 0) {
         setRows(prev => prev.filter(row => !deletedSet.has(row.id)));
-        setDraftUpdatesById(prev => {
-          const next = { ...prev };
-          for (const id of deletedSet) {
-            delete next[id];
-          }
-          return next;
-        });
         setSelectedRowIds(prev => prev.filter(id => !deletedSet.has(id)));
       }
-
-      if (editingId !== null && deletedSet.has(editingId)) {
-        resetEdit();
-      }
-
       if (failedRows.length > 0) {
-        setError(
-          `Deleted ${deletedCount} row(s). Failed rows: ${failedRows.join(', ')}. ${failureMessages.join(' | ')}`,
-        );
+        setError(`Deleted ${deletedCount} row(s). Failed rows: ${failedRows.join(', ')}.`);
       } else {
         setSuccessMessage(
           deletedCount === 1
@@ -478,8 +459,6 @@ export default function AdminMediaCurationTable() {
 
       setDeleteTarget(null);
       setBulkDeleteIds([]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete entries');
     } finally {
       setIsDeleting(false);
     }
@@ -493,6 +472,18 @@ export default function AdminMediaCurationTable() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-foreground">Data Curation</CardTitle>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={syncSelectedFromIgdb}
+              disabled={selectedSyncableGameRows.length === 0 || syncingSelected}
+            >
+              <RefreshCw className={`h-4 w-4 ${syncingSelected ? 'animate-spin' : ''}`} />
+              {syncingSelected
+                ? 'Syncing selected...'
+                : `Sync selected from IGDB (${selectedSyncableGameRows.length})`}
+            </Button>
             <Button
               type="button"
               size="sm"
@@ -559,19 +550,14 @@ export default function AdminMediaCurationTable() {
           />
           <div className="space-y-1">
             <label className="text-sm font-medium text-foreground">Search</label>
-            <div className="flex items-center gap-2">
-              <Input
-                value={filters.q}
-                onChange={event => {
-                  setPage(1);
-                  setFilters(prev => ({ ...prev, q: event.target.value }));
-                }}
-                placeholder="Title or description"
-              />
-              <Button type="button" variant="secondary" size="icon" aria-label="Search">
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
+            <Input
+              value={filters.q}
+              onChange={event => {
+                setPage(1);
+                setFilters(prev => ({ ...prev, q: event.target.value }));
+              }}
+              placeholder="Title or description"
+            />
           </div>
         </div>
 
@@ -579,6 +565,7 @@ export default function AdminMediaCurationTable() {
         {successMessage ? (
           <p className="text-sm font-medium text-emerald-400">{successMessage}</p>
         ) : null}
+        {syncProgress ? <p className="text-sm text-muted-foreground">{syncProgress}</p> : null}
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -606,24 +593,21 @@ export default function AdminMediaCurationTable() {
                   <TableHead>Source</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Title (EN)</TableHead>
-                  <TableHead>Romaji</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Format</TableHead>
                   <TableHead>Year</TableHead>
-                  <TableHead>Episodes</TableHead>
                   <TableHead>Release</TableHead>
-                  <TableHead>Runtime</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>Metacritic</TableHead>
-                  <TableHead>ESRB</TableHead>
-                  <TableHead>RAWG ID</TableHead>
-                  <TableHead>Steam App ID</TableHead>
+                  <TableHead>IGDB ID</TableHead>
+                  <TableHead>IGDB Category</TableHead>
+                  <TableHead>IGDB Slug</TableHead>
+                  <TableHead>Cover</TableHead>
+                  <TableHead>Official Site</TableHead>
                   <TableHead>Developer</TableHead>
-                  <TableHead>Publisher</TableHead>
                   <TableHead>Platforms</TableHead>
                   <TableHead>Genres</TableHead>
-                  <TableHead>Cover (M)</TableHead>
-                  <TableHead>Cover (L)</TableHead>
+                  <TableHead>Themes</TableHead>
+                  <TableHead>Modes</TableHead>
+                  <TableHead>Perspectives</TableHead>
+                  <TableHead>Media</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Updated</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -632,10 +616,8 @@ export default function AdminMediaCurationTable() {
               <TableBody>
                 {rows.map(row => {
                   const isEditing = editingId === row.id;
-                  const isGame = row.category === 'games';
                   const isSyncing = syncingIds.includes(row.id);
-                  const hasDraft = Boolean(draftUpdatesById[row.id]);
-
+                  const excludedReason = getExcludedReason(row);
                   return (
                     <TableRow key={row.id}>
                       <TableCell>
@@ -653,16 +635,7 @@ export default function AdminMediaCurationTable() {
                           aria-label={`Select row ${row.id}`}
                         />
                       </TableCell>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <span>{row.id}</span>
-                          {hasDraft ? (
-                            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-primary">
-                              Draft
-                            </span>
-                          ) : null}
-                        </div>
-                      </TableCell>
+                      <TableCell className="font-medium">{row.id}</TableCell>
                       <TableCell>{row.category}</TableCell>
                       <TableCell>
                         {isEditing ? (
@@ -692,21 +665,6 @@ export default function AdminMediaCurationTable() {
                           (row.title_english ?? '-')
                         )}
                       </TableCell>
-                      <TableCell className="min-w-[180px]">
-                        {isEditing ? (
-                          <Input
-                            value={editingState.title_romaji ?? ''}
-                            onChange={event =>
-                              setEditingState(prev => ({
-                                ...prev,
-                                title_romaji: event.target.value,
-                              }))
-                            }
-                          />
-                        ) : (
-                          (row.title_romaji ?? '-')
-                        )}
-                      </TableCell>
                       <TableCell>
                         {isEditing ? (
                           <Input
@@ -722,18 +680,6 @@ export default function AdminMediaCurationTable() {
                       <TableCell>
                         {isEditing ? (
                           <Input
-                            value={editingState.format ?? ''}
-                            onChange={event =>
-                              setEditingState(prev => ({ ...prev, format: event.target.value }))
-                            }
-                          />
-                        ) : (
-                          (row.format ?? '-')
-                        )}
-                      </TableCell>
-                      <TableCell className="w-[120px]">
-                        {isEditing ? (
-                          <Input
                             type="number"
                             value={editingState.season_year ?? ''}
                             onChange={event =>
@@ -747,55 +693,104 @@ export default function AdminMediaCurationTable() {
                           (row.season_year ?? '-')
                         )}
                       </TableCell>
-                      <TableCell className="w-[120px]">
+                      <TableCell className="whitespace-nowrap">
                         {isEditing ? (
                           <Input
-                            type="number"
-                            value={editingState.episodes ?? ''}
+                            value={editingState.release_date ?? ''}
                             onChange={event =>
                               setEditingState(prev => ({
                                 ...prev,
-                                episodes: event.target.value ? Number(event.target.value) : null,
+                                release_date: event.target.value,
                               }))
                             }
                           />
                         ) : (
-                          (row.episodes ?? '-')
+                          (row.release_date ?? row.first_release_date ?? '-')
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">{row.release_date ?? '-'}</TableCell>
-                      <TableCell>{row.runtime ?? '-'}</TableCell>
-                      <TableCell>{row.rating ?? '-'}</TableCell>
-                      <TableCell>{row.metacritic ?? '-'}</TableCell>
-                      <TableCell>{row.esrb_rating ?? '-'}</TableCell>
-                      <TableCell>{row.rawg_id ?? '-'}</TableCell>
-                      <TableCell>{row.steam_app_id ?? '-'}</TableCell>
-                      <TableCell className="min-w-[160px]">{row.developer ?? '-'}</TableCell>
-                      <TableCell className="min-w-[160px]">{row.publisher ?? '-'}</TableCell>
-                      <TableCell className="min-w-[220px]">
-                        <span className="line-clamp-3">
-                          {(row.platforms ?? []).length ? (row.platforms ?? []).join(', ') : '-'}
-                        </span>
+                      <TableCell>
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            value={editingState.igdb_id ?? ''}
+                            onChange={event =>
+                              setEditingState(prev => ({
+                                ...prev,
+                                igdb_id: event.target.value ? Number(event.target.value) : null,
+                              }))
+                            }
+                          />
+                        ) : (
+                          (row.igdb_id ?? '-')
+                        )}
                       </TableCell>
-                      <TableCell className="min-w-[220px]">
-                        <span className="line-clamp-3">
-                          {(row.genres ?? []).length ? (row.genres ?? []).join(', ') : '-'}
-                        </span>
+                      <TableCell className="whitespace-nowrap">
+                        {typeof row.igdb_category === 'number'
+                          ? getIgdbCategoryLabel(row.igdb_category)
+                          : '-'}
+                      </TableCell>
+                      <TableCell className="max-w-[220px] truncate">
+                        {row.igdb_slug ?? '-'}
+                      </TableCell>
+                      <TableCell>
+                        {row.cover_url_thumb ||
+                        row.cover_url_big ||
+                        row.cover_image_medium ||
+                        row.cover_image_large ? (
+                          <Image
+                            src={
+                              row.cover_url_thumb ??
+                              row.cover_url_big ??
+                              row.cover_image_medium ??
+                              row.cover_image_large ??
+                              ''
+                            }
+                            alt={row.title_english ?? row.title ?? `Game ${row.id}`}
+                            width={36}
+                            height={48}
+                            className="h-12 w-9 rounded object-cover"
+                          />
+                        ) : (
+                          '-'
+                        )}
                       </TableCell>
                       <TableCell className="max-w-[220px]">
-                        <span className="line-clamp-2 break-all">
-                          {row.cover_image_medium ?? '-'}
-                        </span>
+                        {row.official_website ? (
+                          <a
+                            href={row.official_website}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary underline"
+                          >
+                            {row.official_website}
+                          </a>
+                        ) : (
+                          '-'
+                        )}
                       </TableCell>
-                      <TableCell className="max-w-[220px]">
-                        <span className="line-clamp-2 break-all">
-                          {row.cover_image_large ?? '-'}
-                        </span>
+                      <TableCell>{row.developer ?? '-'}</TableCell>
+                      <TableCell className="min-w-[220px]">
+                        {(row.platforms ?? []).length ? (row.platforms ?? []).join(', ') : '-'}
+                      </TableCell>
+                      <TableCell className="min-w-[220px]">
+                        {(row.genres ?? []).length ? (row.genres ?? []).join(', ') : '-'}
+                      </TableCell>
+                      <TableCell className="max-w-[240px]">
+                        {summarizeFacet(row.igdb_themes)}
+                      </TableCell>
+                      <TableCell className="max-w-[240px]">
+                        {summarizeFacet(row.igdb_game_modes)}
+                      </TableCell>
+                      <TableCell className="max-w-[240px]">
+                        {summarizeFacet(row.igdb_player_perspectives)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {`A:${(row.igdb_artwork_image_ids ?? []).length} / S:${(row.igdb_screenshot_image_ids ?? []).length}`}
                       </TableCell>
                       <TableCell className="min-w-[320px]">
                         {isEditing ? (
                           <Textarea
-                            rows={4}
+                            rows={3}
                             value={editingState.description ?? ''}
                             onChange={event =>
                               setEditingState(prev => ({
@@ -812,75 +807,49 @@ export default function AdminMediaCurationTable() {
                         {row.updated_at ? new Date(row.updated_at).toLocaleString() : '-'}
                       </TableCell>
                       <TableCell className="text-right">
-                        {isEditing ? (
-                          <div className="flex justify-end gap-2">
-                            {isGame ? (
+                        <div className="flex justify-end gap-2">
+                          {row.category === 'games' ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => void syncIgdbForRow(row)}
+                              disabled={isSyncing || excludedReason !== null}
+                              title={
+                                excludedReason
+                                  ? `Excluded: ${excludedReason}`
+                                  : 'Sync this item from IGDB'
+                              }
+                            >
+                              <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                            </Button>
+                          ) : null}
+                          {excludedReason ? (
+                            <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[11px] font-medium text-amber-300">
+                              {`Excluded: ${excludedReason}`}
+                            </span>
+                          ) : null}
+                          {isEditing ? (
+                            <>
                               <Button
                                 type="button"
                                 size="sm"
-                                variant="outline"
-                                onClick={() => syncRawgPreviewForRow(row)}
-                                disabled={isSyncing || savingId === row.id}
+                                variant="secondary"
+                                onClick={resetEdit}
+                                disabled={savingId === row.id}
                               >
-                                <RefreshCw
-                                  className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
-                                />
+                                <X className="h-4 w-4" />
                               </Button>
-                            ) : null}
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => setDeleteTarget(row)}
-                              disabled={savingId === row.id || isDeleting}
-                              title="Delete entry"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              onClick={resetEdit}
-                              disabled={savingId === row.id}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={() => saveRow(row.id)}
-                              disabled={savingId === row.id}
-                            >
-                              <Save className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex justify-end gap-2">
-                            {isGame ? (
                               <Button
                                 type="button"
                                 size="sm"
-                                variant="outline"
-                                onClick={() => syncRawgPreviewForRow(row)}
-                                disabled={isSyncing}
-                                title="Sync metadata preview from RAWG"
+                                onClick={() => void saveRow(row.id)}
+                                disabled={savingId === row.id}
                               >
-                                <RefreshCw
-                                  className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
-                                />
+                                <Save className="h-4 w-4" />
                               </Button>
-                            ) : null}
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => setDeleteTarget(row)}
-                              disabled={isDeleting}
-                              title="Delete entry"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            </>
+                          ) : (
                             <Button
                               type="button"
                               size="sm"
@@ -889,8 +858,18 @@ export default function AdminMediaCurationTable() {
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                          </div>
-                        )}
+                          )}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setDeleteTarget(row)}
+                            disabled={isDeleting}
+                            title="Delete entry"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -948,7 +927,7 @@ export default function AdminMediaCurationTable() {
               {bulkDeleteIds.length > 0
                 ? `This will permanently delete ${bulkDeleteIds.length} selected entr${bulkDeleteIds.length === 1 ? 'y' : 'ies'} from media_items and remove linked user entries.`
                 : deleteTarget
-                  ? `This will permanently delete "${deleteTarget.title_english ?? deleteTarget.title ?? `ID ${deleteTarget.id}`}" from media_items and remove linked user entries.`
+                  ? `This will permanently delete "${deleteTarget.title_english ?? deleteTarget.title ?? `ID ${deleteTarget.id}`}".`
                   : 'This action cannot be undone.'}
             </AlertDialogDescription>
           </AlertDialogHeader>

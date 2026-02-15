@@ -35,7 +35,7 @@ export function LoadingState() {
           <Skeleton className="h-24 w-full rounded-xl" />
           <Skeleton className="h-12 w-full" />
           <div className="flex justify-center pt-1">
-            <Spinner className="h-5 w-5 text-info" />
+            <Spinner className="h-5 w-5 text-primary" />
           </div>
         </CardContent>
       </Card>
@@ -222,7 +222,7 @@ export function ResetPasswordCard({
       <div className="w-full max-w-md">
         <Card className="bg-card/84">
           <CardHeader className="bg-transparent pb-4 pt-7 text-center">
-            <div className="bg-info/14 mx-auto mb-4 flex h-12 w-12 items-center justify-center text-info">
+            <div className="bg-accent/14 mx-auto mb-4 flex h-12 w-12 items-center justify-center text-primary">
               <Lock className="h-6 w-6" />
             </div>
             <CardTitle className="text-2xl font-semibold text-foreground">

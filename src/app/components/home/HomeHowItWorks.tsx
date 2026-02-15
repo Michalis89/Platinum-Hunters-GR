@@ -36,7 +36,7 @@ export function HomeHowItWorks() {
 
       <div className="relative mx-auto max-w-5xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-info">Getting started</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">Getting started</p>
           <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
             Sign up and start tracking
           </h2>
@@ -51,10 +51,10 @@ export function HomeHowItWorks() {
 
               <div className="relative flex flex-col items-center rounded-lg p-6 text-center">
                 <div className="relative mb-5">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border bg-card text-info shadow-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border bg-card text-primary shadow-sm">
                     {step.icon}
                   </div>
-                  <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-info text-[10px] font-semibold tracking-[-0.01em] text-white">
+                  <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-[10px] font-semibold tracking-[-0.01em] text-white">
                     {step.number}
                   </span>
                 </div>

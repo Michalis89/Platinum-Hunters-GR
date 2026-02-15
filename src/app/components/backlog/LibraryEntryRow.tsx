@@ -103,7 +103,7 @@ function LibraryEntryRow({
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-[14px] px-2 py-1.5 text-center">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Status</p>
-              <p className="text-xs font-semibold text-info">{statusLabel}</p>
+              <p className="text-xs font-semibold text-primary">{statusLabel}</p>
             </div>
             <div className="rounded-[14px] px-2 py-1.5 text-center">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Progress</p>

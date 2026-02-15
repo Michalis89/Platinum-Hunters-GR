@@ -73,12 +73,12 @@ export const MEDIA_CATEGORY_CONFIGS: Record<MediaCategoryKey, MediaCategoryConfi
   games: {
     key: 'games',
     subcategories: ['games'],
-    externalId: { field: 'rawg_id', type: 'number' },
+    externalId: { field: 'igdb_id', type: 'number' },
     titlePriority: ['title', 'title_english'],
     logPrefix: 'Games',
     defaultCategory: 'games',
     librarySelectFields:
-      'id,status,is_favorite,import_source,selected_platform,priority,score,progress,notes,media_items!inner(id,category,source,steam_app_id,rawg_id,title,title_english,description,release_date,cover_image_large,cover_image_medium,genres,platforms,developer,publisher,metacritic,runtime)',
+      'id,status,is_favorite,import_source,selected_platform,priority,score,progress,notes,media_items!inner(id,category,source,steam_app_id,rawg_id,igdb_id,igdb_category,igdb_slug,title,title_english,summary,storyline,description,first_release_date,release_date,cover_image_id,cover_url_thumb,cover_url_big,cover_image_large,cover_image_medium,genres,platforms,developer,publisher,aggregated_rating,aggregated_rating_count,rating,rating_count,igdb_themes,igdb_game_modes,igdb_player_perspectives,igdb_artwork_image_ids,igdb_screenshot_image_ids,official_website,runtime)',
     suggestionsSelectFields:
       'media_id,score,media_items!inner(id,category,title,title_english,description,season_year,release_date,cover_image_large,cover_image_medium,genres)',
     // payloadMapper will be set in enrichers.ts to avoid circular dependency

@@ -139,7 +139,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
           {primaryStats.map(stat => (
             <div key={stat.label} className="group rounded-[18px] border bg-card p-4 text-center">
               {/* Icon */}
-              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-info">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-primary">
                 {stat.icon}
               </div>
 
@@ -167,7 +167,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
                     key={stat.label}
                     className="group w-full rounded-[18px] border bg-card p-4 text-center"
                   >
-                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-info">
+                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-primary">
                       {stat.icon}
                     </div>
                     <p className="mb-1 text-2xl font-semibold text-foreground md:text-[28px]">

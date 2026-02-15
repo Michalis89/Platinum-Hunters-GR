@@ -60,7 +60,7 @@ async function GETHandler(req: Request) {
     let request = supabase
       .from('media_items')
       .select(
-        'id,mal_id,category,source,title,title_english,title_romaji,title_native,description,format,status,season_year,episodes,start_date,end_date,release_date,runtime,rating,metacritic,esrb_rating,rawg_id,steam_app_id,developer,publisher,platforms,genres,cover_image_large,cover_image_medium,updated_at',
+        'id,mal_id,category,source,title,title_english,title_romaji,title_native,description,summary,storyline,format,status,season_year,episodes,start_date,end_date,first_release_date,release_date,runtime,rating,rating_count,aggregated_rating,aggregated_rating_count,metacritic,esrb_rating,rawg_id,igdb_id,igdb_category,igdb_slug,steam_app_id,developer,publisher,platforms,genres,igdb_themes,igdb_game_modes,igdb_player_perspectives,igdb_artwork_image_ids,igdb_screenshot_image_ids,official_website,cover_image_id,cover_url_thumb,cover_url_big,cover_image_large,cover_image_medium,igdb_updated_at,updated_at',
         { count: 'exact' },
       )
       .order('updated_at', { ascending: false, nullsFirst: false })
@@ -99,7 +99,7 @@ async function GETHandler(req: Request) {
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    return okWithMeta(data ?? [], {
+    return okWithMeta(Array.isArray(data) ? (data as unknown as Record<string, unknown>[]) : [], {
       total: count ?? 0,
       limit,
       offset,

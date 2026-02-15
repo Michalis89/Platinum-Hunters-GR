@@ -110,7 +110,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             {/* Full name */}
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <User className="h-5 w-5 text-info" />
+                <User className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs">Ονοματεπώνυμο</p>
@@ -123,7 +123,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             {/* Display name */}
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <Mail className="h-5 w-5 text-info" />
+                <Mail className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs">Display / Username</p>
@@ -137,7 +137,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             {showAge && (
               <div className="flex min-w-0 items-start gap-3">
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                  <Calendar className="h-5 w-5 text-info" />
+                  <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-xs">Ηλικία</p>
@@ -154,7 +154,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             {/* Location */}
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <MapPin className="h-5 w-5 text-info" />
+                <MapPin className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs">Τοποθεσία</p>
@@ -169,7 +169,7 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
             {/* Timezone */}
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <Globe2 className="h-5 w-5 text-info" />
+                <Globe2 className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs">Ζώνη Ώρας</p>
@@ -197,10 +197,10 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
                         rel="noreferrer"
                         className="group flex items-center gap-3 rounded-[14px] border bg-card p-3 transition-colors hover:border-info/35"
                       >
-                        <span className="text-info transition-colors">{platform.icon}</span>
+                        <span className="text-primary transition-colors">{platform.icon}</span>
                         <div className="min-w-0 flex-1">
                           <p className="text-xs">{platform.label}</p>
-                          <p className="break-all text-sm text-foreground transition-colors group-hover:text-info sm:truncate">
+                          <p className="break-all text-sm text-foreground transition-colors group-hover:text-primary sm:truncate">
                             {getSocialDisplayValue(value)}
                           </p>
                         </div>

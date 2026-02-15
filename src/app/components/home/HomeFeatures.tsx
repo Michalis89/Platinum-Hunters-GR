@@ -68,9 +68,9 @@ const features: Feature[] = [
 export function HomeFeatures() {
   return (
     <section className="px-4 py-12 md:px-6 md:py-16">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-screen-2xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-info">What you can do</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">What you can do</p>
           <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
             Add, track, and organize
           </h2>
@@ -85,7 +85,7 @@ export function HomeFeatures() {
               key={feature.title}
               className="group rounded-lg p-6 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
             >
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border bg-card text-info transition-colors group-hover:bg-primary/10">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border bg-card text-primary transition-colors group-hover:bg-primary/10">
                 {feature.icon}
               </div>
               <h3 className="mb-2 text-base font-semibold tracking-[-0.01em] text-foreground">

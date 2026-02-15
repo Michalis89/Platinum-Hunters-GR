@@ -32,7 +32,7 @@ export default function AdminSupportShell({ children }: AdminSupportShellProps) 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <PageContainer size="lg" className="flex h-14 max-w-none items-center justify-between">
+        <PageContainer size="full" className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -56,7 +56,7 @@ export default function AdminSupportShell({ children }: AdminSupportShellProps) 
         </PageContainer>
       </header>
 
-      <PageContainer size="lg" className="flex max-w-none items-start gap-6 py-6">
+      <PageContainer size="full" className="flex items-start gap-6 py-6">
         <aside className="sticky top-20 hidden w-64 shrink-0 rounded-xl border border-border bg-card p-3 md:block">
           <AdminSupportNav pathname={pathname} />
         </aside>

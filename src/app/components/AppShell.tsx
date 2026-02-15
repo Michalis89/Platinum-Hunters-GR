@@ -39,7 +39,7 @@ export default function AppShell({ children }: Props) {
         <NavbarWrapper />
         <main
           id="main-content"
-          className="flex-1 scroll-smooth pb-12 pt-4"
+          className="flex-1 scroll-smooth"
           style={{ scrollPaddingBlockStart: '6rem' }}
         >
           {children}

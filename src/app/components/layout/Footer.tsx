@@ -52,8 +52,8 @@ export function Footer() {
   );
 
   return (
-    <footer className="relative mt-auto pt-6">
-      <PageContainer size="lg" className="relative pb-8">
+    <footer className="relative mt-auto">
+      <PageContainer size="full" className="relative px-0 md:px-0">
         <div className="relative rounded-lg px-6 py-8 md:px-8 md:py-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,hsl(var(--primary)/0.12),transparent_46%)]" />
 

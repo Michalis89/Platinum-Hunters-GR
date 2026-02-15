@@ -1,6 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { RawgGame } from '@/lib/rawg/rawgClient';
-import { RawgClient } from '@/lib/rawg/rawgClient';
+import { searchIgdbGames, type IgdbGame } from '@/lib/services/igdbService';
 
 const ENTRY_STATUS_WEIGHTS: Record<string, number> = {
   completed: 1,
@@ -22,7 +21,7 @@ type EntryRow = {
   progress: number | null;
   is_favorite: boolean | null;
   media_items: {
-    rawg_id: number | null;
+    igdb_id: number | null;
     genres: string[] | null;
     title: string | null;
   } | null;
@@ -37,7 +36,7 @@ type GenreMetadata = {
 };
 
 export type GameSuggestion = {
-  rawgId: number;
+  igdbId: number;
   title: string;
   reason: string;
   signals: string;
@@ -76,9 +75,6 @@ function toGenreSlug(value: string) {
 }
 
 export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
-  const rawgKey = process.env.RAWG_API_KEY ?? '';
-  const rawgClient = new RawgClient(rawgKey);
-
   const { data: entriesData, error } = await supabase
     .from('user_media_entries')
     .select(
@@ -88,7 +84,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       progress,
       is_favorite,
       media_items!inner (
-        rawg_id,
+        igdb_id,
         genres,
         title
       )
@@ -113,8 +109,8 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
   const genreScoreCount = new Map<string, number>();
   const goodHours = new Map<string, number>(); // completed/current weighted hours
   const badHours = new Map<string, number>(); // dropped unweighted hours
-  const trackedRawgIds = new Set<number>();
-  const droppedRawgIds = new Set<number>();
+  const trackedIgdbIds = new Set<number>();
+  const droppedIgdbIds = new Set<number>();
   const trackedTitles = new Set<string>(); // Track normalized titles to prevent similar games
 
   entries.forEach(entry => {
@@ -129,7 +125,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const scoreNorm = score !== null ? clampProbability(score / 10) : 0.6;
     const favBoost = entry.is_favorite ? 1.2 : 1.0;
     const dropMultiplier = status === 'dropped' ? 0.4 : 1;
-    // Boost high-rated games: score 10 → 1.5x, score 0 → 0.3x (5x range vs old 1.67x)
+    // Boost high-rated games: score 10 -> 1.5x, score 0 -> 0.3x (5x range vs old 1.67x)
     const entryValue = hours * statusWeight * (0.3 + 1.2 * scoreNorm) * favBoost * dropMultiplier;
 
     const validGenres = media.genres.map(genre => genre?.trim()).filter(Boolean) as string[];
@@ -180,11 +176,11 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       }
     });
 
-    if (media.rawg_id) {
-      trackedRawgIds.add(media.rawg_id);
+    if (media.igdb_id) {
+      trackedIgdbIds.add(media.igdb_id);
     }
-    if (status === 'dropped' && media.rawg_id) {
-      droppedRawgIds.add(media.rawg_id);
+    if (status === 'dropped' && media.igdb_id) {
+      droppedIgdbIds.add(media.igdb_id);
     }
     // Track normalized title to prevent suggesting similar games (e.g., "The Walking Dead: Season 1" when user has "The Walking Dead")
     if (media.title) {
@@ -233,7 +229,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     // ULTRA-AGGRESSIVE quality multiplier: avgScore is the PRIMARY preference signal
     // Make high-rated genres DOMINATE over high-volume genres
     if (avgScore >= 6.0) {
-      // EXTREME BOOST: 6.0 → 0.3x, 7.0 → 1.0x, 7.5 → 3.0x, 8.0 → 5.5x, 10.0 → 10.0x
+      // EXTREME BOOST: 6.0 -> 0.3x, 7.0 -> 1.0x, 7.5 -> 3.0x, 8.0 -> 5.5x, 10.0 -> 10.0x
       const qualityMultiplier = 0.3 + 9.7 * ((avgScore - 6.0) / 4.0);
       finalScore *= qualityMultiplier;
     } else {
@@ -267,30 +263,30 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   // Debug: Log top genres and eligibility
   const allGenresSorted = [...finalGenreScore.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-  console.log('🎮 Top Genres by Score:');
+  console.log('Top Genres by Score:');
   allGenresSorted.forEach(([genre, score]) => {
     const metadata = genreMetadata.get(genre);
     const good = metadata?.goodHours ?? 0;
     const dropRate = metadata?.dropRate ?? 1;
     const eligible = good >= 10 && dropRate <= 0.35;
     console.log(
-      `  ${eligible ? '✅' : '❌'} ${genre}: score=${score.toFixed(3)}, goodHours=${good.toFixed(1)}, dropRate=${(dropRate * 100).toFixed(1)}%, avgScore=${metadata?.avgScore.toFixed(1)}`,
+      `  ${eligible ? 'OK' : 'NO'} ${genre}: score=${score.toFixed(3)}, goodHours=${good.toFixed(1)}, dropRate=${(dropRate * 100).toFixed(1)}%, avgScore=${metadata?.avgScore.toFixed(1)}`,
     );
   });
-  console.log(`🎯 Eligible genres: ${eligibleGenres.map(([g]) => g).join(', ')}`);
+  console.log(`Eligible genres: ${eligibleGenres.map(([g]) => g).join(', ')}`);
 
   const genreRanking = eligibleGenres;
   const eligibleGenresSet = new Set(genreRanking.map(([genre]) => genre));
 
   // Debug: Log tracked titles
   console.log(
-    `📚 Tracked titles (${trackedTitles.size}):`,
+    `Tracked titles (${trackedTitles.size}):`,
     Array.from(trackedTitles).slice(0, 20).join(', '),
   );
 
   if (!genreRanking.length) {
     return Array.from({ length: 4 }).map((_, index) => ({
-      rawgId: index,
+      igdbId: index,
       title: 'More history needed',
       reason: 'Complete more games so we can build personalized picks.',
       signals: 'Awaiting data',
@@ -300,14 +296,15 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   const genreSlugs = genreRanking.map(([genre]) => toGenreSlug(genre)).filter(Boolean);
 
-  const rawgGames = await rawgClient.fetchGames({
-    genres: genreSlugs.length ? genreSlugs : undefined,
-    ordering: '-added',
-    pageSize: 60,
-  });
+  let igdbGames: IgdbGame[] = [];
+  try {
+    igdbGames = await searchIgdbGames(genreSlugs.join(' '), 60);
+  } catch {
+    return [];
+  }
 
   const candidates: Array<{
-    game: RawgGame;
+    game: IgdbGame;
     score: number;
     primaryGenre: string;
     reason: string;
@@ -315,8 +312,8 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     matchedCount: number;
   }> = [];
 
-  rawgGames.forEach(game => {
-    if (!game?.id || trackedRawgIds.has(game.id) || droppedRawgIds.has(game.id)) {
+  igdbGames.forEach(game => {
+    if (!game?.id || trackedIgdbIds.has(game.id) || droppedIgdbIds.has(game.id)) {
       return;
     }
 
@@ -325,14 +322,14 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
     // Reject games with similar titles already in library (e.g., "The Walking Dead: Season 1" when user has "The Walking Dead")
     if (trackedTitles.has(title)) {
-      console.log(`❌ REJECTED ${game.name}: Already in library (exact title match: "${title}")`);
+      console.log(`REJECTED ${game.name}: Already in library (exact title match: "${title}")`);
       return;
     }
 
     // Debug log to trace title checking
     if (game.name.toLowerCase().includes('horizon')) {
       console.log(
-        `🔍 Checking "${game.name}" → normalized: "${title}" | In tracked? ${trackedTitles.has(title)}`,
+        `Checking "${game.name}" -> normalized: "${title}" | In tracked? ${trackedTitles.has(title)}`,
       );
     }
 
@@ -345,7 +342,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       return commonWords.length >= 3;
     });
     if (hasPartialMatch) {
-      console.log(`❌ REJECTED ${game.name}: Similar title already in library`);
+      console.log(`REJECTED ${game.name}: Similar title already in library`);
       return;
     }
 
@@ -354,13 +351,13 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     }
 
     const candidateGenres = (game.genres ?? [])
-      .map(rawgGenre => normalizeText(rawgGenre?.name))
+      .map(igdbGenre => normalizeText(igdbGenre?.name))
       .filter(Boolean);
     if (!candidateGenres.length) return;
 
-    // Extract tags (like Multiplayer, Co-op, FPS, Shooter) for filtering
-    const candidateTags = (game.tags ?? [])
-      .map(rawgTag => normalizeText(rawgTag?.name))
+    // Use themes/modes as extra descriptors for filtering
+    const candidateTags = [...(game.themes ?? []), ...(game.game_modes ?? [])]
+      .map(igdbTag => normalizeText(igdbTag?.name))
       .filter(Boolean)
       .slice(0, 10); // Limit to top 10 tags to avoid noise
 
@@ -377,7 +374,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     );
     if (heavilyDroppedDescriptors.length > 0) {
       console.log(
-        `❌ REJECTED ${game.name}: Heavily dropped (>45%) → ${heavilyDroppedDescriptors.map(d => `${d}:${((dropRateMap.get(d) ?? 0) * 100).toFixed(1)}%`).join(', ')}`,
+        `REJECTED ${game.name}: Heavily dropped (>45%) -> ${heavilyDroppedDescriptors.map(d => `${d}:${((dropRateMap.get(d) ?? 0) * 100).toFixed(1)}%`).join(', ')}`,
       );
       return;
     }
@@ -402,7 +399,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     });
     if (foundProblematicUnknownTags.length > 0) {
       console.log(
-        `❌ REJECTED ${game.name}: Unknown problematic tags → ${foundProblematicUnknownTags.join(', ')}`,
+        `REJECTED ${game.name}: Unknown problematic tags -> ${foundProblematicUnknownTags.join(', ')}`,
       );
       return;
     }
@@ -419,7 +416,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     allGameDescriptors.forEach(descriptor => {
       const dropRate = dropRateMap.get(descriptor) ?? 0;
       if (dropRate > 0.3) {
-        // Penalty scales with drop rate: 30% → 0.05, 40% → 0.15, 45% → 0.25
+        // Penalty scales with drop rate: 30% -> 0.05, 40% -> 0.15, 45% -> 0.25
         cumulativePenalty += (dropRate - 0.3) * 1.5;
       }
     });
@@ -436,7 +433,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       const zeroEngagementPenalty = 0.7 * proportion;
       cumulativePenalty += zeroEngagementPenalty;
       console.log(
-        `⚠️ PENALTY ${game.name}: Zero engagement (${zeroEngagementGenres.length}/${candidateGenres.length}) → ${zeroEngagementGenres.join(', ')} (penalty=${zeroEngagementPenalty.toFixed(2)})`,
+        `PENALTY ${game.name}: Zero engagement (${zeroEngagementGenres.length}/${candidateGenres.length}) -> ${zeroEngagementGenres.join(', ')} (penalty=${zeroEngagementPenalty.toFixed(2)})`,
       );
     }
 
@@ -472,7 +469,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       favoriteCount ? 'favorite' : null,
     ]
       .filter(Boolean)
-      .join(' · ');
+      .join(' | ');
 
     candidates.push({
       game,
@@ -491,7 +488,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       })
       .join(', ');
     console.log(
-      `✅ ACCEPTED ${game.name}: score=${candidateScore.toFixed(3)}, primary=${primaryGenre} | All descriptors: [${descriptorDetails}]`,
+      `ACCEPTED ${game.name}: score=${candidateScore.toFixed(3)}, primary=${primaryGenre} | All descriptors: [${descriptorDetails}]`,
     );
   });
 
@@ -518,7 +515,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     genreUsage.set(candidate.primaryGenre, usage + 1);
 
     suggestions.push({
-      rawgId: candidate.game.id,
+      igdbId: candidate.game.id,
       title: candidate.game.name ?? 'Untitled',
       reason: candidate.reason,
       signals: candidate.signals,
@@ -529,12 +526,12 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   // Fallback suggestions if needed
   if (suggestions.length < 4) {
-    const fallback = rawgGames
-      .filter(game => game?.id && !trackedRawgIds.has(game.id))
+    const fallback = igdbGames
+      .filter(game => game?.id && !trackedIgdbIds.has(game.id))
       .slice(0, 4 - suggestions.length);
     fallback.forEach(game => {
       suggestions.push({
-        rawgId: game.id,
+        igdbId: game.id,
         title: game.name ?? 'Untitled',
         reason: 'A new candidate based on your history profile.',
         signals: game.genres?.[0]?.name ?? 'Game pick',
@@ -546,7 +543,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   while (suggestions.length < 4) {
     suggestions.push({
-      rawgId: 0,
+      igdbId: 0,
       title: 'More data needed',
       reason: 'Complete more games so we can personalize your picks.',
       signals: 'Awaiting history',

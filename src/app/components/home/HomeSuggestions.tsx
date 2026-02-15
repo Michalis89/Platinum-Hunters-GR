@@ -123,7 +123,7 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
 
   return (
     <section className="px-4 py-10 md:px-6">
-      <div className="mx-auto max-w-7xl space-y-5">
+      <div className="mx-auto max-w-screen-2xl space-y-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-1.5">
             <h2 className="text-2xl font-semibold">Discover more favorites?</h2>
@@ -175,7 +175,7 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
 
             <Link
               href={activeConfig?.addPath ?? '/pages/backlog'}
-              className="mt-5 inline-flex items-center gap-1 text-sm font-medium transition hover:text-info"
+              className="mt-5 inline-flex items-center gap-1 text-sm font-medium transition hover:text-primary"
             >
               Browse backlog
               <ChevronRight className="h-4 w-4" />

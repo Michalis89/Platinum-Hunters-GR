@@ -239,7 +239,7 @@ function renderText(item: ActivityItem) {
 }
 
 function iconFor(item: ActivityItem) {
-  if (item.type === 'backlog_added') return <Gamepad2 className="h-4 w-4 text-info" />;
+  if (item.type === 'backlog_added') return <Gamepad2 className="h-4 w-4 text-primary" />;
   if (item.type === 'backlog_status') {
     const status = (item.payload?.status || '').toString();
     if (status === 'platinumed') return <TrophyIcon className="h-4 w-4 text-warning" />;
@@ -249,9 +249,9 @@ function iconFor(item: ActivityItem) {
       return <Heart className="h-4 w-4 text-rose-500" />;
     if (item.payload?.favoriteAction === 'removed')
       return <Heart className="h-4 w-4 text-muted-foreground" />;
-    return <Gamepad2 className="h-4 w-4 text-info" />;
+    return <Gamepad2 className="h-4 w-4 text-primary" />;
   }
-  if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-info" />;
+  if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-primary" />;
   if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
   if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-500" />;
   // Article/Review icons - use Star for reviews
@@ -260,21 +260,21 @@ function iconFor(item: ActivityItem) {
     return isReview ? (
       <Star className="h-4 w-4 text-warning" />
     ) : (
-      <FileText className="h-4 w-4 text-info" />
+      <FileText className="h-4 w-4 text-primary" />
     );
   }
   if (item.type === 'article_updated') {
     return isReview ? (
       <Star className="h-4 w-4 text-warning" />
     ) : (
-      <Pencil className="h-4 w-4 text-info" />
+      <Pencil className="h-4 w-4 text-primary" />
     );
   }
   if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-destructive" />;
   if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-500" />;
   if (item.type === 'article_unliked') return <Heart className="h-4 w-4 text-muted-foreground" />;
-  if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-info" />;
-  if (item.type === 'article_commented') return <MessageSquare className="h-4 w-4 text-info" />;
+  if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-primary" />;
+  if (item.type === 'article_commented') return <MessageSquare className="h-4 w-4 text-primary" />;
   if (item.type === 'article_comment_deleted')
     return <MessageSquare className="h-4 w-4 text-muted-foreground" />;
   return <UserIcon className="h-4 w-4 text-muted-foreground" />;
@@ -314,7 +314,7 @@ function ActivityFeedComponent({
   };
 
   const activities: ActivityItem[] = data?.activities ?? [];
-  const feedTextClass = '  font-medium transition-colors hover:text-info';
+  const feedTextClass = '  font-medium transition-colors hover:text-primary';
 
   return (
     <div className="p-4 sm:p-5">
@@ -329,7 +329,7 @@ function ActivityFeedComponent({
               <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
               <Link
                 href="/pages/profile/edit#categories"
-                className="font-semibold text-info underline hover:opacity-85"
+                className="font-semibold text-primary underline hover:opacity-85"
               >
                 Πρόσθεσέ την εδώ
               </Link>

@@ -1,5 +1,10 @@
 import type { Database } from '@/lib/supabase/database.types';
-import { searchRawgGames, fetchRawgGameDetails, type RawgGame } from '@/lib/services/rawgService';
+import {
+  fetchIgdbGameDetails,
+  mapIgdbToPayload,
+  searchIgdbGames,
+  type IgdbGame,
+} from '@/lib/services/igdbService';
 import { getSteamCoverUrls, type SteamOwnedGame } from './steam';
 
 export type SteamGameWithAchievements = SteamOwnedGame & {
@@ -20,8 +25,7 @@ export function normalizeTitle(value?: string | null): string {
  */
 export function cleanTitleForStorage(value?: string | null): string {
   if (!value) return '';
-  // Remove trademark symbols (™, ®, ©)
-  return value.replace(/[™®©]/g, '').trim();
+  return value.replace(/[\u2122\u00AE\u00A9]/g, '').trim();
 }
 
 /**
@@ -31,10 +35,9 @@ export function cleanTitleForStorage(value?: string | null): string {
 export function normalizeForMatch(value?: string | null): string {
   let normalized = (value ?? '').trim();
 
-  // Remove trademark symbols (™, ®, ©)
-  normalized = normalized.replace(/[™®©]/g, '');
+  normalized = normalized.replace(/[\u2122\u00AE\u00A9]/g, '');
 
-  // Remove edition tokens that break RAWG matching
+  // Remove edition tokens that break IGDB matching
   const editionTokens = [
     /\s*-?\s*Complete Edition/gi,
     /\s*-?\s*Definitive Edition/gi,
@@ -55,7 +58,6 @@ export function normalizeForMatch(value?: string | null): string {
     normalized = normalized.replace(pattern, '');
   }
 
-  // Normalize to lowercase and remove non-alphanumeric
   return normalized
     .toLowerCase()
     .normalize('NFKD')
@@ -70,12 +72,6 @@ export function normalizeForMatch(value?: string | null): string {
 /**
  * Map Steam game data to status based on playtime, last played, and achievements.
  * ONLY applies to steam-imported games. Never overrides user-edited status.
- *
- * Rules:
- * - If never played (playtime=0 AND last_played=0) => 'planned'
- * - If 100% achievements => 'completed'
- * - If not played in 90+ days AND has playtime => 'dropped'
- * - Otherwise => 'current'
  */
 export function deriveStatusFromSteamData(params: {
   playtimeMinutes?: number;
@@ -90,17 +86,14 @@ export function deriveStatusFromSteamData(params: {
     droppedThresholdDays = 90,
   } = params;
 
-  // Never played => planned (backlog)
   if (playtimeMinutes === 0 && lastPlayedUnix === 0) {
     return 'planned';
   }
 
-  // 100% achievements => completed
   if (achievementsPercent === 100) {
     return 'completed';
   }
 
-  // Dropped: has playtime but not played in 90+ days
   if (lastPlayedUnix > 0 && playtimeMinutes > 0) {
     const lastPlayedDate = new Date(lastPlayedUnix * 1000);
     const daysSinceLastPlayed = (Date.now() - lastPlayedDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -110,12 +103,10 @@ export function deriveStatusFromSteamData(params: {
     }
   }
 
-  // Has playtime => current
   if (playtimeMinutes > 0) {
     return 'current';
   }
 
-  // Default to planned
   return 'planned';
 }
 
@@ -126,8 +117,8 @@ export function deriveStatusFromSteamData(params: {
 /**
  * Merge platforms ensuring PC is included for Steam games.
  */
-export function mergePlatforms(rawgPlatforms: string[] | null | undefined): string[] {
-  const ordered = ['PC', ...(rawgPlatforms ?? [])].filter(Boolean) as string[];
+export function mergePlatforms(platforms: string[] | null | undefined): string[] {
+  const ordered = ['PC', ...(platforms ?? [])].filter(Boolean) as string[];
   return Array.from(new Set(ordered));
 }
 
@@ -139,7 +130,7 @@ export function getSteamHours(game: SteamOwnedGame): number | null {
 }
 
 // ============================================================================
-// RAWG Matching & Enrichment
+// IGDB Matching & Enrichment
 // ============================================================================
 
 export async function mapWithConcurrency<TInput, TOutput>(
@@ -166,11 +157,11 @@ export async function mapWithConcurrency<TInput, TOutput>(
   return results;
 }
 
-export async function matchSteamGamesToRawg(
+export async function matchSteamGamesToIgdb(
   games: SteamGameWithAchievements[],
   onItemComplete?: (completed: number, total: number) => Promise<void> | void,
 ) {
-  const cache = new Map<string, RawgGame | null>();
+  const cache = new Map<string, IgdbGame | null>();
 
   const pairs = await mapWithConcurrency(
     games,
@@ -187,14 +178,14 @@ export async function matchSteamGamesToRawg(
       }
 
       try {
-        const candidates = await searchRawgGames(title, 8);
+        const candidates = await searchIgdbGames(title, 8);
         const matched =
           candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
 
         cache.set(key, matched);
         return [game.appid, matched] as const;
       } catch (error) {
-        console.warn(`RAWG search failed for "${title}":`, error);
+        console.warn(`IGDB search failed for "${title}":`, error);
         cache.set(key, null);
         return [game.appid, null] as const;
       }
@@ -202,44 +193,44 @@ export async function matchSteamGamesToRawg(
     onItemComplete,
   );
 
-  return new Map<number, RawgGame | null>(pairs);
+  return new Map<number, IgdbGame | null>(pairs);
 }
 
-export async function enrichRawgMatches(
-  matchByAppId: Map<number, RawgGame | null>,
+export async function enrichIgdbMatches(
+  matchByAppId: Map<number, IgdbGame | null>,
   onItemComplete?: (completed: number, total: number) => Promise<void> | void,
 ) {
-  const matchedRawgIds = Array.from(
+  const matchedIgdbIds = Array.from(
     new Set(
       Array.from(matchByAppId.values())
         .map(item => item?.id)
         .filter((id): id is number => typeof id === 'number'),
     ),
   );
-  const detailsCache = new Map<number, RawgGame | null>();
+  const detailsCache = new Map<number, IgdbGame | null>();
 
-  if (matchedRawgIds.length === 0) {
-    return new Map<number, RawgGame | null>();
+  if (matchedIgdbIds.length === 0) {
+    return new Map<number, IgdbGame | null>();
   }
 
   await mapWithConcurrency(
-    matchedRawgIds,
+    matchedIgdbIds,
     3,
-    async rawgId => {
+    async igdbId => {
       try {
-        const details = await fetchRawgGameDetails(rawgId);
-        detailsCache.set(rawgId, details);
+        const details = await fetchIgdbGameDetails(igdbId, { mainGameOnly: false });
+        detailsCache.set(igdbId, details);
         return details;
       } catch (error) {
-        console.warn(`RAWG details fetch failed for ID ${rawgId}:`, error);
-        detailsCache.set(rawgId, null);
+        console.warn(`IGDB details fetch failed for ID ${igdbId}:`, error);
+        detailsCache.set(igdbId, null);
         return null;
       }
     },
     onItemComplete,
   );
 
-  const enrichedByAppId = new Map<number, RawgGame | null>();
+  const enrichedByAppId = new Map<number, IgdbGame | null>();
   for (const [appid, matched] of matchByAppId.entries()) {
     if (!matched) {
       enrichedByAppId.set(appid, null);
@@ -256,42 +247,29 @@ export async function enrichRawgMatches(
 // ============================================================================
 
 /**
- * Build RAWG metadata patch for a Steam game.
- * EXACTLY like EditEntryDialog's sync_rawg_metadata action.
+ * Build IGDB metadata patch for a Steam game.
  * This should ONLY be called for NEW enrichment, NOT for already-enriched items.
  */
-export function buildGameMetadataPatch(game: SteamGameWithAchievements, rawg: RawgGame) {
-  const rawgGenres = rawg.genres?.map(item => item.name) ?? [];
-  const rawgPlatforms = rawg.platforms?.map(item => item.platform.name) ?? [];
-  const year = rawg.released ? Number.parseInt(rawg.released.slice(0, 4), 10) : null;
-
-  // Safety: Ensure we have full RAWG data (not just search result)
-  if (!rawg.background_image && !rawg.description_raw) {
-    console.warn(`⚠️ buildGameMetadataPatch called with incomplete RAWG data for ${rawg.name}`);
-  }
-
-  // Clean titles: remove trademark symbols (™, ®, ©)
-  const cleanTitle = cleanTitleForStorage(rawg.name ?? game.name ?? `Steam App ${game.appid}`);
+export function buildGameMetadataPatch(game: SteamGameWithAchievements, igdbGame: IgdbGame) {
+  const payload = mapIgdbToPayload(igdbGame);
+  const cleanTitle = cleanTitleForStorage(payload.title ?? game.name ?? `Steam App ${game.appid}`);
 
   return {
-    source: 'rawg',
-    rawg_id: rawg.id,
+    source: 'igdb',
+    rawg_id: payload.igdb_id,
     steam_app_id: game.appid,
     title: cleanTitle,
     title_english: cleanTitle,
-    description: rawg.description_raw ?? null,
-    cover_image_large: rawg.background_image ?? getSteamCoverUrls(game).large,
-    cover_image_medium: rawg.background_image ?? getSteamCoverUrls(game).medium,
-    season_year: Number.isFinite(year) ? year : null,
-    release_date: rawg.released ?? null,
-    rating: rawg.rating ?? null,
-    metacritic: rawg.metacritic ?? null,
-    platforms: mergePlatforms(rawgPlatforms), // PC + RAWG platforms (merged)
-    genres: rawgGenres,
-    developer: rawg.developers?.[0]?.name ?? null,
-    publisher: rawg.publishers?.[0]?.name ?? null,
-    esrb_rating: rawg.esrb_rating?.name ?? null,
-    runtime: rawg.playtime ?? null,
+    description: payload.description,
+    cover_image_large: payload.cover_image_large ?? getSteamCoverUrls(game).large,
+    cover_image_medium: payload.cover_image_medium ?? getSteamCoverUrls(game).medium,
+    season_year: payload.season_year,
+    release_date: payload.release_date,
+    rating: payload.rating,
+    platforms: mergePlatforms(payload.platforms),
+    genres: payload.genres,
+    developer: payload.developer,
+    publisher: payload.publisher,
   } satisfies Database['public']['Tables']['media_items']['Update'];
 }
 
@@ -307,6 +285,6 @@ export function buildSteamFallbackInsert(game: SteamGameWithAchievements) {
     title_english: cleanTitle,
     cover_image_large: covers.large,
     cover_image_medium: covers.medium,
-    platforms: ['PC'], // Steam-only fallback = PC only
+    platforms: ['PC'],
   } satisfies Database['public']['Tables']['media_items']['Insert'];
 }

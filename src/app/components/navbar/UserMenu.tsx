@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { User as UserEntity } from '@/types/user';
-import { desktopLinkClass, getUserInitials } from './navbar.helpers';
+import { getUserInitials } from './navbar.helpers';
 
 type UserMenuProps = {
   user: UserEntity;
@@ -52,8 +52,7 @@ export const UserMenu = React.memo(function UserMenu({
           type="button"
           variant="secondary"
           className={cn(
-            desktopLinkClass(false),
-            'h-9 gap-2 border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-foreground',
+            'h-9 gap-2 rounded-md border border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-foreground shadow-none transition-[background-color,color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent-muted))/0.35] hover:text-primary active:scale-[0.99]',
           )}
         >
           <Avatar className="h-7 w-7 border border-border">

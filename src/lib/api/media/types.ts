@@ -96,7 +96,7 @@ export type TitlePriority = TitleField[];
  * External ID configuration
  */
 export type ExternalIdConfig = {
-  field: 'mal_id' | 'google_books_id' | 'rawg_id' | 'tmdb_id';
+  field: 'mal_id' | 'google_books_id' | 'rawg_id' | 'igdb_id' | 'tmdb_id';
   type: 'number' | 'string';
 };
 

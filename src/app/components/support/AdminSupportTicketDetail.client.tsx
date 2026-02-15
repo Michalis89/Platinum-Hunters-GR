@@ -309,7 +309,7 @@ export default function AdminSupportTicketDetail() {
           }
         />
 
-        <PageContainer size="lg" className="max-w-none pb-20">
+        <PageContainer size="full" className="pb-20">
           <div className="mb-4 flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => router.push('/admin/support')}>
               Πίσω

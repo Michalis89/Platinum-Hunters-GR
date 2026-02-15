@@ -4,11 +4,11 @@ import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import type { Database } from '@/lib/supabase/database.types';
-import type { RawgGame } from '@/lib/services/rawgService';
+import type { IgdbGame } from '@/lib/services/igdbService';
 import {
   type SteamGameWithAchievements,
-  matchSteamGamesToRawg,
-  enrichRawgMatches,
+  matchSteamGamesToIgdb,
+  enrichIgdbMatches,
   buildGameMetadataPatch,
   buildSteamFallbackInsert,
   deriveStatusFromSteamData,
@@ -38,8 +38,6 @@ async function POSTHandler(req: Request) {
     const adminSupabase = createSupabaseAdminClient();
     const session = await requireAuth(supabase);
 
-    console.log(`🔄 [Steam Sync Process] Processing batch for job: ${jobId}`);
-
     // Fetch job
     const { data: job, error: jobError } = await supabase
       .from('steam_sync_jobs')
@@ -49,7 +47,6 @@ async function POSTHandler(req: Request) {
       .maybeSingle();
 
     if (jobError || !job) {
-      console.error('❌ [Steam Sync Process] Job not found:', jobError);
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
@@ -59,7 +56,7 @@ async function POSTHandler(req: Request) {
         totalGames: job.total_steps,
         isComplete: true,
         percent: 100,
-        message: 'Ο συγχρονισμός έχει ήδη ολοκληρωθεί',
+        message: 'Steam sync is already completed',
       } satisfies ProcessResult);
     }
 
@@ -70,17 +67,14 @@ async function POSTHandler(req: Request) {
     const allGames = (job.steam_games as SteamGameWithAchievements[]) || [];
     const processedCount = job.processed_count || 0;
     const batchSize = job.batch_size || 25;
-
-    // Get the next batch to process
     const batch = allGames.slice(processedCount, processedCount + batchSize);
 
     if (batch.length === 0) {
-      // No more games to process - mark as complete
       await supabase
         .from('steam_sync_jobs')
         .update({
           status: 'completed',
-          message: 'Ο συγχρονισμός ολοκληρώθηκε επιτυχώς',
+          message: 'Steam sync completed successfully',
           percent: 100,
           finished_at: new Date().toISOString(),
         })
@@ -91,26 +85,19 @@ async function POSTHandler(req: Request) {
         totalGames: allGames.length,
         isComplete: true,
         percent: 100,
-        message: 'Ο συγχρονισμός ολοκληρώθηκε επιτυχώς',
+        message: 'Steam sync completed successfully',
       } satisfies ProcessResult);
     }
 
-    console.log(
-      `📦 [Steam Sync Process] Processing ${batch.length} games (${processedCount + 1}-${processedCount + batch.length} of ${allGames.length})`,
-    );
-
-    // Update job status
     await supabase
       .from('steam_sync_jobs')
       .update({
-        message: `Επεξεργασία παιχνιδιών ${processedCount + 1}-${processedCount + batch.length} από ${allGames.length}...`,
+        message: `Processing games ${processedCount + 1}-${processedCount + batch.length} of ${allGames.length}...`,
       })
       .eq('id', jobId);
 
-    // Match with RAWG
-    const rawgMatchByAppId = await matchSteamGamesToRawg(batch);
+    const igdbMatchByAppId = await matchSteamGamesToIgdb(batch);
 
-    // Fetch existing media items (needed for enrichment filtering)
     const appIds = batch.map(game => game.appid);
     const { data: existingMediaRows } = await adminSupabase
       .from('media_items')
@@ -128,60 +115,54 @@ async function POSTHandler(req: Request) {
       }
     }
 
-    // Filter matches: skip enrichment for items that already have RAWG metadata
-    const rawgMatchesNeedingEnrichment = new Map<number, RawgGame | null>();
-    const rawgMatchesAlreadyEnriched = new Map<number, RawgGame | null>();
+    const igdbMatchesNeedingEnrichment = new Map<number, IgdbGame | null>();
+    const igdbMatchesAlreadyEnriched = new Map<number, IgdbGame | null>();
 
-    for (const [appid, rawgMatch] of rawgMatchByAppId.entries()) {
-      if (!rawgMatch) {
-        rawgMatchesNeedingEnrichment.set(appid, null);
+    for (const [appid, igdbMatch] of igdbMatchByAppId.entries()) {
+      if (!igdbMatch) {
+        igdbMatchesNeedingEnrichment.set(appid, null);
         continue;
       }
 
       const existingMedia = mediaByAppId.get(appid);
       const alreadyEnriched =
-        existingMedia && existingMedia.rawg_id === rawgMatch.id && existingMedia.source === 'rawg';
+        existingMedia && existingMedia.rawg_id === igdbMatch.id && existingMedia.source === 'igdb';
 
       if (alreadyEnriched) {
-        rawgMatchesAlreadyEnriched.set(appid, rawgMatch);
+        igdbMatchesAlreadyEnriched.set(appid, igdbMatch);
       } else {
-        rawgMatchesNeedingEnrichment.set(appid, rawgMatch);
+        igdbMatchesNeedingEnrichment.set(appid, igdbMatch);
       }
     }
 
-    // Enrich RAWG matches
-    const enrichedRawgByAppId = await enrichRawgMatches(rawgMatchesNeedingEnrichment);
-
-    // Merge already-enriched items back in
-    for (const [appid, match] of rawgMatchesAlreadyEnriched.entries()) {
-      enrichedRawgByAppId.set(appid, match);
+    const enrichedIgdbByAppId = await enrichIgdbMatches(igdbMatchesNeedingEnrichment);
+    for (const [appid, match] of igdbMatchesAlreadyEnriched.entries()) {
+      enrichedIgdbByAppId.set(appid, match);
     }
 
-    // Fetch all matched RAWG IDs to check for existing media
-    const allMatchedRawgIds = Array.from(
+    const allMatchedIgdbIds = Array.from(
       new Set(
         batch
-          .map(game => enrichedRawgByAppId.get(game.appid)?.id)
+          .map(game => enrichedIgdbByAppId.get(game.appid)?.id)
           .filter((id): id is number => typeof id === 'number'),
       ),
     );
 
-    const existingRawgMediaByRawgId = new Map<number, { id: number; rawg_id: number | null }>();
-    if (allMatchedRawgIds.length > 0) {
-      const { data: rawgRows } = await adminSupabase
+    const existingIgdbMediaByIgdbId = new Map<number, { id: number; rawg_id: number | null }>();
+    if (allMatchedIgdbIds.length > 0) {
+      const { data: igdbRows } = await adminSupabase
         .from('media_items')
         .select('id,rawg_id')
         .eq('category', 'games')
-        .in('rawg_id', allMatchedRawgIds);
+        .in('rawg_id', allMatchedIgdbIds);
 
-      for (const row of rawgRows ?? []) {
+      for (const row of igdbRows ?? []) {
         if (typeof row.rawg_id === 'number') {
-          existingRawgMediaByRawgId.set(row.rawg_id, row);
+          existingIgdbMediaByIgdbId.set(row.rawg_id, row);
         }
       }
     }
 
-    // Prepare media updates and inserts
     const mediaIdByAppId = new Map<number, number>();
     const insertTasks: Array<{
       appid: number;
@@ -193,26 +174,22 @@ async function POSTHandler(req: Request) {
     >();
 
     for (const game of batch) {
-      const matchedRawg = enrichedRawgByAppId.get(game.appid) ?? null;
+      const matchedIgdb = enrichedIgdbByAppId.get(game.appid) ?? null;
       const existingByAppId = mediaByAppId.get(game.appid);
 
       if (existingByAppId) {
         mediaIdByAppId.set(game.appid, existingByAppId.id);
 
-        // Check if already RAWG-enriched
-        const isAlreadyEnriched = existingByAppId.source === 'rawg' && existingByAppId.rawg_id;
+        const isAlreadyEnriched = existingByAppId.source === 'igdb' && existingByAppId.rawg_id;
 
         if (isAlreadyEnriched) {
-          // Preserve existing RAWG data
           updateByMediaId.set(existingByAppId.id, {
             steam_app_id: game.appid,
             runtime: getSteamHours(game),
           });
-        } else if (matchedRawg) {
-          // New RAWG enrichment
-          updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedRawg));
+        } else if (matchedIgdb) {
+          updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedIgdb));
         } else {
-          // No RAWG match, just update Steam fields
           updateByMediaId.set(existingByAppId.id, {
             steam_app_id: game.appid,
             runtime: getSteamHours(game),
@@ -221,11 +198,11 @@ async function POSTHandler(req: Request) {
         continue;
       }
 
-      if (matchedRawg) {
-        const existingRawgMedia = existingRawgMediaByRawgId.get(matchedRawg.id);
-        if (existingRawgMedia) {
-          mediaIdByAppId.set(game.appid, existingRawgMedia.id);
-          updateByMediaId.set(existingRawgMedia.id, {
+      if (matchedIgdb) {
+        const existingIgdbMedia = existingIgdbMediaByIgdbId.get(matchedIgdb.id);
+        if (existingIgdbMedia) {
+          mediaIdByAppId.set(game.appid, existingIgdbMedia.id);
+          updateByMediaId.set(existingIgdbMedia.id, {
             steam_app_id: game.appid,
             runtime: getSteamHours(game),
           });
@@ -236,7 +213,7 @@ async function POSTHandler(req: Request) {
           appid: game.appid,
           payload: {
             category: 'games',
-            ...buildGameMetadataPatch(game, matchedRawg),
+            ...buildGameMetadataPatch(game, matchedIgdb),
           },
         });
       } else {
@@ -247,7 +224,6 @@ async function POSTHandler(req: Request) {
       }
     }
 
-    // Execute media inserts
     if (insertTasks.length > 0) {
       const { data: insertedMediaRows, error: mediaInsertError } = await adminSupabase
         .from('media_items')
@@ -261,7 +237,6 @@ async function POSTHandler(req: Request) {
           }
         }
       } else {
-        // Fallback to individual inserts
         await mapWithConcurrency(insertTasks, 4, async task => {
           const { data } = await adminSupabase
             .from('media_items')
@@ -277,7 +252,6 @@ async function POSTHandler(req: Request) {
       }
     }
 
-    // Execute media updates
     if (updateByMediaId.size > 0) {
       await mapWithConcurrency(
         Array.from(updateByMediaId.entries()),
@@ -289,7 +263,6 @@ async function POSTHandler(req: Request) {
       );
     }
 
-    // Handle user entries
     const mediaIds = Array.from(mediaIdByAppId.values());
     const { data: existingEntryRows } = await supabase
       .from('user_media_entries')
@@ -309,7 +282,6 @@ async function POSTHandler(req: Request) {
       });
     }
 
-    // Get user's existing game titles for dedup
     const { data: userGameRows } = await supabase
       .from('user_media_entries')
       .select('media_items!inner(title,title_english,category)')
@@ -328,7 +300,6 @@ async function POSTHandler(req: Request) {
       if (normalizedEnglishTitle) userTitleSet.add(normalizedEnglishTitle);
     }
 
-    // Prepare user entry payloads
     const userEntryPayload: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
     const userEntryUpdates: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
 
@@ -344,7 +315,6 @@ async function POSTHandler(req: Request) {
       });
 
       if (existingEntry !== undefined) {
-        // Only update if import_source='steam'
         if (existingEntry.import_source === 'steam') {
           userEntryUpdates.push({
             user_id: session.user.id,
@@ -358,7 +328,6 @@ async function POSTHandler(req: Request) {
         continue;
       }
 
-      // Check for potential duplicates
       const normalizedSteamTitle = normalizeTitle(game.name);
       if (normalizedSteamTitle && userTitleSet.has(normalizedSteamTitle)) {
         continue;
@@ -378,7 +347,6 @@ async function POSTHandler(req: Request) {
       }
     }
 
-    // Upsert user entries
     if (userEntryPayload.length > 0) {
       await supabase
         .from('user_media_entries')
@@ -391,7 +359,6 @@ async function POSTHandler(req: Request) {
         .upsert(userEntryUpdates, { onConflict: 'user_id,media_id' });
     }
 
-    // Update job progress
     const newProcessedCount = processedCount + batch.length;
     const newPercent = Math.min(100, Math.round((newProcessedCount / allGames.length) * 100));
     const isComplete = newProcessedCount >= allGames.length;
@@ -403,8 +370,8 @@ async function POSTHandler(req: Request) {
         completed_steps: newProcessedCount,
         percent: newPercent,
         message: isComplete
-          ? 'Ο συγχρονισμός ολοκληρώθηκε επιτυχώς'
-          : `Επεξεργάστηκαν ${newProcessedCount} από ${allGames.length} παιχνίδια`,
+          ? 'Steam sync completed successfully'
+          : `Processed ${newProcessedCount} of ${allGames.length} games`,
         ...(isComplete && {
           status: 'completed',
           finished_at: new Date().toISOString(),
@@ -412,18 +379,14 @@ async function POSTHandler(req: Request) {
       })
       .eq('id', jobId);
 
-    console.log(
-      `✅ [Steam Sync Process] Batch complete: ${newProcessedCount}/${allGames.length} (${newPercent}%)`,
-    );
-
     return NextResponse.json({
       processed: newProcessedCount,
       totalGames: allGames.length,
       isComplete,
       percent: newPercent,
       message: isComplete
-        ? 'Ο συγχρονισμός ολοκληρώθηκε επιτυχώς'
-        : `Επεξεργάστηκαν ${newProcessedCount} από ${allGames.length} παιχνίδια`,
+        ? 'Steam sync completed successfully'
+        : `Processed ${newProcessedCount} of ${allGames.length} games`,
     } satisfies ProcessResult);
   } catch (error) {
     if (error instanceof UnauthorizedError) {
@@ -431,12 +394,11 @@ async function POSTHandler(req: Request) {
     }
 
     const message = error instanceof Error ? error.message : 'Failed to process batch';
-    console.error('❌ [Steam Sync Process] Error:', error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 export const POST = withApiRoute(POSTHandler);
 
-// Each batch should complete in < 10 seconds (25 games with RAWG matching/enrichment)
+// Each batch should complete in < 10 seconds (25 games with IGDB matching/enrichment)
 export const maxDuration = 10;

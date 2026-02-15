@@ -192,18 +192,18 @@ export function RegisterTermsRow({ checked, error, loading, onChange }: Register
           checked={checked}
           onCheckedChange={value => onChange(value === true)}
           disabled={loading}
-          className="mt-0.5 h-4 w-4 rounded-[7px] data-[state=checked]:border-info data-[state=checked]:bg-info"
+          className="mt-0.5 h-4 w-4 rounded-[7px] data-[state=checked]:border-info data-[state=checked]:bg-accent"
         />
         <Label
           htmlFor="agree-to-terms"
           className="text-[13px] font-medium tracking-[-0.008em] text-foreground"
         >
           I accept the{' '}
-          <Link href="/terms" className="font-semibold text-info transition hover:opacity-80">
+          <Link href="/terms" className="font-semibold text-primary transition hover:opacity-80">
             terms of use
           </Link>{' '}
           and the{' '}
-          <Link href="/privacy" className="font-semibold text-info transition hover:opacity-80">
+          <Link href="/privacy" className="font-semibold text-primary transition hover:opacity-80">
             privacy policy
           </Link>
         </Label>
@@ -304,7 +304,7 @@ export function LoginPrompt({ redirectParam }: LoginPromptProps) {
               ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}`
               : '/auth/login'
           }
-          className="font-semibold text-info transition hover:opacity-80"
+          className="font-semibold text-primary transition hover:opacity-80"
         >
           Login
         </Link>
