@@ -4,6 +4,7 @@ import { CoverHeroImage } from '@/components/ui/cover-image';
 import Link from 'next/link';
 import useSWR from 'swr';
 import {
+  ArrowRight,
   BookOpen,
   BookText,
   ChevronLeft,
@@ -183,46 +184,50 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
   const progressLabel = getProgressLabel(item.slide.category, item.slide.progress);
 
   return (
-    <div className="grid min-h-[304px] items-center gap-8 rounded-xl border border-border/40 bg-card/30 p-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
-      <div className="space-y-5">
-        <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.06em]">
+    <div className="grid min-h-[324px] items-center gap-8 rounded-2xl border border-border/35 bg-card p-6 shadow-[0_10px_35px_-22px_rgba(0,0,0,0.8)] md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)] md:p-7">
+      <div className="space-y-5 md:space-y-6">
+        <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.08em] text-muted-foreground">
           <span>{item.config.icon}</span>
           {item.config.label}
         </div>
 
-        <div className="space-y-2">
-          <h2 className="text-3xl font-semibold leading-[1.08] tracking-[-0.03em] md:text-4xl">
+        <div className="space-y-2.5">
+          <h2 className="text-3xl font-semibold leading-[1.05] tracking-[-0.03em] text-foreground md:text-4xl">
             Continue where you left off
           </h2>
-          <p className="text-sm leading-relaxed">{item.config.verb(item.currentCount)}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {item.config.verb(item.currentCount)}
+          </p>
         </div>
 
         <div className="space-y-1.5">
-          <p className="text-lg font-semibold tracking-[-0.02em]">
+          <p className="text-lg font-semibold tracking-[-0.02em] text-foreground">
             {item.slide.title ?? 'Untitled'}
           </p>
-          <p className="text-sm">
+          <p className="text-sm text-muted-foreground">
             Last updated: <RelativeTimeDisplay date={item.slide.updated_at} /> ago
           </p>
         </div>
 
         {progressLabel && (
-          <div className="inline-flex items-center px-3 py-1 text-xs">{progressLabel}</div>
+          <div className="inline-flex items-center rounded-full border border-border/50 bg-muted/20 px-3 py-1 text-xs text-foreground/90">
+            {progressLabel}
+          </div>
         )}
 
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <Button
             variant="primary"
             href={getCategoryRoute(item.slide.category, item.slide.title)}
-            className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
+            className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-semibold tracking-[-0.01em] shadow-sm"
           >
             Continue
-            <span aria-hidden="true">?</span>
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Button>
           <Button
             variant="secondary"
             href={getCategoryRoute(item.slide.category)}
-            className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
+            className="min-h-11 rounded-[20px] border-border/60 px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
           >
             All {item.config.label} in progress
           </Button>
@@ -323,9 +328,9 @@ export function ContinueHero() {
 
   if (isInitialLoading) {
     return (
-      <section className="px-4 py-6 md:px-6">
+      <section className="px-4 py-7 md:px-6 md:py-8">
         <div className="mx-auto max-w-screen-2xl">
-          <div className="min-h-[304px] animate-pulse p-6">
+          <div className="min-h-[304px] animate-pulse rounded-3xl border border-border/30 bg-card/90 p-6 md:p-7">
             <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
               <div className="space-y-4">
                 <div className="h-4 w-24 rounded bg-card/60" />
@@ -346,20 +351,22 @@ export function ContinueHero() {
 
   if (slideItems.length === 0) {
     return (
-      <section className="px-4 py-6 md:px-6">
+      <section className="px-4 py-7 md:px-6 md:py-8">
         <div className="mx-auto max-w-screen-2xl">
-          <div className="p-7">
+          <div className="rounded-3xl border border-border/30 bg-card/90 p-7 shadow-[0_10px_35px_-22px_rgba(0,0,0,0.8)]">
             <h2 className="text-3xl font-semibold tracking-[-0.03em]">
               Continue where you left off
             </h2>
-            <p className="mt-2 text-sm">You don&apos;t have anything in progress yet.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You don&apos;t have anything in progress yet.
+            </p>
             <div className="mt-6">
               <Link
                 href={getFallbackRoute(enabledCategories)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition hover:brightness-95"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:brightness-95"
               >
                 View backlog
-                <span aria-hidden="true">?</span>
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -369,9 +376,9 @@ export function ContinueHero() {
   }
 
   return (
-    <section className="px-4 py-6 md:px-6">
+    <section className="px-4 py-7 md:px-6 md:py-8">
       <div className="mx-auto max-w-screen-2xl">
-        <div className="p-7">
+        <div className="rounded-3xl border border-border/30 bg-card/95 p-7 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.85)] md:p-8">
           <Carousel
             setApi={setCarouselApi}
             opts={{
@@ -391,7 +398,7 @@ export function ContinueHero() {
           </Carousel>
 
           {slideItems.length > 1 && (
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
               <Button
                 variant="secondary"
                 size="icon"

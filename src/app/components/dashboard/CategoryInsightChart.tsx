@@ -55,12 +55,12 @@ export default function CategoryInsightChart({ payload, category }: CategoryInsi
     : 'No activity recorded yet.';
 
   return (
-    <Card className="border bg-card">
-      <CardHeader className="flex flex-col gap-3 border-b border-border/50 pb-4 pt-5">
+    <Card className="border-border/40 bg-card/75 shadow-[0_8px_24px_-24px_rgba(0,0,0,0.85)]">
+      <CardHeader className="flex flex-col gap-4 border-b border-border/35 pb-5 pt-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-          <div>
+          <div className="space-y-1">
             <CardTitle className="text-base font-semibold">Your {label} patterns</CardTitle>
-            <p className="text-xs text-muted-foreground">Derived from your library activity.</p>
+            <p className="text-xs text-muted-foreground/80">Derived from your library activity.</p>
           </div>
           <div className="flex w-full max-w-[220px] md:w-auto">
             <Select defaultValue={RANGE_OPTIONS[0].value}>
@@ -95,8 +95,8 @@ export default function CategoryInsightChart({ payload, category }: CategoryInsi
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 pt-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <CardContent className="flex flex-col gap-5 pt-5">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/30 bg-muted/[0.06] px-3 py-2.5 text-xs text-muted-foreground/85">
           <span>{summaryLine}</span>
           {totalAttempts > 0 && (
             <>
@@ -117,7 +117,7 @@ export default function CategoryInsightChart({ payload, category }: CategoryInsi
             </>
           )}
         </div>
-        <div className="h-[240px] md:h-[300px]">
+        <div className="h-[240px] rounded-xl border border-border/30 bg-muted/[0.04] p-3 md:h-[300px] md:p-4">
           {hasEnoughData ? (
             <ChartContainer config={CHART_CONFIG} className="!aspect-auto h-full w-full">
               <AreaChart data={dataPoints} margin={{ top: 10, right: 6, bottom: 6, left: 6 }}>
@@ -181,10 +181,10 @@ export default function CategoryInsightChart({ payload, category }: CategoryInsi
           )}
         </div>
         {payload.insight && (
-          <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-muted/5 p-4 text-sm text-muted-foreground">
-            <Sparkles className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-start gap-3 rounded-xl border border-border/35 bg-muted/[0.08] p-4 text-sm text-muted-foreground/85">
+            <Sparkles className="h-4 w-4 text-muted-foreground/85" />
             <div className="flex flex-col gap-1">
-              <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground/80">
+              <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground/70">
                 Insight
               </span>
               <p>{payload.insight}</p>

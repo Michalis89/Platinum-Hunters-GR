@@ -10,7 +10,7 @@ import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashb
 import { HomeDashboardHeader, ContinueHero } from '@/app/components/home';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
 
-const DIVIDER_WRAP = 'mx-auto mt-8 max-w-screen-2xl px-4 md:mt-10 md:px-6';
+const DIVIDER_WRAP = 'mx-auto mt-12 max-w-screen-2xl px-4 md:mt-14 md:px-6';
 const DIVIDER_STYLE = '';
 const HomeSocialSection = dynamic(
   () => import('./HomeSocialSection').then(mod => mod.HomeSocialSection),
@@ -49,13 +49,13 @@ export default function HomeDashboardContent({
   const showSocialSection = socialEnabled && (suggestionSectionVisible || activitySectionVisible);
 
   return (
-    <main className="pb-16 pt-2 md:pb-20 md:pt-3">
+    <main className="pb-20 pt-2 md:pb-24 md:pt-3">
       <HomeDashboardHeader username={username} displayName={displayName} />
 
       {mediaCategories.length === 0 && (
         <section>
           <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
-            <div className="rounded-lg border p-5 md:p-6">
+            <div className="rounded-xl border border-border/40 bg-card/70 p-5 md:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-foreground">
@@ -81,13 +81,13 @@ export default function HomeDashboardContent({
         </section>
       )}
 
-      <section className="pt-2 md:pt-3">
+      <section className="pt-1 md:pt-2">
         <ContinueHero />
       </section>
 
       {mediaCategories.length > 0 && (
         <>
-          <section>
+          <section className="mt-12 md:mt-14">
             <CategoryDashboardTabs
               enabledCategories={mediaCategories}
               sections={categorySections}

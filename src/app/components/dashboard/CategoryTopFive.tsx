@@ -43,14 +43,14 @@ function SortableFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition,
       }}
-      className={`relative flex h-full w-full cursor-grab select-none flex-col gap-2 rounded-2xl border p-2 shadow-sm transition-all active:cursor-grabbing ${
+      className={`relative flex h-full w-full cursor-grab select-none flex-col gap-2.5 rounded-2xl border p-3 shadow-sm transition-all active:cursor-grabbing ${
         isTopFive
-          ? 'border-primary/45 bg-card shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
-          : 'border-border bg-card/80'
+          ? 'border-primary/35 bg-card/80 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]'
+          : 'border-border/40 bg-card/60'
       } ${isDragging ? 'z-10 opacity-50 shadow-lg' : ''}`}
       aria-label={`Reorder favorite ${item.title}`}
     >
-      <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-border bg-muted">
+      <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-border/40 bg-muted/60">
         <CoverThumbImage
           src={item.cover}
           alt={item.title}
@@ -113,11 +113,11 @@ function OverlayFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank:
     <article
       className={`relative flex w-[320px] flex-col gap-4 rounded-2xl border p-3 pb-12 shadow-2xl ${
         isTopFive
-          ? 'border-primary/45 bg-card shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
-          : 'border-border bg-card/90'
+          ? 'border-primary/35 bg-card/90 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]'
+          : 'border-border/40 bg-card/80'
       }`}
     >
-      <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-border bg-muted">
+      <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-border/40 bg-muted/60">
         <CoverThumbImage
           src={item.cover}
           alt={item.title}
@@ -253,10 +253,10 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
   }
 
   return (
-    <section className="space-y-5">
-      <div className="space-y-1 text-center">
+    <section className="space-y-6 py-1 md:py-2">
+      <div className="space-y-1.5 text-center">
         <p className="text-sm font-semibold tracking-tight">Favorites</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground/85">
           All favorites in one list. Top 5 are highlighted.
         </p>
       </div>
@@ -268,15 +268,15 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="rounded-3xl border border-border bg-card/80 p-5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+        <div className="rounded-3xl border border-border/40 bg-card/65 p-5 shadow-[0_8px_24px_-22px_rgba(0,0,0,0.8)] md:p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground/90">
               Drag And Reorder
             </p>
-            <span className="text-[10px] text-muted-foreground">5 cards per row</span>
+            <span className="text-[10px] text-muted-foreground/80">5 cards per row</span>
           </div>
           <SortableContext items={orderedIds} strategy={rectSortingStrategy}>
-            <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {order.map((item, index) => (
                 <SortableFavoriteCard key={item.entryId} item={item} rank={index + 1} />
               ))}

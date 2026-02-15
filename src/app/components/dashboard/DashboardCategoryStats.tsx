@@ -56,14 +56,14 @@ export default function DashboardCategoryStats({ category, stats }: DashboardCat
   const labels = TITLES[category];
   const CategoryIcon = CATEGORY_ICONS[category] ?? Sparkles;
 
-  const rowOne = [
+  const primaryStats = [
     { key: 'total', label: 'Total', value: stats.total, icon: CategoryIcon },
-    { key: 'planned', label: 'Backlog', value: stats.planned, icon: ListTodo },
-    { key: 'current', label: 'Current', value: stats.current, icon: Play },
+    { key: 'completed', label: 'Completed', value: stats.completed, icon: CheckCircle2 },
     { key: 'dropped', label: 'Dropped', value: stats.dropped, icon: XCircle },
   ];
-  const rowTwo = [
-    { key: 'completed', label: 'Completed', value: stats.completed, icon: CheckCircle2 },
+  const secondaryStats = [
+    { key: 'planned', label: 'Backlog', value: stats.planned, icon: ListTodo },
+    { key: 'current', label: 'Current', value: stats.current, icon: Play },
     { key: 'favorites', label: 'Favorites', value: stats.favorites, icon: Heart },
     { key: 'hours', label: 'Συνολικές ώρες', value: stats.hours, icon: Sparkles },
   ];
@@ -76,15 +76,36 @@ export default function DashboardCategoryStats({ category, stats }: DashboardCat
   }) => {
     const Icon = card.icon;
     const showHoursBreakdown = card.key === 'hours';
+    const isPrimary = primaryStats.some(primaryCard => primaryCard.key === card.key);
+
     return (
-      <article key={card.key} className="rounded-xl border bg-card p-3 text-center">
-        <div className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-lg bg-card text-primary">
-          <Icon className="h-4 w-4" />
+      <article
+        key={card.key}
+        className={`rounded-xl border p-4 text-center ${
+          isPrimary
+            ? 'border-border/45 bg-card/90 shadow-[0_8px_26px_-22px_rgba(0,0,0,0.85)] md:p-5'
+            : 'border-border/35 bg-card/70'
+        }`}
+      >
+        <div
+          className={`mx-auto mb-2 flex items-center justify-center rounded-lg text-primary ${
+            isPrimary ? 'h-10 w-10 bg-muted/20' : 'h-8 w-8 bg-muted/15'
+          }`}
+        >
+          <Icon className={isPrimary ? 'h-5 w-5' : 'h-4 w-4'} />
         </div>
-        <p className="text-xl font-semibold leading-tight">{card.value}</p>
-        <p className="text-xs font-medium text-muted-foreground">{card.label}</p>
+        <p
+          className={`leading-tight tracking-tight text-foreground ${
+            isPrimary ? 'text-3xl font-semibold md:text-[2rem]' : 'text-2xl font-semibold'
+          }`}
+        >
+          {card.value}
+        </p>
+        <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/90">
+          {card.label}
+        </p>
         {showHoursBreakdown && (
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground/80">
             {formatHoursBreakdown(Number(card.value))}
           </p>
         )}
@@ -93,17 +114,17 @@ export default function DashboardCategoryStats({ category, stats }: DashboardCat
   };
 
   return (
-    <section className="space-y-4">
-      <div className="space-y-1 text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+    <section className="space-y-6">
+      <div className="space-y-1.5 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground/85">
           {labels.eyebrow}
         </p>
-        <h3 className="text-xl font-semibold tracking-tight">{labels.title}</h3>
+        <h3 className="text-2xl font-semibold tracking-tight">{labels.title}</h3>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">{rowOne.map(renderCard)}</div>
-      <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-2.5 md:grid-cols-3">
-        {rowTwo.map(renderCard)}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">{primaryStats.map(renderCard)}</div>
+      <div className="grid grid-cols-2 gap-3 pt-1 md:grid-cols-4 md:gap-3.5">
+        {secondaryStats.map(renderCard)}
       </div>
     </section>
   );

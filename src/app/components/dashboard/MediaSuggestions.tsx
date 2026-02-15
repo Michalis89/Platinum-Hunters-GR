@@ -37,9 +37,14 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
   const visibleSuggestions = suggestions.slice(0, 4);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold">Recommended for you</h3>
+    <section className="space-y-5 rounded-2xl border border-border/40 bg-muted/[0.08] p-5 md:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <h3 className="text-base font-semibold">Recommended for you</h3>
+          <span className="rounded-full border border-border/50 bg-card/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/90">
+            Personalized
+          </span>
+        </div>
         {visibleSuggestions.length > 0 && (
           <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
             2 backlog + 2 database picks
@@ -54,7 +59,7 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
           {visibleSuggestions.map(suggestion => (
             <Card
               key={`media-suggestion-${suggestion.mediaId}`}
-              className="flex flex-col gap-4 border bg-card p-4"
+              className="flex flex-col gap-4 border-border/45 bg-card/85 p-4 shadow-[0_8px_24px_-24px_rgba(0,0,0,0.8)]"
             >
               <div className="flex gap-3">
                 <div className="relative h-20 w-14 flex-shrink-0 overflow-hidden rounded">
@@ -77,7 +82,7 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
 
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground/85">
                     Confidence
                   </p>
                   <p className="text-sm font-medium text-foreground">
@@ -85,7 +90,7 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
                   </p>
                 </div>
                 {suggestion.slug && (
-                  <Button size="sm" variant="outline" asChild>
+                  <Button size="sm" variant="primary" className="font-semibold" asChild>
                     <Link href={`/media/${suggestion.category}/${suggestion.slug}`}>
                       View details
                     </Link>
@@ -109,6 +114,6 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

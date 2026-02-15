@@ -84,10 +84,10 @@ export default function CategoryDashboardTabs({
     <Tabs
       value={activeCategory}
       onValueChange={value => setActiveCategory(value as DashboardCategoryKey)}
-      className="space-y-6"
+      className="space-y-8 md:space-y-10"
     >
       <div className="overflow-x-auto pb-1 [scrollbar-width:thin] sm:flex sm:justify-center">
-        <TabsList className="inline-flex h-auto min-w-full items-center justify-start gap-1 rounded-xl border border-border/70 bg-card/70 p-1 backdrop-blur supports-[backdrop-filter]:bg-card/60 sm:min-w-0 sm:flex-wrap sm:justify-center">
+        <TabsList className="inline-flex h-auto min-w-full items-center justify-start gap-1 rounded-xl border border-border/45 bg-card/70 p-1 supports-[backdrop-filter]:bg-card/65 sm:min-w-0 sm:flex-wrap sm:justify-center">
           {visibleCategories.map(category => (
             <TabsTrigger
               key={category}
@@ -100,9 +100,9 @@ export default function CategoryDashboardTabs({
         </TabsList>
       </div>
 
-      <div className="min-w-0 space-y-6">
+      <div className="min-w-0 space-y-8">
         {visibleCategories.map(category => (
-          <TabsContent key={category} value={category} className="mt-0 space-y-6">
+          <TabsContent key={category} value={category} className="mt-0 space-y-7 md:space-y-8">
             <DashboardCategoryStats category={category} stats={resolveStatsForCategory(category)} />
             <CategoryTopFive
               category={category}

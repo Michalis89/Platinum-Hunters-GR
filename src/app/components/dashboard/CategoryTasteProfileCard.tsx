@@ -121,36 +121,41 @@ export default function CategoryTasteProfileCard({
   );
 
   return (
-    <Card className="col-span-full w-full border bg-card">
-      <CardHeader className="space-y-1 pb-2">
+    <Card className="col-span-full w-full border-border/40 bg-card/75 shadow-[0_8px_24px_-24px_rgba(0,0,0,0.85)]">
+      <CardHeader className="space-y-1.5 border-b border-border/35 pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold">{categoryLabel} Taste Profile</CardTitle>
-          <Icon className="h-4 w-4 text-primary" />
+          <CardTitle className="text-base font-semibold tracking-tight">
+            {categoryLabel} Taste Profile
+          </CardTitle>
+          <Icon className="h-4 w-4 text-primary/90" />
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground/80">
           Based on {tasteProfile.totalItems} completed + in-progress{' '}
           {category === 'games' ? 'games' : 'items'}
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5 pt-5">
         {visibleBuckets.length === 0 ? (
           <p className="text-sm text-muted-foreground">No data yet.</p>
         ) : (
-          <div className={category === 'games' ? 'grid gap-4 md:grid-cols-4' : 'space-y-4'}>
+          <div className={category === 'games' ? 'grid gap-5 md:grid-cols-2 xl:grid-cols-4' : 'space-y-5'}>
             {visibleBuckets.map(bucket => (
-              <section key={bucket.bucketKey} className="space-y-2">
-                <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <section
+                key={bucket.bucketKey}
+                className="space-y-3 rounded-xl border border-border/30 bg-muted/[0.07] p-3.5"
+              >
+                <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
                   {BUCKET_LABELS[bucket.bucketKey]}
                 </h4>
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   {bucket.traits.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No data yet.</p>
+                    <p className="text-xs text-muted-foreground/80">No data yet.</p>
                   ) : (
                     bucket.traits.map(trait => (
-                      <div key={`${bucket.bucketKey}-${trait.name}`} className="space-y-1">
+                      <div key={`${bucket.bucketKey}-${trait.name}`} className="space-y-1.5">
                         <div className="flex items-center justify-between gap-3 text-sm leading-tight">
                           <span className="truncate text-foreground">{trait.name}</span>
-                          <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
+                          <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
                             {trait.percentageLabel}
                           </span>
                         </div>
