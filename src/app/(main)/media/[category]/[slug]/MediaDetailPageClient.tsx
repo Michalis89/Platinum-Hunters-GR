@@ -251,13 +251,13 @@ function GallerySection({ title, images }: { title: string; images: GalleryImage
   return (
     <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 p-5">
       <h3 className="text-lg font-semibold text-foreground">Gallery</h3>
-      <div className="mt-4 overflow-hidden px-10">
+      <div className="mt-4 overflow-hidden">
         <Carousel opts={{ align: 'start', loop: false }} className="group relative">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-background/85 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-background/85 to-transparent" />
-          <CarouselContent>
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-background/85 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-background/85 to-transparent" />
+          <CarouselContent className="ml-0">
             {images.map(image => (
-              <CarouselItem key={image.id} className="basis-[72%] sm:basis-[42%] lg:basis-[30%]">
+              <CarouselItem key={image.id} className="basis-[72%] pl-0 pr-4 sm:basis-[42%] lg:basis-[30%]">
                 <button
                   type="button"
                   onClick={() => setActiveImage(image)}
@@ -270,8 +270,8 @@ function GallerySection({ title, images }: { title: string; images: GalleryImage
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="left-2 top-1/2 z-20 h-11 w-11 -translate-y-1/2 rounded-full border border-border/80 bg-background/90 text-foreground shadow-md transition-all hover:scale-105 hover:bg-background focus-visible:ring-2 focus-visible:ring-primary" />
-          <CarouselNext className="right-2 top-1/2 z-20 h-11 w-11 -translate-y-1/2 rounded-full border border-border/80 bg-background/90 text-foreground shadow-md transition-all hover:scale-105 hover:bg-background focus-visible:ring-2 focus-visible:ring-primary" />
+          <CarouselPrevious className="left-3 top-1/2 z-20 h-11 w-11 -translate-y-1/2 rounded-full border border-border/80 bg-background/90 text-foreground shadow-md transition-all hover:scale-105 hover:bg-background focus-visible:ring-2 focus-visible:ring-primary" />
+          <CarouselNext className="right-3 top-1/2 z-20 h-11 w-11 -translate-y-1/2 rounded-full border border-border/80 bg-background/90 text-foreground shadow-md transition-all hover:scale-105 hover:bg-background focus-visible:ring-2 focus-visible:ring-primary" />
         </Carousel>
       </div>
 
