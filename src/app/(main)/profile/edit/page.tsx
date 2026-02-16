@@ -56,8 +56,18 @@ function ProfileEditSkeleton() {
   );
 }
 import { Button } from '@/components/ui/button';
-import { ProfileCategoryTabs } from '@/components/profile/profile-category-tabs';
+import dynamic from 'next/dynamic';
 import { CATEGORIES, COUNTRIES } from '@/data/hobbyConstants';
+
+const ProfileCategoryTabs = dynamic(
+  () => import('@/components/profile/profile-category-tabs').then(mod => mod.ProfileCategoryTabs),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 animate-pulse rounded-xl bg-muted" />
+    ),
+  },
+);
 const SOCIAL_PLATFORMS = [
   {
     key: 'discord',

@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/sheet';
 import { apiClient } from '@/lib/api/client';
 import { yieldToMain } from '@/lib/performance';
+import dynamic from 'next/dynamic';
 
 import CategoryHeader from './CategoryHeader';
 import CategoryStats from './CategoryStats';
@@ -28,7 +29,7 @@ import CreateEntryPanel from './CreateEntryPanel';
 import SuggestionsPanel from './SuggestionsPanel';
 import StatusFilterBar from './StatusFilterBar';
 import LibraryEntryList from './LibraryEntryList';
-import EntryEditDialog, { EditState } from './EntryEditDialog';
+import type { EditState } from './EntryEditDialog';
 import {
   MediaCategory,
   MediaEntry,
@@ -39,6 +40,11 @@ import {
   supportsExternalApi,
   getTotalCount,
 } from './types';
+
+const EntryEditDialog = dynamic(() => import('./EntryEditDialog'), {
+  ssr: false,
+  loading: () => null,
+});
 
 export { isMediaCategory };
 export type { MediaCategory };

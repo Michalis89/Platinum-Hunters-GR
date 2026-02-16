@@ -127,13 +127,17 @@ const fetchPublishedMediaItemCached = unstable_cache(
       const supabase = getSupabaseServer();
 
       const fetchById = async (id: number) => {
-        const { data, error } = await supabase
+        let query = supabase
           .from('media_items')
           .select(selectFields)
-          .eq('category', category)
-          .eq('status', 'published')
-          .eq('id', id)
-          .maybeSingle();
+          .eq('category', category);
+
+        // Only filter by 'published' status for non-anime/manga categories
+        if (category !== 'anime' && category !== 'manga') {
+          query = query.or('status.eq.published,status.is.null');
+        }
+
+        const { data, error } = await query.eq('id', id).maybeSingle();
 
         if (error) throw error;
         return data as MediaItem | null;
@@ -143,13 +147,21 @@ const fetchPublishedMediaItemCached = unstable_cache(
         let query = supabase
           .from('media_items')
           .select(selectFields)
-          .eq('category', category)
-          .eq('status', 'published');
+          .eq('category', category);
+
+        // Only filter by 'published' status for non-anime/manga categories
+        if (category !== 'anime' && category !== 'manga') {
+          query = query.or('status.eq.published,status.is.null');
+        }
 
         if (category === 'anime' || category === 'manga') {
-          query = query.eq('mal_id', Number(externalId));
+          const numericId = Number(externalId);
+          if (!Number.isFinite(numericId)) return null;
+          query = query.eq('mal_id', numericId);
         } else if (category === 'movies' || category === 'tv') {
-          query = query.eq('tmdb_id', Number(externalId));
+          const numericId = Number(externalId);
+          if (!Number.isFinite(numericId)) return null;
+          query = query.eq('tmdb_id', numericId);
         } else if (category === 'games') {
           const numericId = Number(externalId);
           if (!Number.isFinite(numericId)) return null;
@@ -175,7 +187,7 @@ const fetchPublishedMediaItemCached = unstable_cache(
             .from('media_items')
             .select(selectFields)
             .eq('category', category)
-            .eq('status', 'published')
+            .or('status.eq.published,status.is.null')
             .in('igdb_slug', slugCandidates)
             .limit(10);
 
@@ -211,7 +223,6 @@ const fetchPublishedMediaItemCached = unstable_cache(
           .from('media_items')
           .select(selectFields)
           .eq('category', category)
-          .eq('status', 'published')
           .or(
             [
               ...gamesSlugClauses,
@@ -236,9 +247,15 @@ const fetchPublishedMediaItemCached = unstable_cache(
 
         if (error) throw error;
         const rows = Array.isArray(data) ? (data as unknown as MediaItem[]) : [];
-        if (rows.length === 0) return null;
 
-        const ranked = rows
+        // Filter by status after fetching - only for non-anime/manga categories
+        const filteredRows = (category === 'anime' || category === 'manga')
+          ? rows // Don't filter anime/manga by status
+          : rows.filter(row => row.status === 'published' || row.status === null);
+
+        if (filteredRows.length === 0) return null;
+
+        const ranked = filteredRows
           .map(item => ({ item, score: scoreSlugMatch(canonicalSlug, item) }))
           .sort((a, b) => b.score - a.score);
 
@@ -320,6 +337,12 @@ async function MediaDetailContent({ params }: MediaDetailPageProps) {
 
   const title = resolveMediaTitle(item);
   if (!title) {
+    notFound();
+  }
+
+  // Validate that the item has a valid ID
+  if (!item.id || typeof item.id !== 'number' || !Number.isFinite(item.id)) {
+    console.error('Media item missing valid ID:', { category: normalizedCategory, slug, item });
     notFound();
   }
 

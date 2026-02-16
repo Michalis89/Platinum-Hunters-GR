@@ -80,6 +80,12 @@ export function mapLibraryEntry(
     return null;
   }
 
+  // Validate that media has a valid ID
+  if (!media.id || typeof media.id !== 'number' || !Number.isFinite(media.id)) {
+    console.warn('Invalid media.id in library entry:', { entryId: row.id, mediaId: media.id });
+    return null;
+  }
+
   // Resolve title based on category priority
   const title = resolveTitle(media, config.titlePriority);
 

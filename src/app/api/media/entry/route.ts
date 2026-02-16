@@ -217,7 +217,8 @@ async function GETHandler(req: Request) {
     }
 
     const mediaId = Number(mediaIdRaw);
-    if (!Number.isFinite(mediaId)) {
+    if (!Number.isFinite(mediaId) || Number.isNaN(mediaId) || mediaId <= 0) {
+      console.warn('[GET /api/media/entry] Invalid mediaId:', mediaIdRaw);
       return NextResponse.json({ error: 'Invalid mediaId' }, { status: 400 });
     }
 

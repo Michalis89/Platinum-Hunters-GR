@@ -165,9 +165,13 @@ async function fetchByExternalId(category: string, externalId: number | string) 
   let query = supabase.from('media_items').select(selectFields).eq('category', category);
 
   if (category === 'anime' || category === 'manga') {
-    query = query.eq('mal_id', Number(externalId));
+    const numericId = Number(externalId);
+    if (!Number.isFinite(numericId)) return null;
+    query = query.eq('mal_id', numericId);
   } else if (category === 'movies' || category === 'tv') {
-    query = query.eq('tmdb_id', Number(externalId));
+    const numericId = Number(externalId);
+    if (!Number.isFinite(numericId)) return null;
+    query = query.eq('tmdb_id', numericId);
   } else if (category === 'games') {
     const numericId = Number(externalId);
     if (!Number.isFinite(numericId)) return null;
