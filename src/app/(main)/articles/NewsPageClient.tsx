@@ -11,11 +11,7 @@ import { PageContainer } from '@/app/components/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import EmptyState from '@/components/ui/empty';
 import { ErrorAlert } from '@/components/ui/alert';
-import {
-  CATEGORY_LABELS,
-  CATEGORY_SUBTITLES,
-  TOPIC_LABELS,
-} from '@/app/(main)/articles/constants';
+import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/(main)/articles/constants';
 import { normalizeSlug } from '@/utils/slugify';
 import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
 import { FormattedDate } from '@/utils/components/FormattedDate';
@@ -302,7 +298,7 @@ function NewsPageContent() {
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
   const pageTitle = categoryLabel ? categoryLabel : 'Articles';
   const subtitle = category
-    ? CATEGORY_SUBTITLES[category] ?? 'Community-written articles and stories, clearly organized.'
+    ? (CATEGORY_SUBTITLES[category] ?? 'Community-written articles and stories, clearly organized.')
     : 'Discover community-written articles and stories across all hobbies.';
   const articleCountLabel = `${total} article${total === 1 ? '' : 's'}`;
   const metaLine = tag ? `${articleCountLabel} - ${tag}` : articleCountLabel;
@@ -327,7 +323,9 @@ function NewsPageContent() {
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">Editorial Desk</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">
+                Editorial Desk
+              </p>
               <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">{pageTitle}</h1>
               <p className="max-w-2xl text-[14px] text-muted-foreground">{subtitle}</p>
             </div>

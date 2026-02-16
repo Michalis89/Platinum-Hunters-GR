@@ -1,16 +1,8 @@
-/**
- * Auth Redux Slice
- * PH-30: User Authentication System
- */
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import type { AuthSession } from '@/types/auth';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
 
-/**
- * Initial state
- */
 const initialState: AuthSession = {
   user: null,
   isAuthenticated: false,
@@ -18,9 +10,6 @@ const initialState: AuthSession = {
   error: null,
 };
 
-/**
- * Thunk: Fetch current session
- */
 export const fetchSession = createAsyncThunk('auth/fetchSession', async () => {
   const {
     data: { session },
@@ -30,7 +19,6 @@ export const fetchSession = createAsyncThunk('auth/fetchSession', async () => {
   if (error) throw error;
   if (!session) return null;
 
-  // Fetch full user profile from public.users
   const { data: userProfile, error: profileError } = await supabase
     .from('users')
     .select('*')
@@ -42,9 +30,6 @@ export const fetchSession = createAsyncThunk('auth/fetchSession', async () => {
   return userProfile as User;
 });
 
-/**
- * Thunk: Login
- */
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
@@ -55,7 +40,6 @@ export const login = createAsyncThunk(
 
     if (error) throw error;
 
-    // Fetch full user profile
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
       .select('*')
@@ -64,16 +48,12 @@ export const login = createAsyncThunk(
 
     if (profileError) throw profileError;
 
-    // Update last_login (using type assertion due to Supabase RPC typing limitations)
     await supabase.rpc('update_user_last_login', { user_id: data.user.id } as never);
 
     return userProfile as User;
   },
 );
 
-/**
- * Thunk: Logout
- */
 export const logout = createAsyncThunk('auth/logout', async () => {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
@@ -85,9 +65,6 @@ export const logout = createAsyncThunk('auth/logout', async () => {
   }
 });
 
-/**
- * Thunk: Update user profile
- */
 export const updateUserProfile = createAsyncThunk(
   'auth/updateProfile',
   async ({ userId, updates }: { userId: string; updates: Partial<User> }) => {
@@ -103,9 +80,6 @@ export const updateUserProfile = createAsyncThunk(
   },
 );
 
-/**
- * Auth Slice
- */
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -128,7 +102,6 @@ const authSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    // Fetch Session
     builder
       .addCase(fetchSession.pending, state => {
         state.isLoading = true;
@@ -144,10 +117,9 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         state.isLoading = false;
-        state.error = action.error.message || 'Σφάλμα φόρτωσης session';
+        state.error = action.error.message || 'Session loading error';
       });
 
-    // Login
     builder
       .addCase(login.pending, state => {
         state.isLoading = true;
@@ -163,10 +135,9 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         state.isLoading = false;
-        state.error = action.error.message || 'Σφάλμα σύνδεσης';
+        state.error = action.error.message || 'Login error';
       });
 
-    // Logout
     builder
       .addCase(logout.pending, state => {
         state.isLoading = true;
@@ -180,10 +151,9 @@ const authSlice = createSlice({
       })
       .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Σφάλμα αποσύνδεσης';
+        state.error = action.error.message || 'Logout error';
       });
 
-    // Update Profile
     builder
       .addCase(updateUserProfile.pending, state => {
         state.isLoading = true;
@@ -196,25 +166,21 @@ const authSlice = createSlice({
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Σφάλμα ενημέρωσης προφίλ';
+        state.error = action.error.message || 'Profile update error';
       });
   },
 });
 
-// Export actions
 export const { setUser, setLoading, setError, clearError } = authSlice.actions;
 
-// Export reducer
 export default authSlice.reducer;
 
-// Selectors
 export const selectAuth = (state: { auth: AuthSession }) => state.auth;
 export const selectUser = (state: { auth: AuthSession }) => state.auth.user;
 export const selectIsAuthenticated = (state: { auth: AuthSession }) => state.auth.isAuthenticated;
 export const selectIsLoading = (state: { auth: AuthSession }) => state.auth.isLoading;
 export const selectAuthError = (state: { auth: AuthSession }) => state.auth.error;
 
-// Computed/derived selectors for common role checks
 import { createSelector } from '@reduxjs/toolkit';
 import { getUserRoles, hasAnyRole } from '@/lib/roles';
 
@@ -248,14 +214,12 @@ export const selectCanEditArticles = (state: { auth: AuthSession }) => {
   return !!user && hasAnyRole(user, ['admin', 'author', 'reviewer', 'owner']);
 };
 
-// Factory selector: Check if user is author of specific item
 export const selectIsAuthorOf =
   (authorId: string | null | undefined) => (state: { auth: AuthSession }) => {
     const user = state.auth.user;
     return Boolean(user && authorId && user.id === authorId);
   };
 
-// Combined selector for Navbar - reduces re-renders by subscribing once
 export const selectNavbarAuth = createSelector(
   [
     selectIsAuthenticated,

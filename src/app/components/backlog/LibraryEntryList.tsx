@@ -36,7 +36,10 @@ function LibraryEntryList({
   });
 
   return (
-    <section ref={parentRef} className="max-h-none overflow-y-auto [scrollbar-gutter:stable] md:max-h-[70vh]">
+    <section
+      ref={parentRef}
+      className="max-h-none overflow-y-auto [scrollbar-gutter:stable] md:max-h-[70vh]"
+    >
       {isLoading && (
         <div className="rounded-2xl border border-border/70 bg-card/60 px-4 py-10">
           <div className="flex flex-col items-center justify-center gap-3">

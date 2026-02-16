@@ -166,11 +166,6 @@ export async function fetchSteamOwnedGames(params: {
   return payload.response?.games ?? [];
 }
 
-/**
- * Fetch Steam achievements for a specific app/game.
- * Returns null if the game has no achievements or the request fails.
- * Safe to call - won't crash if achievements are not available.
- */
 export async function fetchSteamAchievements(params: {
   apiKey: string;
   steamId64: string;
@@ -189,7 +184,6 @@ export async function fetchSteamAchievements(params: {
     });
 
     if (!response.ok) {
-      // Game might not have achievements or stats not public
       return null;
     }
 
@@ -207,7 +201,6 @@ export async function fetchSteamAchievements(params: {
 
     return { total, unlocked, percent, is100 };
   } catch (error) {
-    // Silently fail - achievements are optional
     console.warn(`Achievements fetch failed for appid ${params.appid}:`, error);
     return null;
   }

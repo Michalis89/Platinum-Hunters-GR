@@ -4,7 +4,7 @@ import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
   title: 'Data Curation | Admin Support',
-  description: 'Επιμέλεια δεδομένων media για διαχειριστές.',
+  description: 'Media data curation for admins.',
   path: '/admin/support/data-curation',
 });
 

@@ -138,7 +138,11 @@ export default function CategoryTasteProfileCard({
         {visibleBuckets.length === 0 ? (
           <p className="text-sm text-muted-foreground">No data yet.</p>
         ) : (
-          <div className={category === 'games' ? 'grid gap-5 md:grid-cols-2 xl:grid-cols-4' : 'space-y-5'}>
+          <div
+            className={
+              category === 'games' ? 'grid gap-5 md:grid-cols-2 xl:grid-cols-4' : 'space-y-5'
+            }
+          >
             {visibleBuckets.map(bucket => (
               <section
                 key={bucket.bucketKey}

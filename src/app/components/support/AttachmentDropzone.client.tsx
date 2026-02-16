@@ -127,7 +127,7 @@ export default function AttachmentDropzone({
     <div className={cn('space-y-3', className)}>
       <div
         className={cn(
-          'flex min-h-[152px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 px-4 py-6 text-center transition-colors transition-shadow duration-200',
+          'flex min-h-[152px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 px-4 py-6 text-center transition-[border-color,box-shadow] duration-200',
           disabled ? 'opacity-60' : 'hover:border-primary/60 hover:shadow-sm',
         )}
         onDrop={handleDrop}
@@ -166,7 +166,10 @@ export default function AttachmentDropzone({
       {items.length > 0 ? (
         <div className="grid gap-3 md:grid-cols-2">
           {items.map(item => (
-            <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/70 p-3">
+            <div
+              key={item.id}
+              className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/70 p-3"
+            >
               <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-border/50 bg-card">
                 {item.previewUrl ? (
                   <Image

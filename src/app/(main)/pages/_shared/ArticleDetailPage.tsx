@@ -12,10 +12,7 @@ import ReadingProgress from '@/app/components/article/ReadingProgress.client';
 import EmptyState from '@/components/ui/empty';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
-import {
-  getArticleStructuredData,
-  getBreadcrumbStructuredData,
-} from '@/utils/seo/metadata/structuredData';
+import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
 import { CATEGORY_LABELS, TOPIC_LABELS } from '@/app/(main)/articles/constants';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
@@ -25,6 +22,7 @@ import ArticleComments from '@/app/components/article/ArticleComments.client';
 import ArticleAuthHint from '@/app/components/article/ArticleAuthHint.client';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { FormattedDate } from '@/utils/components/FormattedDate';
+import { buildArticleJsonLd, buildReviewJsonLd } from '@/lib/seo/jsonld';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -35,6 +33,26 @@ interface ArticleWithAuthor extends ArticleRow {
     avatar_url: string | null;
   } | null;
 }
+
+type ArticleMetadataRow = Pick<
+  ArticleRow,
+  | 'slug'
+  | 'title'
+  | 'description'
+  | 'meta_title'
+  | 'meta_description'
+  | 'cover_image'
+  | 'published_at'
+  | 'updated_at'
+  | 'topic'
+  | 'tags'
+  | 'category'
+> & {
+  users?: {
+    username: string;
+    display_name: string | null;
+  } | null;
+};
 
 export interface ArticleDetailPageOptions {
   basePath: `/${string}`;
@@ -83,6 +101,16 @@ const buildSlugCandidates = (value: string) => {
 
 const TOC_MIN_HEADINGS = 3;
 const HEADING_REGEX = /<h2([^>]*)>(.*?)<\/h2>/gi;
+const OG_IMAGE_WIDTH = 1200;
+const OG_IMAGE_HEIGHT = 630;
+
+const truncateForMeta = (value: string, maxLength = 160) => {
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+  return `${normalized.slice(0, maxLength - 1).trimEnd()}...`;
+};
 
 function enrichContentHeadings(html: string) {
   const headings: HeadingData[] = [];
@@ -194,6 +222,33 @@ async function fetchArticle(
   return article;
 }
 
+async function fetchArticleMetadata(
+  slug: string,
+  topicFilter?: ArticleTopic,
+): Promise<ArticleMetadataRow | null> {
+  const supabase = getSupabaseServer();
+  const slugCandidates = buildSlugCandidates(slug);
+
+  let query = supabase
+    .from('articles')
+    .select(
+      'slug, title, description, meta_title, meta_description, cover_image, published_at, updated_at, topic, tags, category, users!author_id(username, display_name)',
+    )
+    .eq('status', 'published')
+    .in('slug', slugCandidates);
+
+  if (topicFilter) {
+    query = query.eq('topic', topicFilter);
+  }
+
+  const { data: article, error } = await query.limit(1).single<ArticleMetadataRow>();
+  if (error || !article) {
+    return null;
+  }
+
+  return article;
+}
+
 async function trackArticleView(articleId: number, userId: string | null) {
   const supabase = getSupabaseServer();
   try {
@@ -211,37 +266,35 @@ export async function buildArticleDetailMetadata({
   options: { basePath, topicFilter },
 }: ArticleMetadataArgs) {
   const { slug } = await params;
-  const article = await fetchArticle(slug, topicFilter);
-  const defaultPath = `${basePath}/${slug}`;
+  const article = await fetchArticleMetadata(slug, topicFilter);
 
   if (!article) {
-    return buildMetadata({
-      title: 'Article Not Found | Hobbistas',
-      description: 'The article you requested was not found or it has been removed.',
-      path: defaultPath,
-    });
+    notFound();
   }
 
   const authorName = article.users?.display_name || article.users?.username || 'Hobbistas';
   const coverImage = article.cover_image ?? undefined;
   const metaTitle = article.meta_title || article.title;
-  const metaDescription =
+  const rawMetaDescription =
     article.meta_description ||
     article.description ||
     'Stay tuned for updates or explore another story while we resolve this.';
+  const metaDescription = truncateForMeta(rawMetaDescription);
   const normalizedSlug = normalizeSlug(article.slug);
   const canonicalPath = `${basePath}/${normalizedSlug}`;
   const modifiedTime = article.updated_at ?? article.published_at ?? undefined;
 
   return buildMetadata({
-    title: `${metaTitle} | Hobbistas`,
+    title: metaTitle,
     description: metaDescription,
     path: canonicalPath,
     openGraphType: 'article',
     publishedTime: article.published_at ?? undefined,
     modifiedTime,
     authors: [authorName],
-    images: coverImage ? [{ url: coverImage, alt: article.title }] : undefined,
+    images: coverImage
+      ? [{ url: coverImage, alt: article.title, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT }]
+      : undefined,
   });
 }
 
@@ -320,20 +373,36 @@ export default async function ArticleDetailPage({
     { name: categoryLabel, url: `${SITE_URL}${basePath}?category=${article.category}` },
     { name: article.title, url: articleUrl },
   ];
-
-  return (
-    <div className="relative min-h-screen bg-background text-foreground">
-      <StructuredData
-        data={getArticleStructuredData({
+  const articleDescription =
+    article.meta_description || article.description || 'Explore this entry on Hobbistas.';
+  const jsonLd =
+    article.topic === 'reviews'
+      ? buildReviewJsonLd({
           title: article.title,
-          description: article.description,
+          description: articleDescription,
           url: articleUrl,
           image: article.cover_image,
           publishedAt: article.published_at,
           updatedAt: article.updated_at,
           authorName: article.users?.display_name || article.users?.username || null,
-        })}
-      />
+          category: article.category,
+          tags: article.tags,
+        })
+      : buildArticleJsonLd({
+          title: article.title,
+          description: articleDescription,
+          url: articleUrl,
+          image: article.cover_image,
+          publishedAt: article.published_at,
+          updatedAt: article.updated_at,
+          authorName: article.users?.display_name || article.users?.username || null,
+          tags: article.tags,
+        });
+  const jsonLdMarkup = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
+
+  return (
+    <div className="relative min-h-screen bg-background text-foreground">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdMarkup }} />
       <StructuredData data={getBreadcrumbStructuredData(breadcrumbItems)} />
       <ReadingProgress />
 

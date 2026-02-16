@@ -49,10 +49,6 @@ type StatsEntry = {
   } | null;
 };
 
-/**
- * GET /api/user/stats
- * Returns detailed personal stats for the authenticated user's dashboard
- */
 async function GETHandler() {
   try {
     const supabase = await createRouteHandlerClient();

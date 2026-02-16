@@ -20,8 +20,7 @@ const toCanonicalSlug = (value: string) =>
     .replace(/^-+|-+$/g, '')
     .replace(/-+/g, '-');
 
-const foldPossessiveSlug = (value: string) =>
-  value.replace(/([a-z0-9])-s-(?=[a-z0-9])/g, '$1s-');
+const foldPossessiveSlug = (value: string) => value.replace(/([a-z0-9])-s-(?=[a-z0-9])/g, '$1s-');
 
 const buildSlugCandidates = (value: string): string[] => {
   const canonical = toCanonicalSlug(value);
@@ -58,7 +57,9 @@ const scoreSlugMatch = (target: string, item: MediaItem): number => {
 
   // Prefer rows where one slug is a strict prefix/suffix variant
   // e.g. divinity-original-sin vs divinity-original-sin-enhanced-edition
-  const prefixVariant = slugs.some(slug => slug.startsWith(`${target}-`) || target.startsWith(`${slug}-`));
+  const prefixVariant = slugs.some(
+    slug => slug.startsWith(`${target}-`) || target.startsWith(`${slug}-`),
+  );
   if (prefixVariant) return 700;
 
   const includesVariant = slugs.some(slug => slug.includes(target) || target.includes(slug));
@@ -89,9 +90,11 @@ async function fetchBySlug(category: string, slug: string) {
       ? (exactIgdbSlugMatches as unknown as MediaItem[])
       : [];
     if (exactRows.length > 0) {
-      return exactRows
-        .map(item => ({ item, score: scoreSlugMatch(canonicalSlug, item) }))
-        .sort((a, b) => b.score - a.score)[0]?.item ?? exactRows[0];
+      return (
+        exactRows
+          .map(item => ({ item, score: scoreSlugMatch(canonicalSlug, item) }))
+          .sort((a, b) => b.score - a.score)[0]?.item ?? exactRows[0]
+      );
     }
   }
 

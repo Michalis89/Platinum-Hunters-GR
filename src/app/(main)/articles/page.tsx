@@ -1,11 +1,7 @@
 import type { Metadata } from 'next';
 import NewsPageClient from '@/app/(main)/articles/NewsPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
-import {
-  CATEGORY_LABELS,
-  CATEGORY_SUBTITLES,
-  TOPIC_LABELS,
-} from '@/app/(main)/articles/constants';
+import { CATEGORY_LABELS, CATEGORY_SUBTITLES, TOPIC_LABELS } from '@/app/(main)/articles/constants';
 import type { ArticleCategory } from '@/types/database';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
@@ -32,9 +28,14 @@ export async function generateMetadata({ searchParams }: NewsPageProps): Promise
   const topicLabel = topic ? TOPIC_LABELS[topic] : undefined;
   const heading = topicLabel ?? DEFAULT_HEADING;
 
-  const title = categoryLabel ? `${heading} for ${categoryLabel} | Hobbistas` : `${heading} | Hobbistas`;
+  const title = categoryLabel
+    ? `${heading} for ${categoryLabel} | Hobbistas`
+    : `${heading} | Hobbistas`;
 
-  const description = category && categoryLabel ? CATEGORY_SUBTITLES[category] ?? DEFAULT_DESCRIPTION : DEFAULT_DESCRIPTION;
+  const description =
+    category && categoryLabel
+      ? (CATEGORY_SUBTITLES[category] ?? DEFAULT_DESCRIPTION)
+      : DEFAULT_DESCRIPTION;
 
   const params = new URLSearchParams();
   if (category) params.set('category', category);

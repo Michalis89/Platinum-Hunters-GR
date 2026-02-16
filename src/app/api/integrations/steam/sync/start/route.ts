@@ -57,9 +57,7 @@ async function POSTHandler() {
     const steamInput = userData?.steam_id?.trim();
     if (!steamInput) {
       console.error('❌ [Steam Sync Start] No steam_id in user profile');
-      throw new Error(
-        'Δεν έχεις ορίσει Steam ID στο προφίλ σου. Πήγαινε στις ρυθμίσεις για να το προσθέσεις.',
-      );
+      throw new Error('You have not set a Steam ID in your profile. Go to settings to add it.');
     }
 
     console.log('🔑 [Steam Sync Start] Fetching Steam API key...');
@@ -82,11 +80,10 @@ async function POSTHandler() {
       return NextResponse.json({
         jobId: null,
         totalGames: 0,
-        message: 'Δεν βρέθηκαν παιχνίδια στη βιβλιοθήκη Steam.',
+        message: 'No games were found in the Steam library.',
       });
     }
 
-    // Fetch achievements for games with stats (throttled)
     console.log('🏆 [Steam Sync Start] Fetching achievements...');
     const achievementsPercentByAppId = new Map<number, number>();
     const gamesWithStats = uniqueGames.filter(g => g.has_community_visible_stats);
@@ -119,7 +116,7 @@ async function POSTHandler() {
       id: jobId,
       user_id: session.user.id,
       status: 'running',
-      message: `Προετοιμασία για επεξεργασία ${uniqueGames.length} παιχνιδιών...`,
+      message: `Preparing to process ${uniqueGames.length} games...`,
       percent: 0,
       completed_steps: 0,
       total_steps: uniqueGames.length,
@@ -140,7 +137,7 @@ async function POSTHandler() {
       totalGames: uniqueGames.length,
       batchSize,
       estimatedBatches: Math.ceil(uniqueGames.length / batchSize),
-      message: `Βρέθηκαν ${uniqueGames.length} παιχνίδια. Έτοιμο για επεξεργασία.`,
+      message: `${uniqueGames.length} games found. Ready for processing.`,
     });
   } catch (error) {
     if (error instanceof UnauthorizedError) {

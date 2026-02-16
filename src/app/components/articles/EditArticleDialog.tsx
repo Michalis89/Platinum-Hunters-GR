@@ -35,49 +35,49 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
   games: {
     label: 'Games',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'reviews', label: 'Reviews' },
     ],
   },
   anime: {
     label: 'Anime',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'reviews', label: 'Reviews' },
     ],
   },
   manga: {
     label: 'Manga',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'reviews', label: 'Reviews' },
     ],
   },
   books: {
-    label: 'Βιβλία',
+    label: 'Books',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'reviews', label: 'Reviews' },
     ],
   },
   movies: {
     label: 'Movies',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'reviews', label: 'Reviews' },
     ],
   },
   tv: {
     label: 'TV Series',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'reviews', label: 'Reviews' },
     ],
   },
   coding: {
     label: 'Coding',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'tutorials', label: 'Tutorials' },
       { value: 'weird-cases', label: 'Weird Cases' },
     ],
@@ -85,20 +85,20 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
   pet: {
     label: 'Pet',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
-      { value: 'care', label: 'Φροντίδα' },
-      { value: 'experiences', label: 'Εμπειρίες' },
-      { value: 'health', label: 'Υγεία' },
+      { value: 'articles', label: 'Articles' },
+      { value: 'care', label: 'Care' },
+      { value: 'experiences', label: 'Experiences' },
+      { value: 'health', label: 'Health' },
     ],
   },
   vape: {
     label: 'Vape',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
-      { value: 'devices', label: 'Ατμοποιητές/Συσκευές' },
-      { value: 'liquids', label: 'Υγρά' },
-      { value: 'experiences', label: 'Εμπειρίες' },
-      { value: 'reviews', label: 'Κριτικές' },
+      { value: 'articles', label: 'Articles' },
+      { value: 'devices', label: 'Vapes/Devices' },
+      { value: 'liquids', label: 'Liquids' },
+      { value: 'experiences', label: 'Experiences' },
+      { value: 'reviews', label: 'Reviews' },
     ],
   },
 };
@@ -199,36 +199,34 @@ export default function EditArticleDialog({
     } catch (uploadErr) {
       console.error('Cover upload failed:', uploadErr);
       setCoverUploadError(
-        uploadErr instanceof Error
-          ? uploadErr.message
-          : 'Αποτυχία ανέβασμα εικόνας. Δοκίμασε ξανά.',
+        uploadErr instanceof Error ? uploadErr.message : 'Image upload failed. Try again.',
       );
     } finally {
       setIsCoverUploading(false);
     }
   };
 
-  const titleValidation = validatePlainText(title, 'Ο τίτλος');
-  const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
-  const tagsValidation = validatePlainText(tags, 'Τα tags');
+  const titleValidation = validatePlainText(title, 'Title');
+  const descriptionValidation = validatePlainText(description, 'Description');
+  const tagsValidation = validatePlainText(tags, 'Tags');
   const hasPlainTextError =
     !titleValidation.isValid || !descriptionValidation.isValid || !tagsValidation.isValid;
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      setError('Παρακαλώ εισάγετε τίτλο');
+      setError('Please enter a title');
       return;
     }
     if (!titleValidation.isValid) {
-      setError(titleValidation.error || 'Ο τίτλος δεν πρέπει να περιέχει HTML.');
+      setError(titleValidation.error || 'Title must not contain HTML.');
       return;
     }
     if (!descriptionValidation.isValid) {
-      setError(descriptionValidation.error || 'Η περιγραφή δεν πρέπει να περιέχει HTML.');
+      setError(descriptionValidation.error || 'Description must not contain HTML.');
       return;
     }
     if (!tagsValidation.isValid) {
-      setError(tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.');
+      setError(tagsValidation.error || 'Tags must not contain HTML.');
       return;
     }
 
@@ -266,7 +264,7 @@ export default function EditArticleDialog({
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Αποτυχία ενημέρωσης');
+        throw new Error(data.error || 'Update failed');
       }
 
       const data = await response.json();
@@ -274,14 +272,18 @@ export default function EditArticleDialog({
       onSuccess?.(payload.article);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Θες να διαγράψεις οριστικά αυτό το άρθρο; Η ενέργεια δεν αναστρέφεται.')) {
+    if (
+      !window.confirm(
+        'Do you want to permanently delete this article? This action cannot be undone.',
+      )
+    ) {
       return;
     }
 
@@ -295,7 +297,7 @@ export default function EditArticleDialog({
 
       if (!response.ok) {
         const data = await response.json().catch(() => null);
-        throw new Error(data?.error || 'Αποτυχία διαγραφής άρθρου');
+        throw new Error(data?.error || 'Article deletion failed');
       }
 
       onDelete?.();
@@ -305,7 +307,7 @@ export default function EditArticleDialog({
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : 'Κάτι πήγε στραβά κατά τη διαγραφή. Δοκίμασε ξανά.',
+          : 'Something went wrong during deletion. Try again.',
       );
     } finally {
       setIsDeleting(false);
@@ -339,7 +341,7 @@ export default function EditArticleDialog({
               className="flex h-full max-h-[90vh] flex-col"
             >
               <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h2 className="text-xl font-semibold text-foreground">Επεξεργασία Άρθρου</h2>
+                <h2 className="text-xl font-semibold text-foreground">Edit Article</h2>
                 <Button variant={'ghost'} onClick={onClose}>
                   <X size={20} />
                 </Button>
@@ -356,7 +358,7 @@ export default function EditArticleDialog({
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Κατηγορία</label>
+                      <label className="text-sm font-medium text-foreground">Category</label>
                       <select
                         value={category}
                         onChange={event => setCategory(event.target.value as ArticleCategory)}
@@ -371,7 +373,7 @@ export default function EditArticleDialog({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Υποκατηγορία</label>
+                      <label className="text-sm font-medium text-foreground">Subcategory</label>
                       <select
                         value={topic}
                         onChange={event => setTopic(event.target.value as ArticleTopic)}
@@ -386,7 +388,7 @@ export default function EditArticleDialog({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Κατάσταση</label>
+                      <label className="text-sm font-medium text-foreground">Status</label>
                       <select
                         value={status}
                         onChange={event => setStatus(event.target.value as ArticleStatus)}
@@ -402,20 +404,20 @@ export default function EditArticleDialog({
                   </div>
 
                   <Input
-                    label="Τίτλος *"
-                    placeholder="Εισάγετε τον τίτλο του άρθρου"
+                    label="Title *"
+                    placeholder="Enter the article title"
                     value={title}
                     onChange={event => setTitle(event.target.value)}
                     error={!titleValidation.isValid}
                   />
                   {!titleValidation.isValid && (
-                    <p className="text-xs text-red-400">Ο τίτλος δεν πρέπει να περιέχει HTML.</p>
+                    <p className="text-xs text-red-400">Title must not contain HTML.</p>
                   )}
 
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground">Περιγραφή</label>
+                    <label className="text-sm font-medium text-foreground">Description</label>
                     <Textarea
-                      placeholder="Σύντομη περιγραφή του άρθρου"
+                      placeholder="Short article description"
                       rows={3}
                       value={description}
                       onChange={event => setDescription(event.target.value)}
@@ -423,15 +425,15 @@ export default function EditArticleDialog({
                     />
                   </div>
                   {!descriptionValidation.isValid && (
-                    <p className="text-xs text-red-400">Η περιγραφή δεν πρέπει να περιέχει HTML.</p>
+                    <p className="text-xs text-red-400">Description must not contain HTML.</p>
                   )}
 
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-foreground">Εικόνα εξωφύλλου</label>
+                    <label className="text-sm font-medium text-foreground">Cover image</label>
                     <div className="flex flex-wrap gap-3">
                       <div className="flex min-w-[220px] flex-1 flex-col gap-2">
                         <Input
-                          placeholder="URL εικόνας"
+                          placeholder="Image URL"
                           value={coverImage}
                           onChange={event => {
                             setCoverImage(event.target.value);
@@ -452,9 +454,9 @@ export default function EditArticleDialog({
                             onClick={handleCoverUploadClick}
                             disabled={isCoverUploading}
                           >
-                            {isCoverUploading ? 'Ανεβαίνει...' : 'Ανέβασε αρχείο'}
+                            {isCoverUploading ? 'Uploading...' : 'Upload file'}
                           </Button>
-                          <span>Το URL προέρχεται από το Supabase storage.</span>
+                          <span>The URL comes from Supabase storage.</span>
                         </div>
                         {coverUploadError && (
                           <p className="text-xs text-amber-300">{coverUploadError}</p>
@@ -486,22 +488,22 @@ export default function EditArticleDialog({
                   </div>
 
                   <RichTextEditor
-                    label="Περιεχόμενο"
+                    label="Content"
                     value={contentHtml}
                     onChange={setContentHtml}
-                    placeholder="Γράψτε το περιεχόμενο του άρθρου..."
+                    placeholder="Write the article content..."
                   />
 
                   <Input
                     label="Tags"
-                    placeholder="Χωρισμένα με κόμμα"
+                    placeholder="Comma-separated"
                     value={tags}
                     onChange={event => setTags(event.target.value)}
                     error={!tagsValidation.isValid}
                   />
                   {!tagsValidation.isValid && (
                     <p className="text-xs text-red-400">
-                      {tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.'}
+                      {tagsValidation.error || 'Tags must not contain HTML.'}
                     </p>
                   )}
                 </div>
@@ -510,14 +512,14 @@ export default function EditArticleDialog({
               <div className="flex items-center justify-between border-t border-border px-6 py-4">
                 <div className="flex items-center gap-2">
                   <Button variant={'secondary'} onClick={onClose}>
-                    Ακύρωση
+                    Cancel
                   </Button>
                   <Button
                     variant="destructive"
                     onClick={handleDelete}
                     disabled={isSubmitting || isDeleting}
                   >
-                    {isDeleting ? <Spinner className="size-4" /> : 'Διαγραφή άρθρου'}
+                    {isDeleting ? <Spinner className="size-4" /> : 'Delete article'}
                   </Button>
                 </div>
                 <Button
@@ -526,7 +528,7 @@ export default function EditArticleDialog({
                   onClick={handleSubmit}
                   disabled={isSubmitting || hasPlainTextError}
                 >
-                  Αποθήκευση
+                  Save
                 </Button>
               </div>
             </motion.div>

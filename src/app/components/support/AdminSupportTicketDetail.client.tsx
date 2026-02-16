@@ -113,7 +113,7 @@ export default function AdminSupportTicketDetail() {
         const response = await fetch(`/api/admin/support/tickets/${ticketId}`);
         const payload = await response.json();
         if (!response.ok) {
-          throw new Error(payload.error || 'Αποτυχία φόρτωσης');
+          throw new Error(payload.error || 'Failed to load');
         }
         if (!ignore) {
           setTicket(payload.data?.ticket ?? null);
@@ -131,7 +131,7 @@ export default function AdminSupportTicketDetail() {
         }
       } catch (err) {
         if (!ignore) {
-          setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+          setError(err instanceof Error ? err.message : 'Something went wrong');
         }
       } finally {
         if (!ignore) setLoading(false);
@@ -180,15 +180,15 @@ export default function AdminSupportTicketDetail() {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || 'Αποτυχία αποθήκευσης');
+        throw new Error(data.error || 'Save failed');
       }
 
       setTicket(data.data?.ticket ?? ticket);
-      setSaveResult({ type: 'success', message: 'Οι αλλαγές αποθηκεύτηκαν.' });
+      setSaveResult({ type: 'success', message: 'Changes saved.' });
     } catch (err) {
       setSaveResult({
         type: 'error',
-        message: err instanceof Error ? err.message : 'Κάτι πήγε στραβά',
+        message: err instanceof Error ? err.message : 'Something went wrong',
       });
     } finally {
       setSaving(false);
@@ -198,7 +198,7 @@ export default function AdminSupportTicketDetail() {
   const handleReply = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!replyText.trim()) {
-      setReplyResult({ type: 'error', message: 'Πρόσθεσε μήνυμα.' });
+      setReplyResult({ type: 'error', message: 'Add a message.' });
       return;
     }
 
@@ -218,7 +218,7 @@ export default function AdminSupportTicketDetail() {
 
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload.error || 'Αποτυχία αποστολής');
+        throw new Error(payload.error || 'Send failed');
       }
 
       setReplyText('');
@@ -226,7 +226,7 @@ export default function AdminSupportTicketDetail() {
       setReplyInternal(false);
       setReplyResult({
         type: 'success',
-        message: replyInternal ? 'Σημείωση προστέθηκε.' : 'Η απάντηση στάλθηκε.',
+        message: replyInternal ? 'Note added.' : 'Reply sent.',
       });
 
       const refresh = await fetch(`/api/admin/support/tickets/${ticketId}`);
@@ -240,7 +240,7 @@ export default function AdminSupportTicketDetail() {
     } catch (err) {
       setReplyResult({
         type: 'error',
-        message: err instanceof Error ? err.message : 'Κάτι πήγε στραβά',
+        message: err instanceof Error ? err.message : 'Something went wrong',
       });
     } finally {
       setReplyLoading(false);
@@ -250,10 +250,10 @@ export default function AdminSupportTicketDetail() {
   if (!isAdmin) {
     return (
       <PageContainer size="md" className="py-20">
-        <ErrorAlert message="Δεν έχεις πρόσβαση σε αυτή τη σελίδα." />
+        <ErrorAlert message="You do not have access to this page." />
         <div className="mt-6 flex justify-center">
           <Button variant={'link'} onClick={() => router.push('/')}>
-            Επιστροφή στην αρχική
+            Back to home
           </Button>
         </div>
       </PageContainer>
@@ -265,14 +265,14 @@ export default function AdminSupportTicketDetail() {
       <div className="py-20">
         <div className="flex flex-col items-center justify-center gap-3">
           <Spinner />
-          <span className="text-sm text-muted-foreground">Φορτώνουμε το ticket...</span>
+          <span className="text-sm text-muted-foreground">Loading ticket...</span>
         </div>
       </div>
     );
   }
 
   if (error || !ticket) {
-    return <ErrorAlert message={error || 'Το ticket δεν βρέθηκε'} />;
+    return <ErrorAlert message={error || 'Ticket not found'} />;
   }
 
   return (
@@ -282,9 +282,9 @@ export default function AdminSupportTicketDetail() {
       </div>
       <div className="relative">
         <PageHero
-          eyebrow="Διαχείριση"
+          eyebrow="Management"
           title={<span className="text-3xl text-foreground md:text-5xl">{ticket.subject}</span>}
-          subtitle={`Κατηγορία: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
+          subtitle={`Category: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
           badges={
             <>
               <Badge
@@ -302,7 +302,7 @@ export default function AdminSupportTicketDetail() {
               </Badge>
               {ticket.severity ? (
                 <span className="rounded-full border border-border bg-card px-3 py-1 text-xs">
-                  Σοβαρότητα: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
+                  Severity: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
                 </span>
               ) : null}
             </>
@@ -312,13 +312,13 @@ export default function AdminSupportTicketDetail() {
         <PageContainer size="full" className="pb-20">
           <div className="mb-4 flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => router.push('/admin/support')}>
-              Πίσω
+              Back
             </Button>
             <Button
               variant="destructive"
               onClick={async () => {
                 if (deleteLoading) return;
-                const confirmed = window.confirm('Οριστική διαγραφή αυτού του ticket;');
+                const confirmed = window.confirm('Permanently delete this ticket?');
                 if (!confirmed) return;
                 setDeleteLoading(true);
                 try {
@@ -327,13 +327,13 @@ export default function AdminSupportTicketDetail() {
                   });
                   const payload = await res.json().catch(() => null);
                   if (!res.ok) {
-                    throw new Error(payload?.error || 'Αποτυχία διαγραφής');
+                    throw new Error(payload?.error || 'Deletion failed');
                   }
                   router.push('/admin/support');
                 } catch (err) {
                   setReplyResult({
                     type: 'error',
-                    message: err instanceof Error ? err.message : 'Σφάλμα διαγραφής',
+                    message: err instanceof Error ? err.message : 'Delete error',
                   });
                 } finally {
                   setDeleteLoading(false);
@@ -341,7 +341,7 @@ export default function AdminSupportTicketDetail() {
               }}
               disabled={deleteLoading}
             >
-              Διαγραφή
+              Delete
             </Button>
           </div>
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -349,7 +349,7 @@ export default function AdminSupportTicketDetail() {
               <CardHeader className="border-border">
                 <CardTitle className="flex items-center gap-2 text-foreground">
                   <ClipboardList className="h-5 w-5 text-primary" />
-                  Συνομιλία
+                  Conversation
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -370,10 +370,10 @@ export default function AdminSupportTicketDetail() {
                           <ShieldCheck className="h-4 w-4 text-primary" />
                         ) : null}
                         {message.is_internal
-                          ? 'Εσωτερική σημείωση'
+                          ? 'Internal note'
                           : message.author_role === 'admin'
-                            ? 'Διαχειριστής'
-                            : 'Χρήστης'}
+                            ? 'Admin'
+                            : 'User'}
                       </span>
                       <FormattedDate
                         date={message.created_at}
@@ -395,7 +395,7 @@ export default function AdminSupportTicketDetail() {
                             rel="noreferrer"
                           >
                             <Paperclip className="h-4 w-4 text-muted-foreground" />
-                            {attachment.file_name || 'Συνημμένο'}
+                            {attachment.file_name || 'Attachment'}
                           </a>
                         ))}
                       </div>
@@ -407,20 +407,20 @@ export default function AdminSupportTicketDetail() {
                   onSubmit={handleReply}
                   className="space-y-4 rounded-2xl border border-border bg-card p-4"
                 >
-                  <div className="text-sm font-semibold text-foreground">Απάντηση / Σημείωση</div>
+                  <div className="text-sm font-semibold text-foreground">Reply / Note</div>
                   {replyResult ? (
                     <Alert
                       variant={replyResult.type === 'success' ? 'success' : 'destructive'}
                       className="rounded-xl border border-border bg-card/80 px-4 py-3"
                     >
                       <AlertTitle className="text-base">
-                        {replyResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
+                        {replyResult.type === 'success' ? 'OK' : 'Error'}
                       </AlertTitle>
                       <AlertDescription>{replyResult.message}</AlertDescription>
                     </Alert>
                   ) : null}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground">Μήνυμα</label>
+                    <label className="text-sm font-medium text-foreground">Message</label>
                     <Textarea
                       value={replyText}
                       onChange={event => setReplyText(event.target.value)}
@@ -431,10 +431,10 @@ export default function AdminSupportTicketDetail() {
                   <label className="flex items-start justify-between gap-4">
                     <span className="flex flex-col gap-1">
                       <span className="text-sm font-medium text-[var(--hb-headline)]">
-                        Εσωτερική σημείωση
+                        Internal note
                       </span>
                       <span className="text-xs text-[var(--hb-muted)]">
-                        Ο χρήστης δεν θα τη δει.
+                        The user will not see it.
                       </span>
                     </span>
                     <Switch
@@ -448,11 +448,7 @@ export default function AdminSupportTicketDetail() {
                     disabled={replyLoading}
                   />
                   <Button type="submit" variant="primary" disabled={replyLoading}>
-                    {replyLoading
-                      ? 'Αποστολή...'
-                      : replyInternal
-                        ? 'Προσθήκη σημείωσης'
-                        : 'Αποστολή απάντησης'}
+                    {replyLoading ? 'Sending...' : replyInternal ? 'Add note' : 'Send reply'}
                   </Button>
                 </form>
               </CardContent>
@@ -463,7 +459,7 @@ export default function AdminSupportTicketDetail() {
                 <CardHeader className="border-border">
                   <CardTitle className="flex items-center gap-2 text-foreground">
                     <UserCheck className="h-5 w-5 text-primary" />
-                    Διαχείριση
+                    Management
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -473,28 +469,28 @@ export default function AdminSupportTicketDetail() {
                       className="rounded-xl border border-border bg-card/80 px-4 py-3"
                     >
                       <AlertTitle className="text-base">
-                        {saveResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
+                        {saveResult.type === 'success' ? 'OK' : 'Error'}
                       </AlertTitle>
                       <AlertDescription>{saveResult.message}</AlertDescription>
                     </Alert>
                   ) : null}
                   <Select
-                    label="Κατάσταση"
+                    label="Status"
                     value={status}
                     onChange={value => setStatus(value)}
                     options={SUPPORT_STATUS_OPTIONS}
                     optionLabels={SUPPORT_STATUS_LABELS}
-                    placeholder="Επίλεξε"
+                    placeholder="Select"
                     labelClassName="text-foreground"
                     className="border-border bg-card text-foreground"
                   />
                   <label className="flex items-start justify-between gap-4">
                     <span className="flex flex-col gap-1">
                       <span className="text-sm font-medium text-[var(--hb-headline)]">
-                        Ανάθεση σε μένα
+                        Assign to me
                       </span>
                       <span className="text-xs text-[var(--hb-muted)]">
-                        Το ticket θα εμφανίζεται ως assigned στον λογαριασμό σου.
+                        The ticket will appear as assigned to your account.
                       </span>
                     </span>
                     <Switch checked={assignToMe} onCheckedChange={value => setAssignToMe(value)} />
@@ -505,13 +501,13 @@ export default function AdminSupportTicketDetail() {
                       type="text"
                       value={labels}
                       onChange={event => setLabels(event.target.value)}
-                      placeholder="π.χ. billing, ux"
+                      placeholder="e.g. billing, ux"
                       className="border-border bg-card"
                     />
-                    <div className="mt-2 text-xs text-muted-foreground">Χώρισε με κόμμα.</div>
+                    <div className="mt-2 text-xs text-muted-foreground">Separate with commas.</div>
                   </div>
                   <Button type="button" variant="primary" onClick={handleSave} disabled={saving}>
-                    {saving ? 'Αποθήκευση...' : 'Αποθήκευση αλλαγών'}
+                    {saving ? 'Saving...' : 'Save changes'}
                   </Button>
                 </CardContent>
               </Card>
@@ -520,12 +516,12 @@ export default function AdminSupportTicketDetail() {
                 <CardHeader className="border-border">
                   <CardTitle className="flex items-center gap-2 text-foreground">
                     <Tag className="h-5 w-5 text-primary" />
-                    Ενέργειες
+                    Actions
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm text-muted-foreground">
                   {events.length === 0 ? (
-                    <p>Δεν υπάρχουν ακόμη events.</p>
+                    <p>No events yet.</p>
                   ) : (
                     events.map(event => (
                       <div key={event.id} className="rounded-xl border border-border bg-card p-3">

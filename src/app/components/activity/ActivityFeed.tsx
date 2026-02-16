@@ -27,7 +27,6 @@ import { Info } from 'lucide-react';
 import { selectUser } from '@/store/slices/authSlice';
 import { Button } from '@/components/ui/button';
 
-// Context to pass down category alert state to FeedText
 type CategoryAlertState = {
   showCategoryAlert: (category: string) => void;
   userCategories: string[] | null;
@@ -75,24 +74,21 @@ function timeAgo(date: string) {
   const now = Date.now();
   const then = new Date(date).getTime();
   const diffSec = Math.max(0, Math.floor((now - then) / 1000));
-  if (diffSec < 60) return `${diffSec}s πριν`;
+  if (diffSec < 60) return `${diffSec}s ago`;
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m πριν`;
+  if (diffMin < 60) return `${diffMin}m ago`;
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}h πριν`;
+  if (diffH < 24) return `${diffH}h ago`;
   const diffD = Math.floor(diffH / 24);
-  return `${diffD}d πριν`;
+  return `${diffD}d ago`;
 }
 
-// Hydration-safe relative time component
 function RelativeTime({ date }: { date: string }) {
   const [relativeTime, setRelativeTime] = useState<string | null>(null);
 
   useEffect(() => {
-    // Calculate immediately on mount
     setRelativeTime(timeAgo(date));
 
-    // Update every minute
     const interval = setInterval(() => {
       setRelativeTime(timeAgo(date));
     }, 60000);
@@ -105,41 +101,39 @@ function RelativeTime({ date }: { date: string }) {
 
 function renderText(item: ActivityItem) {
   const p = item.payload || {};
-  const name = p.display_name || p.username || 'Χρήστης';
-  const title = p.gameTitle || p.articleTitle || 'περιεχόμενο';
+  const name = p.display_name || p.username || 'User';
+  const title = p.gameTitle || p.articleTitle || 'content';
   const category = (p.category || '').toString();
   const mediaTitle = p.title || title;
-  // Category labels with proper Greek articles (singular)
   const categoryWithArticle: Record<string, { article: string; label: string }> = {
-    anime: { article: 'το', label: 'Anime' },
-    manga: { article: 'το', label: 'manga' },
-    movies: { article: 'την', label: 'ταινία' },
-    books: { article: 'το', label: 'βιβλίο' },
-    tv: { article: 'την', label: 'σειρά' },
-    games: { article: 'το', label: 'παιχνίδι' },
+    anime: { article: 'the', label: 'anime' },
+    manga: { article: 'the', label: 'manga' },
+    movies: { article: 'the', label: 'movie' },
+    books: { article: 'the', label: 'book' },
+    tv: { article: 'the', label: 'series' },
+    games: { article: 'the', label: 'game' },
   };
   if (item.type === 'backlog_added') {
-    return `${name} πρόσθεσε στο backlog: ${title}`;
+    return `${name} added to backlog: ${title}`;
   }
   if (item.type === 'backlog_status') {
-    if (item.payload?.favoriteAction === 'added') return `${name} έκανε favorite: ${title}`;
+    if (item.payload?.favoriteAction === 'added') return `${name} favorited: ${title}`;
     if (item.payload?.favoriteAction === 'removed')
-      return `${name} αφαίρεσε από favorites: ${title}`;
+      return `${name} removed from favorites: ${title}`;
     const status = (p.status || '').toString();
     const statusLabel: Record<string, string> = {
-      platinumed: 'πήρε πλατίνα',
-      completed: 'ολοκλήρωσε',
-      playing: 'παίζει τώρα',
-      to_play: 'πρόσθεσε στο backlog',
-      dropped: 'το άφησε',
+      platinumed: 'earned platinum',
+      completed: 'completed',
+      playing: 'is playing',
+      to_play: 'added to backlog',
+      dropped: 'dropped',
     };
-    return `${name} ${statusLabel[status] || 'άλλαξε status σε ' + status}: ${title}`;
+    return `${name} ${statusLabel[status] || 'changed status to ' + status}: ${title}`;
   }
   if (item.type === 'media_added') {
-    const cat = categoryWithArticle[category] || { article: 'το', label: 'media' };
+    const cat = categoryWithArticle[category] || { article: 'the', label: 'media' };
     const status = (p.status || 'planned').toString();
 
-    // Different verbs based on category
     const isBook = category === 'books';
     const isGame = category === 'games';
 
@@ -147,31 +141,30 @@ function renderText(item: ActivityItem) {
     let plannedVerb: string;
 
     if (isGame) {
-      currentVerb = `παίζει τώρα ${cat.article}`;
-      plannedVerb = `πρόσθεσε ${cat.article} ${cat.label} στο backlog`;
+      currentVerb = `is playing ${cat.article}`;
+      plannedVerb = `added ${cat.article} ${cat.label} to backlog`;
     } else if (isBook) {
-      currentVerb = `ξεκίνησε να διαβάζει ${cat.article}`;
-      plannedVerb = `πρόσθεσε ${cat.article}`;
+      currentVerb = `started reading ${cat.article}`;
+      plannedVerb = `added ${cat.article}`;
     } else {
-      currentVerb = `ξεκίνησε να παρακολουθεί ${cat.article}`;
-      plannedVerb = `πρόσθεσε ${cat.article}`;
+      currentVerb = `started watching ${cat.article}`;
+      plannedVerb = `added ${cat.article}`;
     }
 
     const statusActions: Record<string, string> = {
       planned: plannedVerb,
       current: currentVerb,
-      completed: `ολοκλήρωσε ${cat.article}`,
-      dropped: `παράτησε ${cat.article}`,
+      completed: `completed ${cat.article}`,
+      dropped: `dropped ${cat.article}`,
     };
-    const action = statusActions[status] || `πρόσθεσε ${cat.article}`;
-    // For games with planned status, don't repeat "παιχνίδι" twice
+    const action = statusActions[status] || `added ${cat.article}`;
     if (isGame && status === 'planned') {
       return `${name} ${action}: ${mediaTitle}`;
     }
     return `${name} ${action} ${cat.label}: ${mediaTitle}`;
   }
   if (item.type === 'media_status') {
-    const cat = categoryWithArticle[category] || { article: 'το', label: 'media' };
+    const cat = categoryWithArticle[category] || { article: 'the', label: 'media' };
     const status = (p.status || '').toString();
     const isBook = category === 'books';
     const isGame = category === 'games';
@@ -180,64 +173,62 @@ function renderText(item: ActivityItem) {
     let plannedVerb: string;
 
     if (isGame) {
-      currentVerb = `παίζει τώρα ${cat.article}`;
-      plannedVerb = `πρόσθεσε ${cat.article} ${cat.label} στο backlog`;
+      currentVerb = `is playing ${cat.article}`;
+      plannedVerb = `added ${cat.article} ${cat.label} to backlog`;
     } else if (isBook) {
-      currentVerb = `διαβάζει ${cat.article}`;
-      plannedVerb = `πρόσθεσε ${cat.article}`;
+      currentVerb = `is reading ${cat.article}`;
+      plannedVerb = `added ${cat.article}`;
     } else {
-      currentVerb = `παρακολουθεί ${cat.article}`;
-      plannedVerb = `πρόσθεσε ${cat.article}`;
+      currentVerb = `is watching ${cat.article}`;
+      plannedVerb = `added ${cat.article}`;
     }
 
     const statusActions: Record<string, string> = {
       planned: plannedVerb,
       current: currentVerb,
-      completed: `ολοκλήρωσε ${cat.article}`,
-      dropped: `παράτησε ${cat.article}`,
+      completed: `completed ${cat.article}`,
+      dropped: `dropped ${cat.article}`,
     };
 
-    // For games with planned status, don't repeat "παιχνίδι" twice
     if (isGame && status === 'planned') {
-      return `${name} ${statusActions[status] || 'άλλαξε status'}: ${mediaTitle}`;
+      return `${name} ${statusActions[status] || 'changed status'}: ${mediaTitle}`;
     }
-    return `${name} ${statusActions[status] || 'άλλαξε status'} ${cat.label}: ${mediaTitle}`;
+    return `${name} ${statusActions[status] || 'changed status'} ${cat.label}: ${mediaTitle}`;
   }
   if (item.type === 'media_favorite') {
-    const cat = categoryWithArticle[category] || { article: 'το', label: 'media' };
-    const action = p.favoriteAction === 'removed' ? 'αφαίρεσε από favorites' : 'έκανε favorite';
+    const cat = categoryWithArticle[category] || { article: 'the', label: 'media' };
+    const action = p.favoriteAction === 'removed' ? 'removed from favorites' : 'favorited';
     return `${name} ${action} ${cat.article} ${cat.label}: ${mediaTitle}`;
   }
-  // Article/Review activities - check topic to distinguish
   const isReview = p.topic === 'reviews';
-  const contentType = isReview ? 'το review' : 'άρθρο';
-  const contentTitle = p.articleTitle || (isReview ? 'review' : 'άρθρο');
+  const contentType = isReview ? 'the review' : 'article';
+  const contentTitle = p.articleTitle || (isReview ? 'review' : 'article');
 
   if (item.type === 'article_created') {
-    return `${name} δημοσίευσε ${contentType}: ${contentTitle}`;
+    return `${name} published ${contentType}: ${contentTitle}`;
   }
   if (item.type === 'article_updated') {
-    return `${name} ενημέρωσε ${contentType}: ${contentTitle}`;
+    return `${name} updated ${contentType}: ${contentTitle}`;
   }
   if (item.type === 'article_deleted') {
-    return `${name} διέγραψε ${contentType}: ${contentTitle}`;
+    return `${name} deleted ${contentType}: ${contentTitle}`;
   }
   if (item.type === 'article_liked') {
-    return `${name} έκανε like στο: ${contentTitle}`;
+    return `${name} liked: ${contentTitle}`;
   }
   if (item.type === 'article_unliked') {
-    return `${name} αφαίρεσε το like από: ${contentTitle}`;
+    return `${name} removed like from: ${contentTitle}`;
   }
   if (item.type === 'article_comment') {
-    return `${name} σχολίασε στο: ${contentTitle}`;
+    return `${name} commented on: ${contentTitle}`;
   }
   if (item.type === 'article_commented') {
-    return `${name} σχολίασε στο: ${contentTitle}`;
+    return `${name} commented on: ${contentTitle}`;
   }
   if (item.type === 'article_comment_deleted') {
-    return `${name} διέγραψε σχόλιο στο: ${contentTitle}`;
+    return `${name} deleted comment on: ${contentTitle}`;
   }
-  return `${name} έκανε μια ενέργεια`;
+  return `${name} performed an action`;
 }
 
 function iconFor(item: ActivityItem) {
@@ -256,7 +247,6 @@ function iconFor(item: ActivityItem) {
   if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-primary" />;
   if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
   if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-500" />;
-  // Article/Review icons - use Star for reviews
   const isReview = item.payload?.topic === 'reviews';
   if (item.type === 'article_created') {
     return isReview ? (
@@ -282,14 +272,13 @@ function iconFor(item: ActivityItem) {
   return <UserIcon className="h-4 w-4 text-muted-foreground" />;
 }
 
-// Category labels for alerts
 const categoryLabels: Record<string, string> = {
   anime: 'Anime',
   manga: 'Manga',
-  movies: 'Ταινίες',
-  books: 'Βιβλία',
-  tv: 'Σειρές',
-  games: 'Παιχνίδια',
+  movies: 'Movies',
+  books: 'Books',
+  tv: 'Series',
+  games: 'Games',
 };
 
 function ActivityFeedComponent({
@@ -310,7 +299,6 @@ function ActivityFeedComponent({
   const user = useSelector(selectUser);
   const userCategories = user?.categories ?? null;
 
-  // State for category access alert
   const [alertCategory, setAlertCategory] = useState<string | null>(null);
 
   const showCategoryAlert = (category: string) => {
@@ -330,16 +318,16 @@ function ActivityFeedComponent({
       {alertCategory && (
         <Alert variant="info" className="mb-6">
           <Info className="h-4 w-4" />
-          <AlertTitle>Κατηγορία μη διαθέσιμη</AlertTitle>
+          <AlertTitle>Category unavailable</AlertTitle>
           <AlertDescription>
             <span>
-              Δεν έχεις επιλέξει την κατηγορία{' '}
-              <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
+              You have not selected the category{' '}
+              <strong>{categoryLabels[alertCategory] || alertCategory}</strong> in your profile.{' '}
               <Link
                 href="/profile/edit#categories"
                 className="font-semibold text-primary underline hover:opacity-85"
               >
-                Πρόσθεσέ την εδώ
+                Add it here
               </Link>
             </span>
           </AlertDescription>
@@ -347,24 +335,24 @@ function ActivityFeedComponent({
       )}
 
       {showHeader && (
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-base font-semibold">{title || 'Τελευταίες ενέργειες'}</h3>
-        <div className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium">
-          <Clock className="h-3.5 w-3.5" />
-          <span>Live</span>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-base font-semibold">{title || 'Latest activity'}</h3>
+          <div className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium">
+            <Clock className="h-3.5 w-3.5" />
+            <span>Live</span>
+          </div>
         </div>
-      </div>
       )}
 
       {isLoading && (
         <div className="inline-flex items-center gap-2">
           <Spinner className="size-4" />
-          <span className="text-sm text-muted-foreground">Φόρτωση...</span>
+          <span className="text-sm text-muted-foreground">Loading...</span>
         </div>
       )}
-      {error && <ErrorAlert message="Σφάλμα φόρτωσης activity. Προσπάθησε ξανά αργότερα." />}
+      {error && <ErrorAlert message="Failed to load activity. Please try again later." />}
       {!isLoading && !error && activities.length === 0 && (
-        <EmptyState title="Καμία πρόσφατη ενέργεια." />
+        <EmptyState title="No recent activity." />
       )}
 
       <CategoryAlertContext.Provider value={{ showCategoryAlert, userCategories }}>
@@ -401,13 +389,11 @@ export function renderActivityText(item: ActivityItem) {
   return renderText(item);
 }
 
-
 function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }) {
   const text = renderText(item);
   const payload = item.payload || {};
   const alertContext = useContext(CategoryAlertContext);
 
-  // Article activities - link to article
   if (
     (item.type === 'article_created' ||
       item.type === 'article_updated' ||
@@ -447,7 +433,6 @@ function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }
     );
   }
 
-  // Media activities - check if user has access to the category
   if (
     (item.type === 'media_added' ||
       item.type === 'media_status' ||
@@ -458,7 +443,6 @@ function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }
     const userCategories = alertContext?.userCategories;
     const hasCategory = userCategories?.includes(category);
 
-    // If user doesn't have this category, show alert on click instead of navigating
     if (!hasCategory && alertContext) {
       return (
         <Button variant={'primary'} onClick={() => alertContext.showCategoryAlert(category)}>
@@ -480,5 +464,3 @@ function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }
   }
   return <p className="font-medium">{text}</p>;
 }
-
-

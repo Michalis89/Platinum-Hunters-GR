@@ -58,8 +58,8 @@ function ProfileFavoritesComponent({
       <EmptyState
         title={
           isArticleOnly
-            ? 'Αυτή η κατηγορία έχει μόνο άρθρα.'
-            : `Δεν υπάρχουν ${categoryLabel.toLowerCase()} ακόμα.`
+            ? 'This category has only articles.'
+            : `There are no ${categoryLabel.toLowerCase()} yet.`
         }
         size="sm"
       />
@@ -121,8 +121,8 @@ function ProfileFavoritesComponent({
       {/* Hint text */}
       <p className="mt-4 text-center text-xs text-muted-foreground">
         {category === 'games'
-          ? 'Για να προσθέσεις/αφαιρέσεις favorites, χρησιμοποίησε το toggle "Favorite" στα backlog items.'
-          : 'Σύρε για αναδιάταξη. Πρόσθεσε favorites από το library.'}
+          ? 'To add/remove favorites, use the "Favorite" toggle on backlog items.'
+          : 'Drag to reorder. Add favorites from the library.'}
       </p>
     </div>
   );

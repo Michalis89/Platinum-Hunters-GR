@@ -8,7 +8,6 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { fail, ok } from '@/lib/api/response';
 import { revalidateCache } from '@/lib/cache/tags';
 
-// GET - Check if user has liked the article
 async function GETHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -46,7 +45,6 @@ async function GETHandler(_req: Request, { params }: { params: Promise<{ id: str
   }
 }
 
-// POST - Like the article
 async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -54,7 +52,6 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
 
     const session = await requireAuth(supabase);
 
-    // Get article info for activity log
     const { data: article, error: articleError } = await supabase
       .from('articles')
       .select('id, title, slug')
@@ -62,10 +59,9 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
       .single();
 
     if (articleError || !article) {
-      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Article not found' }, 404);
     }
 
-    // Check if already liked
     const { data: existingLike } = await supabase
       .from('article_likes')
       .select('id')
@@ -74,13 +70,11 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
       .maybeSingle();
 
     if (existingLike) {
-      return fail({ error: 'Το άρθρο έχει ήδη γίνει like', code: 'CONFLICT' }, 409);
+      return fail({ error: 'Article is already liked', code: 'CONFLICT' }, 409);
     }
 
-    // Get user info for activity log
     const userData = await getUserBasicInfo(supabase, session.user.id);
 
-    // Insert like
     const { error: insertError } = await supabase.from('article_likes').insert({
       article_id: Number.parseInt(id, 10),
       user_id: session.user.id,
@@ -88,10 +82,9 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
 
     if (insertError) {
       console.error('Error inserting like:', insertError);
-      return fail({ error: 'Αποτυχία like άρθρου' }, 500);
+      return fail({ error: 'Article like failed' }, 500);
     }
 
-    // Log activity
     await insertActivity(supabase, session.user.id, 'article_liked', {
       articleId: article.id,
       articleTitle: article.title,
@@ -101,17 +94,15 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
       avatar_url: userData?.avatar_url,
     });
 
-    // Get updated count
     const { count } = await supabase
       .from('article_likes')
       .select('*', { count: 'exact', head: true })
       .eq('article_id', Number.parseInt(id, 10));
 
-    // Revalidate like caches
     revalidateCache.articleLike(id);
 
     return ok({
-      message: 'Το άρθρο έγινε like',
+      message: 'Article liked',
       liked: true,
       count: count || 0,
     });
@@ -124,7 +115,6 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
   }
 }
 
-// DELETE - Unlike the article
 async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -132,7 +122,6 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
 
     const session = await requireAuth(supabase);
 
-    // Get article info for activity log
     const { data: article, error: articleError } = await supabase
       .from('articles')
       .select('id, title, slug')
@@ -140,13 +129,11 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
       .single();
 
     if (articleError || !article) {
-      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Article not found' }, 404);
     }
 
-    // Get user info for activity log
     const userData = await getUserBasicInfo(supabase, session.user.id);
 
-    // Delete like
     const { error: deleteError } = await supabase
       .from('article_likes')
       .delete()
@@ -155,10 +142,9 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
 
     if (deleteError) {
       console.error('Error removing like:', deleteError);
-      return fail({ error: 'Αποτυχία αφαίρεσης like' }, 500);
+      return fail({ error: 'Failed to remove like' }, 500);
     }
 
-    // Log activity
     await insertActivity(supabase, session.user.id, 'article_unliked', {
       articleId: article.id,
       articleTitle: article.title,
@@ -168,17 +154,15 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
       avatar_url: userData?.avatar_url,
     });
 
-    // Get updated count
     const { count } = await supabase
       .from('article_likes')
       .select('*', { count: 'exact', head: true })
       .eq('article_id', Number.parseInt(id, 10));
 
-    // Revalidate like caches
     revalidateCache.articleLike(id);
 
     return ok({
-      message: 'Το like αφαιρέθηκε',
+      message: 'Like removed',
       liked: false,
       count: count || 0,
     });

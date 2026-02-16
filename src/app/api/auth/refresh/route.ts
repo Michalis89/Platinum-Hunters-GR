@@ -1,5 +1,4 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
-
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { API_ERRORS } from '@/lib/api/errors';
@@ -12,7 +11,7 @@ async function POSTHandler(req: Request) {
 
     const existingRefreshToken = cookieStore.get('sb-refresh-token')?.value;
     if (!existingRefreshToken) {
-      return fail({ error: 'Δεν υπάρχει ενεργή συνεδρία' }, 401);
+      return fail({ error: 'No active session' }, 401);
     }
 
     const body = await req.json();
@@ -20,7 +19,7 @@ async function POSTHandler(req: Request) {
     const shouldRemember = remember === true;
 
     if (!access_token || !refresh_token) {
-      return fail({ error: 'Λείπουν τα tokens' }, 400);
+      return fail({ error: 'Tokens are missing' }, 400);
     }
 
     if (refresh_token !== existingRefreshToken && process.env.NODE_ENV !== 'production') {
@@ -43,10 +42,9 @@ async function POSTHandler(req: Request) {
     const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
 
     if (userError || !userData.user) {
-      return fail({ error: 'Μη έγκυρο access token' }, 401);
+      return fail({ error: 'Invalid access token' }, 401);
     }
 
-    // Set auth cookies using shared utility
     await setAuthCookies(access_token, refresh_token, shouldRemember);
 
     return ok({ success: true });

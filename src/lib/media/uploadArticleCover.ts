@@ -12,15 +12,13 @@ export async function uploadArticleCoverImage(file: File): Promise<string> {
   if (!response.ok) {
     const data = await response.json().catch(() => null);
     const message =
-      data && typeof data.message === 'string'
-        ? data.message
-        : 'Αποτυχία ανέβασμα εικόνας. Δοκίμασε ξανά.';
+      data && typeof data.message === 'string' ? data.message : 'Image upload failed. Try again.';
     throw new Error(message);
   }
 
   const data = await response.json();
   if (!data?.url) {
-    throw new Error('Δεν λάβαμε URL εικόνας από τον server.');
+    throw new Error('We did not receive an image URL from the server.');
   }
 
   return data.url as string;

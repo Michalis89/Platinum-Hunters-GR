@@ -9,26 +9,25 @@ import {
 } from '@/config/site';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+
   title: {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
+
   description: DEFAULT_DESCRIPTION,
-  metadataBase: new URL(SITE_URL),
+
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
-    other: [
-      {
-        rel: 'mask-icon',
-        url: '/favicon.svg', // Αν είναι το λογότυπό σου σε μαύρο/μονόχρωμο
-      },
-    ],
   },
-  manifest: '/manifest.webmanifest',
+
+  manifest: '/site.webmanifest',
+
   openGraph: {
     title: SITE_NAME,
     description: DEFAULT_DESCRIPTION,
@@ -45,21 +44,21 @@ export const metadata: Metadata = {
     type: 'website',
     locale: SITE_LOCALE,
   },
+
   twitter: {
     card: 'summary_large_image',
     title: SITE_NAME,
     description: DEFAULT_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE],
   },
-  authors: [{ name: SITE_NAME, url: SITE_URL }],
+
   robots: {
     index: true,
     follow: true,
   },
+
   alternates: {
-    canonical: SITE_URL,
-    languages: {
-      el: SITE_URL,
-    },
+    canonical: '/',
+    // Add languages only when you have real i18n URLs
   },
 };

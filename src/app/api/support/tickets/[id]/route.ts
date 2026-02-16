@@ -102,7 +102,7 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
     if (action === 'delete') deleted = true;
 
     if (archived === null && deleted === null) {
-      return fail({ error: 'Μη έγκυρη ενέργεια.' }, 400);
+      return fail({ error: 'Invalid action.' }, 400);
     }
 
     const { data, error } = await supabase.rpc('user_set_support_ticket_flags', {

@@ -32,7 +32,7 @@ async function GETHandler(req: Request, { params }: { params: Promise<{ id: stri
 
     if (error) {
       console.error('Error fetching comments:', error);
-      return fail({ error: 'Αποτυχία φόρτωσης σχολίων' }, 500);
+      return fail({ error: 'Failed to load comments' }, 500);
     }
 
     return okWithMeta(comments || [], { total: count || 0, limit, offset });
@@ -54,11 +54,11 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
     const { content } = body;
 
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
-      return fail({ error: 'Το περιεχόμενο του σχολίου είναι υποχρεωτικό' }, 400);
+      return fail({ error: 'Comment content is required' }, 400);
     }
 
     if (content.length > 2000) {
-      return fail({ error: 'Το σχόλιο είναι πολύ μεγάλο (μέχρι 2000 χαρακτήρες)' }, 400);
+      return fail({ error: 'Comment is too long (up to 2000 characters)' }, 400);
     }
 
     // Get article info for activity log
@@ -69,7 +69,7 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
       .single();
 
     if (articleError || !article) {
-      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Article not found' }, 404);
     }
 
     // Get user info for activity log
@@ -88,7 +88,7 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
 
     if (insertError) {
       console.error('Error inserting comment:', insertError);
-      return fail({ error: 'Αποτυχία προσθήκης σχολίου' }, 500);
+      return fail({ error: 'Failed to add comment' }, 500);
     }
 
     // Log activity
@@ -106,7 +106,7 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
     // Revalidate comment caches
     revalidateCache.articleComment(article.id);
 
-    return ok({ message: 'Το σχόλιο προστέθηκε επιτυχώς', comment });
+    return ok({ message: 'Comment added successfully', comment });
   } catch (error) {
     console.error('Error adding comment:', error);
     if (error instanceof UnauthorizedError) {
@@ -125,12 +125,12 @@ async function DELETEHandler(req: Request, { params }: { params: Promise<{ id: s
     const commentId = searchParams.get('commentId');
 
     if (!commentId) {
-      return fail({ error: 'Το ID σχολίου είναι υποχρεωτικό' }, 400);
+      return fail({ error: 'Comment ID is required' }, 400);
     }
 
     const session = await requireAuth(supabase);
 
-    // Get the comment and verify it belongs to this article
+    // Get ?? comment and verify it belongs to this article
     const { data: comment, error: fetchError } = await supabase
       .from('article_comments')
       .select('*')
@@ -139,7 +139,7 @@ async function DELETEHandler(req: Request, { params }: { params: Promise<{ id: s
       .single();
 
     if (fetchError || !comment) {
-      return fail({ error: 'Το σχόλιο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Comment not found' }, 404);
     }
 
     // Check permission (owner or admin)
@@ -149,7 +149,7 @@ async function DELETEHandler(req: Request, { params }: { params: Promise<{ id: s
     const isAdmin = hasAnyRole(userData, ['admin', 'owner']);
 
     if (!isOwner && !isAdmin) {
-      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
+      return fail({ error: 'Access forbidden' }, 403);
     }
 
     // Delete comment
@@ -160,13 +160,13 @@ async function DELETEHandler(req: Request, { params }: { params: Promise<{ id: s
 
     if (deleteError) {
       console.error('Error deleting comment:', deleteError);
-      return fail({ error: 'Αποτυχία διαγραφής σχολίου' }, 500);
+      return fail({ error: 'Failed to delete comment' }, 500);
     }
 
     // Revalidate comment caches
     revalidateCache.articleComment(comment.article_id);
 
-    return ok({ message: 'Το σχόλιο διαγράφηκε επιτυχώς' });
+    return ok({ message: 'Comment deleted successfully' });
   } catch (error) {
     console.error('Error deleting comment:', error);
     if (error instanceof UnauthorizedError) {
@@ -187,14 +187,14 @@ async function PATCHHandler(req: Request, { params }: { params: Promise<{ id: st
     const content = typeof body?.content === 'string' ? body.content.trim() : '';
 
     if (!commentId || !content) {
-      return fail({ error: 'Το ID και περιεχόμενο του σχολίου είναι υποχρεωτικά' }, 400);
+      return fail({ error: 'Comment ID and content are required' }, 400);
     }
 
     if (content.length > 2000) {
-      return fail({ error: 'Το σχόλιο είναι πολύ μεγάλο (μέχρι 2000 χαρακτήρες)' }, 400);
+      return fail({ error: 'Comment is too long (up to 2000 characters)' }, 400);
     }
 
-    // Get the comment and verify it belongs to this article
+    // Get ?? comment and verify it belongs to this article
     const { data: comment, error: fetchError } = await supabase
       .from('article_comments')
       .select('*')
@@ -203,7 +203,7 @@ async function PATCHHandler(req: Request, { params }: { params: Promise<{ id: st
       .single();
 
     if (fetchError || !comment) {
-      return fail({ error: 'Το σχόλιο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Comment not found' }, 404);
     }
 
     const userData = await getUserFullInfo(supabase, session.user.id);
@@ -212,7 +212,7 @@ async function PATCHHandler(req: Request, { params }: { params: Promise<{ id: st
     const isAdmin = hasAnyRole(userData, ['admin', 'owner']);
 
     if (!isOwner && !isAdmin) {
-      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
+      return fail({ error: 'Access forbidden' }, 403);
     }
 
     const { data: updatedComment, error: updateError } = await supabase
@@ -226,12 +226,12 @@ async function PATCHHandler(req: Request, { params }: { params: Promise<{ id: st
 
     if (updateError || !updatedComment) {
       console.error('Error updating comment:', updateError);
-      return fail({ error: 'Αποτυχία ενημέρωσης σχολίου' }, 500);
+      return fail({ error: 'Failed to update comment' }, 500);
     }
 
     revalidateCache.articleComment(comment.article_id);
 
-    return ok({ message: 'Το σχόλιο ενημερώθηκε επιτυχώς', comment: updatedComment });
+    return ok({ message: 'Comment updated successfully', comment: updatedComment });
   } catch (error) {
     console.error('Error updating comment:', error);
     if (error instanceof UnauthorizedError) {

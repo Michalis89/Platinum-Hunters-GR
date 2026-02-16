@@ -62,9 +62,9 @@ type ErrorAlertProps = {
 
 function ErrorAlert({
   message,
-  title = 'Σφάλμα',
+  title = 'Error',
   onRetry,
-  retryLabel = 'Δοκίμασε ξανά',
+  retryLabel = 'Try again',
   className,
 }: ErrorAlertProps) {
   return (

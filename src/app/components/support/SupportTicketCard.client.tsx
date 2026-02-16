@@ -32,7 +32,11 @@ export default function SupportTicketCard({
   actions,
 }: SupportTicketCardProps) {
   const isAwaitingResponse = statusText === 'Awaiting your response';
-  const badgeVariant = isAwaitingResponse ? 'outline' : statusColor === 'red' ? 'destructive' : 'secondary';
+  const badgeVariant = isAwaitingResponse
+    ? 'outline'
+    : statusColor === 'red'
+      ? 'destructive'
+      : 'secondary';
 
   return (
     <Card className="rounded-2xl border border-border/30 bg-card shadow-md shadow-black/5 transition-shadow hover:shadow-lg hover:shadow-black/10">
@@ -42,7 +46,10 @@ export default function SupportTicketCard({
             {titleIcon}
             {subject}
           </span>
-          <Badge variant={badgeVariant} className={isAwaitingResponse ? 'border-primary/40 text-primary' : ''}>
+          <Badge
+            variant={badgeVariant}
+            className={isAwaitingResponse ? 'border-primary/40 text-primary' : ''}
+          >
             {statusText}
           </Badge>
         </CardTitle>

@@ -75,7 +75,9 @@ export default function ProfilePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               {categoryMeta[category]?.title || category}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">{categoryMeta[category]?.desc || ''}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {categoryMeta[category]?.desc || ''}
+            </p>
           </header>
 
           <ProfileCategoryInfo category={category} user={user} categoryNotes={categoryNotes} />
@@ -119,12 +121,16 @@ export default function ProfilePage() {
 
                 {!activityOpen && (
                   <div className="mt-2 rounded-xl border border-border/50 bg-card/50 px-3 py-2 text-sm text-muted-foreground">
-                    {activityItems[0] ? renderActivityText(activityItems[0]) : 'No recent activity yet.'}
+                    {activityItems[0]
+                      ? renderActivityText(activityItems[0])
+                      : 'No recent activity yet.'}
                   </div>
                 )}
 
                 <CollapsibleContent forceMount className="overflow-hidden">
-                  <div className={cn('mt-3 border-t border-border/40 pt-3', !activityOpen && 'hidden')}>
+                  <div
+                    className={cn('mt-3 border-t border-border/40 pt-3', !activityOpen && 'hidden')}
+                  >
                     <ActivityFeed
                       scope="me"
                       limit={30}

@@ -184,7 +184,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
             comments.map(comment => (
               <article key={comment.id} className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{comment.users?.display_name || comment.users?.username || 'Anonymous'}</span>
+                  <span>
+                    {comment.users?.display_name || comment.users?.username || 'Anonymous'}
+                  </span>
                   <FormattedDate
                     date={comment.created_at}
                     options={COMMENT_DATE_OPTIONS}

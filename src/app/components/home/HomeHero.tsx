@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import PageHero from '@/app/components/shared/PageHero';
 
@@ -13,7 +13,7 @@ export function HomeHero() {
           <span className="text-primary">Your space.</span>
         </>
       }
-      subtitle="Track games, anime, manga, movies, series, and books. Update progress, add notes, and see your statsâ€”all in one place."
+      subtitle="Track games, anime, manga, movies, series, and books. Update progress, add notes, and see your stats all in one place."
       sectionClassName="px-4 pb-14 pt-14 md:px-6 md:pb-20 md:pt-20"
       titleClassName="mb-5 text-balance text-[2.35rem] font-semibold leading-[1.08] md:text-6xl"
       subtitleClassName=" max-w-[46rem] text-[15px] text-muted-foreground md:text-[1.15rem]"
@@ -52,4 +52,3 @@ export function HomeHero() {
     />
   );
 }
-

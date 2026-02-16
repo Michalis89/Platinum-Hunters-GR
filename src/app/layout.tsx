@@ -37,7 +37,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html
-      lang="el"
+      lang="en"
       data-theme={initialTheme}
       data-scroll-behavior="smooth"
       suppressHydrationWarning

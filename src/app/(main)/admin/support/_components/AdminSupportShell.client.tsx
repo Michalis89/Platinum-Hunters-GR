@@ -24,7 +24,7 @@ export default function AdminSupportShell({ children }: AdminSupportShellProps) 
   if (!isAdmin) {
     return (
       <PageContainer size="md" className="py-20">
-        <ErrorAlert message="Δεν έχεις πρόσβαση σε αυτή τη σελίδα." />
+        <ErrorAlert message="You do not have access to this page." />
       </PageContainer>
     );
   }

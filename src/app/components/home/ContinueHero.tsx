@@ -442,4 +442,3 @@ export function ContinueHero() {
     </section>
   );
 }
-

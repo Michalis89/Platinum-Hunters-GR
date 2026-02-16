@@ -7,7 +7,7 @@ export const metadata = buildMetadata({
   title: 'Your Hobby Hub',
   description:
     'Organize your backlog, track your progress, and keep all your hobbies in one place.',
-  path: '/home',
+  path: '/',
 });
 
 export default async function HomePage() {

@@ -13,6 +13,7 @@ export const metadata = buildMetadata({
   title: 'Application Settings',
   description: 'Fine-tune your experience, privacy, and optional social layer for Hobbistas.',
   path: '/settings',
+  noindex: true,
 });
 
 function SettingsSkeleton() {

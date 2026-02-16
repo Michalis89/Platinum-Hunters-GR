@@ -223,7 +223,7 @@ async function DELETEHandler(_req: Request, context: { params: Promise<{ id: str
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    return ok({ message: 'Ticket διαγράφηκε οριστικά.' });
+    return ok({ message: 'Ticket was permanently deleted.' });
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);

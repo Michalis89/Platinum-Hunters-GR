@@ -62,14 +62,14 @@ const getFiles = (formData: FormData) => {
 
 const validateAttachments = (files: File[]) => {
   if (files.length > MAX_ATTACHMENTS) {
-    return `Μπορείς να ανεβάσεις μέχρι ${MAX_ATTACHMENTS} αρχεία.`;
+    return `You can upload up to ${MAX_ATTACHMENTS} files.`;
   }
   for (const file of files) {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return 'Επιτρέπονται μόνο PNG, JPG, WEBP ή PDF αρχεία.';
+      return 'Only PNG, JPG, WEBP, or PDF files are allowed.';
     }
     if (file.size > MAX_FILE_SIZE) {
-      return 'Κάθε αρχείο πρέπει να είναι μέχρι 5MB.';
+      return 'Each file must be up to 5MB.';
     }
   }
   return null;
@@ -118,13 +118,13 @@ async function POSTHandler(req: Request) {
     const allowFollowUp = coerceBoolean(formData.get('allow_follow_up'));
 
     if (!isSupportCategory(category)) {
-      return fail({ error: 'Μη έγκυρη κατηγορία.' }, 400);
+      return fail({ error: 'Invalid category.' }, 400);
     }
     if (!subject || !description) {
-      return fail({ error: 'Το θέμα και η περιγραφή είναι υποχρεωτικά.' }, 400);
+      return fail({ error: 'Subject and description are required.' }, 400);
     }
     if (!consent) {
-      return fail({ error: 'Χρειάζεται να αποδεχθείς την αποθήκευση των στοιχείων.' }, 400);
+      return fail({ error: 'You need to accept data storage.' }, 400);
     }
 
     const { data: sessionData } = await supabase.auth.getSession();
@@ -146,11 +146,11 @@ async function POSTHandler(req: Request) {
 
     // Support tickets now require authentication
     if (!session) {
-      return fail({ error: 'Πρέπει να συνδεθείς για να υποβάλεις αίτημα υποστήριξης.' }, 401);
+      return fail({ error: 'You must be logged in to submit a support request.' }, 401);
     }
 
     if (!resolvedEmail) {
-      return fail({ error: 'Το email είναι υποχρεωτικό.' }, 400);
+      return fail({ error: 'Email is required.' }, 400);
     }
 
     const environment = parseOptionalJson(formData.get('environment'));
@@ -169,10 +169,10 @@ async function POSTHandler(req: Request) {
       const severityValue = String(formData.get('severity') ?? '').trim();
 
       if (!steps || !expected || !actual) {
-        return fail({ error: 'Συμπλήρωσε βήματα, αναμενόμενο και πραγματικό αποτέλεσμα.' }, 400);
+        return fail({ error: 'Fill in steps, expected result, and actual result.' }, 400);
       }
       if (!isSupportSeverity(severityValue)) {
-        return fail({ error: 'Επίλεξε επίπεδο σοβαρότητας.' }, 400);
+        return fail({ error: 'Select severity level.' }, 400);
       }
 
       severity = severityValue;
@@ -187,10 +187,10 @@ async function POSTHandler(req: Request) {
       const urgency = String(formData.get('urgency') ?? '').trim();
 
       if (!useCase || !value) {
-        return fail({ error: 'Συμπλήρωσε use case και αξία.' }, 400);
+        return fail({ error: 'Fill in use case and value.' }, 400);
       }
       if (!URGENCY_SET.has(urgency)) {
-        return fail({ error: 'Επίλεξε επίπεδο προτεραιότητας.' }, 400);
+        return fail({ error: 'Select priority level.' }, 400);
       }
 
       meta.use_case = useCase;
@@ -205,7 +205,7 @@ async function POSTHandler(req: Request) {
       const requestedPermissions = parseOptionalJson(formData.get('requested_permissions'));
 
       if (!reason) {
-        return fail({ error: 'Πες μας τον λόγο του αιτήματός σου.' }, 400);
+        return fail({ error: 'Tell us the reason for your request.' }, 400);
       }
 
       if (profileLink) meta.profile_link = profileLink;
@@ -291,7 +291,7 @@ async function POSTHandler(req: Request) {
 
         if (uploadError) {
           console.error('Support attachment upload failed:', uploadError);
-          return fail({ error: 'Αποτυχία μεταφόρτωσης αρχείων.' }, 500);
+          return fail({ error: 'File upload failed.' }, 500);
         }
 
         const { error: attachmentError } = await supabase.from('support_attachments').insert({

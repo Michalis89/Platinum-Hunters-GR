@@ -31,18 +31,18 @@ function validateArticlePayload({
   tags,
 }: ArticlePayloadValidationInput): ArticlePayloadValidationResult {
   const plainTextFieldChecks = [
-    { validation: validatePlainText(title, 'Ο τίτλος'), fallbackError: 'Μη έγκυρος τίτλος' },
+    { validation: validatePlainText(title, 'Title'), fallbackError: 'Invalid title' },
     {
-      validation: validatePlainText(description, 'Η περιγραφή'),
-      fallbackError: 'Μη έγκυρη περιγραφή',
+      validation: validatePlainText(description, 'Description'),
+      fallbackError: 'Invalid description',
     },
     {
-      validation: validatePlainText(meta_title, 'Ο meta τίτλος'),
-      fallbackError: 'Μη έγκυρος meta τίτλος',
+      validation: validatePlainText(meta_title, 'Meta title'),
+      fallbackError: 'Invalid meta title',
     },
     {
-      validation: validatePlainText(meta_description, 'Το meta description'),
-      fallbackError: 'Μη έγκυρο meta description',
+      validation: validatePlainText(meta_description, 'Meta description'),
+      fallbackError: 'Invalid meta description',
     },
   ];
 
@@ -52,9 +52,9 @@ function validateArticlePayload({
     }
   }
 
-  const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
+  const tagsValidation = validatePlainTextArray(tags, 'Tags');
   if (!tagsValidation.isValid) {
-    return { isValid: false, error: tagsValidation.error || 'Μη έγκυρα tags' };
+    return { isValid: false, error: tagsValidation.error || 'Invalid tags' };
   }
 
   return { isValid: true };
@@ -147,14 +147,14 @@ async function POSTHandler(req: Request) {
     // Validate content_rich JSON structure (TipTap format)
     const contentRichValidation = validateTipTapContent(content_rich);
     if (!contentRichValidation.isValid) {
-      return fail({ error: contentRichValidation.error || 'Μη έγκυρη μορφή περιεχομένου' }, 400);
+      return fail({ error: contentRichValidation.error || 'Invalid content format' }, 400);
     }
 
     const sanitizedContentHtml = sanitizeHtmlContent(content_html).trim() || null;
 
     // Validate required fields
     if (!title || !slug || !category) {
-      return fail({ error: 'Ο τίτλος, το slug και η κατηγορία είναι υποχρεωτικά' }, 400);
+      return fail({ error: 'Title, slug, and category are required' }, 400);
     }
 
     const normalizedSlug = normalizeSlug(slug);

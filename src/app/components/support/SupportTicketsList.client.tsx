@@ -198,7 +198,9 @@ export default function SupportTicketsList() {
             statusColor={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
             categoryText={categoryLabels[ticket.category] || ticket.category}
             severityText={
-              ticket.severity ? `Severity: ${severityLabels[ticket.severity] || ticket.severity}` : null
+              ticket.severity
+                ? `Severity: ${severityLabels[ticket.severity] || ticket.severity}`
+                : null
             }
             updatedAt={ticket.updated_at}
             updatedLabel="Last updated"
@@ -319,7 +321,11 @@ export default function SupportTicketsList() {
             )}
 
             <div className="mb-6 rounded-xl border border-border/30 bg-muted/20 p-4 md:flex md:items-center md:justify-between">
-              <Tabs value={view} onValueChange={value => setView(value as typeof view)} className="w-full md:w-auto">
+              <Tabs
+                value={view}
+                onValueChange={value => setView(value as typeof view)}
+                className="w-full md:w-auto"
+              >
                 <TabsList className="h-10 w-full flex-wrap gap-2 rounded-xl border border-border/30 bg-card p-1 md:w-auto">
                   {[
                     { value: 'active', label: 'Active' },
@@ -368,4 +374,3 @@ export default function SupportTicketsList() {
     </div>
   );
 }
-

@@ -305,4 +305,3 @@ export const getVisibleHobbyItems = (
         : [],
     }));
 };
-

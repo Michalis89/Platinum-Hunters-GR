@@ -10,8 +10,8 @@ export const parseError = (error: unknown): string => {
   }
 
   if ((error as FetchBaseQueryError)?.status) {
-    return `Σφάλμα: ${(error as FetchBaseQueryError).status}`;
+    return `Error: ${(error as FetchBaseQueryError).status}`;
   }
 
-  return 'Άγνωστο σφάλμα';
+  return 'Unknown error';
 };

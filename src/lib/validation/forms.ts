@@ -38,23 +38,23 @@ export const generalQuestionSchema = generalQuestionShape.superRefine(
 
     switch (data.category) {
       case 'Support':
-        ensure('serviceDescription', 'Η περιγραφή της υπηρεσίας είναι υποχρεωτική.');
+        ensure('serviceDescription', 'Service description is required.');
         break;
       case 'Info':
-        ensure('infoType', 'Το θέμα πληροφοριών είναι υποχρεωτικό.');
-        ensure('infoDetails', 'Η περιγραφή πληροφοριών είναι υποχρεωτική.');
+        ensure('infoType', 'Information topic is required.');
+        ensure('infoDetails', 'Information details are required.');
         break;
       case 'Feedback':
         if (typeof data.feedbackRating !== 'number') {
           ctx.addIssue({
             path: ['feedbackRating'],
             code: z.ZodIssueCode.custom,
-            message: 'Η βαθμολογία Feedback είναι υποχρεωτική.',
+            message: 'Feedback rating is required.',
           });
         }
         break;
       case 'Other':
-        ensure('question', 'Η ερώτησή σας είναι υποχρεωτική.');
+        ensure('question', 'Your question is required.');
         break;
       default:
         break;

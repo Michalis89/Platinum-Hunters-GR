@@ -2,8 +2,8 @@ import AdminSupportTicketsPane from '@/app/components/support/AdminSupportTicket
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 
 export const metadata = buildMetadata({
-  title: 'Εισερχόμενα Υποστήριξης | Hobbistas',
-  description: 'Διαχείριση αιτημάτων υποστήριξης για διαχειριστές.',
+  title: 'Support Inbox | Hobbistas',
+  description: 'Support request management for admins.',
   path: '/admin/support',
 });
 

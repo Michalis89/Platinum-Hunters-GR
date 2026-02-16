@@ -140,7 +140,7 @@ function LibraryEntryRow({
             </Badge>
           </div>
 
-          <div className="flex items-center justify-end gap-2 opacity-100 transition md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+          <div className="flex items-center justify-end gap-2 opacity-100 transition md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
             <Button
               type="button"
               size="icon"

@@ -55,10 +55,20 @@ type GalleryImage = {
 };
 
 const resolveTitle = (item: MediaItem) =>
-  item.title || item.title_english || item.title_romaji || item.title_native || item.original_title || 'Untitled';
+  item.title ||
+  item.title_english ||
+  item.title_romaji ||
+  item.title_native ||
+  item.original_title ||
+  'Untitled';
 
 const resolveSubtitle = (item: MediaItem, title: string) => {
-  const candidates = [item.original_title, item.title_romaji, item.title_english, item.title_native];
+  const candidates = [
+    item.original_title,
+    item.title_romaji,
+    item.title_english,
+    item.title_native,
+  ];
   return candidates.find(value => value && value !== title) || '';
 };
 
@@ -118,7 +128,8 @@ const buildEntry = (item: MediaItem, entryState: MediaEntryState | null) => {
     mediaId: item.id,
     status: entryState?.status ?? 'planned',
     isFavorite: entryState?.favorite ?? false,
-    score: entryState?.rating !== null && entryState?.rating !== undefined ? `${entryState.rating}` : '',
+    score:
+      entryState?.rating !== null && entryState?.rating !== undefined ? `${entryState.rating}` : '',
     progress: entryState?.progress ?? undefined,
     notes: entryState?.notes ?? undefined,
     selectedPlatform: entryState?.selectedPlatform ?? undefined,
@@ -142,7 +153,13 @@ const buildEntry = (item: MediaItem, entryState: MediaEntryState | null) => {
   } as MediaEntry & Partial<SearchResult>;
 };
 
-function ScoreCluster({ mediaItem, entryState }: { mediaItem: MediaItem; entryState: MediaEntryState | null }) {
+function ScoreCluster({
+  mediaItem,
+  entryState,
+}: {
+  mediaItem: MediaItem;
+  entryState: MediaEntryState | null;
+}) {
   const scoreItems = [
     typeof entryState?.rating === 'number'
       ? { label: 'My rating', value: entryState.rating.toFixed(1), icon: '★' }
@@ -164,7 +181,9 @@ function ScoreCluster({ mediaItem, entryState }: { mediaItem: MediaItem; entrySt
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {scoreItems.map(item => (
         <div key={item.label} className="rounded-xl border border-border/70 bg-card/70 p-3">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            {item.label}
+          </p>
           <p className="mt-1 text-base font-semibold text-foreground">
             <span className="mr-1 opacity-70">{item.icon}</span>
             {item.value}
@@ -179,39 +198,62 @@ function MetadataGrid({ category, mediaItem }: { category: MediaCategory; mediaI
   const fields: Array<{ label: string; value: string }> = [];
 
   if (category === 'games') {
-    if (mediaItem.platforms?.length) fields.push({ label: 'Platforms', value: mediaItem.platforms.join(', ') });
+    if (mediaItem.platforms?.length)
+      fields.push({ label: 'Platforms', value: mediaItem.platforms.join(', ') });
     if (mediaItem.developer) fields.push({ label: 'Developer', value: mediaItem.developer });
     if (mediaItem.publisher) fields.push({ label: 'Publisher', value: mediaItem.publisher });
     if (mediaItem.esrb_rating) fields.push({ label: 'ESRB', value: mediaItem.esrb_rating });
     if (mediaItem.release_date || mediaItem.first_release_date) {
-      fields.push({ label: 'Release date', value: mediaItem.release_date || mediaItem.first_release_date || '-' });
+      fields.push({
+        label: 'Release date',
+        value: mediaItem.release_date || mediaItem.first_release_date || '-',
+      });
     }
-    if (mediaItem.igdb_game_modes?.length) fields.push({ label: 'Game modes', value: mediaItem.igdb_game_modes.join(', ') });
+    if (mediaItem.igdb_game_modes?.length)
+      fields.push({ label: 'Game modes', value: mediaItem.igdb_game_modes.join(', ') });
     if (mediaItem.igdb_player_perspectives?.length) {
-      fields.push({ label: 'Player perspective', value: mediaItem.igdb_player_perspectives.join(', ') });
+      fields.push({
+        label: 'Player perspective',
+        value: mediaItem.igdb_player_perspectives.join(', '),
+      });
     }
   } else if (category === 'anime' || category === 'tv') {
     if (mediaItem.number_of_episodes || mediaItem.episodes) {
-      fields.push({ label: 'Episodes', value: `${mediaItem.number_of_episodes ?? mediaItem.episodes}` });
+      fields.push({
+        label: 'Episodes',
+        value: `${mediaItem.number_of_episodes ?? mediaItem.episodes}`,
+      });
     }
-    if (mediaItem.number_of_seasons) fields.push({ label: 'Seasons', value: `${mediaItem.number_of_seasons}` });
+    if (mediaItem.number_of_seasons)
+      fields.push({ label: 'Seasons', value: `${mediaItem.number_of_seasons}` });
     if (mediaItem.start_date || mediaItem.first_air_date) {
-      fields.push({ label: 'Air date', value: mediaItem.start_date || mediaItem.first_air_date || '-' });
+      fields.push({
+        label: 'Air date',
+        value: mediaItem.start_date || mediaItem.first_air_date || '-',
+      });
     }
     if (mediaItem.status) fields.push({ label: 'Status', value: mediaItem.status });
-    if (mediaItem.duration || mediaItem.runtime) fields.push({ label: 'Duration', value: `${mediaItem.duration ?? mediaItem.runtime} min` });
+    if (mediaItem.duration || mediaItem.runtime)
+      fields.push({ label: 'Duration', value: `${mediaItem.duration ?? mediaItem.runtime} min` });
   } else if (category === 'manga') {
     if (mediaItem.volumes) fields.push({ label: 'Volumes', value: `${mediaItem.volumes}` });
     if (mediaItem.chapters) fields.push({ label: 'Chapters', value: `${mediaItem.chapters}` });
-    if (mediaItem.release_date || mediaItem.start_date) fields.push({ label: 'Release date', value: mediaItem.release_date || mediaItem.start_date || '-' });
+    if (mediaItem.release_date || mediaItem.start_date)
+      fields.push({
+        label: 'Release date',
+        value: mediaItem.release_date || mediaItem.start_date || '-',
+      });
     if (mediaItem.status) fields.push({ label: 'Status', value: mediaItem.status });
   } else if (category === 'books') {
-    if (mediaItem.page_count) fields.push({ label: 'Page count', value: `${mediaItem.page_count}` });
+    if (mediaItem.page_count)
+      fields.push({ label: 'Page count', value: `${mediaItem.page_count}` });
     if (mediaItem.publisher) fields.push({ label: 'Publisher', value: mediaItem.publisher });
-    if (mediaItem.release_date) fields.push({ label: 'Release date', value: mediaItem.release_date });
+    if (mediaItem.release_date)
+      fields.push({ label: 'Release date', value: mediaItem.release_date });
   } else if (category === 'movies') {
     if (mediaItem.runtime) fields.push({ label: 'Runtime', value: `${mediaItem.runtime} min` });
-    if (mediaItem.release_date) fields.push({ label: 'Release date', value: mediaItem.release_date });
+    if (mediaItem.release_date)
+      fields.push({ label: 'Release date', value: mediaItem.release_date });
     if (mediaItem.status) fields.push({ label: 'Status', value: mediaItem.status });
   }
 
@@ -226,10 +268,20 @@ function MetadataGrid({ category, mediaItem }: { category: MediaCategory; mediaI
       <h3 className="text-lg font-semibold text-foreground">Details</h3>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {fields.map(field => (
-          <div key={`${field.label}-${field.value}`} className="rounded-xl border border-border/60 bg-card/70 p-3">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{field.label}</p>
+          <div
+            key={`${field.label}-${field.value}`}
+            className="rounded-xl border border-border/60 bg-card/70 p-3"
+          >
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              {field.label}
+            </p>
             {field.label === 'Website' ? (
-              <a href={field.value} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm text-primary hover:underline">
+              <a
+                href={field.value}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+              >
                 <Globe className="h-3.5 w-3.5" />
                 {field.value}
               </a>
@@ -257,14 +309,23 @@ function GallerySection({ title, images }: { title: string; images: GalleryImage
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-background/85 to-transparent" />
           <CarouselContent className="ml-0">
             {images.map(image => (
-              <CarouselItem key={image.id} className="basis-[72%] pl-0 pr-4 sm:basis-[42%] lg:basis-[30%]">
+              <CarouselItem
+                key={image.id}
+                className="basis-[72%] pl-0 pr-4 sm:basis-[42%] lg:basis-[30%]"
+              >
                 <button
                   type="button"
                   onClick={() => setActiveImage(image)}
                   className="w-full overflow-hidden rounded-xl border border-border/60 bg-card/80 text-left"
                 >
                   <div className="relative aspect-video w-full">
-                    <Image src={image.src} alt={image.alt} fill sizes="(max-width: 768px) 70vw, 28vw" className="object-cover" />
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      fill
+                      sizes="(max-width: 768px) 70vw, 28vw"
+                      className="object-cover"
+                    />
                   </div>
                 </button>
               </CarouselItem>
@@ -284,7 +345,13 @@ function GallerySection({ title, images }: { title: string; images: GalleryImage
                 <DialogDescription>{activeImage.alt}</DialogDescription>
               </DialogHeader>
               <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                <Image src={activeImage.src} alt={activeImage.alt} fill sizes="100vw" className="object-contain" />
+                <Image
+                  src={activeImage.src}
+                  alt={activeImage.alt}
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                />
               </div>
             </div>
           ) : null}
@@ -326,7 +393,8 @@ export default function MediaDetailPageClient({
 
   const overviewText = mediaItem.summary || mediaItem.description || '';
   const storyText = mediaItem.storyline?.trim() || '';
-  const shortOverview = overviewText.length > 280 ? `${overviewText.slice(0, 280).trim()}...` : overviewText;
+  const shortOverview =
+    overviewText.length > 280 ? `${overviewText.slice(0, 280).trim()}...` : overviewText;
 
   const refreshEntry = async () => {
     if (!mediaItem.id) return;
@@ -394,7 +462,8 @@ export default function MediaDetailPageClient({
             mediaId: mediaItem.id,
             status: editState.status,
             is_favorite: editState.isFavorite,
-            selected_platform: category === 'games' ? editState.selectedPlatform || null : undefined,
+            selected_platform:
+              category === 'games' ? editState.selectedPlatform || null : undefined,
             progress: nextProgress,
             score: nextScore,
             notes: nextNotes,
@@ -523,7 +592,9 @@ export default function MediaDetailPageClient({
 
   const statusLabel = getStatusLabel(category, entryState);
   const ratingLabel =
-    entryState?.rating !== null && entryState?.rating !== undefined ? entryState.rating.toFixed(1) : '-';
+    entryState?.rating !== null && entryState?.rating !== undefined
+      ? entryState.rating.toFixed(1)
+      : '-';
 
   const categoryLabel = CATEGORY_CONFIG[category]?.title || category;
   const breadcrumbs = [
@@ -541,7 +612,11 @@ export default function MediaDetailPageClient({
           variant={alert.type === 'error' ? 'destructive' : 'success'}
           className="mb-6"
         >
-          {alert.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+          {alert.type === 'success' ? (
+            <CheckCircle className="h-4 w-4" />
+          ) : (
+            <XCircle className="h-4 w-4" />
+          )}
           <AlertTitle>{alert.title}</AlertTitle>
           <AlertDescription>{alert.message}</AlertDescription>
         </Alert>
@@ -555,7 +630,9 @@ export default function MediaDetailPageClient({
           {mediaItem.banner_image ? (
             <div
               className="absolute inset-x-0 top-0 h-72 bg-cover bg-center opacity-20"
-              style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,.35), transparent), url(${mediaItem.banner_image})` }}
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,.35), transparent), url(${mediaItem.banner_image})`,
+              }}
             />
           ) : null}
         </div>
@@ -575,8 +652,12 @@ export default function MediaDetailPageClient({
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">{category.toUpperCase()}</p>
-                <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">{baseEntry.title}</h1>
+                <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                  {category.toUpperCase()}
+                </p>
+                <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
+                  {baseEntry.title}
+                </h1>
                 <p className="text-sm text-muted-foreground">
                   {baseEntry.subtitle}
                   {baseEntry.year ? ` - ${baseEntry.year}` : ''}
@@ -584,15 +665,24 @@ export default function MediaDetailPageClient({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="rounded-full border border-border/70 bg-card/70 px-3 py-1">
+                <Badge
+                  variant="secondary"
+                  className="rounded-full border border-border/70 bg-card/70 px-3 py-1"
+                >
                   {statusLabel}
                 </Badge>
-                <Badge variant="secondary" className="rounded-full border border-border/70 bg-card/70 px-3 py-1">
+                <Badge
+                  variant="secondary"
+                  className="rounded-full border border-border/70 bg-card/70 px-3 py-1"
+                >
                   <Star className="mr-1 h-3.5 w-3.5 text-primary" />
                   {ratingLabel}
                 </Badge>
                 {baseEntry.year ? (
-                  <Badge variant="secondary" className="rounded-full border border-border/70 bg-card/70 px-3 py-1">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full border border-border/70 bg-card/70 px-3 py-1"
+                  >
                     <CalendarDays className="mr-1 h-3.5 w-3.5" />
                     {baseEntry.year}
                   </Badge>
@@ -602,7 +692,10 @@ export default function MediaDetailPageClient({
               <div className="flex flex-wrap gap-2">
                 {baseEntry.tags.length > 0 ? (
                   baseEntry.tags.slice(0, 10).map(tag => (
-                    <span key={tag} className="rounded-full border border-border/70 bg-card/50 px-2.5 py-1 text-xs text-muted-foreground">
+                    <span
+                      key={tag}
+                      className="rounded-full border border-border/70 bg-card/50 px-2.5 py-1 text-xs text-muted-foreground"
+                    >
                       {tag}
                     </span>
                   ))
@@ -610,7 +703,10 @@ export default function MediaDetailPageClient({
                   <span className="text-xs text-muted-foreground">No genres available</span>
                 )}
                 {(mediaItem.igdb_themes ?? []).slice(0, 4).map(theme => (
-                  <span key={theme} className="rounded-full border border-border/70 bg-card/50 px-2.5 py-1 text-xs text-muted-foreground">
+                  <span
+                    key={theme}
+                    className="rounded-full border border-border/70 bg-card/50 px-2.5 py-1 text-xs text-muted-foreground"
+                  >
                     {theme}
                   </span>
                 ))}
@@ -659,20 +755,32 @@ export default function MediaDetailPageClient({
           ) : hasEntry ? (
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Status</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Status
+                </p>
                 <p className="mt-1 text-sm font-medium text-foreground">{statusLabel}</p>
               </div>
               <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Progress</p>
-                <p className="mt-1 text-sm font-medium text-foreground">{getProgressDisplay(category, entryState, mediaItem)}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Progress
+                </p>
+                <p className="mt-1 text-sm font-medium text-foreground">
+                  {getProgressDisplay(category, entryState, mediaItem)}
+                </p>
               </div>
               <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">My rating</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  My rating
+                </p>
                 <p className="mt-1 text-sm font-medium text-foreground">{ratingLabel}</p>
               </div>
               <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Notes</p>
-                <p className="mt-1 line-clamp-2 text-sm text-foreground/90">{entryState?.notes || 'No notes yet.'}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Notes
+                </p>
+                <p className="mt-1 line-clamp-2 text-sm text-foreground/90">
+                  {entryState?.notes || 'No notes yet.'}
+                </p>
               </div>
             </div>
           ) : (
@@ -695,7 +803,9 @@ export default function MediaDetailPageClient({
           <h3 className="text-lg font-semibold text-foreground">Overview</h3>
           <div className="mt-3 text-sm leading-relaxed text-foreground/90">
             {overviewText ? (
-              <p className="whitespace-pre-line">{overviewExpanded ? overviewText : shortOverview}</p>
+              <p className="whitespace-pre-line">
+                {overviewExpanded ? overviewText : shortOverview}
+              </p>
             ) : (
               <p className="text-muted-foreground">No description available.</p>
             )}

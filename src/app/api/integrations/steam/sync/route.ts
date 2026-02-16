@@ -111,7 +111,6 @@ async function updateSyncJob(jobId: string, updates: JobUpdate): Promise<void> {
 
   if (error) {
     console.warn('Failed to update sync job:', error);
-    // Don't throw - progress updates are not critical
   }
 }
 
@@ -119,27 +118,16 @@ function normalizeTitle(value?: string | null): string {
   return (value ?? '').trim().toLowerCase();
 }
 
-/**
- * Clean title for storage: remove trademark symbols.
- * Use this when STORING titles in the database.
- */
 function cleanTitleForStorage(value?: string | null): string {
   if (!value) return '';
-  // Remove trademark symbols.
   return value.replace(/[\u2122\u00AE\u00A9]/g, '').trim();
 }
 
-/**
- * Normalize title for MATCHING purposes (more aggressive).
- * Use this when COMPARING titles to find matches.
- */
 function normalizeForMatch(value?: string | null): string {
   let normalized = (value ?? '').trim();
 
-  // Remove trademark symbols.
   normalized = normalized.replace(/[\u2122\u00AE\u00A9]/g, '');
 
-  // Remove edition tokens that break IGDB matching
   const editionTokens = [
     /\s*-?\s*Complete Edition/gi,
     /\s*-?\s*Definitive Edition/gi,
@@ -160,7 +148,6 @@ function normalizeForMatch(value?: string | null): string {
     normalized = normalized.replace(pattern, '');
   }
 
-  // Normalize to lowercase and remove non-alphanumeric
   return normalized
     .toLowerCase()
     .normalize('NFKD')
@@ -168,16 +155,6 @@ function normalizeForMatch(value?: string | null): string {
     .trim();
 }
 
-/**
- * Map Steam game data to status based on playtime, last played, and achievements.
- * ONLY applies to steam-imported games. Never overrides user-edited status.
- *
- * Rules:
- * - If never played (playtime=0 AND last_played=0) => 'planned'
- * - If 100% achievements => 'completed'
- * - If not played in 90+ days AND has playtime => 'dropped'
- * - Otherwise => 'current'
- */
 function deriveStatusFromSteamData(params: {
   playtimeMinutes?: number;
   lastPlayedUnix?: number;
@@ -191,17 +168,14 @@ function deriveStatusFromSteamData(params: {
     droppedThresholdDays = 90,
   } = params;
 
-  // Never played => planned (backlog)
   if (playtimeMinutes === 0 && lastPlayedUnix === 0) {
     return 'planned';
   }
 
-  // 100% achievements => completed
   if (achievementsPercent === 100) {
     return 'completed';
   }
 
-  // Dropped: has playtime but not played in 90+ days
   if (lastPlayedUnix > 0 && playtimeMinutes > 0) {
     const lastPlayedDate = new Date(lastPlayedUnix * 1000);
     const daysSinceLastPlayed = (Date.now() - lastPlayedDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -211,12 +185,10 @@ function deriveStatusFromSteamData(params: {
     }
   }
 
-  // Has playtime => current
   if (playtimeMinutes > 0) {
     return 'current';
   }
 
-  // Default to planned
   return 'planned';
 }
 
@@ -403,7 +375,7 @@ function buildSteamFallbackInsert(game: SteamOwnedGame) {
     title_english: cleanTitle,
     cover_image_large: covers.large,
     cover_image_medium: covers.medium,
-    platforms: ['PC'], // Steam-only fallback = PC only
+    platforms: ['PC'],
   } satisfies Database['public']['Tables']['media_items']['Insert'];
 }
 
@@ -421,7 +393,7 @@ async function syncSteamForUser(options?: {
   jobId?: string;
   onProgress?: (progress: SyncProgress) => Promise<void> | void;
 }): Promise<SyncResult> {
-  console.log('Ã°Å¸Å¡â‚¬ [Steam Sync] Starting sync...', { jobId: options?.jobId });
+  console.log('[Steam Sync] Starting sync...', { jobId: options?.jobId });
 
   const supabase = await createRouteHandlerClient();
   const adminSupabase = createSupabaseAdminClient();
@@ -435,10 +407,9 @@ async function syncSteamForUser(options?: {
       totalSteps > 0 ? Math.min(100, Math.round((completedSteps / totalSteps) * 100)) : 0;
 
     console.log(
-      `Ã°Å¸â€œÅ  [Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`,
+      `[Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`,
     );
 
-    // Update job record if jobId provided
     if (options?.jobId) {
       await updateSyncJob(options.jobId, {
         message,
@@ -448,7 +419,6 @@ async function syncSteamForUser(options?: {
       });
     }
 
-    // Call progress callback
     await options?.onProgress?.({
       message,
       completedSteps,
@@ -457,7 +427,7 @@ async function syncSteamForUser(options?: {
     });
   };
 
-  await updateProgress('ÃŽÂ£ÃÂÃŽÂ½ÃŽÂ´ÃŽÂµÃÆ’ÃŽÂ· ÃŽÂ¼ÃŽÂµ Steam Ãâ‚¬ÃÂÃŽÂ¿Ãâ€ ÃŽÂ¯ÃŽÂ»...');
+  await updateProgress('Connecting to Steam profile...');
 
   const { data: userData, error: userError } = await supabase
     .from('users')
@@ -466,25 +436,23 @@ async function syncSteamForUser(options?: {
     .maybeSingle();
 
   if (userError) {
-    console.error('Ã¢ÂÅ’ [Steam Sync] User fetch error:', userError);
+    console.error('[Steam Sync] User fetch error:', userError);
     throw userError;
   }
 
   const steamInput = userData?.steam_id?.trim();
   if (!steamInput) {
-    console.error('Ã¢ÂÅ’ [Steam Sync] No steam_id in user profile');
-    throw new Error(
-      'ÃŽâ€ÃŽÂµÃŽÂ½ ÃŽÂ­Ãâ€¡ÃŽÂµÃŽÂ¹Ãâ€š ÃŽÂ¿ÃÂÃŽÂ¯ÃÆ’ÃŽÂµÃŽÂ¹ Steam ID ÃÆ’Ãâ€žÃŽÂ¿ Ãâ‚¬ÃÂÃŽÂ¿Ãâ€ ÃŽÂ¯ÃŽÂ» ÃÆ’ÃŽÂ¿Ãâ€¦. ÃŽÂ ÃŽÂ®ÃŽÂ³ÃŽÂ±ÃŽÂ¹ÃŽÂ½ÃŽÂµ ÃÆ’Ãâ€žÃŽÂ¹Ãâ€š ÃÂÃâ€¦ÃŽÂ¸ÃŽÂ¼ÃŽÂ¯ÃÆ’ÃŽÂµÃŽÂ¹Ãâ€š ÃŽÂ³ÃŽÂ¹ÃŽÂ± ÃŽÂ½ÃŽÂ± Ãâ€žÃŽÂ¿ Ãâ‚¬ÃÂÃŽÂ¿ÃÆ’ÃŽÂ¸ÃŽÂ­ÃÆ’ÃŽÂµÃŽÂ¹Ãâ€š.',
-    );
+    console.error('[Steam Sync] No steam_id in user profile');
+    throw new Error('No Steam ID is set in your profile. Go to settings to add it.');
   }
 
-  console.log('Ã°Å¸â€â€˜ [Steam Sync] Fetching Steam API key...');
+  console.log('[Steam Sync] Fetching Steam API key...');
   const apiKey = getSteamApiKey();
 
-  console.log('Ã°Å¸Å½Â® [Steam Sync] Resolving Steam ID64...');
+  console.log('[Steam Sync] Resolving Steam ID64...');
   const steamId64 = await resolveSteamId64({ apiKey, steamInput });
 
-  console.log('Ã°Å¸â€œÅ¡ [Steam Sync] Fetching owned games...');
+  console.log('[Steam Sync] Fetching owned games...');
   const steamGames = await fetchSteamOwnedGames({ apiKey, steamId64 });
 
   const uniqueGames = Array.from(
@@ -492,7 +460,7 @@ async function syncSteamForUser(options?: {
   ).filter(game => typeof game.appid === 'number' && game.appid > 0 && game.name);
 
   totalSteps = Math.max(12, uniqueGames.length * 4 + 8);
-  await updateProgress(`ÃŽâ€™ÃÂÃŽÂ­ÃŽÂ¸ÃŽÂ·ÃŽÂºÃŽÂ±ÃŽÂ½ ${uniqueGames.length} Ãâ‚¬ÃŽÂ±ÃŽÂ¹Ãâ€¡ÃŽÂ½ÃŽÂ¯ÃŽÂ´ÃŽÂ¹ÃŽÂ± ÃŽÂ±Ãâ‚¬ÃÅ’ Steam.`, 1);
+  await updateProgress(`Found ${uniqueGames.length} games from Steam.`, 1);
 
   if (uniqueGames.length === 0) {
     return {
@@ -517,8 +485,7 @@ async function syncSteamForUser(options?: {
     };
   }
 
-  // Fetch achievements for games with stats (throttled to avoid rate limits)
-  await updateProgress('ÃŽâ€˜ÃŽÂ½ÃŽÂ¬ÃŽÂºÃâ€žÃŽÂ·ÃÆ’ÃŽÂ· achievements...', 1);
+  await updateProgress('Fetching achievements...', 1);
   const achievementsPercentByAppId = new Map<number, number>();
   const gamesWithStats = uniqueGames.filter(g => g.has_community_visible_stats);
 
@@ -526,7 +493,7 @@ async function syncSteamForUser(options?: {
     totalSteps += gamesWithStats.length;
     await mapWithConcurrency(
       gamesWithStats,
-      2, // Very conservative concurrency for achievements API
+      2,
       async game => {
         const result = await fetchSteamAchievements({ apiKey, steamId64, appid: game.appid });
         if (result && result.percent > 0) {
@@ -540,12 +507,11 @@ async function syncSteamForUser(options?: {
     );
   }
 
-  await updateProgress('ÃŽâ€˜ÃŽÂ½Ãâ€žÃŽÂ¹ÃÆ’Ãâ€žÃŽÂ¿ÃŽÂ¯Ãâ€¡ÃŽÂ¹ÃÆ’ÃŽÂ· Ãâ€žÃŽÂ¯Ãâ€žÃŽÂ»Ãâ€°ÃŽÂ½ Steam ÃŽÂ¼ÃŽÂµ IGDB...', 1);
+  await updateProgress('Matching Steam titles with IGDB...', 1);
   const igdbMatchByAppId = await matchSteamGamesToIgdb(uniqueGames, async (done, total) => {
-    await updateProgress(`ÃŽâ€˜ÃŽÂ½Ãâ€žÃŽÂ¹ÃÆ’Ãâ€žÃŽÂ¿ÃŽÂ¯Ãâ€¡ÃŽÂ¹ÃÆ’ÃŽÂ· IGDB ${done}/${total}`, 1);
+    await updateProgress(`IGDB matching ${done}/${total}`, 1);
   });
 
-  // Fetch existing media items first (needed for enrichment filtering)
   const appIds = uniqueGames.map(game => game.appid);
   const { data: existingMediaRows, error: existingMediaError } = await adminSupabase
     .from('media_items')
@@ -567,9 +533,8 @@ async function syncSteamForUser(options?: {
     }
   }
 
-  await updateProgress('ÃŽâ€˜ÃŽÂ½ÃŽÂ¬ÃŽÂºÃâ€žÃŽÂ·ÃÆ’ÃŽÂ· IGDB metadata...', 0);
+  await updateProgress('Fetching IGDB metadata...', 0);
 
-  // Filter matches: skip enrichment for items that already have IGDB metadata
   const igdbMatchesNeedingEnrichment = new Map<number, IgdbGame | null>();
   const igdbMatchesAlreadyEnriched = new Map<number, IgdbGame | null>();
 
@@ -584,10 +549,8 @@ async function syncSteamForUser(options?: {
       existingMedia && existingMedia.rawg_id === igdbMatch.id && existingMedia.source === 'igdb';
 
     if (alreadyEnriched) {
-      // Already have enriched data for this IGDB ID - reuse the basic match
       igdbMatchesAlreadyEnriched.set(appid, igdbMatch);
     } else {
-      // Need to fetch details
       igdbMatchesNeedingEnrichment.set(appid, igdbMatch);
     }
   }
@@ -604,7 +567,6 @@ async function syncSteamForUser(options?: {
     },
   );
 
-  // Merge already-enriched items back in
   for (const [appid, match] of igdbMatchesAlreadyEnriched.entries()) {
     enrichedIgdbByAppId.set(appid, match);
   }
@@ -642,7 +604,7 @@ async function syncSteamForUser(options?: {
   }> = [];
   const updateByMediaId = new Map<number, Database['public']['Tables']['media_items']['Update']>();
 
-  await updateProgress('ÃŽÂ£Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃÅ’Ãâ€š catalog media...', 1);
+  await updateProgress('Syncing catalog media...', 1);
   for (const game of uniqueGames) {
     const matchedIgdb = enrichedIgdbByAppId.get(game.appid) ?? null;
     const existingByAppId = mediaByAppId.get(game.appid);
@@ -650,37 +612,26 @@ async function syncSteamForUser(options?: {
     if (existingByAppId) {
       mediaIdByAppId.set(game.appid, existingByAppId.id);
 
-      // CRITICAL: Check if this item is already IGDB-enriched
-      // If yes, ONLY update steam_app_id + runtime
-      // NEVER touch: images, platforms, description, genres, developer, publisher, etc.
       const isAlreadyEnriched = existingByAppId.source === 'igdb' && existingByAppId.rawg_id;
 
       if (isAlreadyEnriched) {
-        // Ã¢Å“â€¦ PRESERVING EXISTING IGDB DATA (images, platforms, etc.)
         console.log(
-          `Ã¢Å“â€¦ [Steam Sync] Preserving IGDB data for: ${game.name} (IGDB ID: ${existingByAppId.rawg_id})`,
+          `[Steam Sync] Preserving IGDB data for: ${game.name} (IGDB ID: ${existingByAppId.rawg_id})`,
         );
         updateByMediaId.set(existingByAppId.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
         });
       } else if (matchedIgdb) {
-        // Ã°Å¸â€ â€¢ NEW IGDB ENRICHMENT (item has no IGDB data yet)
-        console.log(
-          `Ã°Å¸â€ â€¢ [Steam Sync] Enriching with IGDB: ${game.name} (IGDB ID: ${matchedIgdb.id})`,
-        );
+        console.log(`[Steam Sync] Enriching with IGDB: ${game.name} (IGDB ID: ${matchedIgdb.id})`);
         updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedIgdb));
       } else {
-        // No IGDB match found, just update Steam fields
         updateByMediaId.set(existingByAppId.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
         });
       }
-      await updateProgress(
-        `Catalog ÃŽÂµÃŽÂ½ÃŽÂ·ÃŽÂ¼ÃŽÂ­ÃÂÃâ€°ÃÆ’ÃŽÂ· ${mediaIdByAppId.size}/${uniqueGames.length}`,
-        1,
-      );
+      await updateProgress(`Catalog sync ${mediaIdByAppId.size}/${uniqueGames.length}`, 1);
       continue;
     }
 
@@ -688,18 +639,14 @@ async function syncSteamForUser(options?: {
       const existingIgdbMedia = existingIgdbMediaByIgdbId.get(matchedIgdb.id);
       if (existingIgdbMedia) {
         mediaIdByAppId.set(game.appid, existingIgdbMedia.id);
-        // Ã¢Å“â€¦ PRESERVING: Game exists with same IGDB ID (already enriched)
         console.log(
-          `Ã¢Å“â€¦ [Steam Sync] Preserving existing IGDB media: ${game.name} (IGDB ID: ${matchedIgdb.id})`,
+          `[Steam Sync] Preserving existing IGDB media: ${game.name} (IGDB ID: ${matchedIgdb.id})`,
         );
         updateByMediaId.set(existingIgdbMedia.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
         });
-        await updateProgress(
-          `Catalog ÃŽÂµÃŽÂ½ÃŽÂ·ÃŽÂ¼ÃŽÂ­ÃÂÃâ€°ÃÆ’ÃŽÂ· ${mediaIdByAppId.size}/${uniqueGames.length}`,
-          1,
-        );
+        await updateProgress(`Catalog sync ${mediaIdByAppId.size}/${uniqueGames.length}`, 1);
         continue;
       }
 
@@ -718,7 +665,7 @@ async function syncSteamForUser(options?: {
     }
 
     await updateProgress(
-      `Catalog ÃŽÂµÃŽÂ½ÃŽÂ·ÃŽÂ¼ÃŽÂ­ÃÂÃâ€°ÃÆ’ÃŽÂ· ${mediaIdByAppId.size + insertTasks.length}/${uniqueGames.length}`,
+      `Catalog sync ${mediaIdByAppId.size + insertTasks.length}/${uniqueGames.length}`,
       1,
     );
   }
@@ -771,7 +718,7 @@ async function syncSteamForUser(options?: {
           .eq('id', mediaId);
 
         if (error) {
-          console.error(`Ã¢ÂÅ’ Media update failed for ID ${mediaId}:`, error);
+          console.error(`Media update failed for ID ${mediaId}:`, error);
           console.error(`   Payload:`, JSON.stringify(updatePayload, null, 2));
           failedMediaUpdateCount += 1;
           return false;
@@ -833,7 +780,7 @@ async function syncSteamForUser(options?: {
   const userEntryUpdates: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
   let skippedPotentialDuplicate = 0;
 
-  await updateProgress('ÃŽÂ£Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃÅ’Ãâ€š user entries...', 1);
+  await updateProgress('Syncing user entries...', 1);
   for (const game of uniqueGames) {
     const mediaId = mediaIdByAppId.get(game.appid);
     if (!mediaId) {
@@ -849,7 +796,6 @@ async function syncSteamForUser(options?: {
     });
 
     if (existingEntry !== undefined) {
-      // Only update if import_source='steam' (don't touch manual or other imports)
       if (existingEntry.import_source === 'steam') {
         userEntryUpdates.push({
           user_id: session.user.id,
@@ -914,18 +860,13 @@ async function syncSteamForUser(options?: {
     }
   }
 
-  await updateProgress(
-    'ÃŽÅ¸ÃŽÂ»ÃŽÂ¿ÃŽÂºÃŽÂ»ÃŽÂ®ÃÂÃâ€°ÃÆ’ÃŽÂ· ÃÆ’Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃŽÂ¿ÃÂ...',
-    totalSteps - completedSteps,
-  );
+  await updateProgress('Finalizing sync...', totalSteps - completedSteps);
 
   const warnings: string[] = [];
-  if (failedMediaInsertCount > 0)
-    warnings.push(`ÃŽâ€˜Ãâ‚¬ÃŽÂ¿Ãâ€žÃâ€¦Ãâ€¡ÃŽÂ·ÃŽÂ¼ÃŽÂ­ÃŽÂ½ÃŽÂµÃâ€š ÃŽÂµÃŽÂ¹ÃÆ’ÃŽÂ±ÃŽÂ³Ãâ€°ÃŽÂ³ÃŽÂ­Ãâ€š media: ${failedMediaInsertCount}`);
-  if (failedMediaUpdateCount > 0)
-    warnings.push(`ÃŽâ€˜Ãâ‚¬ÃŽÂ¿Ãâ€žÃâ€¦Ãâ€¡ÃŽÂ·ÃŽÂ¼ÃŽÂ­ÃŽÂ½ÃŽÂ± updates media: ${failedMediaUpdateCount}`);
+  if (failedMediaInsertCount > 0) warnings.push(`Failed media inserts: ${failedMediaInsertCount}`);
+  if (failedMediaUpdateCount > 0) warnings.push(`Failed media updates: ${failedMediaUpdateCount}`);
   if (failedEntryUpsertCount > 0)
-    warnings.push(`ÃŽâ€˜Ãâ‚¬ÃŽÂ¿Ãâ€žÃâ€¦Ãâ€¡ÃŽÂ·ÃŽÂ¼ÃŽÂ­ÃŽÂ½ÃŽÂ± inserts/updates entries: ${failedEntryUpsertCount}`);
+    warnings.push(`Failed entry inserts/updates: ${failedEntryUpsertCount}`);
 
   const result: SyncResult = {
     totalFetched: uniqueGames.length,
@@ -958,18 +899,15 @@ async function POSTHandler(req: Request) {
     const url = new URL(req.url);
     const includeDebug = url.searchParams.get('debug') === '1';
 
-    // Create job for progress tracking
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
     jobId = await createSyncJob(session.user.id);
 
-    // Run sync with job tracking
     const result = await syncSteamForUser({ includeDebug, jobId });
 
-    // Mark job as completed
     await updateSyncJob(jobId, {
       status: 'completed',
-      message: 'ÃŽÅ¸ ÃÆ’Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃÅ’Ãâ€š ÃŽÂ¿ÃŽÂ»ÃŽÂ¿ÃŽÂºÃŽÂ»ÃŽÂ·ÃÂÃÅ½ÃŽÂ¸ÃŽÂ·ÃŽÂºÃŽÂµ ÃŽÂµÃâ‚¬ÃŽÂ¹Ãâ€žÃâ€¦Ãâ€¡ÃÅ½Ãâ€š',
+      message: 'Steam sync completed successfully',
       percent: 100,
       result: result,
       finishedAt: new Date().toISOString(),
@@ -977,12 +915,11 @@ async function POSTHandler(req: Request) {
 
     return NextResponse.json({ ...result, jobId });
   } catch (error) {
-    // Mark job as failed if we created one
     if (jobId) {
-      const errorMessage = error instanceof Error ? error.message : 'ÃŽâ€ ÃŽÂ³ÃŽÂ½Ãâ€°ÃÆ’Ãâ€žÃŽÂ¿ ÃÆ’Ãâ€ ÃŽÂ¬ÃŽÂ»ÃŽÂ¼ÃŽÂ±';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await updateSyncJob(jobId, {
         status: 'failed',
-        message: 'ÃŽÅ¸ ÃÆ’Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃÅ’Ãâ€š ÃŽÂ±Ãâ‚¬ÃŽÂ­Ãâ€žÃâ€¦Ãâ€¡ÃŽÂµ',
+        message: 'Steam sync failed',
         error: errorMessage,
         finishedAt: new Date().toISOString(),
       }).catch(console.error);
@@ -992,10 +929,7 @@ async function POSTHandler(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'ÃŽâ€˜Ãâ‚¬ÃŽÂ¿Ãâ€žÃâ€¦Ãâ€¡ÃŽÂ¯ÃŽÂ± ÃÆ’Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃŽÂ¿ÃÂ ÃŽÂ²ÃŽÂ¹ÃŽÂ²ÃŽÂ»ÃŽÂ¹ÃŽÂ¿ÃŽÂ¸ÃŽÂ®ÃŽÂºÃŽÂ·Ãâ€š Steam';
+    const message = error instanceof Error ? error.message : 'Steam library sync failed';
     console.error('Steam sync error:', error);
     return NextResponse.json({ error: message, jobId }, { status: 500 });
   }
@@ -1009,17 +943,15 @@ async function GETHandler(req: Request) {
     const shouldRedirect = searchParams.get('redirect') === '1';
     const includeDebug = searchParams.get('debug') === '1';
 
-    // Create job for progress tracking
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
     jobId = await createSyncJob(session.user.id);
 
     const result = await syncSteamForUser({ includeDebug, jobId });
 
-    // Mark job as completed
     await updateSyncJob(jobId, {
       status: 'completed',
-      message: 'ÃŽÅ¸ ÃÆ’Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃÅ’Ãâ€š ÃŽÂ¿ÃŽÂ»ÃŽÂ¿ÃŽÂºÃŽÂ»ÃŽÂ·ÃÂÃÅ½ÃŽÂ¸ÃŽÂ·ÃŽÂºÃŽÂµ ÃŽÂµÃâ‚¬ÃŽÂ¹Ãâ€žÃâ€¦Ãâ€¡ÃÅ½Ãâ€š',
+      message: 'Steam sync completed successfully',
       percent: 100,
       result: result,
       finishedAt: new Date().toISOString(),
@@ -1031,12 +963,11 @@ async function GETHandler(req: Request) {
 
     return NextResponse.redirect(buildBacklogRedirect(req.url, 'success').toString());
   } catch (error) {
-    // Mark job as failed if we created one
     if (jobId) {
-      const errorMessage = error instanceof Error ? error.message : 'ÃŽâ€ ÃŽÂ³ÃŽÂ½Ãâ€°ÃÆ’Ãâ€žÃŽÂ¿ ÃÆ’Ãâ€ ÃŽÂ¬ÃŽÂ»ÃŽÂ¼ÃŽÂ±';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await updateSyncJob(jobId, {
         status: 'failed',
-        message: 'ÃŽÅ¸ ÃÆ’Ãâ€¦ÃŽÂ³Ãâ€¡ÃÂÃŽÂ¿ÃŽÂ½ÃŽÂ¹ÃÆ’ÃŽÂ¼ÃÅ’Ãâ€š ÃŽÂ±Ãâ‚¬ÃŽÂ­Ãâ€žÃâ€¦Ãâ€¡ÃŽÂµ',
+        message: 'Steam sync failed',
         error: errorMessage,
         finishedAt: new Date().toISOString(),
       }).catch(console.error);
@@ -1058,4 +989,3 @@ async function GETHandler(req: Request) {
 
 export const POST = withApiRoute(POSTHandler);
 export const GET = withApiRoute(GETHandler);
-

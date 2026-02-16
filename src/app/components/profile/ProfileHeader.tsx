@@ -46,7 +46,9 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
               <h1 className="break-words text-3xl font-semibold leading-tight text-foreground md:text-4xl">
                 {displayName}
               </h1>
-              <p className="mt-1 break-all text-sm text-muted-foreground sm:text-base">@{user.username}</p>
+              <p className="mt-1 break-all text-sm text-muted-foreground sm:text-base">
+                @{user.username}
+              </p>
 
               {showOwnerBadge && (
                 <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/35 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -105,4 +107,3 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
     </section>
   );
 }
-

@@ -94,7 +94,9 @@ export default function CategoryStats({
           }`}
         >
           <CardContent className="p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{card.label}</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              {card.label}
+            </p>
             <p className="mt-2 text-3xl font-semibold text-foreground">{card.value}</p>
             <p className="mt-1 text-xs text-muted-foreground">{card.caption}</p>
             <Progress

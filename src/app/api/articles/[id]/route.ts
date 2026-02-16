@@ -39,7 +39,7 @@ async function GETHandler(_req: Request, { params }: { params: Promise<{ id: str
     const { data: article, error } = await query.single();
 
     if (error || !article) {
-      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Article not found' }, 404);
     }
 
     // Record view (optionally)
@@ -80,7 +80,7 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
       .single();
 
     if (fetchError || !existingArticle) {
-      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Article not found' }, 404);
     }
 
     // Check permission (author or admin)
@@ -90,7 +90,7 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
     const isAdmin = hasAnyRole(userData, ['admin', 'owner', 'reviewer']);
 
     if (!isAuthor && !isAdmin) {
-      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
+      return fail({ error: 'Access forbidden' }, 403);
     }
 
     const body = await req.json();
@@ -110,36 +110,33 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
       is_featured,
     } = body;
     if (title !== undefined) {
-      const titleValidation = validatePlainText(title, 'Ο τίτλος');
+      const titleValidation = validatePlainText(title, 'Title');
       if (!titleValidation.isValid) {
-        return fail({ error: titleValidation.error || 'Μη έγκυρος τίτλος' }, 400);
+        return fail({ error: titleValidation.error || 'Invalid title' }, 400);
       }
     }
     if (description !== undefined) {
-      const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
+      const descriptionValidation = validatePlainText(description, 'Description');
       if (!descriptionValidation.isValid) {
-        return fail({ error: descriptionValidation.error || 'Μη έγκυρη περιγραφή' }, 400);
+        return fail({ error: descriptionValidation.error || 'Invalid description' }, 400);
       }
     }
     if (meta_title !== undefined) {
-      const metaTitleValidation = validatePlainText(meta_title, 'Ο meta τίτλος');
+      const metaTitleValidation = validatePlainText(meta_title, 'Meta title');
       if (!metaTitleValidation.isValid) {
-        return fail({ error: metaTitleValidation.error || 'Μη έγκυρος meta τίτλος' }, 400);
+        return fail({ error: metaTitleValidation.error || 'Invalid meta title' }, 400);
       }
     }
     if (meta_description !== undefined) {
-      const metaDescriptionValidation = validatePlainText(meta_description, 'Το meta description');
+      const metaDescriptionValidation = validatePlainText(meta_description, 'Meta description');
       if (!metaDescriptionValidation.isValid) {
-        return fail(
-          { error: metaDescriptionValidation.error || 'Μη έγκυρο meta description' },
-          400,
-        );
+        return fail({ error: metaDescriptionValidation.error || 'Invalid meta description' }, 400);
       }
     }
     if (tags !== undefined) {
-      const tagsValidation = validatePlainTextArray(tags, 'Τα tags');
+      const tagsValidation = validatePlainTextArray(tags, 'Tags');
       if (!tagsValidation.isValid) {
-        return fail({ error: tagsValidation.error || 'Μη έγκυρα tags' }, 400);
+        return fail({ error: tagsValidation.error || 'Invalid tags' }, 400);
       }
     }
 
@@ -177,7 +174,7 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
 
     if (updateError) {
       console.error('Error updating article:', updateError);
-      return fail({ error: 'Αποτυχία ενημέρωσης άρθρου' }, 500);
+      return fail({ error: 'Article update failed' }, 500);
     }
 
     // Log activity
@@ -194,7 +191,7 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
     // Revalidate article caches
     revalidateCache.article(article.id);
 
-    return ok({ message: 'Επιτυχής ενημέρωση άρθρου', article });
+    return ok({ message: 'Article updated successfully', article });
   } catch (error) {
     console.error('Error updating article:', error);
     if (error instanceof UnauthorizedError) {
@@ -220,7 +217,7 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
       .single();
 
     if (fetchError || !existingArticle) {
-      return fail({ error: 'Το άρθρο δεν βρέθηκε' }, 404);
+      return fail({ error: 'Article not found' }, 404);
     }
 
     // Check permission (author or admin)
@@ -230,7 +227,7 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
     const isAdmin = hasAnyRole(userData, ['admin', 'owner', 'reviewer']);
 
     if (!isAuthor && !isAdmin) {
-      return fail({ error: 'Απαγορεύεται η πρόσβαση' }, 403);
+      return fail({ error: 'Access forbidden' }, 403);
     }
 
     // Delete article (cascade will handle likes, comments, views)
@@ -241,7 +238,7 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
 
     if (deleteError) {
       console.error('Error deleting article:', deleteError);
-      return fail({ error: 'Αποτυχία διαγραφής άρθρου' }, 500);
+      return fail({ error: 'Article deletion failed' }, 500);
     }
 
     // Log activity
@@ -257,7 +254,7 @@ async function DELETEHandler(_req: Request, { params }: { params: Promise<{ id: 
     // Revalidate article caches
     revalidateCache.article(existingArticle.id);
 
-    return ok({ message: 'Το άρθρο διαγράφηκε επιτυχώς' });
+    return ok({ message: 'Article deleted successfully' });
   } catch (error) {
     console.error('Error deleting article:', error);
     if (error instanceof UnauthorizedError) {

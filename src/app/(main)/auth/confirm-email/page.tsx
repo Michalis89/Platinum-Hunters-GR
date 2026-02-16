@@ -4,7 +4,15 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import SuccessAutoRedirect from './SuccessAutoRedirect';
+
+export const metadata = buildMetadata({
+  title: 'Confirm Email',
+  description: 'Email confirmation and verification flow.',
+  path: '/auth/confirm-email',
+  noindex: true,
+});
 
 type ConfirmEmailPageProps = {
   searchParams?: Promise<{

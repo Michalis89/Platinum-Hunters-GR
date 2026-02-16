@@ -13,7 +13,7 @@ export function validatePlainText(
   if (HTML_ANGLE_PATTERN.test(value)) {
     return {
       isValid: false,
-      error: `${fieldLabel} δεν πρέπει να περιέχει HTML.`,
+      error: `${fieldLabel} must not contain HTML.`,
     };
   }
   return { isValid: true };
@@ -28,7 +28,7 @@ export function validatePlainTextArray(
   if (invalid !== undefined) {
     return {
       isValid: false,
-      error: `${fieldLabel} δεν πρέπει να περιέχει HTML.`,
+      error: `${fieldLabel} must not contain HTML.`,
     };
   }
   return { isValid: true };

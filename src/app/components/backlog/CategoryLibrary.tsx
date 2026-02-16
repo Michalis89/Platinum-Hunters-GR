@@ -1016,9 +1016,7 @@ export default function CategoryLibrary({
           <div className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/90 p-6 text-white shadow-2xl shadow-violet-500/20">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-lg font-semibold text-white">
-                  Steam sync with IGDB metadata
-                </p>
+                <p className="text-lg font-semibold text-white">Steam sync with IGDB metadata</p>
                 <p className="text-sm text-slate-300">
                   {steamSyncProgress?.message ??
                     'Fetching metadata, cover images, and updating entries. Please wait...'}
@@ -1056,18 +1054,14 @@ export default function CategoryLibrary({
                   <p className="text-xs text-slate-400">total</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
-                    Imported
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Imported</p>
                   <p className="text-lg font-semibold text-white">
                     {steamSyncProgress.result.mediaInserted ?? 0}
                   </p>
                   <p className="text-xs text-slate-400">new entries</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
-                    Updated
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Updated</p>
                   <p className="text-lg font-semibold text-white">
                     {steamSyncProgress.result.mediaUpdated ?? 0}
                   </p>
@@ -1081,4 +1075,3 @@ export default function CategoryLibrary({
     </div>
   );
 }
-

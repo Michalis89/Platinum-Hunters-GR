@@ -80,7 +80,9 @@ export function HomeContinue() {
           <Clock className="h-5 w-5 text-primary" />
           <div>
             <h2 className="text-lg font-semibold text-foreground">More in progress</h2>
-            <p className="text-xs text-muted-foreground">Quick reminders to help you choose what to do next</p>
+            <p className="text-xs text-muted-foreground">
+              Quick reminders to help you choose what to do next
+            </p>
           </div>
         </div>
 

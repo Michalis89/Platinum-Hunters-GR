@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(ls:*)",
+      "Bash(findstr:*)",
+      "Read(//c/**)",
+      "Bash(npx tsc:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}

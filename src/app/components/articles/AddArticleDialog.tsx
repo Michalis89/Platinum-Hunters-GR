@@ -41,8 +41,8 @@ interface CategoryConfig {
 }
 
 const CONTENT_TYPES: { value: ContentType; label: string }[] = [
-  { value: 'article', label: 'Άρθρο' },
-  { value: 'review', label: 'Κριτική' },
+  { value: 'article', label: 'Article' },
+  { value: 'review', label: 'Review' },
 ];
 
 const REVIEW_CATEGORIES: ArticleCategory[] = [
@@ -58,32 +58,32 @@ const REVIEW_CATEGORIES: ArticleCategory[] = [
 const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
   games: {
     label: 'Games',
-    topics: [{ value: 'articles', label: 'Άρθρα' }],
+    topics: [{ value: 'articles', label: 'Articles' }],
   },
   anime: {
     label: 'Anime',
-    topics: [{ value: 'articles', label: 'Άρθρα' }],
+    topics: [{ value: 'articles', label: 'Articles' }],
   },
   manga: {
     label: 'Manga',
-    topics: [{ value: 'articles', label: 'Άρθρα' }],
+    topics: [{ value: 'articles', label: 'Articles' }],
   },
   books: {
-    label: 'Βιβλία',
-    topics: [{ value: 'articles', label: 'Άρθρα' }],
+    label: 'Books',
+    topics: [{ value: 'articles', label: 'Articles' }],
   },
   movies: {
     label: 'Movies',
-    topics: [{ value: 'articles', label: 'Άρθρα' }],
+    topics: [{ value: 'articles', label: 'Articles' }],
   },
   tv: {
     label: 'TV Series',
-    topics: [{ value: 'articles', label: 'Άρθρα' }],
+    topics: [{ value: 'articles', label: 'Articles' }],
   },
   coding: {
     label: 'Coding',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
+      { value: 'articles', label: 'Articles' },
       { value: 'tutorials', label: 'Tutorials' },
       { value: 'weird-cases', label: 'Weird Cases' },
     ],
@@ -91,19 +91,19 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
   pet: {
     label: 'Pet',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
-      { value: 'care', label: 'Φροντίδα' },
-      { value: 'experiences', label: 'Εμπειρίες' },
-      { value: 'health', label: 'Υγεία' },
+      { value: 'articles', label: 'Articles' },
+      { value: 'care', label: 'Care' },
+      { value: 'experiences', label: 'Experiences' },
+      { value: 'health', label: 'Health' },
     ],
   },
   vape: {
     label: 'Vape',
     topics: [
-      { value: 'articles', label: 'Άρθρα' },
-      { value: 'devices', label: 'Ατμοποιητές/Συσκευές' },
-      { value: 'liquids', label: 'Υγρά' },
-      { value: 'experiences', label: 'Εμπειρίες' },
+      { value: 'articles', label: 'Articles' },
+      { value: 'devices', label: 'Vapes/Devices' },
+      { value: 'liquids', label: 'Liquids' },
+      { value: 'experiences', label: 'Experiences' },
     ],
   },
 };
@@ -248,48 +248,46 @@ export default function AddArticleDialog({
     } catch (uploadErr) {
       console.error('Cover upload failed:', uploadErr);
       setCoverUploadError(
-        uploadErr instanceof Error
-          ? uploadErr.message
-          : 'Αποτυχία ανέβασμα εικόνας. Δοκίμασε ξανά.',
+        uploadErr instanceof Error ? uploadErr.message : 'Image upload failed. Try again.',
       );
     } finally {
       setIsCoverUploading(false);
     }
   };
 
-  const titleValidation = validatePlainText(title, 'Ο τίτλος');
-  const descriptionValidation = validatePlainText(description, 'Η περιγραφή');
-  const tagsValidation = validatePlainText(tags, 'Τα tags');
+  const titleValidation = validatePlainText(title, 'Title');
+  const descriptionValidation = validatePlainText(description, 'Description');
+  const tagsValidation = validatePlainText(tags, 'Tags');
   const hasPlainTextError =
     !titleValidation.isValid || !descriptionValidation.isValid || !tagsValidation.isValid;
 
   const handleSubmit = async (saveStatus: ArticleStatus) => {
     if (noPermission) {
-      setError('Δεν έχεις δικαίωμα για δημιουργία περιεχομένου.');
+      setError('You do not have permission to create content.');
       return;
     }
     if (!category) {
-      setError('Παρακαλώ επιλέξτε κατηγορία');
+      setError('Please select a category');
       return;
     }
     if (contentType === 'review' && !REVIEW_CATEGORIES.includes(category as ArticleCategory)) {
-      setError('Η κατηγορία δεν υποστηρίζει reviews.');
+      setError('This category does not support reviews.');
       return;
     }
     if (!title.trim()) {
-      setError('Παρακαλώ εισάγετε τίτλο');
+      setError('Please enter a title');
       return;
     }
     if (!titleValidation.isValid) {
-      setError(titleValidation.error || 'Ο τίτλος δεν πρέπει να περιέχει HTML.');
+      setError(titleValidation.error || 'Title must not contain HTML.');
       return;
     }
     if (!descriptionValidation.isValid) {
-      setError(descriptionValidation.error || 'Η περιγραφή δεν πρέπει να περιέχει HTML.');
+      setError(descriptionValidation.error || 'Description must not contain HTML.');
       return;
     }
     if (!tagsValidation.isValid) {
-      setError(tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.');
+      setError(tagsValidation.error || 'Tags must not contain HTML.');
       return;
     }
 
@@ -329,7 +327,7 @@ export default function AddArticleDialog({
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Αποτυχία αποθήκευσης');
+        throw new Error(data.error || 'Save failed');
       }
 
       onSuccess?.();
@@ -338,17 +336,17 @@ export default function AddArticleDialog({
       }
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const dialogTitle = contentType === 'review' ? 'Νέα Κριτική' : 'Νέο Άρθρο';
+  const dialogTitle = contentType === 'review' ? 'New Review' : 'New Article';
   const noPermission = availableContentTypes.length === 0;
   const availableTopics = category
     ? contentType === 'review'
-      ? [{ value: 'reviews', label: 'Κριτικές' }]
+      ? [{ value: 'reviews', label: 'Reviews' }]
       : CATEGORIES[category].topics
     : [];
   const availableCategories =
@@ -394,7 +392,7 @@ export default function AddArticleDialog({
                   {/* Error message */}
                   {error && <ErrorAlert message={error} />}
                   {noPermission && (
-                    <ErrorAlert message="Δεν έχεις δικαίωμα να δημιουργήσεις άρθρο ή review." />
+                    <ErrorAlert message="You do not have permission to create an article or review." />
                   )}
                   {warning && (
                     <div className="rounded-lg border border-amber-500/30 bg-warning/10 px-4 py-3 text-sm text-amber-300">
@@ -406,7 +404,7 @@ export default function AddArticleDialog({
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {/* Content Type */}
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Τύπος</label>
+                      <label className="text-sm font-medium text-foreground">Type</label>
                       <select
                         value={contentType}
                         onChange={e => setContentType(e.target.value as ContentType)}
@@ -423,13 +421,13 @@ export default function AddArticleDialog({
 
                     {/* Category */}
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Κατηγορία *</label>
+                      <label className="text-sm font-medium text-foreground">Category *</label>
                       <select
                         value={category}
                         onChange={e => setCategory(e.target.value as ArticleCategory)}
                         className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                       >
-                        <option value="">-- Επιλέξτε --</option>
+                        <option value="">-- Select --</option>
                         {availableCategories.map(cat => (
                           <option key={cat} value={cat}>
                             {CATEGORIES[cat].label}
@@ -440,7 +438,7 @@ export default function AddArticleDialog({
 
                     {/* Topic */}
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Υποκατηγορία</label>
+                      <label className="text-sm font-medium text-foreground">Subcategory</label>
                       <select
                         value={topic}
                         onChange={e => setTopic(e.target.value as ArticleTopic)}
@@ -458,21 +456,21 @@ export default function AddArticleDialog({
 
                   {/* Title */}
                   <Input
-                    label="Τίτλος *"
-                    placeholder="Εισάγετε τον τίτλο του άρθρου"
+                    label="Title *"
+                    placeholder="Enter the article title"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     error={!titleValidation.isValid}
                   />
                   {!titleValidation.isValid && (
-                    <p className="text-xs text-red-400">Ο τίτλος δεν πρέπει να περιέχει HTML.</p>
+                    <p className="text-xs text-red-400">Title must not contain HTML.</p>
                   )}
 
                   {/* Description */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground">Περιγραφή</label>
+                    <label className="text-sm font-medium text-foreground">Description</label>
                     <Textarea
-                      placeholder="Σύντομη περιγραφή του άρθρου (εμφανίζεται στις κάρτες)"
+                      placeholder="Short article description (shown in cards)"
                       rows={3}
                       value={description}
                       onChange={e => setDescription(e.target.value)}
@@ -480,16 +478,16 @@ export default function AddArticleDialog({
                     />
                   </div>
                   {!descriptionValidation.isValid && (
-                    <p className="text-xs text-red-400">Η περιγραφή δεν πρέπει να περιέχει HTML.</p>
+                    <p className="text-xs text-red-400">Description must not contain HTML.</p>
                   )}
 
                   {/* Cover Image */}
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-foreground">Εικόνα εξωφύλλου</label>
+                    <label className="text-sm font-medium text-foreground">Cover image</label>
                     <div className="flex flex-wrap gap-3">
                       <div className="flex min-w-[220px] flex-1 flex-col gap-2">
                         <Input
-                          placeholder="URL εικόνας"
+                          placeholder="Image URL"
                           value={coverImage}
                           onChange={e => {
                             setCoverImage(e.target.value);
@@ -510,9 +508,9 @@ export default function AddArticleDialog({
                             onClick={handleCoverUploadClick}
                             disabled={isCoverUploading}
                           >
-                            {isCoverUploading ? 'Ανεβαίνει...' : 'Ανέβασε αρχείο'}
+                            {isCoverUploading ? 'Uploading...' : 'Upload file'}
                           </Button>
-                          <span>Το URL προέρχεται από το Supabase storage.</span>
+                          <span>The URL comes from Supabase storage.</span>
                         </div>
                         {coverUploadError && (
                           <p className="text-xs text-amber-300">{coverUploadError}</p>
@@ -545,23 +543,23 @@ export default function AddArticleDialog({
 
                   {/* Content */}
                   <RichTextEditor
-                    label="Περιεχόμενο"
+                    label="Content"
                     value={contentHtml}
                     onChange={setContentHtml}
-                    placeholder="Γράψτε το περιεχόμενο του άρθρου..."
+                    placeholder="Write the article content..."
                   />
 
                   {/* Tags */}
                   <Input
                     label="Tags"
-                    placeholder="Χωρισμένα με κόμμα (π.χ. ps5, rpg, exclusive)"
+                    placeholder="Comma-separated (e.g. ps5, rpg, exclusive)"
                     value={tags}
                     onChange={e => setTags(e.target.value)}
                     error={!tagsValidation.isValid}
                   />
                   {!tagsValidation.isValid && (
                     <p className="text-xs text-red-400">
-                      {tagsValidation.error || 'Τα tags δεν πρέπει να περιέχουν HTML.'}
+                      {tagsValidation.error || 'Tags must not contain HTML.'}
                     </p>
                   )}
                 </div>
@@ -570,7 +568,7 @@ export default function AddArticleDialog({
               {/* Footer */}
               <div className="flex items-center justify-between border-t border-border px-6 py-4">
                 <Button variant="secondary" onClick={onClose}>
-                  Ακύρωση
+                  Cancel
                 </Button>
                 <div className="flex gap-3">
                   <Button
@@ -579,7 +577,7 @@ export default function AddArticleDialog({
                     onClick={() => handleSubmit('draft')}
                     disabled={isSubmitting || hasPlainTextError || noPermission}
                   >
-                    Αποθήκευση ως Draft
+                    Save as Draft
                   </Button>
                   <Button
                     variant="primary"
@@ -587,7 +585,7 @@ export default function AddArticleDialog({
                     onClick={() => handleSubmit('published')}
                     disabled={isSubmitting || hasPlainTextError || noPermission}
                   >
-                    Δημοσίευση
+                    Publish
                   </Button>
                 </div>
               </div>

@@ -222,4 +222,3 @@ function SuggestionCard({ item, addPath }: SuggestionCardProps) {
     </Link>
   );
 }
-

@@ -25,14 +25,14 @@ const getFiles = (formData: FormData) => {
 
 const validateAttachments = (files: File[]) => {
   if (files.length > MAX_ATTACHMENTS) {
-    return `Μπορείς να ανεβάσεις μέχρι ${MAX_ATTACHMENTS} αρχεία.`;
+    return `You can upload up to ${MAX_ATTACHMENTS} files.`;
   }
   for (const file of files) {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return 'Επιτρέπονται μόνο PNG, JPG, WEBP ή PDF αρχεία.';
+      return 'Only PNG, JPG, WEBP, or PDF files are allowed.';
     }
     if (file.size > MAX_FILE_SIZE) {
-      return 'Κάθε αρχείο πρέπει να είναι μέχρι 5MB.';
+      return 'Each file must be up to 5MB.';
     }
   }
   return null;
@@ -48,7 +48,7 @@ async function POSTHandler(req: Request, context: { params: Promise<{ id: string
     const messageText = String(formData.get('message') ?? '').trim();
 
     if (!messageText) {
-      return fail({ error: 'Το μήνυμα είναι υποχρεωτικό.' }, 400);
+      return fail({ error: 'Message is required.' }, 400);
     }
 
     const { data: ticket, error: ticketError } = await supabase
@@ -106,7 +106,7 @@ async function POSTHandler(req: Request, context: { params: Promise<{ id: string
 
         if (uploadError) {
           console.error('Support attachment upload failed:', uploadError);
-          return fail({ error: 'Αποτυχία μεταφόρτωσης αρχείων.' }, 500);
+          return fail({ error: 'File upload failed.' }, 500);
         }
 
         const { error: attachmentError } = await supabase.from('support_attachments').insert({

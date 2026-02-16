@@ -315,4 +315,3 @@ function NavbarAuthSkeletonMobile() {
     </div>
   );
 }
-

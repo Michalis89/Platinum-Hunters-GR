@@ -26,9 +26,7 @@ export async function generateMetadata({ searchParams }: BacklogPageProps): Prom
     : 'Organize your backlog with goals, progress tracking, and per-hobby insights.';
 
   // Canonical strategy: treat category query pages as first-class and keep their querystring.
-  const path = normalizedCategory
-    ? `/backlog?category=${normalizedCategory}`
-    : '/backlog';
+  const path = normalizedCategory ? `/backlog?category=${normalizedCategory}` : '/backlog';
 
   return buildMetadata({
     title,
@@ -54,9 +52,7 @@ export default async function BacklogPage({ searchParams }: BacklogPageProps) {
     });
   }
 
-  const redirectPath = normalizedCategory
-    ? `/backlog?category=${normalizedCategory}`
-    : '/backlog';
+  const redirectPath = normalizedCategory ? `/backlog?category=${normalizedCategory}` : '/backlog';
   await requireServerAuth(redirectPath);
 
   return (

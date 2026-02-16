@@ -58,7 +58,7 @@ function ModuleButton({
 
   const isUnderConstruction = status === 'under-construction';
   const isDisabled = status !== true;
-  const disabledTitle = isUnderConstruction ? 'Υπό κατασκευή' : 'Μη διαθέσιμο';
+  const disabledTitle = isUnderConstruction ? 'Under construction' : 'Unavailable';
   const needsLogin = requiresAuth && !isAuthenticated && status === true;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -132,7 +132,7 @@ export function HobbiesCategoryCard({ category }: HobbiesCategoryCardProps) {
           icon={ListTodo}
         />
         <ModuleButton
-          label="Άρθρα"
+          label="Articles"
           href={category.routes.news}
           status={category.modules.news}
           requiresAuth={category.requiresAuth.news}

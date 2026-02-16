@@ -43,12 +43,12 @@ type ProfileStatsProps = {
 };
 
 const categoryTitles: Record<string, { eyebrow: string; title: string }> = {
-  games: { eyebrow: 'Gaming Stats', title: 'Η πορεία σου στα games' },
-  anime: { eyebrow: 'Anime Stats', title: 'Η πορεία σου στα anime' },
-  manga: { eyebrow: 'Manga Stats', title: 'Η πορεία σου στα manga' },
-  movies: { eyebrow: 'Movies Stats', title: 'Η πορεία σου στις ταινίες' },
-  tv: { eyebrow: 'TV Stats', title: 'Η πορεία σου στις σειρές' },
-  books: { eyebrow: 'Books Stats', title: 'Η πορεία σου στα βιβλία' },
+  games: { eyebrow: 'Gaming Stats', title: 'Your progress in games' },
+  anime: { eyebrow: 'Anime Stats', title: 'Your progress in anime' },
+  manga: { eyebrow: 'Manga Stats', title: 'Your progress in manga' },
+  movies: { eyebrow: 'Movies Stats', title: 'Your progress in movies' },
+  tv: { eyebrow: 'TV Stats', title: 'Your progress in series' },
+  books: { eyebrow: 'Books Stats', title: 'Your progress in books' },
 };
 
 const categoryIcons: Record<string, ReactNode> = {
@@ -61,33 +61,33 @@ const categoryIcons: Record<string, ReactNode> = {
 };
 
 const readingTips: Record<string, string> = {
-  manga: 'Εκτίμηση: ~4 ώρες ανά volume (220 σελίδες/volume, 55 σελίδες/ώρα).',
+  manga: 'Estimate: ~4 hours per volume (220 pages/volume, 55 pages/hour).',
 
   books:
-    'Κατά προσέγγιση: ~35–45 σελίδες/ώρα (ανάλογα τη δυσκολία), με βάση έναν μέσο ρυθμό ανάγνωσης.',
+    'Approximate: ~35-45 pages/hour (depending on difficulty), based on an average reading speed.',
 };
 
 function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsProps>) {
-  const titles = categoryTitles[category] || { eyebrow: 'Stats', title: 'Τα στατιστικά σου' };
+  const titles = categoryTitles[category] || { eyebrow: 'Stats', title: 'Your stats' };
 
   const labels: Record<string, { completed: string; current: string; planned: string }> = {
-    games: { completed: 'Ολοκληρωμένα', current: 'Παίζω τώρα', planned: 'Backlog' },
-    anime: { completed: 'Ολοκληρωμένα', current: 'Βλέπω τώρα', planned: 'Backlog' },
-    manga: { completed: 'Ολοκληρωμένα', current: 'Διαβάζω τώρα', planned: 'Backlog' },
-    movies: { completed: 'Είδα', current: 'Βλέπω', planned: 'Backlog' },
-    tv: { completed: 'Ολοκληρωμένα', current: 'Βλέπω τώρα', planned: 'Backlog' },
-    books: { completed: 'Διάβασα', current: 'Διαβάζω', planned: 'Backlog' },
+    games: { completed: 'Completed', current: 'Playing now', planned: 'Backlog' },
+    anime: { completed: 'Completed', current: 'Watching now', planned: 'Backlog' },
+    manga: { completed: 'Completed', current: 'Reading now', planned: 'Backlog' },
+    movies: { completed: 'Watched', current: 'Watching', planned: 'Backlog' },
+    tv: { completed: 'Completed', current: 'Watching now', planned: 'Backlog' },
+    books: { completed: 'Read', current: 'Reading', planned: 'Backlog' },
   };
   const catLabels = labels[category] || {
-    completed: 'Ολοκληρωμένα',
-    current: 'Τρέχον',
-    planned: 'Λίστα',
+    completed: 'Completed',
+    current: 'Current',
+    planned: 'List',
   };
 
   const stats: Stat[] = [
     {
       value: mediaStats?.total || 0,
-      label: 'Σύνολο',
+      label: 'Total',
       icon: categoryIcons[category] || <Eye className="h-5 w-5" />,
     },
     {
@@ -107,17 +107,17 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
     },
     {
       value: mediaStats?.dropped || 0,
-      label: 'Παρατημένα',
+      label: 'Dropped',
       icon: <XCircle className="h-5 w-5" />,
     },
     {
       value: mediaStats?.favorites || 0,
-      label: 'Αγαπημένα',
+      label: 'Favorites',
       icon: <Heart className="h-5 w-5" />,
     },
     {
       value: mediaStats?.totalTime || 0,
-      label: 'Συνολικές ώρες',
+      label: 'Total hours',
       icon: <Clock className="h-5 w-5" />,
     },
   ];
@@ -160,7 +160,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
           <div className="mx-auto mt-4 w-full max-w-4xl">
             <div className="grid grid-cols-2 justify-items-center gap-4 md:grid-cols-3">
               {secondaryStats.map(stat => {
-                const showTip = stat.label === 'Συνολικές ώρες' && Boolean(readingTips[category]);
+                const showTip = stat.label === 'Total hours' && Boolean(readingTips[category]);
                 const tipText = showTip ? readingTips[category] : undefined;
                 return (
                   <div
@@ -182,7 +182,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
                               <Button
                                 type="button"
                                 variant="secondary"
-                                aria-label="Πληροφορίες υπολογισμού"
+                                aria-label="Calculation details"
                                 className="grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary hover:bg-primary/10"
                               >
                                 <Info className="h-4 w-4" />

@@ -32,7 +32,7 @@ async function GETHandler() {
     const error = usersError || activeError || mediaError;
     if (error) {
       console.error('Analytics fetch error:', error);
-      return NextResponse.json({ error: 'Σφάλμα φόρτωσης analytics' }, { status: 500 });
+      return NextResponse.json({ error: 'Analytics loading error' }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -42,7 +42,7 @@ async function GETHandler() {
     });
   } catch (err) {
     console.error('Analytics server error:', err);
-    return NextResponse.json({ error: 'Σφάλμα φόρτωσης analytics' }, { status: 500 });
+    return NextResponse.json({ error: 'Analytics loading error' }, { status: 500 });
   }
 }
 

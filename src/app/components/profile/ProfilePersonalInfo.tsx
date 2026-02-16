@@ -120,7 +120,9 @@ export function ProfilePersonalInfo({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Full Name</p>
-                <p className="break-words text-sm font-medium text-foreground">{user.full_name || '�'}</p>
+                <p className="break-words text-sm font-medium text-foreground">
+                  {user.full_name || '�'}
+                </p>
               </div>
             </div>
 
@@ -143,7 +145,10 @@ export function ProfilePersonalInfo({
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Age</p>
-                  <p className="break-words text-sm font-medium text-foreground" suppressHydrationWarning>
+                  <p
+                    className="break-words text-sm font-medium text-foreground"
+                    suppressHydrationWarning
+                  >
                     {age ? `${age} years old` : '�'}
                   </p>
                 </div>
@@ -157,7 +162,9 @@ export function ProfilePersonalInfo({
               <div>
                 <p className="text-xs text-muted-foreground">Location</p>
                 <p className="break-words text-sm font-medium text-foreground">
-                  {showLocation ? [locationCity, user.country].filter(Boolean).join(', ') || '�' : 'Hidden'}
+                  {showLocation
+                    ? [locationCity, user.country].filter(Boolean).join(', ') || '�'
+                    : 'Hidden'}
                 </p>
               </div>
             </div>
@@ -193,7 +200,9 @@ export function ProfilePersonalInfo({
                         rel="noreferrer"
                         className="group flex items-center gap-3 rounded-[14px] border border-border/60 bg-card/50 p-3 transition-colors hover:border-border"
                       >
-                        <span className="text-muted-foreground transition-colors">{platform.icon}</span>
+                        <span className="text-muted-foreground transition-colors">
+                          {platform.icon}
+                        </span>
                         <div className="min-w-0 flex-1">
                           <p className="text-xs text-muted-foreground">{platform.label}</p>
                           <p className="break-all text-sm text-foreground sm:truncate">

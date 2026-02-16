@@ -141,7 +141,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-transparent bg-transparent md:border-b md:border-white/5 md:bg-background/80 md:backdrop-blur-sm md:shadow-[0_1px_0_rgba(255,255,255,0.04)]">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-transparent bg-transparent md:border-b md:border-white/5 md:bg-background/80 md:shadow-[0_1px_0_rgba(255,255,255,0.04)] md:backdrop-blur-sm">
       <nav
         className={`relative mx-auto flex h-16 w-full items-center gap-4 px-6 md:px-10 ${
           isAdminRoute ? 'max-w-none' : 'max-w-screen-2xl'
@@ -196,7 +196,7 @@ export default function Navbar() {
 
 function NavbarLoadingSkeleton({ isAdminRoute }: { isAdminRoute: boolean }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-transparent bg-transparent md:border-b md:border-white/5 md:bg-background/80 md:backdrop-blur-sm md:shadow-[0_1px_0_rgba(255,255,255,0.04)]">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-transparent bg-transparent md:border-b md:border-white/5 md:bg-background/80 md:shadow-[0_1px_0_rgba(255,255,255,0.04)] md:backdrop-blur-sm">
       <div
         className={`mx-auto flex h-16 items-center justify-between gap-4 px-6 md:px-10 ${
           isAdminRoute ? 'max-w-none' : 'max-w-screen-2xl'

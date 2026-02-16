@@ -5,8 +5,9 @@ import { requireServerAuth } from '@/lib/auth/requireServerAuth';
 
 export const metadata = buildMetadata({
   title: 'Support | Hobbistas',
-  description: 'Contact the Hobbistas team for bug reports, feedback, or author rights requests.',
+  description: 'Contact support for account, content, or platform issues.',
   path: '/support',
+  noindex: true,
 });
 
 export default async function SupportPage() {

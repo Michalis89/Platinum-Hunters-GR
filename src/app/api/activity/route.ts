@@ -33,8 +33,8 @@ async function GETHandler(request: Request) {
     const { data, error } = await query;
 
     if (error) {
-      console.error('❌ Σφάλμα φόρτωσης activity:', error);
-      return NextResponse.json({ error: 'Σφάλμα φόρτωσης activity' }, { status: 500 });
+      console.error('Failed to load activity:', error);
+      return NextResponse.json({ error: 'Activity loading error' }, { status: 500 });
     }
 
     return NextResponse.json({ activities: data ?? [] });
@@ -42,8 +42,8 @@ async function GETHandler(request: Request) {
     if (err instanceof UnauthorizedError) {
       return NextResponse.json({ error: AUTH_ERROR }, { status: 401 });
     }
-    console.error('❌ Activity API error:', err);
-    return NextResponse.json({ error: 'Σφάλμα φόρτωσης activity' }, { status: 500 });
+    console.error('Activity API error:', err);
+    return NextResponse.json({ error: 'Activity loading error' }, { status: 500 });
   }
 }
 

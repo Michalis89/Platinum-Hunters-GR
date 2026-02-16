@@ -7,19 +7,6 @@ type Props = {
   children: React.ReactNode;
 };
 
-/**
- * AppShell - Root layout wrapper for the entire application.
- *
- * Provides:
- * - Consistent background with theme variables
- * - Unified gradient glow effect (100px blur)
- * - Fixed navbar at top
- * - Footer at bottom (via flex layout)
- * - Main content area with proper spacing
- *
- * Note: Individual pages should NOT include <Footer /> - it's handled here.
- * Pages control their own container width using <PageContainer size="...">
- */
 export default function AppShell({ children }: Props) {
   return (
     <div className="relative flex min-h-screen flex-col bg-background text-foreground">

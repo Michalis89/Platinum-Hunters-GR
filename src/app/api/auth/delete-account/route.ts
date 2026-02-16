@@ -17,7 +17,7 @@ async function POSTHandler(req: Request) {
     const rateLimitResult = await rateLimit('deleteAccount', userId);
 
     if (!rateLimitResult.success) {
-      return fail({ error: 'Πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα.' }, 429, {
+      return fail({ error: 'Too many attempts. Please try again later.' }, 429, {
         headers: rateLimitHeaders(rateLimitResult),
       });
     }
@@ -27,13 +27,13 @@ async function POSTHandler(req: Request) {
     const { password } = body;
 
     if (!password || typeof password !== 'string') {
-      return fail({ error: 'Απαιτείται ο κωδικός πρόσβασης για επιβεβαίωση' }, 400);
+      return fail({ error: 'Password is required for confirmation' }, 400);
     }
 
     // Verify password by attempting to sign in
     const userEmail = session.user.email;
     if (!userEmail) {
-      return fail({ error: 'Δεν βρέθηκε email χρήστη' }, 400);
+      return fail({ error: 'User email not found' }, 400);
     }
 
     const { error: authError } = await supabase.auth.signInWithPassword({
@@ -42,7 +42,7 @@ async function POSTHandler(req: Request) {
     });
 
     if (authError) {
-      return fail({ error: 'Λάθος κωδικός πρόσβασης' }, 401);
+      return fail({ error: 'Incorrect password' }, 401);
     }
 
     // Delete user data first (auth deletion will cascade)
@@ -50,7 +50,7 @@ async function POSTHandler(req: Request) {
 
     if (deleteError) {
       console.error('User deletion error:', deleteError);
-      return fail({ error: 'Σφάλμα διαγραφής λογαριασμού' }, 500);
+      return fail({ error: 'Account deletion error' }, 500);
     }
 
     // Delete from auth
@@ -68,7 +68,7 @@ async function POSTHandler(req: Request) {
     }
 
     return ok({
-      message: 'Ο λογαριασμός διαγράφηκε επιτυχώς',
+      message: 'Account deleted successfully',
     });
   } catch (error) {
     console.error('Delete account error:', error);

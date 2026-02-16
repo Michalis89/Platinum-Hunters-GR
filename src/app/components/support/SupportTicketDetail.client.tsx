@@ -23,10 +23,9 @@ import {
 } from '@/lib/constants/support';
 import { DATE_TIME_OPTIONS, UI_CLASSNAMES } from '@/lib/constants/ui';
 
-// User-friendly override: "waiting_user" shows as "Απάντηση από εσένα" for end users
 const statusLabels: Record<string, string> = {
   ...SUPPORT_STATUS_LABELS,
-  waiting_user: 'Απάντηση από εσένα',
+  waiting_user: 'Reply from you',
 };
 
 type TicketDetail = {
@@ -90,7 +89,7 @@ export default function SupportTicketDetail() {
         const response = await fetch(`/api/support/tickets/${ticketId}`);
         const payload = await response.json();
         if (!response.ok) {
-          throw new Error(payload.error || 'Αποτυχία φόρτωσης ticket');
+          throw new Error(payload.error || 'Failed to load ticket');
         }
         if (!ignore) {
           setTicket(payload.data?.ticket ?? null);
@@ -99,7 +98,7 @@ export default function SupportTicketDetail() {
         }
       } catch (err) {
         if (!ignore) {
-          setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+          setError(err instanceof Error ? err.message : 'Something went wrong');
         }
       } finally {
         if (!ignore) setLoading(false);
@@ -125,7 +124,7 @@ export default function SupportTicketDetail() {
   const handleReplySubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!replyText.trim()) {
-      setReplyResult({ type: 'error', message: 'Πρόσθεσε το μήνυμά σου.' });
+      setReplyResult({ type: 'error', message: 'Add your message.' });
       return;
     }
 
@@ -144,12 +143,12 @@ export default function SupportTicketDetail() {
 
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload.error || 'Η αποστολή απέτυχε');
+        throw new Error(payload.error || 'Sending failed');
       }
 
       setReplyText('');
       setReplyAttachments([]);
-      setReplyResult({ type: 'success', message: 'Το μήνυμα στάλθηκε.' });
+      setReplyResult({ type: 'success', message: 'Message sent.' });
 
       const refresh = await fetch(`/api/support/tickets/${ticketId}`);
       const refreshPayload = await refresh.json();
@@ -161,28 +160,26 @@ export default function SupportTicketDetail() {
     } catch (err) {
       setReplyResult({
         type: 'error',
-        message: err instanceof Error ? err.message : 'Κάτι πήγε στραβά',
+        message: err instanceof Error ? err.message : 'Something went wrong',
       });
     } finally {
       setReplyLoading(false);
     }
   };
 
-  // Middleware ensures only authenticated users reach this page
-
   if (loading) {
     return (
       <div className="py-20">
         <div className="flex flex-col items-center justify-center gap-3">
           <Spinner />
-          <span className="text-sm text-muted-foreground">Φορτώνουμε το ticket...</span>
+          <span className="text-sm text-muted-foreground">Loading ticket...</span>
         </div>
       </div>
     );
   }
 
   if (error || !ticket) {
-    return <ErrorAlert message={error || 'Το ticket δεν βρέθηκε'} />;
+    return <ErrorAlert message={error || 'Ticket not found'} />;
   }
 
   return (
@@ -192,13 +189,13 @@ export default function SupportTicketDetail() {
       </div>
       <div className="relative">
         <PageHero
-          eyebrow="Υποστήριξη"
+          eyebrow="Support"
           title={
             <span className="text-3xl font-semibold text-foreground md:text-5xl">
               {ticket.subject}
             </span>
           }
-          subtitle={`Κατηγορία: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
+          subtitle={`Category: ${SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}`}
           sectionClassName=" pt-4"
           subtitleClassName=" text-muted-foreground"
           badges={
@@ -218,7 +215,7 @@ export default function SupportTicketDetail() {
               </Badge>
               {ticket.severity ? (
                 <span className="rounded-full px-3 py-1 text-xs text-muted-foreground">
-                  Σοβαρότητα: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
+                  Severity: {SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}
                 </span>
               ) : null}
             </>
@@ -230,7 +227,7 @@ export default function SupportTicketDetail() {
             <CardHeader className="bg-transparent">
               <CardTitle className="flex items-center gap-2 text-foreground">
                 <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden />
-                Ιστορικό συνομιλίας
+                Conversation history
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-4">
@@ -251,7 +248,7 @@ export default function SupportTicketDetail() {
                         }`}
                         aria-hidden
                       />
-                      {message.author_role === 'admin' ? 'Ομάδα υποστήριξης' : 'Εσύ'}
+                      {message.author_role === 'admin' ? 'Support team' : 'You'}
                     </span>
                     <FormattedDate
                       date={message.created_at}
@@ -276,7 +273,7 @@ export default function SupportTicketDetail() {
                             className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--muted-foreground))]"
                             aria-hidden
                           />
-                          {attachment.file_name || 'Συνημμένο'}
+                          {attachment.file_name || 'Attachment'}
                         </a>
                       ))}
                     </div>
@@ -285,20 +282,20 @@ export default function SupportTicketDetail() {
               ))}
 
               <form onSubmit={handleReplySubmit} className="space-y-4 rounded-lg p-4">
-                <div className="text-sm font-semibold text-foreground">Απάντησε στο ticket</div>
+                <div className="text-sm font-semibold text-foreground">Reply to ticket</div>
                 {replyResult ? (
                   <Alert
                     variant={replyResult.type === 'success' ? 'success' : 'destructive'}
                     className="rounded-xl border border-border bg-card/80 px-4 py-3"
                   >
                     <AlertTitle className="text-base">
-                      {replyResult.type === 'success' ? 'ΟΚ' : 'Σφάλμα'}
+                      {replyResult.type === 'success' ? 'OK' : 'Error'}
                     </AlertTitle>
                     <AlertDescription>{replyResult.message}</AlertDescription>
                   </Alert>
                 ) : null}
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-foreground">Μήνυμα</label>
+                  <label className="text-sm font-medium text-foreground">Message</label>
                   <Textarea
                     value={replyText}
                     onChange={event => setReplyText(event.target.value)}
@@ -312,7 +309,7 @@ export default function SupportTicketDetail() {
                   disabled={replyLoading}
                 />
                 <Button type="submit" variant="primary" disabled={replyLoading}>
-                  {replyLoading ? 'Αποστολή...' : 'Αποστολή απάντησης'}
+                  {replyLoading ? 'Sending...' : 'Send reply'}
                 </Button>
               </form>
             </CardContent>

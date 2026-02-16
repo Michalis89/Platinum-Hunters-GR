@@ -142,4 +142,3 @@ export const UserMenu = React.memo(function UserMenu({
     </DropdownMenu>
   );
 });
-

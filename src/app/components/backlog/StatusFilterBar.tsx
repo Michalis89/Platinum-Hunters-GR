@@ -49,7 +49,10 @@ export default function StatusFilterBar({
           />
         </div>
 
-        <Tabs value={activeStatus} onValueChange={value => onStatusChange(value as MediaStatus | 'all')}>
+        <Tabs
+          value={activeStatus}
+          onValueChange={value => onStatusChange(value as MediaStatus | 'all')}
+        >
           <TabsList className="h-11 w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border/70 bg-card/70 p-1 [scrollbar-width:thin]">
             {filters.map(filter => (
               <TabsTrigger

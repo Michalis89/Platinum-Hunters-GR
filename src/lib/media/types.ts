@@ -3,6 +3,7 @@
 export type MediaItem = {
   id: number;
   category: MediaCategory;
+  updated_at?: string | null;
   slug?: string | null;
   title?: string | null;
   original_title?: string | null;

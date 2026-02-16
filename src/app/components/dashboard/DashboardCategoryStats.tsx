@@ -49,7 +49,7 @@ function formatHoursBreakdown(totalHours: number): string {
   const days = Math.floor(remainder / hoursPerDay);
   const hours = remainder % hoursPerDay;
 
-  return `${years} χρόνια, ${months} μήνες, ${days} μέρες, ${hours} ώρες`;
+  return `${years} years, ${months} months, ${days} days, ${hours} hours`;
 }
 
 export default function DashboardCategoryStats({ category, stats }: DashboardCategoryStatsProps) {
@@ -65,7 +65,7 @@ export default function DashboardCategoryStats({ category, stats }: DashboardCat
     { key: 'planned', label: 'Backlog', value: stats.planned, icon: ListTodo },
     { key: 'current', label: 'Current', value: stats.current, icon: Play },
     { key: 'favorites', label: 'Favorites', value: stats.favorites, icon: Heart },
-    { key: 'hours', label: 'Συνολικές ώρες', value: stats.hours, icon: Sparkles },
+    { key: 'hours', label: 'Total hours', value: stats.hours, icon: Sparkles },
   ];
 
   const renderCard = (card: {
@@ -122,7 +122,9 @@ export default function DashboardCategoryStats({ category, stats }: DashboardCat
         <h3 className="text-2xl font-semibold tracking-tight">{labels.title}</h3>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">{primaryStats.map(renderCard)}</div>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+        {primaryStats.map(renderCard)}
+      </div>
       <div className="grid grid-cols-2 gap-3 pt-1 md:grid-cols-4 md:gap-3.5">
         {secondaryStats.map(renderCard)}
       </div>

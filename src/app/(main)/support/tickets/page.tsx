@@ -6,6 +6,7 @@ export const metadata = buildMetadata({
   title: 'My tickets | Hobbistas',
   description: 'Track your support requests and their status on Hobbistas.',
   path: '/support/tickets',
+  noindex: true,
 });
 
 export default async function SupportTicketsPage() {

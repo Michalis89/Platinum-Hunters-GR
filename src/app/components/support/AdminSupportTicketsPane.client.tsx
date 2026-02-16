@@ -74,7 +74,7 @@ export default function AdminSupportTicketsPane() {
       severity: '',
       q: '',
     },
-    errorMessage: 'Αποτυχία φόρτωσης',
+    errorMessage: 'Failed to load',
   });
 
   return (
@@ -84,15 +84,13 @@ export default function AdminSupportTicketsPane() {
       </div>
       <div className="relative mt-10">
         <PageHero
-          eyebrow="Διαχείριση"
-          title={
-            <span className="text-3xl text-foreground md:text-5xl">Εισερχόμενα Υποστήριξης</span>
-          }
-          subtitle="Διαχειρίσου όλα τα εισερχόμενα αιτήματα υποστήριξης."
+          eyebrow="Management"
+          title={<span className="text-3xl text-foreground md:text-5xl">Support Inbox</span>}
+          subtitle="Manage all incoming support requests."
           badges={
             <span className="rounded-full border border-border bg-card px-3 py-1">
               <ShieldCheck className="mr-2 inline h-4 w-4" />
-              Μόνο για διαχειριστές
+              Admins only
             </span>
           }
         />
@@ -113,7 +111,7 @@ export default function AdminSupportTicketsPane() {
                           className="font-medium"
                           onClick={alert.onConfirm}
                         >
-                          Διαγραφή
+                          Delete
                         </Button>
                       )}
                       {alert.onCancel && (
@@ -127,7 +125,7 @@ export default function AdminSupportTicketsPane() {
                             setAlert(null);
                           }}
                         >
-                          Άκυρο
+                          Cancel
                         </Button>
                       )}
                     </div>
@@ -138,7 +136,7 @@ export default function AdminSupportTicketsPane() {
                   variant="ghost"
                   size="icon"
                   className="absolute right-3 top-3 h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
-                  aria-label="Κλείσιμο μηνύματος"
+                  aria-label="Close message"
                   onClick={() => setAlert(null)}
                 >
                   <X className="h-4 w-4" />
@@ -148,47 +146,47 @@ export default function AdminSupportTicketsPane() {
           )}
           <Card className={UI_CLASSNAMES.panelCard}>
             <CardHeader className="border-border">
-              <CardTitle className="text-foreground">Φίλτρα</CardTitle>
+              <CardTitle className="text-foreground">Filters</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-4">
               <Select
-                label="Κατάσταση"
+                label="Status"
                 value={filters.status}
                 onChange={value => setFilters(prev => ({ ...prev, status: value }))}
                 options={STATUS_OPTIONS}
                 optionLabels={statusLabels}
-                placeholder="Όλα"
+                placeholder="All"
                 labelClassName="text-foreground"
                 className="border-border bg-card text-foreground"
               />
               <Select
-                label="Κατηγορία"
+                label="Category"
                 value={filters.category}
                 onChange={value => setFilters(prev => ({ ...prev, category: value }))}
                 options={CATEGORY_OPTIONS}
                 optionLabels={categoryLabels}
-                placeholder="Όλες"
+                placeholder="All"
                 labelClassName="text-foreground"
                 className="border-border bg-card text-foreground"
               />
               <Select
-                label="Σοβαρότητα"
+                label="Severity"
                 value={filters.severity}
                 onChange={value => setFilters(prev => ({ ...prev, severity: value }))}
                 options={SEVERITY_OPTIONS}
                 optionLabels={severityLabels}
-                placeholder="Όλες"
+                placeholder="All"
                 labelClassName="text-foreground"
                 className="border-border bg-card text-foreground"
               />
               <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground">Αναζήτηση</label>
+                <label className="text-sm font-medium text-foreground">Search</label>
                 <div className="flex items-center gap-2">
                   <Input
                     type="text"
                     value={filters.q}
                     onChange={event => setFilters(prev => ({ ...prev, q: event.target.value }))}
-                    placeholder="Θέμα ή περιγραφή"
+                    placeholder="Subject or description"
                     className="border-border bg-card"
                   />
                   <Button variant="secondary" className="px-3">
@@ -204,22 +202,20 @@ export default function AdminSupportTicketsPane() {
               <div className="py-16">
                 <div className="flex flex-col items-center justify-center gap-3">
                   <Spinner />
-                  <span className="text-sm text-muted-foreground">Φορτώνουμε το inbox...</span>
+                  <span className="text-sm text-muted-foreground">Loading inbox...</span>
                 </div>
               </div>
             ) : error ? (
               <ErrorAlert message={error} />
             ) : tickets.length === 0 ? (
               <EmptyState
-                title="Δεν υπάρχουν tickets"
-                description="Δεν βρέθηκαν αιτήματα με τα συγκεκριμένα φίλτρα."
+                title="No tickets"
+                description="No requests were found with these filters."
               />
             ) : (
               <div className="space-y-4">
                 {meta ? (
-                  <div className="text-xs text-muted-foreground">
-                    Σύνολο αποτελεσμάτων: {meta.total}
-                  </div>
+                  <div className="text-xs text-muted-foreground">Total results: {meta.total}</div>
                 ) : null}
                 {tickets.map(ticket => (
                   <SupportTicketCard
@@ -230,13 +226,13 @@ export default function AdminSupportTicketsPane() {
                     categoryText={categoryLabels[ticket.category] || ticket.category}
                     severityText={
                       ticket.severity
-                        ? `Σοβαρότητα: ${severityLabels[ticket.severity] || ticket.severity}`
+                        ? `Severity: ${severityLabels[ticket.severity] || ticket.severity}`
                         : null
                     }
                     updatedAt={ticket.updated_at}
                     meta={
                       <div className="text-xs text-muted-foreground">
-                        Από:{' '}
+                        From:{' '}
                         {ticket.name || ticket.users?.display_name || ticket.users?.username || '—'}
                         {' • '}
                         {ticket.email || ticket.users?.email || '—'}
@@ -245,7 +241,7 @@ export default function AdminSupportTicketsPane() {
                     actions={
                       <>
                         <Button href={`/admin/support/${ticket.id}`} variant="secondary">
-                          Άνοιγμα ticket
+                          Open ticket
                         </Button>
                         <Button
                           variant="destructive"
@@ -253,7 +249,7 @@ export default function AdminSupportTicketsPane() {
                           onClick={() => {
                             setAlert({
                               type: 'warning',
-                              message: 'Οριστική διαγραφή ticket; Η ενέργεια δεν αναιρείται.',
+                              message: 'Permanently delete ticket? This action cannot be undone.',
                               onConfirm: async () => {
                                 setAlert(null);
                                 setActionLoading(ticket.id);
@@ -266,7 +262,7 @@ export default function AdminSupportTicketsPane() {
                                   );
                                   const payload = await res.json().catch(() => null);
                                   if (!res.ok) {
-                                    throw new Error(payload?.error || 'Αποτυχία διαγραφής');
+                                    throw new Error(payload?.error || 'Deletion failed');
                                   }
                                   setTickets(prev => prev.filter(t => t.id !== ticket.id));
                                   setAlert(null);
@@ -274,15 +270,14 @@ export default function AdminSupportTicketsPane() {
                                     () =>
                                       setAlert({
                                         type: 'success',
-                                        message: 'Το ticket διαγράφηκε.',
+                                        message: 'Ticket deleted.',
                                       }),
                                     80,
                                   );
                                 } catch (err) {
                                   setAlert({
                                     type: 'error',
-                                    message:
-                                      err instanceof Error ? err.message : 'Σφάλμα διαγραφής',
+                                    message: err instanceof Error ? err.message : 'Delete error',
                                   });
                                 } finally {
                                   setActionLoading(null);
@@ -292,7 +287,7 @@ export default function AdminSupportTicketsPane() {
                             });
                           }}
                         >
-                          Διαγραφή
+                          Delete
                         </Button>
                       </>
                     }
@@ -304,7 +299,7 @@ export default function AdminSupportTicketsPane() {
 
           <div className="mt-10 text-center text-xs text-muted-foreground">
             <Link href="/" className="hover:text-primary">
-              Επιστροφή στην αρχική
+              Back to home
             </Link>
           </div>
         </PageContainer>

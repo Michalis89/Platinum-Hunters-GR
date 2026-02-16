@@ -96,7 +96,9 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {tvNotes.services?.length && <ChipList items={tvNotes.services} label="Streaming Services" />}
+        {tvNotes.services?.length && (
+          <ChipList items={tvNotes.services} label="Streaming Services" />
+        )}
         {tvNotes.service_other && <InfoRow label="Other Service">{tvNotes.service_other}</InfoRow>}
         {tvNotes.genres?.length && <ChipList items={tvNotes.genres} label="Favorite Genres" />}
         {tvNotes.style && <InfoRow label="Watching Style">{tvNotes.style}</InfoRow>}
@@ -131,10 +133,14 @@ export function ProfileCategoryInfo({
         {moviesNotes.service_other && (
           <InfoRow label="Other Service">{moviesNotes.service_other}</InfoRow>
         )}
-        {moviesNotes.genres?.length && <ChipList items={moviesNotes.genres} label="Favorite Genres" />}
+        {moviesNotes.genres?.length && (
+          <ChipList items={moviesNotes.genres} label="Favorite Genres" />
+        )}
         {moviesNotes.style && <InfoRow label="Watching Style">{moviesNotes.style}</InfoRow>}
         {moviesNotes.since && <InfoRow label="Watching Since">{moviesNotes.since}</InfoRow>}
-        {moviesNotes.directors && <InfoRow label="Favorite Directors">{moviesNotes.directors}</InfoRow>}
+        {moviesNotes.directors && (
+          <InfoRow label="Favorite Directors">{moviesNotes.directors}</InfoRow>
+        )}
         {moviesNotes.actors && <InfoRow label="Favorite Actors">{moviesNotes.actors}</InfoRow>}
       </div>
     );
@@ -159,14 +165,20 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {animeNotes.platforms?.length && <ChipList items={animeNotes.platforms} label="Platforms" />}
+        {animeNotes.platforms?.length && (
+          <ChipList items={animeNotes.platforms} label="Platforms" />
+        )}
         {animeNotes.platform_other && (
           <InfoRow label="Other Platform">{animeNotes.platform_other}</InfoRow>
         )}
-        {animeNotes.genres?.length && <ChipList items={animeNotes.genres} label="Favorite Genres" />}
+        {animeNotes.genres?.length && (
+          <ChipList items={animeNotes.genres} label="Favorite Genres" />
+        )}
         {animeNotes.format && <InfoRow label="Watching Format">{animeNotes.format}</InfoRow>}
         {animeNotes.since && <InfoRow label="Watching Since">{animeNotes.since}</InfoRow>}
-        {animeNotes.directors && <InfoRow label="Directors / Studios">{animeNotes.directors}</InfoRow>}
+        {animeNotes.directors && (
+          <InfoRow label="Directors / Studios">{animeNotes.directors}</InfoRow>
+        )}
         {animeNotes.notes && <InfoRow label="Notes">{animeNotes.notes}</InfoRow>}
       </div>
     );
@@ -189,7 +201,9 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {booksNotes.genres?.length && <ChipList items={booksNotes.genres} label="Favorite Genres" />}
+        {booksNotes.genres?.length && (
+          <ChipList items={booksNotes.genres} label="Favorite Genres" />
+        )}
         {booksNotes.format && <InfoRow label="Reading Format">{booksNotes.format}</InfoRow>}
         {booksNotes.since && <InfoRow label="Reading Since">{booksNotes.since}</InfoRow>}
         {booksNotes.authors && <InfoRow label="Favorite Authors">{booksNotes.authors}</InfoRow>}
@@ -215,7 +229,9 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {mangaNotes.genres?.length && <ChipList items={mangaNotes.genres} label="Favorite Genres" />}
+        {mangaNotes.genres?.length && (
+          <ChipList items={mangaNotes.genres} label="Favorite Genres" />
+        )}
         {mangaNotes.format && <InfoRow label="Reading Format">{mangaNotes.format}</InfoRow>}
         {mangaNotes.since && <InfoRow label="Reading Since">{mangaNotes.since}</InfoRow>}
         {mangaNotes.authors && <InfoRow label="Favorite Mangaka">{mangaNotes.authors}</InfoRow>}
@@ -241,7 +257,9 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {codingNotes.languages?.length && <ChipList items={codingNotes.languages} label="Languages" />}
+        {codingNotes.languages?.length && (
+          <ChipList items={codingNotes.languages} label="Languages" />
+        )}
         {codingNotes.focus?.length && <ChipList items={codingNotes.focus} label="Focus Areas" />}
         {codingNotes.since && <InfoRow label="Coding Since">{codingNotes.since}</InfoRow>}
         {codingNotes.tools && <InfoRow label="Tools / Stack">{codingNotes.tools}</InfoRow>}

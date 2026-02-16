@@ -1,5 +1,4 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
-
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import type { Database } from '@/lib/supabase/database.types';
 import { API_ERRORS } from '@/lib/api/errors';
@@ -10,7 +9,6 @@ async function GETHandler() {
   try {
     const supabase = await createRouteHandlerClient();
 
-    // Get current session
     const {
       data: { session },
       error: sessionError,
@@ -18,14 +16,13 @@ async function GETHandler() {
 
     if (sessionError) {
       console.error('Session error:', sessionError);
-      return fail({ error: 'Σφάλμα ελέγχου session' }, 500);
+      return fail({ error: 'Session check error' }, 500);
     }
 
     if (!session) {
       return ok({ user: null, session: null });
     }
 
-    // Fetch user profile
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
       .select('*')
@@ -34,14 +31,12 @@ async function GETHandler() {
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
-      return fail({ error: 'Σφάλμα φόρτωσης προφίλ' }, 500);
+      return fail({ error: 'Profile loading error' }, 500);
     }
 
     const typedUserProfile = userProfile as Database['public']['Tables']['users']['Row'];
 
-    // Check if account is deleted, suspended, or banned
     if (typedUserProfile.account_status === 'deleted') {
-      // Sign out the user and clear cookies
       await supabase.auth.signOut();
       await clearAuthCookies();
 
@@ -52,7 +47,6 @@ async function GETHandler() {
       typedUserProfile.account_status === 'suspended' ||
       typedUserProfile.account_status === 'banned'
     ) {
-      // Sign out suspended/banned users
       await supabase.auth.signOut();
       await clearAuthCookies();
 
@@ -60,8 +54,8 @@ async function GETHandler() {
         {
           error:
             typedUserProfile.account_status === 'suspended'
-              ? 'Ο λογαριασμός σας έχει ανασταλεί'
-              : 'Ο λογαριασμός σας έχει αποκλειστεί',
+              ? 'Your account has been suspended'
+              : 'Your account has been blocked',
         },
         403,
       );

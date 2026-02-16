@@ -36,19 +36,14 @@ const ALLOWED_CATEGORIES = new Set([
   'vape',
 ]);
 
-/**
- * Signup API route that creates a Supabase user via the Admin API and
- * ships a Resend confirmation email with the Supabase action link.
- */
 async function POSTHandler(req: Request) {
   const siteUrl = resolveSiteUrl(req);
   let step = 'rate_limit';
 
-  // Rate limit: 5 registrations per hour per IP (Redis-backed, serverless-safe)
   const clientIp = getClientIp(req);
   const rateLimitResult = await rateLimit('registerIp', clientIp);
   if (!rateLimitResult.success) {
-    return fail({ error: 'Πολλές προσπάθειες εγγραφής. Δοκιμάστε ξανά αργότερα.' }, 429, {
+    return fail({ error: 'Too many sign-up attempts. Please try again later.' }, 429, {
       headers: rateLimitHeaders(rateLimitResult),
     });
   }
@@ -120,17 +115,17 @@ async function POSTHandler(req: Request) {
 
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      return fail({ error: emailValidation.error || 'Μη έγκυρο email' }, 400);
+      return fail({ error: emailValidation.error || 'Invalid email' }, 400);
     }
 
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
-      return fail({ error: usernameValidation.error || 'Μη έγκυρο username' }, 400);
+      return fail({ error: usernameValidation.error || 'Invalid username' }, 400);
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      return fail({ error: passwordValidation.error || 'Μη έγκυρος κωδικός' }, 400);
+      return fail({ error: passwordValidation.error || 'Invalid password' }, 400);
     }
 
     if (full_name) {
@@ -164,14 +159,14 @@ async function POSTHandler(req: Request) {
     if (psn_id) {
       const psnValidation = validatePSNId(psn_id);
       if (!psnValidation.isValid) {
-        return fail({ error: psnValidation.error || 'Μη έγκυρο PSN ID' }, 400);
+        return fail({ error: psnValidation.error || 'Invalid PSN ID' }, 400);
       }
     }
 
     if (bio) {
       const bioValidation = validateBio(bio);
       if (!bioValidation.isValid) {
-        return fail({ error: bioValidation.error || 'Μη έγκυρο bio' }, 400);
+        return fail({ error: bioValidation.error || 'Invalid bio' }, 400);
       }
     }
 
@@ -188,7 +183,7 @@ async function POSTHandler(req: Request) {
 
     if (existingEmail) {
       console.info('Signup attempt for already registered email', email);
-      return fail({ error: 'Υπάρχει ήδη λογαριασμός με αυτό το email.' }, 409);
+      return fail({ error: 'An account with this email already exists.' }, 409);
     }
 
     step = 'check_existing_username';
@@ -201,7 +196,7 @@ async function POSTHandler(req: Request) {
 
     if (existingUsername) {
       console.info('Signup attempt with existing username', username);
-      return fail({ error: 'Το username χρησιμοποιείται ήδη.' }, 409);
+      return fail({ error: 'Username is already in use.' }, 409);
     }
 
     if (psn_id) {
@@ -214,7 +209,7 @@ async function POSTHandler(req: Request) {
 
       if (existingPSN) {
         console.info('Signup attempt with existing PSN ID', psn_id);
-        return fail({ error: 'Το PSN ID χρησιμοποιείται ήδη.' }, 409);
+        return fail({ error: 'PSN ID is already in use.' }, 409);
       }
     }
 
@@ -233,7 +228,7 @@ async function POSTHandler(req: Request) {
     if (authError) {
       console.error('Admin create user error:', authError);
       if (authError.message.toLowerCase().includes('already')) {
-        return fail({ error: 'Υπάρχει ήδη λογαριασμός με αυτά τα στοιχεία.' }, 409);
+        return fail({ error: 'An account with these details already exists.' }, 409);
       }
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
@@ -301,8 +296,7 @@ async function POSTHandler(req: Request) {
       console.error('Signup link generation failed:', linkError);
       return fail(
         {
-          error:
-            'Ο λογαριασμός δημιουργήθηκε, αλλά δεν στάλθηκε email επιβεβαίωσης. Προσπάθησε ξανά.',
+          error: 'Account created, but confirmation email was not sent. Try again.',
         },
         500,
       );
@@ -313,10 +307,7 @@ async function POSTHandler(req: Request) {
       await sendConfirmEmail(email, actionLink);
     } catch (error) {
       console.error('Failed to send confirmation email:', error);
-      return fail(
-        { error: 'Δεν καταφέραμε να στείλουμε email επιβεβαίωσης. Προσπάθησε ξανά σε λίγο.' },
-        500,
-      );
+      return fail({ error: 'We could not send the confirmation email. Try again shortly.' }, 500);
     }
 
     step = 'complete';

@@ -171,8 +171,8 @@ export const CODING_FOCUS = [
   'Other',
 ];
 
-export const PET_TYPES = ['Σκύλος', 'Γάτα', 'Πτηνά', 'Ψάρια', 'Ερπετά', 'Άλλα'];
+export const PET_TYPES = ['Dog', 'Cat', 'Birds', 'Fish', 'Reptiles', 'Other'];
 
-export const VAPE_DEVICES = ['Pod', 'Mod', 'Disposable', 'MTL', 'DTL', 'Άλλα'];
+export const VAPE_DEVICES = ['Pod', 'Mod', 'Disposable', 'MTL', 'DTL', 'Other'];
 
-export const VAPE_FLAVORS = ['Tobacco', 'Dessert', 'Fruits', 'Menthol', 'Drinks', 'Άλλα'];
+export const VAPE_FLAVORS = ['Tobacco', 'Dessert', 'Fruits', 'Menthol', 'Drinks', 'Other'];

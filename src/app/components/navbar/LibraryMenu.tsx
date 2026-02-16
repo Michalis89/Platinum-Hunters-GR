@@ -77,4 +77,3 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
     </MenubarMenu>
   );
 }
-

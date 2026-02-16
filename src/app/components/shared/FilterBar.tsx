@@ -64,7 +64,7 @@ export default function FilterBar({
     category ? category === activeCategory : !activeCategory;
 
   const renderPill = (category: ArticleCategory | null) => {
-    const label = category ? (CATEGORY_LABELS[category] ?? category) : 'Όλα';
+    const label = category ? (CATEGORY_LABELS[category] ?? category) : 'All';
     const isActive = isCategoryActive(category);
 
     const styleClasses = isActive ? PILL_ACTIVE : PILL_INACTIVE;
@@ -86,16 +86,16 @@ export default function FilterBar({
   return (
     <div className="rounded-3xl border border-border bg-card/90 p-4 shadow-md">
       <div className="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-        <span>Κατηγορίες</span>
+        <span>Categories</span>
         {hasActiveCategory && (
-          <Link href={basePath} className={CLEAR_BUTTON} aria-label="Επαναφορά φίλτρων">
+          <Link href={basePath} className={CLEAR_BUTTON} aria-label="Reset filters">
             <X className="h-3 w-3" />
-            <span className="text-[11px]">Εκκαθάριση</span>
+            <span className="text-[11px]">Clear</span>
           </Link>
         )}
       </div>
 
-      <div role="tablist" aria-label="Κατηγορίες">
+      <div role="tablist" aria-label="Categories">
         <div className="flex flex-wrap items-center gap-2">
           {renderPill(null)}
           {primaries.map(category => renderPill(category))}

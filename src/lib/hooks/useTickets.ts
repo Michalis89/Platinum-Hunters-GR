@@ -101,7 +101,7 @@ export function useTickets<
     endpoint,
     enabled = true,
     initialFilters,
-    errorMessage = 'Κάτι πήγε στραβά',
+    errorMessage = 'Something went wrong',
     buildQueryParams = defaultQueryBuilder,
     mapData = defaultMapData<TTicket>,
     mapMeta = defaultMapMeta,

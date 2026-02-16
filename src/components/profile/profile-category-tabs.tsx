@@ -89,7 +89,16 @@ const ANIME_PLATFORMS = [
   'Blu-ray / Physical',
   'Other',
 ];
-const MANGA_GENRES = ['Shonen', 'Seinen', 'Shojo', 'Josei', 'Fantasy', 'Action', 'Sci-Fi', 'Romance'];
+const MANGA_GENRES = [
+  'Shonen',
+  'Seinen',
+  'Shojo',
+  'Josei',
+  'Fantasy',
+  'Action',
+  'Sci-Fi',
+  'Romance',
+];
 const MANGA_FORMATS = ['Physical', 'Digital', 'Webtoon', 'Mixed'];
 const BOOK_FORMATS = ['Physical books', 'eBooks', 'Audiobooks', 'Mixed', 'Depends on the book'];
 
@@ -140,7 +149,10 @@ export function ProfileCategoryTabs({
   }, [orderedCategories, activeCategory]);
 
   const getNote = (cat: string) =>
-    ((categoryNotes?.[cat] as Record<string, unknown> | undefined) || {}) as Record<string, unknown>;
+    ((categoryNotes?.[cat] as Record<string, unknown> | undefined) || {}) as Record<
+      string,
+      unknown
+    >;
 
   if (!orderedCategories.length) {
     return (
@@ -168,13 +180,17 @@ export function ProfileCategoryTabs({
           <TabsContent key={category} value={category}>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">{String(TAB_LABELS[category] ?? category)}</CardTitle>
+                <CardTitle className="text-base">
+                  {String(TAB_LABELS[category] ?? category)}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {category === 'games' && (
                   <CollapsibleCard className="">
                     <CollapsibleCardHeader className="border-b border-border bg-card/50">
-                      <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">Gaming</p>
+                      <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">
+                        Gaming
+                      </p>
                       <CardTitle className="text-lg text-foreground">Gaming Information</CardTitle>
                     </CollapsibleCardHeader>
                     <CollapsibleCardContent className="space-y-4">
@@ -214,7 +230,8 @@ export function ProfileCategoryTabs({
                                   className="max-w-xs text-left leading-relaxed"
                                 >
                                   Use your Steam ID from your profile. Prefer the 17-digit SteamID64
-                                  (for example 7656119...). Vanity names and profile URLs are also accepted.
+                                  (for example 7656119...). Vanity names and profile URLs are also
+                                  accepted.
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -367,11 +384,7 @@ export function ProfileCategoryTabs({
                                   label="Other platform"
                                   value={(note.platform_other as string) || ''}
                                   onChange={e =>
-                                    onCategoryFieldChange(
-                                      'anime',
-                                      'platform_other',
-                                      e.target.value,
-                                    )
+                                    onCategoryFieldChange('anime', 'platform_other', e.target.value)
                                   }
                                   placeholder="e.g. local streaming app"
                                 />
@@ -383,9 +396,7 @@ export function ProfileCategoryTabs({
                             label="Watching Anime Since (Year)"
                             type="number"
                             value={(note.since as string | number | undefined) || ''}
-                            onChange={e =>
-                              onCategoryFieldChange('anime', 'since', e.target.value)
-                            }
+                            onChange={e => onCategoryFieldChange('anime', 'since', e.target.value)}
                             placeholder="e.g. 2004"
                             min="1970"
                             max={new Date().getFullYear()}
@@ -770,7 +781,9 @@ export function ProfileCategoryTabs({
                                     <Button
                                       type="button"
                                       key={service}
-                                      onClick={() => onCategoryListToggle('tv', 'services', service)}
+                                      onClick={() =>
+                                        onCategoryListToggle('tv', 'services', service)
+                                      }
                                       className={chipClass(active)}
                                     >
                                       {service}
@@ -852,7 +865,9 @@ export function ProfileCategoryTabs({
                               </label>
                               <Textarea
                                 value={(note.people as string) || ''}
-                                onChange={e => onCategoryFieldChange('tv', 'people', e.target.value)}
+                                onChange={e =>
+                                  onCategoryFieldChange('tv', 'people', e.target.value)
+                                }
                                 placeholder="Favorite actors/directors or extra notes."
                                 rows={3}
                               />
@@ -888,7 +903,9 @@ export function ProfileCategoryTabs({
                                     <Button
                                       type="button"
                                       key={lang}
-                                      onClick={() => onCategoryListToggle('coding', 'languages', lang)}
+                                      onClick={() =>
+                                        onCategoryListToggle('coding', 'languages', lang)
+                                      }
                                       className={chipClass(active)}
                                     >
                                       {lang}
@@ -965,7 +982,8 @@ export function ProfileCategoryTabs({
                         const activePetTypes =
                           petSelection.length > 0 ? petSelection : fallbackType;
                         const petEntries =
-                          (note.entries as Record<string, Record<string, string>> | undefined) || {};
+                          (note.entries as Record<string, Record<string, string>> | undefined) ||
+                          {};
                         const getPetEntryValue = (type: string, key: string) => {
                           const entry = petEntries[type] || {};
                           if (entry[key]) return entry[key];
@@ -1011,7 +1029,9 @@ export function ProfileCategoryTabs({
                                     key={`pet-entry-${type}`}
                                     className="space-y-3 rounded-lg border bg-card/70 px-4 py-3"
                                   >
-                                    <p className="text-sm font-semibold text-foreground">{String(type)}</p>
+                                    <p className="text-sm font-semibold text-foreground">
+                                      {String(type)}
+                                    </p>
                                     <div className="grid gap-4 md:grid-cols-3">
                                       <Input
                                         label={`Name (${type})`}
@@ -1063,7 +1083,9 @@ export function ProfileCategoryTabs({
                       {(() => {
                         const vapeDeviceValue =
                           (note.device as string) || String(vapeFallback.device || '');
-                        const fallbackFlavor = vapeFallback.flavor ? [String(vapeFallback.flavor)] : [];
+                        const fallbackFlavor = vapeFallback.flavor
+                          ? [String(vapeFallback.flavor)]
+                          : [];
                         const vapeFlavors =
                           Array.isArray(note.flavors) && (note.flavors as string[]).length > 0
                             ? (note.flavors as string[])
@@ -1115,7 +1137,9 @@ export function ProfileCategoryTabs({
                                     <Button
                                       type="button"
                                       key={flavor}
-                                      onClick={() => onCategoryListToggle('vape', 'flavors', flavor)}
+                                      onClick={() =>
+                                        onCategoryListToggle('vape', 'flavors', flavor)
+                                      }
                                       className={chipClass(active)}
                                     >
                                       {flavor}
@@ -1138,4 +1162,3 @@ export function ProfileCategoryTabs({
     </Tabs>
   );
 }
-

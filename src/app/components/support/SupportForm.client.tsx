@@ -240,7 +240,6 @@ export default function SupportForm({}: Readonly<{
     const nextErrors: Record<string, string> = {};
     if (!formData.subject.trim()) nextErrors.subject = 'Subject is required.';
     if (!formData.description.trim()) nextErrors.description = 'Message is required.';
-    // Email is optional since user is authenticated (middleware ensures this)
     if (!formData.consent) nextErrors.consent = 'Consent is required to continue.';
 
     if (category === 'bug') {
@@ -372,7 +371,10 @@ export default function SupportForm({}: Readonly<{
           />
           <div className="relative">
             <div className="mb-3 flex items-center justify-center gap-2">
-              <Badge variant="secondary" className="rounded-full border-border/60 bg-card/70 text-xs">
+              <Badge
+                variant="secondary"
+                className="rounded-full border-border/60 bg-card/70 text-xs"
+              >
                 Support
               </Badge>
             </div>
@@ -435,7 +437,10 @@ export default function SupportForm({}: Readonly<{
               ) : null}
 
               <section className="space-y-4">
-                <SectionHeading icon={<Mail className="h-4 w-4" />} title="Contact & request type" />
+                <SectionHeading
+                  icon={<Mail className="h-4 w-4" />}
+                  title="Contact & request type"
+                />
 
                 <Tabs
                   value={category}
@@ -570,7 +575,9 @@ export default function SupportForm({}: Readonly<{
                               rows={3}
                               disabled={submitting}
                               className={
-                                errors.expected ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                                errors.expected
+                                  ? 'border-red-500 focus-visible:ring-red-500/30'
+                                  : ''
                               }
                             />
                           </div>
@@ -648,7 +655,9 @@ export default function SupportForm({}: Readonly<{
                         />
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium text-foreground">App version</label>
+                            <label className="text-sm font-medium text-foreground">
+                              App version
+                            </label>
                             <TooltipProvider delayDuration={150}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -696,7 +705,10 @@ export default function SupportForm({}: Readonly<{
                   <Separator className="bg-border/50" />
 
                   <section className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors duration-200">
-                    <SectionHeading icon={<Sparkles className="h-4 w-4" />} title="Feature request" />
+                    <SectionHeading
+                      icon={<Sparkles className="h-4 w-4" />}
+                      title="Feature request"
+                    />
                     <div>
                       <div className="space-y-1.5">
                         <label className="text-sm font-medium text-foreground">
@@ -763,7 +775,10 @@ export default function SupportForm({}: Readonly<{
                   <Separator className="bg-border/50" />
 
                   <section className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors duration-200">
-                    <SectionHeading icon={<ShieldCheck className="h-4 w-4" />} title="Author rights" />
+                    <SectionHeading
+                      icon={<ShieldCheck className="h-4 w-4" />}
+                      title="Author rights"
+                    />
                     <div className="grid gap-4 md:grid-cols-2">
                       <Input
                         label="Profile / username"
@@ -802,7 +817,9 @@ export default function SupportForm({}: Readonly<{
                       <FieldError>{errors.reason}</FieldError>
                     </div>
                     <div>
-                      <p className="mb-2 text-sm font-medium text-foreground">Requested permissions</p>
+                      <p className="mb-2 text-sm font-medium text-foreground">
+                        Requested permissions
+                      </p>
                       <p className="mb-3 text-xs text-muted-foreground">
                         You can choose both Author and Reviewer if needed.
                       </p>
@@ -830,7 +847,10 @@ export default function SupportForm({}: Readonly<{
                   <Separator className="bg-border/50" />
 
                   <section className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors duration-200">
-                    <SectionHeading icon={<MessageCircle className="h-4 w-4" />} title="General topic" />
+                    <SectionHeading
+                      icon={<MessageCircle className="h-4 w-4" />}
+                      title="General topic"
+                    />
                     <Input
                       label="Topic"
                       type="text"
@@ -868,7 +888,11 @@ export default function SupportForm({}: Readonly<{
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <AttachmentDropzone items={attachments} onChange={setAttachments} disabled={submitting} />
+                <AttachmentDropzone
+                  items={attachments}
+                  onChange={setAttachments}
+                  disabled={submitting}
+                />
               </section>
             </CardContent>
 
@@ -904,7 +928,9 @@ export default function SupportForm({}: Readonly<{
 
                   <label className="flex items-start justify-between gap-4 rounded-xl border border-border/60 bg-card/70 p-3">
                     <span className="flex flex-col gap-1">
-                      <span className="text-sm font-medium text-foreground">Allow follow-up email</span>
+                      <span className="text-sm font-medium text-foreground">
+                        Allow follow-up email
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         Receive updates when there is progress on your ticket.
                       </span>

@@ -30,7 +30,7 @@ async function POSTHandler(request: Request) {
     const formData = await request.formData();
     const file = formData.get('file');
     if (!file || !(file instanceof File)) {
-      return NextResponse.json({ message: 'Δεν βρέθηκε αρχείο.' }, { status: 400 });
+      return NextResponse.json({ message: 'File not found.' }, { status: 400 });
     }
 
     const supabaseServer = getSupabaseServer();
@@ -41,13 +41,13 @@ async function POSTHandler(request: Request) {
       .single();
     if (userError || !user) {
       console.error('Cover upload: failed to load user role', userError);
-      return NextResponse.json({ message: 'Δεν επιτρέπεται η ενέργεια.' }, { status: 403 });
+      return NextResponse.json({ message: 'Action is not allowed.' }, { status: 403 });
     }
 
     const role = user.role;
     if (!role || !ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number])) {
       return NextResponse.json(
-        { message: 'Δεν έχεις δικαίωμα για αυτή τη δράση.' },
+        { message: 'You do not have permission for this action.' },
         { status: 403 },
       );
     }
@@ -66,7 +66,7 @@ async function POSTHandler(request: Request) {
 
     if (uploadError) {
       console.error('Cover upload failed', uploadError);
-      return NextResponse.json({ message: 'Αστοχία ανέβασματος.' }, { status: 500 });
+      return NextResponse.json({ message: 'Upload failed.' }, { status: 500 });
     }
 
     const { data: urlData } = await supabaseServer.storage
@@ -75,19 +75,16 @@ async function POSTHandler(request: Request) {
 
     if (!urlData?.publicUrl) {
       console.error('Cover upload failed to get public url');
-      return NextResponse.json(
-        { message: 'Δεν μπορούμε να επιστρέψουμε το URL εικόνας.' },
-        { status: 500 },
-      );
+      return NextResponse.json({ message: 'We cannot return the image URL.' }, { status: 500 });
     }
 
     return NextResponse.json({ url: urlData.publicUrl });
   } catch (error) {
     if (error instanceof UnauthorizedError) {
-      return NextResponse.json({ message: 'Μη εξουσιοδοτημένη πρόσβαση.' }, { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized access.' }, { status: 401 });
     }
     console.error('Article cover upload error:', error);
-    return NextResponse.json({ message: 'Σφάλμα ανέβασμα εικόνας.' }, { status: 500 });
+    return NextResponse.json({ message: 'Image upload error.' }, { status: 500 });
   }
 }
 

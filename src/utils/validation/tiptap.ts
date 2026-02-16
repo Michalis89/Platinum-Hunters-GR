@@ -1,13 +1,5 @@
-/**
- * TipTap JSON Content Validation
- *
- * Validates TipTap editor JSON content to prevent XSS via malformed content_rich fields.
- * Ensures the content structure matches expected TipTap document format.
- */
-
 import { z } from 'zod';
 
-// Allowed node types in TipTap
 const ALLOWED_NODE_TYPES = new Set([
   'doc',
   'paragraph',
@@ -29,7 +21,6 @@ const ALLOWED_NODE_TYPES = new Set([
   'taskItem',
 ]);
 
-// Allowed mark types in TipTap
 const ALLOWED_MARK_TYPES = new Set([
   'bold',
   'italic',
@@ -43,7 +34,6 @@ const ALLOWED_MARK_TYPES = new Set([
   'superscript',
 ]);
 
-// Mark schema
 const TipTapMarkSchema = z.object({
   type: z.string().refine(t => ALLOWED_MARK_TYPES.has(t), {
     message: 'Invalid mark type',
@@ -60,7 +50,6 @@ const BaseTipTapNodeSchema = z.object({
   attrs: z.record(z.string(), z.unknown()).optional(),
 });
 
-// Recursive node schema with depth limit
 type TipTapNode = z.infer<typeof BaseTipTapNodeSchema> & {
   content?: TipTapNode[];
 };
@@ -85,7 +74,6 @@ function validateTipTapNode(node: unknown, depth = 0): node is TipTapNode {
   return true;
 }
 
-// Document schema
 const TipTapDocumentSchema = z.object({
   type: z.literal('doc'),
   content: z.array(z.unknown()).optional(),
@@ -104,12 +92,11 @@ export type TipTapValidationResult = {
  */
 export function validateTipTapContent(content: unknown): TipTapValidationResult {
   if (content === null || content === undefined) {
-    return { isValid: true }; // Allow empty content
+    return { isValid: true };
   }
 
   let parsed: unknown;
 
-  // Parse if string
   if (typeof content === 'string') {
     if (content.trim() === '') {
       return { isValid: true };
@@ -123,13 +110,11 @@ export function validateTipTapContent(content: unknown): TipTapValidationResult 
     parsed = content;
   }
 
-  // Validate document structure
   const docResult = TipTapDocumentSchema.safeParse(parsed);
   if (!docResult.success) {
     return { isValid: false, error: 'Invalid TipTap document structure' };
   }
 
-  // Validate all nodes recursively
   const doc = parsed as { content?: unknown[] };
   if (doc.content && Array.isArray(doc.content)) {
     for (const node of doc.content) {
