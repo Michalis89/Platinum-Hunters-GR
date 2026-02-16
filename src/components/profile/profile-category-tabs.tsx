@@ -10,10 +10,10 @@ import {
   CollapsibleCardHeader,
 } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { SelectField as Select } from '@/components/ui/select-field';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   ANIME_GENRES,
   BOOK_GENRES,
@@ -212,29 +212,34 @@ export function ProfileCategoryTabs({
                         />
 
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between gap-2">
                             <label className="text-sm font-medium text-foreground">Steam ID</label>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    type="button"
-                                    className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-                                    aria-label="Steam ID help"
-                                  >
-                                    <CircleHelp className="h-4 w-4" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent
-                                  side="top"
-                                  className="max-w-xs text-left leading-relaxed"
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 rounded-full text-muted-foreground opacity-80 transition-opacity hover:text-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                  aria-label="Steam import tips"
                                 >
-                                  Use your Steam ID from your profile. Prefer the 17-digit SteamID64
-                                  (for example 7656119...). Vanity names and profile URLs are also
-                                  accepted.
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                                  <CircleHelp className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                side="top"
+                                align="end"
+                                className="w-80 max-w-[90vw] p-4"
+                              >
+                                <h4 className="text-sm font-semibold">Steam import tips</h4>
+                                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                                  <li>Use your SteamID64 (17 digits, e.g. 7656119...)</li>
+                                  <li>Vanity URLs and profile links are also supported</li>
+                                  <li>Your profile must be public during import</li>
+                                  <li>You can make it private again afterwards</li>
+                                </ul>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                           <input
                             type="text"
