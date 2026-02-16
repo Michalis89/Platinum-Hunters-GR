@@ -254,7 +254,7 @@ export function useLoginForm() {
       // 2. Saved URL from sessionStorage
       // 3. Server-provided redirectUrl based on profile completeness
       // 4. Default fallback
-      let redirectUrl = payload.redirectUrl || '/pages/profile/edit';
+      let redirectUrl = payload.redirectUrl || '/profile/edit';
       if (redirectParam) {
         redirectUrl = decodeURIComponent(redirectParam);
       } else {
@@ -358,3 +358,4 @@ export function useLoginForm() {
     handleSubmit,
   };
 }
+

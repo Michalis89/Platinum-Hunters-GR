@@ -12,17 +12,95 @@ const isNumeric = (value: string) => /^\d+$/.test(value);
 
 const escapeLike = (value: string) => value.replace(/[%_]/g, match => `\\${match}`);
 
+const toCanonicalSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
+
+const foldPossessiveSlug = (value: string) =>
+  value.replace(/([a-z0-9])-s-(?=[a-z0-9])/g, '$1s-');
+
+const buildSlugCandidates = (value: string): string[] => {
+  const canonical = toCanonicalSlug(value);
+  if (!canonical) return [];
+
+  const folded = foldPossessiveSlug(canonical);
+  return Array.from(new Set([canonical, folded].filter(Boolean)));
+};
+
+const collectCandidateSlugs = (item: MediaItem): string[] => {
+  const candidates = [
+    item.igdb_slug,
+    item.title,
+    item.original_title,
+    item.title_english,
+    item.title_romaji,
+    item.title_native,
+  ]
+    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+    .flatMap(value => buildSlugCandidates(value))
+    .filter(Boolean);
+
+  return Array.from(new Set(candidates));
+};
+
+const scoreSlugMatch = (target: string, item: MediaItem): number => {
+  const slugs = collectCandidateSlugs(item);
+  if (slugs.includes(target)) return 1000;
+
+  // Prefer rows where one slug is a strict prefix/suffix variant
+  // e.g. divinity-original-sin vs divinity-original-sin-enhanced-edition
+  const prefixVariant = slugs.some(slug => slug.startsWith(`${target}-`) || target.startsWith(`${slug}-`));
+  if (prefixVariant) return 700;
+
+  const includesVariant = slugs.some(slug => slug.includes(target) || target.includes(slug));
+  if (includesVariant) return 500;
+
+  return 0;
+};
+
 async function fetchBySlug(category: string, slug: string) {
   const supabase = await createRouteHandlerClient();
+  const slugCandidates = buildSlugCandidates(slug);
+  const canonicalSlug = slugCandidates[0] ?? '';
   const slugText = escapeLike(slug.replace(/[-_]/g, ' ').trim());
-  if (!slugText) return null;
+  if (!canonicalSlug && !slugText) return null;
 
+  // Exact igdb_slug hit first (fast path for clean imports)
+  if (slugCandidates.length > 0) {
+    const { data: exactIgdbSlugMatches, error: exactIgdbSlugError } = await supabase
+      .from('media_items')
+      .select(selectFields)
+      .eq('category', category)
+      .in('igdb_slug', slugCandidates)
+      .limit(10);
+
+    if (exactIgdbSlugError) throw exactIgdbSlugError;
+    const exactRows = Array.isArray(exactIgdbSlugMatches)
+      ? (exactIgdbSlugMatches as unknown as MediaItem[])
+      : [];
+    if (exactRows.length > 0) {
+      return exactRows
+        .map(item => ({ item, score: scoreSlugMatch(canonicalSlug, item) }))
+        .sort((a, b) => b.score - a.score)[0]?.item ?? exactRows[0];
+    }
+  }
+
+  const looseSlugForLike = escapeLike(canonicalSlug.replace(/-/g, '%'));
+  const foldedLooseSlugForLike = escapeLike(foldPossessiveSlug(canonicalSlug).replace(/-/g, '%'));
+  const escapedCandidates = slugCandidates.map(candidate => escapeLike(candidate));
   const { data, error } = await supabase
     .from('media_items')
     .select(selectFields)
     .eq('category', category)
     .or(
       [
+        ...escapedCandidates.map(candidate => `igdb_slug.ilike.%${candidate}%`),
+        `igdb_slug.ilike.%${looseSlugForLike}%`,
+        `igdb_slug.ilike.%${foldedLooseSlugForLike}%`,
         `title.ilike.%${slugText}%`,
         `original_title.ilike.%${slugText}%`,
         `title_english.ilike.%${slugText}%`,
@@ -30,11 +108,17 @@ async function fetchBySlug(category: string, slug: string) {
         `title_native.ilike.%${slugText}%`,
       ].join(','),
     )
-    .limit(1)
-    .maybeSingle();
+    .limit(25);
 
   if (error) throw error;
-  return data as MediaItem | null;
+  const rows = Array.isArray(data) ? (data as unknown as MediaItem[]) : [];
+  if (rows.length === 0) return null;
+
+  const ranked = rows
+    .map(item => ({ item, score: scoreSlugMatch(canonicalSlug, item) }))
+    .sort((a, b) => b.score - a.score);
+
+  return ranked[0]?.item ?? null;
 }
 
 async function fetchById(category: string, id: number) {

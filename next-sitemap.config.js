@@ -10,11 +10,12 @@ const supabaseAdmin = () =>
 
 const STATIC_PUBLIC = [
   '/',
-  '/pages/about',
-  '/pages/reviews',
-  '/pages/news',
-  '/pages/terms',
-  '/pages/privacy',
+  '/home',
+  '/about',
+  '/reviews',
+  '/articles',
+  '/terms',
+  '/privacy',
 ];
 
 const config = {
@@ -48,7 +49,7 @@ const config = {
         if (!item?.slug) continue;
 
         const isReview = item.topic === 'reviews';
-        const basePath = isReview ? '/pages/reviews' : '/pages/news';
+        const basePath = isReview ? '/reviews' : '/articles';
 
         paths.push({
           loc: `${basePath}/${item.slug}`,

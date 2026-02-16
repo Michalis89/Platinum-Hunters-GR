@@ -94,7 +94,7 @@ function BacklogPageContent() {
     params.delete('mal');
     params.delete('mal_reason');
     params.delete('mal_token_error');
-    const nextPath = params.toString() ? `/pages/backlog?${params.toString()}` : '/pages/backlog';
+    const nextPath = params.toString() ? `/backlog?${params.toString()}` : '/backlog';
 
     const runSync = async () => {
       try {
@@ -138,26 +138,26 @@ function BacklogPageContent() {
             <ShieldAlert className="h-8 w-8" />
           </div>
           <h2 className="mb-2 text-2xl font-semibold text-foreground">
-            Δεν έχεις πρόσβαση σε αυτή την κατηγορία
+            You do not have access to this category
           </h2>
           <p className="mb-6 text-[15px] text-muted-foreground">
-            Για να δεις το <strong className="text-foreground">{category}</strong> backlog, πρέπει
-            πρώτα να ενεργοποιήσεις αυτή την κατηγορία στο προφίλ σου.
+            To view the <strong className="text-foreground">{category}</strong> backlog, enable this
+            category in your profile first.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
             <Button
               variant={'primary'}
-              onClick={() => router.push('/pages/profile/edit')}
+              onClick={() => router.push('/profile/edit')}
               className="h-11 rounded-[12px]"
             >
-              Ρυθμίσεις Προφίλ
+              Profile Settings
             </Button>
             <Button
               variant={'secondary'}
-              onClick={() => router.push('/pages/backlog')}
+              onClick={() => router.push('/backlog')}
               className="h-11 rounded-[12px]"
             >
-              Πίσω στο Dashboard
+              Back to Backlog
             </Button>
           </div>
         </div>

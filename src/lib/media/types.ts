@@ -49,6 +49,17 @@ export type MediaItem = {
   publisher?: string | null;
   metacritic?: number | null;
   esrb_rating?: string | null;
+  number_of_seasons?: number | null;
+  status?: string | null;
+  end_date?: string | null;
+  duration?: number | null;
+  studios?: unknown;
+  official_website?: string | null;
+  igdb_themes?: string[] | null;
+  igdb_game_modes?: string[] | null;
+  igdb_player_perspectives?: string[] | null;
+  igdb_artwork_image_ids?: string[] | null;
+  igdb_screenshot_image_ids?: string[] | null;
 };
 
 export type MediaEntryState = {

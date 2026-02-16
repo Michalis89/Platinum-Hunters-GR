@@ -163,12 +163,12 @@ export default function EntryEditDialog({
       setDescriptionValue(data.description ?? descriptionDraft);
       setIsDescriptionEditing(false);
       await onRefreshEntry?.(true);
-      setCatalogMessage({ type: 'success', message: 'Η περιγραφή ενημερώθηκε.' });
+      setCatalogMessage({ type: 'success', message: 'Description updated.' });
     } catch (error) {
       console.warn('Description update failed:', error);
       setCatalogMessage({
         type: 'error',
-        message: error instanceof Error ? error.message : 'Αποτυχία ενημέρωσης περιγραφής.',
+        message: error instanceof Error ? error.message : 'Could not update description.',
       });
     } finally {
       setIsSavingDescription(false);
@@ -192,12 +192,12 @@ export default function EntryEditDialog({
         setDescriptionDraft(data.description);
       }
       await onRefreshEntry?.();
-      setCatalogMessage({ type: 'success', message: 'Το metadata sync από IGDB ολοκληρώθηκε.' });
+      setCatalogMessage({ type: 'success', message: 'IGDB metadata synced.' });
     } catch (error) {
       console.warn('IGDB metadata sync failed:', error);
       setCatalogMessage({
         type: 'error',
-        message: error instanceof Error ? error.message : 'Αποτυχία sync metadata από IGDB.',
+        message: error instanceof Error ? error.message : 'IGDB metadata sync failed.',
       });
     } finally {
       setIsSyncingIgdbMetadata(false);
@@ -303,7 +303,7 @@ export default function EntryEditDialog({
                       </DialogTitle>
                       <DialogDescription className="text-sm text-muted-foreground">
                         {entry.subtitle}
-                        {entry.year ? ` • ${entry.year}` : ''}
+                        {entry.year ? ` - ${entry.year}` : ''}
                       </DialogDescription>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -343,12 +343,12 @@ export default function EntryEditDialog({
                               value={descriptionDraft}
                               onChange={event => setDescriptionDraft(event.target.value)}
                               className="min-h-[120px]"
-                              placeholder="Περιγραφή..."
+                              placeholder="Description..."
                               aria-label="Description editor"
                             />
                           ) : (
                             <p className="whitespace-pre-line">
-                              {descriptionText || 'Δεν υπάρχει περιγραφή.'}
+                              {descriptionText || 'No description available.'}
                             </p>
                           )}
                           {!descriptionExpanded && !isDescriptionEditing && (
@@ -439,7 +439,7 @@ export default function EntryEditDialog({
                           htmlFor="entry-platform-trigger"
                           className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
                         >
-                          Platform που παίζεις
+                          Platform
                         </label>
                         <Select
                           value={platformValue}
@@ -451,10 +451,10 @@ export default function EntryEditDialog({
                           }
                         >
                           <SelectTrigger id="entry-platform-trigger" className="mt-2 h-10">
-                            <SelectValue placeholder="Δεν έχω επιλέξει" />
+                            <SelectValue placeholder="Not selected" />
                           </SelectTrigger>
                           <SelectContent portalContainer={selectPortalContainer}>
-                            <SelectItem value={NO_PLATFORM_VALUE}>Δεν έχω επιλέξει</SelectItem>
+                            <SelectItem value={NO_PLATFORM_VALUE}>Not selected</SelectItem>
                             {(entry.platforms ?? []).map(platform => (
                               <SelectItem key={platform} value={platform}>
                                 {platform}
@@ -495,7 +495,7 @@ export default function EntryEditDialog({
                           htmlFor="entry-progress"
                           className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
                         >
-                          Πρόοδος ({progressLabel})
+                          Progress ({progressLabel})
                         </label>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                           <div className="flex h-10 w-full items-center rounded-xl border border-border bg-card sm:w-48">
@@ -512,7 +512,7 @@ export default function EntryEditDialog({
                               <>
                                 <div className="h-5 w-px bg-border opacity-80" />
                                 <div className="flex h-full flex-1 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold text-muted-foreground">
-                                  {total ?? '—'}
+                                  {total ?? '-'}
                                 </div>
                               </>
                             )}
@@ -526,7 +526,7 @@ export default function EntryEditDialog({
                                 onClick={() => setProgress((hasNumeric ? safeValue : 0) - 1)}
                                 className="h-9 rounded-full px-3"
                               >
-                                −1
+                                -1
                               </Button>
                               <Button
                                 type="button"
@@ -558,7 +558,7 @@ export default function EntryEditDialog({
                                 style={{ width: `${percent ?? 0}%` }}
                               />
                               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-white/90">
-                                {percent !== null ? `${percent}%` : '—'}
+                                {percent !== null ? `${percent}%` : '-'}
                               </span>
                             </div>
                           </div>
@@ -567,10 +567,10 @@ export default function EntryEditDialog({
                     ) : (
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                          Διάρκεια
+                          Runtime
                         </label>
                         <div className="mt-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground">
-                          {total ? `${total} min` : '—'}
+                          {total ? `${total} min` : '-'}
                         </div>
                         {editState.status !== 'completed' && (
                           <Button
@@ -591,10 +591,10 @@ export default function EntryEditDialog({
                           htmlFor="entry-score"
                           className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
                         >
-                          Βαθμολογία
+                          Score
                         </label>
                         <span className="text-xs font-semibold text-foreground">
-                          {editState.score === '' ? '—' : editState.score}
+                          {editState.score === '' ? '-' : editState.score}
                         </span>
                       </div>
 
@@ -611,7 +611,7 @@ export default function EntryEditDialog({
                         }
                         data-empty={editState.score === ''}
                         className="mt-3 [&_[data-slot=slider-range]]:bg-accent [&_[data-slot=slider-thumb]]:h-5 [&_[data-slot=slider-thumb]]:w-5 [&_[data-slot=slider-thumb]]:border-info/35 [&_[data-slot=slider-thumb]]:bg-card [&_[data-slot=slider-thumb]]:shadow-[0_2px_10px_rgba(0,122,255,0.35)] [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:rounded-full [&_[data-slot=slider-track]]:border [&_[data-slot=slider-track]]:border-border/60 [&_[data-slot=slider-track]]:bg-border/20"
-                        aria-label="Βαθμολογία slider"
+                        aria-label="Score slider"
                       />
 
                       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
@@ -619,19 +619,19 @@ export default function EntryEditDialog({
                           id="entry-score"
                           value={editState.score}
                           inputMode="decimal"
-                          placeholder="0–10"
+                          placeholder="0-10"
                           onChange={event => handleScoreChange(event.target.value)}
                           className="w-16 min-w-[56px] text-center sm:w-24"
                         />
                         <p className="flex-1 text-xs text-muted-foreground">
-                          Tip: σύρε την μπάρα ή γράψε τιμή (δέχεται και <span>0,5</span>).
+                          Tip: Use the slider or type a value (for example <span>0.5</span>).
                         </p>
                         <Button
                           type="button"
                           variant="secondary"
                           onClick={() => setEditState(prev => ({ ...prev, score: '' }))}
                           className="w-full sm:w-auto"
-                          title="Καθάρισμα"
+                          title="Clear score"
                         >
                           Reset
                         </Button>
@@ -652,7 +652,7 @@ export default function EntryEditDialog({
                         aria-pressed={editState.isFavorite}
                       >
                         <span className="text-lg">{editState.isFavorite ? '♥' : '♡'}</span>
-                        {editState.isFavorite ? 'Στα αγαπημένα' : 'Προσθήκη στα αγαπημένα'}
+                        {editState.isFavorite ? 'In favorites' : 'Add to favorites'}
                       </Button>
                     </div>
 
@@ -661,7 +661,7 @@ export default function EntryEditDialog({
                         htmlFor="entry-notes"
                         className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
                       >
-                        Σημειώσεις
+                        Notes
                       </label>
                       <Textarea
                         id="entry-notes"
@@ -670,7 +670,7 @@ export default function EntryEditDialog({
                           setEditState(prev => ({ ...prev, notes: event.target.value }))
                         }
                         className="mt-2 min-h-[56px]"
-                        placeholder="Προσωπικές σημειώσεις..."
+                        placeholder="Personal notes..."
                       />
                     </div>
                   </section>
@@ -687,16 +687,16 @@ export default function EntryEditDialog({
                         onClick={() => setShowDeleteConfirm(true)}
                         icon={<Trash2 className="h-4 w-4" />}
                       >
-                        Διαγραφή
+                        Delete
                       </Button>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2 sm:gap-3">
                     <Button type="button" variant="outline" onClick={onClose}>
-                      Ακύρωση
+                      Cancel
                     </Button>
                     <Button type="button" variant="primary" onClick={() => onSave(editState)}>
-                      Αποθήκευση
+                      Save
                     </Button>
                   </div>
                 </div>
@@ -710,14 +710,14 @@ export default function EntryEditDialog({
         <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
           <AlertDialogContent className="border-border text-foreground">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-foreground">Διαγραφή καταχώρησης</AlertDialogTitle>
+              <AlertDialogTitle className="text-foreground">Delete entry</AlertDialogTitle>
               <AlertDialogDescription className="text-muted-foreground">
-                {`Θες σίγουρα να αφαιρέσεις το "${entry.title}" από τη βιβλιοθήκη σου;`}
+                {`Are you sure you want to remove "${entry.title}" from your library?`}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="border-border bg-transparent text-foreground">
-                Άκυρο
+                Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 className="bg-accent text-white hover:brightness-110"
@@ -726,7 +726,7 @@ export default function EntryEditDialog({
                   onDelete(entry);
                 }}
               >
-                Διαγραφή
+                Delete
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

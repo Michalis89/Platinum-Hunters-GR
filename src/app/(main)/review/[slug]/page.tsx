@@ -1,10 +1,10 @@
-﻿import ArticleDetailPage, {
+import ArticleDetailPage, {
   ArticleDetailPageOptions,
   buildArticleDetailMetadata,
 } from '@/app/(main)/pages/_shared/ArticleDetailPage';
 
 const REVIEW_DETAIL_OPTIONS: ArticleDetailPageOptions = {
-  basePath: '/pages/reviews',
+  basePath: '/review',
   breadcrumbLabel: 'Reviews',
   topicFilter: 'reviews',
 };

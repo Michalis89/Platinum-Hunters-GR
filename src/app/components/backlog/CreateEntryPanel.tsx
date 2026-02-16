@@ -51,7 +51,7 @@ export default function CreateEntryPanel({
           onClick={onClose}
           className="h-9 rounded-[12px] px-3 text-muted-foreground"
         >
-          Κλείσιμο
+          Close
         </Button>
       </div>
 
@@ -82,11 +82,11 @@ export default function CreateEntryPanel({
         ))}
         {isLoading && (
           <div className="rounded-[16px] px-4 py-5 text-center text-xs text-muted-foreground md:col-span-2">
-            Αναζήτηση στη βάση μας...
+            Searching library...
           </div>
         )}
         {!isLoading && searchResults.length === 0 && (
-          <EmptyState title="Δεν βρέθηκαν αποτελέσματα." size="sm" className="md:col-span-2" />
+          <EmptyState title="No results found." size="sm" className="md:col-span-2" />
         )}
       </div>
     </section>

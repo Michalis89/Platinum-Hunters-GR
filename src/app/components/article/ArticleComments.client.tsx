@@ -56,12 +56,12 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     try {
       const response = await fetch(`/api/articles/${articleId}/comments?limit=20`);
       if (!response.ok) {
-        throw new Error('Δεν καταφέραμε να φορτώσουμε τα σχόλια');
+        throw new Error('Failed to load comments');
       }
       const payload: CommentsResponse = await response.json();
       setComments(payload.data ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     setSuccessMessage(null);
     const trimmed = commentText.trim();
     if (!trimmed) {
-      setError('Γράψε κάτι πριν το δημοσιεύσεις.');
+      setError('Write a comment before posting.');
       return;
     }
 
@@ -90,13 +90,13 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       });
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
-        throw new Error(payload?.error || 'Αποτυχία αποστολής σχολίου');
+        throw new Error(payload?.error || 'Failed to post comment');
       }
       setCommentText('');
-      setSuccessMessage('Το σχόλιό σου δημοσιεύτηκε.');
+      setSuccessMessage('Your comment was posted.');
       await fetchComments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setSubmitting(false);
     }
@@ -107,7 +107,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     setEditError(null);
     const trimmed = editContent.trim();
     if (!trimmed) {
-      setEditError('Το σχόλιο δεν μπορεί να είναι άδειο.');
+      setEditError('Comment cannot be empty.');
       return;
     }
 
@@ -120,14 +120,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || 'Αποτυχία ενημέρωσης σχολίου');
+        throw new Error(payload?.error || 'Failed to update comment');
       }
       setEditingCommentId(null);
       setEditContent('');
-      setSuccessMessage('Το σχόλιό σου ενημερώθηκε.');
+      setSuccessMessage('Your comment was updated.');
       await fetchComments();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+      setEditError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setEditLoading(false);
     }
@@ -135,7 +135,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
 
   const handleDelete = async (commentId: number) => {
     if (!user) return;
-    if (!window.confirm('Θέλεις να διαγράψεις το σχόλιο;')) {
+    if (!window.confirm('Do you want to delete this comment?')) {
       return;
     }
     setDeleteLoading(commentId);
@@ -146,12 +146,12 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || 'Αποτυχία διαγραφής σχολίου');
+        throw new Error(payload?.error || 'Failed to delete comment');
       }
-      setSuccessMessage('Το σχόλιο διαγράφηκε.');
+      setSuccessMessage('Comment deleted.');
       await fetchComments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setDeleteLoading(null);
     }
@@ -166,9 +166,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   return (
     <section className="mt-12 rounded-3xl border border-border bg-card p-6 text-foreground shadow-md">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-foreground">Σχόλια</h3>
+        <h3 className="text-lg font-semibold text-foreground">Comments</h3>
         <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          {comments.length} σχόλια
+          {comments.length} comments
         </span>
       </div>
       {loading ? (
@@ -179,18 +179,16 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         <div className="mt-6 space-y-4">
           {error && <p className="text-sm text-red-400">{error}</p>}
           {comments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Δεν υπάρχουν ακόμα σχόλια.</p>
+            <p className="text-sm text-muted-foreground">No comments yet.</p>
           ) : (
             comments.map(comment => (
               <article key={comment.id} className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>
-                    {comment.users?.display_name || comment.users?.username || 'Ανώνυμος'}
-                  </span>
+                  <span>{comment.users?.display_name || comment.users?.username || 'Anonymous'}</span>
                   <FormattedDate
                     date={comment.created_at}
                     options={COMMENT_DATE_OPTIONS}
-                    fallback="—"
+                    fallback="-"
                     className="text-xs"
                   />
                 </div>
@@ -200,7 +198,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                       value={editContent}
                       rows={4}
                       onChange={event => setEditContent(event.target.value)}
-                      placeholder="Επεξεργάσου το σχόλιο"
+                      placeholder="Edit your comment"
                       className={editError ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
                     />
                     {editError && <p className="text-xs text-red-400">{editError}</p>}
@@ -210,14 +208,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                         disabled={editLoading}
                         variant="primary"
                       >
-                        {editLoading ? 'Αποθήκευση...' : 'Αποθήκευση'}
+                        {editLoading ? 'Saving...' : 'Save'}
                       </Button>
                       <Button
                         variant="secondary"
                         onClick={() => setEditingCommentId(null)}
                         disabled={editLoading}
                       >
-                        Ακύρωση
+                        Cancel
                       </Button>
                     </div>
                   </div>
@@ -235,7 +233,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                             setEditError(null);
                           }}
                         >
-                          Επεξεργασία
+                          Edit
                         </Button>
                         <Button
                           variant="secondary"
@@ -243,7 +241,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                           onClick={() => handleDelete(comment.id)}
                           disabled={deleteLoading === comment.id}
                         >
-                          {deleteLoading === comment.id ? 'Διαγραφή...' : 'Διαγραφή'}
+                          {deleteLoading === comment.id ? 'Deleting...' : 'Delete'}
                         </Button>
                       </div>
                     )}
@@ -258,13 +256,13 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       <div className="mt-8 space-y-3">
         {!user && (
           <p className="text-xs text-muted-foreground">
-            Για να κάνεις σχόλιο χρειάζεται λογαριασμός.{' '}
+            You need an account to comment.{' '}
             <Link href="/auth/login" className="text-primary underline-offset-4 hover:underline">
-              Σύνδεση
+              Log in
             </Link>{' '}
-            ή{' '}
+            or{' '}
             <Link href="/auth/register" className="text-primary underline-offset-4 hover:underline">
-              Εγγραφή
+              Sign up
             </Link>
             .
           </p>
@@ -272,27 +270,27 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         {user ? (
           <form className="space-y-3" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Το σχόλιό σου</label>
+              <label className="text-sm font-medium text-foreground">Your comment</label>
               <Textarea
                 value={commentText}
                 onChange={event => setCommentText(event.target.value)}
                 rows={4}
-                placeholder="Πες μας τη γνώμη σου"
+                placeholder="Share your thoughts"
                 className={error ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
               />
             </div>
             {successMessage && <p className="text-sm text-primary">{successMessage}</p>}
             <Button type="submit" variant="primary" disabled={submitting}>
-              {submitting ? 'Αποστολή...' : 'Δημοσίευση σχολίου'}
+              {submitting ? 'Posting...' : 'Post comment'}
             </Button>
           </form>
         ) : (
           <div className="flex flex-wrap gap-2">
             <Button href="/auth/login" variant="outline">
-              Σύνδεση
+              Log in
             </Button>
             <Button href="/auth/register" variant="primary">
-              Εγγραφή
+              Sign up
             </Button>
           </div>
         )}

@@ -17,7 +17,7 @@ import {
   getBreadcrumbStructuredData,
 } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
-import { CATEGORY_LABELS, TOPIC_LABELS } from '@/app/(main)/pages/news/constants';
+import { CATEGORY_LABELS, TOPIC_LABELS } from '@/app/(main)/articles/constants';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import getSupabaseServer from '@/lib/supabase-server';
 import { normalizeSlug } from '@/utils/slugify';
@@ -37,7 +37,7 @@ interface ArticleWithAuthor extends ArticleRow {
 }
 
 export interface ArticleDetailPageOptions {
-  basePath: `/pages/${string}`;
+  basePath: `/${string}`;
   breadcrumbLabel: string;
   topicFilter?: ArticleTopic;
 }
@@ -280,7 +280,7 @@ export default async function ArticleDetailPage({
   const host = headersList.get('host');
   const referer = headersList.get('referer');
   const baseUrl = host ? `${protocol}://${host}` : '';
-  const listBasePath = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
+  const listBasePath = article.topic === 'reviews' ? '/review' : '/articles';
   const hasCategory = Boolean(article.category);
   const fallbackHref = hasCategory ? `${listBasePath}?category=${article.category}` : listBasePath;
   let backHref = fallbackHref;
@@ -312,6 +312,7 @@ export default async function ArticleDetailPage({
   const { html: contentWithHeadingIds, headings } = enrichContentHeadings(sanitizedContentHtml);
   const shouldShowTOC = headings.length >= TOC_MIN_HEADINGS;
   const relatedArticles = await fetchRelatedArticles(article);
+  const relatedContentLabel = article.topic === 'reviews' ? 'reviews' : 'articles';
   const categoryLabel = CATEGORY_LABELS[article.category] ?? article.category;
   const breadcrumbItems = [
     { name: 'Home', url: `${SITE_URL}/` },
@@ -503,7 +504,7 @@ export default async function ArticleDetailPage({
           <div className="mt-12 border-t border-border pt-10">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-tight text-foreground">
-                Related articles
+                {`Related ${relatedContentLabel}`}
               </h2>
               <Link
                 href={basePath}
@@ -577,7 +578,7 @@ export default async function ArticleDetailPage({
             ) : (
               <div className="mt-4 rounded-2xl border border-border bg-card p-6">
                 <EmptyState
-                  title="No related articles yet"
+                  title={`No related ${relatedContentLabel} yet`}
                   description="Try refreshing the page or explore a different topic."
                 />
               </div>

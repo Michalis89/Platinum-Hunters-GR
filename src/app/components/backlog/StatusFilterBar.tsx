@@ -2,6 +2,7 @@
 
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MediaCategory, MediaStatus, CATEGORY_CONFIG } from './types';
 
 interface StatusFilterBarProps {
@@ -27,45 +28,40 @@ export default function StatusFilterBar({
   const config = CATEGORY_CONFIG[category];
 
   const filters: FilterItem[] = [
-    { key: 'all', label: 'Όλα' },
+    { key: 'all', label: 'All' },
     { key: 'planned', label: config.plannedLabel },
-    ...(category !== 'movies' ? [{ key: 'current' as const, label: config.currentLabel }] : []),
+    { key: 'current', label: config.currentLabel },
     { key: 'completed', label: config.completedLabel },
     { key: 'dropped', label: config.droppedLabel },
   ];
 
   return (
-    <section className="p-4 sm:p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex-1">
-          <div className="relative">
-            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <Search size={16} />
-            </div>
-            <Input
-              type="search"
-              value={search}
-              onChange={event => onSearchChange(event.target.value)}
-              placeholder={config.searchPlaceholder}
-              className="pl-10"
-            />
-          </div>
+    <section className="sticky top-20 z-30 rounded-2xl border border-border/70 bg-background/95 p-4 shadow-sm supports-[backdrop-filter]:bg-background/95 sm:p-5">
+      <div className="flex flex-col gap-4">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            value={search}
+            onChange={event => onSearchChange(event.target.value)}
+            placeholder={config.searchPlaceholder}
+            className="h-11 rounded-xl border-border/70 bg-card/70 pl-10"
+          />
         </div>
-        <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
-          <div className="flex min-w-max items-center gap-2">
+
+        <Tabs value={activeStatus} onValueChange={value => onStatusChange(value as MediaStatus | 'all')}>
+          <TabsList className="h-11 w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border/70 bg-card/70 p-1 [scrollbar-width:thin]">
             {filters.map(filter => (
-              <button
+              <TabsTrigger
                 key={filter.key}
-                type="button"
-                data-active={activeStatus === filter.key}
-                onClick={() => onStatusChange(filter.key)}
-                className="shrink-0 px-4 py-2 text-xs font-semibold"
+                value={filter.key}
+                className="h-9 shrink-0 rounded-lg px-4 text-xs font-semibold sm:text-sm"
               >
                 {filter.label}
-              </button>
+              </TabsTrigger>
             ))}
-          </div>
-        </div>
+          </TabsList>
+        </Tabs>
       </div>
     </section>
   );

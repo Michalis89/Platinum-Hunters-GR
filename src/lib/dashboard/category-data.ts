@@ -2724,6 +2724,10 @@ async function buildMediaSuggestions(
   userId: string,
   category: DashboardCategoryKey,
   userEntries: CategoryEntryRow[],
+  options?: {
+    maxSuggestions?: number;
+    maxBacklogSuggestions?: number;
+  },
 ): Promise<MediaSuggestion[]> {
   const targetTitle = DASHBOARD_SUGGESTIONS_TARGET_TITLE.toLowerCase();
   const hasTarget = targetTitle.length > 0;
@@ -2806,12 +2810,13 @@ async function buildMediaSuggestions(
   }
 
   const suggestions: MediaSuggestion[] = [];
+  const maxSuggestions = options?.maxSuggestions ?? 4;
+  const maxBacklogSuggestions = options?.maxBacklogSuggestions ?? 2;
 
   // ============================================================================
-  // PART 1: Backlog suggestions (first 2)
+  // PART 1: Backlog suggestions
   // ============================================================================
   const backlogEntries = userEntries.filter(entry => entry.status === 'planned');
-  const maxBacklogSuggestions = 2;
 
   if (backlogEntries.length > 0 && maxBacklogSuggestions > 0) {
     // Sort by priority (if exists) or updated_at
@@ -2915,9 +2920,9 @@ async function buildMediaSuggestions(
   );
 
   // ============================================================================
-  // PART 2: External suggestions (up to 3 more)
+  // PART 2: Database-driven suggestions
   // ============================================================================
-  const neededExternal = 4 - suggestions.length; // Fill up to 4 total
+  const neededExternal = maxSuggestions - suggestions.length; // Fill up to max total
 
   if (neededExternal > 0) {
     // 1. Fetch ALL media IDs for exclusion
@@ -3285,7 +3290,7 @@ async function buildMediaSuggestions(
 
           // 6. Build external suggestion objects (skip similar titles)
           for (const { candidate, score, gameContributors, popularity } of scoredCandidates) {
-            if (suggestions.length >= 4) break; // Already have 4 suggestions
+            if (suggestions.length >= maxSuggestions) break;
 
             const title =
               candidate.title ??
@@ -3398,4 +3403,17 @@ async function buildMediaSuggestions(
   });
 
   return suggestions;
+}
+
+export async function buildBacklogPersonalMediaSuggestions(
+  supabase: DashboardSupabaseClient,
+  userId: string,
+  category: DashboardCategoryKey,
+  limit = 4,
+): Promise<MediaSuggestion[]> {
+  const entries = await fetchCategoryEntries(supabase, userId, category);
+  return buildMediaSuggestions(supabase, userId, category, entries, {
+    maxSuggestions: limit,
+    maxBacklogSuggestions: 0,
+  });
 }

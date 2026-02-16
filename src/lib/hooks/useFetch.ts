@@ -1,4 +1,4 @@
-﻿/**
+/**
  * useFetch Hook
  * Generic data fetching hook with loading, error state, and cleanup
  */
@@ -51,7 +51,7 @@ export function useFetch<T>(url: string | null, options?: UseFetchOptions): Fetc
 
         if (!response.ok) {
           const payload = await response.json().catch(() => null);
-          throw new Error(payload?.error || 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï†ÏŒÏÏ„Ï‰ÏƒÎ·Ï‚ Î´ÎµÎ´Î¿Î¼Î­Î½Ï‰Î½');
+          throw new Error(payload?.error || 'Failed to load data');
         }
 
         const payload = await response.json();
@@ -65,7 +65,7 @@ export function useFetch<T>(url: string | null, options?: UseFetchOptions): Fetc
           return;
         }
 
-        const errorMessage = err instanceof Error ? err.message : 'ÎšÎ¬Ï„Î¹ Ï€Î®Î³Îµ ÏƒÏ„ÏÎ±Î²Î¬';
+        const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
         if (!signal?.aborted) {
           setError(errorMessage);
         }

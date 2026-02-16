@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { Tag, X } from 'lucide-react';
 import type { ArticleCategory } from '@/types/database';
-import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
+import { CATEGORY_LABELS } from '@/app/(main)/articles/constants';
 import { getVisibleCategories, type CategoryScope } from '@/app/(main)/pages/_shared/categories';
 
 const BASE_PATHS: Record<CategoryScope, string> = {
-  news: '/pages/news',
-  reviews: '/pages/reviews',
+  news: '/articles',
+  reviews: '/review',
 };
 
 const PILL_BASE =

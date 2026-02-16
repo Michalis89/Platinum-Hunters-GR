@@ -80,8 +80,58 @@ const nextConfig: NextConfigWithInstrumentation = {
   async redirects() {
     return [
       {
+        source: '/pages/backlog',
+        destination: '/backlog',
+        permanent: true,
+      },
+      {
+        source: '/pages/news',
+        destination: '/articles',
+        permanent: true,
+      },
+      {
+        source: '/pages/news/:slug',
+        destination: '/articles/:slug',
+        permanent: true,
+      },
+      {
+        source: '/news',
+        destination: '/articles',
+        permanent: true,
+      },
+      {
+        source: '/news/:slug',
+        destination: '/articles/:slug',
+        permanent: true,
+      },
+      {
+        source: '/pages/reviews',
+        destination: '/review',
+        permanent: true,
+      },
+      {
+        source: '/pages/reviews/:slug',
+        destination: '/review/:slug',
+        permanent: true,
+      },
+      {
+        source: '/reviews',
+        destination: '/review',
+        permanent: true,
+      },
+      {
+        source: '/reviews/:slug',
+        destination: '/review/:slug',
+        permanent: true,
+      },
+      {
         source: '/pages/news/jujutsu-kaisen-anime-manga-1010',
-        destination: '/pages/reviews/jujutsu-kaisen-anime-manga-1010',
+        destination: '/review/jujutsu-kaisen-anime-manga-1010',
+        permanent: true,
+      },
+      {
+        source: '/articles/jujutsu-kaisen-anime-manga-1010',
+        destination: '/review/jujutsu-kaisen-anime-manga-1010',
         permanent: true,
       },
     ];

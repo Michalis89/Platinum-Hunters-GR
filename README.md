@@ -130,7 +130,8 @@ SITE_URL=https://hobbistas-hub.com/
 NEXT_PUBLIC_CONTACT_EMAIL=ops@example.com
 
 # External APIs (optional but recommended for metadata)
-RAWG_API_KEY=rawg-api-key
+TWITCH_CLIENT_ID=twitch-client-id
+TWITCH_CLIENT_SECRET=twitch-client-secret
 MAL_CLIENT_ID=mal-client-id
 MAL_CLIENT_SECRET=mal-client-secret
 GOOGLE_BOOKS_API_KEY=google-books-key
@@ -256,7 +257,8 @@ Key environment variables:
 | `SUPABASE_SERVICE_ROLE_KEY`     | ✅       | Server-only service role key   |
 | `SITE_URL`                      | ✅       | Canonical domain               |
 | `RESEND_API_KEY`                | ✅       | Email provider (notifications) |
-| `RAWG_API_KEY`                  | ✳️       | Game metadata                  |
+| `TWITCH_CLIENT_ID`              | ✳️       | IGDB authentication            |
+| `TWITCH_CLIENT_SECRET`          | ✳️       | IGDB authentication            |
 | `MAL_CLIENT_ID`                 | ✳️       | Anime/manga data               |
 | `MAL_CLIENT_SECRET`             | ✳️       | Anime/manga data               |
 | `GOOGLE_BOOKS_API_KEY`          | ✳️       | Book metadata                  |

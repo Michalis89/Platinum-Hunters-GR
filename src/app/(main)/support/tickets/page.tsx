@@ -3,13 +3,13 @@ import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { requireServerAuth } from '@/lib/auth/requireServerAuth';
 
 export const metadata = buildMetadata({
-  title: 'Τα tickets μου | Hobbistas',
-  description: 'Δες την πορεία των αιτημάτων υποστήριξης σου στον Hobbistas.',
-  path: '/pages/support/tickets',
+  title: 'My tickets | Hobbistas',
+  description: 'Track your support requests and their status on Hobbistas.',
+  path: '/support/tickets',
 });
 
 export default async function SupportTicketsPage() {
-  await requireServerAuth('/pages/support/tickets');
+  await requireServerAuth('/support/tickets');
 
   return (
     <main className="">

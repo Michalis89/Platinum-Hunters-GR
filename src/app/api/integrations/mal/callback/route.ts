@@ -17,7 +17,7 @@ function buildBacklogRedirect(
   status: 'success' | 'error',
   category: 'anime' | 'manga',
 ) {
-  const redirectUrl = new URL(`/pages/backlog?category=${category}`, requestUrl);
+  const redirectUrl = new URL(`/backlog?category=${category}`, requestUrl);
   redirectUrl.searchParams.set('mal', status);
   return redirectUrl;
 }

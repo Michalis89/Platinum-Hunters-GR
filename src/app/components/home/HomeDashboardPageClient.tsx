@@ -118,7 +118,7 @@ export default function HomeDashboardPageClient() {
                   </p>
                 </div>
                 <Button asChild variant="primary" className="h-10 whitespace-nowrap">
-                  <Link href="/pages/profile/edit#categories">
+                  <Link href="/profile/edit#categories">
                     Edit categories
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -202,3 +202,4 @@ function HomeDashboardLoadingShell() {
     </div>
   );
 }
+

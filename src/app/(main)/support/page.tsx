@@ -4,13 +4,13 @@ import { SITE_CONTACT_EMAIL } from '@/config/site';
 import { requireServerAuth } from '@/lib/auth/requireServerAuth';
 
 export const metadata = buildMetadata({
-  title: 'Υποστήριξη | Hobbistas',
-  description: 'Επικοινώνησε με την ομάδα του Hobbistas για bug reports, προτάσεις ή feedback.',
-  path: '/pages/support',
+  title: 'Support | Hobbistas',
+  description: 'Contact the Hobbistas team for bug reports, feedback, or author rights requests.',
+  path: '/support',
 });
 
 export default async function SupportPage() {
-  await requireServerAuth('/pages/support');
+  await requireServerAuth('/support');
   const securityEmail = process.env.SUPPORT_SECURITY_EMAIL ?? null;
 
   return <SupportForm securityEmail={securityEmail} contactEmail={SITE_CONTACT_EMAIL} />;

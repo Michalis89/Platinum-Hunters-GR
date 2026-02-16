@@ -44,7 +44,7 @@ export default function MediaSearchResultCard({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-foreground">{entry.title}</p>
         <p className="truncate text-xs text-muted-foreground">
-          {entry.subtitle} {entry.year ? `· ${entry.year}` : ''}
+          {entry.subtitle} {entry.year ? `- ${entry.year}` : ''}
         </p>
       </div>
 
@@ -54,11 +54,11 @@ export default function MediaSearchResultCard({
           data-active="true"
         >
           <Library className="h-3.5 w-3.5" />
-          <span>Στη βιβλιοθήκη</span>
+          <span>In library</span>
         </div>
       ) : (
         <Button variant="outline" onClick={handleOpenDialog} className="h-9 rounded-[12px] px-3">
-          Προσθήκη
+          Add Entry
         </Button>
       )}
     </article>

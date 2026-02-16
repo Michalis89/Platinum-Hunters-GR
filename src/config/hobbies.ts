@@ -35,7 +35,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   {
     slug: 'games',
     title: 'Games',
-    description: 'Backlog, trophy stats, πρόοδος και achievements για gamers.',
+    description: 'Backlog tracking, trophy stats, progress, and achievements for gamers.',
     icon: 'Gamepad2',
     modules: {
       backlog: true,
@@ -43,9 +43,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: true,
     },
     routes: {
-      backlog: '/pages/backlog',
-      news: '/pages/news?category=games',
-      reviews: '/pages/reviews?category=games',
+      backlog: '/backlog',
+      news: '/articles?category=games',
+      reviews: '/review?category=games',
     },
     requiresAuth: {
       backlog: true,
@@ -57,7 +57,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   {
     slug: 'anime',
     title: 'Anime',
-    description: 'Season tracking, watchlist και favorites για anime lovers.',
+    description: 'Season tracking, watchlists, and favorites for anime fans.',
     icon: 'Sparkles',
     modules: {
       backlog: true,
@@ -65,9 +65,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: true,
     },
     routes: {
-      backlog: '/pages/backlog?category=anime',
-      news: '/pages/news?category=anime',
-      reviews: '/pages/reviews?category=anime',
+      backlog: '/backlog?category=anime',
+      news: '/articles?category=anime',
+      reviews: '/review?category=anime',
     },
     requiresAuth: {
       backlog: true,
@@ -79,7 +79,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   {
     slug: 'manga',
     title: 'Manga',
-    description: 'Chapters, volumes και reading progress για manga fans.',
+    description: 'Track chapters, volumes, and reading progress for manga fans.',
     icon: 'BookOpen',
     modules: {
       backlog: true,
@@ -87,9 +87,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: true,
     },
     routes: {
-      backlog: '/pages/backlog?category=manga',
-      news: '/pages/news?category=manga',
-      reviews: '/pages/reviews?category=manga',
+      backlog: '/backlog?category=manga',
+      news: '/articles?category=manga',
+      reviews: '/review?category=manga',
     },
     requiresAuth: {
       backlog: true,
@@ -100,8 +100,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   // Movies
   {
     slug: 'movies',
-    title: 'Ταινίες',
-    description: 'Watchlist, ratings και cinematic highlights.',
+    title: 'Movies',
+    description: 'Watchlists, ratings, and cinematic highlights.',
     icon: 'Film',
     modules: {
       backlog: true,
@@ -109,9 +109,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: true,
     },
     routes: {
-      backlog: '/pages/backlog?category=movies',
-      news: '/pages/news?category=movies',
-      reviews: '/pages/reviews?category=movies',
+      backlog: '/backlog?category=movies',
+      news: '/articles?category=movies',
+      reviews: '/review?category=movies',
     },
     requiresAuth: {
       backlog: true,
@@ -122,8 +122,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   // TV Shows
   {
     slug: 'tv',
-    title: 'Σειρές',
-    description: 'Series tracking, season progress και binge-watching lists.',
+    title: 'TV Shows',
+    description: 'Track seasons, progress, and binge-worthy picks.',
     icon: 'Tv',
     modules: {
       backlog: true,
@@ -131,9 +131,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: true,
     },
     routes: {
-      backlog: '/pages/backlog?category=tv',
-      news: '/pages/news?category=tv',
-      reviews: '/pages/reviews?category=tv',
+      backlog: '/backlog?category=tv',
+      news: '/articles?category=tv',
+      reviews: '/review?category=tv',
     },
     requiresAuth: {
       backlog: true,
@@ -144,8 +144,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   // Books
   {
     slug: 'books',
-    title: 'Βιβλία',
-    description: 'Reading log, notes και progress tracking για bookworms.',
+    title: 'Books',
+    description: 'Reading logs, notes, and progress tracking for book lovers.',
     icon: 'Book',
     modules: {
       backlog: true,
@@ -153,9 +153,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: true,
     },
     routes: {
-      backlog: '/pages/backlog?category=books',
-      news: '/pages/news?category=books',
-      reviews: '/pages/reviews?category=books',
+      backlog: '/backlog?category=books',
+      news: '/articles?category=books',
+      reviews: '/review?category=books',
     },
     requiresAuth: {
       backlog: true,
@@ -167,7 +167,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   {
     slug: 'coding',
     title: 'Coding',
-    description: 'Άρθρα, tutorials και οδηγοί για developers.',
+    description: 'Articles, tutorials, and practical guides for developers.',
     icon: 'Code',
     modules: {
       backlog: 'under-construction',
@@ -175,9 +175,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: false,
     },
     routes: {
-      backlog: '/pages/backlog?category=coding',
-      news: '/pages/news?category=coding',
-      reviews: '/pages/reviews?category=coding',
+      backlog: '/backlog?category=coding',
+      news: '/articles?category=coding',
+      reviews: '/review?category=coding',
     },
     requiresAuth: {
       backlog: true,
@@ -188,8 +188,8 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   // Pet
   {
     slug: 'pet',
-    title: 'Κατοικίδια',
-    description: 'Ιστορίες, οδηγοί φροντίδας και εμπειρίες για pet owners.',
+    title: 'Pets',
+    description: 'Stories, care guides, and real-world tips for pet owners.',
     icon: 'PawPrint',
     modules: {
       backlog: 'under-construction',
@@ -197,9 +197,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: false,
     },
     routes: {
-      backlog: '/pages/backlog?category=pet',
-      news: '/pages/news?category=pet',
-      reviews: '/pages/reviews?category=pet',
+      backlog: '/backlog?category=pet',
+      news: '/articles?category=pet',
+      reviews: '/review?category=pet',
     },
     requiresAuth: {
       backlog: true,
@@ -211,7 +211,7 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
   {
     slug: 'vape',
     title: 'Vape',
-    description: 'Άρθρα για συσκευές, υγρά και επιλογές.',
+    description: 'Articles on devices, e-liquids, and buying choices.',
     icon: 'Wind',
     modules: {
       backlog: 'under-construction',
@@ -219,9 +219,9 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
       reviews: true,
     },
     routes: {
-      backlog: '/pages/backlog?category=vape',
-      news: '/pages/news?category=vape',
-      reviews: '/pages/reviews?category=vape',
+      backlog: '/backlog?category=vape',
+      news: '/articles?category=vape',
+      reviews: '/review?category=vape',
     },
     requiresAuth: {
       backlog: true,
@@ -237,20 +237,20 @@ export const HOBBY_CATEGORIES: HobbyCategory[] = [
 export const HOBBY_SECTIONS: HobbySection[] = [
   {
     type: 'backlog',
-    title: 'Backlog & Πρόοδος',
-    description: 'Οργάνωσε τα hobbies σου με status, progress και notes.',
+    title: 'Backlog & Progress',
+    description: 'Organize your hobbies with statuses, progress, and notes.',
     categories: ['games', 'anime', 'manga', 'movies', 'tv', 'books'],
   },
   {
     type: 'news',
-    title: 'Άρθρα & Νέα',
-    description: 'Διάβασε άρθρα, tutorials και ιστορίες από την κοινότητα.',
+    title: 'News & Articles',
+    description: 'Discover articles, tutorials, and stories from the community.',
     categories: ['games', 'anime', 'manga', 'books', 'movies', 'tv', 'coding', 'pet', 'vape'],
   },
   {
     type: 'reviews',
-    title: 'Κριτικές',
-    description: 'Κριτικές και εντυπώσεις από τα μέλη της κοινότητας.',
+    title: 'Reviews',
+    description: 'Read honest reviews and member impressions.',
     categories: ['games', 'anime', 'manga', 'books', 'movies', 'tv', 'vape'],
   },
 ];

@@ -16,49 +16,49 @@ type ContinueItem = {
 const continueItems: ContinueItem[] = [
   {
     category: 'Games',
-    title: 'Συνέχισε να παίζεις',
-    progress: 'Κατάσταση: Playing',
-    href: '/pages/backlog?category=games&status=current',
+    title: 'Continue playing',
+    progress: 'Status: In Progress',
+    href: '/backlog?category=games&status=current',
     icon: <Gamepad2 className="h-5 w-5" />,
     requires: ['games'],
   },
   {
     category: 'Anime',
-    title: 'Συνέχισε να παρακολουθείς',
-    progress: 'Κατάσταση: Σε εξέλιξη',
-    href: '/pages/backlog?category=anime&status=current',
+    title: 'Continue watching',
+    progress: 'Status: In Progress',
+    href: '/backlog?category=anime&status=current',
     icon: <Tv className="h-5 w-5" />,
     requires: ['anime'],
   },
   {
     category: 'Manga',
-    title: 'Συνέχισε να διαβάζεις',
-    progress: 'Κατάσταση: Σε εξέλιξη',
-    href: '/pages/backlog?category=manga&status=current',
+    title: 'Continue reading',
+    progress: 'Status: In Progress',
+    href: '/backlog?category=manga&status=current',
     icon: <BookOpen className="h-5 w-5" />,
     requires: ['manga'],
   },
   {
-    category: 'Ταινίες',
-    title: 'Στη watchlist σου',
-    progress: 'Κατάσταση: Προγραμματισμένο',
-    href: '/pages/backlog?category=movies&status=planned',
+    category: 'Movies',
+    title: 'In your watchlist',
+    progress: 'Status: Planned',
+    href: '/backlog?category=movies&status=planned',
     icon: <Film className="h-5 w-5" />,
     requires: ['movies'],
   },
   {
-    category: 'Σειρές',
-    title: 'Βλέπεις αυτή την περίοδο',
-    progress: 'Κατάσταση: Σε εξέλιξη',
-    href: '/pages/backlog?category=tv&status=current',
+    category: 'TV Shows',
+    title: 'Watching this season',
+    progress: 'Status: In Progress',
+    href: '/backlog?category=tv&status=current',
     icon: <Tv className="h-5 w-5" />,
     requires: ['tv'],
   },
   {
-    category: 'Βιβλία',
-    title: 'Διαβάζεις αυτή την περίοδο',
-    progress: 'Κατάσταση: Σε εξέλιξη',
-    href: '/pages/backlog?category=books&status=current',
+    category: 'Books',
+    title: 'Reading this season',
+    progress: 'Status: In Progress',
+    href: '/backlog?category=books&status=current',
     icon: <Book className="h-5 w-5" />,
     requires: ['books'],
   },
@@ -79,8 +79,8 @@ export function HomeContinue() {
         <div className="mb-5 flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Άλλα που έχεις ανοιχτά</h2>
-            <p className="text-xs text-muted-foreground">Μικρά reminders για να αποφασίσεις</p>
+            <h2 className="text-lg font-semibold text-foreground">More in progress</h2>
+            <p className="text-xs text-muted-foreground">Quick reminders to help you choose what to do next</p>
           </div>
         </div>
 

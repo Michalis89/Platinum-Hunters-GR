@@ -5,13 +5,17 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoverThumbImage } from '@/components/ui/cover-image';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Eye, Heart, Star, Tag, User } from 'lucide-react';
+import { Calendar, Clock, Eye, FileText, Heart, Tag, User } from 'lucide-react';
 import type { ArticleCategory, ArticleRow } from '@/types/database';
 import { PageContainer } from '@/app/components/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import EmptyState from '@/components/ui/empty';
 import { ErrorAlert } from '@/components/ui/alert';
-import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
+import {
+  CATEGORY_LABELS,
+  CATEGORY_SUBTITLES,
+  TOPIC_LABELS,
+} from '@/app/(main)/articles/constants';
 import { normalizeSlug } from '@/utils/slugify';
 import { getVisibleCategories } from '@/app/(main)/pages/_shared/categories';
 import { FormattedDate } from '@/utils/components/FormattedDate';
@@ -42,9 +46,12 @@ const PRIMARY_CATEGORIES: ArticleCategory[] = [
 
 const SKELETON_COUNT = 6;
 
-const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithAuthor }) {
+const ArticleCard = memo(function ArticleCard({ article }: { article: ArticleWithAuthor }) {
   const normalizedSlug = normalizeSlug(article.slug);
   const MotionCard = motion(Card);
+  const readTimeLabel = article.reading_time_minutes
+    ? `${article.reading_time_minutes} min read`
+    : null;
 
   return (
     <MotionCard
@@ -53,7 +60,7 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
       transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
       className="group rounded-lg border bg-card shadow-md focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
-      <Link href={`/pages/reviews/${normalizedSlug}`} className="block">
+      <Link href={`/articles/${normalizedSlug}`} className="block">
         <div className="relative aspect-[16/10] bg-muted">
           {article.cover_image ? (
             <CoverThumbImage
@@ -64,23 +71,22 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-muted">
-              <Star size={42} className="text-muted-foreground" />
+              <FileText size={42} className="text-muted-foreground" />
             </div>
           )}
           <div className="absolute left-3 top-3 flex items-center gap-2">
             <span className="px-3 py-1 text-[11px] font-semibold text-foreground">
               {CATEGORY_LABELS[article.category] ?? article.category}
             </span>
-            <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold text-foreground">
-              <Star size={10} className="fill-current" />
-              Review
+            <span className="px-3 py-1 text-[11px] font-semibold text-foreground">
+              {TOPIC_LABELS[article.topic]}
             </span>
           </div>
         </div>
       </Link>
 
       <CardHeader className="p-4 pb-1">
-        <Link href={`/pages/reviews/${normalizedSlug}`}>
+        <Link href={`/articles/${normalizedSlug}`}>
           <CardTitle className="text-[19px] leading-tight text-foreground transition-colors duration-300 [transition-timing-function:cubic-bezier(0.2,0.8,0.2,1)] hover:text-primary group-hover:text-primary">
             {article.title}
           </CardTitle>
@@ -98,7 +104,7 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
             {article.tags.slice(0, 3).map(tag => (
               <Link
                 key={tag}
-                href={`/pages/reviews?tag=${encodeURIComponent(tag)}`}
+                href={`/articles?tag=${encodeURIComponent(tag)}`}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground transition hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 <Tag size={10} />
@@ -123,10 +129,10 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
             </div>
           ) : null}
 
-          {article.reading_time_minutes ? (
+          {readTimeLabel ? (
             <div className="inline-flex items-center gap-1">
               <Clock size={12} />
-              <span>{article.reading_time_minutes} λεπτά</span>
+              <span>{readTimeLabel}</span>
             </div>
           ) : null}
 
@@ -145,9 +151,9 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
     </MotionCard>
   );
 });
-ReviewCard.displayName = 'ReviewCard';
+ArticleCard.displayName = 'ArticleCard';
 
-const ReviewCardSkeleton = () => (
+const ArticleCardSkeleton = () => (
   <div className="min-h-[320px] rounded-lg border bg-card">
     <div className="aspect-[16/10] animate-pulse bg-muted" />
     <div className="space-y-3 p-4">
@@ -158,20 +164,20 @@ const ReviewCardSkeleton = () => (
   </div>
 );
 
-function ReviewSkeletonGrid({ count = SKELETON_COUNT }: { count?: number }) {
+function NewsSkeletonGrid({ count = SKELETON_COUNT }: { count?: number }) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }, (_, index) => (
-        <ReviewCardSkeleton key={`review-skeleton-${index}`} />
+        <ArticleCardSkeleton key={`news-skeleton-${index}`} />
       ))}
     </div>
   );
 }
 
-function ReviewsFallback() {
+function NewsFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <ReviewSkeletonGrid />
+      <NewsSkeletonGrid />
     </div>
   );
 }
@@ -181,7 +187,7 @@ function buildHref({ category, tag }: { category: ArticleCategory | null; tag: s
   if (category) params.set('category', category);
   if (tag) params.set('tag', tag);
   const query = params.toString();
-  return query ? `/pages/reviews?${query}` : '/pages/reviews';
+  return query ? `/articles?${query}` : '/articles';
 }
 
 function FilterSegment({
@@ -208,21 +214,21 @@ function FilterSegment({
   );
 }
 
-export default function ReviewsPageClient() {
+export default function NewsPageClient() {
   return (
-    <Suspense fallback={<ReviewsFallback />}>
-      <ReviewsPageContent />
+    <Suspense fallback={<NewsFallback />}>
+      <NewsPageContent />
     </Suspense>
   );
 }
 
-function ReviewsPageContent() {
+function NewsPageContent() {
   const searchParams = useSearchParams();
-  const allowedCategories = getVisibleCategories({ scope: 'reviews' });
+  const availableCategories = getVisibleCategories({ scope: 'news' });
 
   const rawCategory = searchParams.get('category');
   const category =
-    rawCategory && allowedCategories.includes(rawCategory as ArticleCategory)
+    rawCategory && availableCategories.includes(rawCategory as ArticleCategory)
       ? (rawCategory as ArticleCategory)
       : null;
 
@@ -239,7 +245,7 @@ function ReviewsPageContent() {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchReviews = async () => {
+    const fetchArticles = async () => {
       setLoading(true);
       setError(null);
 
@@ -247,23 +253,23 @@ function ReviewsPageContent() {
         const params = new URLSearchParams();
         if (category) params.set('category', category);
         if (tag) params.set('tag', tag);
-        params.set('topic', 'reviews');
         params.set('status', 'published');
         params.set('limit', '20');
 
         const response = await fetch(`/api/articles?${params.toString()}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch reviews');
+          throw new Error('Failed to fetch articles');
         }
 
         const data = await response.json();
-        const payload = data.data || [];
-        const metaTotal = data.meta?.total || 0;
+        const filtered = (data.data || []).filter(
+          (article: ArticleWithAuthor) => article.topic !== 'reviews',
+        );
 
         startTransition(() => {
           if (!isMounted) return;
-          setArticles(payload);
-          setTotal(metaTotal);
+          setArticles(filtered);
+          setTotal(filtered.length);
           setLoading(false);
         });
       } catch (err) {
@@ -273,7 +279,7 @@ function ReviewsPageContent() {
       }
     };
 
-    fetchReviews();
+    fetchArticles();
     return () => {
       isMounted = false;
     };
@@ -282,7 +288,7 @@ function ReviewsPageContent() {
   useEffect(() => {
     const handleContentPublished = (event: Event) => {
       const customEvent = event as CustomEvent<ContentPublishedEventDetail>;
-      if (customEvent.detail?.type === 'review') {
+      if (customEvent.detail?.type === 'article') {
         setRefreshSignal(current => current + 1);
       }
     };
@@ -294,19 +300,20 @@ function ReviewsPageContent() {
   }, []);
 
   const categoryLabel = category ? (CATEGORY_LABELS[category] ?? null) : null;
-  const pageTitle = categoryLabel ? `Reviews · ${categoryLabel}` : 'Reviews';
-  const subtitle = categoryLabel
-    ? `Κριτικές για ${categoryLabel} από την κοινότητα.`
-    : 'Κριτικές για games, anime, manga, ταινίες, σειρές και βιβλία από την κοινότητα.';
-  const metaLine = tag ? `${total} reviews • ${tag}` : `${total} reviews`;
+  const pageTitle = categoryLabel ? categoryLabel : 'Articles';
+  const subtitle = category
+    ? CATEGORY_SUBTITLES[category] ?? 'Community-written articles and stories, clearly organized.'
+    : 'Discover community-written articles and stories across all hobbies.';
+  const articleCountLabel = `${total} article${total === 1 ? '' : 's'}`;
+  const metaLine = tag ? `${articleCountLabel} - ${tag}` : articleCountLabel;
   const emptyDescription = categoryLabel
-    ? `Δεν βρέθηκαν reviews στην κατηγορία "${categoryLabel}"`
-    : 'Δεν υπάρχουν ακόμα δημοσιευμένα reviews';
+    ? `No articles were found for the "${categoryLabel}" category.`
+    : 'No published articles are available yet.';
 
   const shouldShowSkeleton = loading || isPending;
   const categoryFilters = [
     null,
-    ...PRIMARY_CATEGORIES.filter(item => allowedCategories.includes(item)),
+    ...PRIMARY_CATEGORIES.filter(item => availableCategories.includes(item)),
   ];
 
   return (
@@ -320,7 +327,7 @@ function ReviewsPageContent() {
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">Κριτικές</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">Editorial Desk</p>
               <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">{pageTitle}</h1>
               <p className="max-w-2xl text-[14px] text-muted-foreground">{subtitle}</p>
             </div>
@@ -334,14 +341,14 @@ function ReviewsPageContent() {
           <div className="space-y-4">
             <div className="flex flex-col items-center">
               <p className="mb-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Κατηγορίες
+                Categories
               </p>
               <div className="flex w-full max-w-5xl justify-start gap-1 overflow-x-auto p-1 sm:justify-center">
                 {categoryFilters.map(item => (
                   <FilterSegment
                     key={item ?? 'all'}
                     href={buildHref({ category: item, tag })}
-                    label={item ? (CATEGORY_LABELS[item] ?? item) : 'Όλα'}
+                    label={item ? (CATEGORY_LABELS[item] ?? item) : 'All'}
                     isActive={item === category || (!item && !category)}
                   />
                 ))}
@@ -358,7 +365,7 @@ function ReviewsPageContent() {
                   href={buildHref({ category, tag: null })}
                   className="text-xs font-medium text-primary"
                 >
-                  Εκκαθάριση
+                  Clear
                 </Link>
               </div>
             ) : null}
@@ -366,13 +373,13 @@ function ReviewsPageContent() {
         </motion.section>
 
         {shouldShowSkeleton ? (
-          <ReviewSkeletonGrid />
+          <NewsSkeletonGrid />
         ) : error ? (
           <ErrorAlert message={error} />
         ) : articles.length === 0 ? (
           <EmptyState
-            icon={<Star className="h-16 w-16 text-muted-foreground" />}
-            title="Δεν υπάρχουν reviews"
+            icon={<FileText className="h-16 w-16 text-muted-foreground" />}
+            title="No articles yet"
             description={emptyDescription}
           />
         ) : (
@@ -383,7 +390,7 @@ function ReviewsPageContent() {
             className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
             {articles.map(article => (
-              <ReviewCard key={article.id} article={article} />
+              <ArticleCard key={article.id} article={article} />
             ))}
           </motion.div>
         )}

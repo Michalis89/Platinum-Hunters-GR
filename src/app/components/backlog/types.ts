@@ -71,9 +71,9 @@ export const CATEGORY_CONFIG: Record<MediaCategory, CategoryConfig> = {
   anime: {
     title: 'Anime Library',
     subtitle: 'Season tracking, favorites, and a clean MAL-inspired grid.',
-    searchPlaceholder: 'Αναζήτηση anime...',
+    searchPlaceholder: 'Search anime...',
     currentLabel: 'Watching',
-    plannedLabel: 'Plan to Watch',
+    plannedLabel: 'Backlog',
     completedLabel: 'Completed',
     droppedLabel: 'Dropped',
     icon: Sparkles,
@@ -81,9 +81,9 @@ export const CATEGORY_CONFIG: Record<MediaCategory, CategoryConfig> = {
   manga: {
     title: 'Manga Library',
     subtitle: 'Chapters, volumes, and a clean bookshelf layout.',
-    searchPlaceholder: 'Αναζήτηση manga...',
+    searchPlaceholder: 'Search manga...',
     currentLabel: 'Reading',
-    plannedLabel: 'Plan to Read',
+    plannedLabel: 'Backlog',
     completedLabel: 'Completed',
     droppedLabel: 'Dropped',
     icon: BookOpen,
@@ -91,37 +91,37 @@ export const CATEGORY_CONFIG: Record<MediaCategory, CategoryConfig> = {
   books: {
     title: 'Book Library',
     subtitle: 'Reading log, notes, and progress in a minimal shelf.',
-    searchPlaceholder: 'Αναζήτηση βιβλίων...',
+    searchPlaceholder: 'Search books...',
     currentLabel: 'Reading',
-    plannedLabel: 'To Read',
-    completedLabel: 'Finished',
+    plannedLabel: 'Backlog',
+    completedLabel: 'Completed',
     droppedLabel: 'Dropped',
     icon: BookOpen,
   },
   movies: {
     title: 'Movie Library',
     subtitle: 'Watchlist, ratings, and cinematic highlights.',
-    searchPlaceholder: 'Αναζήτηση ταινιών...',
+    searchPlaceholder: 'Search movies...',
     currentLabel: 'Watching',
-    plannedLabel: 'Watchlist',
-    completedLabel: 'Watched',
+    plannedLabel: 'Backlog',
+    completedLabel: 'Completed',
     droppedLabel: 'Dropped',
     icon: Film,
   },
   tv: {
     title: 'TV Library',
     subtitle: 'Series tracking, ratings, and season progress.',
-    searchPlaceholder: 'Αναζήτηση σειρών...',
-    currentLabel: 'Watching now',
-    plannedLabel: 'Watchlist',
-    completedLabel: 'Watched',
+    searchPlaceholder: 'Search series...',
+    currentLabel: 'Watching',
+    plannedLabel: 'Backlog',
+    completedLabel: 'Completed',
     droppedLabel: 'Dropped',
     icon: Tv,
   },
   games: {
     title: 'Games Library',
     subtitle: 'Track your gaming backlog.',
-    searchPlaceholder: 'Αναζήτηση παιχνιδιών...',
+    searchPlaceholder: 'Search games...',
     currentLabel: 'Playing',
     plannedLabel: 'Backlog',
     completedLabel: 'Completed',
@@ -139,11 +139,11 @@ export const getApiBase = (category: MediaCategory): string | null => {
 };
 
 export const getProgressLabel = (category: MediaCategory): string => {
-  if (category === 'manga') return 'Τόμος';
-  if (category === 'movies') return 'Λεπτά';
-  if (category === 'books') return 'Σελίδες';
-  if (category === 'games') return 'Ώρες';
-  return 'Επεισόδια';
+  if (category === 'manga') return 'Volumes';
+  if (category === 'movies') return 'Minutes';
+  if (category === 'books') return 'Pages';
+  if (category === 'games') return 'Hours';
+  return 'Episodes';
 };
 
 export const supportsExternalApi = (category: MediaCategory): boolean => {

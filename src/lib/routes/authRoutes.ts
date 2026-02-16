@@ -1,4 +1,4 @@
-const LOGIN_REQUIRED_PREFIXES = ['/pages/profile', '/pages/backlog', '/pages/support', '/admin'];
+﻿const LOGIN_REQUIRED_PREFIXES = ['/profile', '/backlog', '/support', '/admin'];
 const DASHBOARD_PATH = '/dashboard';
 const HOME_PATHS = ['/home', '/pages/home'];
 const AUTH_ROUTES = [
@@ -25,3 +25,5 @@ export const getLoginUrl = (redirectTo?: string) =>
   redirectTo ? `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}` : '/auth/login';
 
 export { LOGIN_REQUIRED_PREFIXES, DASHBOARD_PATH, HOME_PATHS, AUTH_ROUTES };
+
+

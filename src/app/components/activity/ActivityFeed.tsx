@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useEffect, createContext, useContext } from 'react';
+import { memo, useState, useEffect, useMemo, createContext, useContext } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
@@ -50,7 +50,7 @@ type ActivityType =
   | 'article_commented'
   | 'article_comment_deleted';
 
-type ActivityItem = {
+export type ActivityItem = {
   id: number;
   user_id: string;
   type: ActivityType;
@@ -65,6 +65,8 @@ type ActivityFeedProps = {
   title?: string;
   compact?: boolean;
   height?: number;
+  showHeader?: boolean;
+  onActivitiesChange?: (activities: ActivityItem[]) => void;
 };
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -296,6 +298,8 @@ function ActivityFeedComponent({
   title,
   compact = false,
   height,
+  showHeader = true,
+  onActivitiesChange,
 }: ActivityFeedProps) {
   const { data, error, isLoading } = useSWR(
     `/api/activity?scope=${scope}&limit=${limit}`,
@@ -313,8 +317,12 @@ function ActivityFeedComponent({
     setAlertCategory(category);
   };
 
-  const activities: ActivityItem[] = data?.activities ?? [];
+  const activities: ActivityItem[] = useMemo(() => data?.activities ?? [], [data?.activities]);
   const feedTextClass = '  font-medium transition-colors hover:text-primary';
+
+  useEffect(() => {
+    onActivitiesChange?.(activities);
+  }, [activities, onActivitiesChange]);
 
   return (
     <div className="p-4 sm:p-5">
@@ -328,7 +336,7 @@ function ActivityFeedComponent({
               Δεν έχεις επιλέξει την κατηγορία{' '}
               <strong>{categoryLabels[alertCategory] || alertCategory}</strong> στο προφίλ σου.{' '}
               <Link
-                href="/pages/profile/edit#categories"
+                href="/profile/edit#categories"
                 className="font-semibold text-primary underline hover:opacity-85"
               >
                 Πρόσθεσέ την εδώ
@@ -338,6 +346,7 @@ function ActivityFeedComponent({
         </Alert>
       )}
 
+      {showHeader && (
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-semibold">{title || 'Τελευταίες ενέργειες'}</h3>
         <div className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium">
@@ -345,6 +354,7 @@ function ActivityFeedComponent({
           <span>Live</span>
         </div>
       </div>
+      )}
 
       {isLoading && (
         <div className="inline-flex items-center gap-2">
@@ -387,6 +397,10 @@ function ActivityFeedComponent({
 }
 
 export const ActivityFeed = memo(ActivityFeedComponent);
+export function renderActivityText(item: ActivityItem) {
+  return renderText(item);
+}
+
 
 function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }) {
   const text = renderText(item);
@@ -406,7 +420,7 @@ function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }
   ) {
     const articleSlug = normalizeSlug(payload.articleSlug as string);
     return (
-      <Link href={`/pages/news/${articleSlug}`} className={textClass}>
+      <Link href={`/articles/${articleSlug}`} className={textClass}>
         {text}
       </Link>
     );
@@ -425,7 +439,7 @@ function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }
       );
     }
 
-    const backlogUrl = `/pages/backlog${category ? `?category=${category}` : ''}`;
+    const backlogUrl = `/backlog${category ? `?category=${category}` : ''}`;
     return (
       <Link href={backlogUrl} className={textClass}>
         {text}
@@ -466,3 +480,5 @@ function FeedText({ item, textClass }: { item: ActivityItem; textClass: string }
   }
   return <p className="font-medium">{text}</p>;
 }
+
+

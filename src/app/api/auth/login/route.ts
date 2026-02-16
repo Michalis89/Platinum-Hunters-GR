@@ -1,4 +1,4 @@
-﻿import { withApiRoute } from '@/lib/observability/withApiRoute';
+import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 /**
  * Login API Route
@@ -189,7 +189,7 @@ async function POSTHandler(req: Request) {
     // DETERMINE REDIRECT URL based on profile completeness
     const hasCategories =
       resolvedUserProfile.categories && resolvedUserProfile.categories.length > 0;
-    const redirectUrl = hasCategories ? '/dashboard' : '/pages/profile/edit';
+    const redirectUrl = hasCategories ? '/dashboard' : '/profile/edit';
 
     // RETURN SUCCESS
     return ok({
@@ -205,3 +205,4 @@ async function POSTHandler(req: Request) {
 }
 
 export const POST = withApiRoute(POSTHandler);
+

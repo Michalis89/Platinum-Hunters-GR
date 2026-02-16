@@ -4,7 +4,7 @@ import { buildMetadata } from '@/utils/seo/metadata/helpers';
 export const metadata = buildMetadata({
   title: 'Ticket υποστήριξης | Hobbistas',
   description: 'Δες το ticket υποστήριξης σου και πρόσθεσε απαντήσεις.',
-  path: '/pages/support/tickets',
+  path: '/support/tickets',
 });
 
 export default function SupportTicketDetailPage() {

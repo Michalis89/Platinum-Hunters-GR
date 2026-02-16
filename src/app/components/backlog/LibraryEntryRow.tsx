@@ -1,9 +1,11 @@
-'use client';
+﻿'use client';
 
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,18 +17,27 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { MediaCategory, MediaEntry, SearchResult, CATEGORY_CONFIG, getTotalCount } from './types';
-import { Item } from '@/components/ui/item';
 
 interface LibraryEntryRowProps {
   entry: MediaEntry;
   category: MediaCategory;
+  index: number;
   onOpenDialog: (entry: MediaEntry & Partial<SearchResult>) => void;
   onDelete: (entry: MediaEntry) => void;
 }
 
+const toMediaSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
+
 function LibraryEntryRow({
   entry,
   category,
+  index,
   onOpenDialog,
   onDelete,
 }: Readonly<LibraryEntryRowProps>) {
@@ -50,8 +61,17 @@ function LibraryEntryRow({
         ? `${progressValue}${total ? ` / ${total}` : ''}`
         : '-'
       : progressValue !== null
-        ? `${progressValue}${total ? ' ' : ''}`
+        ? `${progressValue}${total ? 'h' : ''}`
         : '-';
+
+  const scoreLabel = useMemo(() => {
+    if (!entry.score) return 'No score';
+    return `Score ${entry.score}`;
+  }, [entry.score]);
+  const mediaSlug = useMemo(
+    () => (entry.title?.trim() ? toMediaSlug(entry.title) : String(entry.mediaId ?? entry.id)),
+    [entry.id, entry.mediaId, entry.title],
+  );
 
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
@@ -64,62 +84,67 @@ function LibraryEntryRow({
 
   return (
     <>
-      <div className="rounded-[20px] p-3 sm:p-4">
-        <div className="space-y-3 md:hidden">
-          <div className="flex items-start gap-3">
-            <div className="relative h-20 w-14 shrink-0 rounded-xl bg-card">
-              <Image
-                src={entry.cover}
-                alt={entry.title}
-                width={56}
-                height={80}
-                unoptimized
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <p className="line-clamp-2 text-left text-base font-semibold leading-tight text-foreground">
-                {entry.title}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {entry.subtitle}
-                {entry.year ? ` · ${entry.year}` : ''}
-              </p>
-              {category === 'games' && entry.selectedPlatform ? (
-                <p className="text-xs font-medium text-muted-foreground">
-                  Platform: {entry.selectedPlatform}
-                </p>
-              ) : null}
-              <div className="flex flex-wrap gap-2">
-                {entry.tags.slice(0, 3).map(tag => (
-                  <span key={tag} className="px-2 py-0.5 text-[11px] text-muted-foreground">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+      <article
+        className={`group rounded-2xl border p-3 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg sm:p-4 ${
+          index % 2 === 0 ? 'border-border/70 bg-card/70' : 'border-border/60 bg-card/50'
+        }`}
+      >
+        <div className="grid gap-4 md:grid-cols-[92px,1.4fr,0.55fr,0.5fr,112px] md:items-center">
+          <div className="relative h-28 w-20 overflow-hidden rounded-xl border border-border/60 bg-card">
+            <Image
+              src={entry.cover}
+              alt={entry.title}
+              width={80}
+              height={112}
+              unoptimized
+              className="h-full w-full object-cover"
+            />
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-[14px] px-2 py-1.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Status</p>
-              <p className="text-xs font-semibold text-primary">{statusLabel}</p>
-            </div>
-            <div className="rounded-[14px] px-2 py-1.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Progress</p>
-              <p className="text-xs font-semibold text-foreground">{progressDisplay}</p>
-            </div>
-            <div className="rounded-[14px] px-2 py-1.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Score</p>
-              <p className="text-xs font-semibold text-foreground">{entry.score ?? '-'}</p>
-            </div>
+          <div className="min-w-0 space-y-1">
+            <Link
+              href={`/media/${category}/${mediaSlug}`}
+              className="line-clamp-2 block text-base font-semibold leading-tight text-foreground transition-colors hover:text-primary hover:underline sm:text-lg"
+            >
+              {entry.title}
+            </Link>
+            <p className="line-clamp-1 text-sm text-muted-foreground">
+              {entry.subtitle}
+              {entry.year ? ` - ${entry.year}` : ''}
+            </p>
+            {category === 'games' && entry.selectedPlatform ? (
+              <p className="text-xs font-medium text-muted-foreground">
+                Platform: {entry.selectedPlatform}
+              </p>
+            ) : null}
+            <p className="line-clamp-1 text-xs text-muted-foreground">
+              {entry.tags.slice(0, 3).join(', ') || 'No genres'}
+            </p>
           </div>
 
-          <div className="flex items-center justify-end gap-2">
+          <div className="space-y-2">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Status</p>
+            <span className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {statusLabel}
+            </span>
+            <p className="text-xs text-muted-foreground">Progress: {progressDisplay}</p>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Score</p>
+            <Badge
+              variant="secondary"
+              className="rounded-full border border-border/70 bg-card/80 px-3 py-1 text-xs"
+            >
+              {scoreLabel}
+            </Badge>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 opacity-100 transition md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
             <Button
               type="button"
               size="icon"
-              variant={'secondary'}
+              variant="secondary"
               onClick={() => onOpenDialog(entry)}
               title="Edit"
               aria-label="Edit"
@@ -130,7 +155,7 @@ function LibraryEntryRow({
             <Button
               type="button"
               size="icon"
-              variant={'destructive'}
+              variant="destructive"
               onClick={handleDeleteClick}
               title="Delete"
               aria-label="Delete"
@@ -140,84 +165,7 @@ function LibraryEntryRow({
             </Button>
           </div>
         </div>
-
-        <Item
-          asChild
-          variant="muted"
-          className="hidden items-center gap-4 md:grid md:grid-cols-[72px,1.5fr,0.7fr,0.7fr,0.5fr,112px]"
-        >
-          <div className="contents">
-            <div className="relative h-20 w-14 rounded-xl bg-card">
-              <Image
-                src={entry.cover}
-                alt={entry.title}
-                width={56}
-                height={80}
-                unoptimized
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="space-y-1">
-              <p className="text-left text-base font-semibold text-foreground">{entry.title}</p>
-              {entry.subtitle && (
-                <p className="text-xs font-medium text-muted-foreground">{entry.subtitle}</p>
-              )}
-              <p className="text-xs font-medium text-muted-foreground">
-                Release Year: {entry.year ? ` ${entry.year}` : ''}
-              </p>
-              {category === 'games' && entry.selectedPlatform ? (
-                <p className="text-xs font-medium text-muted-foreground">
-                  Platform: {entry.selectedPlatform}
-                </p>
-              ) : null}
-              <div className="flex flex-wrap gap-2">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Genre:{' '}
-                  {entry.tags.slice(0, 3).map((tag, index, array) => (
-                    <span key={tag}>
-                      {tag}
-                      {index < array.length - 1 ? ', ' : ''}
-                    </span>
-                  ))}
-                </p>
-              </div>
-            </div>
-            <div className="flex w-full items-center justify-center">
-              <span className="px-3 py-1 text-xs font-semibold" data-active="true">
-                {statusLabel}
-              </span>
-            </div>
-            <div className="flex w-full items-center justify-center text-sm text-muted-foreground">
-              {progressDisplay}
-            </div>
-            <div className="flex w-full items-center justify-center text-sm font-semibold text-foreground">
-              {entry.score ?? '-'}
-            </div>
-            <div className="flex w-full items-center justify-center gap-2">
-              <Button
-                type="button"
-                variant={'secondary'}
-                onClick={() => onOpenDialog(entry)}
-                title="Edit"
-                aria-label="Edit"
-                className="rounded-[12px]"
-              >
-                <Pencil className="h-5 w-5" />
-              </Button>
-              <Button
-                type="button"
-                variant={'destructive'}
-                onClick={handleDeleteClick}
-                title="Delete"
-                aria-label="Delete"
-                className="rounded-[12px]"
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-        </Item>
-      </div>
+      </article>
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent className="space-y-6 sm:max-w-xl">

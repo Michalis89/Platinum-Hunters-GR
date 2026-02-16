@@ -1,4 +1,4 @@
-import type { MetadataRoute } from 'next';
+﻿import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/config/site';
 import { HOBBY_CATEGORIES } from '@/config/hobbies';
 
@@ -7,10 +7,11 @@ const toUrl = (path: string) => new URL(path, SITE_URL).toString();
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     '/',
+    '/home',
     '/about',
-    '/pages/news',
-    '/pages/reviews',
-    '/pages/backlog',
+    '/articles',
+    '/reviews',
+    '/backlog',
     '/terms',
     '/privacy',
   ];

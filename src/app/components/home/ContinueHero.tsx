@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { CoverHeroImage } from '@/components/ui/cover-image';
 import Link from 'next/link';
@@ -69,40 +69,40 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     label: 'Games',
     icon: <Gamepad2 className="h-4 w-4" />,
     verb: count => `In progress: ${count} games`,
-    route: '/pages/backlog?category=games',
+    route: '/backlog?category=games',
   },
   anime: {
     label: 'Anime',
     icon: <Sparkles className="h-4 w-4" />,
     verb: count => `In progress: ${count} anime`,
-    route: '/pages/backlog?category=anime',
+    route: '/backlog?category=anime',
   },
   manga: {
     label: 'Manga',
     icon: <BookOpen className="h-4 w-4" />,
     verb: count => `In progress: ${count} manga`,
-    route: '/pages/backlog?category=manga',
+    route: '/backlog?category=manga',
   },
   tv: {
     label: 'TV shows',
     icon: <Tv className="h-4 w-4" />,
     verb: count => `In progress: ${count} TV shows`,
-    route: '/pages/backlog?category=tv',
+    route: '/backlog?category=tv',
   },
   books: {
     label: 'Books',
     icon: <BookText className="h-4 w-4" />,
     verb: count => `In progress: ${count} books`,
-    route: '/pages/backlog?category=books',
+    route: '/backlog?category=books',
   },
 };
 
 const CATEGORY_ROUTES = {
-  games: '/pages/backlog?category=games&status=current',
-  anime: '/pages/backlog?category=anime&status=current',
-  manga: '/pages/backlog?category=manga&status=current',
-  tv: '/pages/backlog?category=tv&status=current',
-  books: '/pages/backlog?category=books&status=current',
+  games: '/backlog?category=games&status=current',
+  anime: '/backlog?category=anime&status=current',
+  manga: '/backlog?category=manga&status=current',
+  tv: '/backlog?category=tv&status=current',
+  books: '/backlog?category=books&status=current',
 };
 
 const appendSearchParam = (route: string, search?: string | null) => {
@@ -158,13 +158,13 @@ const getSlideImage = (slide: ContinueSlide) =>
 
 const getCategoryRoute = (category: string, search?: string | null) =>
   appendSearchParam(
-    CATEGORY_ROUTES[category as keyof typeof CATEGORY_ROUTES] ?? '/pages/backlog',
+    CATEGORY_ROUTES[category as keyof typeof CATEGORY_ROUTES] ?? '/backlog',
     search,
   );
 
 const getFallbackRoute = (enabledCategories: string[]) => {
   const firstEnabled = enabledCategories.find(category => category in CATEGORY_ROUTES);
-  return firstEnabled ? getCategoryRoute(firstEnabled) : '/pages/backlog';
+  return firstEnabled ? getCategoryRoute(firstEnabled) : '/backlog';
 };
 
 const getProgressLabel = (category: string, progress: number | null) => {
@@ -442,3 +442,4 @@ export function ContinueHero() {
     </section>
   );
 }
+

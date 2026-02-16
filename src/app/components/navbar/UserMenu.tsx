@@ -95,13 +95,13 @@ export const UserMenu = React.memo(function UserMenu({
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem asChild className={itemClassName}>
-            <Link href="/pages/profile" prefetch={false}>
+            <Link href="/profile" prefetch={false}>
               <User className="size-4" />
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={itemClassName}>
-            <Link href="/pages/profile/edit" prefetch={false}>
+            <Link href="/profile/edit" prefetch={false}>
               <PenLine className="size-4" />
               <span>Edit profile</span>
             </Link>
@@ -113,7 +113,7 @@ export const UserMenu = React.memo(function UserMenu({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={itemClassName}>
-            <Link href="/pages/support/tickets" prefetch={false}>
+            <Link href="/support/tickets" prefetch={false}>
               <Ticket className="size-4" />
               <span>My tickets</span>
             </Link>
@@ -142,3 +142,4 @@ export const UserMenu = React.memo(function UserMenu({
     </DropdownMenu>
   );
 });
+

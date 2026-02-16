@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { ChevronDown, Layers, type LucideIcon } from 'lucide-react';
 import {
   MenubarContent,
@@ -22,16 +22,16 @@ type LibraryOnlyItem = {
 };
 
 export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
-  const isLibraryActive = pathname.startsWith('/pages/backlog');
+  const isLibraryActive = pathname.startsWith('/backlog');
 
   const libraryItems: LibraryOnlyItem[] = hobbyItems
     .map(item => {
-      const childLibrary = item.children?.find(child => child.href.includes('/pages/backlog'));
+      const childLibrary = item.children?.find(child => child.href.includes('/backlog'));
       if (childLibrary) {
         return { href: childLibrary.href, label: item.label, icon: item.icon };
       }
 
-      if (item.href.includes('/pages/backlog')) {
+      if (item.href.includes('/backlog')) {
         return { href: item.href, label: item.label, icon: item.icon };
       }
 
@@ -77,3 +77,4 @@ export function LibraryMenu({ hobbyItems, pathname }: LibraryMenuProps) {
     </MenubarMenu>
   );
 }
+

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import BacklogPageClient from '@/app/(main)/pages/backlog/BacklogPageClient';
+import BacklogPageClient from '@/app/(main)/backlog/BacklogPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { getCategoryBySlug } from '@/config/hobbies';
 import StructuredData from '@/utils/seo/StructuredData';
@@ -18,17 +18,17 @@ export async function generateMetadata({ searchParams }: BacklogPageProps): Prom
   const categoryLabel = categoryData?.title;
 
   const title = categoryLabel
-    ? `Backlog για ${categoryLabel} | Hobbistas`
-    : 'Backlog & Πρόοδος | Hobbistas';
+    ? `Backlog for ${categoryLabel} | Hobbistas`
+    : 'Backlog & Progress | Hobbistas';
 
   const description = categoryLabel
-    ? `Οργάνωσε το backlog σου για ${categoryLabel}, με στόχους, σημειώσεις και πρόοδο.`
-    : 'Οργάνωσε το backlog σου με στόχους, πρόοδο και στατιστικά ανά χόμπι.';
+    ? `Organize your ${categoryLabel} backlog with goals, notes, and progress tracking.`
+    : 'Organize your backlog with goals, progress tracking, and per-hobby insights.';
 
   // Canonical strategy: treat category query pages as first-class and keep their querystring.
   const path = normalizedCategory
-    ? `/pages/backlog?category=${normalizedCategory}`
-    : '/pages/backlog';
+    ? `/backlog?category=${normalizedCategory}`
+    : '/backlog';
 
   return buildMetadata({
     title,
@@ -43,20 +43,20 @@ export default async function BacklogPage({ searchParams }: BacklogPageProps) {
   const categoryData = normalizedCategory ? getCategoryBySlug(normalizedCategory) : undefined;
   const categoryLabel = categoryData?.title;
   const breadcrumb = [
-    { name: 'Αρχική', url: `${SITE_URL}/` },
-    { name: 'Backlog', url: `${SITE_URL}/pages/backlog` },
+    { name: 'Home', url: `${SITE_URL}/` },
+    { name: 'Backlog', url: `${SITE_URL}/backlog` },
   ];
 
   if (categoryLabel) {
     breadcrumb.push({
       name: categoryLabel,
-      url: `${SITE_URL}/pages/backlog?category=${normalizedCategory}`,
+      url: `${SITE_URL}/backlog?category=${normalizedCategory}`,
     });
   }
 
   const redirectPath = normalizedCategory
-    ? `/pages/backlog?category=${normalizedCategory}`
-    : '/pages/backlog';
+    ? `/backlog?category=${normalizedCategory}`
+    : '/backlog';
   await requireServerAuth(redirectPath);
 
   return (

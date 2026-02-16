@@ -1,5 +1,5 @@
 import type { ArticleCategory } from '@/types/database';
-import { CATEGORY_LABELS } from '@/app/(main)/pages/news/constants';
+import { CATEGORY_LABELS } from '@/app/(main)/articles/constants';
 
 const REVIEW_EXCLUSIONS: ArticleCategory[] = ['coding', 'pet'];
 

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -48,42 +48,42 @@ const categoryConfigs: CategoryConfig[] = [
     label: 'Games',
     icon: <Gamepad2 className="h-4 w-4" />,
     apiPath: '/api/games/suggestions?category=games',
-    addPath: '/pages/backlog?category=games',
+    addPath: '/backlog?category=games',
   },
   {
     key: 'anime',
     label: 'Anime',
     icon: <Sparkles className="h-4 w-4" />,
     apiPath: '/api/anime/suggestions?category=anime',
-    addPath: '/pages/backlog?category=anime',
+    addPath: '/backlog?category=anime',
   },
   {
     key: 'manga',
     label: 'Manga',
     icon: <BookMarked className="h-4 w-4" />,
     apiPath: '/api/anime/suggestions?category=manga',
-    addPath: '/pages/backlog?category=manga',
+    addPath: '/backlog?category=manga',
   },
   {
     key: 'movies',
     label: 'Movies',
     icon: <Film className="h-4 w-4" />,
     apiPath: '/api/movies/suggestions?category=movies',
-    addPath: '/pages/backlog?category=movies',
+    addPath: '/backlog?category=movies',
   },
   {
     key: 'tv',
     label: 'TV shows',
     icon: <Tv className="h-4 w-4" />,
     apiPath: '/api/movies/suggestions?category=tv',
-    addPath: '/pages/backlog?category=tv',
+    addPath: '/backlog?category=tv',
   },
   {
     key: 'books',
     label: 'Books',
     icon: <BookText className="h-4 w-4" />,
     apiPath: '/api/books/suggestions',
-    addPath: '/pages/backlog?category=books',
+    addPath: '/backlog?category=books',
   },
 ];
 
@@ -158,7 +158,7 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
               <SuggestionCard
                 key={item.id}
                 item={item}
-                addPath={activeConfig?.addPath ?? '/pages/backlog'}
+                addPath={activeConfig?.addPath ?? '/backlog'}
               />
             ))}
           </div>
@@ -174,7 +174,7 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
             </p>
 
             <Link
-              href={activeConfig?.addPath ?? '/pages/backlog'}
+              href={activeConfig?.addPath ?? '/backlog'}
               className="mt-5 inline-flex items-center gap-1 text-sm font-medium transition hover:text-primary"
             >
               Browse backlog
@@ -222,3 +222,4 @@ function SuggestionCard({ item, addPath }: SuggestionCardProps) {
     </Link>
   );
 }
+

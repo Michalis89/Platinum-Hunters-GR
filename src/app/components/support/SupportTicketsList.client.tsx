@@ -7,9 +7,10 @@ import { Spinner } from '@/components/ui/spinner';
 import EmptyState from '@/components/ui/empty';
 import { Alert, AlertDescription, ErrorAlert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SelectField as Select } from '@/components/ui/select-field';
-import { X } from 'lucide-react';
+import { Inbox, X } from 'lucide-react';
 import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
 // Middleware ensures only authenticated users reach this page
 import { useTickets } from '@/lib/hooks/useTickets';
@@ -22,10 +23,29 @@ import {
 import { UI_CLASSNAMES } from '@/lib/constants/ui';
 import type { TicketsAlert } from '@/lib/hooks/useTickets';
 
-// User-facing override for "waiting_user" status
 const statusLabels: Record<string, string> = {
   ...SUPPORT_STATUS_LABELS,
-  waiting_user: 'Απάντηση από εσένα', // User-friendly version
+  open: 'Open',
+  in_progress: 'In progress',
+  waiting_user: 'Awaiting your response',
+  resolved: 'Resolved',
+  closed: 'Closed',
+};
+
+const categoryLabels: Record<string, string> = {
+  ...SUPPORT_CATEGORY_LABELS,
+  bug: 'Bug',
+  feature: 'Feature request',
+  author_rights: 'Author rights',
+  general: 'General',
+};
+
+const severityLabels: Record<string, string> = {
+  ...SUPPORT_SEVERITY_LABELS,
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
 };
 
 type TicketItem = {
@@ -54,7 +74,7 @@ export default function SupportTicketsList() {
     reload,
   } = useTickets<TicketItem>({
     endpoint: '/api/support/tickets',
-    enabled: true, // Middleware ensures auth
+    enabled: true,
   });
   const [view, setView] = useState<'active' | 'all' | 'archive'>('active');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
@@ -70,14 +90,14 @@ export default function SupportTicketsList() {
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || 'Αποτυχία ενημέρωσης');
+        throw new Error(payload?.error || 'Failed to update ticket');
       }
       setTickets(prev => prev.map(t => (t.id === id ? { ...t, user_archived: archived } : t)));
     } catch (err) {
       console.error(err);
       setAlert({
         type: 'error',
-        message: err instanceof Error ? err.message : 'Σφάλμα',
+        message: err instanceof Error ? err.message : 'Something went wrong',
       });
     } finally {
       setActionLoading(null);
@@ -95,15 +115,15 @@ export default function SupportTicketsList() {
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || 'Αποτυχία διαγραφής');
+        throw new Error(payload?.error || 'Failed to remove ticket');
       }
       setTickets(prev => prev.filter(t => t.id !== id));
-      setAlert({ type: 'success', message: 'Το ticket αφαιρέθηκε από τη δική σου προβολή.' });
+      setAlert({ type: 'success', message: 'The ticket was removed from your view.' });
     } catch (err) {
       console.error(err);
       setAlert({
         type: 'error',
-        message: err instanceof Error ? err.message : 'Σφάλμα',
+        message: err instanceof Error ? err.message : 'Something went wrong',
       });
     } finally {
       setActionLoading(null);
@@ -113,7 +133,7 @@ export default function SupportTicketsList() {
   const handleDelete = (id: string) => {
     setAlert({
       type: 'warning',
-      message: 'Να αφαιρεθεί το ticket από τη δική σου προβολή; (Admins το βλέπουν πάντα)',
+      message: 'Remove this ticket from your view? (Admins can still see it.)',
       onConfirm: () => {
         setAlert(null);
         performDelete(id);
@@ -132,7 +152,6 @@ export default function SupportTicketsList() {
         const archivedFlag = ticket.user_archived === true;
         if (view === 'active') return activeStatuses.includes(ticket.status) && !archivedFlag;
         if (view === 'archive') return archivedFlag || archivedStatuses.includes(ticket.status);
-        // 'all' => all non-archived tickets
         return !archivedFlag;
       })
       .filter(ticket => (categoryFilter ? ticket.category === categoryFilter : true));
@@ -144,7 +163,7 @@ export default function SupportTicketsList() {
         <div className="py-20">
           <div className="flex flex-col items-center justify-center gap-3">
             <Spinner />
-            <span className="text-sm text-muted-foreground">Φορτώνουμε τα tickets...</span>
+            <span className="text-sm text-muted-foreground">Loading tickets...</span>
           </div>
         </div>
       );
@@ -157,24 +176,12 @@ export default function SupportTicketsList() {
     if (filteredTickets.length === 0) {
       return (
         <EmptyState
-          icon={
-            <span className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-primary">
-              0
-            </span>
-          }
-          title={
-            view === 'archive'
-              ? 'Δεν υπάρχουν αρχειοθετημένα tickets'
-              : 'Δεν υπάρχουν tickets για τα φίλτρα που επέλεξες'
-          }
-          description={
-            view === 'archive'
-              ? 'Τα κλειστά tickets θα εμφανιστούν εδώ ως ιστορικό.'
-              : 'Άλλαξε φίλτρα ή δημιούργησε νέο αίτημα.'
-          }
+          icon={<Inbox className="size-5 text-muted-foreground" />}
+          title="No tickets yet"
+          description="When you submit a support request, it will appear here."
           action={
             <Button href="/pages/support" variant="primary">
-              Νέο αίτημα
+              Create a request
             </Button>
           }
         />
@@ -182,26 +189,24 @@ export default function SupportTicketsList() {
     }
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {filteredTickets.map(ticket => (
           <SupportTicketCard
             key={ticket.id}
             subject={ticket.subject}
             statusText={statusLabels[ticket.status] || ticket.status}
             statusColor={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
-            categoryText={SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category}
+            categoryText={categoryLabels[ticket.category] || ticket.category}
             severityText={
-              ticket.severity
-                ? `Σοβαρότητα: ${SUPPORT_SEVERITY_LABELS[ticket.severity] || ticket.severity}`
-                : null
+              ticket.severity ? `Severity: ${severityLabels[ticket.severity] || ticket.severity}` : null
             }
             updatedAt={ticket.updated_at}
-            updatedLabel="Τελευταία ενημέρωση:"
-            titleIcon={<span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden />}
+            updatedLabel="Last updated"
+            titleIcon={<span className="h-2 w-2 rounded-full bg-primary/50" aria-hidden />}
             actions={
-              <>
-                <Button href={`/pages/support/tickets/${ticket.id}`} variant="secondary">
-                  Δες λεπτομέρειες
+              <div className="flex items-center gap-3 pt-2">
+                <Button href={`/pages/support/tickets/${ticket.id}`} variant="primary" size="sm">
+                  View details
                 </Button>
                 {view === 'archive' ? (
                   <Button
@@ -209,8 +214,9 @@ export default function SupportTicketsList() {
                     onClick={() => handleArchiveToggle(ticket.id, false)}
                     className={UI_CLASSNAMES.mutedInteractive}
                     disabled={actionLoading === ticket.id}
+                    size="sm"
                   >
-                    Επαναφορά από αρχείο
+                    Restore
                   </Button>
                 ) : (
                   <Button
@@ -218,8 +224,9 @@ export default function SupportTicketsList() {
                     onClick={() => handleArchiveToggle(ticket.id, true)}
                     className={UI_CLASSNAMES.mutedInteractive}
                     disabled={actionLoading === ticket.id}
+                    size="sm"
                   >
-                    Μεταφορά στο αρχείο
+                    Move to archive
                   </Button>
                 )}
                 {view === 'archive' && (
@@ -228,11 +235,12 @@ export default function SupportTicketsList() {
                     onClick={() => handleDelete(ticket.id)}
                     className="text-foreground"
                     disabled={actionLoading === ticket.id}
+                    size="sm"
                   >
-                    Διαγραφή
+                    Delete
                   </Button>
                 )}
-              </>
+              </div>
             }
           />
         ))}
@@ -241,8 +249,6 @@ export default function SupportTicketsList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredTickets, loading, error, view]);
 
-  // Middleware ensures only authenticated users reach this page
-
   return (
     <div className={UI_CLASSNAMES.pageShell}>
       <div className={UI_CLASSNAMES.pageBackdrop}>
@@ -250,111 +256,116 @@ export default function SupportTicketsList() {
       </div>
       <div className="relative">
         <PageHero
-          eyebrow="Υποστήριξη"
+          eyebrow={null}
           title={
-            <span className="text-3xl font-semibold text-foreground md:text-5xl">
-              Τα tickets μου
+            <span className="flex flex-col items-center gap-3">
+              <Badge variant="secondary">Support</Badge>
+              <span className="text-3xl font-semibold text-foreground md:text-5xl">My tickets</span>
             </span>
           }
-          subtitle="Δες όλα τα αιτήματα υποστήριξης και την εξέλιξή τους."
-          sectionClassName=" pt-4"
-          subtitleClassName=" text-muted-foreground"
+          subtitle="Track your support requests and their status."
+          sectionClassName="pt-3 md:pt-4"
+          subtitleClassName="mb-6 max-w-2xl text-base text-muted-foreground md:mb-8 md:text-lg"
         />
         <PageContainer size="md" className="pb-20">
-          {alert && (
-            <div className="mb-4">
-              <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">
-                <div className="flex flex-col gap-2">
-                  <AlertDescription>{alert.message}</AlertDescription>
-                  {(alert.onConfirm || alert.onCancel) && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {alert.onConfirm && (
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={alert.onConfirm}
-                          className="font-medium"
-                        >
-                          Διαγραφή
-                        </Button>
-                      )}
-                      {alert.onCancel && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            alert.onCancel?.();
-                            setAlert(null);
-                          }}
-                          className="font-medium"
-                        >
-                          Άκυρο
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-3 top-3 h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
-                  aria-label="Κλείσιμο μηνύματος"
-                  onClick={() => setAlert(null)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </Alert>
-            </div>
-          )}
-          <div className="mb-6 grid gap-4 p-4 md:grid-cols-[1fr_auto] md:items-end">
-            <Tabs
-              value={view}
-              onValueChange={value => setView(value as typeof view)}
-              className="w-full"
-            >
-              <TabsList className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-2">
-                {[
-                  { value: 'active', label: 'Ενεργά' },
-                  { value: 'all', label: 'Όλα' },
-                  { value: 'archive', label: 'Αρχείο' },
-                ].map(option => (
-                  <TabsTrigger
-                    key={option.value}
-                    value={option.value}
-                    className="flex flex-1 flex-col items-center justify-center rounded-xl px-4 py-2 text-sm font-medium"
+          <div className="mx-auto max-w-4xl">
+            {alert && (
+              <div className="mb-4">
+                <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">
+                  <div className="flex flex-col gap-2">
+                    <AlertDescription>{alert.message}</AlertDescription>
+                    {(alert.onConfirm || alert.onCancel) && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {alert.onConfirm && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={alert.onConfirm}
+                            className="font-medium"
+                          >
+                            Delete
+                          </Button>
+                        )}
+                        {alert.onCancel && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              alert.onCancel?.();
+                              setAlert(null);
+                            }}
+                            className="font-medium"
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-3 top-3 h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                    aria-label="Close alert"
+                    onClick={() => setAlert(null)}
                   >
-                    <span>{option.label}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-            <div className="md:w-64">
-              <Select
-                label="Κατηγορία"
-                options={['', 'bug', 'feature', 'author_rights', 'general']}
-                optionLabels={{
-                  '': 'Όλες',
-                  bug: 'Σφάλμα',
-                  feature: 'Πρόταση',
-                  author_rights: 'Author',
-                  general: 'Γενικά',
-                }}
-                value={categoryFilter}
-                onChange={setCategoryFilter}
-              />
+                    <X className="h-4 w-4" />
+                  </Button>
+                </Alert>
+              </div>
+            )}
+
+            <div className="mb-6 rounded-xl border border-border/30 bg-muted/20 p-4 md:flex md:items-center md:justify-between">
+              <Tabs value={view} onValueChange={value => setView(value as typeof view)} className="w-full md:w-auto">
+                <TabsList className="h-10 w-full flex-wrap gap-2 rounded-xl border border-border/30 bg-card p-1 md:w-auto">
+                  {[
+                    { value: 'active', label: 'Active' },
+                    { value: 'all', label: 'All' },
+                    { value: 'archive', label: 'Archived' },
+                  ].map(option => (
+                    <TabsTrigger
+                      key={option.value}
+                      value={option.value}
+                      className="h-8 rounded-lg px-4 text-sm font-medium"
+                    >
+                      {option.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+
+              <div className="mt-3 md:mt-0 md:w-64">
+                <Select
+                  options={['', 'bug', 'feature', 'author_rights', 'general']}
+                  optionLabels={{
+                    '': 'Category',
+                    bug: 'Bug',
+                    feature: 'Feature request',
+                    author_rights: 'Author rights',
+                    general: 'General',
+                  }}
+                  value={categoryFilter}
+                  onChange={setCategoryFilter}
+                  className="h-10"
+                  placeholder="Category"
+                />
+              </div>
             </div>
-          </div>
-          {content}
-          <div className="mt-8 flex justify-center">
-            <Button href="/pages/support" variant="ghost" className="rounded-full px-4">
-              Δημιούργησε νέο αίτημα
-            </Button>
+
+            {content}
+
+            <div className="mt-8 flex justify-center md:justify-end">
+              <Button href="/pages/support" variant="primary" size="lg">
+                Create new request
+              </Button>
+            </div>
           </div>
         </PageContainer>
       </div>
     </div>
   );
 }
+

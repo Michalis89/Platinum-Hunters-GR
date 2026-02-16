@@ -46,14 +46,14 @@ export default function AttachmentDropzone({
   const validateFiles = useCallback(
     (files: File[]) => {
       if (files.length + items.length > maxFiles) {
-        return `Μπορείς να ανεβάσεις μέχρι ${maxFiles} αρχεία.`;
+        return `You can upload up to ${maxFiles} files.`;
       }
       for (const file of files) {
         if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-          return 'Επιτρέπονται μόνο PNG, JPG, WEBP ή PDF αρχεία.';
+          return 'Only PNG, JPG, WEBP, or PDF files are allowed.';
         }
         if (file.size > MAX_FILE_SIZE) {
-          return 'Κάθε αρχείο πρέπει να είναι μέχρι 5MB.';
+          return 'Each file must be 5MB or smaller.';
         }
       }
       return null;
@@ -127,8 +127,8 @@ export default function AttachmentDropzone({
     <div className={cn('space-y-3', className)}>
       <div
         className={cn(
-          'flex min-h-[152px] flex-col items-center justify-center gap-3 rounded-lg border-dashed px-4 py-6 text-center transition',
-          disabled ? 'opacity-60' : 'hover:border-info',
+          'flex min-h-[152px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 px-4 py-6 text-center transition-colors transition-shadow duration-200',
+          disabled ? 'opacity-60' : 'hover:border-primary/60 hover:shadow-sm',
         )}
         onDrop={handleDrop}
         onDragOver={event => event.preventDefault()}
@@ -136,9 +136,9 @@ export default function AttachmentDropzone({
         <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-primary">
           +
         </span>
-        <div className="text-sm font-semibold text-foreground">Σύρε εδώ screenshots ή αρχεία</div>
+        <div className="text-sm font-semibold text-foreground">Drop screenshots or files here</div>
         <div className="text-xs text-muted-foreground">
-          PNG, JPG, WEBP ή PDF έως 5MB (μέχρι {maxFiles} αρχεία)
+          PNG, JPG, WEBP, or PDF up to 5MB (max {maxFiles} files)
         </div>
         {helperText ? <div className="text-xs text-muted-foreground">{helperText}</div> : null}
         <input
@@ -157,7 +157,7 @@ export default function AttachmentDropzone({
           className="rounded-full px-4 py-2"
           disabled={disabled}
         >
-          Επιλογή αρχείων
+          Choose files
         </Button>
       </div>
 
@@ -166,8 +166,8 @@ export default function AttachmentDropzone({
       {items.length > 0 ? (
         <div className="grid gap-3 md:grid-cols-2">
           {items.map(item => (
-            <div key={item.id} className="flex items-center gap-3 p-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border bg-card">
+            <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/70 p-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-border/50 bg-card">
                 {item.previewUrl ? (
                   <Image
                     src={item.previewUrl}

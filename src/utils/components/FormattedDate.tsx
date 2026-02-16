@@ -15,7 +15,7 @@ type FormattedDateProps = {
 
 export function FormattedDate({
   date,
-  locale = 'el-GR',
+  locale,
   options = DEFAULT_OPTIONS,
   fallback = '—',
   className,

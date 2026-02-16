@@ -32,7 +32,7 @@ export default function ActionRow({ article }: ActionRowProps) {
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const fallbackBase = article.topic === 'reviews' ? '/pages/reviews' : '/pages/news';
+  const fallbackBase = article.topic === 'reviews' ? '/review' : '/articles';
   const fallbackHref = `${fallbackBase}?category=${article.category}`;
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Book,
   BookOpen,
   Cloud,
@@ -42,27 +42,27 @@ export type HobbyItem = NavbarLinkItem & {
 export const NAV_ITEMS: NavbarLinkItem[] = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/about', label: 'About', icon: Book },
-  { href: '/pages/news', label: 'Articles', icon: FileText, feature: 'articles' },
-  { href: '/pages/reviews', label: 'Reviews', icon: Star, feature: 'reviews' },
-  { href: '/pages/support', label: 'Support', icon: MessageCircle, requiresAuth: true },
+  { href: '/articles', label: 'Articles', icon: FileText, feature: 'articles' },
+  { href: '/review', label: 'Reviews', icon: Star, feature: 'reviews' },
+  { href: '/support', label: 'Support', icon: MessageCircle, requiresAuth: true },
 ];
 
 export const HOBBY_ITEMS: HobbyItem[] = [
   {
-    href: '/pages/backlog?category=games',
+    href: '/backlog?category=games',
     label: 'Games',
     icon: Gamepad2,
     category: 'games',
     children: [
       {
-        href: '/pages/news?category=games',
+        href: '/articles?category=games',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/backlog?category=games', label: 'Gaming Backlog', icon: ListChecks },
+      { href: '/backlog?category=games', label: 'Gaming Backlog', icon: ListChecks },
       {
-        href: '/pages/reviews?category=games',
+        href: '/review?category=games',
         label: 'Reviews',
         icon: Star,
         feature: 'reviews',
@@ -70,20 +70,20 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     ],
   },
   {
-    href: '/pages/backlog?category=anime',
+    href: '/backlog?category=anime',
     label: 'Anime',
     icon: Sparkles,
     category: 'anime',
     children: [
       {
-        href: '/pages/news?category=anime',
+        href: '/articles?category=anime',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/backlog?category=anime', label: 'Anime Library', icon: ListChecks },
+      { href: '/backlog?category=anime', label: 'Anime Library', icon: ListChecks },
       {
-        href: '/pages/reviews?category=anime',
+        href: '/review?category=anime',
         label: 'Reviews',
         icon: Star,
         feature: 'reviews',
@@ -91,20 +91,20 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     ],
   },
   {
-    href: '/pages/backlog?category=manga',
+    href: '/backlog?category=manga',
     label: 'Manga',
     icon: BookOpen,
     category: 'manga',
     children: [
       {
-        href: '/pages/news?category=manga',
+        href: '/articles?category=manga',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/backlog?category=manga', label: 'Manga Library', icon: ListChecks },
+      { href: '/backlog?category=manga', label: 'Manga Library', icon: ListChecks },
       {
-        href: '/pages/reviews?category=manga',
+        href: '/review?category=manga',
         label: 'Reviews',
         icon: Star,
         feature: 'reviews',
@@ -112,20 +112,20 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     ],
   },
   {
-    href: '/pages/backlog?category=movies',
+    href: '/backlog?category=movies',
     label: 'Movies',
     icon: Film,
     category: 'movies',
     children: [
       {
-        href: '/pages/news?category=movies',
+        href: '/articles?category=movies',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/backlog?category=movies', label: 'Movie Library', icon: ListChecks },
+      { href: '/backlog?category=movies', label: 'Movie Library', icon: ListChecks },
       {
-        href: '/pages/reviews?category=movies',
+        href: '/review?category=movies',
         label: 'Reviews',
         icon: Star,
         feature: 'reviews',
@@ -133,20 +133,20 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     ],
   },
   {
-    href: '/pages/backlog?category=tv',
+    href: '/backlog?category=tv',
     label: 'TV Series',
     icon: Tv,
     category: 'tv',
     children: [
       {
-        href: '/pages/news?category=tv',
+        href: '/articles?category=tv',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/backlog?category=tv', label: 'TV Library', icon: ListChecks },
+      { href: '/backlog?category=tv', label: 'TV Library', icon: ListChecks },
       {
-        href: '/pages/reviews?category=tv',
+        href: '/review?category=tv',
         label: 'Reviews',
         icon: Star,
         feature: 'reviews',
@@ -154,20 +154,20 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     ],
   },
   {
-    href: '/pages/backlog?category=books',
+    href: '/backlog?category=books',
     label: 'Books',
     icon: BookOpen,
     category: 'books',
     children: [
       {
-        href: '/pages/news?category=books',
+        href: '/articles?category=books',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/backlog?category=books', label: 'Book Library', icon: ListChecks },
+      { href: '/backlog?category=books', label: 'Book Library', icon: ListChecks },
       {
-        href: '/pages/reviews?category=books',
+        href: '/review?category=books',
         label: 'Reviews',
         icon: Star,
         feature: 'reviews',
@@ -175,41 +175,41 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     ],
   },
   {
-    href: '/pages/news?category=coding',
+    href: '/articles?category=coding',
     label: 'Coding',
     icon: Code,
     category: 'coding',
     children: [
       {
-        href: '/pages/news?category=coding',
+        href: '/articles?category=coding',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/news?category=coding&topic=tutorials', label: 'Tutorials', icon: BookOpen },
+      { href: '/articles?category=coding&topic=tutorials', label: 'Tutorials', icon: BookOpen },
       {
-        href: '/pages/news?category=coding&topic=weird-cases',
+        href: '/articles?category=coding&topic=weird-cases',
         label: 'Edge Cases',
         icon: Sparkles,
       },
     ],
   },
   {
-    href: '/pages/news?category=pet',
+    href: '/articles?category=pet',
     label: 'Pet',
     icon: PawPrint,
     category: 'pet',
     children: [
       {
-        href: '/pages/news?category=pet',
+        href: '/articles?category=pet',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
-      { href: '/pages/news?category=pet&topic=care', label: 'Care', icon: BookOpen },
-      { href: '/pages/news?category=pet&topic=experiences', label: 'Stories', icon: Sparkles },
+      { href: '/articles?category=pet&topic=care', label: 'Care', icon: BookOpen },
+      { href: '/articles?category=pet&topic=experiences', label: 'Stories', icon: Sparkles },
       {
-        href: '/pages/news?category=pet&topic=health',
+        href: '/articles?category=pet&topic=health',
         label: 'Health',
         icon: Star,
         feature: 'reviews',
@@ -217,26 +217,26 @@ export const HOBBY_ITEMS: HobbyItem[] = [
     ],
   },
   {
-    href: '/pages/news?category=vape',
+    href: '/articles?category=vape',
     label: 'Vape',
     icon: Cloud,
     category: 'vape',
     children: [
       {
-        href: '/pages/news?category=vape',
+        href: '/articles?category=vape',
         label: 'Articles',
         icon: FileText,
         feature: 'articles',
       },
       {
-        href: '/pages/news?category=vape&topic=devices',
+        href: '/articles?category=vape&topic=devices',
         label: 'Devices & Atomizers',
         icon: ListChecks,
       },
-      { href: '/pages/news?category=vape&topic=liquids', label: 'E-liquids', icon: BookOpen },
-      { href: '/pages/news?category=vape&topic=experiences', label: 'Stories', icon: Sparkles },
+      { href: '/articles?category=vape&topic=liquids', label: 'E-liquids', icon: BookOpen },
+      { href: '/articles?category=vape&topic=experiences', label: 'Stories', icon: Sparkles },
       {
-        href: '/pages/reviews?category=vape',
+        href: '/review?category=vape',
         label: 'Reviews',
         icon: Star,
         feature: 'reviews',
@@ -249,8 +249,8 @@ export const normalizeHref = (href: string) => href.split('?')[0];
 
 export const isHrefActive = (pathname: string, href: string) => {
   const targetPath = normalizeHref(href);
-  if (targetPath === '/pages/backlog') {
-    return pathname.startsWith('/pages/backlog');
+  if (targetPath === '/backlog') {
+    return pathname.startsWith('/backlog');
   }
   return pathname.startsWith(targetPath);
 };
@@ -305,3 +305,4 @@ export const getVisibleHobbyItems = (
         : [],
     }));
 };
+

@@ -3,10 +3,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Link from 'next/link';
-import { AlertTriangle, Bug, Info, Mail, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  AlertTriangle,
+  Bug,
+  CircleHelp,
+  Info,
+  Mail,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 import { PageContainer } from '@/app/components/layout/PageContainer';
-import PageHero from '@/app/components/shared/PageHero';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectField as Select } from '@/components/ui/select-field';
@@ -21,36 +38,32 @@ import { selectUser } from '@/store/slices/authSlice';
 import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
-import {
-  SUPPORT_SEVERITY_OPTIONS,
-  SUPPORT_SEVERITY_LABELS,
-  SUPPORT_CATEGORY_LABELS,
-} from '@/lib/constants/support';
+import { SUPPORT_SEVERITY_OPTIONS } from '@/lib/constants/support';
 import { UI_CLASSNAMES } from '@/lib/constants/ui';
 
 const CATEGORY_OPTIONS = [
-  { id: 'bug', label: SUPPORT_CATEGORY_LABELS.bug, description: 'Κάτι δεν δουλεύει' },
-  { id: 'feature', label: SUPPORT_CATEGORY_LABELS.feature, description: 'Νέα λειτουργία' },
+  { id: 'bug', label: 'Bug report', description: 'Something is not working as expected' },
+  { id: 'feature', label: 'Feature request', description: 'Suggest an improvement' },
   {
     id: 'author_rights',
-    label: SUPPORT_CATEGORY_LABELS.author_rights,
-    description: 'Αίτημα ρόλου',
+    label: 'Author rights',
+    description: 'Request content permissions',
   },
-  { id: 'general', label: SUPPORT_CATEGORY_LABELS.general, description: 'Σχόλια/Επικοινωνία' },
+  { id: 'general', label: 'General', description: 'Questions or feedback' },
 ];
 
 const URGENCY_OPTIONS = ['nice_to_have', 'important', 'urgent'];
-const PERMISSIONS = ['Author (Αρθρογραφία)', 'Moderator (Moderation)', 'Reviewer', 'Admin'];
+const PERMISSIONS = ['Author (Publishing)', 'Moderator (Moderation)', 'Reviewer', 'Admin'];
 const DEVICE_OPTIONS = ['desktop', 'mobile', 'tablet', 'console', 'other'];
 const OS_OPTIONS = ['windows', 'macos', 'linux', 'ios', 'android', 'other'];
 const BROWSER_OPTIONS = ['chrome', 'safari', 'firefox', 'edge', 'opera', 'other'];
 
 const deviceLabels: Record<string, string> = {
   desktop: 'Desktop / Laptop',
-  mobile: 'Κινητό',
+  mobile: 'Mobile',
   tablet: 'Tablet',
-  console: 'Κονσόλα',
-  other: 'Άλλο',
+  console: 'Console',
+  other: 'Other',
 };
 
 const osLabels: Record<string, string> = {
@@ -59,7 +72,7 @@ const osLabels: Record<string, string> = {
   linux: 'Linux',
   ios: 'iOS',
   android: 'Android',
-  other: 'Άλλο',
+  other: 'Other',
 };
 
 const browserLabels: Record<string, string> = {
@@ -68,21 +81,34 @@ const browserLabels: Record<string, string> = {
   firefox: 'Firefox',
   edge: 'Edge',
   opera: 'Opera',
-  other: 'Άλλο',
+  other: 'Other',
 };
 
 const urgencyLabels: Record<string, string> = {
   nice_to_have: 'Nice to have',
-  important: 'Σημαντικό',
-  urgent: 'Επείγον',
+  important: 'Important',
+  urgent: 'Urgent',
 };
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  bug: <Bug className="h-4 w-4" />,
-  feature: <Sparkles className="h-4 w-4" />,
-  author_rights: <ShieldCheck className="h-4 w-4" />,
-  general: <MessageCircle className="h-4 w-4" />,
+const severityLabels: Record<string, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
 };
+
+function SectionHeading({ icon, title }: Readonly<{ icon: React.ReactNode; title: string }>) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+        {icon}
+      </span>
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+    </div>
+  );
+}
+
+const requiredMark = <span className="text-destructive/70"> *</span>;
 
 export default function SupportForm({}: Readonly<{
   securityEmail?: string | null;
@@ -212,26 +238,26 @@ export default function SupportForm({}: Readonly<{
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
-    if (!formData.subject.trim()) nextErrors.subject = 'Το θέμα είναι υποχρεωτικό.';
-    if (!formData.description.trim()) nextErrors.description = 'Η περιγραφή είναι υποχρεωτική.';
+    if (!formData.subject.trim()) nextErrors.subject = 'Subject is required.';
+    if (!formData.description.trim()) nextErrors.description = 'Message is required.';
     // Email is optional since user is authenticated (middleware ensures this)
-    if (!formData.consent) nextErrors.consent = 'Χρειάζεται συναίνεση αποθήκευσης.';
+    if (!formData.consent) nextErrors.consent = 'Consent is required to continue.';
 
     if (category === 'bug') {
-      if (!formData.steps.trim()) nextErrors.steps = 'Περιέγραψε τα βήματα.';
-      if (!formData.expected.trim()) nextErrors.expected = 'Πες μας το αναμενόμενο αποτέλεσμα.';
-      if (!formData.actual.trim()) nextErrors.actual = 'Πες μας το πραγματικό αποτέλεσμα.';
-      if (!formData.severity) nextErrors.severity = 'Επίλεξε σοβαρότητα.';
+      if (!formData.steps.trim()) nextErrors.steps = 'Please add steps to reproduce.';
+      if (!formData.expected.trim()) nextErrors.expected = 'Please describe the expected result.';
+      if (!formData.actual.trim()) nextErrors.actual = 'Please describe the actual result.';
+      if (!formData.severity) nextErrors.severity = 'Please select severity.';
     }
 
     if (category === 'feature') {
-      if (!formData.useCase.trim()) nextErrors.useCase = 'Περιέγραψε το use case.';
-      if (!formData.value.trim()) nextErrors.value = 'Πες μας την αξία.';
-      if (!formData.urgency) nextErrors.urgency = 'Επίλεξε προτεραιότητα.';
+      if (!formData.useCase.trim()) nextErrors.useCase = 'Please describe the use case.';
+      if (!formData.value.trim()) nextErrors.value = 'Please explain the value.';
+      if (!formData.urgency) nextErrors.urgency = 'Please set a priority.';
     }
 
     if (category === 'author_rights' && !formData.reason.trim()) {
-      nextErrors.reason = 'Πες μας τον λόγο του αιτήματος.';
+      nextErrors.reason = 'Please explain why you are requesting access.';
     }
 
     setErrors(nextErrors);
@@ -293,11 +319,11 @@ export default function SupportForm({}: Readonly<{
 
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload.error || 'Η αποστολή απέτυχε.');
+        throw new Error(payload.error || 'Request submission failed.');
       }
 
       setTicketId(payload.data?.ticket_id ?? null);
-      setResult({ type: 'success', message: 'Το αίτημά σου καταχωρήθηκε με επιτυχία.' });
+      setResult({ type: 'success', message: 'Your request has been submitted successfully.' });
       setAttachments([]);
       setFormData(prev => ({
         ...prev,
@@ -321,7 +347,7 @@ export default function SupportForm({}: Readonly<{
     } catch (err) {
       setResult({
         type: 'error',
-        message: err instanceof Error ? err.message : 'Κάτι πήγε στραβά. Δοκίμασε ξανά.',
+        message: err instanceof Error ? err.message : 'Something went wrong. Please try again.',
       });
     } finally {
       setSubmitting(false);
@@ -334,101 +360,114 @@ export default function SupportForm({}: Readonly<{
         <div className={UI_CLASSNAMES.pageGradient} />
       </div>
 
-      <div className="relative mt-10">
-        <PageHero
-          eyebrow="Υποστήριξη"
-          title={
-            <span className="text-3xl text-foreground md:text-5xl">
-              Είμαστε εδώ για να βοηθήσουμε
-            </span>
-          }
-          subtitle={
-            <span>
-              Στείλε bug, πρόταση ή αίτημα author rights. Θα λάβεις ενημέρωση μόλις υπάρξει εξέλιξη.
-            </span>
-          }
-          actions={
-            <Button href="/pages/support/tickets" variant="secondary">
-              Τα tickets μου
-            </Button>
-          }
-          badges={
-            <>
-              <span className="rounded-full border border-border bg-card px-3 py-1">
-                Μην ανεβάζεις προσωπικά δεδομένα σε screenshots.
-              </span>
-            </>
-          }
-        />
+      <PageContainer size="md" className="relative pb-16 pt-8 md:pt-10">
+        <section className="relative mx-auto max-w-3xl overflow-hidden rounded-2xl border border-border/40 bg-card/30 px-6 py-7 text-center shadow-sm shadow-black/5 md:px-10 md:py-9">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 -translate-y-1/3 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle at center, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.06) 35%, transparent 72%)',
+            }}
+          />
+          <div className="relative">
+            <div className="mb-3 flex items-center justify-center gap-2">
+              <Badge variant="secondary" className="rounded-full border-border/60 bg-card/70 text-xs">
+                Support
+              </Badge>
+            </div>
+            <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+              We&rsquo;re here to help.
+            </h1>
+            <p className="mx-auto mt-3 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground md:text-base">
+              Report a bug, share feedback, or request author rights. We&rsquo;ll get back to you by
+              email.
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Avoid including sensitive personal data in screenshots.
+            </p>
+            <div className="mt-5">
+              <Button href="/support/tickets" variant="secondary">
+                My tickets
+              </Button>
+            </div>
+          </div>
+        </section>
 
-        <PageContainer size="md" className="mt-10 pb-20">
-          <Card className={UI_CLASSNAMES.panelCard}>
-            <CardHeader className="border-border">
-              <CardTitle className="flex items-center gap-3 text-foreground">
+        <Card className="mx-auto mt-6 max-w-4xl rounded-2xl border-border/40 bg-card/60 shadow-lg shadow-black/10 transition-shadow duration-200">
+          <form onSubmit={handleSubmit} id="support-request-form" className="contents">
+            <CardHeader className="border-b border-border/50 pb-5">
+              <CardTitle className="flex items-center gap-3 text-lg text-foreground">
                 <Mail className="h-5 w-5 text-primary" />
-                Επικοινωνία & Υποστήριξη
+                Contact support
               </CardTitle>
+              <CardDescription>
+                Fill in the details below and submit your request. Required fields are marked with
+                an asterisk.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <Tabs
-                value={category}
-                onValueChange={value => setCategory(value as typeof category)}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 md:grid-cols-4">
-                  {CATEGORY_OPTIONS.map(option => (
-                    <TabsTrigger
-                      key={option.id}
-                      value={option.id}
-                      className="flex flex-col items-start rounded-xl px-4 py-3 text-sm font-semibold text-foreground"
-                    >
-                      <span>{option.label}</span>
-                      {option.description && (
-                        <span className="mt-1 text-xs font-normal text-muted-foreground">
+
+            <CardContent className="space-y-6 pt-6">
+              {result ? (
+                <Alert
+                  variant={result.type === 'success' ? 'success' : 'destructive'}
+                  className="rounded-xl border border-border/60 bg-card/70 px-4 py-3"
+                >
+                  <AlertTitle className="text-base">
+                    {result.type === 'success' ? 'Request sent' : 'Unable to send'}
+                  </AlertTitle>
+                  <AlertDescription className="text-sm">
+                    {result.type === 'success' && ticketId ? (
+                      <>
+                        {result.message}{' '}
+                        <Link
+                          className="underline transition-colors hover:text-primary"
+                          href={`/support/tickets/${ticketId}`}
+                        >
+                          View ticket
+                        </Link>
+                      </>
+                    ) : (
+                      result.message
+                    )}
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              <section className="space-y-4">
+                <SectionHeading icon={<Mail className="h-4 w-4" />} title="Contact & request type" />
+
+                <Tabs
+                  value={category}
+                  onValueChange={value => setCategory(value as typeof category)}
+                  className="w-full"
+                >
+                  <TabsList className="grid h-auto w-full grid-cols-1 gap-2 rounded-xl border border-border/60 bg-card/70 p-2 md:grid-cols-4">
+                    {CATEGORY_OPTIONS.map(option => (
+                      <TabsTrigger
+                        key={option.id}
+                        value={option.id}
+                        className="h-auto whitespace-normal rounded-lg px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors duration-200"
+                      >
+                        <span className="w-full text-pretty leading-tight">{option.label}</span>
+                        <span className="mt-1 w-full text-pretty text-xs font-normal leading-tight text-muted-foreground">
                           {option.description}
                         </span>
-                      )}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {result ? (
-                  <Alert
-                    variant={result.type === 'success' ? 'success' : 'destructive'}
-                    className="rounded-2xl border border-border bg-card/70 px-4 py-3"
-                  >
-                    <AlertTitle className="text-base">
-                      {result.type === 'success' ? 'Επιτυχία' : 'Σφάλμα'}
-                    </AlertTitle>
-                    <AlertDescription className="text-sm">
-                      {result.type === 'success' && ticketId ? (
-                        <>
-                          {result.message}{' '}
-                          <Link
-                            className="underline transition-colors hover:text-primary"
-                            href={`/pages/support/tickets/${ticketId}`}
-                          >
-                            Δες το ticket σου
-                          </Link>
-                        </>
-                      ) : (
-                        result.message
-                      )}
-                    </AlertDescription>
-                  </Alert>
-                ) : null}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <Input
-                    label="Όνομα"
+                    label="Name"
                     type="text"
                     value={formData.name}
                     onChange={handleChange('name')}
-                    placeholder="Προαιρετικό"
+                    placeholder="Your name"
                     disabled={submitting}
-                    className="border-border bg-card"
+                    className="border-border bg-card transition-colors duration-200"
+                    labelClassName="text-sm font-medium"
                   />
                   <Input
                     label="Email"
@@ -438,210 +477,236 @@ export default function SupportForm({}: Readonly<{
                     placeholder="you@email.com"
                     disabled={submitting}
                     error={errors.email}
-                    className="border-border bg-card"
+                    className="border-border bg-card transition-colors duration-200"
+                    labelClassName="text-sm font-medium"
                   />
-                </div>
-
-                <div>
-                  <Input
-                    label="Θέμα"
-                    type="text"
-                    value={formData.subject}
-                    onChange={handleChange('subject')}
-                    placeholder="Σύντομος τίτλος"
-                    disabled={submitting}
-                    required
-                    error={errors.subject}
-                    className="border-border bg-card"
-                  />
-                </div>
-
-                <div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground">
-                      Περιγραφή <span className="text-red-500">*</span>
-                    </label>
-                    <Textarea
-                      value={formData.description}
-                      onChange={handleChange('description')}
-                      placeholder="Περιέγραψε τι χρειάζεσαι"
-                      rows={4}
+                  <div className="md:col-span-2">
+                    <Input
+                      label={
+                        <>
+                          Subject
+                          {requiredMark}
+                        </>
+                      }
+                      type="text"
+                      value={formData.subject}
+                      onChange={handleChange('subject')}
+                      placeholder="Short summary"
                       disabled={submitting}
                       required
-                      className={
-                        errors.description ? 'border-red-500 focus-visible:ring-red-500/30' : ''
-                      }
+                      error={errors.subject}
+                      className="border-border bg-card transition-colors duration-200"
+                      labelClassName="text-sm font-medium"
                     />
                   </div>
-                  <FieldError>{errors.description}</FieldError>
                 </div>
+              </section>
 
-                {category === 'bug' ? (
-                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
-                        {categoryIcons.bug}
-                      </span>
-                      Στοιχεία bug
-                    </div>
-                    <div>
-                      <div className="space-y-1.5">
+              <Separator className="bg-border/50" />
+
+              <section className="space-y-3">
+                <SectionHeading icon={<MessageCircle className="h-4 w-4" />} title="Message" />
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">
+                    Description
+                    {requiredMark}
+                  </label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={handleChange('description')}
+                    placeholder="Describe your request"
+                    rows={5}
+                    disabled={submitting}
+                    required
+                    className={
+                      errors.description
+                        ? 'border-red-500 focus-visible:ring-red-500/30'
+                        : 'transition-colors duration-200'
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Include enough context so we can reproduce the issue or understand the request.
+                  </p>
+                </div>
+                <FieldError>{errors.description}</FieldError>
+              </section>
+
+              {category === 'bug' ? (
+                <>
+                  <Separator className="bg-border/50" />
+
+                  <section className="space-y-4">
+                    <SectionHeading icon={<Bug className="h-4 w-4" />} title="Bug details" />
+                    <div className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors duration-200">
+                      <div className="space-y-1.5 md:col-span-2">
                         <label className="text-sm font-medium text-foreground">
-                          Βήματα αναπαραγωγής
+                          Steps to reproduce
+                          {requiredMark}
                         </label>
                         <Textarea
                           value={formData.steps}
                           onChange={handleChange('steps')}
-                          placeholder="1. ...\n2. ..."
-                          rows={3}
+                          placeholder={'1. First step\n2. Second step'}
+                          rows={4}
                           disabled={submitting}
                           className={
                             errors.steps ? 'border-red-500 focus-visible:ring-red-500/30' : ''
                           }
                         />
+                        <FieldError>{errors.steps}</FieldError>
                       </div>
-                      <FieldError>{errors.steps}</FieldError>
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">
-                            Αναμενόμενο αποτέλεσμα
-                          </label>
-                          <Textarea
-                            value={formData.expected}
-                            onChange={handleChange('expected')}
-                            placeholder="Τι έπρεπε να συμβεί"
-                            rows={2}
-                            disabled={submitting}
-                            className={
-                              errors.expected ? 'border-red-500 focus-visible:ring-red-500/30' : ''
-                            }
-                          />
-                        </div>
-                        <FieldError>{errors.expected}</FieldError>
-                      </div>
-                      <div>
-                        <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-foreground">
-                            Πραγματικό αποτέλεσμα
-                          </label>
-                          <Textarea
-                            value={formData.actual}
-                            onChange={handleChange('actual')}
-                            placeholder="Τι συνέβη"
-                            rows={2}
-                            disabled={submitting}
-                            className={
-                              errors.actual ? 'border-red-500 focus-visible:ring-red-500/30' : ''
-                            }
-                          />
-                        </div>
-                        <FieldError>{errors.actual}</FieldError>
-                      </div>
-                    </div>
-                    <div>
-                      <Select
-                        label="Σοβαρότητα"
-                        value={formData.severity}
-                        onChange={handleSelect('severity')}
-                        options={SUPPORT_SEVERITY_OPTIONS}
-                        optionLabels={SUPPORT_SEVERITY_LABELS}
-                        className="border-border bg-card text-foreground focus:border-primary focus:ring-primary"
-                        labelClassName="text-foreground"
-                        placeholder="Επίλεξε"
-                        error={!!errors.severity}
-                      />
-                      <FieldError>{errors.severity}</FieldError>
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Select
-                        label="Συσκευή"
-                        options={DEVICE_OPTIONS}
-                        optionLabels={deviceLabels}
-                        value={environmentFields.device}
-                        onChange={value =>
-                          setEnvironmentFields(prev => ({ ...prev, device: value }))
-                        }
-                      />
-                      <Select
-                        label="Λειτουργικό"
-                        options={OS_OPTIONS}
-                        optionLabels={osLabels}
-                        value={environmentFields.os}
-                        onChange={value => setEnvironmentFields(prev => ({ ...prev, os: value }))}
-                      />
-                      <Select
-                        label="Browser"
-                        options={BROWSER_OPTIONS}
-                        optionLabels={browserLabels}
-                        value={environmentFields.browser}
-                        onChange={value =>
-                          setEnvironmentFields(prev => ({ ...prev, browser: value }))
-                        }
-                      />
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <label className="text-sm font-medium text-foreground">
-                            Έκδοση εφαρμογής
-                          </label>
-                          <TooltipProvider delayDuration={150}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  aria-label="Πληροφορίες υπολογισμού"
-                                  className="grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary hover:bg-primary/10"
-                                >
-                                  <Info className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent
-                                side="bottom"
-                                align="center"
-                                sideOffset={8}
-                                className="z-[9999] w-[min(280px,80vw)] rounded-2xl border border-border bg-card p-3 text-xs leading-relaxed text-foreground shadow-md"
-                              >
-                                Η έκδοση της εφαρμογής φαίνεται στο footer Personal Hobby Hub:
-                                x.x.x.
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        <Input
-                          type="text"
-                          value={environmentFields.appVersion}
-                          onChange={event =>
-                            setEnvironmentFields(prev => ({
-                              ...prev,
-                              appVersion: event.target.value,
-                            }))
-                          }
-                          placeholder="Build / έκδοση"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
 
-                {category === 'feature' ? (
-                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
-                        {categoryIcons.feature}
-                      </span>
-                      Πρόταση λειτουργίας
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-foreground">
+                              Expected result
+                              {requiredMark}
+                            </label>
+                            <Textarea
+                              value={formData.expected}
+                              onChange={handleChange('expected')}
+                              placeholder="What you expected"
+                              rows={3}
+                              disabled={submitting}
+                              className={
+                                errors.expected ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                              }
+                            />
+                          </div>
+                          <FieldError>{errors.expected}</FieldError>
+                        </div>
+                        <div>
+                          <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-foreground">
+                              Actual result
+                              {requiredMark}
+                            </label>
+                            <Textarea
+                              value={formData.actual}
+                              onChange={handleChange('actual')}
+                              placeholder="What happened instead"
+                              rows={3}
+                              disabled={submitting}
+                              className={
+                                errors.actual ? 'border-red-500 focus-visible:ring-red-500/30' : ''
+                              }
+                            />
+                          </div>
+                          <FieldError>{errors.actual}</FieldError>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Select
+                          label={
+                            <>
+                              Severity
+                              {requiredMark}
+                            </>
+                          }
+                          value={formData.severity}
+                          onChange={handleSelect('severity')}
+                          options={SUPPORT_SEVERITY_OPTIONS}
+                          optionLabels={severityLabels}
+                          className="bg-card transition-colors duration-200"
+                          labelClassName="text-sm font-medium text-foreground"
+                          placeholder="Select severity"
+                          error={!!errors.severity}
+                        />
+                        <FieldError>{errors.severity}</FieldError>
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <Select
+                          label="Device"
+                          options={DEVICE_OPTIONS}
+                          optionLabels={deviceLabels}
+                          value={environmentFields.device}
+                          onChange={value =>
+                            setEnvironmentFields(prev => ({ ...prev, device: value }))
+                          }
+                          labelClassName="text-sm font-medium"
+                        />
+                        <Select
+                          label="Operating system"
+                          options={OS_OPTIONS}
+                          optionLabels={osLabels}
+                          value={environmentFields.os}
+                          onChange={value => setEnvironmentFields(prev => ({ ...prev, os: value }))}
+                          labelClassName="text-sm font-medium"
+                        />
+                        <Select
+                          label="Browser"
+                          options={BROWSER_OPTIONS}
+                          optionLabels={browserLabels}
+                          value={environmentFields.browser}
+                          onChange={value =>
+                            setEnvironmentFields(prev => ({ ...prev, browser: value }))
+                          }
+                          labelClassName="text-sm font-medium"
+                        />
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-foreground">App version</label>
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    aria-label="App version help"
+                                    className="grid h-7 w-7 place-items-center rounded-full border border-border/60 bg-card text-primary transition-colors hover:border-primary/60 hover:bg-primary/10"
+                                  >
+                                    <Info className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                  side="bottom"
+                                  align="center"
+                                  sideOffset={8}
+                                  className="z-[9999] w-[min(280px,80vw)] rounded-xl border border-border bg-card p-3 text-xs leading-relaxed text-foreground shadow-md"
+                                >
+                                  You can find the app version in the site footer as Personal Hobby
+                                  Hub x.x.x.
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                          <Input
+                            type="text"
+                            value={environmentFields.appVersion}
+                            onChange={event =>
+                              setEnvironmentFields(prev => ({
+                                ...prev,
+                                appVersion: event.target.value,
+                              }))
+                            }
+                            placeholder="Build / version"
+                          />
+                        </div>
+                      </div>
                     </div>
+                  </section>
+                </>
+              ) : null}
+
+              {category === 'feature' ? (
+                <>
+                  <Separator className="bg-border/50" />
+
+                  <section className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors duration-200">
+                    <SectionHeading icon={<Sparkles className="h-4 w-4" />} title="Feature request" />
                     <div>
                       <div className="space-y-1.5">
                         <label className="text-sm font-medium text-foreground">
-                          Περίπτωση χρήσης
+                          Use case
+                          {requiredMark}
                         </label>
                         <Textarea
                           value={formData.useCase}
                           onChange={handleChange('useCase')}
-                          placeholder="Ποιο πρόβλημα λύνει;"
+                          placeholder="Who needs this and when"
                           rows={3}
                           disabled={submitting}
                           className={
@@ -653,11 +718,14 @@ export default function SupportForm({}: Readonly<{
                     </div>
                     <div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">Αξία</label>
+                        <label className="text-sm font-medium text-foreground">
+                          Value
+                          {requiredMark}
+                        </label>
                         <Textarea
                           value={formData.value}
                           onChange={handleChange('value')}
-                          placeholder="Πώς θα βοηθήσει την κοινότητα;"
+                          placeholder="Why this matters"
                           rows={3}
                           disabled={submitting}
                           className={
@@ -669,54 +737,61 @@ export default function SupportForm({}: Readonly<{
                     </div>
                     <div>
                       <Select
-                        label="Προτεραιότητα"
+                        label={
+                          <>
+                            Priority
+                            {requiredMark}
+                          </>
+                        }
                         value={formData.urgency}
                         onChange={handleSelect('urgency')}
                         options={URGENCY_OPTIONS}
                         optionLabels={urgencyLabels}
-                        className="border-border bg-card text-foreground focus:border-primary focus:ring-primary"
-                        labelClassName="text-foreground"
-                        placeholder="Επίλεξε"
+                        className="bg-card transition-colors duration-200"
+                        labelClassName="text-sm font-medium text-foreground"
+                        placeholder="Select priority"
                         error={!!errors.urgency}
                       />
                       <FieldError>{errors.urgency}</FieldError>
                     </div>
-                  </div>
-                ) : null}
+                  </section>
+                </>
+              ) : null}
 
-                {category === 'author_rights' ? (
-                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
-                        {categoryIcons.author_rights}
-                      </span>
-                      Αίτημα author δικαιωμάτων
-                    </div>
+              {category === 'author_rights' ? (
+                <>
+                  <Separator className="bg-border/50" />
+
+                  <section className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors duration-200">
+                    <SectionHeading icon={<ShieldCheck className="h-4 w-4" />} title="Author rights" />
                     <div className="grid gap-4 md:grid-cols-2">
                       <Input
-                        label="Προφίλ / Username"
+                        label="Profile / username"
                         type="text"
                         value={formData.profileLink}
                         onChange={handleChange('profileLink')}
                         placeholder="https://..."
+                        labelClassName="text-sm font-medium"
                       />
                       <Input
-                        label="Σύνδεσμοι portfolio"
+                        label="Portfolio links"
                         type="text"
                         value={formData.portfolioLinks}
                         onChange={handleChange('portfolioLinks')}
-                        placeholder="Σύνδεσμοι χωρισμένοι με κόμμα"
+                        placeholder="Comma-separated links"
+                        labelClassName="text-sm font-medium"
                       />
                     </div>
                     <div>
                       <div className="space-y-1.5">
                         <label className="text-sm font-medium text-foreground">
-                          Λόγος αιτήματος
+                          Reason for request
+                          {requiredMark}
                         </label>
                         <Textarea
                           value={formData.reason}
                           onChange={handleChange('reason')}
-                          placeholder="Γιατί θέλεις author rights;"
+                          placeholder="Why do you need author rights"
                           rows={3}
                           disabled={submitting}
                           className={
@@ -727,17 +802,15 @@ export default function SupportForm({}: Readonly<{
                       <FieldError>{errors.reason}</FieldError>
                     </div>
                     <div>
-                      <div className="mb-2 text-sm font-medium text-foreground">
-                        Ζητούμενα δικαιώματα
-                      </div>
+                      <p className="mb-2 text-sm font-medium text-foreground">Requested permissions</p>
                       <p className="mb-3 text-xs text-muted-foreground">
-                        Μπορείς να επιλέξεις και τα δύο Author και Reviewer.
+                        You can choose both Author and Reviewer if needed.
                       </p>
                       <div className="grid gap-2 md:grid-cols-2">
                         {PERMISSIONS.map(permission => (
                           <label
                             key={permission}
-                            className="flex cursor-pointer items-center gap-3 text-sm"
+                            className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/50 bg-card/70 px-3 py-2 text-sm transition-colors duration-200 hover:border-primary/40"
                           >
                             <Checkbox
                               checked={requestedPermissions.includes(permission)}
@@ -748,36 +821,66 @@ export default function SupportForm({}: Readonly<{
                         ))}
                       </div>
                     </div>
-                  </div>
-                ) : null}
+                  </section>
+                </>
+              ) : null}
 
-                {category === 'general' ? (
-                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
-                        {categoryIcons.general}
-                      </span>
-                      Γενικό θέμα
-                    </div>
+              {category === 'general' ? (
+                <>
+                  <Separator className="bg-border/50" />
+
+                  <section className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors duration-200">
+                    <SectionHeading icon={<MessageCircle className="h-4 w-4" />} title="General topic" />
                     <Input
-                      label="Θεματική"
+                      label="Topic"
                       type="text"
                       value={formData.topic}
                       onChange={handleChange('topic')}
-                      placeholder="Π.χ. Συνεργασία, feedback"
+                      placeholder="Partnership, question, feedback"
+                      labelClassName="text-sm font-medium"
                     />
+                  </section>
+                </>
+              ) : null}
+
+              <Separator className="bg-border/50" />
+
+              <section className="space-y-3">
+                <SectionHeading icon={<AlertTriangle className="h-4 w-4" />} title="Attachments" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>Avoid including sensitive personal data in screenshots.</span>
+                  <TooltipProvider delayDuration={150}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-6 w-6 rounded-full p-0 text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                          aria-label="Sensitive data guidance"
+                        >
+                          <CircleHelp className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[260px] text-xs">
+                        Please redact emails, phone numbers, addresses, payment details, and any
+                        sensitive identifiers before uploading files.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <AttachmentDropzone items={attachments} onChange={setAttachments} disabled={submitting} />
+              </section>
+            </CardContent>
+
+            <CardFooter className="border-t border-border/50 pt-5">
+              <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="w-full space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <AlertTriangle className="h-4 w-4" />
+                    Files are stored in private storage and used only for ticket handling.
                   </div>
-                ) : null}
 
-                <AttachmentDropzone
-                  items={attachments}
-                  onChange={setAttachments}
-                  helperText="Μην ανεβάζεις προσωπικά δεδομένα σε screenshots."
-                  disabled={submitting}
-                />
-
-                <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
-                  <label className="flex cursor-pointer items-start gap-3 text-sm">
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 bg-card/70 p-3 text-sm transition-colors duration-200 hover:border-primary/40">
                     <Checkbox
                       checked={formData.consent}
                       onCheckedChange={checked => {
@@ -789,22 +892,21 @@ export default function SupportForm({}: Readonly<{
                     />
                     <span className="flex flex-col gap-1">
                       <span className="font-medium text-foreground">
-                        Συμφωνώ να αποθηκευτούν τα στοιχεία του αιτήματος
+                        I agree to store the request details
+                        {requiredMark}
                       </span>
-                      <span className="text-muted-foreground">
-                        Χρειαζόμαστε τα στοιχεία σου μόνο για την υποστήριξη.
+                      <span className="text-xs text-muted-foreground">
+                        We only use this information to process and respond to your request.
                       </span>
                     </span>
                   </label>
                   <FieldError>{errors.consent}</FieldError>
 
-                  <label className="flex items-start justify-between gap-4">
+                  <label className="flex items-start justify-between gap-4 rounded-xl border border-border/60 bg-card/70 p-3">
                     <span className="flex flex-col gap-1">
-                      <span className="text-sm font-medium text-[var(--hb-headline)]">
-                        Επιτρέπω follow-up email
-                      </span>
-                      <span className="text-xs text-[var(--hb-muted)]">
-                        Θα λάβεις ενημερώσεις για την πορεία του ticket.
+                      <span className="text-sm font-medium text-foreground">Allow follow-up email</span>
+                      <span className="text-xs text-muted-foreground">
+                        Receive updates when there is progress on your ticket.
                       </span>
                     </span>
                     <Switch
@@ -816,25 +918,20 @@ export default function SupportForm({}: Readonly<{
                   </label>
                 </div>
 
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground dark:text-muted-foreground">
-                    <AlertTriangle className="h-4 w-4" />
-                    Τα αρχεία αποθηκεύονται σε ιδιωτικό χώρο.
-                  </div>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={submitting}
-                    className="flex items-center justify-center gap-2"
-                  >
-                    {submitting ? 'Αποστολή...' : 'Υποβολή αιτήματος'}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </PageContainer>
-      </div>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={submitting}
+                  className="w-full transition-shadow duration-200 md:w-auto"
+                >
+                  {submitting ? 'Submitting...' : 'Submit request'}
+                </Button>
+              </div>
+            </CardFooter>
+          </form>
+        </Card>
+      </PageContainer>
     </div>
   );
 }

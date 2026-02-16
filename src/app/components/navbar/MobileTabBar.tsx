@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -21,19 +21,19 @@ const TAB_ITEMS: TabItem[] = [
     requiresAuth: false,
   },
   {
-    href: '/pages/backlog',
+    href: '/backlog',
     label: 'Library',
     icon: Library,
     requiresAuth: true,
   },
   {
-    href: '/pages/news',
-    label: 'News',
+    href: '/articles',
+    label: 'Articles',
     icon: Newspaper,
     requiresAuth: false,
   },
   {
-    href: '/pages/profile',
+    href: '/profile',
     label: 'Profile',
     icon: User,
     requiresAuth: true,
@@ -111,3 +111,5 @@ export default function MobileTabBar() {
     </>
   );
 }
+
+

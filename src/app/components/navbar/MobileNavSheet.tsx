@@ -221,7 +221,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       variant="secondary"
                       className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
                     >
-                      <Link href="/pages/profile">
+                      <Link href="/profile">
                         <User className="size-4" />
                         <span>Profile</span>
                       </Link>
@@ -231,7 +231,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       variant="secondary"
                       className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
                     >
-                      <Link href="/pages/profile/edit">
+                      <Link href="/profile/edit">
                         <PenLine className="size-4" />
                         <span>Edit profile</span>
                       </Link>
@@ -241,7 +241,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       variant="secondary"
                       className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
                     >
-                      <Link href="/pages/support/tickets">
+                      <Link href="/support/tickets">
                         <Ticket className="size-4" />
                         <span>My tickets</span>
                       </Link>
@@ -315,3 +315,4 @@ function NavbarAuthSkeletonMobile() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import {
   useEffect,
@@ -12,6 +12,13 @@ import {
 import { mutate } from 'swr';
 import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { apiClient } from '@/lib/api/client';
 import { yieldToMain } from '@/lib/performance';
 
@@ -284,7 +291,7 @@ export default function CategoryLibrary({
         dispatch({
           type: 'patch',
           payload: {
-            libraryError: 'Αποτυχία φόρτωσης βιβλιοθήκης',
+            libraryError: 'Failed to load library.',
             libraryEntries: [],
           },
         });
@@ -365,7 +372,7 @@ export default function CategoryLibrary({
           return;
         }
         const data = await apiClient.getJsonOrThrow<{ items?: SearchResult[] }>(
-          `${apiBase}/suggestions?category=${category}`,
+          `/api/backlog/personal-suggestions?category=${category}`,
         );
         const items = Array.isArray(data.items) ? data.items : [];
         if (!ignore) {
@@ -585,15 +592,15 @@ export default function CategoryLibrary({
 
         showAlert({
           type: 'success',
-          title: 'Αποθηκεύτηκε',
-          message: 'Οι αλλαγές αποθηκεύτηκαν επιτυχώς.',
+          title: 'Saved',
+          message: 'Changes saved.',
         });
       } catch (error) {
         console.warn('Update entry failed:', error);
         showAlert({
           type: 'error',
-          title: 'Σφάλμα',
-          message: 'Αποτυχία αποθήκευσης. Δοκίμασε ξανά.',
+          title: 'Error',
+          message: 'Could not save changes. Try again.',
         });
       }
     } else if (supportsExternal && selectedEntry.source === 'external' && selectedEntry.payload) {
@@ -626,15 +633,15 @@ export default function CategoryLibrary({
 
         showAlert({
           type: 'success',
-          title: 'Επιτυχής προσθήκη',
-          message: `Το "${selectedEntry.title}" προστέθηκε στη βιβλιοθήκη σου.`,
+          title: 'Added',
+          message: `"${selectedEntry.title}" was added to your library.`,
         });
       } catch (error) {
         console.warn('Add entry failed:', error);
         showAlert({
           type: 'error',
-          title: 'Σφάλμα',
-          message: 'Αποτυχία προσθήκης. Δοκίμασε ξανά.',
+          title: 'Error',
+          message: 'Could not add entry. Try again.',
         });
       }
     } else {
@@ -658,8 +665,8 @@ export default function CategoryLibrary({
       });
       showAlert({
         type: 'success',
-        title: 'Αποθηκεύτηκε',
-        message: 'Οι αλλαγές αποθηκεύτηκαν επιτυχώς.',
+        title: 'Saved',
+        message: 'Changes saved.',
       });
     }
   };
@@ -673,7 +680,7 @@ export default function CategoryLibrary({
   })();
   const stepLabel = `${steamSyncProgress?.completedSteps ?? 0} / ${
     steamSyncProgress?.totalSteps ?? 0
-  } βήματα`;
+  } steps`;
   const statusLabel = steamSyncProgress?.status
     ? steamSyncProgress.status.charAt(0).toUpperCase() + steamSyncProgress.status.slice(1)
     : 'Running';
@@ -713,16 +720,16 @@ export default function CategoryLibrary({
           clearSelection();
           showAlert({
             type: 'success',
-            title: 'Διαγράφηκε',
-            message: `Το "${entry.title}" αφαιρέθηκε από τη βιβλιοθήκη.`,
+            title: 'Removed',
+            message: `"${entry.title}" was removed from your library.`,
           });
           return;
         } catch (error) {
           console.warn('Delete entry failed:', error);
           showAlert({
             type: 'error',
-            title: 'Σφάλμα',
-            message: 'Αποτυχία διαγραφής. Δοκίμασε ξανά.',
+            title: 'Error',
+            message: 'Could not remove entry. Try again.',
           });
         }
       }
@@ -756,7 +763,7 @@ export default function CategoryLibrary({
       setSteamSyncProgress({
         id: 'starting',
         status: 'running',
-        message: 'Ξεκινά ο συγχρονισμός...',
+        message: 'Starting sync...',
         percent: 0,
         completedSteps: 0,
         totalSteps: 1,
@@ -784,8 +791,8 @@ export default function CategoryLibrary({
         // No games found
         showAlert({
           type: 'info',
-          title: 'Συγχρονισμός Steam',
-          message: startData.message || 'Δεν βρέθηκαν παιχνίδια.',
+          title: 'Steam Sync',
+          message: startData.message || 'No games found.',
         });
         setSteamSyncing(false);
         setSteamSyncProgress(null);
@@ -797,7 +804,7 @@ export default function CategoryLibrary({
       setSteamSyncProgress({
         id: jobId,
         status: 'running',
-        message: `Βρέθηκαν ${startData.totalGames} παιχνίδια. Ξεκινά η επεξεργασία...`,
+        message: `Found ${startData.totalGames} games. Processing...`,
         percent: 0,
         completedSteps: 0,
         totalSteps: startData.totalGames,
@@ -809,7 +816,7 @@ export default function CategoryLibrary({
 
       while (!isComplete) {
         processBatchCount += 1;
-        console.log(`🔄 Processing batch ${processBatchCount}...`);
+        console.log(`ðŸ”„ Processing batch ${processBatchCount}...`);
 
         const processResponse = await apiClient.request(
           `/api/integrations/steam/sync/process?jobId=${jobId}`,
@@ -853,19 +860,19 @@ export default function CategoryLibrary({
 
       showAlert({
         type: 'success',
-        title: 'Ο συγχρονισμός Steam ολοκληρώθηκε',
-        message: `Έγινε συγχρονισμός ${startData.totalGames} παιχνιδιών από Steam.`,
+        title: 'Steam sync complete',
+        message: `Synced ${startData.totalGames} games from Steam.`,
       });
 
       setSteamSyncing(false);
       setSteamSyncProgress(null);
     } catch (error) {
       console.warn('Steam sync failed:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Άγνωστο σφάλμα';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       showAlert({
         type: 'error',
-        title: 'Σφάλμα',
-        message: `Ο συγχρονισμός Steam απέτυχε. ${errorMessage}`,
+        title: 'Error',
+        message: `Steam sync failed. ${errorMessage}`,
       });
       setSteamSyncing(false);
       setSteamSyncProgress(null);
@@ -878,7 +885,7 @@ export default function CategoryLibrary({
   };
 
   return (
-    <div className="relative min-h-screen px-3 py-16 text-foreground sm:px-4 sm:py-20">
+    <div className="relative min-h-screen px-3 py-12 text-foreground sm:px-4 sm:py-16">
       {alert && (
         <Alert
           key={alertKey}
@@ -902,13 +909,13 @@ export default function CategoryLibrary({
         </Alert>
       )}
 
-      <div className="relative mx-auto flex w-full max-w-screen-2xl flex-col gap-6 sm:gap-8">
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-30">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,hsl(var(--primary)/0.2),transparent_52%)]" />
-          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--success)/0.15),transparent_58%)]" />
+      <div className="relative mx-auto flex w-full max-w-screen-2xl flex-col gap-5 sm:gap-6">
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-40">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,hsl(var(--primary)/0.2),transparent_54%)]" />
+          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--primary)/0.16),transparent_58%)]" />
         </div>
 
-        <section className="p-4 sm:p-6">
+        <section className="space-y-6">
           <CategoryHeader
             category={category}
             username={username}
@@ -934,40 +941,41 @@ export default function CategoryLibrary({
             />
           )}
 
-          {ctaMode === 'suggestions' && (
-            <SuggestionsPanel
-              suggestions={suggestions}
-              isLoading={suggestionsLoading}
-              onOpenDialog={openEntryDialog}
-              onClose={() => dispatch({ type: 'patch', payload: { ctaMode: null } })}
-              libraryEntries={libraryEntries}
-            />
-          )}
-
-          <CategoryStats category={category} totalEntries={libraryEntries.length} counts={counts} />
+          <CategoryStats
+            category={category}
+            totalEntries={libraryEntries.length}
+            activeStatus={activeStatus}
+            onStatusChange={value => dispatch({ type: 'patch', payload: { activeStatus: value } })}
+            counts={counts}
+          />
         </section>
 
-        <StatusFilterBar
-          category={category}
-          search={search}
-          onSearchChange={value => dispatch({ type: 'patch', payload: { search: value } })}
-          activeStatus={activeStatus}
-          onStatusChange={value => dispatch({ type: 'patch', payload: { activeStatus: value } })}
-        />
+        <div className="px-1 sm:px-0">
+          <StatusFilterBar
+            category={category}
+            search={search}
+            onSearchChange={value => dispatch({ type: 'patch', payload: { search: value } })}
+            activeStatus={activeStatus}
+            onStatusChange={value => dispatch({ type: 'patch', payload: { activeStatus: value } })}
+          />
+        </div>
 
         {libraryError && (
-          <div className="rounded-[20px] p-4">
+          <div className="rounded-[20px] p-2 sm:p-3">
             <ErrorAlert message={libraryError} />
           </div>
         )}
 
-        <LibraryEntryList
-          category={category}
-          entries={entries}
-          isLoading={libraryLoading}
-          onOpenDialog={openEntryDialog}
-          onDelete={handleDeleteEntry}
-        />
+        <div className="rounded-2xl border border-border/70 bg-card/40 p-3 sm:p-4">
+          <LibraryEntryList
+            category={category}
+            entries={entries}
+            isLoading={libraryLoading}
+            onOpenDialog={openEntryDialog}
+            onDelete={handleDeleteEntry}
+            onCreateClick={() => dispatch({ type: 'patch', payload: { ctaMode: 'create' } })}
+          />
+        </div>
 
         <EntryEditDialog
           entry={selectedEntry}
@@ -979,17 +987,41 @@ export default function CategoryLibrary({
         />
       </div>
 
+      <Sheet
+        open={ctaMode === 'suggestions'}
+        onOpenChange={open => {
+          dispatch({ type: 'patch', payload: { ctaMode: open ? 'suggestions' : null } });
+        }}
+      >
+        <SheetContent side="right" className="w-full max-w-xl border-border/70 bg-card p-0">
+          <div className="flex h-full flex-col">
+            <SheetHeader className="border-b border-border/70 px-6 py-5">
+              <SheetTitle>Personal Suggestions</SheetTitle>
+              <SheetDescription>Recommendations based on your taste profile.</SheetDescription>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto p-6">
+              <SuggestionsPanel
+                suggestions={suggestions}
+                isLoading={suggestionsLoading}
+                onOpenDialog={openEntryDialog}
+                libraryEntries={libraryEntries}
+              />
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {steamSyncing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
           <div className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/90 p-6 text-white shadow-2xl shadow-violet-500/20">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-lg font-semibold text-white">
-                  Συγχρονισμός Steam με IGDB metadata
+                  Steam sync with IGDB metadata
                 </p>
                 <p className="text-sm text-slate-300">
                   {steamSyncProgress?.message ??
-                    'Γίνεται ανάκτηση metadata, cover images και ενημέρωση entries. Παρακαλώ περίμενε...'}
+                    'Fetching metadata, cover images, and updating entries. Please wait...'}
                 </p>
               </div>
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-100">
@@ -998,7 +1030,7 @@ export default function CategoryLibrary({
             </div>
             <div className="mt-5 space-y-3">
               <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                <span>Πρόοδος</span>
+                <span>Progress</span>
                 <span>{normalizedProgressPercent}%</span>
               </div>
               <div className="overflow-hidden rounded-full border border-white/10 bg-slate-900/70">
@@ -1011,37 +1043,35 @@ export default function CategoryLibrary({
             </div>
             {steamSyncProgress?.error && (
               <p className="mt-2 text-xs font-semibold text-rose-400">
-                Σφάλμα: {steamSyncProgress.error}
+                Error: {steamSyncProgress.error}
               </p>
             )}
             {steamSyncProgress?.result && (
               <div className="mt-4 grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 sm:grid-cols-3">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
-                    Παιχνίδια
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Games</p>
                   <p className="text-lg font-semibold text-white">
                     {steamSyncProgress.result.totalFetched ?? 0}
                   </p>
-                  <p className="text-xs text-slate-400">συνολικά</p>
+                  <p className="text-xs text-slate-400">total</p>
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
-                    Εισαγωγές
+                    Imported
                   </p>
                   <p className="text-lg font-semibold text-white">
                     {steamSyncProgress.result.mediaInserted ?? 0}
                   </p>
-                  <p className="text-xs text-slate-400">νέα entries</p>
+                  <p className="text-xs text-slate-400">new entries</p>
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
-                    Ενημερώσεις
+                    Updated
                   </p>
                   <p className="text-lg font-semibold text-white">
                     {steamSyncProgress.result.mediaUpdated ?? 0}
                   </p>
-                  <p className="text-xs text-slate-400">ρυθμίστηκαν</p>
+                  <p className="text-xs text-slate-400">updated entries</p>
                 </div>
               </div>
             )}
@@ -1051,3 +1081,4 @@ export default function CategoryLibrary({
     </div>
   );
 }
+

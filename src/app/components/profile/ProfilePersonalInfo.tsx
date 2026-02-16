@@ -13,12 +13,13 @@ import {
   Twitter,
   Link2,
 } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
 import EmptyState from '@/components/ui/empty';
 import type { User as UserType } from '@/types/user';
-import { useEffect, useState } from 'react';
 
 type ProfilePersonalInfoProps = {
   user: UserType;
+  interestsSection?: ReactNode;
 };
 
 function normalizeSocialUrl(value: string) {
@@ -27,6 +28,7 @@ function normalizeSocialUrl(value: string) {
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
 }
+
 function decodePathname(pathname: string) {
   if (!pathname || pathname === '/') return '';
   const segments = pathname
@@ -80,7 +82,10 @@ function calculateAge(dateOfBirth?: string | null) {
   return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
-export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>) {
+export function ProfilePersonalInfo({
+  user,
+  interestsSection,
+}: Readonly<ProfilePersonalInfoProps>) {
   const privacy = (user.privacy_settings as unknown as Record<string, unknown>) || {};
   const showAge = (privacy.show_age as boolean) ?? false;
   const showSocial = (privacy.show_social_links as boolean) ?? true;
@@ -92,98 +97,89 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
   useEffect(() => {
     setAge(calculateAge(user.date_of_birth));
   }, [user.date_of_birth]);
+
   const visibleSocialLinks = socialPlatforms.filter(p =>
     (socialLinks[p.key] as string | undefined)?.trim(),
   );
 
   return (
     <section className="px-4 py-10 md:px-6 md:py-14">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-8 text-center md:mb-10">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]">Προφίλ</p>
-          <h2 className="text-2xl font-semibold md:text-3xl">Προσωπικές Πληροφορίες</h2>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Profile
+          </p>
+          <h2 className="text-2xl font-semibold md:text-3xl">About</h2>
         </div>
 
-        <div className="p-4 sm:p-6">
-          {/* Info Grid */}
+        <div className="rounded-2xl border border-border/60 bg-card/40 p-4 sm:p-6">
           <div className="mb-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Full name */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <User className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card/70">
+                <User className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs">Ονοματεπώνυμο</p>
-                <p className="break-words text-sm font-medium text-foreground">
-                  {user.full_name || '—'}
-                </p>
+                <p className="text-xs text-muted-foreground">Full Name</p>
+                <p className="break-words text-sm font-medium text-foreground">{user.full_name || '�'}</p>
               </div>
             </div>
 
-            {/* Display name */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <Mail className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card/70">
+                <Mail className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs">Display / Username</p>
+                <p className="text-xs text-muted-foreground">Display Name</p>
                 <p className="break-words text-sm font-medium text-foreground">
                   {user.display_name || user.username}
                 </p>
               </div>
             </div>
 
-            {/* Age (if visible) */}
             {showAge && (
               <div className="flex min-w-0 items-start gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                  <Calendar className="h-5 w-5 text-primary" />
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card/70">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs">Ηλικία</p>
-                  <p
-                    className="break-words text-sm font-medium text-foreground"
-                    suppressHydrationWarning
-                  >
-                    {age ? `${age} ετών` : '—'}
+                  <p className="text-xs text-muted-foreground">Age</p>
+                  <p className="break-words text-sm font-medium text-foreground" suppressHydrationWarning>
+                    {age ? `${age} years old` : '�'}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Location */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <MapPin className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card/70">
+                <MapPin className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs">Τοποθεσία</p>
+                <p className="text-xs text-muted-foreground">Location</p>
                 <p className="break-words text-sm font-medium text-foreground">
-                  {showLocation
-                    ? [locationCity, user.country].filter(Boolean).join(', ') || '—'
-                    : 'Κρυφό'}
+                  {showLocation ? [locationCity, user.country].filter(Boolean).join(', ') || '�' : 'Hidden'}
                 </p>
               </div>
             </div>
 
-            {/* Timezone */}
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card">
-                <Globe2 className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-card/70">
+                <Globe2 className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs">Ζώνη Ώρας</p>
+                <p className="text-xs text-muted-foreground">Time Zone</p>
                 <p className="break-words text-sm font-medium text-foreground">
-                  {showLocation ? user.timezone || '—' : 'Κρυφό'}
+                  {showLocation ? user.timezone || '�' : 'Hidden'}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Social Links */}
           {showSocial && (
-            <div className="border-t pt-6">
-              <p className="mb-4 text-xs uppercase tracking-[0.14em]">Social Presence</p>
+            <div className="border-t border-border/40 pt-6">
+              <p className="mb-4 text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Social Presence
+              </p>
 
               {visibleSocialLinks.length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -195,12 +191,12 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
                         href={normalizeSocialUrl(value)}
                         target="_blank"
                         rel="noreferrer"
-                        className="group flex items-center gap-3 rounded-[14px] border bg-card p-3 transition-colors hover:border-info/35"
+                        className="group flex items-center gap-3 rounded-[14px] border border-border/60 bg-card/50 p-3 transition-colors hover:border-border"
                       >
-                        <span className="text-primary transition-colors">{platform.icon}</span>
+                        <span className="text-muted-foreground transition-colors">{platform.icon}</span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs">{platform.label}</p>
-                          <p className="break-all text-sm text-foreground transition-colors group-hover:text-primary sm:truncate">
+                          <p className="text-xs text-muted-foreground">{platform.label}</p>
+                          <p className="break-all text-sm text-foreground sm:truncate">
                             {getSocialDisplayValue(value)}
                           </p>
                         </div>
@@ -209,8 +205,17 @@ export function ProfilePersonalInfo({ user }: Readonly<ProfilePersonalInfoProps>
                   })}
                 </div>
               ) : (
-                <EmptyState title="Δεν υπάρχουν social links." size="sm" />
+                <EmptyState title="No social links yet." size="sm" />
               )}
+            </div>
+          )}
+
+          {interestsSection && (
+            <div className="mt-6 border-t border-border/40 pt-6">
+              <p className="mb-4 text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Categories & Interests
+              </p>
+              {interestsSection}
             </div>
           )}
         </div>
