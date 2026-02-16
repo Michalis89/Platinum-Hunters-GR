@@ -17,7 +17,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
-import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import type { CarouselApi} from '@/components/ui/carousel';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 type ContinueSlide = {
   category: string;
@@ -119,25 +120,25 @@ const appendSearchParam = (route: string, search?: string | null) => {
 const formatTimeAgo = (value: string) => {
   const normalized = value.replace(' ', 'T') + 'Z';
   const timestamp = Date.parse(normalized);
-  if (Number.isNaN(timestamp)) return 'just now';
+  if (Number.isNaN(timestamp)) {return 'just now';}
 
   const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-  if (seconds < 60) return 'a few seconds';
+  if (seconds < 60) {return 'a few seconds';}
 
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+  if (minutes < 60) {return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;}
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  if (hours < 24) {return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;}
 
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} ${days === 1 ? 'day' : 'days'}`;
+  if (days < 7) {return `${days} ${days === 1 ? 'day' : 'days'}`;}
 
   const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;
+  if (weeks < 5) {return `${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;}
 
   const months = Math.floor(days / 30);
-  if (months < 12) return `${months} ${months === 1 ? 'month' : 'months'}`;
+  if (months < 12) {return `${months} ${months === 1 ? 'month' : 'months'}`;}
 
   const years = Math.floor(days / 365);
   return `${years} ${years === 1 ? 'year' : 'years'}`;
@@ -168,14 +169,14 @@ const getFallbackRoute = (enabledCategories: string[]) => {
 };
 
 const getProgressLabel = (category: string, progress: number | null) => {
-  if (!progress || progress <= 0) return null;
-  if (category === 'games') return null;
-  if (category === 'anime' || category === 'tv') return `Episode ${progress}`;
+  if (!progress || progress <= 0) {return null;}
+  if (category === 'games') {return null;}
+  if (category === 'anime' || category === 'tv') {return `Episode ${progress}`;}
   if (category === 'manga') {
     const plural = progress === 1 ? 'Volume' : 'Volumes';
     return `${plural} ${progress}`;
   }
-  if (category === 'books') return `Page ${progress}`;
+  if (category === 'books') {return `Page ${progress}`;}
   return null;
 };
 
@@ -288,7 +289,7 @@ export function ContinueHero() {
       slides
         .map<SlideItem | null>(slide => {
           const config = CATEGORY_CONFIG[slide.category];
-          if (!config) return null;
+          if (!config) {return null;}
           return {
             slide,
             config,
@@ -300,7 +301,7 @@ export function ContinueHero() {
   );
 
   useEffect(() => {
-    if (!carouselApi) return;
+    if (!carouselApi) {return;}
 
     const onSelect = () => {
       setSelectedIndex(carouselApi.selectedScrollSnap());
@@ -317,7 +318,7 @@ export function ContinueHero() {
   }, [carouselApi]);
 
   useEffect(() => {
-    if (!carouselApi || slideItems.length <= 1) return;
+    if (!carouselApi || slideItems.length <= 1) {return;}
 
     const intervalId = window.setInterval(() => {
       carouselApi.scrollNext();

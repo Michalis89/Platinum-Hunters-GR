@@ -38,11 +38,12 @@ import { apiClient } from '@/lib/api/client';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
 import { isAllowedIgdbCategory } from '@/lib/igdb/categories';
-import {
+import type {
   MediaCategory,
   MediaEntry,
   MediaStatus,
-  SearchResult,
+  SearchResult} from './types';
+import {
   CATEGORY_CONFIG,
   getTotalCount,
   getProgressLabel,
@@ -106,7 +107,7 @@ export default function EntryEditDialog({
   }, []);
 
   useEffect(() => {
-    if (!entry) return;
+    if (!entry) {return;}
     setDescriptionExpanded(false);
     setIsDescriptionEditing(false);
     setCatalogMessage(null);
@@ -144,7 +145,7 @@ export default function EntryEditDialog({
   ].join(' ');
 
   const handleSaveDescription = async () => {
-    if (!entry?.mediaId || !showDescriptionTools) return;
+    if (!entry?.mediaId || !showDescriptionTools) {return;}
     try {
       setIsSavingDescription(true);
       setCatalogMessage(null);
@@ -159,7 +160,7 @@ export default function EntryEditDialog({
         }),
       });
       const data = (await response.json()) as { error?: string; description?: string };
-      if (!response.ok) throw new Error(data.error || 'Description update failed');
+      if (!response.ok) {throw new Error(data.error || 'Description update failed');}
       setDescriptionValue(data.description ?? descriptionDraft);
       setIsDescriptionEditing(false);
       await onRefreshEntry?.(true);
@@ -176,7 +177,7 @@ export default function EntryEditDialog({
   };
 
   const handleSyncIgdbMetadata = async () => {
-    if (!entry?.mediaId || category !== 'games' || !showDescriptionTools) return;
+    if (!entry?.mediaId || category !== 'games' || !showDescriptionTools) {return;}
     try {
       setIsSyncingIgdbMetadata(true);
       setCatalogMessage(null);
@@ -186,7 +187,7 @@ export default function EntryEditDialog({
         body: JSON.stringify({ action: 'sync_igdb_metadata', category, mediaId: entry.mediaId }),
       });
       const data = (await response.json()) as { error?: string; description?: string };
-      if (!response.ok) throw new Error(data.error || 'IGDB metadata sync failed');
+      if (!response.ok) {throw new Error(data.error || 'IGDB metadata sync failed');}
       if (typeof data.description === 'string') {
         setDescriptionValue(data.description);
         setDescriptionDraft(data.description);
@@ -233,7 +234,7 @@ export default function EntryEditDialog({
       setEditState(prev => ({ ...prev, progress: '' }));
       return;
     }
-    if (!/^\d+$/.test(value)) return;
+    if (!/^\d+$/.test(value)) {return;}
     const numericProgress = Number.parseInt(value, 10);
     const shouldComplete =
       clampProgress &&
@@ -253,10 +254,10 @@ export default function EntryEditDialog({
       return;
     }
     raw = raw.replace(',', '.');
-    if (!/^\d*\.?\d*$/.test(raw)) return;
-    if (raw.startsWith('.')) raw = `0${raw}`;
+    if (!/^\d*\.?\d*$/.test(raw)) {return;}
+    if (raw.startsWith('.')) {raw = `0${raw}`;}
     const num = Number(raw);
-    if (!Number.isNaN(num) && num > 10) raw = '10';
+    if (!Number.isNaN(num) && num > 10) {raw = '10';}
     setEditState(prev => ({ ...prev, score: raw }));
   };
 

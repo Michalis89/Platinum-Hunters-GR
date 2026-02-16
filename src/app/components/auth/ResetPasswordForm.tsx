@@ -41,7 +41,7 @@ export default function ResetPasswordForm({
     return <LoadingState />;
   }
 
-  if (!hasValidSession) return null;
+  if (!hasValidSession) {return null;}
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4 py-12">

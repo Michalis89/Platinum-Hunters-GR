@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -120,7 +120,7 @@ function normalizeTitle(value?: string | null): string {
 }
 
 function cleanTitleForStorage(value?: string | null): string {
-  if (!value) return '';
+  if (!value) {return '';}
   return value.replace(/[\u2122\u00AE\u00A9]/g, '').trim();
 }
 
@@ -379,7 +379,7 @@ async function syncSteamForUser(options?: {
   jobId?: string;
   onProgress?: (progress: SyncProgress) => Promise<void> | void;
 }): Promise<SyncResult> {
-  console.log('[Steam Sync] Starting sync...', { jobId: options?.jobId });
+  console.warn('[Steam Sync] Starting sync...', { jobId: options?.jobId });
 
   const supabase = await createRouteHandlerClient();
   const adminSupabase = createSupabaseAdminClient();
@@ -392,7 +392,7 @@ async function syncSteamForUser(options?: {
     const percent =
       totalSteps > 0 ? Math.min(100, Math.round((completedSteps / totalSteps) * 100)) : 0;
 
-    console.log(
+    console.warn(
       `[Steam Sync] Progress: ${percent}% - ${message} (${completedSteps}/${totalSteps})`,
     );
 
@@ -432,13 +432,13 @@ async function syncSteamForUser(options?: {
     throw new Error('No Steam ID is set in your profile. Go to settings to add it.');
   }
 
-  console.log('[Steam Sync] Fetching Steam API key...');
+  console.warn('[Steam Sync] Fetching Steam API key...');
   const apiKey = getSteamApiKey();
 
-  console.log('[Steam Sync] Resolving Steam ID64...');
+  console.warn('[Steam Sync] Resolving Steam ID64...');
   const steamId64 = await resolveSteamId64({ apiKey, steamInput });
 
-  console.log('[Steam Sync] Fetching owned games...');
+  console.warn('[Steam Sync] Fetching owned games...');
   const steamGames = await fetchSteamOwnedGames({ apiKey, steamId64 });
 
   const uniqueGames = Array.from(
@@ -602,7 +602,7 @@ async function syncSteamForUser(options?: {
       const isAlreadyEnriched = existingByAppId.source === 'igdb' && existingByAppId.rawg_id;
 
       if (isAlreadyEnriched) {
-        console.log(
+        console.warn(
           `[Steam Sync] Preserving IGDB data for: ${game.name} (IGDB ID: ${existingByAppId.rawg_id})`,
         );
         updateByMediaId.set(existingByAppId.id, {
@@ -610,7 +610,7 @@ async function syncSteamForUser(options?: {
           runtime: getSteamHours(game),
         });
       } else if (matchedIgdb) {
-        console.log(`[Steam Sync] Enriching with IGDB: ${game.name} (IGDB ID: ${matchedIgdb.id})`);
+        console.warn(`[Steam Sync] Enriching with IGDB: ${game.name} (IGDB ID: ${matchedIgdb.id})`);
         updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedIgdb));
       } else {
         // Keep existing entry but don't enrich it
@@ -627,7 +627,7 @@ async function syncSteamForUser(options?: {
       const existingIgdbMedia = existingIgdbMediaByIgdbId.get(matchedIgdb.id);
       if (existingIgdbMedia) {
         mediaIdByAppId.set(game.appid, existingIgdbMedia.id);
-        console.log(
+        console.warn(
           `[Steam Sync] Preserving existing IGDB media: ${game.name} (IGDB ID: ${matchedIgdb.id})`,
         );
         updateByMediaId.set(existingIgdbMedia.id, {
@@ -647,7 +647,7 @@ async function syncSteamForUser(options?: {
       });
     } else {
       // Reject games without IGDB match - don't insert them
-      console.log(`[Steam Sync] Rejecting: ${game.name} (Steam App ${game.appid}) - No IGDB match`);
+      console.warn(`[Steam Sync] Rejecting: ${game.name} (Steam App ${game.appid}) - No IGDB match`);
       rejectedGames.push({
         appid: game.appid,
         name: game.name ?? `Steam App ${game.appid}`,
@@ -763,8 +763,8 @@ async function syncSteamForUser(options?: {
     } | null;
     const normalizedTitle = normalizeTitle(media?.title);
     const normalizedEnglishTitle = normalizeTitle(media?.title_english);
-    if (normalizedTitle) userTitleSet.add(normalizedTitle);
-    if (normalizedEnglishTitle) userTitleSet.add(normalizedEnglishTitle);
+    if (normalizedTitle) {userTitleSet.add(normalizedTitle);}
+    if (normalizedEnglishTitle) {userTitleSet.add(normalizedEnglishTitle);}
   }
 
   const userEntryPayload: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
@@ -854,10 +854,10 @@ async function syncSteamForUser(options?: {
   await updateProgress('Finalizing sync...', totalSteps - completedSteps);
 
   const warnings: string[] = [];
-  if (failedMediaInsertCount > 0) warnings.push(`Failed media inserts: ${failedMediaInsertCount}`);
-  if (failedMediaUpdateCount > 0) warnings.push(`Failed media updates: ${failedMediaUpdateCount}`);
+  if (failedMediaInsertCount > 0) {warnings.push(`Failed media inserts: ${failedMediaInsertCount}`);}
+  if (failedMediaUpdateCount > 0) {warnings.push(`Failed media updates: ${failedMediaUpdateCount}`);}
   if (failedEntryUpsertCount > 0)
-    warnings.push(`Failed entry inserts/updates: ${failedEntryUpsertCount}`);
+    {warnings.push(`Failed entry inserts/updates: ${failedEntryUpsertCount}`);}
 
   const result: SyncResult = {
     totalFetched: uniqueGames.length,
@@ -901,7 +901,7 @@ async function POSTHandler(req: Request) {
       status: 'completed',
       message: 'Steam sync completed successfully',
       percent: 100,
-      result: result,
+      result,
       finishedAt: new Date().toISOString(),
     });
 
@@ -945,7 +945,7 @@ async function GETHandler(req: Request) {
       status: 'completed',
       message: 'Steam sync completed successfully',
       percent: 100,
-      result: result,
+      result,
       finishedAt: new Date().toISOString(),
     });
 
@@ -981,3 +981,4 @@ async function GETHandler(req: Request) {
 
 export const POST = withApiRoute(POSTHandler);
 export const GET = withApiRoute(GETHandler);
+

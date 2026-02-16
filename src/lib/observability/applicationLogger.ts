@@ -65,7 +65,7 @@ export type ApplicationLogsDatabase = {
 };
 
 function toSafeJson(details: Record<string, unknown> | null | undefined) {
-  if (!details) return null;
+  if (!details) {return null;}
   try {
     return JSON.parse(JSON.stringify(details));
   } catch {

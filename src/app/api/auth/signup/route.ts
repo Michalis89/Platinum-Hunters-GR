@@ -182,7 +182,7 @@ async function POSTHandler(req: Request) {
       .maybeSingle();
 
     if (existingEmail) {
-      console.info('Signup attempt for already registered email', email);
+      console.warn('Signup attempt for already registered email', email);
       return fail({ error: 'An account with this email already exists.' }, 409);
     }
 
@@ -195,7 +195,7 @@ async function POSTHandler(req: Request) {
       .maybeSingle();
 
     if (existingUsername) {
-      console.info('Signup attempt with existing username', username);
+      console.warn('Signup attempt with existing username', username);
       return fail({ error: 'Username is already in use.' }, 409);
     }
 
@@ -208,7 +208,7 @@ async function POSTHandler(req: Request) {
         .maybeSingle();
 
       if (existingPSN) {
-        console.info('Signup attempt with existing PSN ID', psn_id);
+        console.warn('Signup attempt with existing PSN ID', psn_id);
         return fail({ error: 'PSN ID is already in use.' }, 409);
       }
     }

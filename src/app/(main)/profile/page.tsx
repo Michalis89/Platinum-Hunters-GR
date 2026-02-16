@@ -62,7 +62,7 @@ export default function ProfilePage() {
     );
   }, [user]);
 
-  if (!user) return <ProfilePageSkeleton />;
+  if (!user) {return <ProfilePageSkeleton />;}
 
   const categoryCards = showcaseCategories.length ? (
     <div className="grid gap-4 md:grid-cols-2">

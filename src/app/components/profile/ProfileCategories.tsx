@@ -79,7 +79,7 @@ export function ProfileCategories({
   activeCategory,
   onCategoryChange,
 }: Readonly<ProfileCategoriesProps>) {
-  if (categories.length === 0) return null;
+  if (categories.length === 0) {return null;}
 
   const actionCategory =
     activeCategory && categoryMeta[activeCategory] ? activeCategory : (categories[0] ?? null);
@@ -97,7 +97,7 @@ export function ProfileCategories({
         <div className="flex flex-wrap items-center justify-center gap-3 p-2 sm:p-3">
           {categories.map(cat => {
             const meta = categoryMeta[cat];
-            if (!meta) return null;
+            if (!meta) {return null;}
 
             const isActive = activeCategory === cat;
 

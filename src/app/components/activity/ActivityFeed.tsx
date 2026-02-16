@@ -74,11 +74,11 @@ function timeAgo(date: string) {
   const now = Date.now();
   const then = new Date(date).getTime();
   const diffSec = Math.max(0, Math.floor((now - then) / 1000));
-  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffSec < 60) {return `${diffSec}s ago`;}
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) {return `${diffMin}m ago`;}
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}h ago`;
+  if (diffH < 24) {return `${diffH}h ago`;}
   const diffD = Math.floor(diffH / 24);
   return `${diffD}d ago`;
 }
@@ -117,9 +117,9 @@ function renderText(item: ActivityItem) {
     return `${name} added to backlog: ${title}`;
   }
   if (item.type === 'backlog_status') {
-    if (item.payload?.favoriteAction === 'added') return `${name} favorited: ${title}`;
+    if (item.payload?.favoriteAction === 'added') {return `${name} favorited: ${title}`;}
     if (item.payload?.favoriteAction === 'removed')
-      return `${name} removed from favorites: ${title}`;
+      {return `${name} removed from favorites: ${title}`;}
     const status = (p.status || '').toString();
     const statusLabel: Record<string, string> = {
       platinumed: 'earned platinum',
@@ -232,21 +232,21 @@ function renderText(item: ActivityItem) {
 }
 
 function iconFor(item: ActivityItem) {
-  if (item.type === 'backlog_added') return <Gamepad2 className="h-4 w-4 text-primary" />;
+  if (item.type === 'backlog_added') {return <Gamepad2 className="h-4 w-4 text-primary" />;}
   if (item.type === 'backlog_status') {
     const status = (item.payload?.status || '').toString();
-    if (status === 'platinumed') return <TrophyIcon className="h-4 w-4 text-warning" />;
-    if (status === 'dropped') return <Flag className="h-4 w-4 text-destructive" />;
-    if (status === 'playing') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
+    if (status === 'platinumed') {return <TrophyIcon className="h-4 w-4 text-warning" />;}
+    if (status === 'dropped') {return <Flag className="h-4 w-4 text-destructive" />;}
+    if (status === 'playing') {return <Gamepad2 className="h-4 w-4 text-emerald-500" />;}
     if (item.payload?.favoriteAction === 'added')
-      return <Heart className="h-4 w-4 text-rose-500" />;
+      {return <Heart className="h-4 w-4 text-rose-500" />;}
     if (item.payload?.favoriteAction === 'removed')
-      return <Heart className="h-4 w-4 text-muted-foreground" />;
+      {return <Heart className="h-4 w-4 text-muted-foreground" />;}
     return <Gamepad2 className="h-4 w-4 text-primary" />;
   }
-  if (item.type === 'media_added') return <Sparkles className="h-4 w-4 text-primary" />;
-  if (item.type === 'media_status') return <Gamepad2 className="h-4 w-4 text-emerald-500" />;
-  if (item.type === 'media_favorite') return <Heart className="h-4 w-4 text-rose-500" />;
+  if (item.type === 'media_added') {return <Sparkles className="h-4 w-4 text-primary" />;}
+  if (item.type === 'media_status') {return <Gamepad2 className="h-4 w-4 text-emerald-500" />;}
+  if (item.type === 'media_favorite') {return <Heart className="h-4 w-4 text-rose-500" />;}
   const isReview = item.payload?.topic === 'reviews';
   if (item.type === 'article_created') {
     return isReview ? (
@@ -262,13 +262,13 @@ function iconFor(item: ActivityItem) {
       <Pencil className="h-4 w-4 text-primary" />
     );
   }
-  if (item.type === 'article_deleted') return <Trash2 className="h-4 w-4 text-destructive" />;
-  if (item.type === 'article_liked') return <Heart className="h-4 w-4 text-rose-500" />;
-  if (item.type === 'article_unliked') return <Heart className="h-4 w-4 text-muted-foreground" />;
-  if (item.type === 'article_comment') return <MessageSquare className="h-4 w-4 text-primary" />;
-  if (item.type === 'article_commented') return <MessageSquare className="h-4 w-4 text-primary" />;
+  if (item.type === 'article_deleted') {return <Trash2 className="h-4 w-4 text-destructive" />;}
+  if (item.type === 'article_liked') {return <Heart className="h-4 w-4 text-rose-500" />;}
+  if (item.type === 'article_unliked') {return <Heart className="h-4 w-4 text-muted-foreground" />;}
+  if (item.type === 'article_comment') {return <MessageSquare className="h-4 w-4 text-primary" />;}
+  if (item.type === 'article_commented') {return <MessageSquare className="h-4 w-4 text-primary" />;}
   if (item.type === 'article_comment_deleted')
-    return <MessageSquare className="h-4 w-4 text-muted-foreground" />;
+    {return <MessageSquare className="h-4 w-4 text-muted-foreground" />;}
   return <UserIcon className="h-4 w-4 text-muted-foreground" />;
 }
 

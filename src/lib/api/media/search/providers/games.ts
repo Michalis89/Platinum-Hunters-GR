@@ -32,7 +32,7 @@ function normalizeGameSearchTerm(value: string): string {
     .trim()
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s]+/gu, ' ');
-  if (!normalized) return '';
+  if (!normalized) {return '';}
 
   const romanMap: Record<string, string> = {
     '2': 'ii',
@@ -77,7 +77,7 @@ export const gamesSearchConfig: MediaSearchConfig<GamesCategory, IgdbGame, GameS
   getExternalId: item => item.id,
   fetchExternal: async (search, { limit }) => {
     const strict = await searchIgdbGames(search, limit);
-    if (strict.length > 0) return strict;
+    if (strict.length > 0) {return strict;}
 
     const fallback = await searchIgdbGamesWithoutCategoryFilter(search, Math.max(limit * 2, 20));
     return fallback.filter(isSearchAllowedGameCandidate).slice(0, limit);

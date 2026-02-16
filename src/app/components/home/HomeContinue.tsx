@@ -69,7 +69,7 @@ export function HomeContinue() {
   const userCategories = (user?.categories as string[] | undefined) ?? [];
 
   const visibleContinueItems = continueItems.filter(item => {
-    if (!item.requires) return true;
+    if (!item.requires) {return true;}
     return item.requires.some(cat => userCategories.includes(cat));
   });
 

@@ -10,7 +10,7 @@ type ProfileCategoryInfoProps = {
 };
 
 function InfoRow({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
-  if (!children) return null;
+  if (!children) {return null;}
   return (
     <div className="flex flex-col gap-1">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -20,7 +20,7 @@ function InfoRow({ label, children }: Readonly<{ label: string; children: React.
 }
 
 function ChipList({ items, label }: Readonly<{ items: string[]; label: string }>) {
-  if (!items?.length) return null;
+  if (!items?.length) {return null;}
   return (
     <div>
       <p className="mb-2 text-xs text-muted-foreground">{label}</p>

@@ -1,4 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { AuthSession } from '@/types/auth';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
@@ -16,8 +17,8 @@ export const fetchSession = createAsyncThunk('auth/fetchSession', async () => {
     error,
   } = await supabase.auth.getSession();
 
-  if (error) throw error;
-  if (!session) return null;
+  if (error) {throw error;}
+  if (!session) {return null;}
 
   const { data: userProfile, error: profileError } = await supabase
     .from('users')
@@ -25,7 +26,7 @@ export const fetchSession = createAsyncThunk('auth/fetchSession', async () => {
     .eq('id', session.user.id)
     .single();
 
-  if (profileError) throw profileError;
+  if (profileError) {throw profileError;}
 
   return userProfile as User;
 });
@@ -38,7 +39,7 @@ export const login = createAsyncThunk(
       password,
     });
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
@@ -46,7 +47,7 @@ export const login = createAsyncThunk(
       .eq('id', data.user.id)
       .single();
 
-    if (profileError) throw profileError;
+    if (profileError) {throw profileError;}
 
     await supabase.rpc('update_user_last_login', { user_id: data.user.id } as never);
 
@@ -56,7 +57,7 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk('auth/logout', async () => {
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  if (error) {throw error;}
 
   try {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -75,7 +76,7 @@ export const updateUserProfile = createAsyncThunk(
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
     return data as User;
   },
 );

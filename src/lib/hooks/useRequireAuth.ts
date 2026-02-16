@@ -35,7 +35,7 @@ export function useRequireAuth({ redirectPath }: UseRequireAuthOptions = {}) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      if (typeof window === 'undefined') return;
+      if (typeof window === 'undefined') {return;}
 
       const currentUrl = window.location.pathname + window.location.search;
       try {

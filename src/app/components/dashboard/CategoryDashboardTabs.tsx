@@ -45,7 +45,7 @@ export default function CategoryDashboardTabs({
   );
 
   useEffect(() => {
-    if (!visibleCategories.length) return;
+    if (!visibleCategories.length) {return;}
     if (!activeCategory || !visibleCategories.includes(activeCategory)) {
       setActiveCategory(visibleCategories[0]);
     }

@@ -20,7 +20,7 @@ const sanitizeFilename = (name: string) =>
     .slice(0, 80);
 
 const coerceBoolean = (value: FormDataEntryValue | null) => {
-  if (value === null) return false;
+  if (value === null) {return false;}
   if (typeof value === 'string') {
     return value === 'true' || value === 'on' || value === '1';
   }

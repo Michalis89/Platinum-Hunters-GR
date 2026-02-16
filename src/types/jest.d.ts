@@ -1,4 +1,4 @@
-import { FetchMock } from 'jest-fetch-mock';
+import type { FetchMock } from 'jest-fetch-mock';
 
 declare global {
   // Use var so tests can reassign global fetch mocks freely

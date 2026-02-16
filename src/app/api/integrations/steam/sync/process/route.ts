@@ -299,8 +299,8 @@ async function POSTHandler(req: Request) {
       } | null;
       const normalizedTitle = normalizeTitle(media?.title);
       const normalizedEnglishTitle = normalizeTitle(media?.title_english);
-      if (normalizedTitle) userTitleSet.add(normalizedTitle);
-      if (normalizedEnglishTitle) userTitleSet.add(normalizedEnglishTitle);
+      if (normalizedTitle) {userTitleSet.add(normalizedTitle);}
+      if (normalizedEnglishTitle) {userTitleSet.add(normalizedEnglishTitle);}
     }
 
     const userEntryPayload: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
@@ -308,7 +308,7 @@ async function POSTHandler(req: Request) {
 
     for (const game of batch) {
       const mediaId = mediaIdByAppId.get(game.appid);
-      if (!mediaId) continue;
+      if (!mediaId) {continue;}
 
       const existingEntry = existingEntryByMediaId.get(mediaId);
       const derivedStatus = deriveStatusFromSteamData({

@@ -92,7 +92,7 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
     // Handle dialog open/close
     React.useEffect(() => {
       const dialog = dialogRef.current;
-      if (!dialog) return;
+      if (!dialog) {return;}
 
       if (open) {
         if (!dialog.open) {
@@ -115,7 +115,7 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
     // Handle ESC key and close events
     React.useEffect(() => {
       const dialog = dialogRef.current;
-      if (!dialog) return;
+      if (!dialog) {return;}
 
       const handleClose = () => {
         onOpenChange(false);
@@ -156,7 +156,7 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
       }
     }, [open, triggerElement]);
 
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined') {return null;}
 
     // Slide direction styles
     const slideStyles = {

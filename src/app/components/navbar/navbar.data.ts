@@ -261,9 +261,9 @@ export type NavbarFeatureFilters = {
 };
 
 const featureEnabled = (feature: NavbarFeatureName | undefined, filters: NavbarFeatureFilters) => {
-  if (!feature) return true;
-  if (feature === 'articles') return filters.articles ?? true;
-  if (feature === 'reviews') return filters.reviews ?? true;
+  if (!feature) {return true;}
+  if (feature === 'articles') {return filters.articles ?? true;}
+  if (feature === 'reviews') {return filters.reviews ?? true;}
   return true;
 };
 
@@ -274,9 +274,9 @@ export const getVisibleNavItems = (
   filters: NavbarFeatureFilters,
 ) =>
   NAV_ITEMS.filter(item => {
-    if (item.devOnly && !isDev) return false;
-    if (item.requiresAuth) return authResolved && isAuthenticated;
-    if (!featureEnabled(item.feature, filters)) return false;
+    if (item.devOnly && !isDev) {return false;}
+    if (item.requiresAuth) {return authResolved && isAuthenticated;}
+    if (!featureEnabled(item.feature, filters)) {return false;}
     return true;
   });
 
@@ -287,14 +287,14 @@ export const getVisibleHobbyItems = (
   userCategories: string[],
   filters: NavbarFeatureFilters,
 ) => {
-  if (!authResolved || !isAuthenticated) return [];
+  if (!authResolved || !isAuthenticated) {return [];}
 
   const normalizedCategories = userCategories
     .map(category => category.trim().toLowerCase())
     .filter(Boolean);
 
   // Guard: authenticated users with no enabled categories should not see hobby/library items.
-  if (normalizedCategories.length === 0) return [];
+  if (normalizedCategories.length === 0) {return [];}
 
   return items
     .filter(item => !item.category || normalizedCategories.includes(item.category.toLowerCase()))

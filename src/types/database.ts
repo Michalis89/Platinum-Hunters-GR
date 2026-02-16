@@ -4,8 +4,8 @@
  * PH-30: User Authentication System
  */
 
-import { User } from './user';
-import { Game, Guide } from './interfaces';
+import type { User } from './user';
+import type { Game, Guide } from './interfaces';
 
 /**
  * Article status type

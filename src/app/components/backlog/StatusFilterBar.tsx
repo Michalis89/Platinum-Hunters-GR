@@ -3,7 +3,8 @@
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MediaCategory, MediaStatus, CATEGORY_CONFIG } from './types';
+import type { MediaCategory, MediaStatus} from './types';
+import { CATEGORY_CONFIG } from './types';
 
 interface StatusFilterBarProps {
   category: MediaCategory;

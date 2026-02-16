@@ -39,7 +39,7 @@ const config = {
     const now = new Date().toISOString();
     const pathMap = new Map();
     const addPath = entry => {
-      if (!entry?.loc) return;
+      if (!entry?.loc) {return;}
       pathMap.set(entry.loc, entry);
     };
 
@@ -64,7 +64,7 @@ const config = {
 
     if (!error && Array.isArray(articles)) {
       for (const item of articles) {
-        if (!item?.slug) continue;
+        if (!item?.slug) {continue;}
 
         const basePath = item.topic === 'reviews' ? '/review' : '/articles';
         addPath({
@@ -83,8 +83,8 @@ const config = {
 
     if (!mediaError && Array.isArray(mediaItems)) {
       for (const item of mediaItems) {
-        if (item?.status !== 'published') continue;
-        if (!item?.slug || !item?.category) continue;
+        if (item?.status !== 'published') {continue;}
+        if (!item?.slug || !item?.category) {continue;}
 
         addPath({
           loc: `/media/${item.category}/${item.slug}`,

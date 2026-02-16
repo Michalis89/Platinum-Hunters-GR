@@ -40,7 +40,7 @@ export default function ActionRow({ article }: ActionRowProps) {
     fetch(`/api/articles/${article.id}/like`)
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
-        if (!active || !data) return;
+        if (!active || !data) {return;}
         const payload = data?.data ?? data;
         setLikeState({
           liked: !!payload.liked,
@@ -103,7 +103,7 @@ export default function ActionRow({ article }: ActionRowProps) {
   };
 
   const toggleLike = async () => {
-    if (likeLoading || isAuthor) return;
+    if (likeLoading || isAuthor) {return;}
     setLikeLoading(true);
 
     try {

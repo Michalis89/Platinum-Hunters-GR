@@ -39,7 +39,7 @@ const sanitizeFilename = (name: string) =>
     .slice(0, 80);
 
 const coerceBoolean = (value: FormDataEntryValue | null) => {
-  if (value === null) return false;
+  if (value === null) {return false;}
   if (typeof value === 'string') {
     return value === 'true' || value === 'on' || value === '1';
   }
@@ -47,7 +47,7 @@ const coerceBoolean = (value: FormDataEntryValue | null) => {
 };
 
 const parseOptionalJson = (value: FormDataEntryValue | null) => {
-  if (!value || typeof value !== 'string') return null;
+  if (!value || typeof value !== 'string') {return null;}
   try {
     return JSON.parse(value);
   } catch {
@@ -208,7 +208,7 @@ async function POSTHandler(req: Request) {
         return fail({ error: 'Tell us the reason for your request.' }, 400);
       }
 
-      if (profileLink) meta.profile_link = profileLink;
+      if (profileLink) {meta.profile_link = profileLink;}
       if (portfolioLinks) {
         meta.portfolio_links = portfolioLinks
           .split(',')
@@ -223,7 +223,7 @@ async function POSTHandler(req: Request) {
 
     if (category === 'general') {
       const topic = String(formData.get('topic') ?? '').trim();
-      if (topic) meta.topic = topic;
+      if (topic) {meta.topic = topic;}
     }
 
     const files = getFiles(formData);

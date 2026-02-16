@@ -24,7 +24,7 @@ type StatusAlertProps = {
 };
 
 export function LoginStatusAlert({ alert, isRedirecting }: StatusAlertProps) {
-  if (!alert) return null;
+  if (!alert) {return null;}
 
   return (
     <Alert className={`rounded-lg ${alertToneClass(alert.type)}`}>
@@ -268,7 +268,7 @@ export function ResetPanel({
   onSendRecoveryLink,
   onClose,
 }: ResetPanelProps) {
-  if (!showResetPanel) return null;
+  if (!showResetPanel) {return null;}
 
   return (
     <div className="space-y-4 p-4">

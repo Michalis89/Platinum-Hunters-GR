@@ -64,7 +64,7 @@ async function POSTHandler(req: Request) {
     try {
       await supabase.auth.signOut();
     } catch (signOutError: unknown) {
-      console.log('SignOut warning (continuing anyway):', signOutError);
+      console.warn('SignOut warning (continuing anyway):', signOutError);
     }
 
     return ok({

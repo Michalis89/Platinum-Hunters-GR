@@ -3,10 +3,10 @@ import sanitizeHtml from 'sanitize-html';
 const isProtocolRelative = (value: string) => value.trim().startsWith('//');
 
 const isSafeUrl = (rawUrl: string, allowRelative: boolean) => {
-  if (!rawUrl) return false;
+  if (!rawUrl) {return false;}
   const trimmed = rawUrl.trim();
-  if (isProtocolRelative(trimmed)) return false;
-  if (allowRelative && !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(trimmed)) return true;
+  if (isProtocolRelative(trimmed)) {return false;}
+  if (allowRelative && !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(trimmed)) {return true;}
   try {
     const url = new URL(trimmed);
     return url.protocol === 'https:';
@@ -16,7 +16,7 @@ const isSafeUrl = (rawUrl: string, allowRelative: boolean) => {
 };
 
 export const sanitizeHtmlContent = (html: string | null | undefined) => {
-  if (!html) return '';
+  if (!html) {return '';}
 
   return sanitizeHtml(html, {
     allowedTags: [

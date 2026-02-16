@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase-client';
 import { isSessionError } from '@/lib/auth/session';
 
 export async function establishRecoverySessionFromUrl(): Promise<boolean> {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
 
   const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
   const hashParams = new URLSearchParams(hash);
@@ -14,14 +14,14 @@ export async function establishRecoverySessionFromUrl(): Promise<boolean> {
       access_token: accessToken,
       refresh_token: refreshToken,
     });
-    if (!setSessionError) return true;
+    if (!setSessionError) {return true;}
   }
 
   const queryParams = new URLSearchParams(window.location.search);
   const code = queryParams.get('code');
   if (code) {
     const { error: codeError } = await supabase.auth.exchangeCodeForSession(code);
-    if (!codeError) return true;
+    if (!codeError) {return true;}
   }
 
   const tokenHash = queryParams.get('token_hash');
@@ -31,14 +31,14 @@ export async function establishRecoverySessionFromUrl(): Promise<boolean> {
       type: 'recovery',
       token_hash: tokenHash,
     });
-    if (!otpError) return true;
+    if (!otpError) {return true;}
   }
 
   return false;
 }
 
 export function hasRecoveryParamsInUrl() {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
 
   const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
   const hashParams = new URLSearchParams(hash);
@@ -57,7 +57,7 @@ export function hasRecoveryParamsInUrl() {
 }
 
 export function clearRecoveryParamsFromUrl() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 

@@ -40,7 +40,7 @@ async function POSTHandler() {
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
 
-    console.log('🚀 [Steam Sync Start] Initiating sync for user:', session.user.id);
+    console.warn('🚀 [Steam Sync Start] Initiating sync for user:', session.user.id);
 
     // Get user's Steam ID
     const { data: userData, error: userError } = await supabase
@@ -50,23 +50,23 @@ async function POSTHandler() {
       .maybeSingle();
 
     if (userError) {
-      console.error('❌ [Steam Sync Start] User fetch error:', userError);
+      console.error('[Steam Sync Start] User fetch error:', userError);
       throw userError;
     }
 
     const steamInput = userData?.steam_id?.trim();
     if (!steamInput) {
-      console.error('❌ [Steam Sync Start] No steam_id in user profile');
+      console.error('[Steam Sync Start] No steam_id in user profile');
       throw new Error('You have not set a Steam ID in your profile. Go to settings to add it.');
     }
 
-    console.log('🔑 [Steam Sync Start] Fetching Steam API key...');
+    console.warn('🔑 [Steam Sync Start] Fetching Steam API key...');
     const apiKey = getSteamApiKey();
 
-    console.log('🎮 [Steam Sync Start] Resolving Steam ID64...');
+    console.warn('🎮 [Steam Sync Start] Resolving Steam ID64...');
     const steamId64 = await resolveSteamId64({ apiKey, steamInput });
 
-    console.log('📚 [Steam Sync Start] Fetching owned games...');
+    console.warn('📚 [Steam Sync Start] Fetching owned games...');
     const steamGames = await fetchSteamOwnedGames({ apiKey, steamId64 });
 
     // Filter and deduplicate games
@@ -74,7 +74,7 @@ async function POSTHandler() {
       new Map(steamGames.map(game => [game.appid, game] as const)).values(),
     ).filter(game => typeof game.appid === 'number' && game.appid > 0 && game.name);
 
-    console.log(`📊 [Steam Sync Start] Found ${uniqueGames.length} unique games`);
+    console.warn(`📊 [Steam Sync Start] Found ${uniqueGames.length} unique games`);
 
     if (uniqueGames.length === 0) {
       return NextResponse.json({
@@ -84,7 +84,7 @@ async function POSTHandler() {
       });
     }
 
-    console.log('🏆 [Steam Sync Start] Fetching achievements...');
+    console.warn('🏆 [Steam Sync Start] Fetching achievements...');
     const achievementsPercentByAppId = new Map<number, number>();
     const gamesWithStats = uniqueGames.filter(g => g.has_community_visible_stats);
 
@@ -128,11 +128,11 @@ async function POSTHandler() {
     });
 
     if (insertError) {
-      console.error('❌ [Steam Sync Start] Failed to create job:', insertError);
+      console.error('[Steam Sync Start] Failed to create job:', insertError);
       throw new Error('Failed to create sync job');
     }
 
-    console.log(`✅ [Steam Sync Start] Job created: ${jobId}`);
+    console.warn(`✅ [Steam Sync Start] Job created: ${jobId}`);
 
     return NextResponse.json({
       jobId,
@@ -147,7 +147,7 @@ async function POSTHandler() {
     }
 
     const message = error instanceof Error ? error.message : 'Failed to start Steam sync';
-    console.error('❌ [Steam Sync Start] Error:', error);
+    console.error('[Steam Sync Start] Error:', error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

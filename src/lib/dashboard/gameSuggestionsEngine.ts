@@ -74,6 +74,8 @@ function toGenreSlug(value: string) {
     .replace(/(^-|-$)/g, '');
 }
 
+function dbg(..._args: unknown[]) {}
+
 export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
   const { data: entriesData, error } = await supabase
     .from('user_media_entries')
@@ -115,7 +117,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   entries.forEach(entry => {
     const media = entry.media_items;
-    if (!media || !Array.isArray(media.genres)) return;
+    if (!media || !Array.isArray(media.genres)) {return;}
     const hours = Math.max(0, entry.progress ?? 0);
     const status = entry.status ?? 'planned';
     const rawScoreValue =
@@ -129,12 +131,12 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const entryValue = hours * statusWeight * (0.3 + 1.2 * scoreNorm) * favBoost * dropMultiplier;
 
     const validGenres = media.genres.map(genre => genre?.trim()).filter(Boolean) as string[];
-    if (!validGenres.length) return;
+    if (!validGenres.length) {return;}
     const genreShare = 1 / validGenres.length;
 
     validGenres.forEach(genre => {
       const normalized = normalizeText(genre);
-      if (!normalized) return;
+      if (!normalized) {return;}
 
       // REQUIREMENT A: genreHours must be weighted by statusWeight
       const hoursSoFar = genreHours.get(normalized) ?? 0;
@@ -263,23 +265,23 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   // Debug: Log top genres and eligibility
   const allGenresSorted = [...finalGenreScore.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-  console.log('Top Genres by Score:');
+  dbg('Top Genres by Score:');
   allGenresSorted.forEach(([genre, score]) => {
     const metadata = genreMetadata.get(genre);
     const good = metadata?.goodHours ?? 0;
     const dropRate = metadata?.dropRate ?? 1;
     const eligible = good >= 10 && dropRate <= 0.35;
-    console.log(
+    dbg(
       `  ${eligible ? 'OK' : 'NO'} ${genre}: score=${score.toFixed(3)}, goodHours=${good.toFixed(1)}, dropRate=${(dropRate * 100).toFixed(1)}%, avgScore=${metadata?.avgScore.toFixed(1)}`,
     );
   });
-  console.log(`Eligible genres: ${eligibleGenres.map(([g]) => g).join(', ')}`);
+  dbg(`Eligible genres: ${eligibleGenres.map(([g]) => g).join(', ')}`);
 
   const genreRanking = eligibleGenres;
   const eligibleGenresSet = new Set(genreRanking.map(([genre]) => genre));
 
   // Debug: Log tracked titles
-  console.log(
+  dbg(
     `Tracked titles (${trackedTitles.size}):`,
     Array.from(trackedTitles).slice(0, 20).join(', '),
   );
@@ -318,17 +320,17 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     }
 
     const title = normalizeText(game.name);
-    if (!title) return;
+    if (!title) {return;}
 
     // Reject games with similar titles already in library (e.g., "The Walking Dead: Season 1" when user has "The Walking Dead")
     if (trackedTitles.has(title)) {
-      console.log(`REJECTED ${game.name}: Already in library (exact title match: "${title}")`);
+      dbg(`REJECTED ${game.name}: Already in library (exact title match: "${title}")`);
       return;
     }
 
     // Debug log to trace title checking
     if (game.name.toLowerCase().includes('horizon')) {
-      console.log(
+      dbg(
         `Checking "${game.name}" -> normalized: "${title}" | In tracked? ${trackedTitles.has(title)}`,
       );
     }
@@ -342,7 +344,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       return commonWords.length >= 3;
     });
     if (hasPartialMatch) {
-      console.log(`REJECTED ${game.name}: Similar title already in library`);
+      dbg(`REJECTED ${game.name}: Similar title already in library`);
       return;
     }
 
@@ -353,7 +355,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const candidateGenres = (game.genres ?? [])
       .map(igdbGenre => normalizeText(igdbGenre?.name))
       .filter(Boolean);
-    if (!candidateGenres.length) return;
+    if (!candidateGenres.length) {return;}
 
     // Use themes/modes as extra descriptors for filtering
     const candidateTags = [...(game.themes ?? []), ...(game.game_modes ?? [])]
@@ -366,14 +368,14 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
     // REQUIREMENT E: Only consider eligible genres for scoring
     const matchedEligible = candidateGenres.filter(genre => eligibleGenresSet.has(genre));
-    if (!matchedEligible.length) return;
+    if (!matchedEligible.length) {return;}
 
     // STRICT FILTER 1: Reject games with heavily dropped genres/tags (dropRate > 45%)
     const heavilyDroppedDescriptors = allGameDescriptors.filter(
       descriptor => (dropRateMap.get(descriptor) ?? 0) > 0.45,
     );
     if (heavilyDroppedDescriptors.length > 0) {
-      console.log(
+      dbg(
         `REJECTED ${game.name}: Heavily dropped (>45%) -> ${heavilyDroppedDescriptors.map(d => `${d}:${((dropRateMap.get(d) ?? 0) * 100).toFixed(1)}%`).join(', ')}`,
       );
       return;
@@ -398,7 +400,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       return isProblematic && isUnknown;
     });
     if (foundProblematicUnknownTags.length > 0) {
-      console.log(
+      dbg(
         `REJECTED ${game.name}: Unknown problematic tags -> ${foundProblematicUnknownTags.join(', ')}`,
       );
       return;
@@ -409,7 +411,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       (sum, genre) => sum + (finalGenreScore.get(genre) ?? 0),
       0,
     );
-    if (genreFit <= 0) return;
+    if (genreFit <= 0) {return;}
 
     // CUMULATIVE PENALTY: Apply penalty for each genre/tag with dropRate > 30%
     let cumulativePenalty = 0;
@@ -432,7 +434,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       const proportion = zeroEngagementGenres.length / candidateGenres.length;
       const zeroEngagementPenalty = 0.7 * proportion;
       cumulativePenalty += zeroEngagementPenalty;
-      console.log(
+      dbg(
         `PENALTY ${game.name}: Zero engagement (${zeroEngagementGenres.length}/${candidateGenres.length}) -> ${zeroEngagementGenres.join(', ')} (penalty=${zeroEngagementPenalty.toFixed(2)})`,
       );
     }
@@ -443,10 +445,10 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const primaryGenre = matchedEligible.sort(
       (a, b) => (finalGenreScore.get(b) ?? 0) - (finalGenreScore.get(a) ?? 0),
     )[0];
-    if (!primaryGenre) return;
+    if (!primaryGenre) {return;}
 
     const metadata = genreMetadata.get(primaryGenre);
-    if (!metadata) return;
+    if (!metadata) {return;}
 
     // REQUIREMENT F: Use goodHours for explanation (not total hours)
     const hoursSpent = Math.round(metadata.goodHours);
@@ -455,7 +457,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const avgScore = metadata.avgScore;
 
     // REQUIREMENT F: Only reference hours if goodHours > 0
-    if (hoursSpent === 0) return;
+    if (hoursSpent === 0) {return;}
 
     const reason = `You logged ${hoursSpent}h in ${primaryGenre} with avg score ${avgScore.toFixed(
       1,
@@ -487,7 +489,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
         return `${d}:${(dr * 100).toFixed(0)}%`;
       })
       .join(', ');
-    console.log(
+    dbg(
       `ACCEPTED ${game.name}: score=${candidateScore.toFixed(3)}, primary=${primaryGenre} | All descriptors: [${descriptorDetails}]`,
     );
   });
@@ -498,7 +500,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
   const genreUsage = new Map<string, number>();
 
   for (const candidate of sortedCandidates) {
-    if (suggestions.length >= 4) break;
+    if (suggestions.length >= 4) {break;}
 
     const usage = genreUsage.get(candidate.primaryGenre) ?? 0;
     const diversityPenalty = usage >= 2 ? 0.15 : 0;
@@ -553,3 +555,5 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   return suggestions.slice(0, 4);
 }
+
+

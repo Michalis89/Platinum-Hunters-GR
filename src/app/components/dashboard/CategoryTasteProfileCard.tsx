@@ -111,7 +111,7 @@ export default function CategoryTasteProfileCard({
             .filter(trait => trait.percentageValue >= MIN_VISIBLE_PERCENTAGE)
             .sort((a, b) => {
               if (b.percentageValue !== a.percentageValue)
-                return b.percentageValue - a.percentageValue;
+                {return b.percentageValue - a.percentageValue;}
               return a.name.localeCompare(b.name);
             })
             .slice(0, MAX_TRAITS_PER_BUCKET),

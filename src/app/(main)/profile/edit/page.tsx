@@ -63,9 +63,7 @@ const ProfileCategoryTabs = dynamic(
   () => import('@/components/profile/profile-category-tabs').then(mod => mod.ProfileCategoryTabs),
   {
     ssr: false,
-    loading: () => (
-      <div className="h-64 animate-pulse rounded-xl bg-muted" />
-    ),
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-muted" />,
   },
 );
 const SOCIAL_PLATFORMS = [
@@ -297,7 +295,9 @@ export default function EditProfilePage() {
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     setAvatarFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -643,7 +643,7 @@ export default function EditProfilePage() {
       try {
         await supabase.auth.signOut();
       } catch (e) {
-        console.log('SignOut error (ignored):', e);
+        console.warn('SignOut error (ignored):', e);
       }
 
       await dispatch(logout());
@@ -712,9 +712,12 @@ export default function EditProfilePage() {
                 >
                   My Hobbies → Hobby Categories
                 </a>
-                . You can also configure additional settings like social links, articles, and reviews
-                in{' '}
-                <a href="/settings" className="font-semibold text-primary underline hover:text-primary/80">
+                . You can also configure additional settings like social links, articles, and
+                reviews in{' '}
+                <a
+                  href="/settings"
+                  className="font-semibold text-primary underline hover:text-primary/80"
+                >
                   Settings
                 </a>
                 . Don&apos;t forget to save your changes when you&apos;re done!

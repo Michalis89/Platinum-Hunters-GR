@@ -49,7 +49,7 @@ function tokenize(value?: string | null): string[] {
 
 function buildIgdbSearchQueries(value: string): string[] {
   const base = value.trim();
-  if (!base) return [];
+  if (!base) {return [];}
   const beforeColon = base.split(':')[0]?.trim() ?? '';
   const withoutParens = base
     .replace(/\([^)]*\)/g, ' ')
@@ -63,21 +63,21 @@ function selectBestCandidate<T extends { name?: string | null }>(
   query: string,
   candidates: T[],
 ): T | null {
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) {return null;}
   const key = normalizeForMatch(query);
   const exact = candidates.find(candidate => normalizeForMatch(candidate.name) === key);
-  if (exact) return exact;
+  if (exact) {return exact;}
 
   const queryTokens = tokenize(query);
-  if (queryTokens.length === 0) return candidates[0] ?? null;
+  if (queryTokens.length === 0) {return candidates[0] ?? null;}
   const queryTokenSet = new Set(queryTokens);
 
   let best: { candidate: T; score: number } | null = null;
   for (const candidate of candidates) {
     const candidateTokens = tokenize(candidate.name);
-    if (candidateTokens.length === 0) continue;
+    if (candidateTokens.length === 0) {continue;}
     const overlap = candidateTokens.filter(token => queryTokenSet.has(token)).length;
-    if (overlap === 0) continue;
+    if (overlap === 0) {continue;}
     const score =
       overlap / Math.max(queryTokens.length, 1) + overlap / Math.max(candidateTokens.length, 1);
     if (!best || score > best.score) {
@@ -112,8 +112,8 @@ async function resolveIgdbPatch(
     category: string;
   } | null;
 
-  if (mediaError) throw mediaError;
-  if (!typedMedia) throw new Error('GAME_NOT_FOUND');
+  if (mediaError) {throw mediaError;}
+  if (!typedMedia) {throw new Error('GAME_NOT_FOUND');}
   if (
     (typeof typedMedia.igdb_category === 'number' &&
       !isAllowedIgdbCategory(typedMedia.igdb_category)) ||
@@ -140,17 +140,17 @@ async function resolveIgdbPatch(
   if (!igdbId) {
     const query = typedMedia.title_english || typedMedia.title || '';
     const searchQueries = buildIgdbSearchQueries(query);
-    if (searchQueries.length === 0) throw new Error('IGDB_ID_NOT_RESOLVED');
+    if (searchQueries.length === 0) {throw new Error('IGDB_ID_NOT_RESOLVED');}
 
     let candidates: Awaited<ReturnType<typeof searchIgdbGames>> = [];
     for (const q of searchQueries) {
       candidates = await searchIgdbGames(q, 8);
-      if (candidates.length > 0) break;
+      if (candidates.length > 0) {break;}
     }
     if (candidates.length === 0) {
       for (const q of searchQueries) {
         candidates = await searchIgdbGamesWithoutCategoryFilter(q, 20);
-        if (candidates.length > 0) break;
+        if (candidates.length > 0) {break;}
       }
     }
     const allowedCandidates = candidates.filter(candidate =>
@@ -164,10 +164,10 @@ async function resolveIgdbPatch(
     igdbId = matched?.id ?? null;
   }
 
-  if (!igdbId) throw new Error('IGDB_MATCH_NOT_FOUND');
+  if (!igdbId) {throw new Error('IGDB_MATCH_NOT_FOUND');}
 
   const game = await fetchIgdbGameDetails(igdbId, { mainGameOnly: false });
-  if (!game) throw new Error('IGDB_DETAILS_FAILED');
+  if (!game) {throw new Error('IGDB_DETAILS_FAILED');}
   if (
     !isAllowedIgdbGameCandidate({
       category: game.category,
@@ -196,7 +196,7 @@ async function assertPrivilegedUser(userId: string) {
     .eq('id', userId)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {throw error;}
   const userRoles = Array.isArray(userRow?.roles) ? userRow.roles : [];
   const hasSupportRole = userRoles.some(r => r.toLowerCase() === 'support');
 
@@ -234,8 +234,8 @@ async function GETHandler(req: Request) {
       .eq('media_items.category', category)
       .maybeSingle();
 
-    if (error) throw error;
-    if (!data) return NextResponse.json({ entry: null });
+    if (error) {throw error;}
+    if (!data) {return NextResponse.json({ entry: null });}
 
     const status = (data.status as MediaStatus) ?? 'planned';
     const entry: MediaEntryState = {
@@ -296,8 +296,8 @@ async function PATCHHandler(req: Request) {
         .select('id,description')
         .maybeSingle();
 
-      if (error) throw error;
-      if (!data) return NextResponse.json({ error: 'Media not found' }, { status: 404 });
+      if (error) {throw error;}
+      if (!data) {return NextResponse.json({ error: 'Media not found' }, { status: 404 });}
 
       return NextResponse.json({ success: true, mediaId, description: data.description ?? '' });
     }
@@ -368,7 +368,7 @@ async function PATCHHandler(req: Request) {
       .eq('category', 'games')
       .select('id,igdb_id,description')
       .single();
-    if (saveError) throw saveError;
+    if (saveError) {throw saveError;}
 
     return NextResponse.json({
       success: true,

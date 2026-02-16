@@ -91,7 +91,7 @@ function renderEmailTemplate(config: EmailTemplateConfig): string {
 }
 
 export function renderConfirmEmail(actionLink: string): string {
-  if (!actionLink) throw new Error('Missing actionLink for confirm email');
+  if (!actionLink) {throw new Error('Missing actionLink for confirm email');}
 
   return renderEmailTemplate({
     preheader: 'Confirm your email address on Hobbistas.',
@@ -107,7 +107,7 @@ export function renderConfirmEmail(actionLink: string): string {
 }
 
 export function renderResetPasswordEmail(actionLink: string): string {
-  if (!actionLink) throw new Error('Missing actionLink for reset password email');
+  if (!actionLink) {throw new Error('Missing actionLink for reset password email');}
 
   return renderEmailTemplate({
     preheader: 'Reset your Hobbistas account password.',

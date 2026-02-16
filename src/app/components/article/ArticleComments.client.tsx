@@ -103,7 +103,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   };
 
   const handleUpdate = async (commentId: number) => {
-    if (!user) return;
+    if (!user) {return;}
     setEditError(null);
     const trimmed = editContent.trim();
     if (!trimmed) {
@@ -134,7 +134,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   };
 
   const handleDelete = async (commentId: number) => {
-    if (!user) return;
+    if (!user) {return;}
     if (!window.confirm('Do you want to delete this comment?')) {
       return;
     }

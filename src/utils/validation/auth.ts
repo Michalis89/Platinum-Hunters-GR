@@ -104,10 +104,15 @@ export function getPasswordStrength(password: string): PasswordStrength {
   }
 
   // Length check
-  if (password.length >= 8) score++;
-  else errors.push('At least 8 characters');
+  if (password.length >= 8) {
+    score++;
+  } else {
+    errors.push('At least 8 characters');
+  }
 
-  if (password.length >= 12) score++;
+  if (password.length >= 12) {
+    score++;
+  }
 
   // Character type checks
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) {
@@ -129,14 +134,20 @@ export function getPasswordStrength(password: string): PasswordStrength {
   }
 
   // Avoid common patterns
-  if (/(012|123|234|345|456|567|678|789|890)/.test(password)) score--;
+  if (/(012|123|234|345|456|567|678|789|890)/.test(password)) {
+    score--;
+  }
+
   if (
     /(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(
       password,
     )
-  )
+  ) {
     score--;
-  if (/(.)\1{2,}/.test(password)) score--; // Repeated characters
+  }
+  if (/(.)\1{2,}/.test(password)) {
+    score--;
+  }
 
   // Clamp score between 0-4
   score = Math.max(0, Math.min(4, score));
@@ -156,9 +167,6 @@ export function getPasswordStrength(password: string): PasswordStrength {
   };
 }
 
-/**
- * Confirm password match
- */
 export function validatePasswordConfirm(
   password: string,
   confirmPassword: string,

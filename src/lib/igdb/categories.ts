@@ -66,7 +66,7 @@ export function isAllowedIgdbGameCandidate(input: {
   name?: string | null;
   slug?: string | null;
 }): boolean {
-  if (isAllowedIgdbCategory(input.category)) return true;
-  if (typeof input.category === 'number') return false;
+  if (isAllowedIgdbCategory(input.category)) {return true;}
+  if (typeof input.category === 'number') {return false;}
   return !isExcludedByTitleOrSlug(input.name, input.slug);
 }

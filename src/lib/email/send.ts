@@ -20,12 +20,12 @@ async function sendEmail(params: {
 
   // In development, log email instead of sending (unless API key is provided)
   if (isDevelopment && (ENABLE_DEV_EMAIL_LOGGING || !process.env.RESEND_API_KEY)) {
-    console.log('\n📧 [DEV EMAIL] Would send email:');
-    console.log('  To:', to);
-    console.log('  Subject:', subject);
-    console.log('  Type:', type);
-    console.log('  HTML:', html.substring(0, 200) + '...');
-    console.log('');
+    console.warn('\n📧 [DEV EMAIL] Would send email:');
+    console.warn('  To:', to);
+    console.warn('  Subject:', subject);
+    console.warn('  Type:', type);
+    console.warn('  HTML:', html.substring(0, 200) + '...');
+    console.warn('');
     return; // Don't actually send in dev mode
   }
 

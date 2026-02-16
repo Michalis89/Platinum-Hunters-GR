@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { Lightbulb, Sparkles } from 'lucide-react';
 import EmptyState from '@/components/ui/empty';
 import MediaSearchResultCard from './MediaSearchResultCard';
-import { MediaEntry, SearchResult } from './types';
+import type { MediaEntry, SearchResult } from './types';
 
 interface SuggestionsPanelProps {
   suggestions: SearchResult[];

@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = Number(searchParams.get('id') ?? 0);
-  if (!id) return NextResponse.json({ ok: false, error: 'Missing id' }, { status: 400 });
+  if (!id) {return NextResponse.json({ ok: false, error: 'Missing id' }, { status: 400 });}
 
   const token = await getIgdbAccessToken();
   const clientId = getIgdbClientId();

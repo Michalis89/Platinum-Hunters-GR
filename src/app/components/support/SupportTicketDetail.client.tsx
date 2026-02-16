@@ -78,7 +78,7 @@ export default function SupportTicketDetail() {
   } | null>(null);
 
   useEffect(() => {
-    if (!ticketId) return;
+    if (!ticketId) {return;}
 
     let ignore = false;
 
@@ -101,7 +101,7 @@ export default function SupportTicketDetail() {
           setError(err instanceof Error ? err.message : 'Something went wrong');
         }
       } finally {
-        if (!ignore) setLoading(false);
+        if (!ignore) {setLoading(false);}
       }
     };
 
@@ -115,7 +115,7 @@ export default function SupportTicketDetail() {
     const map: Record<string, TicketAttachment[]> = {};
     attachments.forEach(item => {
       const key = item.message_id || 'ticket';
-      if (!map[key]) map[key] = [];
+      if (!map[key]) {map[key] = [];}
       map[key].push(item);
     });
     return map;

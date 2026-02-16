@@ -180,8 +180,8 @@ function NewsFallback() {
 
 function buildHref({ category, tag }: { category: ArticleCategory | null; tag: string | null }) {
   const params = new URLSearchParams();
-  if (category) params.set('category', category);
-  if (tag) params.set('tag', tag);
+  if (category) {params.set('category', category);}
+  if (tag) {params.set('tag', tag);}
   const query = params.toString();
   return query ? `/articles?${query}` : '/articles';
 }
@@ -247,8 +247,8 @@ function NewsPageContent() {
 
       try {
         const params = new URLSearchParams();
-        if (category) params.set('category', category);
-        if (tag) params.set('tag', tag);
+        if (category) {params.set('category', category);}
+        if (tag) {params.set('tag', tag);}
         params.set('status', 'published');
         params.set('limit', '20');
 
@@ -263,13 +263,13 @@ function NewsPageContent() {
         );
 
         startTransition(() => {
-          if (!isMounted) return;
+          if (!isMounted) {return;}
           setArticles(filtered);
           setTotal(filtered.length);
           setLoading(false);
         });
       } catch (err) {
-        if (!isMounted) return;
+        if (!isMounted) {return;}
         setError(err instanceof Error ? err.message : 'Something went wrong');
         setLoading(false);
       }

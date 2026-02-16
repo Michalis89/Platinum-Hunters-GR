@@ -134,7 +134,7 @@ export default function AdminSupportTicketDetail() {
           setError(err instanceof Error ? err.message : 'Something went wrong');
         }
       } finally {
-        if (!ignore) setLoading(false);
+        if (!ignore) {setLoading(false);}
       }
     };
 
@@ -151,14 +151,14 @@ export default function AdminSupportTicketDetail() {
     const map: Record<string, TicketAttachment[]> = {};
     attachments.forEach(item => {
       const key = item.message_id || 'ticket';
-      if (!map[key]) map[key] = [];
+      if (!map[key]) {map[key] = [];}
       map[key].push(item);
     });
     return map;
   }, [attachments]);
 
   const handleSave = async () => {
-    if (!ticket) return;
+    if (!ticket) {return;}
     setSaving(true);
     setSaveResult(null);
 
@@ -317,9 +317,9 @@ export default function AdminSupportTicketDetail() {
             <Button
               variant="destructive"
               onClick={async () => {
-                if (deleteLoading) return;
+                if (deleteLoading) {return;}
                 const confirmed = window.confirm('Permanently delete this ticket?');
-                if (!confirmed) return;
+                if (!confirmed) {return;}
                 setDeleteLoading(true);
                 try {
                   const res = await fetch(`/api/admin/support/tickets/${ticket.id}`, {

@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SearchResult } from './types';
+import type { SearchResult } from './types';
 
 interface MediaSearchResultCardProps {
   entry: SearchResult;
@@ -19,7 +19,7 @@ export default function MediaSearchResultCard({
   isInLibrary = false,
 }: Readonly<MediaSearchResultCardProps>) {
   const handleOpenDialog = () => {
-    if (isInLibrary) return;
+    if (isInLibrary) {return;}
     onOpenDialog(entry);
   };
 

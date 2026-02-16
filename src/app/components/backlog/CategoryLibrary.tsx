@@ -30,11 +30,12 @@ import SuggestionsPanel from './SuggestionsPanel';
 import StatusFilterBar from './StatusFilterBar';
 import LibraryEntryList from './LibraryEntryList';
 import type { EditState } from './EntryEditDialog';
-import {
+import type {
   MediaCategory,
   MediaEntry,
   MediaStatus,
-  SearchResult,
+  SearchResult} from './types';
+import {
   isMediaCategory,
   getApiBase,
   supportsExternalApi,
@@ -162,7 +163,7 @@ function categoryLibraryReducer(
     case 'clearAlert':
       return { ...state, alert: null };
     case 'applySelectedEntryDetails': {
-      if (!state.selectedEntry) return state;
+      if (!state.selectedEntry) {return state;}
       const details = action.payload;
       const totalRuntime = state.selectedEntry.totalRuntime ?? details.runtime ?? undefined;
       const totalEpisodes =
@@ -201,27 +202,27 @@ function categoryLibraryReducer(
 // Helper to check if IGDB rate limit is active
 const RATE_LIMIT_KEY = 'igdb_rate_limit_until';
 const isRateLimited = () => {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   const limitUntil = localStorage.getItem(RATE_LIMIT_KEY);
-  if (!limitUntil) return false;
+  if (!limitUntil) {return false;}
   const limitTime = parseInt(limitUntil, 10);
-  if (isNaN(limitTime)) return false;
+  if (isNaN(limitTime)) {return false;}
   return Date.now() < limitTime;
 };
 
 const setRateLimitCooldown = () => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
   // Set cooldown for 24 hours
   const cooldownUntil = Date.now() + 24 * 60 * 60 * 1000;
   localStorage.setItem(RATE_LIMIT_KEY, cooldownUntil.toString());
 };
 
 const getRateLimitResetTime = () => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') {return null;}
   const limitUntil = localStorage.getItem(RATE_LIMIT_KEY);
-  if (!limitUntil) return null;
+  if (!limitUntil) {return null;}
   const limitTime = parseInt(limitUntil, 10);
-  if (isNaN(limitTime)) return null;
+  if (isNaN(limitTime)) {return null;}
   return new Date(limitTime);
 };
 
@@ -365,7 +366,7 @@ export default function CategoryLibrary({
   }, [category, normalizedInitialStatus, normalizedInitialSearch, loadLibraryEntries]);
 
   useEffect(() => {
-    if (ctaMode !== 'create') return;
+    if (ctaMode !== 'create') {return;}
 
     if (!supportsExternal) {
       dispatch({ type: 'patch', payload: { createResults: [] } });
@@ -408,7 +409,7 @@ export default function CategoryLibrary({
   }, [category, createQuery, ctaMode, supportsExternal]);
 
   useEffect(() => {
-    if (ctaMode !== 'suggestions') return;
+    if (ctaMode !== 'suggestions') {return;}
     if (!supportsExternal) {
       dispatch({ type: 'patch', payload: { suggestions: [] } });
       return;
@@ -449,8 +450,8 @@ export default function CategoryLibrary({
     const base = libraryEntries;
     const normalized = search.trim().toLowerCase();
     return base.filter(entry => {
-      if (activeStatus !== 'all' && entry.status !== activeStatus) return false;
-      if (!normalized) return true;
+      if (activeStatus !== 'all' && entry.status !== activeStatus) {return false;}
+      if (!normalized) {return true;}
       return (
         entry.title.toLowerCase().includes(normalized) ||
         entry.subtitle.toLowerCase().includes(normalized) ||
@@ -522,7 +523,7 @@ export default function CategoryLibrary({
             };
           })
           .then(details => {
-            if (!details) return;
+            if (!details) {return;}
             startTransition(() => {
               dispatch({ type: 'applySelectedEntryDetails', payload: details });
             });
@@ -552,7 +553,7 @@ export default function CategoryLibrary({
             };
           })
           .then(details => {
-            if (!details) return;
+            if (!details) {return;}
             startTransition(() => {
               dispatch({
                 type: 'patch',
@@ -578,7 +579,7 @@ export default function CategoryLibrary({
   );
 
   const handleSaveEntry = async (editState: EditState) => {
-    if (!selectedEntry) return;
+    if (!selectedEntry) {return;}
     const progressValue = Number.parseInt(editState.progress, 10);
     const scoreValue = Number.parseFloat(editState.score);
     const nextProgress = Number.isFinite(progressValue) ? progressValue : null;
@@ -889,13 +890,9 @@ export default function CategoryLibrary({
 
       // Step 2: Process batches in a loop
       let isComplete = false;
-      let processBatchCount = 0;
       const allRejectedGames: Array<{ appid: number; name: string; reason: string }> = [];
 
       while (!isComplete) {
-        processBatchCount += 1;
-        console.log(`ðŸ”„ Processing batch ${processBatchCount}...`);
-
         const processResponse = await apiClient.request(
           `/api/integrations/steam/sync/process?jobId=${jobId}`,
           { method: 'POST' },

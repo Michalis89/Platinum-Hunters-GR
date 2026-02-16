@@ -38,8 +38,8 @@ export async function generateMetadata({ searchParams }: NewsPageProps): Promise
       : DEFAULT_DESCRIPTION;
 
   const params = new URLSearchParams();
-  if (category) params.set('category', category);
-  if (topic) params.set('topic', topic);
+  if (category) {params.set('category', category);}
+  if (topic) {params.set('topic', topic);}
 
   const path = params.toString() ? `/articles?${params.toString()}` : '/articles';
 

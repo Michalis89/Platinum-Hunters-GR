@@ -80,7 +80,7 @@ export default function SupportTicketsList() {
   const [categoryFilter, setCategoryFilter] = useState<string>('');
 
   const handleArchiveToggle = async (id: string, archived: boolean) => {
-    if (actionLoading) return;
+    if (actionLoading) {return;}
     setActionLoading(id);
     try {
       const response = await fetch(`/api/support/tickets/${id}`, {
@@ -105,7 +105,7 @@ export default function SupportTicketsList() {
   };
 
   const performDelete = async (id: string) => {
-    if (actionLoading) return;
+    if (actionLoading) {return;}
     setActionLoading(id);
     try {
       const response = await fetch(`/api/support/tickets/${id}`, {
@@ -150,8 +150,8 @@ export default function SupportTicketsList() {
     return tickets
       .filter(ticket => {
         const archivedFlag = ticket.user_archived === true;
-        if (view === 'active') return activeStatuses.includes(ticket.status) && !archivedFlag;
-        if (view === 'archive') return archivedFlag || archivedStatuses.includes(ticket.status);
+        if (view === 'active') {return activeStatuses.includes(ticket.status) && !archivedFlag;}
+        if (view === 'archive') {return archivedFlag || archivedStatuses.includes(ticket.status);}
         return !archivedFlag;
       })
       .filter(ticket => (categoryFilter ? ticket.category === categoryFilter : true));

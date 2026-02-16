@@ -9,7 +9,9 @@ export function validatePlainText(
   value: string | null | undefined,
   fieldLabel: string,
 ): PlainTextValidationResult {
-  if (!value) return { isValid: true };
+  if (!value) {
+    return { isValid: true };
+  }
   if (HTML_ANGLE_PATTERN.test(value)) {
     return {
       isValid: false,
@@ -23,7 +25,9 @@ export function validatePlainTextArray(
   values: string[] | null | undefined,
   fieldLabel: string,
 ): PlainTextValidationResult {
-  if (!values || values.length === 0) return { isValid: true };
+  if (!values || values.length === 0) {
+    return { isValid: true };
+  }
   const invalid = values.find(item => HTML_ANGLE_PATTERN.test(item));
   if (invalid !== undefined) {
     return {

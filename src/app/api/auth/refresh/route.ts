@@ -23,7 +23,7 @@ async function POSTHandler(req: Request) {
     }
 
     if (refresh_token !== existingRefreshToken && process.env.NODE_ENV !== 'production') {
-      console.info('Refresh token rotation detected; updating cookies with the latest token.');
+      console.warn('Refresh token rotation detected; updating cookies with the latest token.');
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -3,7 +3,7 @@
  * PH-30: User Authentication System
  */
 
-import { User } from './user';
+import type { User } from './user';
 
 /**
  * Authentication Session

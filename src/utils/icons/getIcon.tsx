@@ -13,7 +13,7 @@ import {
   LandPlot,
   Gamepad,
 } from 'lucide-react';
-import { JSX } from 'react';
+import type { JSX } from 'react';
 
 export const getIcon = (input: string): JSX.Element => {
   switch (input.toLowerCase()) {

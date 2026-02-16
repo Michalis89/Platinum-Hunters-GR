@@ -161,7 +161,7 @@ export default function SupportForm({}: Readonly<{
   }, [user]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {return;}
     const buildId = (window as { __NEXT_DATA__?: { buildId?: string } }).__NEXT_DATA__?.buildId;
     const ua = navigator.userAgent.toLowerCase();
     const platform = navigator.platform.toLowerCase();
@@ -238,21 +238,21 @@ export default function SupportForm({}: Readonly<{
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
-    if (!formData.subject.trim()) nextErrors.subject = 'Subject is required.';
-    if (!formData.description.trim()) nextErrors.description = 'Message is required.';
-    if (!formData.consent) nextErrors.consent = 'Consent is required to continue.';
+    if (!formData.subject.trim()) {nextErrors.subject = 'Subject is required.';}
+    if (!formData.description.trim()) {nextErrors.description = 'Message is required.';}
+    if (!formData.consent) {nextErrors.consent = 'Consent is required to continue.';}
 
     if (category === 'bug') {
-      if (!formData.steps.trim()) nextErrors.steps = 'Please add steps to reproduce.';
-      if (!formData.expected.trim()) nextErrors.expected = 'Please describe the expected result.';
-      if (!formData.actual.trim()) nextErrors.actual = 'Please describe the actual result.';
-      if (!formData.severity) nextErrors.severity = 'Please select severity.';
+      if (!formData.steps.trim()) {nextErrors.steps = 'Please add steps to reproduce.';}
+      if (!formData.expected.trim()) {nextErrors.expected = 'Please describe the expected result.';}
+      if (!formData.actual.trim()) {nextErrors.actual = 'Please describe the actual result.';}
+      if (!formData.severity) {nextErrors.severity = 'Please select severity.';}
     }
 
     if (category === 'feature') {
-      if (!formData.useCase.trim()) nextErrors.useCase = 'Please describe the use case.';
-      if (!formData.value.trim()) nextErrors.value = 'Please explain the value.';
-      if (!formData.urgency) nextErrors.urgency = 'Please set a priority.';
+      if (!formData.useCase.trim()) {nextErrors.useCase = 'Please describe the use case.';}
+      if (!formData.value.trim()) {nextErrors.value = 'Please explain the value.';}
+      if (!formData.urgency) {nextErrors.urgency = 'Please set a priority.';}
     }
 
     if (category === 'author_rights' && !formData.reason.trim()) {
@@ -268,7 +268,7 @@ export default function SupportForm({}: Readonly<{
     setResult(null);
     setTicketId(null);
 
-    if (!validate()) return;
+    if (!validate()) {return;}
 
     setSubmitting(true);
 

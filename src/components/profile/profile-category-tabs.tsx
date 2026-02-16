@@ -131,7 +131,7 @@ export function ProfileCategoryTabs({
 }: ProfileCategoryTabsProps) {
   const orderedCategories = useMemo(() => {
     const enabled = categories.filter(category => TAB_LABELS[category]);
-    if (!enabled.includes('games')) return enabled;
+    if (!enabled.includes('games')) {return enabled;}
     return ['games', ...enabled.filter(category => category !== 'games')];
   }, [categories]);
 
@@ -991,11 +991,11 @@ export function ProfileCategoryTabs({
                           {};
                         const getPetEntryValue = (type: string, key: string) => {
                           const entry = petEntries[type] || {};
-                          if (entry[key]) return entry[key];
+                          if (entry[key]) {return entry[key];}
                           if (type === String(note.type)) {
-                            if (key === 'name') return String(note.name || '');
-                            if (key === 'breed') return String(note.breed || '');
-                            if (key === 'since') return String(note.since || '');
+                            if (key === 'name') {return String(note.name || '');}
+                            if (key === 'breed') {return String(note.breed || '');}
+                            if (key === 'since') {return String(note.since || '');}
                           }
                           return '';
                         };

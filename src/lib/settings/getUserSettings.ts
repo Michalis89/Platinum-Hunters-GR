@@ -2,7 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/database.types';
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import { USER_SETTINGS_DEFAULTS, UserSettingsData } from './types';
+import type { UserSettingsData } from './types';
+import { USER_SETTINGS_DEFAULTS } from './types';
 
 interface SettingsOptions {
   supabase?: SupabaseClient<Database>;

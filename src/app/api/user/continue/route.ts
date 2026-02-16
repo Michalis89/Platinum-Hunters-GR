@@ -69,14 +69,14 @@ type CountEntry = {
 };
 
 const toTimestamp = (value: string | null | undefined) => {
-  if (!value) return 0;
+  if (!value) {return 0;}
   const parsed = Date.parse(value);
   return Number.isNaN(parsed) ? 0 : parsed;
 };
 
 const compareEntryDates = (a: ContinueEntry, b: ContinueEntry) => {
   const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-  if (updatedDiff !== 0) return updatedDiff;
+  if (updatedDiff !== 0) {return updatedDiff;}
   return toTimestamp(b.created_at) - toTimestamp(a.created_at);
 };
 
@@ -92,7 +92,7 @@ const normalizeSteamCoverForContinue = (
   url: string | null | undefined,
   steamAppId: number | null | undefined,
 ) => {
-  if (!url) return null;
+  if (!url) {return null;}
 
   if (
     steamAppId &&
@@ -251,7 +251,7 @@ async function GETHandler() {
 
     const slides = Array.from(latestByCategory.values()).sort((a, b) => {
       const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-      if (updatedDiff !== 0) return updatedDiff;
+      if (updatedDiff !== 0) {return updatedDiff;}
       return toTimestamp(b.created_at) - toTimestamp(a.created_at);
     });
 
@@ -278,9 +278,9 @@ async function GETHandler() {
 
     for (const entry of (countEntries ?? []) as CountEntry[]) {
       const category = entry.media_items?.category;
-      if (!category || !(category in countsByCategory)) continue;
+      if (!category || !(category in countsByCategory)) {continue;}
 
-      if (!entry.status) continue;
+      if (!entry.status) {continue;}
       const status = entry.status;
       countsByCategory[category].total += 1;
 

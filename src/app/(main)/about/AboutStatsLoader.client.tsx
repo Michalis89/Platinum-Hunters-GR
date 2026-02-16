@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
-import { AboutStats, AboutStatsProps } from '@/app/components/about/AboutStats';
+import type { AboutStatsProps } from '@/app/components/about/AboutStats';
+import { AboutStats } from '@/app/components/about/AboutStats';
 
 const EMPTY_STATS: AboutStatsProps = {
   totalUsers: 0,

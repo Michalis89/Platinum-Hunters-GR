@@ -1,4 +1,4 @@
-import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import type { Database } from '@/lib/supabase/database.types';
 
 type SupabaseClient = Awaited<ReturnType<typeof createRouteHandlerClient>>;

@@ -324,7 +324,7 @@ function normalizeTasteProfileLabels(item: CategoryTasteProfileItem): string[] {
 
   for (const value of source) {
     const label = value?.trim().replace(/\s+/g, ' ').toLowerCase();
-    if (!label) continue;
+    if (!label) {continue;}
     normalized.add(label);
   }
 
@@ -339,14 +339,14 @@ function normalizeBucketLabels(item: CategoryTasteProfileItem, bucket: InsightTa
       bucket,
       value?.trim().replace(/\s+/g, ' ').toLowerCase() ?? '',
     );
-    if (!label) continue;
+    if (!label) {continue;}
     normalized.add(label);
   }
   return Array.from(normalized);
 }
 
 function canonicalizeBucketLabel(bucket: InsightTagBucket, label: string): string {
-  if (!label) return '';
+  if (!label) {return '';}
   if (bucket === 'subgenre') {
     const normalizedKey = label.replace(/[_\s]+/g, '-').replace(/-+/g, '-');
     if (normalizedKey === 'role-playing-game' || normalizedKey === 'rpg') {
@@ -354,7 +354,7 @@ function canonicalizeBucketLabel(bucket: InsightTagBucket, label: string): strin
     }
     return label;
   }
-  if (bucket !== 'structure') return label;
+  if (bucket !== 'structure') {return label;}
 
   const compact = label.replace(/[_\s]+/g, '-');
   if (/^(third|3rd)-person(?:-[a-z0-9]+)*$/.test(compact)) {
@@ -365,22 +365,22 @@ function canonicalizeBucketLabel(bucket: InsightTagBucket, label: string): strin
 }
 
 function extractTasteTagLabelsFromMediaTags(tags: unknown): string[] {
-  if (!Array.isArray(tags)) return [];
+  if (!Array.isArray(tags)) {return [];}
 
   const result: string[] = [];
   for (const entry of tags) {
     if (typeof entry === 'string') {
       const label = entry.trim();
-      if (label) result.push(label);
+      if (label) {result.push(label);}
       continue;
     }
 
-    if (!entry || typeof entry !== 'object') continue;
+    if (!entry || typeof entry !== 'object') {continue;}
     const tag = entry as Record<string, unknown>;
     const bucket = tag.bucket;
     const type = tag.type;
-    if (bucket === 'playstyle' || bucket === 'noise' || bucket === 'unknown') continue;
-    if (type === 'noise' || type === 'playstyle') continue;
+    if (bucket === 'playstyle' || bucket === 'noise' || bucket === 'unknown') {continue;}
+    if (type === 'noise' || type === 'playstyle') {continue;}
 
     const name =
       typeof tag.name === 'string' && tag.name.trim()
@@ -388,7 +388,7 @@ function extractTasteTagLabelsFromMediaTags(tags: unknown): string[] {
         : typeof tag.slug === 'string' && tag.slug.trim()
           ? tag.slug.trim()
           : '';
-    if (name) result.push(name);
+    if (name) {result.push(name);}
   }
 
   return Array.from(new Set(result));
@@ -398,7 +398,7 @@ function formatTasteProfileLabel(label: string): string {
   if (label === TASTE_PROFILE_UNKNOWN_GENRE_KEY || label === TASTE_PROFILE_UNKNOWN_BUCKET_KEY) {
     return 'Unknown';
   }
-  if (label === 'rpg') return 'RPG';
+  if (label === 'rpg') {return 'RPG';}
 
   return label.replace(/\b\w/g, char => char.toUpperCase());
 }
@@ -543,7 +543,7 @@ export function buildTasteProfile(
     ? []
     : Array.from(genreWeightSums.entries())
         .sort((a, b) => {
-          if (b[1] !== a[1]) return b[1] - a[1];
+          if (b[1] !== a[1]) {return b[1] - a[1];}
           return a[0].localeCompare(b[0]);
         })
         .slice(0, DEFAULT_TASTE_PROFILE_TOP_GENRES)
@@ -560,7 +560,7 @@ export function buildTasteProfile(
           acc[bucket] = Array.from(bucketWeightSums[bucket].entries())
             .filter(([name]) => name !== TASTE_PROFILE_UNKNOWN_BUCKET_KEY)
             .sort((a, b) => {
-              if (b[1] !== a[1]) return b[1] - a[1];
+              if (b[1] !== a[1]) {return b[1] - a[1];}
               return a[0].localeCompare(b[0]);
             })
             .slice(0, DEFAULT_TASTE_PROFILE_TOP_BUCKET_TRAITS)
@@ -642,7 +642,7 @@ export async function fetchCategoryDashboardData(
 
   await Promise.all(
     requestedCategories.map(async (category, index) => {
-      if (category !== 'games') return;
+      if (category !== 'games') {return;}
       const entries = entryResults[index] ?? [];
       const mediaIds = entries
         .map(entry => entry.media_items?.id)
@@ -680,7 +680,7 @@ async function fetchGameInsightTagMap(
   supabase: DashboardSupabaseClient,
   mediaIds: number[],
 ): Promise<Map<number, Partial<Record<InsightTagBucket, string[]>>>> {
-  if (mediaIds.length === 0) return new Map();
+  if (mediaIds.length === 0) {return new Map();}
   const uniqueMediaIds = Array.from(new Set(mediaIds));
   const { data, error } = await supabase
     .from('media_items')
@@ -692,7 +692,7 @@ async function fetchGameInsightTagMap(
   }
 
   const normalizeArray = (input: unknown): string[] => {
-    if (!Array.isArray(input)) return [];
+    if (!Array.isArray(input)) {return [];}
     return Array.from(
       new Set(input.map(item => (typeof item === 'string' ? item.trim() : '')).filter(Boolean)),
     );
@@ -701,7 +701,7 @@ async function fetchGameInsightTagMap(
   const result = new Map<number, Partial<Record<InsightTagBucket, string[]>>>();
   for (const row of data as unknown as Array<Record<string, unknown>>) {
     const id = typeof row.id === 'number' ? row.id : null;
-    if (!id) continue;
+    if (!id) {continue;}
 
     const genres = normalizeArray(row.genres);
     const themes = normalizeArray(row.igdb_themes);
@@ -830,7 +830,7 @@ function getCover(media: NonNullable<CategoryEntryRow['media_items']>): string {
 
 function deriveSubtitle(entry: CategoryEntryRow, category: DashboardCategoryKey): string {
   const media = entry.media_items;
-  if (!media) return CATEGORY_LABELS[category];
+  if (!media) {return CATEGORY_LABELS[category];}
   const genre = (media.genres ?? []).find(Boolean);
   const tag = (media.tags ?? []).find(Boolean);
   const format = media.format;
@@ -893,7 +893,7 @@ function getCategoryTotal(
 }
 
 function formatRelativeDistance(timestamp?: string | null): string {
-  if (!timestamp) return 'Recently';
+  if (!timestamp) {return 'Recently';}
   return formatDistanceToNowStrict(new Date(timestamp), { addSuffix: true });
 }
 
@@ -1025,7 +1025,7 @@ function ensureFourSpotlights(
   const picked: CategorySpotlightCard[] = [];
   const seen = new Set<string>();
   for (const card of cards) {
-    if (seen.has(card.id)) continue;
+    if (seen.has(card.id)) {continue;}
     seen.add(card.id);
     picked.push(card);
     if (picked.length === 4) {
@@ -1061,8 +1061,8 @@ function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightP
     const current = platformMap.get(platform) ?? { total: 0, completed: 0, dropped: 0 };
 
     current.total += 1;
-    if (entry.status === 'completed') current.completed += 1;
-    if (entry.status === 'dropped') current.dropped += 1;
+    if (entry.status === 'completed') {current.completed += 1;}
+    if (entry.status === 'dropped') {current.dropped += 1;}
 
     platformMap.set(platform, current);
   }
@@ -1076,8 +1076,8 @@ function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightP
       completionRate: counts.total > 0 ? Math.round((counts.completed / counts.total) * 100) : 0,
     }))
     .sort((a, b) => {
-      if (b.completionRate !== a.completionRate) return b.completionRate - a.completionRate;
-      if (b.total !== a.total) return b.total - a.total;
+      if (b.completionRate !== a.completionRate) {return b.completionRate - a.completionRate;}
+      if (b.total !== a.total) {return b.total - a.total;}
       return a.platform.localeCompare(b.platform);
     });
 
@@ -1092,14 +1092,14 @@ function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightP
   }
 
   const best = [...comparableRows].sort((a, b) => {
-    if (b.completionRate !== a.completionRate) return b.completionRate - a.completionRate;
-    if (b.total !== a.total) return b.total - a.total;
+    if (b.completionRate !== a.completionRate) {return b.completionRate - a.completionRate;}
+    if (b.total !== a.total) {return b.total - a.total;}
     return a.platform.localeCompare(b.platform);
   })[0];
 
   const worst = [...comparableRows].sort((a, b) => {
-    if (a.completionRate !== b.completionRate) return a.completionRate - b.completionRate;
-    if (b.total !== a.total) return b.total - a.total;
+    if (a.completionRate !== b.completionRate) {return a.completionRate - b.completionRate;}
+    if (b.total !== a.total) {return b.total - a.total;}
     return a.platform.localeCompare(b.platform);
   })[0];
 
@@ -1130,7 +1130,7 @@ function buildGameSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard
     .sort((a, b) => b.percent - a.percent)[0];
 
   const stale = current.find(entry => {
-    if (!entry.updated_at) return false;
+    if (!entry.updated_at) {return false;}
     return new Date(entry.updated_at) < subDays(new Date(), 14);
   });
 
@@ -1220,12 +1220,12 @@ function buildBookSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard
   const recent = completed[0];
 
   const seriesReminder = entries.find(entry => {
-    if (!entry.media_items) return false;
+    if (!entry.media_items) {return false;}
     const totalVolumes =
       entry.media_items.volumes ??
       entry.media_items.chapters ??
       (entry.media_items.page_count ? Math.ceil(entry.media_items.page_count / 220) : undefined);
-    if (!totalVolumes || !entry.progress) return false;
+    if (!totalVolumes || !entry.progress) {return false;}
     return entry.progress < totalVolumes;
   });
 
@@ -1408,9 +1408,9 @@ function buildMangaSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
 
   const catchUp = current.find(entry => {
     const media = entry.media_items;
-    if (!media) return false;
+    if (!media) {return false;}
     const totalVolumes = media.volumes ?? media.chapters ?? 0;
-    if (!entry.progress) return false;
+    if (!entry.progress) {return false;}
     return totalVolumes > entry.progress;
   });
 
@@ -1423,7 +1423,7 @@ function buildMangaSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
     .sort((a, b) => b.percent - a.percent)[0];
 
   const hiatus = current.find(entry => {
-    if (!entry.updated_at) return false;
+    if (!entry.updated_at) {return false;}
     return new Date(entry.updated_at) < subDays(new Date(), 21);
   });
 
@@ -1514,7 +1514,7 @@ function buildMovieSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
 
   const watchNext = planned
     .filter(entry => {
-      if (!entry.created_at) return false;
+      if (!entry.created_at) {return false;}
       return new Date(entry.created_at) >= subDays(new Date(), 14);
     })
     .sort((a, b) => Number(new Date(b.created_at!)) - Number(new Date(a.created_at!)))[0];
@@ -1523,7 +1523,7 @@ function buildMovieSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCar
   completed.forEach(entry => {
     const studios = entry.media_items?.studios ?? [];
     studios.forEach(studio => {
-      if (!studio) return;
+      if (!studio) {return;}
       studioCounts[studio] = (studioCounts[studio] ?? 0) + 1;
     });
   });
@@ -1629,7 +1629,7 @@ function buildTvSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[]
   const serviceCounts: Record<string, number> = {};
   completed.forEach(entry => {
     const service = entry.selected_platform?.trim() ?? entry.media_items?.platforms?.find(Boolean);
-    if (!service) return;
+    if (!service) {return;}
     serviceCounts[service] = (serviceCounts[service] ?? 0) + 1;
   });
 
@@ -1712,7 +1712,7 @@ function buildCompletionByGenre(entries: CategoryEntryRow[]): DropPattern {
   entries.forEach(entry => {
     const genres = entry.media_items?.genres ?? [];
     const genre = genres[0];
-    if (!genre) return;
+    if (!genre) {return;}
     const data = buckets[genre] ?? { total: 0, completed: 0 };
     data.total += 1;
     if (entry.status === 'completed') {
@@ -1769,7 +1769,7 @@ function buildCategoryChart(
 
 function entryHasEpisodes(entry: CategoryEntryRow, category: DashboardCategoryKey): boolean {
   const media = entry.media_items;
-  if (!media) return false;
+  if (!media) {return false;}
   if (category === 'anime') {
     return Boolean(media.number_of_episodes ?? media.episodes);
   }
@@ -1792,7 +1792,7 @@ function buildDropPattern(entries: CategoryEntryRow[]): DropPattern {
   for (const entry of entries) {
     const media = entry.media_items;
     const genres = media?.genres ?? [];
-    if (!genres.length) continue;
+    if (!genres.length) {continue;}
     const genre = genres[0];
     const data = buckets[genre] ?? { completed: 0, dropped: 0 };
     if (entry.status === 'completed') {
@@ -1859,7 +1859,7 @@ function areTitlesSimilar(title1: string, title2: string): boolean {
   const normalized2 = normalizeTitle(title2);
 
   // Exact match after normalization
-  if (normalized1 === normalized2) return true;
+  if (normalized1 === normalized2) {return true;}
 
   // One is substring of the other (e.g., "Dark Souls II" in "Dark Souls II Scholar")
   const longer = normalized1.length > normalized2.length ? normalized1 : normalized2;
@@ -1981,7 +1981,7 @@ function checkSeriesPrerequisites(
 
     for (const entry of userEntries) {
       const media = entry.media_items;
-      if (!media) continue;
+      if (!media) {continue;}
 
       const entryTitle =
         media.title ??
@@ -1991,7 +1991,7 @@ function checkSeriesPrerequisites(
         media.original_title ??
         '';
 
-      if (!entryTitle) continue;
+      if (!entryTitle) {continue;}
 
       // Check if this entry matches the previous game in the series
       const entrySeriesInfo = detectSeries(entryTitle);
@@ -2078,17 +2078,17 @@ function generateBacklogReason(
 
   for (const entry of userEntries) {
     const entryMedia = entry.media_items;
-    if (!entryMedia) continue;
+    if (!entryMedia) {continue;}
 
     // ONLY count games you've actually played (completed or current)
     // Skip planned (0 hours) and dropped games
-    if (entry.status === 'planned') continue; // Skip backlog items - not played yet!
-    if (entry.status === 'dropped') continue; // Skip dropped games
+    if (entry.status === 'planned') {continue;} // Skip backlog items - not played yet!
+    if (entry.status === 'dropped') {continue;} // Skip dropped games
 
     // Weight completed and favorite games more heavily
     let weight = 1;
-    if (entry.status === 'completed') weight = 3;
-    if (entry.is_favorite) weight = 4;
+    if (entry.status === 'completed') {weight = 3;}
+    if (entry.is_favorite) {weight = 4;}
 
     // Factor in hours played (progress) - more hours = more engagement
     const hours = Math.max(0, entry.progress ?? 0);
@@ -2099,14 +2099,14 @@ function generateBacklogReason(
 
     // Count genres
     for (const genre of entryMedia.genres ?? []) {
-      if (!genre) continue;
+      if (!genre) {continue;}
       genreCounts.set(genre, (genreCounts.get(genre) ?? 0) + weight);
     }
 
     // Count tags (limit to avoid noise)
     const entryTags = (entryMedia.tags ?? []).slice(0, 5);
     for (const tag of entryTags) {
-      if (!tag) continue;
+      if (!tag) {continue;}
       tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + weight);
     }
   }
@@ -2218,7 +2218,7 @@ function safeDebugJson(value: unknown): string {
     return JSON.stringify(
       value,
       (_key, val) => {
-        if (typeof val === 'string') return truncateDebugString(val, 180);
+        if (typeof val === 'string') {return truncateDebugString(val, 180);}
         return val;
       },
       2,
@@ -2228,31 +2228,24 @@ function safeDebugJson(value: unknown): string {
   }
 }
 
-function dbg(...args: unknown[]) {
-  if (!DASHBOARD_SUGGESTIONS_DEBUG) return;
-  console.log('[DashboardSuggestionsDebug]', ...args);
-}
+function dbg(..._args: unknown[]) {}
 
-function dbgTable(label: string, rows: Array<Record<string, unknown>>) {
-  if (!DASHBOARD_SUGGESTIONS_DEBUG) return;
-  console.log(`[DashboardSuggestionsDebug] ${label} (rows=${rows.length})`);
-  console.table(rows);
-}
+function dbgTable(_label: string, _rows: Array<Record<string, unknown>>) {}
 
 function toSafeListPreview(values: string[], max = 5): string[] {
   return values.slice(0, max).map(value => truncateDebugString(value, 120));
 }
 
 function formatTagsForDebug(tags: unknown): string {
-  if (!Array.isArray(tags)) return '';
+  if (!Array.isArray(tags)) {return '';}
   const values: string[] = [];
   for (const tag of tags) {
     if (typeof tag === 'string') {
       const value = tag.trim();
-      if (value) values.push(value);
+      if (value) {values.push(value);}
       continue;
     }
-    if (!tag || typeof tag !== 'object') continue;
+    if (!tag || typeof tag !== 'object') {continue;}
     const record = tag as Record<string, unknown>;
     const value =
       typeof record.name === 'string' && record.name.trim()
@@ -2260,7 +2253,7 @@ function formatTagsForDebug(tags: unknown): string {
         : typeof record.slug === 'string' && record.slug.trim()
           ? record.slug.trim()
           : '';
-    if (value) values.push(value);
+    if (value) {values.push(value);}
   }
   return Array.from(new Set(values)).join(', ');
 }
@@ -2277,7 +2270,7 @@ function resolveCandidateTitle(candidate: CandidateItem): string {
 }
 
 function isTargetTitleMatch(title: string): boolean {
-  if (!DASHBOARD_SUGGESTIONS_TARGET_TITLE) return false;
+  if (!DASHBOARD_SUGGESTIONS_TARGET_TITLE) {return false;}
   return title.toLowerCase().includes(DASHBOARD_SUGGESTIONS_TARGET_TITLE.toLowerCase());
 }
 
@@ -2323,7 +2316,7 @@ function analyzeUserPreferences(
 
   for (const entry of entries) {
     const media = entry.media_items;
-    if (!media) continue;
+    if (!media) {continue;}
 
     const genres = media.genres ?? [];
     const isDropped = entry.status === 'dropped';
@@ -2362,7 +2355,7 @@ function analyzeUserPreferences(
 
     // Count genres (can be negative for dropped)
     for (const genre of genres) {
-      if (!genre) continue;
+      if (!genre) {continue;}
       genreWeights.set(genre, (genreWeights.get(genre) ?? 0) + weight);
     }
 
@@ -2445,7 +2438,7 @@ function scoreCandidateItem(candidate: CandidateItem, preferences: UserPreferenc
     let tagScore = 0;
     for (const tag of candidateTags) {
       const weight = preferences.favoriteTags.get(tag) ?? 0;
-      if (weight > 0) tagScore += weight;
+      if (weight > 0) {tagScore += weight;}
     }
     score += tagScore * 0.2;
 
@@ -2488,7 +2481,7 @@ function scoreCandidateItem(candidate: CandidateItem, preferences: UserPreferenc
   }
 
   // Normalize to 0-1 range
-  if (maxScore <= 0) return 0;
+  if (maxScore <= 0) {return 0;}
   return Math.max(0, Math.min(1, score / maxScore));
 }
 
@@ -2665,7 +2658,7 @@ function scoreCandidateItemGames(
     .sort((a, b) => {
       const bucketPriorityA = a.bucket === 'subgenre' ? 1 : 0;
       const bucketPriorityB = b.bucket === 'subgenre' ? 1 : 0;
-      if (bucketPriorityB !== bucketPriorityA) return bucketPriorityB - bucketPriorityA;
+      if (bucketPriorityB !== bucketPriorityA) {return bucketPriorityB - bucketPriorityA;}
       return b.weightedScore - a.weightedScore;
     });
 
@@ -2697,10 +2690,10 @@ function buildGameRecommendationReason(contributors: GameSuggestionContributor[]
 
   for (const contributor of contributors) {
     const key = `${contributor.bucket}:${contributor.label}`;
-    if (uniqueByLabel.has(key)) continue;
+    if (uniqueByLabel.has(key)) {continue;}
     uniqueByLabel.add(key);
     selected.push(formatTasteProfileLabel(contributor.label));
-    if (selected.length >= 2) break;
+    if (selected.length >= 2) {break;}
   }
 
   if (selected.length === 0) {
@@ -2823,7 +2816,7 @@ async function buildMediaSuggestions(
     const sortedBacklog = backlogEntries.sort((a, b) => {
       const priorityA = (a as unknown as { priority?: number }).priority ?? 0;
       const priorityB = (b as unknown as { priority?: number }).priority ?? 0;
-      if (priorityA !== priorityB) return priorityB - priorityA;
+      if (priorityA !== priorityB) {return priorityB - priorityA;}
       const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
       const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
       return dateB - dateA;
@@ -2831,10 +2824,10 @@ async function buildMediaSuggestions(
 
     // Take up to 2 from backlog, but filter out sequels without prerequisites
     for (const entry of sortedBacklog) {
-      if (suggestions.length >= maxBacklogSuggestions) break;
+      if (suggestions.length >= maxBacklogSuggestions) {break;}
 
       const media = entry.media_items;
-      if (!media) continue;
+      if (!media) {continue;}
 
       const title =
         media.title ??
@@ -2898,9 +2891,9 @@ async function buildMediaSuggestions(
   for (const entry of userEntries) {
     const genres = entry.media_items?.genres ?? [];
     for (const genre of genres) {
-      if (!genre) continue;
+      if (!genre) {continue;}
       const key = normalizeGenreKey(genre);
-      if (!key) continue;
+      if (!key) {continue;}
       if (entry.status === 'dropped') {
         droppedGenreCounts.set(key, (droppedGenreCounts.get(key) ?? 0) + 1);
         continue;
@@ -2969,7 +2962,7 @@ async function buildMediaSuggestions(
               };
             }
           ).media_items;
-          if (!media) return null;
+          if (!media) {return null;}
           return (
             media.title ??
             media.title_english ??
@@ -3065,7 +3058,7 @@ async function buildMediaSuggestions(
           >();
           for (const row of popularityRows ?? []) {
             const mediaId = (row as { media_id: number | null }).media_id;
-            if (typeof mediaId !== 'number') continue;
+            if (typeof mediaId !== 'number') {continue;}
             const stats = popularityByMediaId.get(mediaId) ?? {
               tracked: 0,
               completed: 0,
@@ -3290,7 +3283,7 @@ async function buildMediaSuggestions(
 
           // 6. Build external suggestion objects (skip similar titles)
           for (const { candidate, score, gameContributors, popularity } of scoredCandidates) {
-            if (suggestions.length >= maxSuggestions) break;
+            if (suggestions.length >= maxSuggestions) {break;}
 
             const title =
               candidate.title ??

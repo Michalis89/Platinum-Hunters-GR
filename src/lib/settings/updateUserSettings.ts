@@ -3,7 +3,7 @@ import type { Database } from '@/lib/supabase/database.types';
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { getUserSettings } from './getUserSettings';
-import { UserSettingsData, UserSettingsUpdate, UserSettingsValue } from './types';
+import type { UserSettingsData, UserSettingsUpdate, UserSettingsValue } from './types';
 
 interface SettingsOptions {
   supabase?: SupabaseClient<Database>;

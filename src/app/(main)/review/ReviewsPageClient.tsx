@@ -181,8 +181,8 @@ function ReviewsFallback() {
 
 function buildHref({ category, tag }: { category: ArticleCategory | null; tag: string | null }) {
   const params = new URLSearchParams();
-  if (category) params.set('category', category);
-  if (tag) params.set('tag', tag);
+  if (category) {params.set('category', category);}
+  if (tag) {params.set('tag', tag);}
   const query = params.toString();
   return query ? `/review?${query}` : '/review';
 }
@@ -248,8 +248,8 @@ function ReviewsPageContent() {
 
       try {
         const params = new URLSearchParams();
-        if (category) params.set('category', category);
-        if (tag) params.set('tag', tag);
+        if (category) {params.set('category', category);}
+        if (tag) {params.set('tag', tag);}
         params.set('topic', 'reviews');
         params.set('status', 'published');
         params.set('limit', '20');
@@ -264,13 +264,13 @@ function ReviewsPageContent() {
         const metaTotal = data.meta?.total || 0;
 
         startTransition(() => {
-          if (!isMounted) return;
+          if (!isMounted) {return;}
           setArticles(payload);
           setTotal(metaTotal);
           setLoading(false);
         });
       } catch (err) {
-        if (!isMounted) return;
+        if (!isMounted) {return;}
         setError(err instanceof Error ? err.message : 'Something went wrong');
         setLoading(false);
       }

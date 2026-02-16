@@ -32,7 +32,9 @@ async function redirectWithClear(
   const category = oauthCategory === 'manga' ? 'manga' : 'anime';
   const url = buildBacklogRedirect(req.url, status, category);
   if (extra) {
-    for (const [k, v] of Object.entries(extra)) url.searchParams.set(k, v);
+    for (const [k, v] of Object.entries(extra)) {
+      url.searchParams.set(k, v);
+    }
   }
 
   const res = NextResponse.redirect(url.toString());
@@ -139,7 +141,7 @@ async function GETHandler(req: Request) {
       return await redirectWithClear(req, 'error', { mal_reason: 'integration_upsert_failed' });
     }
 
-    console.log('MAL callback: success', { userId: session.user.id, scopes, expiresAt });
+    console.warn('MAL callback: success', { userId: session.user.id, scopes, expiresAt });
     return await redirectWithClear(req, 'success');
   } catch (error) {
     if (error instanceof UnauthorizedError) {

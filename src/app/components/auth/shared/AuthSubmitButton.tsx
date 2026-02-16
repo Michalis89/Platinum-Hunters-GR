@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import type { VariantProps } from 'class-variance-authority';
-import { buttonVariants } from '@/components/ui/button';
+import type { buttonVariants } from '@/components/ui/button';
 
 type AuthSubmitButtonProps = Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,

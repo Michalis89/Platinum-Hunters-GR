@@ -6,9 +6,10 @@ import { fetchUserStats, fetchContinueData } from '@/lib/dashboard/server-data';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { PageContainer } from '@/app/components/layout';
 import { getUserSettings } from '@/lib/settings';
+import type {
+  DashboardCategoryKey} from '@/lib/dashboard/category-data';
 import {
   DASHBOARD_TAB_CATEGORIES,
-  DashboardCategoryKey,
   fetchCategoryDashboardData,
 } from '@/lib/dashboard/category-data';
 

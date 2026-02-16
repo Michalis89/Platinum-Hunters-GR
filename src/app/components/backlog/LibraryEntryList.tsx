@@ -7,7 +7,7 @@ import { Spinner } from '@/components/ui/spinner';
 import EmptyState from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';
 import LibraryEntryRow from './LibraryEntryRow';
-import { MediaCategory, MediaEntry, SearchResult } from './types';
+import type { MediaCategory, MediaEntry, SearchResult } from './types';
 
 interface LibraryEntryListProps {
   category: MediaCategory;
@@ -67,7 +67,7 @@ function LibraryEntryList({
         <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map(virtualItem => {
             const entry = entries[virtualItem.index];
-            if (!entry) return null;
+            if (!entry) {return null;}
 
             return (
               <div

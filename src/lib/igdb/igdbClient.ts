@@ -29,17 +29,17 @@ export async function igdbPost(endpoint: string, body: string): Promise<unknown>
 }
 
 export function igdbImage(imageId: string | null | undefined, size: string): string | null {
-  if (!imageId) return null;
+  if (!imageId) {return null;}
   return `https://images.igdb.com/igdb/image/upload/${size}/${imageId}.jpg`;
 }
 
 export function normalizeHttpsUrl(value: string | null | undefined): string | null {
-  if (!value) return null;
-  if (value.startsWith('//')) return `https:${value}`;
+  if (!value) {return null;}
+  if (value.startsWith('//')) {return `https:${value}`;}
   return value;
 }
 
 export function unixToDate(value: number | null | undefined): Date | null {
-  if (!Number.isFinite(value)) return null;
+  if (!Number.isFinite(value)) {return null;}
   return new Date(Number(value) * 1000);
 }

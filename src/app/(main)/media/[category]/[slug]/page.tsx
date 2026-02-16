@@ -66,7 +66,7 @@ const foldPossessiveSlug = (value: string) => value.replace(/([a-z0-9])-s-(?=[a-
 
 const buildSlugCandidates = (value: string): string[] => {
   const canonical = toCanonicalSlug(value);
-  if (!canonical) return [];
+  if (!canonical) {return [];}
 
   const folded = foldPossessiveSlug(canonical);
   return Array.from(new Set([canonical, folded].filter(Boolean)));
@@ -95,15 +95,15 @@ const collectCandidateSlugs = (item: MediaItem): string[] => {
 
 const scoreSlugMatch = (target: string, item: MediaItem): number => {
   const slugs = collectCandidateSlugs(item);
-  if (slugs.includes(target)) return 1000;
+  if (slugs.includes(target)) {return 1000;}
 
   const prefixVariant = slugs.some(
     slug => slug.startsWith(`${target}-`) || target.startsWith(`${slug}-`),
   );
-  if (prefixVariant) return 700;
+  if (prefixVariant) {return 700;}
 
   const includesVariant = slugs.some(slug => slug.includes(target) || target.includes(slug));
-  if (includesVariant) return 500;
+  if (includesVariant) {return 500;}
 
   return 0;
 };
@@ -139,7 +139,7 @@ const fetchPublishedMediaItemCached = unstable_cache(
 
         const { data, error } = await query.eq('id', id).maybeSingle();
 
-        if (error) throw error;
+        if (error) {throw error;}
         return data as MediaItem | null;
       };
 
@@ -156,22 +156,22 @@ const fetchPublishedMediaItemCached = unstable_cache(
 
         if (category === 'anime' || category === 'manga') {
           const numericId = Number(externalId);
-          if (!Number.isFinite(numericId)) return null;
+          if (!Number.isFinite(numericId)) {return null;}
           query = query.eq('mal_id', numericId);
         } else if (category === 'movies' || category === 'tv') {
           const numericId = Number(externalId);
-          if (!Number.isFinite(numericId)) return null;
+          if (!Number.isFinite(numericId)) {return null;}
           query = query.eq('tmdb_id', numericId);
         } else if (category === 'games') {
           const numericId = Number(externalId);
-          if (!Number.isFinite(numericId)) return null;
+          if (!Number.isFinite(numericId)) {return null;}
           query = query.eq('igdb_id', numericId);
         } else if (category === 'books') {
           query = query.eq('google_books_id', String(externalId));
         }
 
         const { data, error } = await query.maybeSingle();
-        if (error) throw error;
+        if (error) {throw error;}
         return data as MediaItem | null;
       };
 
@@ -180,7 +180,7 @@ const fetchPublishedMediaItemCached = unstable_cache(
         const slugCandidates = buildSlugCandidates(slug);
         const canonicalSlug = slugCandidates[0] ?? '';
         const slugText = escapeLike(slug.replace(/[-_]/g, ' ').trim());
-        if (!canonicalSlug && !slugText) return null;
+        if (!canonicalSlug && !slugText) {return null;}
 
         if (isGamesCategory && slugCandidates.length > 0) {
           const { data: exactMatches, error: exactError } = await supabase
@@ -191,7 +191,7 @@ const fetchPublishedMediaItemCached = unstable_cache(
             .in('igdb_slug', slugCandidates)
             .limit(10);
 
-          if (exactError) throw exactError;
+          if (exactError) {throw exactError;}
           const exactRows = Array.isArray(exactMatches)
             ? (exactMatches as unknown as MediaItem[])
             : [];
@@ -245,7 +245,7 @@ const fetchPublishedMediaItemCached = unstable_cache(
           )
           .limit(25);
 
-        if (error) throw error;
+        if (error) {throw error;}
         const rows = Array.isArray(data) ? (data as unknown as MediaItem[]) : [];
 
         // Filter by status after fetching - only for non-anime/manga categories
@@ -253,7 +253,7 @@ const fetchPublishedMediaItemCached = unstable_cache(
           ? rows // Don't filter anime/manga by status
           : rows.filter(row => row.status === 'published' || row.status === null);
 
-        if (filteredRows.length === 0) return null;
+        if (filteredRows.length === 0) {return null;}
 
         const ranked = filteredRows
           .map(item => ({ item, score: scoreSlugMatch(canonicalSlug, item) }))
@@ -265,12 +265,12 @@ const fetchPublishedMediaItemCached = unstable_cache(
       if (isNumeric(slug)) {
         const numericId = Number(slug);
         const byId = await fetchById(numericId);
-        if (byId) return byId;
+        if (byId) {return byId;}
         return fetchByExternalId(numericId);
       }
 
       const bySlug = await fetchBySlug();
-      if (bySlug) return bySlug;
+      if (bySlug) {return bySlug;}
       return fetchByExternalId(slug);
     } catch (error) {
       console.error('Failed to fetch media item for detail page:', error);

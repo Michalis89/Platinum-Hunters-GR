@@ -49,15 +49,15 @@ const mapLocalItem = (item: SearchLocalItem) => {
 };
 
 const normalizeImage = (url?: string) => {
-  if (!url) return null;
+  if (!url) {return null;}
   return url.startsWith('http://') ? url.replace('http://', 'https://') : url;
 };
 
 const normalizeDate = (value?: string) => {
-  if (!value) return null;
-  if (/^\d{4}$/.test(value)) return `${value}-01-01`;
-  if (/^\d{4}-\d{2}$/.test(value)) return `${value}-01`;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  if (!value) {return null;}
+  if (/^\d{4}$/.test(value)) {return `${value}-01-01`;}
+  if (/^\d{4}-\d{2}$/.test(value)) {return `${value}-01`;}
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {return value;}
   return null;
 };
 

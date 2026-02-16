@@ -155,7 +155,7 @@ export default function EditArticleDialog({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {return;}
     initialCategoryRef.current = article.category;
     setCategory(article.category);
     setTopic(article.topic);
@@ -171,7 +171,7 @@ export default function EditArticleDialog({
   }, [article, isOpen]);
 
   useEffect(() => {
-    if (!category) return;
+    if (!category) {return;}
     if (category !== initialCategoryRef.current) {
       setTopic('articles');
     }
@@ -188,7 +188,7 @@ export default function EditArticleDialog({
   const handleCoverFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
-    if (!file) return;
+    if (!file) {return;}
 
     setCoverUploadError(null);
     setIsCoverUploading(true);

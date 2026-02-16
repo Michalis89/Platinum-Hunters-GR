@@ -7,7 +7,7 @@ let cache: TokenCache | null = null;
 
 function assertEnv(name: string): string {
   const v = process.env[name];
-  if (!v) throw new Error(`Missing env var: ${name}`);
+  if (!v) {throw new Error(`Missing env var: ${name}`);}
   return v;
 }
 
@@ -15,7 +15,7 @@ export async function getIgdbAccessToken(): Promise<string> {
   const now = Date.now();
 
   // 30s safety margin
-  if (cache && cache.expiresAtMs - 30_000 > now) return cache.accessToken;
+  if (cache && cache.expiresAtMs - 30_000 > now) {return cache.accessToken;}
 
   const clientId = assertEnv('TWITCH_CLIENT_ID');
   const clientSecret = assertEnv('TWITCH_CLIENT_SECRET');

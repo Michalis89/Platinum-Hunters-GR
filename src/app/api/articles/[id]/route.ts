@@ -142,20 +142,20 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
 
     // Build update object (only include provided fields)
     const updateData: Database['public']['Tables']['articles']['Update'] = {};
-    if (title !== undefined) updateData.title = title;
-    if (slug !== undefined) updateData.slug = normalizeSlug(slug);
-    if (description !== undefined) updateData.description = description;
-    if (category !== undefined) updateData.category = category;
-    if (topic !== undefined) updateData.topic = topic;
-    if (tags !== undefined) updateData.tags = tags;
-    if (cover_image !== undefined) updateData.cover_image = cover_image;
-    if (content_rich !== undefined) updateData.content_rich = content_rich;
+    if (title !== undefined) {updateData.title = title;}
+    if (slug !== undefined) {updateData.slug = normalizeSlug(slug);}
+    if (description !== undefined) {updateData.description = description;}
+    if (category !== undefined) {updateData.category = category;}
+    if (topic !== undefined) {updateData.topic = topic;}
+    if (tags !== undefined) {updateData.tags = tags;}
+    if (cover_image !== undefined) {updateData.cover_image = cover_image;}
+    if (content_rich !== undefined) {updateData.content_rich = content_rich;}
     if (content_html !== undefined) {
       updateData.content_html = sanitizeHtmlContent(content_html).trim() || null;
     }
-    if (meta_title !== undefined) updateData.meta_title = meta_title;
-    if (meta_description !== undefined) updateData.meta_description = meta_description;
-    if (is_featured !== undefined) updateData.is_featured = is_featured;
+    if (meta_title !== undefined) {updateData.meta_title = meta_title;}
+    if (meta_description !== undefined) {updateData.meta_description = meta_description;}
+    if (is_featured !== undefined) {updateData.is_featured = is_featured;}
 
     // Handle status change
     if (status !== undefined) {

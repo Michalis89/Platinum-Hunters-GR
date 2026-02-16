@@ -16,7 +16,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MediaCategory, MediaEntry, SearchResult, CATEGORY_CONFIG, getTotalCount } from './types';
+import type { MediaCategory, MediaEntry, SearchResult} from './types';
+import { CATEGORY_CONFIG, getTotalCount } from './types';
 
 interface LibraryEntryRowProps {
   entry: MediaEntry;
@@ -65,7 +66,7 @@ function LibraryEntryRow({
         : '-';
 
   const scoreLabel = useMemo(() => {
-    if (!entry.score) return 'No score';
+    if (!entry.score) {return 'No score';}
     return `Score ${entry.score}`;
   }, [entry.score]);
   const mediaSlug = useMemo(
