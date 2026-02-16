@@ -6,8 +6,7 @@ export type TeamMember = {
   id: string;
   username: string;
   display_name: string | null;
-  role: string;
-  roles?: string[] | null;
+  roles: string[];
   bio: string | null;
   avatar_url: string | null;
   country: string | null;
@@ -38,8 +37,7 @@ const ROLE_PRIORITY = ['owner', 'admin', 'moderator', 'author', 'reviewer', 'use
 
 const getDisplayRole = (member: TeamMember) => {
   const roles = Array.isArray(member.roles) ? member.roles : [];
-  const roleFromArray = ROLE_PRIORITY.find(role => roles.includes(role));
-  return roleFromArray ?? member.role;
+  return ROLE_PRIORITY.find(role => roles.includes(role)) ?? 'user';
 };
 
 export function AboutPeople({ team }: AboutPeopleProps) {

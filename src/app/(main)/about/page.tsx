@@ -45,11 +45,8 @@ async function getTeam(): Promise<TeamMember[]> {
     const supabase = getSupabaseServer();
     const { data, error } = await supabase
       .from('users')
-      .select('id,username,display_name,role,roles,bio,avatar_url,country,favorite_platform')
-      .or(
-        'role.in.(owner,admin,moderator,author,reviewer),roles.ov.{owner,admin,moderator,author,reviewer}',
-      )
-      .order('role', { ascending: true });
+      .select('id,username,display_name,roles,bio,avatar_url,country,favorite_platform')
+      .filter('roles', 'ov', '{owner,admin,moderator,author,reviewer}');
 
     if (error || !data) {
       console.error('Failed to load team', error);

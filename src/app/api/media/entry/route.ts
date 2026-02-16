@@ -192,14 +192,13 @@ async function assertPrivilegedUser(userId: string) {
   const supabase = await createRouteHandlerClient();
   const { data: userRow, error } = await supabase
     .from('users')
-    .select('role,roles')
+    .select('roles')
     .eq('id', userId)
     .maybeSingle();
 
   if (error) throw error;
-  const hasSupportRole =
-    userRow?.role?.toLowerCase() === 'support' ||
-    (Array.isArray(userRow?.roles) && userRow.roles.some(role => role.toLowerCase() === 'support'));
+  const userRoles = Array.isArray(userRow?.roles) ? userRow.roles : [];
+  const hasSupportRole = userRoles.some(r => r.toLowerCase() === 'support');
 
   if (!userRow || (!hasSupportRole && !hasAnyRole(userRow, ['admin', 'owner', 'moderator']))) {
     throw new Error('FORBIDDEN');

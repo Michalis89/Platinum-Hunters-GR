@@ -36,16 +36,16 @@ async function POSTHandler(request: Request) {
     const supabaseServer = getSupabaseServer();
     const { data: user, error: userError } = await supabaseServer
       .from('users')
-      .select('role')
+      .select('roles')
       .eq('id', session.user.id)
       .single();
     if (userError || !user) {
-      console.error('Cover upload: failed to load user role', userError);
+      console.error('Cover upload: failed to load user roles', userError);
       return NextResponse.json({ message: 'Action is not allowed.' }, { status: 403 });
     }
 
-    const role = user.role;
-    if (!role || !ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number])) {
+    const userRoles = Array.isArray(user.roles) ? user.roles : [];
+    if (!userRoles.some(r => ALLOWED_ROLES.includes(r as (typeof ALLOWED_ROLES)[number]))) {
       return NextResponse.json(
         { message: 'You do not have permission for this action.' },
         { status: 403 },

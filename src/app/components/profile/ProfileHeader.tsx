@@ -20,7 +20,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
   const displayName = user.display_name || user.username;
   const bio = (user.bio || '').trim();
   const canExpandBio = bio.length > 160;
-  const showOwnerBadge = user.role?.toLowerCase() === 'owner';
+  const showOwnerBadge = Array.isArray(user.roles) && user.roles.includes('owner');
 
   return (
     <section className="relative px-4 pb-10 pt-8 md:px-6 md:pb-12 md:pt-10">

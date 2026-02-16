@@ -14,7 +14,6 @@ export type UserBasicInfo = {
 export type UserFullInfo = UserBasicInfo & {
   id: string;
   email: string | null;
-  role: string | null;
   roles: string[] | null;
 };
 
@@ -50,7 +49,7 @@ export async function getUserFullInfo(
 ): Promise<UserFullInfo | null> {
   const { data, error } = await supabase
     .from('users')
-    .select('id, username, display_name, avatar_url, email, role, roles')
+    .select('id, username, display_name, avatar_url, email, roles')
     .eq('id', userId)
     .single();
 

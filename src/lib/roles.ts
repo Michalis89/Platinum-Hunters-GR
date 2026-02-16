@@ -5,10 +5,7 @@ const VALID_ROLES: UserRole[] = ['user', 'author', 'reviewer', 'moderator', 'adm
 const VALID_ROLE_SET = new Set<UserRole>(VALID_ROLES);
 
 type RoleCarrier =
-  | {
-      role?: string | null;
-      roles?: string[] | null;
-    }
+  | { roles?: string[] | null }
   | null
   | undefined;
 
@@ -26,11 +23,7 @@ const normalizeRoles = (roles: (string | null | undefined)[]) =>
 export const getUserRoles = (user: RoleCarrier): UserRole[] => {
   if (!user) return [];
   if (Array.isArray(user.roles) && user.roles.length > 0) {
-    const normalized = normalizeRoles(user.roles);
-    if (normalized.length > 0) return normalized;
-  }
-  if (user.role) {
-    return normalizeRoles([user.role]);
+    return normalizeRoles(user.roles);
   }
   return [];
 };

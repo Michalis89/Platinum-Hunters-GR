@@ -16,7 +16,7 @@ async function GETHandler(_req: Request, context: { params: Promise<{ id: string
     // Check if user is admin (can view all tickets)
     const { data: userData } = await supabase
       .from('users')
-      .select('role, roles')
+      .select('roles')
       .eq('id', session.user.id)
       .single();
 

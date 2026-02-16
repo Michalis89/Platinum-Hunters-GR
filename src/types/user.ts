@@ -53,7 +53,7 @@ export interface PublicUserProfile {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
-  role: UserRole;
+  roles: UserRole[];
   bio: string | null;
   country: string | null;
   favorite_platform: string | null;

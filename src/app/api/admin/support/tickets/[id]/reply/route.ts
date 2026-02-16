@@ -51,7 +51,7 @@ async function ensureAdmin(supabase: Awaited<ReturnType<typeof createRouteHandle
   const session = await requireAuth(supabase);
   const { data: userData } = await supabase
     .from('users')
-    .select('role, roles')
+    .select('roles')
     .eq('id', session.user.id)
     .single();
 
