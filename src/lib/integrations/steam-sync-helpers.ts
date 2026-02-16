@@ -3,8 +3,11 @@ import {
   fetchIgdbGameDetails,
   mapIgdbToPayload,
   searchIgdbGames,
+  searchIgdbGamesWithoutCategoryFilter,
+  findIgdbGameIdBySteamAppId,
   type IgdbGame,
 } from '@/lib/services/igdbService';
+import { isAllowedIgdbGameCandidate } from '@/lib/igdb/categories';
 import { getSteamCoverUrls, type SteamOwnedGame } from './steam';
 
 export type SteamGameWithAchievements = SteamOwnedGame & {
@@ -20,12 +23,22 @@ export function normalizeTitle(value?: string | null): string {
 }
 
 /**
- * Clean title for storage: remove trademark symbols.
+ * Clean title for storage: remove trademark symbols, superscripts, and other decorative symbols.
  * Use this when STORING titles in the database.
  */
 export function cleanTitleForStorage(value?: string | null): string {
   if (!value) return '';
-  return value.replace(/[\u2122\u00AE\u00A9]/g, '').trim();
+
+  // Remove all trademark, copyright, and decorative symbols
+  return value
+    .replace(/[\u2122\u00AE\u00A9]/g, '') // ™ ® ©
+    .replace(/[\u00B2\u00B3\u00B9]/g, '') // Superscripts ² ³ ¹
+    .replace(/[\u2120\u2121]/g, '') // ℠ ℡ Service mark, telephone sign
+    .replace(/[\u00AE\u24C7\u24C7]/g, '') // Additional ® variants
+    .replace(/[\u2022\u2023\u2043]/g, '') // Bullets •‣⁃
+    .replace(/[\u00B7\u00B8]/g, '') // Middle dot, cedilla
+    .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
+    .trim();
 }
 
 /**
@@ -133,6 +146,63 @@ export function getSteamHours(game: SteamOwnedGame): number | null {
 // IGDB Matching & Enrichment
 // ============================================================================
 
+/**
+ * Calculate string similarity using Jaro-Winkler distance (0-1, higher = more similar)
+ * Simple implementation for fuzzy matching game titles
+ */
+function calculateSimilarity(str1: string, str2: string): number {
+  if (str1 === str2) return 1;
+  if (!str1 || !str2) return 0;
+
+  const len1 = str1.length;
+  const len2 = str2.length;
+
+  // Use simple approach: count matching characters in order
+  let matches = 0;
+  const maxLen = Math.max(len1, len2);
+
+  for (let i = 0; i < Math.min(len1, len2); i++) {
+    if (str1[i] === str2[i]) {
+      matches++;
+    }
+  }
+
+  // Bonus for matching prefix (Jaro-Winkler style)
+  let prefixLen = 0;
+  for (let i = 0; i < Math.min(4, len1, len2); i++) {
+    if (str1[i] === str2[i]) {
+      prefixLen++;
+    } else {
+      break;
+    }
+  }
+
+  const baseSimilarity = matches / maxLen;
+  const prefixBonus = prefixLen * 0.1 * (1 - baseSimilarity);
+
+  return Math.min(1, baseSimilarity + prefixBonus);
+}
+
+/**
+ * Rate limiter for IGDB API calls (free tier: 4 req/sec)
+ * Adds 300ms delay between calls to stay safely under limit
+ */
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+let lastApiCallTime = 0;
+const MIN_API_CALL_INTERVAL_MS = 300; // ~3 calls per second (safe margin)
+
+async function rateLimitedApiCall<T>(apiCall: () => Promise<T>): Promise<T> {
+  const now = Date.now();
+  const timeSinceLastCall = now - lastApiCallTime;
+
+  if (timeSinceLastCall < MIN_API_CALL_INTERVAL_MS) {
+    await sleep(MIN_API_CALL_INTERVAL_MS - timeSinceLastCall);
+  }
+
+  lastApiCallTime = Date.now();
+  return apiCall();
+}
+
 export async function mapWithConcurrency<TInput, TOutput>(
   items: TInput[],
   limit: number,
@@ -165,7 +235,7 @@ export async function matchSteamGamesToIgdb(
 
   const pairs = await mapWithConcurrency(
     games,
-    3,
+    2, // Conservative for IGDB free tier (4 req/sec limit)
     async game => {
       const title = game.name ?? '';
       const key = normalizeForMatch(title);
@@ -178,12 +248,65 @@ export async function matchSteamGamesToIgdb(
       }
 
       try {
-        const candidates = await searchIgdbGames(title, 8);
-        const matched =
-          candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
+        // Strategy 1: Try direct Steam App ID lookup first (much faster!)
+        // This uses 1 API call to external_games, then 1 for game details = 2 calls
+        const igdbId = await rateLimitedApiCall(() => findIgdbGameIdBySteamAppId(game.appid));
+        if (igdbId) {
+          const igdbGame = await rateLimitedApiCall(() =>
+            fetchIgdbGameDetails(igdbId, { mainGameOnly: false }),
+          );
+          if (igdbGame) {
+            cache.set(key, igdbGame);
+            return [game.appid, igdbGame] as const;
+          }
+        }
 
-        cache.set(key, matched);
-        return [game.appid, matched] as const;
+        // Strategy 2: Fallback to text search if direct lookup fails
+        // First try with category filter (stricter)
+        let candidates = await rateLimitedApiCall(() => searchIgdbGames(title, 8));
+
+        // If no results with category filter, try without filter (broader search)
+        if (candidates.length === 0) {
+          const allCandidates = await rateLimitedApiCall(() =>
+            searchIgdbGamesWithoutCategoryFilter(title, 16),
+          );
+          // Filter to only allowed candidates
+          candidates = allCandidates.filter(candidate =>
+            isAllowedIgdbGameCandidate({
+              category: candidate.category,
+              name: candidate.name,
+              slug: candidate.slug ?? null,
+            }),
+          );
+        }
+
+        // Try exact normalized match first
+        let matched = candidates.find(candidate => normalizeForMatch(candidate.name) === key);
+
+        // If exact match fails, try less aggressive normalization (keep spaces, basic cleanup)
+        if (!matched) {
+          const basicNormalized = title.toLowerCase().replace(/[™®©]/g, '').trim();
+          matched = candidates.find(candidate => {
+            const candidateBasic = candidate.name.toLowerCase().replace(/[™®©]/g, '').trim();
+            return candidateBasic === basicNormalized;
+          });
+        }
+
+        // If still no match, try first result if it's very similar
+        if (!matched && candidates.length > 0) {
+          const firstCandidate = candidates[0];
+          const similarity = calculateSimilarity(
+            normalizeForMatch(title),
+            normalizeForMatch(firstCandidate.name),
+          );
+          // Accept if >80% similar (catches minor differences)
+          if (similarity > 0.8) {
+            matched = firstCandidate;
+          }
+        }
+
+        cache.set(key, matched ?? null);
+        return [game.appid, matched ?? null] as const;
       } catch (error) {
         console.warn(`IGDB search failed for "${title}":`, error);
         cache.set(key, null);
@@ -215,10 +338,12 @@ export async function enrichIgdbMatches(
 
   await mapWithConcurrency(
     matchedIgdbIds,
-    3,
+    2, // Conservative for IGDB free tier (4 req/sec limit)
     async igdbId => {
       try {
-        const details = await fetchIgdbGameDetails(igdbId, { mainGameOnly: false });
+        const details = await rateLimitedApiCall(() =>
+          fetchIgdbGameDetails(igdbId, { mainGameOnly: false }),
+        );
         detailsCache.set(igdbId, details);
         return details;
       } catch (error) {
@@ -273,18 +398,3 @@ export function buildGameMetadataPatch(game: SteamGameWithAchievements, igdbGame
   } satisfies Database['public']['Tables']['media_items']['Update'];
 }
 
-export function buildSteamFallbackInsert(game: SteamGameWithAchievements) {
-  const covers = getSteamCoverUrls(game);
-  const cleanTitle = cleanTitleForStorage(game.name ?? `Steam App ${game.appid}`);
-
-  return {
-    category: 'games',
-    source: 'steam',
-    steam_app_id: game.appid,
-    title: cleanTitle,
-    title_english: cleanTitle,
-    cover_image_large: covers.large,
-    cover_image_medium: covers.medium,
-    platforms: ['PC'],
-  } satisfies Database['public']['Tables']['media_items']['Insert'];
-}

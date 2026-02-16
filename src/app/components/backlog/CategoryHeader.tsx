@@ -27,6 +27,8 @@ interface CategoryHeaderProps {
   username?: string | null;
   steamId?: string | null;
   isSteamSyncing?: boolean;
+  isSteamRateLimited?: boolean;
+  steamRateLimitResetTime?: Date | null;
   onSteamSyncClick?: () => Promise<void>;
   onCreateClick: () => void;
   onSuggestionsClick: () => void;
@@ -37,6 +39,8 @@ export default function CategoryHeader({
   username,
   steamId,
   isSteamSyncing = false,
+  isSteamRateLimited = false,
+  steamRateLimitResetTime,
   onSteamSyncClick,
   onCreateClick,
   onSuggestionsClick,
@@ -121,9 +125,22 @@ export default function CategoryHeader({
                         <DropdownMenuItem
                           className="cursor-pointer"
                           onSelect={() => setSteamConfirmOpen(true)}
-                          disabled={isSteamSyncing}
+                          disabled={isSteamSyncing || isSteamRateLimited}
                         >
-                          Steam
+                          <div className="flex flex-col">
+                            <span>Steam</span>
+                            {isSteamRateLimited && steamRateLimitResetTime && (
+                              <span className="text-xs text-muted-foreground">
+                                Rate limit - try after{' '}
+                                {steamRateLimitResetTime.toLocaleString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            )}
+                          </div>
                         </DropdownMenuItem>
                       ) : null}
                       <DropdownMenuItem disabled>PlayStation Network (soon)</DropdownMenuItem>
@@ -153,17 +170,32 @@ export default function CategoryHeader({
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground">Steam sync</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Automatic Steam sync sets only `Planned` or `Current`. Set `Completed` and `Dropped`
-              manually.
+              {isSteamRateLimited && steamRateLimitResetTime ? (
+                <span className="text-warning">
+                  ⚠️ IGDB rate limit reached. Please try again after{' '}
+                  {steamRateLimitResetTime.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
+                  .
+                </span>
+              ) : (
+                <>
+                  Automatic Steam sync sets only `Planned` or `Current`. Set `Completed` and
+                  `Dropped` manually. Uses IGDB free tier (rate limited).
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSteamSyncing}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              disabled={isSteamSyncing}
+              disabled={isSteamSyncing || isSteamRateLimited}
               onClick={async event => {
                 event.preventDefault();
-                if (!onSteamSyncClick) {
+                if (!onSteamSyncClick || isSteamRateLimited) {
                   setSteamConfirmOpen(false);
                   return;
                 }
@@ -171,7 +203,7 @@ export default function CategoryHeader({
                 setSteamConfirmOpen(false);
               }}
             >
-              {isSteamSyncing ? 'Syncing...' : 'Continue'}
+              {isSteamSyncing ? 'Syncing...' : isSteamRateLimited ? 'Rate Limited' : 'Continue'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

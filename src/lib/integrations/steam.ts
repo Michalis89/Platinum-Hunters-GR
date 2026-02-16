@@ -149,7 +149,7 @@ export async function fetchSteamOwnedGames(params: {
   url.searchParams.set('key', params.apiKey);
   url.searchParams.set('steamid', params.steamId64);
   url.searchParams.set('include_appinfo', '1');
-  url.searchParams.set('include_played_free_games', '1');
+  url.searchParams.set('include_played_free_games', '0');
   url.searchParams.set('format', 'json');
 
   const response = await fetch(url.toString(), {

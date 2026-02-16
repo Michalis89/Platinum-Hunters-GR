@@ -68,6 +68,7 @@ type SteamSyncJobSnapshot = {
     entriesInserted: number;
     entriesUpdated: number;
     entriesUpsertFailed?: number;
+    rejectedGames?: Array<{ appid: number; name: string; reason: string }>;
     warnings?: string[];
   };
 };
@@ -197,6 +198,33 @@ function categoryLibraryReducer(
   }
 }
 
+// Helper to check if IGDB rate limit is active
+const RATE_LIMIT_KEY = 'igdb_rate_limit_until';
+const isRateLimited = () => {
+  if (typeof window === 'undefined') return false;
+  const limitUntil = localStorage.getItem(RATE_LIMIT_KEY);
+  if (!limitUntil) return false;
+  const limitTime = parseInt(limitUntil, 10);
+  if (isNaN(limitTime)) return false;
+  return Date.now() < limitTime;
+};
+
+const setRateLimitCooldown = () => {
+  if (typeof window === 'undefined') return;
+  // Set cooldown for 24 hours
+  const cooldownUntil = Date.now() + 24 * 60 * 60 * 1000;
+  localStorage.setItem(RATE_LIMIT_KEY, cooldownUntil.toString());
+};
+
+const getRateLimitResetTime = () => {
+  if (typeof window === 'undefined') return null;
+  const limitUntil = localStorage.getItem(RATE_LIMIT_KEY);
+  if (!limitUntil) return null;
+  const limitTime = parseInt(limitUntil, 10);
+  if (isNaN(limitTime)) return null;
+  return new Date(limitTime);
+};
+
 export default function CategoryLibrary({
   category,
   username,
@@ -212,6 +240,7 @@ export default function CategoryLibrary({
 }>) {
   const [steamSyncing, setSteamSyncing] = useState(false);
   const [steamSyncProgress, setSteamSyncProgress] = useState<SteamSyncJobSnapshot | null>(null);
+  const [steamRateLimited, setSteamRateLimited] = useState(isRateLimited());
   const steamPollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const normalizedInitialStatus = initialStatus ?? 'all';
   const normalizedInitialSearch = initialSearch?.trim() ?? '';
@@ -227,6 +256,21 @@ export default function CategoryLibrary({
         clearInterval(steamPollIntervalRef.current);
       }
     };
+  }, []);
+
+  // Check rate limit status periodically
+  useEffect(() => {
+    const checkRateLimit = () => {
+      setSteamRateLimited(isRateLimited());
+    };
+
+    // Check immediately
+    checkRateLimit();
+
+    // Check every minute
+    const interval = setInterval(checkRateLimit, 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const showAlert = useCallback(
@@ -759,6 +803,25 @@ export default function CategoryLibrary({
 
   const handleSteamSync = async () => {
     try {
+      // Check rate limit before starting
+      if (isRateLimited()) {
+        const resetTime = getRateLimitResetTime();
+        const resetTimeStr = resetTime
+          ? resetTime.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+            })
+          : 'tomorrow';
+        showAlert({
+          type: 'warning',
+          title: 'IGDB Rate Limit Reached',
+          message: `You&apos;ve hit the IGDB API daily limit. Please try again after ${resetTimeStr}.`,
+        });
+        return;
+      }
+
       // Clear any existing poll interval
       if (steamPollIntervalRef.current) {
         clearInterval(steamPollIntervalRef.current);
@@ -781,6 +844,14 @@ export default function CategoryLibrary({
       });
 
       if (!startResponse.ok) {
+        // Check for rate limit error
+        if (startResponse.status === 429) {
+          setRateLimitCooldown();
+          setSteamRateLimited(true);
+          throw new Error(
+            'IGDB API rate limit reached. Please try again in 24 hours. Consider using a smaller library or waiting for the limit to reset.',
+          );
+        }
         const data = (await startResponse.json()) as { error?: string };
         throw new Error(data.error || 'Failed to start Steam sync');
       }
@@ -819,6 +890,7 @@ export default function CategoryLibrary({
       // Step 2: Process batches in a loop
       let isComplete = false;
       let processBatchCount = 0;
+      const allRejectedGames: Array<{ appid: number; name: string; reason: string }> = [];
 
       while (!isComplete) {
         processBatchCount += 1;
@@ -830,6 +902,14 @@ export default function CategoryLibrary({
         );
 
         if (!processResponse.ok) {
+          // Check for rate limit error
+          if (processResponse.status === 429) {
+            setRateLimitCooldown();
+            setSteamRateLimited(true);
+            throw new Error(
+              'IGDB API rate limit reached during processing. Progress has been saved. Please try again in 24 hours.',
+            );
+          }
           const data = (await processResponse.json()) as { error?: string };
           throw new Error(data.error || 'Failed to process batch');
         }
@@ -840,7 +920,13 @@ export default function CategoryLibrary({
           isComplete: boolean;
           percent: number;
           message: string;
+          rejectedGames?: Array<{ appid: number; name: string; reason: string }>;
         };
+
+        // Collect rejected games from this batch
+        if (processData.rejectedGames && processData.rejectedGames.length > 0) {
+          allRejectedGames.push(...processData.rejectedGames);
+        }
 
         isComplete = processData.isComplete;
 
@@ -864,11 +950,28 @@ export default function CategoryLibrary({
       await loadLibraryEntries();
       await mutate('/api/user/continue');
 
-      showAlert({
-        type: 'success',
-        title: 'Steam sync complete',
-        message: `Synced ${startData.totalGames} games from Steam.`,
-      });
+      // Show appropriate alert based on whether there were rejected games
+      if (allRejectedGames.length > 0) {
+        const rejectedCount = allRejectedGames.length;
+        const importedCount = startData.totalGames - rejectedCount;
+        const rejectedNames = allRejectedGames
+          .slice(0, 10)
+          .map(g => g.name)
+          .join(', ');
+        const moreText = allRejectedGames.length > 10 ? ` and ${allRejectedGames.length - 10} more` : '';
+
+        showAlert({
+          type: 'warning',
+          title: 'Steam sync completed with warnings',
+          message: `Successfully imported ${importedCount} games. ${rejectedCount} games were not found in IGDB database and were skipped: ${rejectedNames}${moreText}. Try searching for them manually.`,
+        });
+      } else {
+        showAlert({
+          type: 'success',
+          title: 'Steam sync complete',
+          message: `Successfully synced ${startData.totalGames} games from Steam.`,
+        });
+      }
 
       setSteamSyncing(false);
       setSteamSyncProgress(null);
@@ -927,6 +1030,8 @@ export default function CategoryLibrary({
             username={username}
             steamId={steamId}
             isSteamSyncing={steamSyncing}
+            isSteamRateLimited={steamRateLimited}
+            steamRateLimitResetTime={getRateLimitResetTime()}
             onSteamSyncClick={handleSteamSync}
             onCreateClick={() => dispatch({ type: 'patch', payload: { ctaMode: 'create' } })}
             onSuggestionsClick={() =>
@@ -1018,61 +1123,114 @@ export default function CategoryLibrary({
       </Sheet>
 
       {steamSyncing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
-          <div className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/90 p-6 text-white shadow-2xl shadow-violet-500/20">
+        <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center px-4 py-6 backdrop-blur-sm">
+          <div className="modal-surface pointer-events-auto w-full max-w-2xl p-6 shadow-2xl">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-lg font-semibold text-white">Steam sync with IGDB metadata</p>
-                <p className="text-sm text-slate-300">
+              <div className="flex-1">
+                <p className="text-lg font-semibold text-foreground">Steam sync with IGDB metadata</p>
+                <p className="text-sm text-muted-foreground">
                   {steamSyncProgress?.message ??
                     'Fetching metadata, cover images, and updating entries. Please wait...'}
                 </p>
+                {steamSyncProgress && steamSyncProgress.totalSteps > 0 && (
+                  <p className="mt-1 text-xs text-tertiary">
+                    Processing with IGDB free tier (rate limited for stability)
+                  </p>
+                )}
               </div>
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-100">
+              <span className="rounded-full border border-border bg-surface-hover px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground">
                 {statusLabel}
               </span>
             </div>
             <div className="mt-5 space-y-3">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 <span>Progress</span>
                 <span>{normalizedProgressPercent}%</span>
               </div>
-              <div className="overflow-hidden rounded-full border border-white/10 bg-slate-900/70">
+              <div className="overflow-hidden rounded-full border border-border bg-surface-base">
                 <div
-                  className="h-3 rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 shadow-[0_0_18px_rgba(192,132,252,0.65)] transition-[width] duration-700 ease-out"
+                  className="h-3 rounded-full bg-primary shadow-[0_0_18px_hsl(var(--primary)/0.5)] transition-[width] duration-700 ease-out"
                   style={{ width: `${normalizedProgressPercent}%` }}
                 />
               </div>
-              <p className="text-xs text-slate-300">{stepLabel}</p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-foreground">{stepLabel}</span>
+                {steamSyncProgress && steamSyncProgress.totalSteps > 0 && (
+                  <span className="text-muted-foreground">
+                    ~{Math.ceil((steamSyncProgress.totalSteps - steamSyncProgress.completedSteps) * 0.5)}s remaining
+                  </span>
+                )}
+              </div>
             </div>
             {steamSyncProgress?.error && (
-              <p className="mt-2 text-xs font-semibold text-rose-400">
+              <p className="mt-2 text-xs font-semibold text-destructive">
                 Error: {steamSyncProgress.error}
               </p>
             )}
+            {/* Live progress indicators during sync */}
+            {steamSyncing && !steamSyncProgress?.result && steamSyncProgress?.message && (
+              <div className="mt-4 rounded-2xl border border-border bg-surface-hover p-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-primary"></div>
+                  <p className="text-xs text-foreground">
+                    {steamSyncProgress.message.includes('matching') || steamSyncProgress.message.includes('IGDB')
+                      ? '🔍 Searching IGDB database...'
+                      : steamSyncProgress.message.includes('metadata') || steamSyncProgress.message.includes('enrichment')
+                        ? '📥 Fetching game metadata...'
+                        : steamSyncProgress.message.includes('Catalog') || steamSyncProgress.message.includes('catalog')
+                          ? '💾 Syncing with database...'
+                          : steamSyncProgress.message.includes('Entries') || steamSyncProgress.message.includes('entries')
+                            ? '✨ Creating user entries...'
+                            : '⚙️ Processing...'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Final results summary */}
             {steamSyncProgress?.result && (
-              <div className="mt-4 grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 sm:grid-cols-3">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Games</p>
-                  <p className="text-lg font-semibold text-white">
-                    {steamSyncProgress.result.totalFetched ?? 0}
-                  </p>
-                  <p className="text-xs text-slate-400">total</p>
+              <div className="mt-4 space-y-3">
+                <div className="grid gap-3 rounded-2xl border border-border bg-surface-hover p-4 text-sm sm:grid-cols-3">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Games</p>
+                    <p className="text-lg font-semibold text-foreground">
+                      {steamSyncProgress.result.totalFetched ?? 0}
+                    </p>
+                    <p className="text-xs text-muted-foreground">from Steam</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Imported</p>
+                    <p className="text-lg font-semibold" style={{ color: 'hsl(142 76% 36%)' }}>
+                      {steamSyncProgress.result.mediaInserted ?? 0}
+                    </p>
+                    <p className="text-xs text-muted-foreground">new entries</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Updated</p>
+                    <p className="text-lg font-semibold text-primary">
+                      {steamSyncProgress.result.mediaUpdated ?? 0}
+                    </p>
+                    <p className="text-xs text-muted-foreground">existing</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Imported</p>
-                  <p className="text-lg font-semibold text-white">
-                    {steamSyncProgress.result.mediaInserted ?? 0}
-                  </p>
-                  <p className="text-xs text-slate-400">new entries</p>
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">Updated</p>
-                  <p className="text-lg font-semibold text-white">
-                    {steamSyncProgress.result.mediaUpdated ?? 0}
-                  </p>
-                  <p className="text-xs text-slate-400">updated entries</p>
-                </div>
+
+                {/* Show rejected games count if any */}
+                {steamSyncProgress.result.rejectedGames && steamSyncProgress.result.rejectedGames.length > 0 && (
+                  <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-warning">⚠️</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-foreground">
+                          {steamSyncProgress.result.rejectedGames.length} games not found in IGDB
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          These games couldn&apos;t be matched with IGDB database and were skipped.
+                          Try searching for them manually.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

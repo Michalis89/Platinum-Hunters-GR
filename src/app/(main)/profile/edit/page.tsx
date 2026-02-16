@@ -131,6 +131,7 @@ export default function EditProfilePage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [showNewUserInfo, setShowNewUserInfo] = useState(false);
 
   const initialCategoryNotes = useMemo<CategoryNotes>(() => {
     const notes = (user?.social_links as Record<string, unknown> | null | undefined)
@@ -155,6 +156,12 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     if (user) {
+      const userCategories = (user.categories as string[] | undefined) ?? [];
+      const hasNoCategories = userCategories.length === 0;
+
+      // Show info alert if user has no categories selected
+      setShowNewUserInfo(hasNoCategories);
+
       setFormData({
         full_name: user.full_name || '',
         date_of_birth: user.date_of_birth || '',
@@ -174,7 +181,7 @@ export default function EditProfilePage() {
         favorite_book_genres: user.favorite_book_genres || [],
         favorite_languages: user.favorite_languages || [],
         gaming_since: user.gaming_since || null,
-        categories: (user.categories as string[] | undefined) ?? ['games'],
+        categories: hasNoCategories ? [] : userCategories,
         category_notes: initialCategoryNotes,
         pet_types: user.pet_types || [],
         vape_device: user.vape_device || '',
@@ -345,6 +352,12 @@ export default function EditProfilePage() {
     setFormData(prev => {
       const current = (prev.categories as string[] | undefined) ?? [];
       const next = current.includes(cat) ? current.filter(c => c !== cat) : [...current, cat];
+
+      // Hide the new user info alert when user selects at least one category
+      if (next.length > 0 && showNewUserInfo) {
+        setShowNewUserInfo(false);
+      }
+
       return { ...prev, categories: next };
     });
   };
@@ -515,7 +528,7 @@ export default function EditProfilePage() {
         category_notes: category_notes || EMPTY_CATEGORY_NOTES,
       } as User['social_links'];
 
-      // Convert empty strings to null for unique constraint fields
+      // Convert empty strings to null for unique constraint fields and date fields
       const emptyToNull = (val: string | null | undefined): string | null =>
         val && val.trim() !== '' ? val.trim() : null;
 
@@ -525,6 +538,9 @@ export default function EditProfilePage() {
         xbox_gamertag: emptyToNull(rest.xbox_gamertag),
         steam_id: emptyToNull(rest.steam_id),
         nintendo_id: emptyToNull(rest.nintendo_id),
+        // Convert empty date fields to null to prevent date validation errors
+        date_of_birth: emptyToNull(rest.date_of_birth),
+        gaming_since: rest.gaming_since ?? null,
       };
 
       const favoritePayload = deriveFavoritePayload(category_notes);
@@ -684,6 +700,27 @@ export default function EditProfilePage() {
               Manage your account details, hobbies, and privacy settings.
             </p>
           </section>
+
+          {showNewUserInfo && (
+            <Alert variant="info" className="mb-6">
+              <AlertDescription>
+                <strong>Welcome to Hobbistas Hub!</strong> As a new user, please select at least one
+                hobby category below under{' '}
+                <a
+                  href="#categories"
+                  className="font-semibold text-primary underline hover:text-primary/80"
+                >
+                  My Hobbies → Hobby Categories
+                </a>
+                . You can also configure additional settings like social links, articles, and reviews
+                in{' '}
+                <a href="/settings" className="font-semibold text-primary underline hover:text-primary/80">
+                  Settings
+                </a>
+                . Don&apos;t forget to save your changes when you&apos;re done!
+              </AlertDescription>
+            </Alert>
+          )}
 
           {alert && (
             <Alert variant={alert.type === 'error' ? 'destructive' : 'success'} className="mb-6">

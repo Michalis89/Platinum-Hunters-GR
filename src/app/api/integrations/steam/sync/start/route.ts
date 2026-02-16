@@ -110,7 +110,9 @@ async function POSTHandler() {
 
     // Create job record
     const jobId = randomUUID();
-    const batchSize = 25; // Process 25 games per batch
+    // Dynamic batch size based on library size for better performance
+    // Small libraries: 25 games/batch, Medium: 40, Large (500+): 50
+    const batchSize = uniqueGames.length < 100 ? 25 : uniqueGames.length < 500 ? 40 : 50;
 
     const { error: insertError } = await supabase.from('steam_sync_jobs').insert({
       id: jobId,
@@ -152,6 +154,7 @@ async function POSTHandler() {
 
 export const POST = withApiRoute(POSTHandler);
 
-// This endpoint should complete quickly (< 10 seconds even for large libraries)
-// because it only fetches Steam data, doesn't do RAWG matching/enrichment
-export const maxDuration = 10;
+// This endpoint should complete quickly (< 30 seconds even for 1000+ game libraries)
+// because it only fetches Steam data and achievements, doesn't do IGDB matching/enrichment
+// Achievement fetching is the slowest part but runs with concurrency limit of 2
+export const maxDuration = 60;

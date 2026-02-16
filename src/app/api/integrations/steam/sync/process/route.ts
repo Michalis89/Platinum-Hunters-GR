@@ -10,7 +10,6 @@ import {
   matchSteamGamesToIgdb,
   enrichIgdbMatches,
   buildGameMetadataPatch,
-  buildSteamFallbackInsert,
   deriveStatusFromSteamData,
   normalizeTitle,
   getSteamHours,
@@ -23,6 +22,7 @@ type ProcessResult = {
   isComplete: boolean;
   percent: number;
   message: string;
+  rejectedGames?: Array<{ appid: number; name: string; reason: string }>;
 };
 
 async function POSTHandler(req: Request) {
@@ -172,6 +172,7 @@ async function POSTHandler(req: Request) {
       number,
       Database['public']['Tables']['media_items']['Update']
     >();
+    const rejectedGames: Array<{ appid: number; name: string; reason: string }> = [];
 
     for (const game of batch) {
       const matchedIgdb = enrichedIgdbByAppId.get(game.appid) ?? null;
@@ -217,9 +218,11 @@ async function POSTHandler(req: Request) {
           },
         });
       } else {
-        insertTasks.push({
+        // Reject games that don't have IGDB match
+        rejectedGames.push({
           appid: game.appid,
-          payload: buildSteamFallbackInsert(game),
+          name: game.name ?? `Steam App ${game.appid}`,
+          reason: 'Not found in IGDB database',
         });
       }
     }
@@ -387,6 +390,7 @@ async function POSTHandler(req: Request) {
       message: isComplete
         ? 'Steam sync completed successfully'
         : `Processed ${newProcessedCount} of ${allGames.length} games`,
+      rejectedGames: rejectedGames.length > 0 ? rejectedGames : undefined,
     } satisfies ProcessResult);
   } catch (error) {
     if (error instanceof UnauthorizedError) {
@@ -400,5 +404,6 @@ async function POSTHandler(req: Request) {
 
 export const POST = withApiRoute(POSTHandler);
 
-// Each batch should complete in < 10 seconds (25 games with IGDB matching/enrichment)
-export const maxDuration = 10;
+// Increased timeout for larger batches (up to 50 games with IGDB matching/enrichment)
+// Direct Steam App ID lookup is much faster, but text search fallback needs time
+export const maxDuration = 30;

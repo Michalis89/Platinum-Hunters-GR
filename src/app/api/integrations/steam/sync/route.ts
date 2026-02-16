@@ -49,6 +49,7 @@ type SyncResult = {
   entriesUpsertFailed: number;
   entriesSkippedExisting: number;
   entriesSkippedPotentialDuplicate: number;
+  rejectedGames?: Array<{ appid: number; name: string; reason: string }>;
   warnings?: string[];
   debug?: {
     steamId64: string;
@@ -363,21 +364,6 @@ function buildGameMetadataPatch(game: SteamOwnedGame, igdb: IgdbGame) {
   } satisfies Database['public']['Tables']['media_items']['Update'];
 }
 
-function buildSteamFallbackInsert(game: SteamOwnedGame) {
-  const covers = getSteamCoverUrls(game);
-  const cleanTitle = cleanTitleForStorage(game.name ?? `Steam App ${game.appid}`);
-
-  return {
-    category: 'games',
-    source: 'steam',
-    steam_app_id: game.appid,
-    title: cleanTitle,
-    title_english: cleanTitle,
-    cover_image_large: covers.large,
-    cover_image_medium: covers.medium,
-    platforms: ['PC'],
-  } satisfies Database['public']['Tables']['media_items']['Insert'];
-}
 
 function buildBacklogRedirect(requestUrl: string, status: 'success' | 'error', reason?: string) {
   const redirectUrl = new URL('/backlog?category=games', requestUrl);
@@ -603,6 +589,7 @@ async function syncSteamForUser(options?: {
     payload: Database['public']['Tables']['media_items']['Insert'];
   }> = [];
   const updateByMediaId = new Map<number, Database['public']['Tables']['media_items']['Update']>();
+  const rejectedGames: Array<{ appid: number; name: string; reason: string }> = [];
 
   await updateProgress('Syncing catalog media...', 1);
   for (const game of uniqueGames) {
@@ -626,6 +613,7 @@ async function syncSteamForUser(options?: {
         console.log(`[Steam Sync] Enriching with IGDB: ${game.name} (IGDB ID: ${matchedIgdb.id})`);
         updateByMediaId.set(existingByAppId.id, buildGameMetadataPatch(game, matchedIgdb));
       } else {
+        // Keep existing entry but don't enrich it
         updateByMediaId.set(existingByAppId.id, {
           steam_app_id: game.appid,
           runtime: getSteamHours(game),
@@ -658,9 +646,12 @@ async function syncSteamForUser(options?: {
         },
       });
     } else {
-      insertTasks.push({
+      // Reject games without IGDB match - don't insert them
+      console.log(`[Steam Sync] Rejecting: ${game.name} (Steam App ${game.appid}) - No IGDB match`);
+      rejectedGames.push({
         appid: game.appid,
-        payload: buildSteamFallbackInsert(game),
+        name: game.name ?? `Steam App ${game.appid}`,
+        reason: 'Not found in IGDB database',
       });
     }
 
@@ -879,6 +870,7 @@ async function syncSteamForUser(options?: {
     entriesUpsertFailed: failedEntryUpsertCount,
     entriesSkippedExisting: Math.max(0, existingEntryByMediaId.size - userEntryUpdates.length),
     entriesSkippedPotentialDuplicate: skippedPotentialDuplicate,
+    rejectedGames: rejectedGames.length > 0 ? rejectedGames : undefined,
     warnings: warnings.length > 0 ? warnings : undefined,
   };
 
