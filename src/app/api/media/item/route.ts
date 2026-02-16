@@ -31,6 +31,11 @@ const buildSlugCandidates = (value: string): string[] => {
   return Array.from(new Set([canonical, folded].filter(Boolean)));
 };
 
+const toLooseTitleLikePattern = (canonicalSlug: string) => {
+  const tokens = canonicalSlug.split('-').filter(Boolean).map(escapeLike);
+  return tokens.join('%');
+};
+
 const collectCandidateSlugs = (item: MediaItem): string[] => {
   const candidates = [
     item.igdb_slug,
@@ -64,13 +69,14 @@ const scoreSlugMatch = (target: string, item: MediaItem): number => {
 
 async function fetchBySlug(category: string, slug: string) {
   const supabase = await createRouteHandlerClient();
+  const isGamesCategory = category === 'games';
   const slugCandidates = buildSlugCandidates(slug);
   const canonicalSlug = slugCandidates[0] ?? '';
   const slugText = escapeLike(slug.replace(/[-_]/g, ' ').trim());
   if (!canonicalSlug && !slugText) return null;
 
-  // Exact igdb_slug hit first (fast path for clean imports)
-  if (slugCandidates.length > 0) {
+  // Exact igdb_slug hit first (games only)
+  if (isGamesCategory && slugCandidates.length > 0) {
     const { data: exactIgdbSlugMatches, error: exactIgdbSlugError } = await supabase
       .from('media_items')
       .select(selectFields)
@@ -91,21 +97,38 @@ async function fetchBySlug(category: string, slug: string) {
 
   const looseSlugForLike = escapeLike(canonicalSlug.replace(/-/g, '%'));
   const foldedLooseSlugForLike = escapeLike(foldPossessiveSlug(canonicalSlug).replace(/-/g, '%'));
+  const looseTitleLike = toLooseTitleLikePattern(canonicalSlug);
+  const foldedLooseTitleLike = toLooseTitleLikePattern(foldPossessiveSlug(canonicalSlug));
   const escapedCandidates = slugCandidates.map(candidate => escapeLike(candidate));
+  const gamesSlugClauses = isGamesCategory
+    ? [
+        ...escapedCandidates.map(candidate => `igdb_slug.ilike.%${candidate}%`),
+        `igdb_slug.ilike.%${looseSlugForLike}%`,
+        `igdb_slug.ilike.%${foldedLooseSlugForLike}%`,
+      ]
+    : [];
   const { data, error } = await supabase
     .from('media_items')
     .select(selectFields)
     .eq('category', category)
     .or(
       [
-        ...escapedCandidates.map(candidate => `igdb_slug.ilike.%${candidate}%`),
-        `igdb_slug.ilike.%${looseSlugForLike}%`,
-        `igdb_slug.ilike.%${foldedLooseSlugForLike}%`,
+        ...gamesSlugClauses,
         `title.ilike.%${slugText}%`,
+        `title.ilike.%${looseTitleLike}%`,
+        `title.ilike.%${foldedLooseTitleLike}%`,
         `original_title.ilike.%${slugText}%`,
+        `original_title.ilike.%${looseTitleLike}%`,
+        `original_title.ilike.%${foldedLooseTitleLike}%`,
         `title_english.ilike.%${slugText}%`,
+        `title_english.ilike.%${looseTitleLike}%`,
+        `title_english.ilike.%${foldedLooseTitleLike}%`,
         `title_romaji.ilike.%${slugText}%`,
+        `title_romaji.ilike.%${looseTitleLike}%`,
+        `title_romaji.ilike.%${foldedLooseTitleLike}%`,
         `title_native.ilike.%${slugText}%`,
+        `title_native.ilike.%${looseTitleLike}%`,
+        `title_native.ilike.%${foldedLooseTitleLike}%`,
       ].join(','),
     )
     .limit(25);
