@@ -15,6 +15,48 @@ type SteamGameWithAchievements = SteamOwnedGame & {
   achievementsPercent?: number;
 };
 
+function extractErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'object' && error !== null) {
+    const maybeMessage = (error as { message?: unknown }).message;
+    if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
+      return maybeMessage;
+    }
+  }
+  return 'Failed to start Steam sync';
+}
+
+async function getUserSteamInput(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+): Promise<string | null> {
+  const [{ data: userData, error: userError }, { data: categoryData, error: categoryError }] =
+    await Promise.all([
+      supabase.from('users').select('steam_id').eq('id', userId).maybeSingle(),
+      supabase.from('user_category_profiles').select('profiles').eq('user_id', userId).maybeSingle(),
+    ]);
+
+  if (userError) {
+    console.error('[Steam Sync Start] User fetch error:', userError);
+    throw new Error(userError.message || 'Failed to fetch user profile');
+  }
+
+  if (categoryError) {
+    console.error('[Steam Sync Start] Category profile fetch error:', categoryError);
+    throw new Error(categoryError.message || 'Failed to fetch category profile');
+  }
+
+  const categorySteamIdRaw = (
+    categoryData?.profiles as { games?: { steam_id?: string | null } } | null | undefined
+  )?.games?.steam_id;
+  const categorySteamId = typeof categorySteamIdRaw === 'string' ? categorySteamIdRaw.trim() : '';
+  const userSteamId = userData?.steam_id?.trim() ?? '';
+
+  return categorySteamId || userSteamId || null;
+}
+
 async function mapWithConcurrency<TInput, TOutput>(
   items: TInput[],
   limit: number,
@@ -42,19 +84,8 @@ async function POSTHandler() {
 
     console.warn('🚀 [Steam Sync Start] Initiating sync for user:', session.user.id);
 
-    // Get user's Steam ID
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('steam_id')
-      .eq('id', session.user.id)
-      .maybeSingle();
-
-    if (userError) {
-      console.error('[Steam Sync Start] User fetch error:', userError);
-      throw userError;
-    }
-
-    const steamInput = userData?.steam_id?.trim();
+    // Get user's Steam ID from category profile first, then fallback to users.steam_id
+    const steamInput = await getUserSteamInput(supabase, session.user.id);
     if (!steamInput) {
       console.error('[Steam Sync Start] No steam_id in user profile');
       throw new Error('You have not set a Steam ID in your profile. Go to settings to add it.');
@@ -146,7 +177,7 @@ async function POSTHandler() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const message = error instanceof Error ? error.message : 'Failed to start Steam sync';
+    const message = extractErrorMessage(error);
     console.error('[Steam Sync Start] Error:', error);
     return NextResponse.json({ error: message }, { status: 500 });
   }

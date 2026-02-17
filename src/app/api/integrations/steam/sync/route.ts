@@ -66,6 +66,48 @@ type SyncResult = {
   };
 };
 
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'object' && error !== null) {
+    const maybeMessage = (error as { message?: unknown }).message;
+    if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
+      return maybeMessage;
+    }
+  }
+  return fallback;
+}
+
+async function getUserSteamInput(
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
+  userId: string,
+): Promise<string | null> {
+  const [{ data: userData, error: userError }, { data: categoryData, error: categoryError }] =
+    await Promise.all([
+      supabase.from('users').select('steam_id').eq('id', userId).maybeSingle(),
+      supabase.from('user_category_profiles').select('profiles').eq('user_id', userId).maybeSingle(),
+    ]);
+
+  if (userError) {
+    console.error('[Steam Sync] User fetch error:', userError);
+    throw new Error(userError.message || 'Failed to fetch user profile');
+  }
+
+  if (categoryError) {
+    console.error('[Steam Sync] Category profile fetch error:', categoryError);
+    throw new Error(categoryError.message || 'Failed to fetch category profile');
+  }
+
+  const categorySteamIdRaw = (
+    categoryData?.profiles as { games?: { steam_id?: string | null } } | null | undefined
+  )?.games?.steam_id;
+  const categorySteamId = typeof categorySteamIdRaw === 'string' ? categorySteamIdRaw.trim() : '';
+  const userSteamId = userData?.steam_id?.trim() ?? '';
+
+  return categorySteamId || userSteamId || null;
+}
+
 async function createSyncJob(userId: string): Promise<string> {
   const supabase = await createRouteHandlerClient();
   const jobId = randomUUID();
@@ -416,18 +458,7 @@ async function syncSteamForUser(options?: {
 
   await updateProgress('Connecting to Steam profile...');
 
-  const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('steam_id')
-    .eq('id', session.user.id)
-    .maybeSingle();
-
-  if (userError) {
-    console.error('[Steam Sync] User fetch error:', userError);
-    throw userError;
-  }
-
-  const steamInput = userData?.steam_id?.trim();
+  const steamInput = await getUserSteamInput(supabase, session.user.id);
   if (!steamInput) {
     console.error('[Steam Sync] No steam_id in user profile');
     throw new Error('No Steam ID is set in your profile. Go to settings to add it.');
@@ -920,7 +951,7 @@ async function POSTHandler(req: Request) {
     return NextResponse.json({ ...result, jobId });
   } catch (error) {
     if (jobId) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = extractErrorMessage(error, 'Unknown error');
       await updateSyncJob(jobId, {
         status: 'failed',
         message: 'Steam sync failed',
@@ -933,7 +964,7 @@ async function POSTHandler(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const message = error instanceof Error ? error.message : 'Steam library sync failed';
+    const message = extractErrorMessage(error, 'Steam library sync failed');
     console.error('Steam sync error:', error);
     return NextResponse.json({ error: message, jobId }, { status: 500 });
   }
@@ -968,7 +999,7 @@ async function GETHandler(req: Request) {
     return NextResponse.redirect(buildBacklogRedirect(req.url, 'success').toString());
   } catch (error) {
     if (jobId) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = extractErrorMessage(error, 'Unknown error');
       await updateSyncJob(jobId, {
         status: 'failed',
         message: 'Steam sync failed',
@@ -983,7 +1014,7 @@ async function GETHandler(req: Request) {
       );
     }
 
-    const message = error instanceof Error ? error.message : 'steam_sync_failed';
+    const message = extractErrorMessage(error, 'steam_sync_failed');
     console.error('Steam sync error:', error);
     return NextResponse.redirect(
       buildBacklogRedirect(req.url, 'error', message.slice(0, 120)).toString(),
