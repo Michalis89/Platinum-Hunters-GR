@@ -4,15 +4,15 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import type { User } from '@/types/user';
-import type { Json } from '@/lib/supabase/database.types';
 import type { CategoryProfiles } from '@/lib/validation/profile';
-import { enrichCategoryProfilesWithInsights } from '@/lib/profile/insight-genres';
+import { fetchTopGenres } from '@/lib/profile/genre-affinity';
 
 /**
  * GET /api/me
  * Fetch current authenticated user's profile from new structure
  * - location_city: users.location_city (dedicated column)
  * - category_profile: user_category_profiles.profiles (dedicated table)
+ * - genre_affinity: user_genre_affinity table (computed genre scores)
  */
 const handler = withApiRoute(async (request: Request) => {
   try {
@@ -39,38 +39,19 @@ const handler = withApiRoute(async (request: Request) => {
         .eq('user_id', userId)
         .maybeSingle();
 
-      let categoryProfileValue = (categoryProfile?.profiles as CategoryProfiles | null) || null;
-      if (categoryProfileValue) {
-        const enrichedProfiles = await enrichCategoryProfilesWithInsights(
-          supabase,
-          userId,
-          categoryProfileValue,
-        );
-        const oldSerialized = JSON.stringify(categoryProfileValue);
-        const newSerialized = JSON.stringify(enrichedProfiles);
-        if (oldSerialized !== newSerialized) {
-          const { error: syncError } = await supabase.from('user_category_profiles').upsert(
-            {
-              user_id: userId,
-              profiles: enrichedProfiles as unknown as Json,
-            },
-            { onConflict: 'user_id' },
-          );
-          if (!syncError) {
-            categoryProfileValue = enrichedProfiles;
-          }
-        } else {
-          categoryProfileValue = enrichedProfiles;
-        }
-      }
+      const categoryProfileValue = (categoryProfile?.profiles as CategoryProfiles | null) || null;
 
-      // Return user with category_profile from new table
+      // Fetch top genres (all top 8 per category, no threshold filtering)
+      const topGenres = await fetchTopGenres(supabase, userId);
+
+      // Return user with category_profile and genre_affinity as separate fields
       const response = {
         ...user,
         category_profile: categoryProfileValue,
+        genre_affinity: topGenres,
       };
 
-      return ok(response as User & { category_profile: unknown });
+      return ok(response as User & { category_profile: unknown; genre_affinity: Record<string, string[]> });
     }
 
     return fail({ error: 'Method not allowed', code: 'METHOD_NOT_ALLOWED' }, 405, {

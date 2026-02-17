@@ -1129,6 +1129,7 @@ export default function EditProfilePage() {
                     handleCategoryNoteField(cat, key)(value)
                   }
                   onCategoryListToggle={handleCategoryListToggle}
+                  genreAffinity={user.genre_affinity}
                 />
               </CardContent>
             </Card>

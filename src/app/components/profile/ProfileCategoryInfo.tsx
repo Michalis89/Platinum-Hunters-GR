@@ -5,6 +5,7 @@ import EmptyState from '@/components/ui/empty';
 type ProfileCategoryInfoProps = {
   category: string;
   categoryNotes: Record<string, unknown>;
+  genreAffinity?: Record<string, string[]>;
 };
 
 function InfoRow({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
@@ -43,8 +44,10 @@ function ChipList({ items, label }: Readonly<{ items: string[]; label: string }>
 export function ProfileCategoryInfo({
   category,
   categoryNotes,
+  genreAffinity,
 }: Readonly<ProfileCategoryInfoProps>) {
   const notes = categoryNotes[category] as Record<string, unknown> | undefined;
+  const affinityGenres = genreAffinity?.[category] ?? [];
 
   if (category === 'games') {
     // Read from category_profile.games (NEW SOURCE)
@@ -66,7 +69,7 @@ export function ProfileCategoryInfo({
       gamesNotes?.steam_id ||
       gamesNotes?.nintendo_id ||
       gamesNotes?.favorite_platform ||
-      (gamesNotes?.user_favorite_genres && gamesNotes.user_favorite_genres.length > 0);
+      affinityGenres.length > 0;
 
     if (!hasGamingInfo) {
       return <EmptyState title="No gaming details saved yet." size="sm" />;
@@ -87,8 +90,8 @@ export function ProfileCategoryInfo({
             <InfoRow label="Favorite Platform">{gamesNotes.favorite_platform}</InfoRow>
           )}
         </div>
-        {gamesNotes?.user_favorite_genres && gamesNotes.user_favorite_genres.length > 0 && (
-          <ChipList items={gamesNotes.user_favorite_genres} label="Favorite Genres" />
+        {affinityGenres.length > 0 && (
+          <ChipList items={affinityGenres} label="Top Genres" />
         )}
       </div>
     );
@@ -116,7 +119,7 @@ export function ProfileCategoryInfo({
           <ChipList items={tvNotes.services} label="Streaming Services" />
         )}
         {tvNotes.service_other && <InfoRow label="Other Service">{tvNotes.service_other}</InfoRow>}
-        {tvNotes.genres?.length && <ChipList items={tvNotes.genres} label="Favorite Genres" />}
+        {affinityGenres.length > 0 && <ChipList items={affinityGenres} label="Favorite Genres" />}
         {tvNotes.style && <InfoRow label="Watching Style">{tvNotes.style}</InfoRow>}
       </div>
     );
@@ -147,8 +150,8 @@ export function ProfileCategoryInfo({
         {moviesNotes.service_other && (
           <InfoRow label="Other Service">{moviesNotes.service_other}</InfoRow>
         )}
-        {moviesNotes.genres?.length && (
-          <ChipList items={moviesNotes.genres} label="Favorite Genres" />
+        {affinityGenres.length > 0 && (
+          <ChipList items={affinityGenres} label="Top Genres" />
         )}
         {moviesNotes.style && <InfoRow label="Watching Style">{moviesNotes.style}</InfoRow>}
       </div>
@@ -180,8 +183,8 @@ export function ProfileCategoryInfo({
         {animeNotes.platform_other && (
           <InfoRow label="Other Platform">{animeNotes.platform_other}</InfoRow>
         )}
-        {animeNotes.genres?.length && (
-          <ChipList items={animeNotes.genres} label="Favorite Genres" />
+        {affinityGenres.length > 0 && (
+          <ChipList items={affinityGenres} label="Top Genres" />
         )}
         {animeNotes.format && <InfoRow label="Watching Format">{animeNotes.format}</InfoRow>}
         {animeNotes.notes && <InfoRow label="Notes">{animeNotes.notes}</InfoRow>}
@@ -206,8 +209,8 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {booksNotes.genres?.length && (
-          <ChipList items={booksNotes.genres} label="Favorite Genres" />
+        {affinityGenres.length > 0 && (
+          <ChipList items={affinityGenres} label="Top Genres" />
         )}
         {booksNotes.format && <InfoRow label="Reading Format">{booksNotes.format}</InfoRow>}
         {booksNotes.notes && <InfoRow label="Notes">{booksNotes.notes}</InfoRow>}
@@ -232,8 +235,8 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {mangaNotes.genres?.length && (
-          <ChipList items={mangaNotes.genres} label="Favorite Genres" />
+        {affinityGenres.length > 0 && (
+          <ChipList items={affinityGenres} label="Top Genres" />
         )}
         {mangaNotes.format && <InfoRow label="Reading Format">{mangaNotes.format}</InfoRow>}
         {mangaNotes.notes && <InfoRow label="Notes">{mangaNotes.notes}</InfoRow>}

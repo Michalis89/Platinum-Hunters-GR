@@ -125,12 +125,11 @@ const toTimestamp = (value: string | null | undefined) => {
   return Number.isNaN(parsed) ? 0 : parsed;
 };
 
+const getEntryActivityTimestamp = (entry: Pick<ContinueEntry, 'updated_at' | 'created_at'>) =>
+  toTimestamp(entry.updated_at ?? entry.created_at);
+
 const compareEntryDates = (a: ContinueEntry, b: ContinueEntry) => {
-  const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-  if (updatedDiff !== 0) {
-    return updatedDiff;
-  }
-  return toTimestamp(b.created_at) - toTimestamp(a.created_at);
+  return getEntryActivityTimestamp(b) - getEntryActivityTimestamp(a);
 };
 
 const resolveTitle = (media: MediaPreview | null) =>
@@ -560,13 +559,9 @@ export async function fetchContinueData(userId: string): Promise<ContinueData> {
     });
   }
 
-  const slides = Array.from(latestByCategory.values()).sort((a, b) => {
-    const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-    if (updatedDiff !== 0) {
-      return updatedDiff;
-    }
-    return toTimestamp(b.created_at) - toTimestamp(a.created_at);
-  });
+  const slides = Array.from(latestByCategory.values()).sort(
+    (a, b) => toTimestamp(b.updated_at || b.created_at) - toTimestamp(a.updated_at || a.created_at),
+  );
 
   const { data: countEntries, error: countError } = await supabase
     .from('user_media_entries')

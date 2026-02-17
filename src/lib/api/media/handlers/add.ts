@@ -17,6 +17,7 @@ import { resolveTitle } from '../utils/title-resolver';
 import { findExistingMedia } from '../utils/media-lookup';
 import '../handlers/enrichers'; // Import to initialize enricher functions in configs
 import { isAllowedIgdbGameCandidate } from '@/lib/igdb/categories';
+import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
 
 /**
  * Generic handler for POST /api/{category}/add
@@ -93,6 +94,7 @@ async function handleLocalSource(
         media_id: body.mediaId!,
         status: body.status ?? 'planned',
         is_favorite: body.is_favorite ?? false,
+        selected_platform: body.selected_platform ?? null,
         progress: body.progress ?? null,
         score: body.score ?? null,
         notes: body.notes ?? null,
@@ -106,6 +108,9 @@ async function handleLocalSource(
   if (entryError) {
     throw entryError;
   }
+
+  // Recompute genre affinity in the background
+  void refreshGenreAffinity(supabase, userId);
 
   // Log activity
   await insertActivity(supabase, userId, 'media_added', {
@@ -212,6 +217,7 @@ async function handleExternalSource(
         media_id: mediaId,
         status: body.status ?? 'planned',
         is_favorite: body.is_favorite ?? false,
+        selected_platform: body.selected_platform ?? null,
         progress: body.progress ?? null,
         score: body.score ?? null,
         notes: body.notes ?? null,
@@ -225,6 +231,9 @@ async function handleExternalSource(
   if (entryError) {
     throw entryError;
   }
+
+  // Recompute genre affinity in the background
+  void refreshGenreAffinity(supabase, userId);
 
   // Resolve title from payload
   const mediaTitle = resolveTitle(payload!, config.titlePriority);

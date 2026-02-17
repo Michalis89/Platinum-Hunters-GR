@@ -12,6 +12,7 @@ import {
   type MalSyncCategory,
   type MalAnimeListItem,
 } from '@/lib/integrations/mal';
+import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
 
 type IntegrationRow = {
   user_id: string;
@@ -251,6 +252,11 @@ async function POSTHandler(req: Request) {
       if (entryInsertError) {
         throw entryInsertError;
       }
+    }
+
+    // Recompute genre affinity after import
+    if (userEntryPayload.length > 0) {
+      void refreshGenreAffinity(supabase, session.user.id);
     }
 
     const mediaInserted = uniqueMalItems.filter(item => !existingMalIds.has(item.node.id)).length;

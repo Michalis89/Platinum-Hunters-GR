@@ -48,7 +48,13 @@ type ProfileCategoryTabsProps = {
   onPetEntryField: (type: string, key: string, value: string) => void;
   onCategoryFieldChange: (cat: string, key: string, value: string | number | string[]) => void;
   onCategoryListToggle: (cat: string, key: string, item: string) => void;
+  genreAffinity?: Record<string, string[]>;
 };
+
+// Helper to get affinity genres for a category
+function getAffinityGenres(genreAffinity: Record<string, string[]> | undefined, category: string): string[] {
+  return genreAffinity?.[category] ?? [];
+}
 
 const TAB_LABELS: Record<string, string> = {
   games: 'Gaming',
@@ -80,8 +86,8 @@ const ANIME_PLATFORMS = [
 ];
 const MANGA_FORMATS = ['Physical', 'Digital', 'Webtoon', 'Mixed'];
 const BOOK_FORMATS = ['Physical books', 'eBooks', 'Audiobooks', 'Mixed', 'Depends on the book'];
-const GENRE_INSIGHTS_TOOLTIP = 'Genres are auto-generated from your Personal Insights.';
-const NO_INSIGHTS_GENRES_MESSAGE = 'You should import some data in order to see the genres.';
+const GENRE_INSIGHTS_TOOLTIP = 'Genres are auto-generated from your Library.';
+const NO_INSIGHTS_GENRES_MESSAGE = 'Add items to your Library to see your top genres.';
 const CATEGORY_TAB_ORDER = [
   'games',
   'anime',
@@ -115,6 +121,7 @@ export function ProfileCategoryTabs({
   onPetEntryField,
   onCategoryFieldChange,
   onCategoryListToggle,
+  genreAffinity,
 }: ProfileCategoryTabsProps) {
   const orderedCategories = useMemo(() => {
     const enabled = categories.filter(category => TAB_LABELS[category]);
@@ -218,10 +225,8 @@ export function ProfileCategoryTabs({
                 {category === 'games' && (
                   <div className="space-y-4">
                     {renderReadonlyGenres(
-                      'Favorite Genres',
-                      Array.isArray(gameForm.favorite_genres)
-                        ? gameForm.favorite_genres.map(String)
-                        : [],
+                      'Top Genres',
+                      getAffinityGenres(genreAffinity, 'games'),
                     )}
 
                     <div className="grid gap-4 md:grid-cols-2">
@@ -301,10 +306,7 @@ export function ProfileCategoryTabs({
                 {category === 'anime' && (
                   <div className="space-y-4">
                     {(() => {
-                      const animeGenres =
-                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                          ? (note.genres as string[])
-                          : [];
+                      const animeGenres = getAffinityGenres(genreAffinity, 'anime');
                       const platformsList =
                         Array.isArray(note.platforms) && (note.platforms as string[]).length > 0
                           ? (note.platforms as string[])
@@ -312,7 +314,7 @@ export function ProfileCategoryTabs({
 
                       return (
                         <>
-                          {renderReadonlyGenres('Favorite Anime Genres', animeGenres)}
+                          {renderReadonlyGenres('Top Genres', animeGenres)}
 
                           <div>
                             <label className="mb-2 block text-sm font-medium text-foreground">
@@ -380,13 +382,10 @@ export function ProfileCategoryTabs({
                 {category === 'manga' && (
                   <div className="space-y-4">
                     {(() => {
-                      const mangaGenres =
-                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                          ? (note.genres as string[])
-                          : [];
+                      const mangaGenres = getAffinityGenres(genreAffinity, 'manga');
                       return (
                         <>
-                          {renderReadonlyGenres('Favorite Genres / Demographics', mangaGenres)}
+                          {renderReadonlyGenres('Top Genres', mangaGenres)}
 
                           <div>
                             <label className="mb-2 block text-sm font-medium text-foreground">
@@ -423,13 +422,10 @@ export function ProfileCategoryTabs({
                 {category === 'books' && (
                   <div className="space-y-4">
                     {(() => {
-                      const bookGenres =
-                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                          ? (note.genres as string[])
-                          : [];
+                      const bookGenres = getAffinityGenres(genreAffinity, 'books');
                       return (
                         <>
-                          {renderReadonlyGenres('Favorite Book Genres', bookGenres)}
+                          {renderReadonlyGenres('Top Genres', bookGenres)}
 
                           <div>
                             <label className="mb-2 block text-sm font-medium text-foreground">
@@ -462,10 +458,7 @@ export function ProfileCategoryTabs({
                 {category === 'movies' && (
                   <div className="space-y-4">
                     {(() => {
-                      const movieGenres =
-                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                          ? (note.genres as string[])
-                          : [];
+                      const movieGenres = getAffinityGenres(genreAffinity, 'movies');
                       const serviceOptions = CATEGORY_SERVICES.movies || ['Other'];
                       const servicesList =
                         Array.isArray(note.services) && (note.services as string[]).length > 0
@@ -473,7 +466,7 @@ export function ProfileCategoryTabs({
                           : [];
                       return (
                         <>
-                          {renderReadonlyGenres('Favorite Movie Genres', movieGenres)}
+                          {renderReadonlyGenres('Top Genres', movieGenres)}
 
                           <div>
                             <label className="mb-2 block text-sm font-medium text-foreground">
@@ -549,10 +542,7 @@ export function ProfileCategoryTabs({
                 {category === 'tv' && (
                   <div className="space-y-4">
                     {(() => {
-                      const tvGenres =
-                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                          ? (note.genres as string[])
-                          : [];
+                      const tvGenres = getAffinityGenres(genreAffinity, 'tv');
                       const serviceOptions = CATEGORY_SERVICES.tv || ['Other'];
                       const services =
                         (note.services as string[] | undefined) && Array.isArray(note.services)
@@ -560,7 +550,7 @@ export function ProfileCategoryTabs({
                           : [];
                       return (
                         <>
-                          {renderReadonlyGenres('Favorite TV Genres', tvGenres)}
+                          {renderReadonlyGenres('Top Genres', tvGenres)}
 
                           <div>
                             <label className="mb-2 block text-sm font-medium text-foreground">

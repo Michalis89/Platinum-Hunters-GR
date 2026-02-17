@@ -92,7 +92,7 @@ export default function ProfilePage() {
             </p>
           </header>
 
-          <ProfileCategoryInfo category={category} categoryNotes={categoryNotes} />
+          <ProfileCategoryInfo category={category} categoryNotes={categoryNotes} genreAffinity={user.genre_affinity} />
         </article>
       ))}
     </div>

@@ -50,6 +50,7 @@ export type User = Omit<
   // New fields from refactor (returned by /api/me)
   location_city?: string | null;
   category_profile?: CategoryProfiles | null;
+  genre_affinity?: Record<string, string[]>;
 };
 
 export interface PublicUserProfile {

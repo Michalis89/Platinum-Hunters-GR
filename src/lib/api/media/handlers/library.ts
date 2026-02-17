@@ -16,6 +16,7 @@ import type { MediaCategoryConfig } from '../config';
 import type { UpdateLibraryRequestBody, LibraryRow, UserProfile } from '../types';
 import { mapLibraryEntry } from '../utils/entry-mapper';
 import { resolveTitle } from '../utils/title-resolver';
+import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
 
 /**
  * Generic handler for GET /api/{category}/library
@@ -161,6 +162,9 @@ export async function handleLibraryPatch(
       throw error;
     }
 
+    // Recompute genre affinity in the background
+    void refreshGenreAffinity(supabase, session.user.id);
+
     // Fetch user profile and media info for activity logging
     const profileData = await getUserBasicInfo(supabase, session.user.id);
 
@@ -251,6 +255,9 @@ export async function handleLibraryDelete(
     if (error) {
       throw error;
     }
+
+    // Recompute genre affinity in the background
+    void refreshGenreAffinity(supabase, session.user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

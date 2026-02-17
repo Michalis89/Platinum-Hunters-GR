@@ -9,7 +9,6 @@ import {
   mergeCategoryProfiles,
   type CategoryProfiles,
 } from '@/lib/validation/profile';
-import { enrichCategoryProfilesWithInsights } from '@/lib/profile/insight-genres';
 
 const handler = withApiRoute(async (request: Request) => {
   try {
@@ -72,14 +71,9 @@ const handler = withApiRoute(async (request: Request) => {
         .eq('user_id', userId)
         .maybeSingle();
 
-      // Merge patch into existing profiles
+      // Merge patch into existing profiles (genres are NOT stored here anymore)
       const existingProfiles = (existing?.profiles as CategoryProfiles) || {};
       const mergedProfiles = mergeCategoryProfiles(existingProfiles, parsed.data);
-      const enrichedProfiles = await enrichCategoryProfilesWithInsights(
-        supabase,
-        userId,
-        mergedProfiles,
-      );
 
       // Upsert
       const { data: updated, error: upsertError } = await supabase
@@ -87,7 +81,7 @@ const handler = withApiRoute(async (request: Request) => {
         .upsert(
           {
             user_id: userId,
-            profiles: enrichedProfiles as unknown as Json,
+            profiles: mergedProfiles as unknown as Json,
           },
           {
             onConflict: 'user_id',

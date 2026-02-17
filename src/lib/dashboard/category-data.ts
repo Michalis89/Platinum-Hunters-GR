@@ -1,4 +1,4 @@
-import { subDays, formatDistanceToNowStrict, format } from 'date-fns';
+import { subDays, format } from 'date-fns';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { DEFAULT_COVER } from '@/lib/constants/messages';
 
@@ -308,45 +308,16 @@ const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSe
   mediaSuggestions: [],
 });
 
-function buildEmptySpotlights(category: DashboardCategoryKey): CategorySpotlightCard[] {
-  const titleBase = `${CATEGORY_LABELS[category]} insights`;
-  return Array.from({ length: 4 }, (_, index) => ({
-    id: `empty-${category}-${index}`,
-    title: titleBase,
-    explanation: `Log ${CATEGORY_LABELS[category].toLowerCase()} entries to surface this insight.`,
-    dataSubtitle: 'Waiting for your data',
-  }));
-}
-
 function normalizeTasteProfileLabels(item: CategoryTasteProfileItem): string[] {
-  const source = item.genres.length > 0 ? item.genres : item.tags;
-  const normalized = new Set<string>();
-
-  for (const value of source) {
-    const label = value?.trim().replace(/\s+/g, ' ').toLowerCase();
-    if (!label) {
-      continue;
-    }
-    normalized.add(label);
+  if (item.genres.length > 0) {
+    return pickTopGenresForItem(item.genres);
   }
 
-  return Array.from(normalized);
+  return pickTopBucketLabels('theme', item.tags.map(normalizePreferenceLabel).filter(Boolean), 2);
 }
 
 function normalizeBucketLabels(item: CategoryTasteProfileItem, bucket: InsightTagBucket): string[] {
-  const values = item.bucketTags?.[bucket] ?? [];
-  const normalized = new Set<string>();
-  for (const value of values) {
-    const label = canonicalizeBucketLabel(
-      bucket,
-      value?.trim().replace(/\s+/g, ' ').toLowerCase() ?? '',
-    );
-    if (!label) {
-      continue;
-    }
-    normalized.add(label);
-  }
-  return Array.from(normalized);
+  return pickTopBucketLabels(bucket, item.bucketTags?.[bucket] ?? []);
 }
 
 function canonicalizeBucketLabel(bucket: InsightTagBucket, label: string): string {
@@ -354,9 +325,24 @@ function canonicalizeBucketLabel(bucket: InsightTagBucket, label: string): strin
     return '';
   }
   if (bucket === 'subgenre') {
-    const normalizedKey = label.replace(/[_\s]+/g, '-').replace(/-+/g, '-');
-    if (normalizedKey === 'role-playing-game' || normalizedKey === 'rpg') {
+    const normalizedKey = label
+      .replace(/[()]/g, ' ')
+      .replace(/[_/\s]+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+    if (
+      normalizedKey === 'role-playing-game' ||
+      normalizedKey === 'role-playing-rpg' ||
+      normalizedKey === 'rpg'
+    ) {
       return 'rpg';
+    }
+    if (
+      normalizedKey === 'turn-based-strategy' ||
+      normalizedKey === 'turn-based-strategy-tbs' ||
+      normalizedKey === 'tbs'
+    ) {
+      return 'turn-based';
     }
     return label;
   }
@@ -928,13 +914,6 @@ function getCategoryTotal(
   }
 }
 
-function formatRelativeDistance(timestamp?: string | null): string {
-  if (!timestamp) {
-    return 'Recently';
-  }
-  return formatDistanceToNowStrict(new Date(timestamp), { addSuffix: true });
-}
-
 function enrichEntry(
   entry: CategoryEntryRow,
   category: DashboardCategoryKey,
@@ -1019,72 +998,6 @@ function buildFavoriteEntryCards(
   ).map(entry => enrichEntry(entry, category));
 }
 
-function buildSpotlights(
-  category: DashboardCategoryKey,
-  entries: CategoryEntryRow[],
-): CategorySpotlightCard[] {
-  switch (category) {
-    case 'games':
-      return buildGameSpotlights(entries);
-    case 'books':
-      return buildBookSpotlights(entries);
-    case 'anime':
-      return buildAnimeSpotlights(entries);
-    case 'manga':
-      return buildMangaSpotlights(entries);
-    case 'movies':
-      return buildMovieSpotlights(entries);
-    case 'tv':
-      return buildTvSpotlights(entries);
-    default:
-      return buildEmptySpotlights(category);
-  }
-}
-void buildSpotlights;
-
-function buildSpotlightEntry(
-  entry: CategoryEntryRow,
-  category: DashboardCategoryKey,
-  percent?: number,
-): CategorySpotlightEntry {
-  const media = entry.media_items!;
-  return {
-    title: resolveTitle(media) ?? CATEGORY_LABELS[category],
-    cover: getCover(media),
-    detail: percent ? `${percent}% complete` : undefined,
-    progressPercent: percent ?? computeProgressPercent(entry, media, category),
-  };
-}
-
-function ensureFourSpotlights(
-  cards: CategorySpotlightCard[],
-  category: DashboardCategoryKey,
-): CategorySpotlightCard[] {
-  const picked: CategorySpotlightCard[] = [];
-  const seen = new Set<string>();
-  for (const card of cards) {
-    if (seen.has(card.id)) {
-      continue;
-    }
-    seen.add(card.id);
-    picked.push(card);
-    if (picked.length === 4) {
-      break;
-    }
-  }
-
-  while (picked.length < 4) {
-    picked.push({
-      id: `fill-${category}-${picked.length}`,
-      title: 'More activity needed',
-      explanation: `Add ${CATEGORY_LABELS[category].toLowerCase()} entries to unlock this insight.`,
-      dataSubtitle: 'Waiting for data',
-    });
-  }
-
-  return picked;
-}
-
 const GAMES_PLATFORM_INSUFFICIENT_DATA = 'Not enough data to compare platforms yet.';
 const MIN_PLATFORM_ENTRIES_FOR_COMPARISON = 3;
 
@@ -1167,657 +1080,6 @@ function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightP
   return { rows, best, worst, summary };
 }
 
-function buildGameSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[] {
-  const current = entries.filter(entry => entry.status === 'current');
-  const completed = entries
-    .filter(entry => entry.status === 'completed')
-    .sort(
-      (a, b) =>
-        Number(new Date(b.updated_at ?? b.created_at ?? 0)) -
-        Number(new Date(a.updated_at ?? a.created_at ?? 0)),
-    );
-
-  const closest = current
-    .map(entry => ({
-      entry,
-      percent: computeProgressPercent(entry, entry.media_items!, 'games') ?? 0,
-    }))
-    .filter(item => item.percent > 0)
-    .sort((a, b) => b.percent - a.percent)[0];
-
-  const stale = current.find(entry => {
-    if (!entry.updated_at) {
-      return false;
-    }
-    return new Date(entry.updated_at) < subDays(new Date(), 14);
-  });
-
-  const recent = completed[0];
-  const cards: CategorySpotlightCard[] = [];
-
-  if (closest) {
-    cards.push({
-      id: 'games-closest',
-      title: 'Closest to finish',
-      explanation: `You are ${closest.percent}% through ${
-        resolveTitle(closest.entry.media_items!) ?? 'this game'
-      }.`,
-      dataSubtitle: formatRelativeDistance(closest.entry.updated_at),
-      entry: buildSpotlightEntry(closest.entry, 'games', closest.percent),
-      ctaLabel: 'Continue playing',
-    });
-  } else {
-    cards.push({
-      id: 'games-closest-empty',
-      title: 'Closest to finish',
-      explanation: 'No in-progress games above 70% yet. Keep going to surface one.',
-      dataSubtitle: 'Track more progress to unlock this card.',
-    });
-  }
-
-  if (stale) {
-    cards.push({
-      id: 'games-stale',
-      title: 'Stale in progress',
-      explanation: 'This game has not been updated in over two weeks.',
-      dataSubtitle: formatRelativeDistance(stale.updated_at),
-      entry: buildSpotlightEntry(stale, 'games'),
-      ctaLabel: 'Resume now',
-    });
-  } else {
-    cards.push({
-      id: 'games-stale-empty',
-      title: 'Stale in progress',
-      explanation: 'All current games have had recent activity. Nice momentum.',
-      dataSubtitle: 'No stale entries.',
-    });
-  }
-
-  if (recent) {
-    cards.push({
-      id: 'games-completed',
-      title: 'Recently completed',
-      explanation: 'You just cleared this game—great work!',
-      dataSubtitle: formatRelativeDistance(recent.updated_at),
-      entry: buildSpotlightEntry(recent, 'games'),
-    });
-  } else {
-    cards.push({
-      id: 'games-completed-empty',
-      title: 'Recently completed',
-      explanation: 'Finish a game to surface your latest completion here.',
-      dataSubtitle: 'No completions yet.',
-    });
-  }
-
-  return ensureFourSpotlights(cards, 'games');
-}
-
-function buildBookSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[] {
-  const current = entries.filter(entry => entry.status === 'current');
-  const completed = entries
-    .filter(entry => entry.status === 'completed')
-    .sort(
-      (a, b) =>
-        Number(new Date(b.updated_at ?? b.created_at ?? 0)) -
-        Number(new Date(a.updated_at ?? a.created_at ?? 0)),
-    );
-
-  const closest = current
-    .map(entry => ({
-      entry,
-      percent: computeProgressPercent(entry, entry.media_items!, 'books') ?? 0,
-    }))
-    .filter(item => item.percent > 0)
-    .sort((a, b) => b.percent - a.percent)[0];
-
-  const longestRead = current
-    .filter(entry => entry.created_at)
-    .sort((a, b) => Number(new Date(a.created_at!)) - Number(new Date(b.created_at!)))[0];
-
-  const recent = completed[0];
-
-  const seriesReminder = entries.find(entry => {
-    if (!entry.media_items) {
-      return false;
-    }
-    const totalVolumes =
-      entry.media_items.volumes ??
-      entry.media_items.chapters ??
-      (entry.media_items.page_count ? Math.ceil(entry.media_items.page_count / 220) : undefined);
-    if (!totalVolumes || !entry.progress) {
-      return false;
-    }
-    return entry.progress < totalVolumes;
-  });
-
-  const cards: CategorySpotlightCard[] = [];
-
-  if (closest) {
-    cards.push({
-      id: 'books-closest',
-      title: 'Closest to finish',
-      explanation: `You are ${closest.percent}% through ${
-        resolveTitle(closest.entry.media_items!) ?? 'this book'
-      }.`,
-      dataSubtitle: formatRelativeDistance(closest.entry.updated_at),
-      entry: buildSpotlightEntry(closest.entry, 'books', closest.percent),
-    });
-  } else {
-    cards.push({
-      id: 'books-closest-empty',
-      title: 'Closest to finish',
-      explanation: 'No book is above 80% yet. Add some progress to highlight one.',
-      dataSubtitle: 'Track longer reads to surface this card.',
-    });
-  }
-
-  if (longestRead) {
-    cards.push({
-      id: 'books-longest',
-      title: 'Longest running read',
-      explanation: 'This book has been in your current list the longest.',
-      dataSubtitle: `Started ${formatRelativeDistance(longestRead.created_at)}`,
-      entry: buildSpotlightEntry(longestRead, 'books'),
-      ctaLabel: 'Pick up where you left off',
-    });
-  } else {
-    cards.push({
-      id: 'books-longest-empty',
-      title: 'Longest running read',
-      explanation: 'Add a book and keep it current to surface the oldest entry.',
-      dataSubtitle: 'No current books yet.',
-    });
-  }
-
-  if (recent) {
-    cards.push({
-      id: 'books-completed',
-      title: 'Recently completed',
-      explanation: 'You finished this book—nice work!',
-      dataSubtitle: formatRelativeDistance(recent.updated_at),
-      entry: buildSpotlightEntry(recent, 'books'),
-    });
-  } else {
-    cards.push({
-      id: 'books-completed-empty',
-      title: 'Recently completed',
-      explanation: 'Complete a read to highlight your latest finish here.',
-      dataSubtitle: 'No completions yet.',
-    });
-  }
-
-  if (seriesReminder) {
-    cards.push({
-      id: 'books-series',
-      title: 'Series continuation reminder',
-      explanation: 'You are partway through a multi-book series with more volumes ahead.',
-      dataSubtitle: formatRelativeDistance(seriesReminder.updated_at),
-      entry: buildSpotlightEntry(seriesReminder, 'books'),
-      ctaLabel: 'Check next volume',
-    });
-  } else {
-    cards.push({
-      id: 'books-series-empty',
-      title: 'Series continuation reminder',
-      explanation:
-        'Series data not yet available. Complete or add a series entry to fill this slot.',
-      dataSubtitle: 'No eligible series entries.',
-    });
-  }
-
-  return ensureFourSpotlights(cards, 'books');
-}
-
-function buildAnimeSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[] {
-  const current = entries.filter(entry => entry.status === 'current');
-  const completed = entries
-    .filter(entry => entry.status === 'completed')
-    .sort(
-      (a, b) =>
-        Number(new Date(b.updated_at ?? b.created_at ?? 0)) -
-        Number(new Date(a.updated_at ?? a.created_at ?? 0)),
-    );
-
-  const nextEpisodeReady = current
-    .map(entry => ({
-      entry,
-      percent: computeProgressPercent(entry, entry.media_items!, 'anime') ?? 0,
-    }))
-    .filter(item => entryHasEpisodes(item.entry, 'anime') && item.percent < 100)
-    .sort((a, b) => b.percent - a.percent)[0];
-
-  const almostFinished = current
-    .map(entry => ({
-      entry,
-      percent: computeProgressPercent(entry, entry.media_items!, 'anime') ?? 0,
-    }))
-    .filter(item => item.percent >= 85)
-    .sort((a, b) => b.percent - a.percent)[0];
-
-  const recent = completed[0];
-
-  const dropInsight = buildDropPattern(entries);
-
-  const cards: CategorySpotlightCard[] = [];
-
-  if (nextEpisodeReady) {
-    cards.push({
-      id: 'anime-next',
-      title: 'Next episode ready',
-      explanation: 'You are in-progress with a show that still has unwatched episodes.',
-      dataSubtitle: formatRelativeDistance(nextEpisodeReady.entry.updated_at),
-      entry: buildSpotlightEntry(nextEpisodeReady.entry, 'anime', nextEpisodeReady.percent),
-      ctaLabel: 'Watch episode',
-    });
-  } else {
-    cards.push({
-      id: 'anime-next-empty',
-      title: 'Next episode ready',
-      explanation:
-        'No current anime with enough progress yet. Keep watching to unlock this insight.',
-      dataSubtitle: 'No entries need a next episode reminder.',
-    });
-  }
-
-  if (almostFinished) {
-    cards.push({
-      id: 'anime-almost',
-      title: 'Almost finished',
-      explanation: 'This show is more than 85% complete.',
-      dataSubtitle: formatRelativeDistance(almostFinished.entry.updated_at),
-      entry: buildSpotlightEntry(almostFinished.entry, 'anime', almostFinished.percent),
-    });
-  } else {
-    cards.push({
-      id: 'anime-almost-empty',
-      title: 'Almost finished',
-      explanation: 'No shows currently above 85%. Push one farther for this card.',
-      dataSubtitle: 'Track progress to surface a near-completion.',
-    });
-  }
-
-  if (recent) {
-    cards.push({
-      id: 'anime-completed',
-      title: 'Recently completed',
-      explanation: 'You finished this anime—well done!',
-      dataSubtitle: formatRelativeDistance(recent.updated_at),
-      entry: buildSpotlightEntry(recent, 'anime'),
-    });
-  } else {
-    cards.push({
-      id: 'anime-completed-empty',
-      title: 'Recently completed',
-      explanation: 'Complete a show to spotlight your latest finish.',
-      dataSubtitle: 'No completions this period.',
-    });
-  }
-
-  cards.push({
-    id: 'anime-drop',
-    title: 'Drop pattern insight',
-    explanation: dropInsight.explanation,
-    dataSubtitle: dropInsight.subtitle,
-  });
-
-  return ensureFourSpotlights(cards, 'anime');
-}
-
-function buildMangaSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[] {
-  const current = entries.filter(entry => entry.status === 'current');
-  const completed = entries.filter(entry => entry.status === 'completed');
-
-  const catchUp = current.find(entry => {
-    const media = entry.media_items;
-    if (!media) {
-      return false;
-    }
-    const totalVolumes = media.volumes ?? media.chapters ?? 0;
-    if (!entry.progress) {
-      return false;
-    }
-    return totalVolumes > entry.progress;
-  });
-
-  const almostFinished = current
-    .map(entry => ({
-      entry,
-      percent: computeProgressPercent(entry, entry.media_items!, 'manga') ?? 0,
-    }))
-    .filter(item => item.percent >= 85)
-    .sort((a, b) => b.percent - a.percent)[0];
-
-  const hiatus = current.find(entry => {
-    if (!entry.updated_at) {
-      return false;
-    }
-    return new Date(entry.updated_at) < subDays(new Date(), 21);
-  });
-
-  const completionRatio =
-    completed.length === 0
-      ? 0
-      : Math.round(
-          (completed.length /
-            (completed.length +
-              current.length +
-              entries.filter(e => e.status === 'dropped').length)) *
-            100,
-        );
-
-  const cards: CategorySpotlightCard[] = [];
-
-  if (catchUp) {
-    cards.push({
-      id: 'manga-catchup',
-      title: 'Volume catch-up',
-      explanation: 'You are behind the latest volume for this series.',
-      dataSubtitle: formatRelativeDistance(catchUp.updated_at),
-      entry: buildSpotlightEntry(catchUp, 'manga'),
-      ctaLabel: 'Catch up',
-    });
-  } else {
-    cards.push({
-      id: 'manga-catchup-empty',
-      title: 'Volume catch-up',
-      explanation: 'No entries are unusually behind. Keep reading to unlock a catch-up prompt.',
-      dataSubtitle: 'All current entries are near release.',
-    });
-  }
-
-  if (almostFinished) {
-    cards.push({
-      id: 'manga-almost',
-      title: 'Almost finished',
-      explanation: 'This manga is nearly complete.',
-      dataSubtitle: formatRelativeDistance(almostFinished.entry.updated_at),
-      entry: buildSpotlightEntry(almostFinished.entry, 'manga', almostFinished.percent),
-    });
-  } else {
-    cards.push({
-      id: 'manga-almost-empty',
-      title: 'Almost finished',
-      explanation: 'Push a current manga past 85% to highlight it here.',
-      dataSubtitle: 'No near-completions.',
-    });
-  }
-
-  if (hiatus) {
-    cards.push({
-      id: 'manga-hiatus',
-      title: 'Long hiatus reading',
-      explanation: 'This manga hasn’t been updated in over three weeks.',
-      dataSubtitle: formatRelativeDistance(hiatus.updated_at),
-      entry: buildSpotlightEntry(hiatus, 'manga'),
-    });
-  } else {
-    cards.push({
-      id: 'manga-hiatus-empty',
-      title: 'Long hiatus reading',
-      explanation: 'No long-lived entries yet. Keep momentum going to unlock this card.',
-      dataSubtitle: 'No stalled entries found.',
-    });
-  }
-
-  cards.push({
-    id: 'manga-completion',
-    title: 'Completion rate by length',
-    explanation: `You complete ${completionRatio}% of manga entries when you open them.`,
-    dataSubtitle: `${completed.length} completions · ${current.length} in-progress`,
-  });
-
-  return ensureFourSpotlights(cards, 'manga');
-}
-
-function buildMovieSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[] {
-  const planned = entries.filter(entry => entry.status === 'planned');
-  const completed = entries
-    .filter(entry => entry.status === 'completed')
-    .sort(
-      (a, b) =>
-        Number(new Date(b.updated_at ?? b.created_at ?? 0)) -
-        Number(new Date(a.updated_at ?? a.created_at ?? 0)),
-    );
-
-  const watchNext = planned
-    .filter(entry => {
-      if (!entry.created_at) {
-        return false;
-      }
-      return new Date(entry.created_at) >= subDays(new Date(), 14);
-    })
-    .sort((a, b) => Number(new Date(b.created_at!)) - Number(new Date(a.created_at!)))[0];
-
-  const studioCounts: Record<string, number> = {};
-  completed.forEach(entry => {
-    const studios = entry.media_items?.studios ?? [];
-    studios.forEach(studio => {
-      if (!studio) {
-        return;
-      }
-      studioCounts[studio] = (studioCounts[studio] ?? 0) + 1;
-    });
-  });
-  const topStudio = Object.entries(studioCounts).sort(([, a], [, b]) => b - a)[0];
-
-  const genreRatio = buildCompletionByGenre(entries);
-
-  const rewatchCount = entries.filter(entry =>
-    entry.notes?.toLowerCase().includes('rewatch'),
-  ).length;
-
-  const cards: CategorySpotlightCard[] = [];
-
-  if (watchNext) {
-    cards.push({
-      id: 'movies-watch-next',
-      title: 'Watch next',
-      explanation: 'You recently added this to your list but have not started it yet.',
-      dataSubtitle: formatRelativeDistance(watchNext.created_at),
-      entry: buildSpotlightEntry(watchNext, 'movies'),
-      ctaLabel: 'Start watching',
-    });
-  } else {
-    cards.push({
-      id: 'movies-watch-next-empty',
-      title: 'Watch next',
-      explanation: 'Add a recent plan to highlight your next pick.',
-      dataSubtitle: 'No fresh plans.',
-    });
-  }
-
-  if (topStudio && topStudio[1] >= 3) {
-    cards.push({
-      id: 'movies-director',
-      title: 'Director pattern',
-      explanation: `You complete ${topStudio[1]} titles from ${topStudio[0]}.`,
-      dataSubtitle: `${topStudio[0]} is your top studio.`,
-    });
-  } else {
-    cards.push({
-      id: 'movies-director-empty',
-      title: 'Director pattern',
-      explanation: 'We need more completions to surface a favorite director/studio.',
-      dataSubtitle: 'Fewer than 3 titles from any studio yet.',
-    });
-  }
-
-  cards.push({
-    id: 'movies-genre',
-    title: 'Completion ratio by genre',
-    explanation: genreRatio.explanation,
-    dataSubtitle: genreRatio.subtitle,
-  });
-
-  if (rewatchCount > 0) {
-    cards.push({
-      id: 'movies-rewatch',
-      title: 'Rewatch trend',
-      explanation: `You logged "${rewatchCount}" rewatch notes, signaling repeats.`,
-      dataSubtitle: `Notes mentioning rewatch`,
-    });
-  } else {
-    cards.push({
-      id: 'movies-rewatch-empty',
-      title: 'Rewatch trend',
-      explanation:
-        'No explicit rewatch notes yet. Note when you revisit a movie to track the trend.',
-      dataSubtitle: 'No rewatch notes found.',
-    });
-  }
-
-  return ensureFourSpotlights(cards, 'movies');
-}
-
-function buildTvSpotlights(entries: CategoryEntryRow[]): CategorySpotlightCard[] {
-  const current = entries.filter(entry => entry.status === 'current');
-  const completed = entries
-    .filter(entry => entry.status === 'completed')
-    .sort(
-      (a, b) =>
-        Number(new Date(b.updated_at ?? b.created_at ?? 0)) -
-        Number(new Date(a.updated_at ?? a.created_at ?? 0)),
-    );
-
-  const nextEpisodeReady = current
-    .map(entry => ({
-      entry,
-      percent: computeProgressPercent(entry, entry.media_items!, 'tv') ?? 0,
-    }))
-    .filter(item => entryHasEpisodes(item.entry, 'tv') && item.percent < 100)
-    .sort((a, b) => b.percent - a.percent)[0];
-
-  const almostFinished = current
-    .map(entry => ({
-      entry,
-      percent: computeProgressPercent(entry, entry.media_items!, 'tv') ?? 0,
-    }))
-    .filter(item => item.percent >= 85)
-    .sort((a, b) => b.percent - a.percent)[0];
-
-  const recent = completed[0];
-
-  const serviceCounts: Record<string, number> = {};
-  completed.forEach(entry => {
-    const service = entry.selected_platform?.trim() ?? entry.media_items?.platforms?.find(Boolean);
-    if (!service) {
-      return;
-    }
-    serviceCounts[service] = (serviceCounts[service] ?? 0) + 1;
-  });
-
-  const topService = Object.entries(serviceCounts).sort(([, a], [, b]) => b - a)[0];
-
-  const cards: CategorySpotlightCard[] = [];
-
-  if (nextEpisodeReady) {
-    cards.push({
-      id: 'tv-next',
-      title: 'Next episode ready',
-      explanation: `You left ${
-        resolveTitle(nextEpisodeReady.entry.media_items!) ?? 'this show'
-      } with ${nextEpisodeReady.percent}% viewed, so another episode is queued.`,
-      dataSubtitle: formatRelativeDistance(nextEpisodeReady.entry.updated_at),
-      entry: buildSpotlightEntry(nextEpisodeReady.entry, 'tv', nextEpisodeReady.percent),
-      ctaLabel: 'Continue the season',
-    });
-  } else {
-    cards.push({
-      id: 'tv-next-empty',
-      title: 'Next episode ready',
-      explanation: 'No current TV entries need a next episode prompt yet.',
-      dataSubtitle: 'Keep watching to surface a ready-to-play show.',
-    });
-  }
-
-  if (almostFinished) {
-    cards.push({
-      id: 'tv-almost',
-      title: 'Almost finished',
-      explanation: `You are ${almostFinished.percent}% through ${
-        resolveTitle(almostFinished.entry.media_items!) ?? 'a show'
-      }—close the season to lock it in.`,
-      dataSubtitle: formatRelativeDistance(almostFinished.entry.updated_at),
-      entry: buildSpotlightEntry(almostFinished.entry, 'tv', almostFinished.percent),
-    });
-  } else {
-    cards.push({
-      id: 'tv-almost-empty',
-      title: 'Almost finished',
-      explanation: 'No shows are above 85% yet. Push one further to unlock this insight.',
-      dataSubtitle: 'Track progress to highlight a near-completion.',
-    });
-  }
-
-  if (recent) {
-    cards.push({
-      id: 'tv-completed',
-      title: 'Recently completed',
-      explanation: 'You wrapped this show—nice viewing streak.',
-      dataSubtitle: formatRelativeDistance(recent.updated_at),
-      entry: buildSpotlightEntry(recent, 'tv'),
-    });
-  } else {
-    cards.push({
-      id: 'tv-completed-empty',
-      title: 'Recently completed',
-      explanation: 'Complete a series to showcase your latest TV win.',
-      dataSubtitle: 'No completions yet.',
-    });
-  }
-
-  cards.push({
-    id: 'tv-platform',
-    title: 'Service insight',
-    explanation: topService
-      ? `You finish ${topService[1]} shows on ${topService[0]}, so that service keeps you watching.`
-      : 'Track more completions to spotlight your go-to service.',
-    dataSubtitle: topService
-      ? `${topService[0]} · ${topService[1]} completions`
-      : 'Awaiting service data',
-  });
-
-  return ensureFourSpotlights(cards, 'tv');
-}
-
-function buildCompletionByGenre(entries: CategoryEntryRow[]): DropPattern {
-  const buckets: Record<string, { total: number; completed: number }> = {};
-  entries.forEach(entry => {
-    const genres = entry.media_items?.genres ?? [];
-    const genre = genres[0];
-    if (!genre) {
-      return;
-    }
-    const data = buckets[genre] ?? { total: 0, completed: 0 };
-    data.total += 1;
-    if (entry.status === 'completed') {
-      data.completed += 1;
-    }
-    buckets[genre] = data;
-  });
-
-  const topGenre = Object.entries(buckets).sort(([, a], [, b]) => {
-    const ratioA = a.total ? a.completed / a.total : 0;
-    const ratioB = b.total ? b.completed / b.total : 0;
-    return ratioB - ratioA;
-  })[0];
-
-  if (!topGenre) {
-    return {
-      explanation: 'No genre completions yet. Complete a few movies to unlock this insight.',
-      subtitle: 'Awaiting genre data',
-    };
-  }
-
-  const [genre, stats] = topGenre;
-  const ratio = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
-  return {
-    explanation: `You complete ${ratio}% of ${genre} movies you try.`,
-    subtitle: `${stats.completed} / ${stats.total} completed`,
-  };
-}
-
 function buildCategoryChart(
   category: DashboardCategoryKey,
   rows: CategoryChartRow[],
@@ -1840,68 +1102,6 @@ function buildCategoryChart(
   return {
     data,
     insight,
-  };
-}
-
-function entryHasEpisodes(entry: CategoryEntryRow, category: DashboardCategoryKey): boolean {
-  const media = entry.media_items;
-  if (!media) {
-    return false;
-  }
-  if (category === 'anime') {
-    return Boolean(media.number_of_episodes ?? media.episodes);
-  }
-  if (category === 'manga') {
-    return Boolean(media.volumes ?? media.chapters);
-  }
-  if (category === 'tv') {
-    return Boolean(media.number_of_episodes ?? media.episodes);
-  }
-  return false;
-}
-
-type DropPattern = {
-  explanation: string;
-  subtitle: string;
-};
-
-function buildDropPattern(entries: CategoryEntryRow[]): DropPattern {
-  const buckets: Record<string, { completed: number; dropped: number }> = {};
-  for (const entry of entries) {
-    const media = entry.media_items;
-    const genres = media?.genres ?? [];
-    if (!genres.length) {
-      continue;
-    }
-    const genre = genres[0];
-    const data = buckets[genre] ?? { completed: 0, dropped: 0 };
-    if (entry.status === 'completed') {
-      data.completed += 1;
-    } else if (entry.status === 'dropped') {
-      data.dropped += 1;
-    }
-    buckets[genre] = data;
-  }
-
-  const topGenre = Object.entries(buckets).sort(([, a], [, b]) => {
-    const ratioA = a.dropped + a.completed === 0 ? 0 : a.dropped / (a.dropped + a.completed);
-    const ratioB = b.dropped + b.completed === 0 ? 0 : b.dropped / (b.dropped + b.completed);
-    return ratioB - ratioA;
-  })[0];
-
-  if (!topGenre) {
-    return {
-      explanation: 'Drop pattern not available yet. Complete or drop titles to surface a genre.',
-      subtitle: 'Waiting for drop/completion data.',
-    };
-  }
-
-  const [genre, stats] = topGenre;
-  const total = stats.completed + stats.dropped;
-  const ratio = total ? Math.round((stats.completed / total) * 100) : 0;
-  return {
-    explanation: `You keep ${genre} titles ${ratio}% complete versus dropped.`,
-    subtitle: `${stats.completed} completed · ${stats.dropped} dropped`,
   };
 }
 
@@ -2154,6 +1354,7 @@ function checkSeriesPrerequisites(
 function generateBacklogReason(
   media: NonNullable<CategoryEntryRow['media_items']>,
   userEntries: CategoryEntryRow[],
+  context?: { title?: string },
 ): string {
   const genres = media.genres ?? [];
   const tags = media.tags ?? [];
@@ -2235,6 +1436,27 @@ function generateBacklogReason(
 
   const matchingTags = sortedTags.filter(t => (tagCounts.get(t) ?? 0) >= tagThreshold).slice(0, 2);
 
+  const title =
+    context?.title ??
+    media.title ??
+    media.title_english ??
+    media.title_romaji ??
+    media.title_native ??
+    media.original_title ??
+    'Untitled';
+
+  dbg('backlog-reason-analysis', {
+    title,
+    mediaGenres: genres,
+    mediaTags: tags.slice(0, 8),
+    topGenreWeight,
+    genreThreshold,
+    matchingGenres,
+    topTagWeight,
+    tagThreshold,
+    matchingTags,
+  });
+
   // Generate reason based on matches
   if (matchingGenres.length > 0 && matchingTags.length > 0) {
     return `You enjoy ${matchingGenres.join(' & ')} with ${matchingTags[0]}`;
@@ -2275,7 +1497,7 @@ type CandidateItem = {
   cover_image_large: string | null;
   cover_image_medium: string | null;
   genres: string[] | null;
-  tags: string[] | null;
+  tags: unknown[] | null;
   candidateBucketTags?: Partial<Record<InsightTagBucket, string[]>>;
 };
 
@@ -2288,20 +1510,69 @@ type GameSuggestionContributor = {
 type GameScoreResult = {
   score: number;
   contributors: GameSuggestionContributor[];
+  hasPersonalSignal: boolean;
 };
 
 const GAME_BUCKET_CHANNEL_WEIGHTS: Record<InsightTagBucket, number> = {
-  subgenre: 0,
-  mechanic: 0,
-  mood: 0,
-  theme: 0,
-  structure: 0,
+  subgenre: 0.46,
+  mechanic: 0.22,
+  mood: 0.04,
+  theme: 0.18,
+  structure: 0.1,
 };
-const GAME_GENRE_FALLBACK_WEIGHT = 0.05;
+const GAME_GENRE_FALLBACK_WEIGHT = 0.15;
 const GAME_DROPPED_SUBGENRE_BLOCK_THRESHOLD = 2;
 const GAME_DROPPED_SUBGENRE_PENALTY = 0.35;
 const GAME_REQUIRED_SUBGENRE_POSITIVE_MATCH = 0.2;
 const GAME_MIN_EXTERNAL_CONFIDENCE = 0.5;
+const PERSONAL_SMALL_LIBRARY_THRESHOLD = 10;
+const PERSONAL_MAX_GENRES_PER_ITEM = 3;
+const PERSONAL_MAX_BUCKET_TAGS_PER_ITEM = 3;
+const PERSONAL_STATUS_WEIGHT = {
+  completed: 1.8,
+  current: 1.0,
+  planned: 0.3,
+} as const;
+const PERSONAL_FAVORITE_BONUS = 0.9;
+const PERSONAL_DROPPED_WEIGHT = {
+  NO_RATING: -0.35,
+  LOW_RATING: -1.2,
+  HIGH_RATING: 0,
+} as const;
+const PERSONAL_RATING_BOOST = {
+  HIGH: 0.95,
+  MEDIUM: 0.4,
+} as const;
+const PERSONAL_PROGRESS_BOOST_MAX = {
+  completed: 0.35,
+  current: 0.55,
+} as const;
+const GENERIC_GENRE_NOISE_SET = new Set(['fantasy', 'drama', 'comedy', 'romance', 'sci-fi']);
+const GENRE_ALIAS_MAP: Record<string, string> = {
+  'role-playing': 'rpg',
+  'role playing': 'rpg',
+  'role-playing game': 'rpg',
+  'role playing game': 'rpg',
+  'role-playing (rpg)': 'rpg',
+  'role-playing rpg': 'rpg',
+  'turn-based strategy': 'turn-based',
+  'turn based strategy': 'turn-based',
+  'turn-based strategy (tbs)': 'turn-based',
+  'turn-based strategy tbs': 'turn-based',
+  tbs: 'turn-based',
+};
+export const PERSONALIZATION_MODEL_DEFAULTS = {
+  smallLibraryThreshold: PERSONAL_SMALL_LIBRARY_THRESHOLD,
+  maxGenresPerItem: PERSONAL_MAX_GENRES_PER_ITEM,
+  maxBucketTagsPerItem: PERSONAL_MAX_BUCKET_TAGS_PER_ITEM,
+  statusWeight: PERSONAL_STATUS_WEIGHT,
+  favoriteBonus: PERSONAL_FAVORITE_BONUS,
+  droppedWeight: PERSONAL_DROPPED_WEIGHT,
+  ratingBoost: PERSONAL_RATING_BOOST,
+  progressBoostMax: PERSONAL_PROGRESS_BOOST_MAX,
+  gameBucketWeights: GAME_BUCKET_CHANNEL_WEIGHTS,
+  gameGenreFallbackWeight: GAME_GENRE_FALLBACK_WEIGHT,
+};
 const DEBUG_GAME_SUGGESTIONS = process.env.DEBUG_GAME_SUGGESTIONS === '1';
 const DASHBOARD_SUGGESTIONS_DEBUG =
   process.env.DASHBOARD_SUGGESTIONS_DEBUG === '1' || DEBUG_GAME_SUGGESTIONS;
@@ -2330,9 +1601,23 @@ function safeDebugJson(value: unknown): string {
   }
 }
 
-function dbg(..._args: unknown[]) {}
+function dbg(...args: unknown[]) {
+  if (!DASHBOARD_SUGGESTIONS_DEBUG) {
+    return;
+  }
+  // eslint-disable-next-line no-console
+  console.log(...args);
+}
 
-function dbgTable(_label: string, _rows: Array<Record<string, unknown>>) {}
+function dbgTable(label: string, rows: Array<Record<string, unknown>>) {
+  if (!DASHBOARD_SUGGESTIONS_DEBUG) {
+    return;
+  }
+  // eslint-disable-next-line no-console
+  console.log(label);
+  // eslint-disable-next-line no-console
+  console.table(rows);
+}
 
 function toSafeListPreview(values: string[], max = 5): string[] {
   return values.slice(0, max).map(value => truncateDebugString(value, 120));
@@ -2390,6 +1675,154 @@ function normalizePreferenceLabel(value: string): string {
   return value.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
+function normalizeGenreLabel(value: string): string {
+  const normalized = normalizePreferenceLabel(value)
+    .replace(/[()]/g, ' ')
+    .replace(/[_/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!normalized) {
+    return '';
+  }
+  return GENRE_ALIAS_MAP[normalized] ?? normalized;
+}
+
+function getGenreNoiseWeight(label: string): number {
+  return GENERIC_GENRE_NOISE_SET.has(label) ? 0.45 : 1;
+}
+
+function pickTopGenresForItem(
+  genres: string[],
+  maxGenres = PERSONAL_MAX_GENRES_PER_ITEM,
+): string[] {
+  if (genres.length === 0) {
+    return [];
+  }
+  const ranked = Array.from(new Set(genres.map(normalizeGenreLabel).filter(Boolean)))
+    .map(label => {
+      const tokenCount = label.split(/[\s-]+/).filter(Boolean).length;
+      const specificity = tokenCount > 1 ? 0.15 : 0;
+      return {
+        label,
+        rank: getGenreNoiseWeight(label) + specificity,
+      };
+    })
+    .sort((a, b) => {
+      if (b.rank !== a.rank) {
+        return b.rank - a.rank;
+      }
+      return a.label.localeCompare(b.label);
+    });
+
+  return ranked.slice(0, Math.max(1, maxGenres)).map(item => item.label);
+}
+
+function pickTopBucketLabels(
+  bucket: InsightTagBucket,
+  labels: string[],
+  maxLabels = PERSONAL_MAX_BUCKET_TAGS_PER_ITEM,
+): string[] {
+  const normalized = Array.from(
+    new Set(
+      labels
+        .map(label => canonicalizeBucketLabel(bucket, normalizePreferenceLabel(label)))
+        .filter(Boolean),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+  return normalized.slice(0, Math.max(1, maxLabels));
+}
+
+function getBaseWeight(status: string, score: number | null): number {
+  if (status === 'dropped') {
+    if (score === null || score === undefined) {
+      return PERSONAL_DROPPED_WEIGHT.NO_RATING;
+    }
+    if (score <= 5) {
+      return PERSONAL_DROPPED_WEIGHT.LOW_RATING;
+    }
+    if (score >= 7) {
+      return PERSONAL_DROPPED_WEIGHT.HIGH_RATING;
+    }
+    return PERSONAL_DROPPED_WEIGHT.NO_RATING;
+  }
+
+  return PERSONAL_STATUS_WEIGHT[status as keyof typeof PERSONAL_STATUS_WEIGHT] ?? 0;
+}
+
+function getRatingBoost(score: number | null): number {
+  if (score === null || score === undefined) {
+    return 0;
+  }
+  if (score >= 8) {
+    return PERSONAL_RATING_BOOST.HIGH;
+  }
+  if (score >= 6) {
+    return PERSONAL_RATING_BOOST.MEDIUM;
+  }
+  return 0;
+}
+
+function getFavoriteBonus(isFavorite: boolean | null | undefined): number {
+  return isFavorite ? PERSONAL_FAVORITE_BONUS : 0;
+}
+
+function getProgressBoost(
+  entry: Pick<CategoryEntryRow, 'progress' | 'status'>,
+  isGamesMode: boolean,
+): number {
+  const progress =
+    typeof entry.progress === 'number' && Number.isFinite(entry.progress) ? entry.progress : 0;
+  if (progress <= 0) {
+    return 0;
+  }
+  if (entry.status !== 'completed' && entry.status !== 'current') {
+    return 0;
+  }
+
+  const denominator = isGamesMode ? 40 : 100;
+  const normalized = Math.max(0, Math.min(1, progress / denominator));
+  const curve = Math.sqrt(normalized);
+  const maxBoost =
+    entry.status === 'completed'
+      ? PERSONAL_PROGRESS_BOOST_MAX.completed
+      : PERSONAL_PROGRESS_BOOST_MAX.current;
+  return curve * maxBoost;
+}
+
+function getItemSignalWeight(entry: CategoryEntryRow, isGamesMode: boolean): number {
+  const baseWeight = getBaseWeight(entry.status, entry.score);
+  const ratingBoost = getRatingBoost(entry.score);
+  const favoriteBonus = getFavoriteBonus(entry.is_favorite);
+  const progressBoost = getProgressBoost(entry, isGamesMode);
+  return baseWeight + ratingBoost + favoriteBonus + progressBoost;
+}
+
+type WeightedContribution = {
+  label: string;
+  score: number;
+};
+
+function accumulateDistributedLabels(
+  labels: string[],
+  totalWeight: number,
+  targetMap: Map<string, number>,
+): void {
+  if (labels.length === 0 || totalWeight === 0) {
+    return;
+  }
+  const perLabelWeight = totalWeight / labels.length;
+  for (const label of labels) {
+    targetMap.set(label, (targetMap.get(label) ?? 0) + perLabelWeight);
+  }
+}
+
+function extractNormalizedCandidateTags(tags: unknown[] | null | undefined): string[] {
+  if (!Array.isArray(tags)) {
+    return [];
+  }
+  return extractTasteTagLabelsFromMediaTags(tags).map(normalizePreferenceLabel).filter(Boolean);
+}
+
 function createEmptyBucketWeightMaps(): Record<InsightTagBucket, Map<string, number>> {
   return {
     subgenre: new Map(),
@@ -2398,14 +1831,6 @@ function createEmptyBucketWeightMaps(): Record<InsightTagBucket, Map<string, num
     theme: new Map(),
     structure: new Map(),
   };
-}
-
-function getFavoriteRankMultiplier(pinnedRank?: number | null): number {
-  if (typeof pinnedRank !== 'number' || !Number.isFinite(pinnedRank) || pinnedRank <= 0) {
-    return 1.1;
-  }
-  const rank = Math.min(10, Math.max(1, Math.round(pinnedRank)));
-  return 1.35 - (rank - 1) * 0.035;
 }
 
 /**
@@ -2432,72 +1857,69 @@ function analyzeUserPreferences(
       continue;
     }
 
-    const genres = media.genres ?? [];
+    const rawGenres = media.genres ?? [];
+    const genres = pickTopGenresForItem(rawGenres);
     const isDropped = entry.status === 'dropped';
 
     // Track dropped genre combinations
     if (isDropped && genres.length > 0) {
-      const genreKey = genres.filter(Boolean).sort().join('|');
+      const genreKey = [...genres].sort().join('|');
       droppedGenreCombinations.add(genreKey);
     }
 
-    const isPositiveTaste = entry.status === 'completed' || entry.status === 'current';
-    if (!isPositiveTaste && !isDropped) {
+    let totalWeight = getItemSignalWeight(entry, isGamesMode);
+    if (entries.length <= PERSONAL_SMALL_LIBRARY_THRESHOLD && entry.status === 'planned') {
+      totalWeight *= 0.7;
+    }
+
+    if (totalWeight === 0 && !isDropped) {
       continue;
     }
 
-    // Weight based on status and rating
-    let weight = 1;
-    if (entry.status === 'completed') {
-      weight = entry.is_favorite ? 4 : 3;
-    } else if (entry.status === 'current') {
-      weight = entry.is_favorite ? 3 : 2;
-    } else if (isDropped) {
-      weight = -2; // NEGATIVE weight for dropped
-    }
-
-    // Higher rating = more weight
-    if (entry.score !== null && entry.score !== undefined && isPositiveTaste) {
-      weight *= entry.score / 5; // Normalize to 0-2 range
+    if (entry.score !== null && entry.score !== undefined && entry.status === 'completed') {
       totalRating += entry.score;
       ratingCount++;
     }
 
-    if (isPositiveTaste && entry.is_favorite) {
-      weight *= getFavoriteRankMultiplier(entry.pinned_rank);
-    }
-
-    // Count genres (can be negative for dropped)
-    for (const genre of genres) {
-      if (!genre) {
-        continue;
+    const weightedGenres = genres.map(label => ({
+      label,
+      adjustedWeight: totalWeight * getGenreNoiseWeight(label),
+    }));
+    const genreWeightDenominator = weightedGenres.reduce(
+      (sum, genre) => sum + genre.adjustedWeight,
+      0,
+    );
+    if (genreWeightDenominator > 0) {
+      for (const genre of weightedGenres) {
+        const distributed = (genre.adjustedWeight / genreWeightDenominator) * totalWeight;
+        genreWeights.set(genre.label, (genreWeights.get(genre.label) ?? 0) + distributed);
       }
-      genreWeights.set(genre, (genreWeights.get(genre) ?? 0) + weight);
     }
 
     // For games, tags come from bucket links and should not contribute to favoriteTags.
     if (!isGamesMode) {
-      const tags = extractTasteTagLabelsFromMediaTags(media.tags);
-      for (const tag of tags) {
-        tagWeights.set(tag, (tagWeights.get(tag) ?? 0) + weight);
-      }
+      const tags = pickTopBucketLabels(
+        'theme',
+        extractTasteTagLabelsFromMediaTags(media.tags)
+          .map(normalizePreferenceLabel)
+          .filter(Boolean),
+        2,
+      );
+      accumulateDistributedLabels(tags, totalWeight, tagWeights);
     }
 
     const mediaId = entry.media_items?.id;
     if (typeof mediaId === 'number' && gameTagMap?.has(mediaId)) {
       const bucketTags = gameTagMap.get(mediaId) ?? {};
-      const normalizedSubgenres = (bucketTags.subgenre ?? [])
-        .map(normalizePreferenceLabel)
-        .filter(Boolean);
+      const normalizedSubgenres = pickTopBucketLabels('subgenre', bucketTags.subgenre ?? []);
       if (isDropped && normalizedSubgenres.length > 0) {
         droppedSubgenreCombinations.add([...normalizedSubgenres].sort().join('|'));
       }
       for (const bucket of INSIGHT_TAG_BUCKETS) {
-        const labels = (bucketTags[bucket] ?? []).map(normalizePreferenceLabel).filter(Boolean);
-        for (const label of labels) {
-          const map = userBucketWeights[bucket];
-          map.set(label, (map.get(label) ?? 0) + weight);
-          if (isDropped && bucket === 'subgenre') {
+        const labels = pickTopBucketLabels(bucket, bucketTags[bucket] ?? []);
+        accumulateDistributedLabels(labels, totalWeight, userBucketWeights[bucket]);
+        if (isDropped && bucket === 'subgenre') {
+          for (const label of labels) {
             droppedSubgenreCounts.set(label, (droppedSubgenreCounts.get(label) ?? 0) + 1);
           }
         }
@@ -2521,88 +1943,43 @@ function analyzeUserPreferences(
 /**
  * Scores a candidate item based on user preferences
  */
-function scoreCandidateItem(candidate: CandidateItem, preferences: UserPreferences): number {
-  const candidateGenres = (candidate.genres ?? []).filter(Boolean);
-  const candidateTags = (candidate.tags ?? []).filter(Boolean);
+function scoreCandidateItem(
+  candidate: CandidateItem,
+  preferences: UserPreferences,
+): { score: number; contributors: WeightedContribution[]; hasPersonalSignal: boolean } {
+  const candidateGenres = pickTopGenresForItem(candidate.genres ?? []);
+  const candidateTags = pickTopBucketLabels(
+    'theme',
+    extractNormalizedCandidateTags(candidate.tags),
+    2,
+  );
 
   // Check if this exact genre combination was dropped
-  const genreKey = candidateGenres.sort().join('|');
+  const genreKey = [...candidateGenres].sort().join('|');
   if (genreKey && preferences.droppedGenreCombinations.has(genreKey)) {
-    return 0; // Don't suggest games with exact same genre combo as dropped games
+    return { score: 0, contributors: [], hasPersonalSignal: false };
   }
 
-  let score = 0;
-  let maxScore = 0;
+  const genreResult = scoreLabelsAgainstPreferenceMap(candidateGenres, preferences.favoriteGenres);
+  const tagResult = scoreLabelsAgainstPreferenceMap(candidateTags, preferences.favoriteTags);
 
-  // Genre matching (50% weight) - can be negative!
-  let genreScore = 0;
-  for (const genre of candidateGenres) {
-    const weight = preferences.favoriteGenres.get(genre) ?? 0;
-    genreScore += weight;
-  }
-  score += genreScore * 0.5;
+  const positiveScore = genreResult.positive * 0.72 + tagResult.positive * 0.28;
+  const negativePenalty = genreResult.negative * 0.62 + tagResult.negative * 0.38;
+  const score = Math.max(0, Math.min(1, positiveScore - negativePenalty));
 
-  // Calculate max possible genre score (only positive weights)
-  const positiveGenreWeights = Array.from(preferences.favoriteGenres.values())
-    .filter(w => w > 0)
-    .sort((a, b) => b - a)
-    .slice(0, 3);
-  maxScore += positiveGenreWeights.reduce((sum, w) => sum + w * 0.5, 0);
-
-  // Tag matching (20% weight) - only if tags exist
-  if (candidateTags.length > 0 && preferences.favoriteTags.size > 0) {
-    let tagScore = 0;
-    for (const tag of candidateTags) {
-      const weight = preferences.favoriteTags.get(tag) ?? 0;
-      if (weight > 0) {
-        tagScore += weight;
+  const contributors: WeightedContribution[] = [
+    ...genreResult.contributors.map(item => ({ label: item.label, score: item.score * 0.72 })),
+    ...tagResult.contributors.map(item => ({ label: item.label, score: item.score * 0.28 })),
+  ]
+    .filter(item => item.score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
       }
-    }
-    score += tagScore * 0.2;
+      return a.label.localeCompare(b.label);
+    });
 
-    const positiveTagWeights = Array.from(preferences.favoriteTags.values())
-      .filter(w => w > 0)
-      .sort((a, b) => b - a)
-      .slice(0, 3);
-    maxScore += positiveTagWeights.reduce((sum, w) => sum + w * 0.2, 0);
-  }
-
-  // Bonus for multiple POSITIVE genre matches (20% weight)
-  const positiveGenreMatches = candidateGenres.filter(g => {
-    const weight = preferences.favoriteGenres.get(g) ?? 0;
-    return weight > 0;
-  }).length;
-  if (positiveGenreMatches > 1) {
-    score += positiveGenreMatches * 2 * 0.2;
-    maxScore += 6 * 0.2; // Max 3 matches * 2
-  }
-
-  // Penalty if ANY genre has negative weight from dropped games (10% weight)
-  const hasNegativeGenre = candidateGenres.some(g => {
-    const weight = preferences.favoriteGenres.get(g) ?? 0;
-    return weight < 0;
-  });
-  if (hasNegativeGenre) {
-    score -= maxScore * 0.1; // 10% penalty
-  }
-
-  // Heavy penalty for genres with zero or negative engagement
-  const zeroEngagementGenres = candidateGenres.filter(g => {
-    const weight = preferences.favoriteGenres.get(g) ?? 0;
-    return weight <= 0; // Zero or negative weight
-  });
-  if (zeroEngagementGenres.length > 0 && candidateGenres.length > 0) {
-    // Penalty scales: 1/2 genres = 35%, 2/2 genres = 70%
-    const proportion = zeroEngagementGenres.length / candidateGenres.length;
-    const penalty = proportion * 0.7;
-    score -= score * penalty;
-  }
-
-  // Normalize to 0-1 range
-  if (maxScore <= 0) {
-    return 0;
-  }
-  return Math.max(0, Math.min(1, score / maxScore));
+  return { score, contributors, hasPersonalSignal: positiveScore > 0 };
 }
 
 function hasPositiveBucketPreference(preferences: UserPreferences): boolean {
@@ -2624,7 +2001,9 @@ function scoreLabelsAgainstPreferenceMap(
     return { positive: 0, negative: 0, contributors: [] };
   }
 
-  const positiveWeights = Array.from(preferenceMap.values()).filter(weight => weight > 0);
+  const positiveWeights = Array.from(preferenceMap.entries())
+    .map(([label, weight]) => (weight > 0 ? weight * getGenreNoiseWeight(label) : weight))
+    .filter(weight => weight > 0);
   const negativeWeights = Array.from(preferenceMap.values()).filter(weight => weight < 0);
   const maxPositiveWeight = positiveWeights.length > 0 ? Math.max(...positiveWeights) : 0;
   const maxNegativeWeight =
@@ -2633,24 +2012,30 @@ function scoreLabelsAgainstPreferenceMap(
   let positiveRaw = 0;
   let negativeRaw = 0;
   const contributors: Array<{ label: string; score: number }> = [];
+  const weightedLabels = uniqueLabels.map(label => {
+    const noiseAdjustedWeight = preferenceMap.get(label) ?? 0;
+    const adjusted =
+      noiseAdjustedWeight > 0
+        ? noiseAdjustedWeight * getGenreNoiseWeight(label)
+        : noiseAdjustedWeight;
+    return { label, adjusted };
+  });
+  const denominator = Math.max(1, Math.min(weightedLabels.length, 3));
 
-  for (const label of uniqueLabels) {
-    const weight = preferenceMap.get(label) ?? 0;
+  for (const { label, adjusted: weight } of weightedLabels) {
     if (weight > 0 && maxPositiveWeight > 0) {
       const normalizedScore = Math.min(1, weight / maxPositiveWeight);
-      positiveRaw += normalizedScore;
-      contributors.push({ label, score: normalizedScore });
+      positiveRaw += normalizedScore / denominator;
+      contributors.push({ label, score: normalizedScore / denominator });
       continue;
     }
     if (weight < 0 && maxNegativeWeight > 0) {
-      negativeRaw += Math.min(1, Math.abs(weight) / maxNegativeWeight);
+      negativeRaw += Math.min(1, Math.abs(weight) / maxNegativeWeight) / denominator;
     }
   }
-
-  const normalizationBase = Math.max(1, Math.min(uniqueLabels.length, 2));
   return {
-    positive: Math.min(1, positiveRaw / normalizationBase),
-    negative: Math.min(1, negativeRaw / normalizationBase),
+    positive: Math.min(1, positiveRaw),
+    negative: Math.min(1, negativeRaw),
     contributors,
   };
 }
@@ -2662,10 +2047,8 @@ function scoreCandidateItemGames(
 ): GameScoreResult {
   const candidateTitle = resolveCandidateTitle(candidate);
   const targetMatch = isTargetTitleMatch(candidateTitle);
-  const candidateGenres = (candidate.genres ?? []).filter(Boolean);
-  const subgenres = (candidateBucketTags.subgenre ?? [])
-    .map(normalizePreferenceLabel)
-    .filter(Boolean);
+  const candidateGenres = pickTopGenresForItem(candidate.genres ?? []);
+  const subgenres = pickTopBucketLabels('subgenre', candidateBucketTags.subgenre ?? []);
   const subgenreKey = subgenres.length > 0 ? [...subgenres].sort().join('|') : '';
   if (targetMatch) {
     const bucketSummary = INSIGHT_TAG_BUCKETS.map(bucket => ({
@@ -2685,7 +2068,7 @@ function scoreCandidateItemGames(
         { candidateTitle, subgenreKey },
       );
     }
-    return { score: 0, contributors: [] };
+    return { score: 0, contributors: [], hasPersonalSignal: false };
   }
   const blockedDroppedSubgenres = Array.from(new Set(subgenres)).filter(
     subgenre =>
@@ -2709,7 +2092,7 @@ function scoreCandidateItemGames(
         blockedDroppedSubgenres,
       });
     }
-    return { score: 0, contributors: [] };
+    return { score: 0, contributors: [], hasPersonalSignal: false };
   }
 
   let positiveScore = 0;
@@ -2719,7 +2102,7 @@ function scoreCandidateItemGames(
 
   for (const bucket of INSIGHT_TAG_BUCKETS) {
     const channelWeight = GAME_BUCKET_CHANNEL_WEIGHTS[bucket];
-    const bucketLabels = candidateBucketTags[bucket] ?? [];
+    const bucketLabels = pickTopBucketLabels(bucket, candidateBucketTags[bucket] ?? []);
     const channelResult = scoreLabelsAgainstPreferenceMap(
       bucketLabels,
       preferences.userBucketWeights[bucket],
@@ -2769,7 +2152,7 @@ function scoreCandidateItemGames(
         required: GAME_REQUIRED_SUBGENRE_POSITIVE_MATCH,
       });
     }
-    return { score: 0, contributors: [] };
+    return { score: 0, contributors: [], hasPersonalSignal: false };
   }
 
   const score = Math.max(0, Math.min(1, positiveScore - negativePenalty));
@@ -2799,7 +2182,7 @@ function scoreCandidateItemGames(
     });
   }
 
-  return { score, contributors: rankedContributors };
+  return { score, contributors: rankedContributors, hasPersonalSignal: positiveScore > 0 };
 }
 
 function buildGameRecommendationReason(contributors: GameSuggestionContributor[]): string {
@@ -2829,6 +2212,21 @@ function buildGameRecommendationReason(contributors: GameSuggestionContributor[]
     return `Because you love ${selected[0]}`;
   }
   return `Because you love ${selected[0]} + ${selected[1]}`;
+}
+
+function buildGeneralRecommendationReason(contributors: WeightedContribution[]): string {
+  if (contributors.length === 0) {
+    return 'Based on your library preferences';
+  }
+  const unique = Array.from(new Set(contributors.map(item => item.label)));
+  const traits = unique.slice(0, 2).map(label => formatTasteProfileLabel(label));
+  if (traits.length === 0) {
+    return 'Based on your library preferences';
+  }
+  if (traits.length === 1) {
+    return `Because you love ${traits[0]}`;
+  }
+  return `Because you love ${traits[0]} + ${traits[1]}`;
 }
 
 /**
@@ -2999,9 +2397,10 @@ async function buildMediaSuggestions(
         reason = 'High priority in your backlog';
       } else {
         // Generate personalized reason based on user's genre/tag preferences
-        reason = generateBacklogReason(media, userEntries);
+        reason = generateBacklogReason(media, userEntries, { title });
       }
 
+      const confidence = 1.0;
       suggestions.push({
         mediaId: media.id,
         category,
@@ -3009,9 +2408,20 @@ async function buildMediaSuggestions(
         cover: media.cover_image_large ?? media.cover_image_medium ?? DEFAULT_COVER,
         slug: titleToSlug(title),
         reason,
-        confidence: 1.0, // 100% confidence - it's in their backlog!
+        confidence, // 100% confidence - it's in their backlog!
         genres: media.genres ?? [],
         tags: media.tags ?? [],
+      });
+
+      dbg('selected-suggestion', {
+        source: 'backlog',
+        category,
+        title,
+        reason,
+        confidence,
+        genres: media.genres ?? [],
+        status: entry.status,
+        priority: (entry as unknown as { priority?: number }).priority ?? null,
       });
     }
   }
@@ -3164,7 +2574,11 @@ async function buildMediaSuggestions(
           `,
         );
 
-        candidatesQuery = candidatesQuery.eq('category', category).limit(300);
+        const categoryFilters = category === 'games' ? ['games', 'game'] : [category];
+        candidatesQuery = candidatesQuery
+          .in('category', categoryFilters)
+          .order('id', { ascending: false })
+          .limit(500);
         if (existingMediaIds.size > 0) {
           candidatesQuery = candidatesQuery.not(
             'id',
@@ -3245,7 +2659,7 @@ async function buildMediaSuggestions(
             const { data: targetRows, error: targetRowsError } = await supabase
               .from('media_items')
               .select('id,title,title_english,title_romaji,title_native,original_title,category')
-              .eq('category', category)
+              .in('category', category === 'games' ? ['games', 'game'] : [category])
               .or(
                 `title.ilike.${targetLookupPattern},title_english.ilike.${targetLookupPattern},title_romaji.ilike.${targetLookupPattern},title_native.ilike.${targetLookupPattern},original_title.ilike.${targetLookupPattern}`,
               )
@@ -3349,12 +2763,16 @@ async function buildMediaSuggestions(
                 category === 'games'
                   ? scoreCandidateItemGames(typedCandidate, preferences, candidateBucketTags ?? {})
                   : null;
+              const nonGameScoreResult =
+                category === 'games' ? null : scoreCandidateItem(typedCandidate, preferences);
               const personalScore =
                 category === 'games'
-                  ? gameScoreResult
-                    ? gameScoreResult.score
-                    : scoreCandidateItem(typedCandidate, preferences)
-                  : scoreCandidateItem(typedCandidate, preferences);
+                  ? (gameScoreResult?.score ?? 0)
+                  : (nonGameScoreResult?.score ?? 0);
+              const hasCandidatePersonalSignal =
+                category === 'games'
+                  ? (gameScoreResult?.hasPersonalSignal ?? false)
+                  : (nonGameScoreResult?.hasPersonalSignal ?? false);
               const popularity = popularityByMediaId.get(typedCandidate.id) ?? {
                 tracked: 0,
                 completed: 0,
@@ -3375,7 +2793,7 @@ async function buildMediaSuggestions(
                 completionScore * 0.25 +
                 favoriteScore * 0.15 +
                 ratingScore * 0.1;
-              const combinedScore = hasPreferenceSignal
+              const combinedScore = hasCandidatePersonalSignal
                 ? personalScore * 0.45 + commonKnowledgeScore * 0.55
                 : commonKnowledgeScore;
               return {
@@ -3388,6 +2806,14 @@ async function buildMediaSuggestions(
                 commonKnowledgeScore,
                 popularity,
                 gameContributors: gameScoreResult?.contributors ?? [],
+                traitContributors:
+                  category === 'games'
+                    ? (gameScoreResult?.contributors.map(item => ({
+                        label: item.label,
+                        score: item.weightedScore,
+                      })) ?? [])
+                    : (nonGameScoreResult?.contributors ?? []),
+                hasCandidatePersonalSignal,
               };
             })
             .sort((a, b) => b.score - a.score);
@@ -3422,7 +2848,13 @@ async function buildMediaSuggestions(
               : rankedCandidates.filter(item => item.score > 0);
 
           // 6. Build external suggestion objects (skip similar titles)
-          for (const { candidate, score, gameContributors, popularity } of scoredCandidates) {
+          for (const {
+            candidate,
+            score,
+            gameContributors,
+            popularity,
+            traitContributors,
+          } of scoredCandidates) {
             if (suggestions.length >= maxSuggestions) {
               break;
             }
@@ -3455,19 +2887,15 @@ async function buildMediaSuggestions(
               continue; // Skip this candidate
             }
 
+            const seriesInfo = detectSeries(title);
+            const prerequisiteCheck = checkSeriesPrerequisites(title, seriesInfo, userEntries);
+            if (!prerequisiteCheck.canRecommend) {
+              continue;
+            }
+
             const cover =
               candidate.cover_image_large ?? candidate.cover_image_medium ?? DEFAULT_COVER;
 
-            // Generate reason based on bucket/genre matches (ONLY positive weights)
-            const matchingGenres = (candidate.genres ?? []).filter(
-              g => g && (preferences.favoriteGenres.get(g) ?? 0) > 0,
-            );
-            const matchingTags =
-              category === 'games'
-                ? []
-                : (candidate.tags ?? []).filter(
-                    t => t && (preferences.favoriteTags.get(t) ?? 0) > 0,
-                  );
             const droppedGenreMatch = (candidate.genres ?? [])
               .filter(genre => genre && resilientDroppedGenres.has(normalizeGenreKey(genre)))
               .slice(0, 1);
@@ -3477,17 +2905,7 @@ async function buildMediaSuggestions(
                 ? `Second-chance pick: you still play a lot of ${droppedGenreMatch[0]} even after some drops.`
                 : category === 'games'
                   ? buildGameRecommendationReason(gameContributors)
-                  : matchingGenres.length > 0 && popularity.tracked >= 3
-                    ? `Popular ${matchingGenres.slice(0, 2).join(' & ')} pick (${popularity.tracked} users tracked it)`
-                    : matchingGenres.length > 0
-                      ? `You enjoy ${matchingGenres.slice(0, 2).join(' & ')}${
-                          matchingTags.length > 0 ? ` with ${matchingTags[0]}` : ''
-                        }`
-                      : matchingTags.length > 0
-                        ? `Matches your interest in ${matchingTags.slice(0, 2).join(' & ')}`
-                        : popularity.tracked >= 5
-                          ? `Common knowledge pick from the database (${popularity.tracked} users tracked it)`
-                          : 'Based on your library preferences';
+                  : buildGeneralRecommendationReason(traitContributors);
 
             if (DEBUG_GAME_SUGGESTIONS && category === 'games') {
               dbg(`[Games Suggestion Debug] ${title}`, {
@@ -3508,9 +2926,65 @@ async function buildMediaSuggestions(
               reason,
               confidence: Math.max(0.35, Math.min(0.99, score)),
               genres: candidate.genres ?? [],
-              tags: candidate.tags ?? [],
+              tags: extractTasteTagLabelsFromMediaTags(candidate.tags),
               bucketTags: category === 'games' ? candidate.candidateBucketTags : undefined,
             });
+
+            dbg('selected-suggestion', {
+              source: 'database',
+              category,
+              title,
+              reason,
+              confidence: Math.max(0.35, Math.min(0.99, score)),
+              combinedScore: Number(score.toFixed(4)),
+              popularityTracked: popularity.tracked,
+              popularityCompleted: popularity.completed,
+              popularityFavorites: popularity.favorites,
+              genres: candidate.genres ?? [],
+            });
+          }
+
+          const fallbackNeeded = maxSuggestions - suggestions.length;
+          if (fallbackNeeded > 0) {
+            const selectedMediaIds = new Set(suggestions.map(item => item.mediaId));
+            const fallbackCandidates = candidates
+              .map(candidate => candidate as CandidateItem)
+              .filter(candidate => {
+                if (typeof candidate.id !== 'number') {
+                  return false;
+                }
+                if (selectedMediaIds.has(candidate.id)) {
+                  return false;
+                }
+                return !existingMediaIds.has(candidate.id);
+              })
+              .slice(0, fallbackNeeded);
+
+            for (const candidate of fallbackCandidates) {
+              const title = resolveCandidateTitle(candidate);
+              const cover =
+                candidate.cover_image_large ?? candidate.cover_image_medium ?? DEFAULT_COVER;
+              suggestions.push({
+                mediaId: candidate.id,
+                category,
+                title,
+                cover,
+                slug: titleToSlug(title),
+                reason: 'Community pick for your tastes',
+                confidence: 0.35,
+                genres: candidate.genres ?? [],
+                tags: extractTasteTagLabelsFromMediaTags(candidate.tags),
+              });
+
+              dbg('selected-suggestion', {
+                source: 'database-fallback',
+                category,
+                title,
+                reason: 'Community pick for your tastes',
+                confidence: 0.35,
+                genres: candidate.genres ?? [],
+              });
+            }
           }
         } else {
           dbg('candidate-pool:empty-or-error', {
@@ -3531,6 +3005,7 @@ async function buildMediaSuggestions(
     titlesWithScores: suggestions.map(item => ({
       title: item.title,
       confidence: Number(item.confidence.toFixed(4)),
+      reason: item.reason,
     })),
     targetAppearsInFinalList: hasTarget
       ? suggestions.some(item => item.title.toLowerCase().includes(targetTitle))
@@ -3539,6 +3014,16 @@ async function buildMediaSuggestions(
 
   return suggestions;
 }
+
+export const __personalizationTestUtils = {
+  normalizeGenreLabel,
+  pickTopGenresForItem,
+  analyzeUserPreferences,
+  scoreCandidateItem,
+  scoreCandidateItemGames,
+  detectSeries,
+  checkSeriesPrerequisites,
+};
 
 export async function buildBacklogPersonalMediaSuggestions(
   supabase: DashboardSupabaseClient,

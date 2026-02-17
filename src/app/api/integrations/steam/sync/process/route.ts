@@ -15,6 +15,7 @@ import {
   getSteamHours,
   mapWithConcurrency,
 } from '@/lib/integrations/steam-sync-helpers';
+import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
 
 type ProcessResult = {
   processed: number;
@@ -387,6 +388,11 @@ async function POSTHandler(req: Request) {
         }),
       })
       .eq('id', jobId);
+
+    // Recompute genre affinity when sync completes
+    if (isComplete) {
+      void refreshGenreAffinity(supabase, session.user.id);
+    }
 
     return NextResponse.json({
       processed: newProcessedCount,

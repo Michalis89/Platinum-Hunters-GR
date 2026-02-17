@@ -99,6 +99,11 @@ type SelectedEntryDetails = {
   genres?: string[] | null;
 };
 
+const shouldRevalidateContinueHero = (
+  previousStatus: MediaStatus | null | undefined,
+  nextStatus: MediaStatus | null | undefined,
+) => previousStatus === 'current' || nextStatus === 'current';
+
 type CategoryLibraryAction =
   | { type: 'patch'; payload: Partial<CategoryLibraryState> }
   | {
@@ -624,6 +629,7 @@ export default function CategoryLibrary({
       finalStatus = 'planned';
     }
     const nextFavorite = editState.isFavorite;
+    const previousStatus = selectedEntry.status;
 
     // Close dialog immediately for instant feedback (improves INP)
     startTransition(() => {
@@ -660,7 +666,9 @@ export default function CategoryLibrary({
         await yieldToMain();
         await loadLibraryEntries();
         await yieldToMain();
-        await mutate('/api/user/continue');
+        if (shouldRevalidateContinueHero(previousStatus, finalStatus)) {
+          await mutate('/api/user/continue');
+        }
 
         showAlert({
           type: 'success',
@@ -686,8 +694,10 @@ export default function CategoryLibrary({
           body: JSON.stringify({
             source: 'external',
             payload: selectedEntry.payload,
-            status: nextStatus,
+            status: finalStatus,
             is_favorite: nextFavorite,
+            selected_platform:
+              category === 'games' ? editState.selectedPlatform || null : undefined,
             progress: nextProgressValue ?? undefined,
             score: nextScore ?? undefined,
             notes: editState.notes || null,
@@ -701,7 +711,9 @@ export default function CategoryLibrary({
         await yieldToMain();
         await loadLibraryEntries();
         await yieldToMain();
-        await mutate('/api/user/continue');
+        if (shouldRevalidateContinueHero(undefined, finalStatus)) {
+          await mutate('/api/user/continue');
+        }
 
         showAlert({
           type: 'success',
@@ -788,7 +800,9 @@ export default function CategoryLibrary({
             throw new Error('Failed to delete entry');
           }
           await loadLibraryEntries();
-          await mutate('/api/user/continue');
+          if (shouldRevalidateContinueHero(entry.status, undefined)) {
+            await mutate('/api/user/continue');
+          }
           clearSelection();
           showAlert({
             type: 'success',

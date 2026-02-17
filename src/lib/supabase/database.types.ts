@@ -977,6 +977,47 @@ export type Database = {
           },
         ];
       };
+      user_genre_affinity: {
+        Row: {
+          id: number;
+          user_id: string;
+          category: string;
+          genre: string;
+          score: number;
+          item_count: number;
+          strong_signal_count: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id: string;
+          category: string;
+          genre: string;
+          score?: number;
+          item_count?: number;
+          strong_signal_count?: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: string;
+          category?: string;
+          genre?: string;
+          score?: number;
+          item_count?: number;
+          strong_signal_count?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_genre_affinity_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_settings: {
         Row: {
           articles_enabled: boolean;

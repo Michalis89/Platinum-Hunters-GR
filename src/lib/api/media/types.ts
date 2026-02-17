@@ -35,6 +35,7 @@ export type AddMediaRequestBody = {
   score?: number;
   notes?: string | null;
   is_favorite?: boolean;
+  selected_platform?: string | null;
 };
 
 /**
