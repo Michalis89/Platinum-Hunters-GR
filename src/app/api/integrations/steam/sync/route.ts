@@ -83,16 +83,11 @@ async function getUserSteamInput(
   supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
   userId: string,
 ): Promise<string | null> {
-  const [{ data: userData, error: userError }, { data: categoryData, error: categoryError }] =
-    await Promise.all([
-      supabase.from('users').select('steam_id').eq('id', userId).maybeSingle(),
-      supabase.from('user_category_profiles').select('profiles').eq('user_id', userId).maybeSingle(),
-    ]);
-
-  if (userError) {
-    console.error('[Steam Sync] User fetch error:', userError);
-    throw new Error(userError.message || 'Failed to fetch user profile');
-  }
+  const { data: categoryData, error: categoryError } = await supabase
+    .from('user_category_profiles')
+    .select('profiles')
+    .eq('user_id', userId)
+    .maybeSingle();
 
   if (categoryError) {
     console.error('[Steam Sync] Category profile fetch error:', categoryError);
@@ -102,10 +97,8 @@ async function getUserSteamInput(
   const categorySteamIdRaw = (
     categoryData?.profiles as { games?: { steam_id?: string | null } } | null | undefined
   )?.games?.steam_id;
-  const categorySteamId = typeof categorySteamIdRaw === 'string' ? categorySteamIdRaw.trim() : '';
-  const userSteamId = userData?.steam_id?.trim() ?? '';
-
-  return categorySteamId || userSteamId || null;
+  const categorySteamId = typeof categorySteamIdRaw === 'string' ? categorySteamIdRaw.trim() : null;
+  return categorySteamId || null;
 }
 
 async function createSyncJob(userId: string): Promise<string> {
