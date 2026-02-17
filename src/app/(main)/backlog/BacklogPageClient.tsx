@@ -172,7 +172,7 @@ function BacklogPageContent() {
       key={`${category}-${libraryReloadKey}`}
       category={category}
       username={user?.username}
-      steamId={user?.steam_id}
+      steamId={category === 'games' ? user?.category_profile?.games?.steam_id : undefined}
       initialStatus={statusFromParams}
       initialSearch={searchFromParams}
     />
