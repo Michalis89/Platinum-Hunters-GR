@@ -300,7 +300,7 @@ export default function EntryEditDialog({
                       alt={entry.title}
                       width={144}
                       height={208}
-                      unoptimized
+                      sizes="(max-width: 640px) 40px, 112px"
                       className="h-full w-full object-cover"
                     />
                   </div>

@@ -18,6 +18,8 @@ import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData
 import { SITE_URL } from '@/config/site';
 import type { ReactNode } from 'react';
 
+export const revalidate = 3600;
+
 type AboutSectionShellProps = {
   children: ReactNode;
   maxWidthClass?: string;

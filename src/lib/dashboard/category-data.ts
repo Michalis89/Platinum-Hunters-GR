@@ -1,4 +1,5 @@
-import { subDays, format } from 'date-fns';
+import { subDays } from 'date-fns/subDays';
+import { format } from 'date-fns/format';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { DEFAULT_COVER } from '@/lib/constants/messages';
 
@@ -120,6 +121,7 @@ export type MediaSuggestion = {
   slug: string;
   reason: string;
   confidence: number;
+  source: 'backlog' | 'database' | 'database-fallback';
   genres?: string[];
   tags?: string[];
   bucketTags?: Partial<Record<InsightTagBucket, string[]>>;
@@ -641,9 +643,49 @@ export async function fetchCategoryDashboardData(
   const chartResults = await Promise.all(chartPromises);
 
   // Fetch media suggestions in parallel
-  const mediaSuggestionsPromises = requestedCategories.map((category, index) => {
-    const entries = entryResults[index] ?? [];
-    return buildMediaSuggestions(supabase, userId, category, entries);
+  const mediaSuggestionsPromises = requestedCategories.map(async category => {
+    if (category === 'games') {
+      // Use V2 recommendation system for games (data-driven, adaptive)
+      const { generateGameRecommendationsV2 } =
+        await import('@/lib/recommendations/v2/games/games-recommender');
+      const recommendations = await generateGameRecommendationsV2(userId);
+
+      // Convert to MediaSuggestion format
+      return recommendations.map(rec => ({
+        mediaId: rec.mediaId,
+        category: rec.category as DashboardCategoryKey,
+        title: rec.title,
+        cover: rec.cover,
+        slug: rec.slug,
+        reason: rec.reason,
+        confidence: rec.confidence,
+        source: rec.source,
+        genres: rec.genres,
+        tags: rec.tags,
+      }));
+    }
+
+    // Use generic V2 recommender for other categories
+    const { generateGenericRecommendations } =
+      await import('@/lib/recommendations/v2/generic/generic-recommender');
+    const recommendations = await generateGenericRecommendations(
+      userId,
+      category as Exclude<'games' | 'anime' | 'manga' | 'movies' | 'tv' | 'books', 'games'>,
+    );
+
+    // Convert to MediaSuggestion format
+    return recommendations.map(rec => ({
+      mediaId: rec.mediaId,
+      category: rec.category as DashboardCategoryKey,
+      title: rec.title,
+      cover: rec.cover,
+      slug: rec.slug,
+      reason: rec.reason,
+      confidence: rec.confidence,
+      source: rec.source,
+      genres: rec.genres,
+      tags: rec.tags,
+    }));
   });
 
   const mediaSuggestionsResults = await Promise.all(mediaSuggestionsPromises);
@@ -1348,6 +1390,110 @@ function checkSeriesPrerequisites(
 }
 
 /**
+ * List of series where games are standalone-friendly (can jump in at any point)
+ */
+const STANDALONE_FRIENDLY_SERIES = [
+  'final fantasy',
+  'elder scrolls',
+  'divinity: original sin',
+  'persona',
+  'dragon quest',
+] as const;
+
+/**
+ * Checks if a series is standalone-friendly (no penalty for missing prerequisites)
+ */
+function isStandaloneFriendlySeries(seriesName: string): boolean {
+  const normalized = seriesName.toLowerCase();
+  return STANDALONE_FRIENDLY_SERIES.some(friendly => normalized.includes(friendly));
+}
+
+/**
+ * Infers the title of the previous game in a series
+ */
+function inferPreviousGameTitle(seriesInfo: SeriesInfo, currentTitle: string): string {
+  if (!seriesInfo.isSeries || seriesInfo.sequenceNumber <= 1) {
+    return '';
+  }
+
+  const previousNumber = seriesInfo.sequenceNumber - 1;
+
+  // For sequels to the first game, often the first game has no number
+  if (previousNumber === 1) {
+    // Try to construct: just the series name
+    return seriesInfo.seriesName;
+  }
+
+  // For other sequels, try to construct the previous numbered title
+  // Replace the current number with the previous number
+  const currentNumberStr = seriesInfo.sequenceNumber.toString();
+
+  // Try roman numerals first
+  const romanMap: Record<number, string> = {
+    2: 'II',
+    3: 'III',
+    4: 'IV',
+    5: 'V',
+    6: 'VI',
+    7: 'VII',
+    8: 'VIII',
+    9: 'IX',
+    10: 'X',
+    11: 'XI',
+    12: 'XII',
+  };
+
+  const currentRoman = romanMap[seriesInfo.sequenceNumber];
+  const previousRoman = romanMap[previousNumber];
+
+  if (currentRoman && previousRoman && currentTitle.includes(currentRoman)) {
+    return currentTitle.replace(currentRoman, previousRoman);
+  }
+
+  // Try arabic numerals
+  if (currentTitle.includes(` ${currentNumberStr}`)) {
+    return currentTitle.replace(` ${currentNumberStr}`, ` ${previousNumber}`);
+  }
+
+  // Fallback: just use series name with previous number
+  return `${seriesInfo.seriesName} ${previousNumber}`;
+}
+
+/**
+ * Calculates a score penalty for sequels where prerequisites haven't been met
+ * Returns 0 if no penalty should apply (not a sequel, or standalone-friendly series)
+ * Returns 0.10-0.18 for sequels with missing prerequisites
+ */
+function getSeriesPrereqPenalty(
+  seriesInfo: SeriesInfo,
+  title: string,
+  prerequisiteCheck: PrerequisiteCheckResult,
+): number {
+  // No penalty if prerequisites are met
+  if (prerequisiteCheck.canRecommend) {
+    return 0;
+  }
+
+  // No penalty if not a sequel
+  if (!seriesInfo.isSeries || seriesInfo.sequenceNumber <= 1) {
+    return 0;
+  }
+
+  // No penalty for standalone-friendly series
+  if (isStandaloneFriendlySeries(seriesInfo.seriesName)) {
+    return 0;
+  }
+
+  // Apply penalty for sequels without prerequisites
+  // Base penalty: 0.10
+  // Additional penalty based on sequence number (later sequels = higher penalty)
+  const basePenalty = 0.1;
+  const sequencePenalty = Math.min(0.08, (seriesInfo.sequenceNumber - 2) * 0.02);
+
+  return basePenalty + sequencePenalty;
+}
+
+/**
  * Generates a personalized reason for recommending a backlog item
  * based on user's genre/tag preferences
  */
@@ -1525,6 +1671,9 @@ const GAME_DROPPED_SUBGENRE_BLOCK_THRESHOLD = 2;
 const GAME_DROPPED_SUBGENRE_PENALTY = 0.35;
 const GAME_REQUIRED_SUBGENRE_POSITIVE_MATCH = 0.2;
 const GAME_MIN_EXTERNAL_CONFIDENCE = 0.5;
+const MIN_VISIBLE_CONFIDENCE = 0.5;
+const MIN_VISIBLE_BACKLOG_CONFIDENCE = 0.6;
+const MIN_VISIBLE_FALLBACK_CONFIDENCE = 0.6;
 const PERSONAL_SMALL_LIBRARY_THRESHOLD = 10;
 const PERSONAL_MAX_GENRES_PER_ITEM = 3;
 const PERSONAL_MAX_BUCKET_TAGS_PER_ITEM = 3;
@@ -1847,6 +1996,7 @@ function analyzeUserPreferences(
   const droppedGenreCombinations = new Set<string>();
   const droppedSubgenreCombinations = new Set<string>();
   const droppedSubgenreCounts = new Map<string, number>();
+  const droppedGamesDebug: Array<{ title: string; subgenres: string[] }> = [];
   let totalRating = 0;
   let ratingCount = 0;
   const completedCount = entries.filter(e => e.status === 'completed').length;
@@ -1914,6 +2064,15 @@ function analyzeUserPreferences(
       const normalizedSubgenres = pickTopBucketLabels('subgenre', bucketTags.subgenre ?? []);
       if (isDropped && normalizedSubgenres.length > 0) {
         droppedSubgenreCombinations.add([...normalizedSubgenres].sort().join('|'));
+        // Track for debug output
+        const title =
+          media.title ??
+          media.title_english ??
+          media.title_romaji ??
+          media.title_native ??
+          media.original_title ??
+          'Unknown';
+        droppedGamesDebug.push({ title, subgenres: normalizedSubgenres });
       }
       for (const bucket of INSIGHT_TAG_BUCKETS) {
         const labels = pickTopBucketLabels(bucket, bucketTags[bucket] ?? []);
@@ -1924,6 +2083,25 @@ function analyzeUserPreferences(
           }
         }
       }
+    }
+  }
+
+  // Debug: Show which subgenres are blocked
+  if (isGamesMode && droppedSubgenreCounts.size > 0) {
+    const blockedSubgenres = Array.from(droppedSubgenreCounts.entries())
+      .filter(([, count]) => count >= GAME_DROPPED_SUBGENRE_BLOCK_THRESHOLD)
+      .sort((a, b) => b[1] - a[1]);
+    if (blockedSubgenres.length > 0) {
+      dbg('BLOCKED SUBGENRES WARNING', {
+        threshold: GAME_DROPPED_SUBGENRE_BLOCK_THRESHOLD,
+        totalDroppedGames: droppedGamesDebug.length,
+        droppedGames: droppedGamesDebug,
+        blockedSubgenres: blockedSubgenres.map(([subgenre, count]) => ({
+          subgenre,
+          droppedCount: count,
+        })),
+        hint: 'These subgenres will block recommendations. Check your dropped games and update their status if needed.',
+      });
     }
   }
 
@@ -2330,10 +2508,47 @@ async function buildMediaSuggestions(
   const maxSuggestions = options?.maxSuggestions ?? 4;
   const maxBacklogSuggestions = options?.maxBacklogSuggestions ?? 2;
 
+  // Add status count debugging
+  const statusCounts = userEntries.reduce(
+    (acc, entry) => {
+      acc[entry.status] = (acc[entry.status] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+  dbg('buildMediaSuggestions:status-breakdown', {
+    category,
+    totalEntries: userEntries.length,
+    statusCounts,
+  });
+
+  // For games, show detailed entry table (first 10)
+  if (category === 'games' && DASHBOARD_SUGGESTIONS_DEBUG) {
+    dbgTable(
+      '[User Entries] First 10 entries for debugging',
+      userEntries.slice(0, 10).map(entry => ({
+        title:
+          entry.media_items?.title ??
+          entry.media_items?.title_english ??
+          entry.media_items?.original_title ??
+          '(untitled)',
+        status: entry.status,
+        score: entry.score ?? 'null',
+        progress: entry.progress ?? 0,
+        is_favorite: entry.is_favorite ? 'yes' : 'no',
+      })),
+    );
+  }
+
   // ============================================================================
   // PART 1: Backlog suggestions
   // ============================================================================
   const backlogEntries = userEntries.filter(entry => entry.status === 'planned');
+  dbg('buildMediaSuggestions:backlog-count', {
+    category,
+    backlogEntriesCount: backlogEntries.length,
+    maxBacklogSuggestions,
+  });
 
   if (backlogEntries.length > 0 && maxBacklogSuggestions > 0) {
     // Sort by priority (if exists) or updated_at
@@ -2409,6 +2624,7 @@ async function buildMediaSuggestions(
         slug: titleToSlug(title),
         reason,
         confidence, // 100% confidence - it's in their backlog!
+        source: 'backlog',
         genres: media.genres ?? [],
         tags: media.tags ?? [],
       });
@@ -2558,6 +2774,7 @@ async function buildMediaSuggestions(
 
       if (hasPreferenceSignal || category.length > 0) {
         // 4. Fetch candidate items from database (exclude user's items)
+        // Fix candidate pool bias: increase limit and remove id ordering bias
         let candidatesQuery = supabase.from('media_items').select(
           `
             id,
@@ -2570,15 +2787,18 @@ async function buildMediaSuggestions(
             cover_image_large,
             cover_image_medium,
             genres,
-            tags
+            tags,
+            release_date
           `,
         );
 
         const categoryFilters = category === 'games' ? ['games', 'game'] : [category];
+        const today = new Date().toISOString();
+        const candidateLimit = category === 'games' ? 3000 : 1500; // More candidates for games to compensate for threshold filtering
         candidatesQuery = candidatesQuery
           .in('category', categoryFilters)
-          .order('id', { ascending: false })
-          .limit(500);
+          .or(`release_date.is.null,release_date.lte.${today}`) // Exclude future releases
+          .limit(candidateLimit);
         if (existingMediaIds.size > 0) {
           candidatesQuery = candidatesQuery.not(
             'id',
@@ -2588,6 +2808,30 @@ async function buildMediaSuggestions(
         }
 
         const { data: candidates, error } = await candidatesQuery;
+
+        dbg('candidate-pool:query-result', {
+          category,
+          hasError: Boolean(error),
+          errorMessage: error?.message ?? null,
+          candidatesCount: candidates?.length ?? 0,
+          existingMediaIdsCount: existingMediaIds.size,
+        });
+
+        if (error) {
+          dbg('candidate-pool:ERROR', {
+            category,
+            error: error.message,
+            hint: 'Check database connection and query permissions',
+          });
+        }
+
+        if (!candidates || candidates.length === 0) {
+          dbg('candidate-pool:EMPTY', {
+            category,
+            existingMediaIdsCount: existingMediaIds.size,
+            hint: 'No candidates found. Possible causes: (1) All items in DB already in user library, (2) No items in category in DB, (3) Query filter too restrictive',
+          });
+        }
 
         if (!error && candidates && candidates.length > 0) {
           const candidateIds = candidates
@@ -2691,7 +2935,7 @@ async function buildMediaSuggestions(
                   ) &&
                   candidateIds.length >= 100,
                 sqlNotInApplied: true,
-                sqlLimitApplied: 100,
+                sqlLimitApplied: candidateLimit,
               });
             }
           }
@@ -2793,9 +3037,13 @@ async function buildMediaSuggestions(
                 completionScore * 0.25 +
                 favoriteScore * 0.15 +
                 ratingScore * 0.1;
+
               const combinedScore = hasCandidatePersonalSignal
-                ? personalScore * 0.45 + commonKnowledgeScore * 0.55
+                ? popularity.tracked > 0
+                  ? personalScore * 0.45 + commonKnowledgeScore * 0.55
+                  : personalScore
                 : commonKnowledgeScore;
+
               return {
                 candidate: {
                   ...typedCandidate,
@@ -2818,11 +3066,27 @@ async function buildMediaSuggestions(
             })
             .sort((a, b) => b.score - a.score);
 
+          // Adaptive popularity gating for low-user environments
+          const totalPopularityRows = popularityRows?.length ?? 0;
+          const minTracked =
+            totalPopularityRows < 250 || // Low-user environment
+            rankedCandidates.some(item => item.hasCandidatePersonalSignal)
+              ? 1 // Relax gate if personal signal exists
+              : 2; // Default gate
+          dbg('adaptive-popularity-gate', {
+            category,
+            totalPopularityRows,
+            minTracked,
+            hasPersonalSignalCandidates: rankedCandidates.filter(
+              item => item.hasCandidatePersonalSignal,
+            ).length,
+          });
+
           const commonKnowledgeCandidates = rankedCandidates.filter(
             item =>
               item.commonKnowledgeScore >=
                 (category === 'games' ? GAME_MIN_EXTERNAL_CONFIDENCE * 0.24 : 0.12) &&
-              item.popularity.tracked >= 2,
+              item.popularity.tracked >= minTracked,
           );
           if (hasTarget) {
             const targetRanked = rankedCandidates.find(item =>
@@ -2848,6 +3112,10 @@ async function buildMediaSuggestions(
               : rankedCandidates.filter(item => item.score > 0);
 
           // 6. Build external suggestion objects (skip similar titles)
+          // Add diversity tracking to avoid duplicate reason signatures
+          const reasonSignatures = new Map<string, number>(); // signature -> count
+          const MAX_DUPLICATE_REASONS = 2;
+
           for (const {
             candidate,
             score,
@@ -2889,8 +3157,21 @@ async function buildMediaSuggestions(
 
             const seriesInfo = detectSeries(title);
             const prerequisiteCheck = checkSeriesPrerequisites(title, seriesInfo, userEntries);
-            if (!prerequisiteCheck.canRecommend) {
-              continue;
+
+            // For database suggestions, apply penalty instead of hard blocking
+            const prereqPenalty = getSeriesPrereqPenalty(seriesInfo, title, prerequisiteCheck);
+            const penalizedScore = Math.max(0, score - prereqPenalty);
+
+            // Debug log for target title
+            if (hasTarget && title.toLowerCase().includes(targetTitle)) {
+              dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] series prerequisite penalty`, {
+                title,
+                seriesInfo,
+                prerequisiteCheck,
+                prereqPenalty: Number(prereqPenalty.toFixed(4)),
+                originalScore: Number(score.toFixed(4)),
+                penalizedScore: Number(penalizedScore.toFixed(4)),
+              });
             }
 
             const cover =
@@ -2900,12 +3181,45 @@ async function buildMediaSuggestions(
               .filter(genre => genre && resilientDroppedGenres.has(normalizeGenreKey(genre)))
               .slice(0, 1);
 
-            const reason =
-              droppedGenreMatch.length > 0
-                ? `Second-chance pick: you still play a lot of ${droppedGenreMatch[0]} even after some drops.`
-                : category === 'games'
+            // Build reason - check if it's a sequel with missing prerequisites
+            let reason: string;
+            if (droppedGenreMatch.length > 0) {
+              reason = `Second-chance pick: you still play a lot of ${droppedGenreMatch[0]} even after some drops.`;
+            } else if (
+              seriesInfo.isSeries &&
+              seriesInfo.sequenceNumber > 1 &&
+              !prerequisiteCheck.canRecommend &&
+              !isStandaloneFriendlySeries(seriesInfo.seriesName)
+            ) {
+              // Sequel with missing prerequisites - add a note
+              const previousTitle = inferPreviousGameTitle(seriesInfo, title);
+              const baseReason =
+                category === 'games'
                   ? buildGameRecommendationReason(gameContributors)
                   : buildGeneralRecommendationReason(traitContributors);
+              reason = `${baseReason} — you can jump in here, but starting with ${previousTitle} may improve the story.`;
+            } else {
+              reason =
+                category === 'games'
+                  ? buildGameRecommendationReason(gameContributors)
+                  : buildGeneralRecommendationReason(traitContributors);
+            }
+
+            // Check diversity constraint
+            const topContributors =
+              category === 'games'
+                ? gameContributors.slice(0, 2).map(item => item.label)
+                : traitContributors.slice(0, 2).map(item => item.label);
+            const reasonSignature = topContributors.sort().join('|') || 'generic';
+            const currentCount = reasonSignatures.get(reasonSignature) ?? 0;
+
+            if (currentCount >= MAX_DUPLICATE_REASONS) {
+              // Skip to maintain diversity
+              dbg('diversity-skip', { title, reasonSignature, currentCount });
+              continue;
+            }
+
+            reasonSignatures.set(reasonSignature, currentCount + 1);
 
             if (DEBUG_GAME_SUGGESTIONS && category === 'games') {
               dbg(`[Games Suggestion Debug] ${title}`, {
@@ -2917,6 +3231,7 @@ async function buildMediaSuggestions(
               });
             }
 
+            const confidence = Math.min(0.99, Math.max(0, penalizedScore));
             suggestions.push({
               mediaId: candidate.id,
               category,
@@ -2924,7 +3239,8 @@ async function buildMediaSuggestions(
               cover,
               slug: titleToSlug(title),
               reason,
-              confidence: Math.max(0.35, Math.min(0.99, score)),
+              confidence,
+              source: 'database',
               genres: candidate.genres ?? [],
               tags: extractTasteTagLabelsFromMediaTags(candidate.tags),
               bucketTags: category === 'games' ? candidate.candidateBucketTags : undefined,
@@ -2935,8 +3251,10 @@ async function buildMediaSuggestions(
               category,
               title,
               reason,
-              confidence: Math.max(0.35, Math.min(0.99, score)),
-              combinedScore: Number(score.toFixed(4)),
+              confidence,
+              originalScore: Number(score.toFixed(4)),
+              prereqPenalty: prereqPenalty > 0 ? Number(prereqPenalty.toFixed(4)) : undefined,
+              combinedScore: Number(penalizedScore.toFixed(4)),
               popularityTracked: popularity.tracked,
               popularityCompleted: popularity.completed,
               popularityFavorites: popularity.favorites,
@@ -2947,7 +3265,8 @@ async function buildMediaSuggestions(
           const fallbackNeeded = maxSuggestions - suggestions.length;
           if (fallbackNeeded > 0) {
             const selectedMediaIds = new Set(suggestions.map(item => item.mediaId));
-            const fallbackCandidates = candidates
+            // Compute scores for fallback candidates and filter by threshold
+            const fallbackCandidatesWithScores = candidates
               .map(candidate => candidate as CandidateItem)
               .filter(candidate => {
                 if (typeof candidate.id !== 'number') {
@@ -2958,12 +3277,43 @@ async function buildMediaSuggestions(
                 }
                 return !existingMediaIds.has(candidate.id);
               })
+              .map(candidate => {
+                // Compute common knowledge score for fallback
+                const popularity = popularityByMediaId.get(candidate.id) ?? {
+                  tracked: 0,
+                  completed: 0,
+                  favorites: 0,
+                  scoreSum: 0,
+                  scoreCount: 0,
+                };
+                const trackedScore = Math.min(1, popularity.tracked / 20);
+                const completionScore =
+                  popularity.tracked > 0 ? popularity.completed / popularity.tracked : 0;
+                const favoriteScore =
+                  popularity.tracked > 0 ? popularity.favorites / popularity.tracked : 0;
+                const avgScore =
+                  popularity.scoreCount > 0 ? popularity.scoreSum / popularity.scoreCount : 0;
+                const ratingScore = avgScore > 0 ? Math.min(1, avgScore / 10) : 0;
+                const commonKnowledgeScore =
+                  trackedScore * 0.5 +
+                  completionScore * 0.25 +
+                  favoriteScore * 0.15 +
+                  ratingScore * 0.1;
+
+                return {
+                  candidate,
+                  score: commonKnowledgeScore,
+                };
+              })
+              .filter(item => item.score >= MIN_VISIBLE_FALLBACK_CONFIDENCE)
+              .sort((a, b) => b.score - a.score)
               .slice(0, fallbackNeeded);
 
-            for (const candidate of fallbackCandidates) {
+            for (const { candidate, score } of fallbackCandidatesWithScores) {
               const title = resolveCandidateTitle(candidate);
               const cover =
                 candidate.cover_image_large ?? candidate.cover_image_medium ?? DEFAULT_COVER;
+              const confidence = Math.min(0.99, Math.max(0, score));
               suggestions.push({
                 mediaId: candidate.id,
                 category,
@@ -2971,7 +3321,8 @@ async function buildMediaSuggestions(
                 cover,
                 slug: titleToSlug(title),
                 reason: 'Community pick for your tastes',
-                confidence: 0.35,
+                confidence,
+                source: 'database-fallback',
                 genres: candidate.genres ?? [],
                 tags: extractTasteTagLabelsFromMediaTags(candidate.tags),
               });
@@ -2981,7 +3332,7 @@ async function buildMediaSuggestions(
                 category,
                 title,
                 reason: 'Community pick for your tastes',
-                confidence: 0.35,
+                confidence,
                 genres: candidate.genres ?? [],
               });
             }
@@ -2999,20 +3350,80 @@ async function buildMediaSuggestions(
     }
   }
 
+  const beforeFilterCount = suggestions.length;
+  const beforeFilterBySource = suggestions.reduce(
+    (acc, item) => {
+      acc[item.source] = (acc[item.source] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  // Apply confidence threshold filtering
+  const aboveThresholdCount = suggestions.filter(
+    item => item.confidence >= MIN_VISIBLE_CONFIDENCE,
+  ).length;
+
+  // Filter out suggestions below threshold and sort by confidence
+  const filteredSuggestions = suggestions
+    .filter(item =>
+      item.source === 'backlog'
+        ? item.confidence >= MIN_VISIBLE_BACKLOG_CONFIDENCE
+        : item.confidence >= MIN_VISIBLE_CONFIDENCE,
+    )
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(0, maxSuggestions);
+
+  // Debug target title if specified
+  if (hasTarget) {
+    const targetSuggestion = suggestions.find(item =>
+      item.title.toLowerCase().includes(targetTitle),
+    );
+    if (targetSuggestion) {
+      const passedThreshold = targetSuggestion.confidence >= MIN_VISIBLE_CONFIDENCE;
+      dbg(`[TARGET:${DASHBOARD_SUGGESTIONS_TARGET_TITLE}] threshold filter result`, {
+        title: targetSuggestion.title,
+        confidence: Number(targetSuggestion.confidence.toFixed(4)),
+        threshold: MIN_VISIBLE_CONFIDENCE,
+        passedThreshold,
+        reason: targetSuggestion.reason,
+      });
+    }
+  }
+
+  const sourceCounts = filteredSuggestions.reduce(
+    (acc, item) => {
+      acc[item.source] = (acc[item.source] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  dbg('buildMediaSuggestions:threshold-filtering', {
+    category,
+    threshold: MIN_VISIBLE_CONFIDENCE,
+    beforeFilterCount,
+    beforeFilterBySource,
+    aboveThresholdCount,
+    afterFilterCount: filteredSuggestions.length,
+  });
+
   dbg('buildMediaSuggestions:end', {
     category,
-    totalSuggestions: suggestions.length,
-    titlesWithScores: suggestions.map(item => ({
+    totalSuggestions: filteredSuggestions.length,
+    sourceCounts,
+    titlesWithScores: filteredSuggestions.map(item => ({
       title: item.title,
+      source: item.source,
       confidence: Number(item.confidence.toFixed(4)),
       reason: item.reason,
     })),
     targetAppearsInFinalList: hasTarget
-      ? suggestions.some(item => item.title.toLowerCase().includes(targetTitle))
+      ? filteredSuggestions.some(item => item.title.toLowerCase().includes(targetTitle))
       : null,
   });
 
-  return suggestions;
+  return filteredSuggestions;
 }
 
 export const __personalizationTestUtils = {

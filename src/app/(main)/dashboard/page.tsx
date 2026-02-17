@@ -12,6 +12,8 @@ import {
   fetchCategoryDashboardData,
 } from '@/lib/dashboard/category-data';
 
+export const revalidate = 300;
+
 export const metadata = buildMetadata({
   title: 'Dashboard | Hobbistas',
   description:
@@ -112,6 +114,7 @@ async function DashboardData() {
       username={username}
       displayName={displayName}
       stats={stats}
+      continueData={continueData}
       mediaCategories={mediaCategories}
       categorySections={categorySections}
       socialPreferences={socialPreferences}

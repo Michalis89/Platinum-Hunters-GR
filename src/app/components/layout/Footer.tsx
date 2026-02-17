@@ -1,17 +1,19 @@
-'use client';
-
 import Link from 'next/link';
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { selectNavbarAuth } from '@/store/slices/authSlice';
-import { useUserSettings } from '@/lib/settings/useUserSettings';
+import type { ReactNode } from 'react';
 import { PageContainer } from './PageContainer';
 import VersionBadge from '@/utils/components/VersionBadge';
-import { getVisibleNavItems, type NavbarFeatureFilters } from '@/app/components/navbar/navbar.data';
 
 const LEGAL_LINKS = [
   { label: 'Terms of Service', href: '/terms' },
   { label: 'Privacy Policy', href: '/privacy' },
+];
+
+const NAV_LINKS = [
+  { label: 'Home', href: '/home' },
+  { label: 'Backlog', href: '/backlog' },
+  { label: 'Articles', href: '/articles' },
+  { label: 'Reviews', href: '/review' },
+  { label: 'About', href: '/about' },
 ];
 
 const CONTACT = [
@@ -19,7 +21,7 @@ const CONTACT = [
   { label: 'Email', href: 'mailto:mouzakitis.m89+supporthobbistas-hub@gmail.com' },
 ];
 
-function FooterTextLink({ href, children }: { href: string; children: React.ReactNode }) {
+function FooterTextLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link href={href} className="text-sm">
       {children}
@@ -29,30 +31,9 @@ function FooterTextLink({ href, children }: { href: string; children: React.Reac
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  const { isAuthenticated, isLoading: isAuthLoading, user } = useSelector(selectNavbarAuth);
-  const authResolved = !isAuthLoading && (!isAuthenticated || Boolean(user));
-  const { settings } = useUserSettings(isAuthenticated && authResolved);
-  const isDev = process.env.NODE_ENV === 'development';
-
-  const featureFilters = useMemo<NavbarFeatureFilters>(
-    () => ({
-      articles: settings?.articles_enabled ?? true,
-      reviews: settings?.reviews_enabled ?? true,
-    }),
-    [settings?.articles_enabled, settings?.reviews_enabled],
-  );
-
-  const navLinks = useMemo(
-    () =>
-      getVisibleNavItems(isDev, isAuthenticated, authResolved, featureFilters).map(item => ({
-        label: item.label,
-        href: item.href,
-      })),
-    [isDev, isAuthenticated, authResolved, featureFilters],
-  );
 
   return (
-    <footer className="relative mt-auto">
+    <footer className="relative mt-auto" data-app-footer="true">
       <PageContainer size="full" noPadding className="relative">
         <div className="relative rounded-lg px-6 py-8 md:px-8 md:py-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,hsl(var(--primary)/0.12),transparent_46%)]" />
@@ -96,7 +77,7 @@ export function Footer() {
               </h2>
 
               <ul className="space-y-3">
-                {navLinks.map(link => (
+                {NAV_LINKS.map(link => (
                   <li key={link.href}>
                     <FooterTextLink href={link.href}>{link.label}</FooterTextLink>
                   </li>
@@ -122,12 +103,12 @@ export function Footer() {
           <div className="mt-8 border-t pt-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-muted-foreground" suppressHydrationWarning>
-                © {currentYear} Hobbistas. All rights reserved.
+                &copy; {currentYear} Hobbistas. All rights reserved.
               </p>
 
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
                 {LEGAL_LINKS.map(link => (
-                  <Link key={link.href} href={link.href} className="">
+                  <Link key={link.href} href={link.href}>
                     {link.label}
                   </Link>
                 ))}

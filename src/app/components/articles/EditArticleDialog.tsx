@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, ImageIcon } from 'lucide-react';
 import { CoverThumbImage, THUMB_SIZES_SM } from '@/components/ui/cover-image';
 import { Button } from '@/components/ui/button';
@@ -322,225 +321,209 @@ export default function EditArticleDialog({
 
   const availableTopics = category ? CATEGORIES[category].topics : [];
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="hb-dialog-overlay absolute inset-0"
-            onClick={onClose}
-          />
+  return isOpen ? (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      <div className="hb-dialog-overlay absolute inset-0" onClick={onClose} />
 
-          <dialog
-            ref={dialogRef}
-            className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border p-0 backdrop:bg-transparent"
-            onClose={onClose}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="flex h-full max-h-[90vh] flex-col"
-            >
-              <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h2 className="text-xl font-semibold text-foreground">Edit Article</h2>
-                <Button variant={'ghost'} onClick={onClose}>
-                  <X size={20} />
-                </Button>
-              </div>
+      <dialog
+        ref={dialogRef}
+        className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border p-0 backdrop:bg-transparent"
+        onClose={onClose}
+      >
+        <div className="animate-fade-in-up flex h-full max-h-[90vh] flex-col">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <h2 className="text-xl font-semibold text-foreground">Edit Article</h2>
+            <Button variant={'ghost'} onClick={onClose}>
+              <X size={20} />
+            </Button>
+          </div>
 
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="space-y-6">
-                  {error && <ErrorAlert message={error} />}
-                  {warning && (
-                    <div className="rounded-lg border border-amber-500/30 bg-warning/10 px-4 py-3 text-sm text-amber-300">
-                      {warning}
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Category</label>
-                      <select
-                        value={category}
-                        onChange={event => setCategory(event.target.value as ArticleCategory)}
-                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      >
-                        {(Object.keys(CATEGORIES) as ArticleCategory[]).map(cat => (
-                          <option key={cat} value={cat}>
-                            {CATEGORIES[cat].label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Subcategory</label>
-                      <select
-                        value={topic}
-                        onChange={event => setTopic(event.target.value as ArticleTopic)}
-                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      >
-                        {availableTopics.map(item => (
-                          <option key={item.value} value={item.value}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Status</label>
-                      <select
-                        value={status}
-                        onChange={event => setStatus(event.target.value as ArticleStatus)}
-                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      >
-                        {STATUS_OPTIONS.map(item => (
-                          <option key={item.value} value={item.value}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <Input
-                    label="Title *"
-                    placeholder="Enter the article title"
-                    value={title}
-                    onChange={event => setTitle(event.target.value)}
-                    error={!titleValidation.isValid}
-                  />
-                  {!titleValidation.isValid && (
-                    <p className="text-xs text-red-400">Title must not contain HTML.</p>
-                  )}
-
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground">Description</label>
-                    <Textarea
-                      placeholder="Short article description"
-                      rows={3}
-                      value={description}
-                      onChange={event => setDescription(event.target.value)}
-                      className={!descriptionValidation.isValid ? 'border-destructive' : undefined}
-                    />
-                  </div>
-                  {!descriptionValidation.isValid && (
-                    <p className="text-xs text-red-400">Description must not contain HTML.</p>
-                  )}
-
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-foreground">Cover image</label>
-                    <div className="flex flex-wrap gap-3">
-                      <div className="flex min-w-[220px] flex-1 flex-col gap-2">
-                        <Input
-                          placeholder="Image URL"
-                          value={coverImage}
-                          onChange={event => {
-                            setCoverImage(event.target.value);
-                            setCoverUploadError(null);
-                          }}
-                          className="flex-1"
-                        />
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <Button
-                            variant="ghost"
-                            icon={
-                              isCoverUploading ? (
-                                <Spinner className="size-4" />
-                              ) : (
-                                <ImageIcon size={16} />
-                              )
-                            }
-                            onClick={handleCoverUploadClick}
-                            disabled={isCoverUploading}
-                          >
-                            {isCoverUploading ? 'Uploading...' : 'Upload file'}
-                          </Button>
-                          <span>The URL comes from Supabase storage.</span>
-                        </div>
-                        {coverUploadError && (
-                          <p className="text-xs text-amber-300">{coverUploadError}</p>
-                        )}
-                      </div>
-                      <div className="relative h-12 w-12 rounded-lg border border-border">
-                        {coverImage && isCoverPreviewValid ? (
-                          <CoverThumbImage
-                            src={coverImage}
-                            alt="Preview"
-                            sizes={THUMB_SIZES_SM}
-                            className="object-cover"
-                            onError={() => setIsCoverPreviewValid(false)}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-card">
-                            <ImageIcon size={20} className="text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={coverFileInputRef}
-                      className="hidden"
-                      onChange={handleCoverFileChange}
-                    />
-                  </div>
-
-                  <RichTextEditor
-                    label="Content"
-                    value={contentHtml}
-                    onChange={setContentHtml}
-                    placeholder="Write the article content..."
-                  />
-
-                  <Input
-                    label="Tags"
-                    placeholder="Comma-separated"
-                    value={tags}
-                    onChange={event => setTags(event.target.value)}
-                    error={!tagsValidation.isValid}
-                  />
-                  {!tagsValidation.isValid && (
-                    <p className="text-xs text-red-400">
-                      {tagsValidation.error || 'Tags must not contain HTML.'}
-                    </p>
-                  )}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="space-y-6">
+              {error && <ErrorAlert message={error} />}
+              {warning && (
+                <div className="rounded-lg border border-amber-500/30 bg-warning/10 px-4 py-3 text-sm text-amber-300">
+                  {warning}
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-center justify-between border-t border-border px-6 py-4">
-                <div className="flex items-center gap-2">
-                  <Button variant={'secondary'} onClick={onClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={isSubmitting || isDeleting}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-foreground">Category</label>
+                  <select
+                    value={category}
+                    onChange={event => setCategory(event.target.value as ArticleCategory)}
+                    className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
-                    {isDeleting ? <Spinner className="size-4" /> : 'Delete article'}
-                  </Button>
+                    {(Object.keys(CATEGORIES) as ArticleCategory[]).map(cat => (
+                      <option key={cat} value={cat}>
+                        {CATEGORIES[cat].label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <Button
-                  variant="primary"
-                  icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || hasPlainTextError}
-                >
-                  Save
-                </Button>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-foreground">Subcategory</label>
+                  <select
+                    value={topic}
+                    onChange={event => setTopic(event.target.value as ArticleTopic)}
+                    className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    {availableTopics.map(item => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-foreground">Status</label>
+                  <select
+                    value={status}
+                    onChange={event => setStatus(event.target.value as ArticleStatus)}
+                    className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    {STATUS_OPTIONS.map(item => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </motion.div>
-          </dialog>
+
+              <Input
+                label="Title *"
+                placeholder="Enter the article title"
+                value={title}
+                onChange={event => setTitle(event.target.value)}
+                error={!titleValidation.isValid}
+              />
+              {!titleValidation.isValid && (
+                <p className="text-xs text-red-400">Title must not contain HTML.</p>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Description</label>
+                <Textarea
+                  placeholder="Short article description"
+                  rows={3}
+                  value={description}
+                  onChange={event => setDescription(event.target.value)}
+                  className={!descriptionValidation.isValid ? 'border-destructive' : undefined}
+                />
+              </div>
+              {!descriptionValidation.isValid && (
+                <p className="text-xs text-red-400">Description must not contain HTML.</p>
+              )}
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-foreground">Cover image</label>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex min-w-[220px] flex-1 flex-col gap-2">
+                    <Input
+                      placeholder="Image URL"
+                      value={coverImage}
+                      onChange={event => {
+                        setCoverImage(event.target.value);
+                        setCoverUploadError(null);
+                      }}
+                      className="flex-1"
+                    />
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Button
+                        variant="ghost"
+                        icon={
+                          isCoverUploading ? (
+                            <Spinner className="size-4" />
+                          ) : (
+                            <ImageIcon size={16} />
+                          )
+                        }
+                        onClick={handleCoverUploadClick}
+                        disabled={isCoverUploading}
+                      >
+                        {isCoverUploading ? 'Uploading...' : 'Upload file'}
+                      </Button>
+                      <span>The URL comes from Supabase storage.</span>
+                    </div>
+                    {coverUploadError && (
+                      <p className="text-xs text-amber-300">{coverUploadError}</p>
+                    )}
+                  </div>
+                  <div className="relative h-12 w-12 rounded-lg border border-border">
+                    {coverImage && isCoverPreviewValid ? (
+                      <CoverThumbImage
+                        src={coverImage}
+                        alt="Preview"
+                        sizes={THUMB_SIZES_SM}
+                        className="object-cover"
+                        onError={() => setIsCoverPreviewValid(false)}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-card">
+                        <ImageIcon size={20} className="text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={coverFileInputRef}
+                  className="hidden"
+                  onChange={handleCoverFileChange}
+                />
+              </div>
+
+              <RichTextEditor
+                label="Content"
+                value={contentHtml}
+                onChange={setContentHtml}
+                placeholder="Write the article content..."
+              />
+
+              <Input
+                label="Tags"
+                placeholder="Comma-separated"
+                value={tags}
+                onChange={event => setTags(event.target.value)}
+                error={!tagsValidation.isValid}
+              />
+              {!tagsValidation.isValid && (
+                <p className="text-xs text-red-400">
+                  {tagsValidation.error || 'Tags must not contain HTML.'}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-border px-6 py-4">
+            <div className="flex items-center gap-2">
+              <Button variant={'secondary'} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isSubmitting || isDeleting}
+              >
+                {isDeleting ? <Spinner className="size-4" /> : 'Delete article'}
+              </Button>
+            </div>
+            <Button
+              variant="primary"
+              icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
+              onClick={handleSubmit}
+              disabled={isSubmitting || hasPlainTextError}
+            >
+              Save
+            </Button>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
-  );
+      </dialog>
+    </div>
+  ) : null;
 }

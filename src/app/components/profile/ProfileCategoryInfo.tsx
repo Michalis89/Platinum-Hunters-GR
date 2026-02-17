@@ -1,5 +1,3 @@
-'use client';
-
 import EmptyState from '@/components/ui/empty';
 
 type ProfileCategoryInfoProps = {
@@ -90,9 +88,7 @@ export function ProfileCategoryInfo({
             <InfoRow label="Favorite Platform">{gamesNotes.favorite_platform}</InfoRow>
           )}
         </div>
-        {affinityGenres.length > 0 && (
-          <ChipList items={affinityGenres} label="Top Genres" />
-        )}
+        {affinityGenres.length > 0 && <ChipList items={affinityGenres} label="Top Genres" />}
       </div>
     );
   }
@@ -150,9 +146,7 @@ export function ProfileCategoryInfo({
         {moviesNotes.service_other && (
           <InfoRow label="Other Service">{moviesNotes.service_other}</InfoRow>
         )}
-        {affinityGenres.length > 0 && (
-          <ChipList items={affinityGenres} label="Top Genres" />
-        )}
+        {affinityGenres.length > 0 && <ChipList items={affinityGenres} label="Top Genres" />}
         {moviesNotes.style && <InfoRow label="Watching Style">{moviesNotes.style}</InfoRow>}
       </div>
     );
@@ -183,9 +177,7 @@ export function ProfileCategoryInfo({
         {animeNotes.platform_other && (
           <InfoRow label="Other Platform">{animeNotes.platform_other}</InfoRow>
         )}
-        {affinityGenres.length > 0 && (
-          <ChipList items={affinityGenres} label="Top Genres" />
-        )}
+        {affinityGenres.length > 0 && <ChipList items={affinityGenres} label="Top Genres" />}
         {animeNotes.format && <InfoRow label="Watching Format">{animeNotes.format}</InfoRow>}
         {animeNotes.notes && <InfoRow label="Notes">{animeNotes.notes}</InfoRow>}
       </div>
@@ -209,9 +201,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {affinityGenres.length > 0 && (
-          <ChipList items={affinityGenres} label="Top Genres" />
-        )}
+        {affinityGenres.length > 0 && <ChipList items={affinityGenres} label="Top Genres" />}
         {booksNotes.format && <InfoRow label="Reading Format">{booksNotes.format}</InfoRow>}
         {booksNotes.notes && <InfoRow label="Notes">{booksNotes.notes}</InfoRow>}
       </div>
@@ -235,9 +225,7 @@ export function ProfileCategoryInfo({
 
     return (
       <div className="space-y-4">
-        {affinityGenres.length > 0 && (
-          <ChipList items={affinityGenres} label="Top Genres" />
-        )}
+        {affinityGenres.length > 0 && <ChipList items={affinityGenres} label="Top Genres" />}
         {mangaNotes.format && <InfoRow label="Reading Format">{mangaNotes.format}</InfoRow>}
         {mangaNotes.notes && <InfoRow label="Notes">{mangaNotes.notes}</InfoRow>}
       </div>

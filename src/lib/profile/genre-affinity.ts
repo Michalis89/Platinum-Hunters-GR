@@ -24,7 +24,12 @@ type GenreAffinityResult = Partial<Record<AffinityCategory, GenreScore[]>>;
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const AFFINITY_CATEGORIES: AffinityCategory[] = [
-  'games', 'anime', 'manga', 'books', 'movies', 'tv',
+  'games',
+  'anime',
+  'manga',
+  'books',
+  'movies',
+  'tv',
 ];
 
 const STATUS_WEIGHT = {
@@ -37,12 +42,12 @@ const FAVORITE_BONUS = 3.0;
 
 const DROPPED_WEIGHT = {
   NO_RATING: -0.2,
-  LOW_RATING: -1.0,   // rating <= 5
-  HIGH_RATING: 0,      // rating >= 7
+  LOW_RATING: -1.0, // rating <= 5
+  HIGH_RATING: 0, // rating >= 7
 } as const;
 
 const RATING_BOOST = {
-  HIGH: 0.8,   // 8–10
+  HIGH: 0.8, // 8–10
   MEDIUM: 0.3, // 6–7
 } as const;
 
@@ -58,9 +63,15 @@ function normalizeGenreKey(value: string): string {
 
 function getBaseWeight(status: string, score: number | null): number {
   if (status === 'dropped') {
-    if (score === null || score === undefined) {return DROPPED_WEIGHT.NO_RATING;}
-    if (score <= 5) {return DROPPED_WEIGHT.LOW_RATING;}
-    if (score >= 7) {return DROPPED_WEIGHT.HIGH_RATING;}
+    if (score === null || score === undefined) {
+      return DROPPED_WEIGHT.NO_RATING;
+    }
+    if (score <= 5) {
+      return DROPPED_WEIGHT.LOW_RATING;
+    }
+    if (score >= 7) {
+      return DROPPED_WEIGHT.HIGH_RATING;
+    }
     // 5 < score < 7 (e.g. 6): treat as no-rating dropped
     return DROPPED_WEIGHT.NO_RATING;
   }
@@ -69,9 +80,15 @@ function getBaseWeight(status: string, score: number | null): number {
 }
 
 function getRatingBoost(score: number | null): number {
-  if (score === null || score === undefined) {return 0;}
-  if (score >= 8) {return RATING_BOOST.HIGH;}
-  if (score >= 6) {return RATING_BOOST.MEDIUM;}
+  if (score === null || score === undefined) {
+    return 0;
+  }
+  if (score >= 8) {
+    return RATING_BOOST.HIGH;
+  }
+  if (score >= 6) {
+    return RATING_BOOST.MEDIUM;
+  }
   return 0;
 }
 
@@ -79,20 +96,18 @@ function getFavoriteBonus(isFavorite: boolean | null): number {
   return isFavorite ? FAVORITE_BONUS : 0;
 }
 
-function isStrongSignal(
-  entry: AffinityEntry,
-): boolean {
-  if (entry.is_favorite) {return true;}
-  if (entry.status === 'completed') {return true;}
+function isStrongSignal(entry: AffinityEntry): boolean {
+  if (entry.is_favorite) {
+    return true;
+  }
+  if (entry.status === 'completed') {
+    return true;
+  }
   return false;
 }
 
 function hasHighRatingCompleted(entry: AffinityEntry): boolean {
-  return (
-    entry.status === 'completed' &&
-    typeof entry.score === 'number' &&
-    entry.score >= 8
-  );
+  return entry.status === 'completed' && typeof entry.score === 'number' && entry.score >= 8;
 }
 
 // ─── Core Algorithm ──────────────────────────────────────────────────────────
@@ -103,8 +118,12 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
 
   for (const entry of entries) {
     const cat = entry.category as AffinityCategory;
-    if (!AFFINITY_CATEGORIES.includes(cat)) {continue;}
-    if (!entry.genres || entry.genres.length === 0) {continue;}
+    if (!AFFINITY_CATEGORIES.includes(cat)) {
+      continue;
+    }
+    if (!entry.genres || entry.genres.length === 0) {
+      continue;
+    }
 
     const list = byCategory.get(cat) ?? [];
     list.push(entry);
@@ -151,7 +170,9 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
 
       for (const rawGenre of entry.genres) {
         const label = rawGenre.trim();
-        if (!label) {continue;}
+        if (!label) {
+          continue;
+        }
 
         const key = normalizeGenreKey(label);
         const current = genreMap.get(key) ?? {
@@ -166,10 +187,18 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
 
         current.score += weightPerGenre;
         current.itemCount += 1;
-        if (strong) {current.strongSignalCount += 1;}
-        if (entry.is_favorite) {current.favoriteCount += 1;}
-        if (entry.status === 'completed') {current.completedCount += 1;}
-        if (highRatedCompleted) {current.highRatingCompletedCount += 1;}
+        if (strong) {
+          current.strongSignalCount += 1;
+        }
+        if (entry.is_favorite) {
+          current.favoriteCount += 1;
+        }
+        if (entry.status === 'completed') {
+          current.completedCount += 1;
+        }
+        if (highRatedCompleted) {
+          current.highRatingCompletedCount += 1;
+        }
 
         genreMap.set(key, current);
       }
@@ -181,14 +210,18 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
     for (const stats of genreMap.values()) {
       // Clamp to minimum 0
       const clampedScore = Math.max(0, stats.score);
-      if (clampedScore === 0) {continue;}
+      if (clampedScore === 0) {
+        continue;
+      }
 
       // Check minimum evidence
       const meetsEvidence = isSmallLibrary
         ? meetsSmallLibraryEvidence(stats)
         : meetsDefaultEvidence(stats);
 
-      if (!meetsEvidence) {continue;}
+      if (!meetsEvidence) {
+        continue;
+      }
 
       qualified.push({
         genre: stats.label,
@@ -200,8 +233,12 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
 
     // Sort descending by score, then by item count, then alphabetically
     qualified.sort((a, b) => {
-      if (b.score !== a.score) {return b.score - a.score;}
-      if (b.itemCount !== a.itemCount) {return b.itemCount - a.itemCount;}
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      if (b.itemCount !== a.itemCount) {
+        return b.itemCount - a.itemCount;
+      }
       return a.genre.localeCompare(b.genre);
     });
 
@@ -221,7 +258,9 @@ function meetsDefaultEvidence(stats: {
   completedCount: number;
   highRatingCompletedCount: number;
 }): boolean {
-  if (stats.itemCount < MIN_ITEMS_DEFAULT) {return false;}
+  if (stats.itemCount < MIN_ITEMS_DEFAULT) {
+    return false;
+  }
 
   // At least 1 strong signal:
   // 1 favorite OR 2 completed OR 1 completed + rating >= 8
@@ -264,7 +303,9 @@ export async function fetchEntriesForAffinity(
     .eq('user_id', userId)
     .in('media_items.category', AFFINITY_CATEGORIES);
 
-  if (error || !data) {return [];}
+  if (error || !data) {
+    return [];
+  }
 
   const entries: AffinityEntry[] = [];
 
@@ -274,10 +315,14 @@ export async function fetchEntriesForAffinity(
       ? (mediaRaw[0] as Record<string, unknown> | undefined)
       : (mediaRaw as Record<string, unknown> | null | undefined);
 
-    if (!media) {continue;}
+    if (!media) {
+      continue;
+    }
 
     const category = media.category;
-    if (typeof category !== 'string') {continue;}
+    if (typeof category !== 'string') {
+      continue;
+    }
 
     const genres = Array.isArray(media.genres)
       ? (media.genres as string[]).filter((g): g is string => typeof g === 'string')
@@ -301,10 +346,7 @@ export async function storeGenreAffinity(
   affinity: GenreAffinityResult,
 ): Promise<void> {
   // Delete existing affinity rows for this user
-  await supabase
-    .from('user_genre_affinity')
-    .delete()
-    .eq('user_id', userId);
+  await supabase.from('user_genre_affinity').delete().eq('user_id', userId);
 
   // Build rows to insert
   const rows: Array<{
@@ -317,7 +359,9 @@ export async function storeGenreAffinity(
   }> = [];
 
   for (const [category, genres] of Object.entries(affinity)) {
-    if (!genres) {continue;}
+    if (!genres) {
+      continue;
+    }
     for (const g of genres) {
       rows.push({
         user_id: userId,
@@ -434,12 +478,12 @@ export async function fetchFavoriteGenres(
     // Limit to top N genres per category (defensive / future-proof)
     const topGenres = genres.slice(0, TOP_GENRES_LIMIT);
     const topScore = topGenres[0]?.score ?? 0;
-    if (topScore <= 0) {continue;}
+    if (topScore <= 0) {
+      continue;
+    }
 
     const threshold = topScore * FAVORITE_THRESHOLD_RATIO;
-    const filtered = topGenres
-      .filter(g => g.score >= threshold)
-      .map(g => g.genre);
+    const filtered = topGenres.filter(g => g.score >= threshold).map(g => g.genre);
 
     if (filtered.length > 0) {
       result[category] = filtered;

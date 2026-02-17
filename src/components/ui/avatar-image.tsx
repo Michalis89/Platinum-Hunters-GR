@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 type AvatarImageProps = Omit<
   ImageProps,
-  'fill' | 'width' | 'height' | 'sizes' | 'unoptimized' | 'className' | 'src' | 'alt'
+  'fill' | 'width' | 'height' | 'sizes' | 'className' | 'src' | 'alt'
 > & {
   src?: ImageProps['src'];
   alt?: string;
@@ -25,7 +25,6 @@ export function AvatarImage({ size, className, ...props }: AvatarImageProps) {
       width={size}
       height={size}
       sizes={`${size}px`}
-      unoptimized
       className={cn('h-full w-full object-cover', className)}
     />
   );

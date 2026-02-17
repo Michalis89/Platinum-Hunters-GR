@@ -1,5 +1,3 @@
-'use client';
-
 import { Calendar, Clock, CheckCircle2 } from 'lucide-react';
 import type { User } from '@/types/user';
 import { FormattedDate } from '@/utils/components/FormattedDate';

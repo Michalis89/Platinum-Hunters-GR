@@ -142,7 +142,7 @@ async function POSTHandler(req: Request) {
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
-      email_confirm: false,
+      email_confirm: process.env.NODE_ENV === 'development', // Auto-confirm in dev
       user_metadata: {
         username,
         full_name: safeFullName,
@@ -177,7 +177,6 @@ async function POSTHandler(req: Request) {
           date_of_birth: date_of_birth || null,
           country: country || null,
           bio: bio || null,
-          steam_id: steam_id || null,
           privacy_settings: {
             legal_acceptance: legalAcceptance,
           },
@@ -190,6 +189,27 @@ async function POSTHandler(req: Request) {
     if (updateError) {
       console.error('Profile upsert error:', updateError);
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    // Store steam_id in user_category_profiles if provided
+    if (steam_id) {
+      step = 'upsert_category_profile';
+      const { error: categoryError } = await supabase.from('user_category_profiles').upsert(
+        {
+          user_id: createdUser.id,
+          profiles: {
+            games: {
+              steam_id,
+            },
+          },
+        },
+        { onConflict: 'user_id' },
+      );
+
+      if (categoryError) {
+        console.error('Category profile upsert error:', categoryError);
+        // Don't fail signup if category profile fails - user can add it later
+      }
     }
 
     step = 'generate_signup_link';

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Eye, ImageIcon } from 'lucide-react';
 import { CoverThumbImage, THUMB_SIZES_SM } from '@/components/ui/cover-image';
 import { useSelector } from 'react-redux';
@@ -362,247 +361,231 @@ export default function AddArticleDialog({
   const availableCategories =
     contentType === 'review' ? REVIEW_CATEGORIES : (Object.keys(CATEGORIES) as ArticleCategory[]);
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="hb-dialog-overlay absolute inset-0"
-            onClick={onClose}
-          />
+  return isOpen ? (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="hb-dialog-overlay absolute inset-0" onClick={onClose} />
 
-          {/* Dialog Container - Centered */}
-          <dialog
-            ref={dialogRef}
-            className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border p-0 backdrop:bg-transparent"
-            onClose={onClose}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="flex h-full max-h-[90vh] flex-col"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h2 className="text-xl font-semibold text-foreground">{dialogTitle}</h2>
-                <Button variant="secondary" onClick={onClose}>
-                  <X size={20} />
-                </Button>
+      {/* Dialog Container - Centered */}
+      <dialog
+        ref={dialogRef}
+        className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border p-0 backdrop:bg-transparent"
+        onClose={onClose}
+      >
+        <div className="animate-fade-in-up flex h-full max-h-[90vh] flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <h2 className="text-xl font-semibold text-foreground">{dialogTitle}</h2>
+            <Button variant="secondary" onClick={onClose}>
+              <X size={20} />
+            </Button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="space-y-6">
+              {/* Error message */}
+              {error && <ErrorAlert message={error} />}
+              {noPermission && (
+                <ErrorAlert message="You do not have permission to create an article or review." />
+              )}
+              {warning && (
+                <div className="rounded-lg border border-amber-500/30 bg-warning/10 px-4 py-3 text-sm text-amber-300">
+                  {warning}
+                </div>
+              )}
+
+              {/* Type & Category Row */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {/* Content Type */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-foreground">Type</label>
+                  <select
+                    value={contentType}
+                    onChange={e => setContentType(e.target.value as ContentType)}
+                    disabled={availableContentTypes.length <= 1}
+                    className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    {availableContentTypes.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Category */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-foreground">Category *</label>
+                  <select
+                    value={category}
+                    onChange={e => setCategory(e.target.value as ArticleCategory)}
+                    className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    <option value="">-- Select --</option>
+                    {availableCategories.map(cat => (
+                      <option key={cat} value={cat}>
+                        {CATEGORIES[cat].label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Topic */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-foreground">Subcategory</label>
+                  <select
+                    value={topic}
+                    onChange={e => setTopic(e.target.value as ArticleTopic)}
+                    disabled={!category || contentType === 'review'}
+                    className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+                  >
+                    {availableTopics.map(t => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Title */}
+              <Input
+                label="Title *"
+                placeholder="Enter the article title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                error={!titleValidation.isValid}
+              />
+              {!titleValidation.isValid && (
+                <p className="text-xs text-red-400">Title must not contain HTML.</p>
+              )}
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Description</label>
+                <Textarea
+                  placeholder="Short article description (shown in cards)"
+                  rows={3}
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  className={!descriptionValidation.isValid ? 'border-destructive' : undefined}
+                />
+              </div>
+              {!descriptionValidation.isValid && (
+                <p className="text-xs text-red-400">Description must not contain HTML.</p>
+              )}
+
+              {/* Cover Image */}
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-foreground">Cover image</label>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex min-w-[220px] flex-1 flex-col gap-2">
+                    <Input
+                      placeholder="Image URL"
+                      value={coverImage}
+                      onChange={e => {
+                        setCoverImage(e.target.value);
+                        setCoverUploadError(null);
+                      }}
+                      className="flex-1"
+                    />
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Button
+                        variant="ghost"
+                        icon={
+                          isCoverUploading ? (
+                            <Spinner className="size-4" />
+                          ) : (
+                            <ImageIcon size={16} />
+                          )
+                        }
+                        onClick={handleCoverUploadClick}
+                        disabled={isCoverUploading}
+                      >
+                        {isCoverUploading ? 'Uploading...' : 'Upload file'}
+                      </Button>
+                      <span>The URL comes from Supabase storage.</span>
+                    </div>
+                    {coverUploadError && (
+                      <p className="text-xs text-amber-300">{coverUploadError}</p>
+                    )}
+                  </div>
+                  <div className="relative h-12 w-12 rounded-lg border border-border">
+                    {coverImage && isCoverPreviewValid ? (
+                      <CoverThumbImage
+                        src={coverImage}
+                        alt="Preview"
+                        sizes={THUMB_SIZES_SM}
+                        className="object-cover"
+                        onError={() => setIsCoverPreviewValid(false)}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-card">
+                        <ImageIcon size={20} className="text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={coverFileInputRef}
+                  className="hidden"
+                  onChange={handleCoverFileChange}
+                />
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="space-y-6">
-                  {/* Error message */}
-                  {error && <ErrorAlert message={error} />}
-                  {noPermission && (
-                    <ErrorAlert message="You do not have permission to create an article or review." />
-                  )}
-                  {warning && (
-                    <div className="rounded-lg border border-amber-500/30 bg-warning/10 px-4 py-3 text-sm text-amber-300">
-                      {warning}
-                    </div>
-                  )}
+              <RichTextEditor
+                label="Content"
+                value={contentHtml}
+                onChange={setContentHtml}
+                placeholder="Write the article content..."
+              />
 
-                  {/* Type & Category Row */}
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    {/* Content Type */}
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Type</label>
-                      <select
-                        value={contentType}
-                        onChange={e => setContentType(e.target.value as ContentType)}
-                        disabled={availableContentTypes.length <= 1}
-                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      >
-                        {availableContentTypes.map(type => (
-                          <option key={type.value} value={type.value}>
-                            {type.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+              {/* Tags */}
+              <Input
+                label="Tags"
+                placeholder="Comma-separated (e.g. ps5, rpg, exclusive)"
+                value={tags}
+                onChange={e => setTags(e.target.value)}
+                error={!tagsValidation.isValid}
+              />
+              {!tagsValidation.isValid && (
+                <p className="text-xs text-red-400">
+                  {tagsValidation.error || 'Tags must not contain HTML.'}
+                </p>
+              )}
+            </div>
+          </div>
 
-                    {/* Category */}
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Category *</label>
-                      <select
-                        value={category}
-                        onChange={e => setCategory(e.target.value as ArticleCategory)}
-                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      >
-                        <option value="">-- Select --</option>
-                        {availableCategories.map(cat => (
-                          <option key={cat} value={cat}>
-                            {CATEGORIES[cat].label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Topic */}
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-foreground">Subcategory</label>
-                      <select
-                        value={topic}
-                        onChange={e => setTopic(e.target.value as ArticleTopic)}
-                        disabled={!category || contentType === 'review'}
-                        className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground transition hover:border-primary/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-                      >
-                        {availableTopics.map(t => (
-                          <option key={t.value} value={t.value}>
-                            {t.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <Input
-                    label="Title *"
-                    placeholder="Enter the article title"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    error={!titleValidation.isValid}
-                  />
-                  {!titleValidation.isValid && (
-                    <p className="text-xs text-red-400">Title must not contain HTML.</p>
-                  )}
-
-                  {/* Description */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground">Description</label>
-                    <Textarea
-                      placeholder="Short article description (shown in cards)"
-                      rows={3}
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      className={!descriptionValidation.isValid ? 'border-destructive' : undefined}
-                    />
-                  </div>
-                  {!descriptionValidation.isValid && (
-                    <p className="text-xs text-red-400">Description must not contain HTML.</p>
-                  )}
-
-                  {/* Cover Image */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-foreground">Cover image</label>
-                    <div className="flex flex-wrap gap-3">
-                      <div className="flex min-w-[220px] flex-1 flex-col gap-2">
-                        <Input
-                          placeholder="Image URL"
-                          value={coverImage}
-                          onChange={e => {
-                            setCoverImage(e.target.value);
-                            setCoverUploadError(null);
-                          }}
-                          className="flex-1"
-                        />
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <Button
-                            variant="ghost"
-                            icon={
-                              isCoverUploading ? (
-                                <Spinner className="size-4" />
-                              ) : (
-                                <ImageIcon size={16} />
-                              )
-                            }
-                            onClick={handleCoverUploadClick}
-                            disabled={isCoverUploading}
-                          >
-                            {isCoverUploading ? 'Uploading...' : 'Upload file'}
-                          </Button>
-                          <span>The URL comes from Supabase storage.</span>
-                        </div>
-                        {coverUploadError && (
-                          <p className="text-xs text-amber-300">{coverUploadError}</p>
-                        )}
-                      </div>
-                      <div className="relative h-12 w-12 rounded-lg border border-border">
-                        {coverImage && isCoverPreviewValid ? (
-                          <CoverThumbImage
-                            src={coverImage}
-                            alt="Preview"
-                            sizes={THUMB_SIZES_SM}
-                            className="object-cover"
-                            onError={() => setIsCoverPreviewValid(false)}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-card">
-                            <ImageIcon size={20} className="text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={coverFileInputRef}
-                      className="hidden"
-                      onChange={handleCoverFileChange}
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <RichTextEditor
-                    label="Content"
-                    value={contentHtml}
-                    onChange={setContentHtml}
-                    placeholder="Write the article content..."
-                  />
-
-                  {/* Tags */}
-                  <Input
-                    label="Tags"
-                    placeholder="Comma-separated (e.g. ps5, rpg, exclusive)"
-                    value={tags}
-                    onChange={e => setTags(e.target.value)}
-                    error={!tagsValidation.isValid}
-                  />
-                  {!tagsValidation.isValid && (
-                    <p className="text-xs text-red-400">
-                      {tagsValidation.error || 'Tags must not contain HTML.'}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-between border-t border-border px-6 py-4">
-                <Button variant="secondary" onClick={onClose}>
-                  Cancel
-                </Button>
-                <div className="flex gap-3">
-                  <Button
-                    variant="ghost"
-                    icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
-                    onClick={() => handleSubmit('draft')}
-                    disabled={isSubmitting || hasPlainTextError || noPermission}
-                  >
-                    Save as Draft
-                  </Button>
-                  <Button
-                    variant="primary"
-                    icon={isSubmitting ? <Spinner className="size-4" /> : <Eye size={16} />}
-                    onClick={() => handleSubmit('published')}
-                    disabled={isSubmitting || hasPlainTextError || noPermission}
-                  >
-                    Publish
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </dialog>
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t border-border px-6 py-4">
+            <Button variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
+                onClick={() => handleSubmit('draft')}
+                disabled={isSubmitting || hasPlainTextError || noPermission}
+              >
+                Save as Draft
+              </Button>
+              <Button
+                variant="primary"
+                icon={isSubmitting ? <Spinner className="size-4" /> : <Eye size={16} />}
+                onClick={() => handleSubmit('published')}
+                disabled={isSubmitting || hasPlainTextError || noPermission}
+              >
+                Publish
+              </Button>
+            </div>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
-  );
+      </dialog>
+    </div>
+  ) : null;
 }

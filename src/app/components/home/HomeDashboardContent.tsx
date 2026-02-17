@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { PersonalStats } from './types';
 import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
+import type { ContinueData } from '@/lib/dashboard/server-data';
 import { HomeDashboardHeader, ContinueHero } from '@/app/components/home';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
 
@@ -32,6 +33,7 @@ type HomeDashboardContentProps = {
   mediaCategories: DashboardCategoryKey[];
   categorySections: Record<DashboardCategoryKey, CategoryDashboardSection>;
   socialPreferences: SocialPreferences;
+  continueData?: ContinueData;
 };
 
 export default function HomeDashboardContent({
@@ -41,6 +43,7 @@ export default function HomeDashboardContent({
   mediaCategories,
   categorySections,
   socialPreferences,
+  continueData,
 }: HomeDashboardContentProps) {
   const { socialEnabled, communityActivityEnabled, communitySuggestionsEnabled } =
     socialPreferences;
@@ -82,7 +85,7 @@ export default function HomeDashboardContent({
       )}
 
       <section className="pt-1 md:pt-2">
-        <ContinueHero />
+        <ContinueHero fallbackData={continueData} />
       </section>
 
       {mediaCategories.length > 0 && (

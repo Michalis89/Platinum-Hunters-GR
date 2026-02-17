@@ -47,8 +47,8 @@ export default function ResetPasswordForm({
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-success/15 blur-3xl" />
+      <div className="gpu-accelerate pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-xl" />
+      <div className="gpu-accelerate pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-success/15 blur-xl" />
 
       <ResetPasswordCard
         error={error}

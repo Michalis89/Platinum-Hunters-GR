@@ -99,7 +99,7 @@ function LibraryEntryRow({
               alt={entry.title}
               width={80}
               height={112}
-              unoptimized
+              sizes="80px"
               className="h-full w-full object-cover"
             />
           </div>

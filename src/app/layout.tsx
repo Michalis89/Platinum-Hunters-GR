@@ -12,7 +12,6 @@ import {
 } from '@/utils/seo/metadata/structuredData';
 import Providers from '@/store/Providers';
 export { metadata } from '@/utils/seo/metadata/metadata';
-import ScrollToTopOnRouteChange from '@/utils/components/ScrollToTopOnRouteChange';
 
 // Font optimization: removed 'latin-ext' subset (~10KB savings)
 // 'swap' ensures text is visible immediately with fallback font
@@ -61,7 +60,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
         <Providers initialTheme={initialTheme}>
           <AuthInit />
-          <ScrollToTopOnRouteChange />
           {children}
           {isVercelProd ? (
             <>

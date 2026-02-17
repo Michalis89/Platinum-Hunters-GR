@@ -30,7 +30,7 @@ export default function AdminSupportShell({ children }: AdminSupportShellProps) 
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="admin-support-root min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
         <PageContainer size="full" className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-2">

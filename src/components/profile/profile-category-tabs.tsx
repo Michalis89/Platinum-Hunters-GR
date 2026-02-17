@@ -52,7 +52,10 @@ type ProfileCategoryTabsProps = {
 };
 
 // Helper to get affinity genres for a category
-function getAffinityGenres(genreAffinity: Record<string, string[]> | undefined, category: string): string[] {
+function getAffinityGenres(
+  genreAffinity: Record<string, string[]> | undefined,
+  category: string,
+): string[] {
   return genreAffinity?.[category] ?? [];
 }
 
@@ -224,10 +227,7 @@ export function ProfileCategoryTabs({
               <CardContent className="space-y-3">
                 {category === 'games' && (
                   <div className="space-y-4">
-                    {renderReadonlyGenres(
-                      'Top Genres',
-                      getAffinityGenres(genreAffinity, 'games'),
-                    )}
+                    {renderReadonlyGenres('Top Genres', getAffinityGenres(genreAffinity, 'games'))}
 
                     <div className="grid gap-4 md:grid-cols-2">
                       <Input

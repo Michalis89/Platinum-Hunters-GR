@@ -4,7 +4,6 @@ import { Suspense, memo, useEffect, useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoverThumbImage } from '@/components/ui/cover-image';
-import { motion } from 'framer-motion';
 import { Calendar, Clock, Eye, Heart, Star, Tag, User } from 'lucide-react';
 import type { ArticleCategory, ArticleRow } from '@/types/database';
 import { PageContainer } from '@/app/components/layout';
@@ -44,18 +43,12 @@ const SKELETON_COUNT = 6;
 
 const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithAuthor }) {
   const normalizedSlug = normalizeSlug(article.slug);
-  const MotionCard = motion(Card);
   const readTimeLabel = article.reading_time_minutes
     ? `${article.reading_time_minutes} min read`
     : null;
 
   return (
-    <MotionCard
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
-      className="group rounded-lg border bg-card shadow-md focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
-    >
+    <Card className="animate-fade-in-up group rounded-lg border bg-card shadow-md focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background">
       <Link href={`/review/${normalizedSlug}`} className="block">
         <div className="relative aspect-[16/10] bg-muted">
           {article.cover_image ? (
@@ -145,7 +138,7 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
           </div>
         </div>
       </CardContent>
-    </MotionCard>
+    </Card>
   );
 });
 ReviewCard.displayName = 'ReviewCard';
@@ -328,12 +321,7 @@ function ReviewsPageContent() {
   return (
     <PageContainer size="xl" className="py-10 sm:py-12">
       <div className="rounded-lg p-3 sm:p-4">
-        <motion.section
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="mb-6 rounded-lg p-5 sm:p-7"
-        >
+        <section className="mb-6 rounded-lg p-5 sm:p-7">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">Review Desk</p>
@@ -379,7 +367,7 @@ function ReviewsPageContent() {
               </div>
             ) : null}
           </div>
-        </motion.section>
+        </section>
 
         {shouldShowSkeleton ? (
           <ReviewSkeletonGrid />
@@ -392,16 +380,11 @@ function ReviewsPageContent() {
             description={emptyDescription}
           />
         ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.05 }}
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {articles.map(article => (
               <ReviewCard key={article.id} article={article} />
             ))}
-          </motion.div>
+          </div>
         )}
       </div>
     </PageContainer>

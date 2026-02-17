@@ -54,14 +54,10 @@ export default function Navbar() {
   );
 
   const shouldLoadSettings = isAuthenticated && authResolved;
-  const {
-    settings,
-    isLoading: isSettingsLoading,
-    mutate: mutateSettings,
-  } = useUserSettings(shouldLoadSettings);
+  const { settings, mutate: mutateSettings } = useUserSettings(shouldLoadSettings);
   const [isThemeSaving, setIsThemeSaving] = useState(false);
 
-  const isNavbarLoading = !authResolved || (shouldLoadSettings && isSettingsLoading);
+  const isNavbarLoading = !authResolved;
   const featureFilters = useMemo<NavbarFeatureFilters>(
     () => ({
       articles: settings?.articles_enabled ?? true,

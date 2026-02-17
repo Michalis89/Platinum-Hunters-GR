@@ -51,7 +51,9 @@ const handler = withApiRoute(async (request: Request) => {
         genre_affinity: topGenres,
       };
 
-      return ok(response as User & { category_profile: unknown; genre_affinity: Record<string, string[]> });
+      return ok(
+        response as User & { category_profile: unknown; genre_affinity: Record<string, string[]> },
+      );
     }
 
     return fail({ error: 'Method not allowed', code: 'METHOD_NOT_ALLOWED' }, 405, {

@@ -1,5 +1,3 @@
-'use client';
-
 import {
   User,
   Mail,
@@ -13,7 +11,7 @@ import {
   Twitter,
   Link2,
 } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import EmptyState from '@/components/ui/empty';
 import type { User as UserType } from '@/types/user';
 
@@ -105,11 +103,7 @@ export function ProfilePersonalInfo({
   const socialLinks = (user.social_links as Record<string, unknown>) || {};
   // Read from new location_city column (clean, no fallback)
   const locationCity = user.location_city || '';
-  const [age, setAge] = useState<number | null>(null);
-
-  useEffect(() => {
-    setAge(calculateAge(user.date_of_birth));
-  }, [user.date_of_birth]);
+  const age = calculateAge(user.date_of_birth);
 
   const visibleSocialLinks = socialPlatforms.filter(p =>
     (socialLinks[p.key] as string | undefined)?.trim(),

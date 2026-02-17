@@ -76,6 +76,17 @@ export type RateLimitResult = {
  * ```
  */
 export async function rateLimit(limiter: LimiterName, key: string): Promise<RateLimitResult> {
+  // Bypass rate limiting in development mode
+  if (process.env.NODE_ENV === 'development') {
+    const config = getLimiterConfig(limiter);
+    return {
+      success: true,
+      limit: config.limit,
+      remaining: config.limit,
+      reset: Date.now() + config.windowSec * 1000,
+    };
+  }
+
   const rateLimiter = getNamedLimiter(limiter);
   const config = getLimiterConfig(limiter);
 

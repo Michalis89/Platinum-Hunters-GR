@@ -44,7 +44,7 @@ type CountBucket = {
   dropped: number;
 };
 
-type ContinuePayload = {
+export type ContinuePayload = {
   enabledCategories: string[];
   slides: ContinueSlide[];
   countsByCategory: Record<string, CountBucket>;
@@ -284,13 +284,20 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
   );
 };
 
-export function ContinueHero() {
+type ContinueHeroProps = {
+  fallbackData?: ContinuePayload;
+};
+
+export function ContinueHero({ fallbackData }: ContinueHeroProps = {}) {
   const { data: response, isLoading } = useSWR<ContinuePayload | { data: ContinuePayload }>(
     '/api/user/continue',
     fetcher,
     {
+      fallbackData,
       refreshInterval: 0,
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
+      revalidateOnMount: !fallbackData,
+      dedupingInterval: 2000, // Prevent excessive revalidation
     },
   );
 

@@ -129,7 +129,17 @@ const getEntryActivityTimestamp = (entry: Pick<ContinueEntry, 'updated_at' | 'cr
   toTimestamp(entry.updated_at ?? entry.created_at);
 
 const compareEntryDates = (a: ContinueEntry, b: ContinueEntry) => {
-  return getEntryActivityTimestamp(b) - getEntryActivityTimestamp(a);
+  const activityDiff = getEntryActivityTimestamp(b) - getEntryActivityTimestamp(a);
+  if (activityDiff !== 0) {
+    return activityDiff;
+  }
+
+  const createdDiff = toTimestamp(b.created_at) - toTimestamp(a.created_at);
+  if (createdDiff !== 0) {
+    return createdDiff;
+  }
+
+  return b.id - a.id;
 };
 
 const resolveTitle = (media: MediaPreview | null) =>
@@ -514,8 +524,9 @@ export async function fetchContinueData(userId: string): Promise<ContinueData> {
       .eq('user_id', userId)
       .eq('status', 'current')
       .in('media_items.category', slideCategories)
-      .order('updated_at', { ascending: false })
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: false });
 
     if (currentError) {
       throw currentError;
@@ -559,9 +570,20 @@ export async function fetchContinueData(userId: string): Promise<ContinueData> {
     });
   }
 
-  const slides = Array.from(latestByCategory.values()).sort(
-    (a, b) => toTimestamp(b.updated_at || b.created_at) - toTimestamp(a.updated_at || a.created_at),
-  );
+  const slides = Array.from(latestByCategory.values()).sort((a, b) => {
+    const activityDiff =
+      toTimestamp(b.updated_at || b.created_at) - toTimestamp(a.updated_at || a.created_at);
+    if (activityDiff !== 0) {
+      return activityDiff;
+    }
+
+    const createdDiff = toTimestamp(b.created_at) - toTimestamp(a.created_at);
+    if (createdDiff !== 0) {
+      return createdDiff;
+    }
+
+    return b.entry_id - a.entry_id;
+  });
 
   const { data: countEntries, error: countError } = await supabase
     .from('user_media_entries')

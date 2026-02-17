@@ -2,8 +2,10 @@
 
 import { store } from './store';
 import { Provider } from 'react-redux';
+import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { Toaster } from '@/components/ui/sonner';
+import { swrConfig } from '@/lib/swr/config';
 
 type Theme = 'dark' | 'light';
 
@@ -15,10 +17,12 @@ interface Props {
 export default function Providers({ children, initialTheme }: Props) {
   return (
     <Provider store={store}>
-      <ThemeProvider initialTheme={initialTheme}>
-        {children}
-        <Toaster />
-      </ThemeProvider>
+      <SWRConfig value={swrConfig}>
+        <ThemeProvider initialTheme={initialTheme}>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </SWRConfig>
     </Provider>
   );
 }

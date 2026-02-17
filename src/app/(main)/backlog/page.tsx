@@ -7,6 +7,8 @@ import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData
 import { SITE_URL } from '@/config/site';
 import { requireServerAuth } from '@/lib/auth/requireServerAuth';
 
+export const revalidate = 300;
+
 type BacklogPageProps = {
   searchParams: Promise<{ category?: string }>;
 };

@@ -10,7 +10,7 @@ import { getLoginUrl, shouldRedirectToLogin } from '@/lib/routes/authRoutes';
 
 const AUTH_STORAGE_KEY = 'hobbistas-hub-auth';
 const RETURN_URL_KEY = 'hobbistas-hub-return-url';
-const SESSION_CHECK_INTERVAL_MS = 15 * 60 * 1000; // Reduced from 5min to 15min for mobile performance
+const DESKTOP_SESSION_CHECK_INTERVAL_MS = 15 * 60 * 1000;
 
 function scheduleIdleCallback(callback: () => void, timeout = 5000): number {
   if (typeof requestIdleCallback !== 'undefined') {
@@ -25,6 +25,13 @@ function cancelIdleCallback(id: number): void {
   } else {
     clearTimeout(id);
   }
+}
+
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return window.matchMedia('(hover: none)').matches || navigator.maxTouchPoints > 0;
 }
 
 /**
@@ -194,12 +201,10 @@ export default function AuthInit() {
         // Valid session - sync cookies and fetch profile
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session) {
-          const syncOk = await syncCookies(sessionData.session);
-          if (!syncOk) {
-            // Cookies expired but localStorage had session - force logout
-            await forceLogout();
-            return;
-          }
+          // Try to sync cookies, but don't force logout on failure
+          // Cookies will be synced automatically on next token refresh
+          // This prevents logout when opening multiple tabs where cookies may not be ready
+          await syncCookies(sessionData.session);
         }
         await dispatch(fetchSession());
       }
@@ -256,6 +261,7 @@ export default function AuthInit() {
     let cancelled = false;
     let lastCheckTime = 0;
     let pendingIdleCallback: number | null = null;
+    const isMobile = isMobileDevice();
     const VISIBILITY_CHECK_DEBOUNCE_MS = 5000; // Don't check more than once every 5 seconds
 
     // Quick check on visibility - only validates localStorage expiry, no API call
@@ -324,18 +330,24 @@ export default function AuthInit() {
 
     const onVisibility = () => {
       if (document.visibilityState === 'visible') {
-        quickCheckSession();
+        void quickCheckSession();
+        if (isMobile) {
+          fullCheckSession();
+        }
       }
     };
 
     document.addEventListener('visibilitychange', onVisibility);
-    // Full validation with server every 5 minutes (using idle callback to not block INP)
-    const intervalId = window.setInterval(fullCheckSession, SESSION_CHECK_INTERVAL_MS);
+    const intervalId = isMobile
+      ? null
+      : window.setInterval(fullCheckSession, DESKTOP_SESSION_CHECK_INTERVAL_MS);
 
     return () => {
       cancelled = true;
       document.removeEventListener('visibilitychange', onVisibility);
-      window.clearInterval(intervalId);
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
       if (pendingIdleCallback !== null) {
         cancelIdleCallback(pendingIdleCallback);
       }
@@ -346,7 +358,7 @@ export default function AuthInit() {
   // Skip on mobile devices to reduce event listener overhead
   useEffect(() => {
     // Skip idle timeout entirely on mobile (rely on server-side session expiry)
-    if (typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    if (isMobileDevice()) {
       return;
     }
 
@@ -385,7 +397,11 @@ export default function AuthInit() {
       resetTimer();
     };
 
-    const activityEvents = ['click', 'keydown', 'mousemove', 'focus', 'visibilitychange'];
+    const isTouchDevice =
+      window.matchMedia('(hover: none)').matches || navigator.maxTouchPoints > 0;
+    const activityEvents = isTouchDevice
+      ? ['click', 'keydown', 'focus', 'visibilitychange']
+      : ['click', 'keydown', 'mousemove', 'focus', 'visibilitychange'];
     // Use passive listeners for better scroll/touch performance
     activityEvents.forEach(ev => window.addEventListener(ev, onActivity, { passive: true }));
     resetTimer();

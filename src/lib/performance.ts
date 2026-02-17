@@ -1,7 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Performance utilities to improve INP (Interaction to Next Paint)
  */
+
+type SchedulerLike = {
+  yield?: () => Promise<void>;
+};
+
+type IdleDeadline = {
+  didTimeout: boolean;
+  timeRemaining: () => number;
+};
+
+type RequestIdleCallback = (
+  callback: (deadline: IdleDeadline) => void,
+  options?: { timeout: number },
+) => number;
 
 /**
  * Yields to the main thread to allow the browser to paint.
@@ -20,8 +33,18 @@
  * }
  */
 export async function yieldToMain(): Promise<void> {
-  return new Promise(resolve => {
-    setTimeout(resolve, 0);
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const scheduler = (globalThis as { scheduler?: SchedulerLike }).scheduler;
+  if (scheduler?.yield) {
+    await scheduler.yield();
+    return;
+  }
+
+  await new Promise<void>(resolve => {
+    requestAnimationFrame(() => resolve());
   });
 }
 
@@ -45,9 +68,25 @@ export async function yieldToMain(): Promise<void> {
  * }
  */
 export function deferWork(callback: () => void | Promise<void>, delayMs = 50): void {
-  setTimeout(() => {
+  const runCallback = () => {
     void Promise.resolve(callback());
-  }, delayMs);
+  };
+
+  if (typeof window === 'undefined') {
+    setTimeout(runCallback, delayMs);
+    return;
+  }
+
+  const requestIdle = (window as Window & { requestIdleCallback?: RequestIdleCallback })
+    .requestIdleCallback;
+  if (requestIdle) {
+    setTimeout(() => {
+      requestIdle(runCallback, { timeout: 500 });
+    }, delayMs);
+    return;
+  }
+
+  setTimeout(runCallback, delayMs);
 }
 
 /**
@@ -63,11 +102,11 @@ export function deferWork(callback: () => void | Promise<void>, delayMs = 50): v
  *   await heavyWork();
  * });
  */
-export function deferFn<T extends (...args: any[]) => any>(
-  fn: T,
+export function deferFn<TArgs extends unknown[], TResult extends void | Promise<void>>(
+  fn: (...args: TArgs) => TResult,
   delayMs = 50,
-): (...args: Parameters<T>) => void {
-  return (...args: Parameters<T>) => {
+): (...args: TArgs) => void {
+  return (...args: TArgs) => {
     deferWork(() => fn(...args), delayMs);
   };
 }

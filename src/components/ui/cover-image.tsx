@@ -8,43 +8,28 @@ export const THUMB_SIZES_TINY = '56px';
 export const THUMB_SIZES_MD = '64px';
 export const DEFAULT_THUMB_SIZES = '(max-width: 640px) 44vw, (max-width: 1024px) 22vw, 240px';
 export const DEFAULT_HERO_SIZES = '(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px';
-
-const UNOPTIMIZED_CDN_HOSTNAMES = new Set([
-  'media.rawg.io',
-  'cdn.myanimelist.net',
-  'image.tmdb.org',
-]);
-
-const getRemoteHostname = (src: ImageProps['src']) => {
-  if (typeof src !== 'string') {
-    return null;
-  }
-
-  const normalized = src.startsWith('//') ? `https:${src}` : src;
-  if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
-    return null;
-  }
-
-  try {
-    return new URL(normalized).hostname.toLowerCase();
-  } catch {
-    return null;
-  }
-};
-
-const shouldDefaultToUnoptimized = (src: ImageProps['src']) => {
-  const hostname = getRemoteHostname(src);
-  return hostname ? UNOPTIMIZED_CDN_HOSTNAMES.has(hostname) : false;
-};
+export const IMAGE_SIZES = {
+  grid3: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+  grid4: '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw',
+  list: DEFAULT_THUMB_SIZES,
+  hero: DEFAULT_HERO_SIZES,
+  thumb: THUMB_SIZES_MD,
+} as const;
+export const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PC9zdmc+';
 
 type CoverThumbImageProps = Omit<ImageProps, 'fill' | 'sizes' | 'className'> & {
   sizes?: ImageProps['sizes'];
   className?: ImageProps['className'];
+  priority?: boolean;
+  blur?: boolean;
 };
 
 type CoverHeroImageProps = Omit<ImageProps, 'fill' | 'sizes' | 'className'> & {
   sizes?: ImageProps['sizes'];
   className?: ImageProps['className'];
+  priority?: boolean;
+  blur?: boolean;
 };
 
 export function CoverThumbImage({
@@ -52,19 +37,25 @@ export function CoverThumbImage({
   alt,
   sizes = DEFAULT_THUMB_SIZES,
   className,
-  unoptimized,
+  priority = false,
+  blur = true,
+  placeholder,
+  blurDataURL,
   ...rest
 }: CoverThumbImageProps) {
-  const shouldUnoptimized = unoptimized ?? shouldDefaultToUnoptimized(src);
+  const resolvedPlaceholder = placeholder ?? (blur ? 'blur' : undefined);
+  const resolvedBlurDataURL = blurDataURL ?? (blur ? BLUR_DATA_URL : undefined);
 
   return (
     <Image
       src={src}
       alt={alt}
       fill
+      priority={priority}
       sizes={sizes}
+      placeholder={resolvedPlaceholder}
+      blurDataURL={resolvedBlurDataURL}
       className={cn('object-cover', className)}
-      unoptimized={shouldUnoptimized}
       {...rest}
     />
   );
@@ -75,14 +66,24 @@ export function CoverHeroImage({
   alt,
   sizes = DEFAULT_HERO_SIZES,
   className,
+  priority = false,
+  blur = true,
+  placeholder,
+  blurDataURL,
   ...rest
 }: CoverHeroImageProps) {
+  const resolvedPlaceholder = placeholder ?? (blur ? 'blur' : undefined);
+  const resolvedBlurDataURL = blurDataURL ?? (blur ? BLUR_DATA_URL : undefined);
+
   return (
     <Image
       src={src}
       alt={alt}
       fill
+      priority={priority}
       sizes={sizes}
+      placeholder={resolvedPlaceholder}
+      blurDataURL={resolvedBlurDataURL}
       className={cn('object-cover', className)}
       {...rest}
     />

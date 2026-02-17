@@ -97,7 +97,7 @@ function ProfileFavoritesComponent({
               alt={fav.game?.title || 'Item'}
               width={48}
               height={48}
-              unoptimized
+              sizes="(max-width: 640px) 48px, 56px"
               className="h-full w-full object-cover"
             />
             {/* Favorite heart overlay */}

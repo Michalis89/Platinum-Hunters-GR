@@ -33,8 +33,34 @@ function EmptyState({ category }: { category: string }) {
   );
 }
 
+/**
+ * Generates a dynamic label based on suggestion sources
+ */
+function generateSuggestionsLabel(suggestions: MediaSuggestion[]): string {
+  const backlogCount = suggestions.filter(s => s.source === 'backlog').length;
+  const dbCount = suggestions.filter(
+    s => s.source === 'database' || s.source === 'database-fallback',
+  ).length;
+
+  if (backlogCount === 0 && dbCount === 0) {
+    return '';
+  }
+
+  if (backlogCount === 0) {
+    return dbCount === 1 ? '1 strong pick for you' : `${dbCount} strong picks for you`;
+  }
+
+  if (dbCount === 0) {
+    return backlogCount === 1 ? '1 backlog pick' : `${backlogCount} backlog picks`;
+  }
+
+  // Both exist
+  return `${backlogCount} backlog + ${dbCount} database picks`;
+}
+
 export default function MediaSuggestions({ suggestions, category }: MediaSuggestionsProps) {
   const visibleSuggestions = suggestions.slice(0, 4);
+  const suggestionsLabel = generateSuggestionsLabel(visibleSuggestions);
 
   return (
     <section className="space-y-5 rounded-2xl border border-border/40 bg-muted/[0.08] p-5 md:p-6">
@@ -45,9 +71,9 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
             Personalized
           </span>
         </div>
-        {visibleSuggestions.length > 0 && (
+        {visibleSuggestions.length > 0 && suggestionsLabel && (
           <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
-            2 backlog + 2 database picks
+            {suggestionsLabel}
           </span>
         )}
       </div>

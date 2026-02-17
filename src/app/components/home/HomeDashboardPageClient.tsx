@@ -17,6 +17,7 @@ import {
   HomeSuggestions,
   ContinueHero,
 } from '@/app/components/home';
+import type { ContinuePayload } from './ContinueHero';
 
 const fetcher = apiClient.swrFetcher;
 const noStoreFetcher = apiClient.swrNoStoreFetcher;
@@ -130,7 +131,7 @@ export default function HomeDashboardPageClient() {
       )}
 
       <section className="pt-2 md:pt-3">
-        <ContinueHero />
+        <ContinueHero fallbackData={continuePayload as ContinuePayload | undefined} />
       </section>
 
       <div className={DIVIDER_WRAP}>

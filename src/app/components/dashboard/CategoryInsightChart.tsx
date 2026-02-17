@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -33,17 +34,24 @@ const RANGE_OPTIONS = [
   { value: 'all', label: 'All time' },
 ];
 
-export default function CategoryInsightChart({ payload, category }: CategoryInsightChartProps) {
+function CategoryInsightChart({ payload, category }: CategoryInsightChartProps) {
   const label =
     category === 'tv' ? 'TV' : `${category.charAt(0).toUpperCase()}${category.slice(1)}`;
-  const dataPoints = payload.data ?? [];
-  const hasData = dataPoints.length > 0;
+  const dataPoints = useMemo(() => payload.data ?? [], [payload.data]);
   const hasEnoughData = dataPoints.length >= 5;
 
-  const totalCompleted = dataPoints.reduce((sum, point) => sum + (point.completed ?? 0), 0);
-  const totalDropped = dataPoints.reduce((sum, point) => sum + (point.dropped ?? 0), 0);
-  const totalAttempts = totalCompleted + totalDropped;
-  const completionRate = totalAttempts ? Math.round((totalCompleted / totalAttempts) * 100) : 0;
+  const { totalCompleted, totalDropped, totalAttempts, completionRate } = useMemo(() => {
+    const completed = dataPoints.reduce((sum, point) => sum + (point.completed ?? 0), 0);
+    const dropped = dataPoints.reduce((sum, point) => sum + (point.dropped ?? 0), 0);
+    const attempts = completed + dropped;
+    const rate = attempts ? Math.round((completed / attempts) * 100) : 0;
+    return {
+      totalCompleted: completed,
+      totalDropped: dropped,
+      totalAttempts: attempts,
+      completionRate: rate,
+    };
+  }, [dataPoints]);
   const hasMeaningfulData = totalAttempts > 0;
 
   if (!hasMeaningfulData) {
@@ -164,13 +172,6 @@ export default function CategoryInsightChart({ payload, category }: CategoryInsi
                 />
               </AreaChart>
             </ChartContainer>
-          ) : hasData ? (
-            <div className="flex h-full flex-col items-start justify-center gap-2 rounded-2xl border border-border/40 bg-muted/10 p-5 text-left">
-              <p className="text-sm font-semibold text-foreground">Not enough history yet</p>
-              <p className="text-xs text-muted-foreground">
-                Log a few completions or drops to unlock a trend line.
-              </p>
-            </div>
           ) : (
             <div className="flex h-full flex-col items-start justify-center gap-2 rounded-2xl border border-border/40 bg-muted/10 p-5 text-left">
               <p className="text-sm font-semibold text-foreground">Not enough history yet</p>
@@ -195,3 +196,5 @@ export default function CategoryInsightChart({ payload, category }: CategoryInsi
     </Card>
   );
 }
+
+export default memo(CategoryInsightChart);

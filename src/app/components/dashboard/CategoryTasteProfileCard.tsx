@@ -1,6 +1,3 @@
-'use client';
-
-import { useMemo } from 'react';
 import {
   BookOpen,
   Film,
@@ -73,53 +70,46 @@ export default function CategoryTasteProfileCard({
   category,
   items,
 }: CategoryTasteProfileCardProps) {
-  const tasteProfile = useMemo(() => buildTasteProfile(items, category), [category, items]);
+  const tasteProfile = buildTasteProfile(items, category);
   const Icon = CATEGORY_ICONS[category] ?? Sparkles;
   const categoryLabel = CATEGORY_LABELS[category] ?? 'Category';
-  const profileBuckets = useMemo<TasteProfileBarBucket[]>(() => {
-    if (category === 'games') {
-      return GAME_VISIBLE_BUCKETS.map(bucket => ({
-        bucketKey: bucket,
-        traits: (tasteProfile.topBuckets[bucket] ?? []).map(trait => ({
-          name: trait.name,
-          count: trait.count,
-          percentageValue: Math.max(0, Math.min(100, trait.percent)),
-          percentageLabel: `${Math.round(trait.percent)}%`,
-        })),
-      }));
-    }
-
-    return [
-      {
-        bucketKey: 'genre',
-        traits: tasteProfile.topGenres.map(trait => ({
-          name: trait.name,
-          count: trait.count,
-          percentageValue: Math.max(0, Math.min(100, trait.percent)),
-          percentageLabel: `${Math.round(trait.percent)}%`,
-        })),
-      },
-    ];
-  }, [category, tasteProfile.topBuckets, tasteProfile.topGenres]);
-
-  const visibleBuckets = useMemo(
-    () =>
-      profileBuckets
-        .map(bucket => ({
-          ...bucket,
-          traits: [...bucket.traits]
-            .filter(trait => trait.percentageValue >= MIN_VISIBLE_PERCENTAGE)
-            .sort((a, b) => {
-              if (b.percentageValue !== a.percentageValue) {
-                return b.percentageValue - a.percentageValue;
-              }
-              return a.name.localeCompare(b.name);
-            })
-            .slice(0, MAX_TRAITS_PER_BUCKET),
+  const profileBuckets: TasteProfileBarBucket[] =
+    category === 'games'
+      ? GAME_VISIBLE_BUCKETS.map(bucket => ({
+          bucketKey: bucket,
+          traits: (tasteProfile.topBuckets[bucket] ?? []).map(trait => ({
+            name: trait.name,
+            count: trait.count,
+            percentageValue: Math.max(0, Math.min(100, trait.percent)),
+            percentageLabel: `${Math.round(trait.percent)}%`,
+          })),
         }))
-        .filter(bucket => (category === 'games' ? true : bucket.traits.length > 0)),
-    [category, profileBuckets],
-  );
+      : [
+          {
+            bucketKey: 'genre',
+            traits: tasteProfile.topGenres.map(trait => ({
+              name: trait.name,
+              count: trait.count,
+              percentageValue: Math.max(0, Math.min(100, trait.percent)),
+              percentageLabel: `${Math.round(trait.percent)}%`,
+            })),
+          },
+        ];
+
+  const visibleBuckets = profileBuckets
+    .map(bucket => ({
+      ...bucket,
+      traits: [...bucket.traits]
+        .filter(trait => trait.percentageValue >= MIN_VISIBLE_PERCENTAGE)
+        .sort((a, b) => {
+          if (b.percentageValue !== a.percentageValue) {
+            return b.percentageValue - a.percentageValue;
+          }
+          return a.name.localeCompare(b.name);
+        })
+        .slice(0, MAX_TRAITS_PER_BUCKET),
+    }))
+    .filter(bucket => (category === 'games' ? true : bucket.traits.length > 0));
 
   return (
     <Card className="col-span-full w-full border-border/40 bg-card/75 shadow-[0_8px_24px_-24px_rgba(0,0,0,0.85)]">

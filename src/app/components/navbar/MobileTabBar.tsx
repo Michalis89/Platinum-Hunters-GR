@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import { memo, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Library, Newspaper, User } from 'lucide-react';
@@ -40,17 +41,14 @@ const TAB_ITEMS: TabItem[] = [
   },
 ];
 
-export default function MobileTabBar() {
+function MobileTabBar() {
   const pathname = usePathname();
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  // Filter tabs based on auth status
-  const visibleTabs = TAB_ITEMS.filter(tab => {
-    if (tab.requiresAuth && !isAuthenticated) {
-      return false;
-    }
-    return true;
-  });
+  const visibleTabs = useMemo(
+    () => TAB_ITEMS.filter(tab => !tab.requiresAuth || isAuthenticated),
+    [isAuthenticated],
+  );
 
   // Don't show tab bar on certain pages
   const hideOnPaths = [
@@ -82,7 +80,7 @@ export default function MobileTabBar() {
 
       {/* Tab Bar */}
       <nav
-        className="safe-area-inset-bottom fixed bottom-0 left-0 right-0 z-50 md:hidden"
+        className="safe-area-inset-bottom fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] md:hidden"
         aria-label="Mobile navigation"
       >
         <div className="border-t">
@@ -95,7 +93,7 @@ export default function MobileTabBar() {
                 <Link
                   key={tab.href}
                   href={tab.href}
-                  className={`flex min-w-[64px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-colors duration-150 ${
+                  className={`flex min-h-[48px] min-w-[64px] touch-manipulation flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-[color,transform] duration-150 active:scale-95 ${
                     active ? 'text-primary' : 'text-muted-foreground active:text-foreground'
                   } `}
                   aria-label={tab.label}
@@ -115,3 +113,5 @@ export default function MobileTabBar() {
     </>
   );
 }
+
+export default memo(MobileTabBar);

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Image from 'next/image';
 import { Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ interface MediaSearchResultCardProps {
   isInLibrary?: boolean;
 }
 
-export default function MediaSearchResultCard({
+function MediaSearchResultCard({
   entry,
   onOpenDialog,
   variant = 'default',
@@ -39,7 +40,7 @@ export default function MediaSearchResultCard({
           alt={entry.title}
           width={48}
           height={64}
-          unoptimized
+          sizes="48px"
           className="h-full w-full object-cover"
         />
       </div>
@@ -66,3 +67,5 @@ export default function MediaSearchResultCard({
     </article>
   );
 }
+
+export default memo(MediaSearchResultCard);

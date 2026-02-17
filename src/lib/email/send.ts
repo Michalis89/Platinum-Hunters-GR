@@ -24,7 +24,8 @@ async function sendEmail(params: {
     console.warn('  To:', to);
     console.warn('  Subject:', subject);
     console.warn('  Type:', type);
-    console.warn('  HTML:', html.substring(0, 200) + '...');
+    console.warn('  Full HTML:');
+    console.warn(html);
     console.warn('');
     return; // Don't actually send in dev mode
   }

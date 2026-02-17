@@ -105,19 +105,23 @@ describe('category personalization model', () => {
 
   it('blocks sequel suggestions when previous entry in series is not completed', () => {
     const seriesInfo = __personalizationTestUtils.detectSeries('Mass Effect 3');
-    const result = __personalizationTestUtils.checkSeriesPrerequisites('Mass Effect 3', seriesInfo, [
-      createEntry({
-        id: 10,
-        status: 'planned',
-        media_items: {
-          id: 210,
-          category: 'games',
-          title: 'Mass Effect 2',
-          genres: ['RPG'],
-          tags: [],
-        },
-      }),
-    ]);
+    const result = __personalizationTestUtils.checkSeriesPrerequisites(
+      'Mass Effect 3',
+      seriesInfo,
+      [
+        createEntry({
+          id: 10,
+          status: 'planned',
+          media_items: {
+            id: 210,
+            category: 'games',
+            title: 'Mass Effect 2',
+            genres: ['RPG'],
+            tags: [],
+          },
+        }),
+      ],
+    );
 
     expect(seriesInfo.isSeries).toBe(true);
     expect(result.canRecommend).toBe(false);

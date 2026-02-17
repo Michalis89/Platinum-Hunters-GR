@@ -82,7 +82,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
         </SheetTrigger>
         <SheetContent
           side="right"
-          className="hb-dialog-surface w-[92vw] max-w-sm border-border p-0 text-foreground"
+          className="hb-dialog-surface w-[92vw] max-w-sm touch-pan-y border-border p-0 text-foreground"
         >
           <SheetHeader className="border-b border-[var(--border)] px-5 py-4">
             <SheetTitle className="text-left text-sm font-semibold tracking-[-0.015em] text-foreground">

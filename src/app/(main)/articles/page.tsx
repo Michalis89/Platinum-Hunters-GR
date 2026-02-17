@@ -7,6 +7,8 @@ import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
 
+export const revalidate = 300;
+
 type NewsPageProps = {
   searchParams: Promise<{ category?: string; topic?: string }>;
 };

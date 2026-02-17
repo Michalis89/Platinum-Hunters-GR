@@ -697,6 +697,7 @@ export default function MediaDetailPageClient({
                   src={baseEntry.cover}
                   alt={baseEntry.title}
                   sizes="(max-width: 768px) 70vw, 260px"
+                  priority
                   className="object-cover"
                 />
               </div>

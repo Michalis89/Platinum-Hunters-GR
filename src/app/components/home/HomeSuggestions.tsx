@@ -1,7 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
+import { memo, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import {
@@ -17,6 +16,7 @@ import {
 import type { ReactNode } from 'react';
 import { apiClient } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
+import { CoverThumbImage, IMAGE_SIZES } from '@/components/ui/cover-image';
 
 const fetcher = apiClient.swrFetcher;
 
@@ -112,6 +112,8 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
     fetcher,
     {
       revalidateOnFocus: false,
+      dedupingInterval: 60000,
+      keepPreviousData: true,
     },
   );
 
@@ -154,11 +156,12 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
 
         {suggestions.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {suggestions.map(item => (
+            {suggestions.map((item, idx) => (
               <SuggestionCard
                 key={item.id}
                 item={item}
                 addPath={activeConfig?.addPath ?? '/backlog'}
+                priority={idx < 2}
               />
             ))}
           </div>
@@ -190,21 +193,23 @@ export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
 type SuggestionCardProps = {
   item: SuggestionItem;
   addPath: string;
+  priority?: boolean;
 };
 
-function SuggestionCard({ item, addPath }: SuggestionCardProps) {
+const SuggestionCard = memo(function SuggestionCard({
+  item,
+  addPath,
+  priority = false,
+}: SuggestionCardProps) {
   return (
     <Link href={addPath} className="group transition duration-200 hover:border-info/55">
       <div className="relative aspect-[2/3]">
-        <Image
+        <CoverThumbImage
           src={item.cover}
           alt={item.title}
-          width={200}
-          height={300}
+          priority={priority}
           className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.01]"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PC9zdmc+"
+          sizes={IMAGE_SIZES.grid4}
         />
 
         {item.score && (
@@ -221,4 +226,4 @@ function SuggestionCard({ item, addPath }: SuggestionCardProps) {
       </div>
     </Link>
   );
-}
+});

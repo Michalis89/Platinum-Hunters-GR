@@ -1193,6 +1193,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      calculate_user_stats: { Args: { p_user_id: string }; Returns: Json };
       category_dashboard_history: {
         Args: { p_category: string; p_since: string; p_user_id: string };
         Returns: {
