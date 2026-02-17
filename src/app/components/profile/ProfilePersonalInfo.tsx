@@ -24,13 +24,19 @@ type ProfilePersonalInfoProps = {
 
 function normalizeSocialUrl(value: string) {
   const trimmed = value.trim();
-  if (!trimmed) {return '';}
-  if (/^https?:\/\//i.test(trimmed)) {return trimmed;}
+  if (!trimmed) {
+    return '';
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
   return `https://${trimmed}`;
 }
 
 function decodePathname(pathname: string) {
-  if (!pathname || pathname === '/') {return '';}
+  if (!pathname || pathname === '/') {
+    return '';
+  }
   const segments = pathname
     .split('/')
     .map(segment => {
@@ -46,7 +52,9 @@ function decodePathname(pathname: string) {
 
 function getSocialDisplayValue(value: string) {
   const trimmed = value.trim();
-  if (!trimmed) {return '';}
+  if (!trimmed) {
+    return '';
+  }
 
   const normalized = normalizeSocialUrl(trimmed);
   try {
@@ -74,9 +82,13 @@ const socialPlatforms = [
 ];
 
 function calculateAge(dateOfBirth?: string | null) {
-  if (!dateOfBirth) {return null;}
+  if (!dateOfBirth) {
+    return null;
+  }
   const dob = new Date(dateOfBirth);
-  if (Number.isNaN(dob.getTime())) {return null;}
+  if (Number.isNaN(dob.getTime())) {
+    return null;
+  }
   const diff = Date.now() - dob.getTime();
   const ageDate = new Date(diff);
   return Math.abs(ageDate.getUTCFullYear() - 1970);
@@ -91,7 +103,8 @@ export function ProfilePersonalInfo({
   const showSocial = (privacy.show_social_links as boolean) ?? true;
   const showLocation = (privacy.show_location as boolean) ?? true;
   const socialLinks = (user.social_links as Record<string, unknown>) || {};
-  const locationCity = (socialLinks.location_city as string) || '';
+  // Read from new location_city column (clean, no fallback)
+  const locationCity = user.location_city || '';
   const [age, setAge] = useState<number | null>(null);
 
   useEffect(() => {

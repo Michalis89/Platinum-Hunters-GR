@@ -1,5 +1,4 @@
-import type {
-  ArticleDetailPageOptions} from '@/app/(main)/pages/_shared/ArticleDetailPage';
+import type { ArticleDetailPageOptions } from '@/app/(main)/pages/_shared/ArticleDetailPage';
 import ArticleDetailPage, {
   buildArticleDetailMetadata,
 } from '@/app/(main)/pages/_shared/ArticleDetailPage';

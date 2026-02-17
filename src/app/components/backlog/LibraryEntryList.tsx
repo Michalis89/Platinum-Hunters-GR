@@ -67,7 +67,9 @@ function LibraryEntryList({
         <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map(virtualItem => {
             const entry = entries[virtualItem.index];
-            if (!entry) {return null;}
+            if (!entry) {
+              return null;
+            }
 
             return (
               <div

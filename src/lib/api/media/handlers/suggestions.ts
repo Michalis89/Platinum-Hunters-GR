@@ -88,7 +88,9 @@ export async function handleSuggestionsGet<TMediaItem, TResult>(
     let globalCount = 0;
 
     (data as unknown as SuggestionRow<TMediaItem>[] | null)?.forEach(row => {
-      if (!row.media_items || row.score === null) {return;}
+      if (!row.media_items || row.score === null) {
+        return;
+      }
       globalSum += row.score;
       globalCount += 1;
 

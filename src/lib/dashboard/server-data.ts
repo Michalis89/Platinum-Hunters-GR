@@ -118,14 +118,18 @@ const TV_EPISODE_MINUTES = 45;
 
 // Helper functions
 const toTimestamp = (value: string | null | undefined) => {
-  if (!value) {return 0;}
+  if (!value) {
+    return 0;
+  }
   const parsed = Date.parse(value);
   return Number.isNaN(parsed) ? 0 : parsed;
 };
 
 const compareEntryDates = (a: ContinueEntry, b: ContinueEntry) => {
   const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-  if (updatedDiff !== 0) {return updatedDiff;}
+  if (updatedDiff !== 0) {
+    return updatedDiff;
+  }
   return toTimestamp(b.created_at) - toTimestamp(a.created_at);
 };
 
@@ -141,7 +145,9 @@ const normalizeSteamCoverForContinue = (
   url: string | null | undefined,
   steamAppId: number | null | undefined,
 ) => {
-  if (!url) {return null;}
+  if (!url) {
+    return null;
+  }
 
   if (
     steamAppId &&
@@ -233,7 +239,9 @@ export async function fetchUserStats(userId: string): Promise<PersonalStats> {
 
   for (const entry of statsEntries) {
     const media = entry.media_items;
-    if (!media || !media.category) {continue;}
+    if (!media || !media.category) {
+      continue;
+    }
 
     const normalizedCategory = media.category;
     const status = entry.status;
@@ -245,17 +253,29 @@ export async function fetchUserStats(userId: string): Promise<PersonalStats> {
     switch (normalizedCategory) {
       case 'games': {
         gameStats.total++;
-        if (isInProgress) {gameStats.in_progress++;}
-        if (isCompleted) {gameStats.completed++;}
-        if (isDropped) {gameStats.dropped++;}
+        if (isInProgress) {
+          gameStats.in_progress++;
+        }
+        if (isCompleted) {
+          gameStats.completed++;
+        }
+        if (isDropped) {
+          gameStats.dropped++;
+        }
         gameStats.hours += entry.progress ?? 0;
         break;
       }
       case 'anime': {
         animeStats.total++;
-        if (isInProgress) {animeStats.in_progress++;}
-        if (isCompleted) {animeStats.completed++;}
-        if (isDropped) {animeStats.dropped++;}
+        if (isInProgress) {
+          animeStats.in_progress++;
+        }
+        if (isCompleted) {
+          animeStats.completed++;
+        }
+        if (isDropped) {
+          animeStats.dropped++;
+        }
         const duration = media.duration ?? ANIME_EPISODE_MINUTES;
         const totalEpisodes = media.number_of_episodes ?? media.episodes ?? 0;
         if (isCompleted) {
@@ -267,9 +287,15 @@ export async function fetchUserStats(userId: string): Promise<PersonalStats> {
       }
       case 'manga': {
         mangaStats.total++;
-        if (isInProgress) {mangaStats.in_progress++;}
-        if (isCompleted) {mangaStats.completed++;}
-        if (isDropped) {mangaStats.dropped++;}
+        if (isInProgress) {
+          mangaStats.in_progress++;
+        }
+        if (isCompleted) {
+          mangaStats.completed++;
+        }
+        if (isDropped) {
+          mangaStats.dropped++;
+        }
 
         const volumesRead = isCompleted ? (media.volumes ?? 0) : (entry.progress ?? 0);
         mangaStats.chapters += volumesRead;
@@ -282,19 +308,29 @@ export async function fetchUserStats(userId: string): Promise<PersonalStats> {
       }
       case 'movies': {
         movieStats.total++;
-        if (isInProgress) {movieStats.in_progress++;}
+        if (isInProgress) {
+          movieStats.in_progress++;
+        }
         if (isCompleted) {
           movieStats.completed++;
           movieStats.hours += (media.runtime ?? 120) / 60;
         }
-        if (isDropped) {movieStats.dropped++;}
+        if (isDropped) {
+          movieStats.dropped++;
+        }
         break;
       }
       case 'tv': {
         tvStats.total++;
-        if (isInProgress) {tvStats.in_progress++;}
-        if (isCompleted) {tvStats.completed++;}
-        if (isDropped) {tvStats.dropped++;}
+        if (isInProgress) {
+          tvStats.in_progress++;
+        }
+        if (isCompleted) {
+          tvStats.completed++;
+        }
+        if (isDropped) {
+          tvStats.dropped++;
+        }
         const totalEpisodes = media.number_of_episodes ?? media.episodes ?? 0;
         const episodeDuration = media.runtime ?? TV_EPISODE_MINUTES;
         if (isCompleted) {
@@ -306,9 +342,15 @@ export async function fetchUserStats(userId: string): Promise<PersonalStats> {
       }
       case 'books': {
         bookStats.total++;
-        if (isInProgress) {bookStats.in_progress++;}
-        if (isCompleted) {bookStats.completed++;}
-        if (isDropped) {bookStats.dropped++;}
+        if (isInProgress) {
+          bookStats.in_progress++;
+        }
+        if (isCompleted) {
+          bookStats.completed++;
+        }
+        if (isDropped) {
+          bookStats.dropped++;
+        }
 
         const pagesRead = isCompleted ? (media.page_count ?? 0) : (entry.progress ?? 0);
         bookStats.pages += pagesRead;
@@ -323,12 +365,24 @@ export async function fetchUserStats(userId: string): Promise<PersonalStats> {
   }
 
   const activeCategories: string[] = [];
-  if (gameStats.total > 0) {activeCategories.push('games');}
-  if (animeStats.total > 0) {activeCategories.push('anime');}
-  if (mangaStats.total > 0) {activeCategories.push('manga');}
-  if (movieStats.total > 0) {activeCategories.push('movies');}
-  if (tvStats.total > 0) {activeCategories.push('tv');}
-  if (bookStats.total > 0) {activeCategories.push('books');}
+  if (gameStats.total > 0) {
+    activeCategories.push('games');
+  }
+  if (animeStats.total > 0) {
+    activeCategories.push('anime');
+  }
+  if (mangaStats.total > 0) {
+    activeCategories.push('manga');
+  }
+  if (movieStats.total > 0) {
+    activeCategories.push('movies');
+  }
+  if (tvStats.total > 0) {
+    activeCategories.push('tv');
+  }
+  if (bookStats.total > 0) {
+    activeCategories.push('books');
+  }
 
   const totalBacklog =
     gameStats.total +
@@ -404,40 +458,17 @@ export async function fetchUserStats(userId: string): Promise<PersonalStats> {
 export async function fetchContinueData(userId: string): Promise<ContinueData> {
   const supabase = await createRouteHandlerClient();
 
-  const { data: userPrefs, error: userError } = await supabase
-    .from('users')
-    .select('categories')
-    .eq('id', userId)
+  // Calculate enabled categories from user_category_profiles
+  const { data: categoryProfile } = await supabase
+    .from('user_category_profiles')
+    .select('profiles')
+    .eq('user_id', userId)
     .maybeSingle();
 
-  if (userError) {
-    throw userError;
-  }
-
-  const preferredCategories = Array.isArray(userPrefs?.categories) ? userPrefs?.categories : [];
-
-  let enabledCategories = preferredCategories.length > 0 ? preferredCategories : ([] as string[]);
-
-  if (enabledCategories.length === 0) {
-    const { data: categoryRows, error: categoryError } = await supabase
-      .from('user_media_entries')
-      .select('media_items!inner(category)')
-      .eq('user_id', userId);
-
-    if (categoryError) {
-      throw categoryError;
-    }
-
-    const categorySet = new Set<string>();
-    for (const row of (categoryRows ?? []) as { media_items: { category: string | null } }[]) {
-      const category = row.media_items?.category;
-      if (category) {
-        categorySet.add(category);
-      }
-    }
-
-    enabledCategories = Array.from(categorySet);
-  }
+  // Categories are the keys in user_category_profiles.profiles
+  const enabledCategories = categoryProfile?.profiles
+    ? Object.keys(categoryProfile.profiles).filter(key => key && typeof key === 'string')
+    : [];
 
   const normalizedCategories = normalizeEnabledCategories(enabledCategories);
   const slideCategories = normalizedCategories.filter(category =>
@@ -531,7 +562,9 @@ export async function fetchContinueData(userId: string): Promise<ContinueData> {
 
   const slides = Array.from(latestByCategory.values()).sort((a, b) => {
     const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-    if (updatedDiff !== 0) {return updatedDiff;}
+    if (updatedDiff !== 0) {
+      return updatedDiff;
+    }
     return toTimestamp(b.created_at) - toTimestamp(a.created_at);
   });
 
@@ -558,9 +591,13 @@ export async function fetchContinueData(userId: string): Promise<ContinueData> {
 
   for (const entry of (countEntries ?? []) as CountEntry[]) {
     const category = entry.media_items?.category;
-    if (!category || !(category in countsByCategory)) {continue;}
+    if (!category || !(category in countsByCategory)) {
+      continue;
+    }
 
-    if (!entry.status) {continue;}
+    if (!entry.status) {
+      continue;
+    }
     const status = entry.status;
     countsByCategory[category].total += 1;
 

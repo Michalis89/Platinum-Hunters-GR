@@ -18,10 +18,9 @@ import { hasAnyRole } from '@/lib/roles';
 import { uploadArticleCoverImage } from '@/lib/media/uploadArticleCover';
 import type {
   ContentPublicationType,
-  ContentPublishedEventDetail} from '@/app/constants/contentEvents';
-import {
-  CONTENT_PUBLISHED_EVENT
+  ContentPublishedEventDetail,
 } from '@/app/constants/contentEvents';
+import { CONTENT_PUBLISHED_EVENT } from '@/app/constants/contentEvents';
 import { Textarea } from '@/components/ui/textarea';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
@@ -149,8 +148,12 @@ export default function AddArticleDialog({
   const availableContentTypes = useMemo(
     () =>
       CONTENT_TYPES.filter(type => {
-        if (type.value === 'article') {return canWriteArticles;}
-        if (type.value === 'review') {return canWriteReviews;}
+        if (type.value === 'article') {
+          return canWriteArticles;
+        }
+        if (type.value === 'review') {
+          return canWriteReviews;
+        }
         return false;
       }),
     [canWriteArticles, canWriteReviews],
@@ -210,7 +213,9 @@ export default function AddArticleDialog({
 
   // Update topic when category changes
   useEffect(() => {
-    if (!category) {return;}
+    if (!category) {
+      return;
+    }
     if (contentType === 'review') {
       setTopic('reviews');
       return;
@@ -220,7 +225,9 @@ export default function AddArticleDialog({
   }, [category, contentType]);
 
   useEffect(() => {
-    if (!category) {return;}
+    if (!category) {
+      return;
+    }
     if (contentType === 'review' && !REVIEW_CATEGORIES.includes(category as ArticleCategory)) {
       setCategory('');
       setTopic('reviews');
@@ -238,7 +245,9 @@ export default function AddArticleDialog({
   const handleCoverFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
-    if (!file) {return;}
+    if (!file) {
+      return;
+    }
 
     setCoverUploadError(null);
     setIsCoverUploading(true);

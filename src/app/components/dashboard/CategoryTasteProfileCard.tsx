@@ -110,8 +110,9 @@ export default function CategoryTasteProfileCard({
           traits: [...bucket.traits]
             .filter(trait => trait.percentageValue >= MIN_VISIBLE_PERCENTAGE)
             .sort((a, b) => {
-              if (b.percentageValue !== a.percentageValue)
-                {return b.percentageValue - a.percentageValue;}
+              if (b.percentageValue !== a.percentageValue) {
+                return b.percentageValue - a.percentageValue;
+              }
               return a.name.localeCompare(b.name);
             })
             .slice(0, MAX_TRAITS_PER_BUCKET),

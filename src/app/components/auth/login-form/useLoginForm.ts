@@ -51,7 +51,9 @@ export function useLoginForm() {
   const [captchaVisible, setCaptchaVisible] = useState(false);
 
   useEffect(() => {
-    if (isCaptchaDisabled) {return;}
+    if (isCaptchaDisabled) {
+      return;
+    }
 
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let idleId: number | null = null;
@@ -74,7 +76,9 @@ export function useLoginForm() {
   }, []);
 
   useEffect(() => {
-    if (!forgotMode && !expiredResetLink && !resetError) {return;}
+    if (!forgotMode && !expiredResetLink && !resetError) {
+      return;
+    }
 
     if (forgotMode || expiredResetLink) {
       setShowResetPanel(true);
@@ -106,7 +110,9 @@ export function useLoginForm() {
   }, [forgotMode, expiredResetLink, resetError]);
 
   const clearFieldError = (field: keyof LoginFormErrors) => {
-    if (!errors[field]) {return;}
+    if (!errors[field]) {
+      return;
+    }
     setErrors(prev => ({ ...prev, [field]: undefined }));
   };
 
@@ -209,7 +215,9 @@ export function useLoginForm() {
       return;
     }
 
-    if (!validateForm()) {return;}
+    if (!validateForm()) {
+      return;
+    }
 
     if (!isCaptchaDisabled && !captchaToken) {
       setCaptchaError('Complete the CAPTCHA to continue.');

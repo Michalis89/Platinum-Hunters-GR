@@ -25,7 +25,9 @@ type RegisterStatusAlertProps = {
 };
 
 export function RegisterStatusAlert({ alert }: RegisterStatusAlertProps) {
-  if (!alert) {return null;}
+  if (!alert) {
+    return null;
+  }
 
   const Icon = alert.type === 'success' ? CheckCircle : XCircle;
   const variant = alert.type === 'error' ? 'destructive' : 'success';

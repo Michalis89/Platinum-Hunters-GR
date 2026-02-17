@@ -45,7 +45,13 @@ export default function Navbar() {
   const isDev = process.env.NODE_ENV === 'development';
   const authResolved = !isAuthLoading && (!isAuthenticated || Boolean(user));
   const logoHref = authResolved && isAuthenticated ? '/dashboard' : '/home';
-  const userCategories = useMemo(() => user?.categories ?? [], [user?.categories]);
+  const userCategories = useMemo(
+    () =>
+      user?.category_profile
+        ? Object.keys(user.category_profile).filter(key => key && typeof key === 'string')
+        : [],
+    [user?.category_profile],
+  );
 
   const shouldLoadSettings = isAuthenticated && authResolved;
   const {

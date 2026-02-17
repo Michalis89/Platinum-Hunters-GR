@@ -3,11 +3,13 @@ import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
+import type { Json } from '@/lib/supabase/database.types';
 import {
   categoryProfilePatchSchema,
   mergeCategoryProfiles,
   type CategoryProfiles,
 } from '@/lib/validation/profile';
+import { enrichCategoryProfilesWithInsights } from '@/lib/profile/insight-genres';
 
 const handler = withApiRoute(async (request: Request) => {
   try {
@@ -16,34 +18,23 @@ const handler = withApiRoute(async (request: Request) => {
     const userId = session.user.id;
 
     if (request.method === 'GET') {
-      // Fetch category profile
+      // Fetch category profile from dedicated table
       const { data: categoryProfile, error } = await supabase
         .from('user_category_profiles')
         .select('profiles, created_at, updated_at')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = not found (acceptable)
+      if (error) {
         return fail({ error: 'Failed to fetch category profile' }, 500);
       }
 
-      // Fallback: If no row exists, check social_links.category_notes
+      // Return empty profiles if no row exists yet
       if (!categoryProfile) {
-        const { data: user } = await supabase
-          .from('users')
-          .select('social_links')
-          .eq('id', userId)
-          .single();
-
-        const socialLinks = (user?.social_links as Record<string, unknown>) || {};
-        const legacyCategoryNotes = (socialLinks.category_notes as CategoryProfiles) || {};
-
         return ok({
-          profiles: legacyCategoryNotes,
+          profiles: {},
           created_at: null,
           updated_at: null,
-          _source: 'legacy_social_links',
         });
       }
 
@@ -79,11 +70,16 @@ const handler = withApiRoute(async (request: Request) => {
         .from('user_category_profiles')
         .select('profiles')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       // Merge patch into existing profiles
       const existingProfiles = (existing?.profiles as CategoryProfiles) || {};
       const mergedProfiles = mergeCategoryProfiles(existingProfiles, parsed.data);
+      const enrichedProfiles = await enrichCategoryProfilesWithInsights(
+        supabase,
+        userId,
+        mergedProfiles,
+      );
 
       // Upsert
       const { data: updated, error: upsertError } = await supabase
@@ -91,7 +87,7 @@ const handler = withApiRoute(async (request: Request) => {
         .upsert(
           {
             user_id: userId,
-            profiles: mergedProfiles,
+            profiles: enrichedProfiles as unknown as Json,
           },
           {
             onConflict: 'user_id',

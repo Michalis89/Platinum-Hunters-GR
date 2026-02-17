@@ -24,7 +24,9 @@ const foldPossessiveSlug = (value: string) => value.replace(/([a-z0-9])-s-(?=[a-
 
 const buildSlugCandidates = (value: string): string[] => {
   const canonical = toCanonicalSlug(value);
-  if (!canonical) {return [];}
+  if (!canonical) {
+    return [];
+  }
 
   const folded = foldPossessiveSlug(canonical);
   return Array.from(new Set([canonical, folded].filter(Boolean)));
@@ -53,17 +55,23 @@ const collectCandidateSlugs = (item: MediaItem): string[] => {
 
 const scoreSlugMatch = (target: string, item: MediaItem): number => {
   const slugs = collectCandidateSlugs(item);
-  if (slugs.includes(target)) {return 1000;}
+  if (slugs.includes(target)) {
+    return 1000;
+  }
 
   // Prefer rows where one slug is a strict prefix/suffix variant
   // e.g. divinity-original-sin vs divinity-original-sin-enhanced-edition
   const prefixVariant = slugs.some(
     slug => slug.startsWith(`${target}-`) || target.startsWith(`${slug}-`),
   );
-  if (prefixVariant) {return 700;}
+  if (prefixVariant) {
+    return 700;
+  }
 
   const includesVariant = slugs.some(slug => slug.includes(target) || target.includes(slug));
-  if (includesVariant) {return 500;}
+  if (includesVariant) {
+    return 500;
+  }
 
   return 0;
 };
@@ -74,7 +82,9 @@ async function fetchBySlug(category: string, slug: string) {
   const slugCandidates = buildSlugCandidates(slug);
   const canonicalSlug = slugCandidates[0] ?? '';
   const slugText = escapeLike(slug.replace(/[-_]/g, ' ').trim());
-  if (!canonicalSlug && !slugText) {return null;}
+  if (!canonicalSlug && !slugText) {
+    return null;
+  }
 
   // Exact igdb_slug hit first (games only)
   if (isGamesCategory && slugCandidates.length > 0) {
@@ -85,7 +95,9 @@ async function fetchBySlug(category: string, slug: string) {
       .in('igdb_slug', slugCandidates)
       .limit(10);
 
-    if (exactIgdbSlugError) {throw exactIgdbSlugError;}
+    if (exactIgdbSlugError) {
+      throw exactIgdbSlugError;
+    }
     const exactRows = Array.isArray(exactIgdbSlugMatches)
       ? (exactIgdbSlugMatches as unknown as MediaItem[])
       : [];
@@ -136,9 +148,13 @@ async function fetchBySlug(category: string, slug: string) {
     )
     .limit(25);
 
-  if (error) {throw error;}
+  if (error) {
+    throw error;
+  }
   const rows = Array.isArray(data) ? (data as unknown as MediaItem[]) : [];
-  if (rows.length === 0) {return null;}
+  if (rows.length === 0) {
+    return null;
+  }
 
   const ranked = rows
     .map(item => ({ item, score: scoreSlugMatch(canonicalSlug, item) }))
@@ -156,7 +172,9 @@ async function fetchById(category: string, id: number) {
     .eq('id', id)
     .maybeSingle();
 
-  if (error) {throw error;}
+  if (error) {
+    throw error;
+  }
   return data as MediaItem | null;
 }
 
@@ -166,22 +184,30 @@ async function fetchByExternalId(category: string, externalId: number | string) 
 
   if (category === 'anime' || category === 'manga') {
     const numericId = Number(externalId);
-    if (!Number.isFinite(numericId)) {return null;}
+    if (!Number.isFinite(numericId)) {
+      return null;
+    }
     query = query.eq('mal_id', numericId);
   } else if (category === 'movies' || category === 'tv') {
     const numericId = Number(externalId);
-    if (!Number.isFinite(numericId)) {return null;}
+    if (!Number.isFinite(numericId)) {
+      return null;
+    }
     query = query.eq('tmdb_id', numericId);
   } else if (category === 'games') {
     const numericId = Number(externalId);
-    if (!Number.isFinite(numericId)) {return null;}
+    if (!Number.isFinite(numericId)) {
+      return null;
+    }
     query = query.eq('igdb_id', numericId);
   } else if (category === 'books') {
     query = query.eq('google_books_id', String(externalId));
   }
 
   const { data, error } = await query.maybeSingle();
-  if (error) {throw error;}
+  if (error) {
+    throw error;
+  }
   return data as MediaItem | null;
 }
 

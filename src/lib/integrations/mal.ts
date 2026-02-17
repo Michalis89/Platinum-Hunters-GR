@@ -249,8 +249,14 @@ export async function fetchMalList(
 export function mapMalStatusToBacklogStatus(
   status: string,
 ): 'planned' | 'current' | 'completed' | 'dropped' {
-  if (status === 'watching' || status === 'reading' || status === 'on_hold') {return 'current';}
-  if (status === 'completed') {return 'completed';}
-  if (status === 'dropped') {return 'dropped';}
+  if (status === 'watching' || status === 'reading' || status === 'on_hold') {
+    return 'current';
+  }
+  if (status === 'completed') {
+    return 'completed';
+  }
+  if (status === 'dropped') {
+    return 'dropped';
+  }
   return 'planned';
 }

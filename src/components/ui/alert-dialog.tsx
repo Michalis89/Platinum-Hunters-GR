@@ -80,7 +80,9 @@ export const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogCo
 
     React.useEffect(() => {
       const dialog = dialogRef.current;
-      if (!dialog) {return;}
+      if (!dialog) {
+        return;
+      }
 
       if (open) {
         if (!dialog.open) {
@@ -95,7 +97,9 @@ export const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogCo
 
     React.useEffect(() => {
       const dialog = dialogRef.current;
-      if (!dialog) {return;}
+      if (!dialog) {
+        return;
+      }
 
       const handleClose = () => {
         onOpenChange(false);
@@ -136,7 +140,9 @@ export const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogCo
       }
     }, [open]);
 
-    if (typeof window === 'undefined') {return null;}
+    if (typeof window === 'undefined') {
+      return null;
+    }
 
     return createPortal(
       <dialog

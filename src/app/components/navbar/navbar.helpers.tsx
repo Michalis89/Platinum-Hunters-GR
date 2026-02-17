@@ -45,6 +45,8 @@ export const mobileChipClass = (isActive: boolean, fullWidth = false) =>
   );
 
 export const getUserInitials = (username: string | null | undefined) => {
-  if (!username) {return 'H';}
+  if (!username) {
+    return 'H';
+  }
   return username.trim().charAt(0).toUpperCase();
 };

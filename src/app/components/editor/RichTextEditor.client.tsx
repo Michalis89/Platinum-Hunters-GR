@@ -133,12 +133,16 @@ export default function RichTextEditor({
   }, [editor, value]);
 
   const setLink = useCallback(() => {
-    if (!editor) {return;}
+    if (!editor) {
+      return;
+    }
 
     const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt('URL:', previousUrl);
 
-    if (url === null) {return;}
+    if (url === null) {
+      return;
+    }
 
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
@@ -149,7 +153,9 @@ export default function RichTextEditor({
   }, [editor]);
 
   const addImage = useCallback(() => {
-    if (!editor) {return;}
+    if (!editor) {
+      return;
+    }
 
     const url = window.prompt('Image URL:');
     if (url) {

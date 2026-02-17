@@ -9,7 +9,9 @@ export default function ReadingProgress() {
   useEffect(() => {
     const handleScroll = () => {
       // Use requestAnimationFrame to throttle scroll updates
-      if (rafId.current !== null) {return;}
+      if (rafId.current !== null) {
+        return;
+      }
 
       rafId.current = requestAnimationFrame(() => {
         const scrollTop = window.scrollY;

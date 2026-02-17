@@ -26,13 +26,15 @@ import { SelectField as Select } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CheckCircle, XCircle } from 'lucide-react';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
-import { selectUser, updateUserProfile, logout } from '@/store/slices/authSlice';
+import { selectUser, updateUserProfile, logout, fetchSession } from '@/store/slices/authSlice';
 import type { AppDispatch } from '@/store/store';
 import type { User } from '@/types/user';
 import { supabase } from '@/lib/supabase-client';
 import { AvatarImage } from '@/components/ui/avatar-image';
+import { useUserSettings } from '@/lib/settings/useUserSettings';
 
 function ProfileEditSkeleton() {
   return (
@@ -90,6 +92,8 @@ const TIMEZONES = [
   'America/Los_Angeles',
   'Asia/Tokyo',
 ];
+const PRIMARY_HOBBY_CATEGORIES = ['games', 'anime', 'manga', 'books', 'movies', 'tv'] as const;
+const SOCIAL_LAYER_HOBBY_CATEGORIES = ['coding', 'pet', 'vape'] as const;
 
 type CategoryNotes = Record<string, unknown>;
 type ProfileFormData = Partial<User> & {
@@ -130,12 +134,22 @@ export default function EditProfilePage() {
   const [deleting, setDeleting] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [showNewUserInfo, setShowNewUserInfo] = useState(false);
+  const { settings } = useUserSettings(!!user);
 
   const initialCategoryNotes = useMemo<CategoryNotes>(() => {
-    const notes = (user?.social_links as Record<string, unknown> | null | undefined)
-      ?.category_notes;
-    return (notes as CategoryNotes) || EMPTY_CATEGORY_NOTES;
-  }, [user?.social_links]);
+    // Read from new user_category_profiles table (via /api/me)
+    const categoryProfile = user?.category_profile as CategoryNotes | null | undefined;
+    return categoryProfile || EMPTY_CATEGORY_NOTES;
+  }, [user?.category_profile]);
+
+  const socialLayerEnabled = settings?.social_enabled ?? true;
+  const visibleCategoriesForTabs = ((formData.categories as string[] | undefined) ?? [])
+    .map(String)
+    .filter(cat =>
+      socialLayerEnabled
+        ? true
+        : !SOCIAL_LAYER_HOBBY_CATEGORIES.includes(cat as 'coding' | 'pet' | 'vape'),
+    );
 
   // Handle hash scroll after page load (for links like #categories)
   useEffect(() => {
@@ -154,11 +168,18 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     if (user) {
-      const userCategories = (user.categories as string[] | undefined) ?? [];
+      // Calculate categories from category_profile (keys of the object)
+      const userCategories = user.category_profile
+        ? Object.keys(user.category_profile).filter(key => key && typeof key === 'string')
+        : [];
       const hasNoCategories = userCategories.length === 0;
 
       // Show info alert if user has no categories selected
       setShowNewUserInfo(hasNoCategories);
+
+      // Extract game fields from category_profile.games (NEW SOURCE)
+      const gamesProfile =
+        (initialCategoryNotes.games as Record<string, unknown> | undefined) || {};
 
       setFormData({
         full_name: user.full_name || '',
@@ -168,22 +189,28 @@ export default function EditProfilePage() {
         display_name: user.display_name || '',
         avatar_url: user.avatar_url || '',
         bio: user.bio || '',
-        psn_id: user.psn_id || '',
-        xbox_gamertag: user.xbox_gamertag || '',
-        steam_id: user.steam_id || '',
-        nintendo_id: user.nintendo_id || '',
-        favorite_platform: user.favorite_platform || '',
-        favorite_genres: user.favorite_genres || [],
-        favorite_anime_genres: user.favorite_anime_genres || [],
-        favorite_movie_genres: user.favorite_movie_genres || [],
-        favorite_book_genres: user.favorite_book_genres || [],
-        favorite_languages: user.favorite_languages || [],
-        gaming_since: user.gaming_since || null,
+        psn_id: (gamesProfile.psn_id as string) || '',
+        xbox_gamertag: (gamesProfile.xbox_gamertag as string) || '',
+        steam_id: (gamesProfile.steam_id as string) || '',
+        nintendo_id: (gamesProfile.nintendo_id as string) || '',
+        favorite_platform: (gamesProfile.favorite_platform as string) || '',
+        favorite_genres: (gamesProfile.user_favorite_genres as string[]) || [],
+        favorite_anime_genres:
+          ((initialCategoryNotes.anime as Record<string, unknown>)?.genres as string[]) || [],
+        favorite_movie_genres:
+          ((initialCategoryNotes.movies as Record<string, unknown>)?.genres as string[]) || [],
+        favorite_book_genres:
+          ((initialCategoryNotes.books as Record<string, unknown>)?.genres as string[]) || [],
+        favorite_languages:
+          ((initialCategoryNotes.coding as Record<string, unknown>)?.languages as string[]) || [],
+        gaming_since: (gamesProfile.gaming_since as number) || null,
         categories: hasNoCategories ? [] : userCategories,
         category_notes: initialCategoryNotes,
-        pet_types: user.pet_types || [],
-        vape_device: user.vape_device || '',
-        vape_flavor: user.vape_flavor || '',
+        pet_types: [],
+        vape_device:
+          ((initialCategoryNotes.vape as Record<string, unknown>)?.device as string) || '',
+        vape_flavor:
+          ((initialCategoryNotes.vape as Record<string, unknown>)?.flavors as string[])?.[0] || '',
       });
 
       const rawSocial = (user.social_links as Record<string, unknown> | undefined) || {};
@@ -196,7 +223,8 @@ export default function EditProfilePage() {
         reddit: (rawSocial.reddit as string) || '',
         website: (rawSocial.website as string) || (rawSocial.portfolio as string) || '',
       });
-      setLocationCity((rawSocial.location_city as string) || '');
+      // Read from new location_city column (clean, no fallback)
+      setLocationCity(user.location_city || '');
 
       const rawPrivacy = (user.privacy_settings as unknown as Record<string, unknown>) || {};
       setPrivacySettings({
@@ -214,22 +242,29 @@ export default function EditProfilePage() {
           display_name: user.display_name || '',
           avatar_url: user.avatar_url || '',
           bio: user.bio || '',
-          psn_id: user.psn_id || '',
-          xbox_gamertag: user.xbox_gamertag || '',
-          steam_id: user.steam_id || '',
-          nintendo_id: user.nintendo_id || '',
-          favorite_platform: user.favorite_platform || '',
-          favorite_genres: user.favorite_genres || [],
-          favorite_anime_genres: user.favorite_anime_genres || [],
-          favorite_movie_genres: user.favorite_movie_genres || [],
-          favorite_book_genres: user.favorite_book_genres || [],
-          favorite_languages: user.favorite_languages || [],
-          gaming_since: user.gaming_since || null,
-          categories: (user.categories as string[] | undefined) ?? ['games'],
+          psn_id: (gamesProfile.psn_id as string) || '',
+          xbox_gamertag: (gamesProfile.xbox_gamertag as string) || '',
+          steam_id: (gamesProfile.steam_id as string) || '',
+          nintendo_id: (gamesProfile.nintendo_id as string) || '',
+          favorite_platform: (gamesProfile.favorite_platform as string) || '',
+          favorite_genres: (gamesProfile.user_favorite_genres as string[]) || [],
+          favorite_anime_genres:
+            ((initialCategoryNotes.anime as Record<string, unknown>)?.genres as string[]) || [],
+          favorite_movie_genres:
+            ((initialCategoryNotes.movies as Record<string, unknown>)?.genres as string[]) || [],
+          favorite_book_genres:
+            ((initialCategoryNotes.books as Record<string, unknown>)?.genres as string[]) || [],
+          favorite_languages:
+            ((initialCategoryNotes.coding as Record<string, unknown>)?.languages as string[]) || [],
+          gaming_since: (gamesProfile.gaming_since as number) || null,
+          categories: userCategories.length > 0 ? userCategories : ['games'],
           category_notes: initialCategoryNotes,
-          pet_types: user.pet_types || [],
-          vape_device: user.vape_device || '',
-          vape_flavor: user.vape_flavor || '',
+          pet_types: [],
+          vape_device:
+            ((initialCategoryNotes.vape as Record<string, unknown>)?.device as string) || '',
+          vape_flavor:
+            ((initialCategoryNotes.vape as Record<string, unknown>)?.flavors as string[])?.[0] ||
+            '',
         },
         {
           discord: (rawSocial.discord as string) || '',
@@ -240,7 +275,8 @@ export default function EditProfilePage() {
           reddit: (rawSocial.reddit as string) || '',
           website: (rawSocial.website as string) || (rawSocial.portfolio as string) || '',
         },
-        (rawSocial.location_city as string) || '',
+        // Read from new location_city column (clean, no fallback)
+        user.location_city || '',
         {
           show_age: (rawPrivacy.show_age as boolean | undefined) ?? false,
           show_social_links: (rawPrivacy.show_social_links as boolean | undefined) ?? true,
@@ -338,16 +374,6 @@ export default function EditProfilePage() {
     });
   }
 
-  const handleGenreToggle = (genre: string) => {
-    setFormData(prev => {
-      const genres = prev.favorite_genres || [];
-      const newGenres = genres.includes(genre)
-        ? genres.filter(g => g !== genre)
-        : [...genres, genre];
-      return { ...prev, favorite_genres: newGenres };
-    });
-  };
-
   const toggleCategory = (cat: string) => {
     setFormData(prev => {
       const current = (prev.categories as string[] | undefined) ?? [];
@@ -377,36 +403,6 @@ export default function EditProfilePage() {
       });
     };
 
-  const handleCategoryGenreToggle = (cat: string, genre: string) => {
-    setFormData(prev => {
-      const notes = (prev.category_notes as Record<string, unknown> | undefined) || {};
-      const current = (notes[cat] as Record<string, unknown> | undefined) || {};
-      const fallbackGenres = (() => {
-        if (cat === 'anime' || cat === 'manga') {
-          return ((prev.favorite_anime_genres as string[] | undefined) || []).map(String);
-        }
-        if (cat === 'movies' || cat === 'tv') {
-          return ((prev.favorite_movie_genres as string[] | undefined) || []).map(String);
-        }
-        if (cat === 'books') {
-          return ((prev.favorite_book_genres as string[] | undefined) || []).map(String);
-        }
-        return [];
-      })();
-      const list: string[] = Array.isArray((current as { genres?: unknown }).genres)
-        ? ((current as { genres?: string[] }).genres as string[])
-        : fallbackGenres;
-      const nextGenres = list.includes(genre) ? list.filter(g => g !== genre) : [...list, genre];
-      return {
-        ...prev,
-        category_notes: {
-          ...notes,
-          [cat]: { ...current, genres: nextGenres },
-        },
-      };
-    });
-  };
-
   const handleCategoryListToggle = (cat: string, key: string, item: string) => {
     setFormData(prev => {
       const notes = (prev.category_notes as Record<string, unknown> | undefined) || {};
@@ -433,68 +429,8 @@ export default function EditProfilePage() {
     });
   };
 
-  const resolveGenreList = (
-    note: Record<string, unknown> | undefined,
-    fallback?: string[] | null,
-  ) => {
-    if (note && Array.isArray(note.genres) && note.genres.length) {
-      return (note.genres as string[]).map(String);
-    }
-    return (fallback || []).map(String);
-  };
-
-  const resolveLanguageList = (
-    note: Record<string, unknown> | undefined,
-    fallback?: string[] | null,
-  ) => {
-    if (note && Array.isArray(note.languages) && note.languages.length) {
-      return (note.languages as string[]).map(String);
-    }
-    return (fallback || []).map(String);
-  };
-
-  const deriveFavoritePayload = (notes: CategoryNotes | undefined) => {
-    const categoryNotes =
-      notes || (formData.category_notes as CategoryNotes) || EMPTY_CATEGORY_NOTES;
-    const animeGenres = resolveGenreList(
-      categoryNotes.anime as Record<string, unknown> | undefined,
-      formData.favorite_anime_genres,
-    );
-    const movieGenres = resolveGenreList(
-      categoryNotes.movies as Record<string, unknown> | undefined,
-      formData.favorite_movie_genres,
-    );
-    const bookGenres = resolveGenreList(
-      categoryNotes.books as Record<string, unknown> | undefined,
-      formData.favorite_book_genres,
-    );
-    const codingLanguages = resolveLanguageList(
-      categoryNotes.coding as Record<string, unknown> | undefined,
-      formData.favorite_languages,
-    );
-    const noteVape = categoryNotes.vape as Record<string, unknown> | undefined;
-    const noteVapeFlavors = Array.isArray(noteVape?.flavors) ? (noteVape.flavors as string[]) : [];
-    const derivedVapeFlavor =
-      noteVapeFlavors.length > 0
-        ? noteVapeFlavors[0]
-        : formData.vape_flavor
-          ? String(formData.vape_flavor)
-          : null;
-    const derivedVapeDevice =
-      (noteVape?.device as string | undefined) ||
-      (formData.vape_device as string | undefined) ||
-      null;
-
-    return {
-      favorite_anime_genres: animeGenres,
-      favorite_movie_genres: movieGenres,
-      favorite_book_genres: bookGenres,
-      favorite_languages: codingLanguages,
-      pet_types: (formData.pet_types as string[] | undefined) || [],
-      vape_device: derivedVapeDevice,
-      vape_flavor: derivedVapeFlavor,
-    };
-  };
+  // Helper functions removed - favorite_*_genres now stored in category_notes
+  // and sent directly to /api/me/category-profile
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -521,42 +457,62 @@ export default function EditProfilePage() {
         ...(user.privacy_settings as unknown as Record<string, unknown>),
         ...privacySettings,
       };
+      // Clean social_links: remove location_city and category_notes (now stored separately)
       const mergedSocialLinks = {
         ...(user.social_links as Record<string, unknown> | undefined),
         ...socialLinks,
-        location_city: locationCity,
-        category_notes: category_notes || EMPTY_CATEGORY_NOTES,
       } as User['social_links'];
 
       // Convert empty strings to null for unique constraint fields and date fields
       const emptyToNull = (val: string | null | undefined): string | null =>
         val && val.trim() !== '' ? val.trim() : null;
 
-      const sanitizedRest = {
-        ...rest,
-        psn_id: emptyToNull(rest.psn_id),
-        xbox_gamertag: emptyToNull(rest.xbox_gamertag),
-        steam_id: emptyToNull(rest.steam_id),
-        nintendo_id: emptyToNull(rest.nintendo_id),
-        // Convert empty date fields to null to prevent date validation errors
+      // Only update fields that belong to public.users.
+      // Category/game fields now live in user_category_profiles and are sent below.
+      const userUpdates: Partial<User> = {
+        full_name: emptyToNull(rest.full_name),
         date_of_birth: emptyToNull(rest.date_of_birth),
-        gaming_since: rest.gaming_since ?? null,
+        country: emptyToNull(rest.country),
+        timezone: emptyToNull(rest.timezone),
+        display_name: emptyToNull(rest.display_name),
+        bio: emptyToNull(rest.bio),
+        avatar_url: uploadedAvatarUrl || emptyToNull(rest.avatar_url) || user.avatar_url || null,
+        privacy_settings: mergedPrivacy as User['privacy_settings'],
+        social_links: mergedSocialLinks,
       };
 
-      const favoritePayload = deriveFavoritePayload(category_notes);
-
+      // Update basic profile fields (bio, country, timezone, etc.)
       await dispatch(
         updateUserProfile({
           userId: user.id,
-          updates: {
-            ...sanitizedRest,
-            ...favoritePayload,
-            avatar_url: uploadedAvatarUrl || rest.avatar_url || user.avatar_url || null,
-            privacy_settings: mergedPrivacy as User['privacy_settings'],
-            social_links: mergedSocialLinks,
-          },
+          updates: userUpdates,
         }),
       ).unwrap();
+
+      // Update location_city using new endpoint
+      try {
+        await fetch('/api/me/location', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ location_city: locationCity || null }),
+        });
+      } catch (error) {
+        console.warn('Failed to update location (non-critical):', error);
+      }
+
+      // Update category profile using new endpoint
+      try {
+        await fetch('/api/me/category-profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(category_notes || {}),
+        });
+      } catch (error) {
+        console.warn('Failed to update category profile (non-critical):', error);
+      }
+
+      // Refetch user to update Redux store with latest data (including category_profile)
+      await dispatch(fetchSession()).unwrap();
 
       setAlert({ type: 'success', message: 'Profile updated successfully.' });
 
@@ -790,9 +746,10 @@ export default function EditProfilePage() {
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <Select
+                      key={`country-${formData.country || 'none'}`}
                       label="Country"
                       options={COUNTRIES}
-                      value={formData.country || ''}
+                      value={(formData.country as string) || ''}
                       onChange={handleSelectChange('country')}
                     />
                     <Input
@@ -804,9 +761,10 @@ export default function EditProfilePage() {
                       placeholder="e.g. Athens"
                     />
                     <Select
+                      key={`timezone-${formData.timezone || 'none'}`}
                       label="Time Zone"
                       options={TIMEZONES}
-                      value={formData.timezone || ''}
+                      value={(formData.timezone as string) || ''}
                       onChange={handleSelectChange('timezone')}
                     />
                   </div>
@@ -980,36 +938,65 @@ export default function EditProfilePage() {
                   Select the categories that interest you. Only relevant blocks will appear on your
                   pages.
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map(cat => {
+                {(() => {
+                  const labels: Record<string, string> = {
+                    games: 'Games',
+                    anime: 'Anime',
+                    manga: 'Manga',
+                    books: 'Books',
+                    movies: 'Movies',
+                    tv: 'TV Series',
+                    coding: 'Coding',
+                    pet: 'Pet',
+                    vape: 'Vape',
+                  };
+                  const renderChip = (cat: string, disabled = false) => {
                     const active = (formData.categories as string[] | undefined)?.includes(cat);
-                    const labels: Record<string, string> = {
-                      games: 'Games',
-                      anime: 'Anime',
-                      manga: 'Manga',
-                      books: 'Books',
-                      movies: 'Movies',
-                      tv: 'TV Series',
-                      coding: 'Coding',
-                      pet: 'Pet',
-                      vape: 'Vape',
-                    };
                     return (
                       <Button
                         type="button"
                         key={cat}
+                        disabled={disabled}
                         onClick={() => toggleCategory(cat)}
                         className={`rounded-full border px-3 py-1.5 text-sm transition ${
                           active
                             ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
                             : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
-                        }`}
+                        } ${disabled ? 'cursor-not-allowed opacity-55 hover:border-border hover:bg-card' : ''}`}
                       >
                         {String(labels[cat] || cat)}
                       </Button>
                     );
-                  })}
-                </div>
+                  };
+
+                  if (socialLayerEnabled) {
+                    return (
+                      <div className="flex flex-wrap gap-2">
+                        {CATEGORIES.map(cat => renderChip(cat))}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        {PRIMARY_HOBBY_CATEGORIES.map(cat => renderChip(cat))}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {SOCIAL_LAYER_HOBBY_CATEGORIES.map(cat => (
+                          <Popover key={`locked-${cat}`}>
+                            <PopoverTrigger asChild>
+                              <span className="inline-flex">{renderChip(cat, true)}</span>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-72 text-sm" side="top" align="start">
+                              Enable the Social Layer in `/settings` to unlock this category.
+                            </PopoverContent>
+                          </Popover>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
@@ -1019,38 +1006,100 @@ export default function EditProfilePage() {
               </CardHeader>
               <CardContent className="pt-4">
                 <ProfileCategoryTabs
-                  categories={((formData.categories as string[] | undefined) ?? []).map(String)}
-                  animeFavoriteGenres={(
-                    (formData.favorite_anime_genres as string[] | undefined) || []
-                  ).map(String)}
-                  movieFavoriteGenres={(
-                    (formData.favorite_movie_genres as string[] | undefined) || []
-                  ).map(String)}
-                  bookFavoriteGenres={(
-                    (formData.favorite_book_genres as string[] | undefined) || []
-                  ).map(String)}
+                  categories={visibleCategoriesForTabs}
                   codingFavoriteLanguages={(
                     (formData.favorite_languages as string[] | undefined) || []
                   ).map(String)}
                   gameForm={{
-                    psn_id: (formData.psn_id as string | undefined) || '',
-                    xbox_gamertag: (formData.xbox_gamertag as string | undefined) || '',
-                    steam_id: (formData.steam_id as string | undefined) || '',
-                    nintendo_id: (formData.nintendo_id as string | undefined) || '',
-                    favorite_platform: (formData.favorite_platform as string | undefined) || '',
-                    favorite_genres: (formData.favorite_genres as string[] | undefined) || [],
+                    psn_id:
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.games as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.psn_id as string | undefined) || '',
+                    xbox_gamertag:
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.games as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.xbox_gamertag as string | undefined) || '',
+                    steam_id:
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.games as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.steam_id as string | undefined) || '',
+                    nintendo_id:
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.games as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.nintendo_id as string | undefined) || '',
+                    favorite_platform:
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.games as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.favorite_platform as string | undefined) || '',
+                    favorite_genres:
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.games as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.user_favorite_genres as string[] | undefined) || [],
                     gaming_since:
-                      (formData.gaming_since as string | number | null | undefined) ?? '',
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.games as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.gaming_since as string | number | null | undefined) ?? '',
                   }}
                   vapeFallback={{
-                    device: (formData.vape_device as string | undefined) || '',
-                    flavor: (formData.vape_flavor as string | undefined) || '',
+                    device:
+                      ((
+                        (formData.category_notes as Record<string, unknown> | undefined)?.vape as
+                          | Record<string, unknown>
+                          | undefined
+                      )?.device as string | undefined) || '',
+                    flavor:
+                      (
+                        (
+                          (formData.category_notes as Record<string, unknown> | undefined)?.vape as
+                            | Record<string, unknown>
+                            | undefined
+                        )?.flavors as string[] | undefined
+                      )?.[0] || '',
                   }}
-                  onGameFieldChange={(name, value) =>
-                    setFormData(prev => ({ ...prev, [name]: value }))
-                  }
-                  onGamePlatformChange={handleSelectChange('favorite_platform')}
-                  onGameGenreToggle={handleGenreToggle}
+                  onGameFieldChange={(name, value) => {
+                    // Write to category_notes.games instead of root level
+                    setFormData(prev => {
+                      const notes =
+                        (prev.category_notes as Record<string, unknown> | undefined) || {};
+                      const games = (notes.games as Record<string, unknown> | undefined) || {};
+                      return {
+                        ...prev,
+                        category_notes: {
+                          ...notes,
+                          games: { ...games, [name]: value },
+                        },
+                      };
+                    });
+                  }}
+                  onGamePlatformChange={value => {
+                    // Write to category_notes.games.favorite_platform
+                    setFormData(prev => {
+                      const notes =
+                        (prev.category_notes as Record<string, unknown> | undefined) || {};
+                      const games = (notes.games as Record<string, unknown> | undefined) || {};
+                      return {
+                        ...prev,
+                        category_notes: {
+                          ...notes,
+                          games: { ...games, favorite_platform: value },
+                        },
+                      };
+                    });
+                  }}
                   categoryNotes={
                     ((formData.category_notes as Record<string, unknown> | undefined) ||
                       {}) as Record<string, unknown>
@@ -1062,11 +1111,6 @@ export default function EditProfilePage() {
                       const notes =
                         (prev.category_notes as Record<string, unknown> | undefined) || {};
                       const petNote = (notes.pet as Record<string, unknown> | undefined) || {};
-                      const entries =
-                        (petNote.entries as Record<string, Record<string, string>> | undefined) ||
-                        {};
-                      const currentEntry =
-                        (entries[type] as Record<string, string> | undefined) || {};
 
                       return {
                         ...prev,
@@ -1074,13 +1118,8 @@ export default function EditProfilePage() {
                           ...notes,
                           pet: {
                             ...petNote,
-                            entries: {
-                              ...entries,
-                              [type]: {
-                                ...currentEntry,
-                                [key]: value,
-                              },
-                            },
+                            type,
+                            [key]: value,
                           },
                         },
                       };
@@ -1089,7 +1128,6 @@ export default function EditProfilePage() {
                   onCategoryFieldChange={(cat, key, value) =>
                     handleCategoryNoteField(cat, key)(value)
                   }
-                  onCategoryGenreToggle={handleCategoryGenreToggle}
                   onCategoryListToggle={handleCategoryListToggle}
                 />
               </CardContent>

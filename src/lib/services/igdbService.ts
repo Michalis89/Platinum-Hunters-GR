@@ -112,7 +112,9 @@ function uniqueSorted(values: string[]): string[] {
 }
 
 function toNames(rows: Array<{ name?: string | null } | null> | null | undefined): string[] {
-  if (!Array.isArray(rows)) {return [];}
+  if (!Array.isArray(rows)) {
+    return [];
+  }
   return uniqueSorted(rows.map(row => row?.name?.trim() ?? '').filter(Boolean));
 }
 
@@ -120,13 +122,17 @@ function toImageIds(
   rows: Array<{ image_id?: string | null } | null> | null | undefined,
   limit: number,
 ): string[] {
-  if (!Array.isArray(rows)) {return [];}
+  if (!Array.isArray(rows)) {
+    return [];
+  }
   return uniqueSorted(rows.map(row => row?.image_id?.trim() ?? '').filter(Boolean)).slice(0, limit);
 }
 
 function normalizeWebsite(url: string | null | undefined): string | null {
   const normalized = normalizeHttpsUrl(url ?? null);
-  if (!normalized) {return null;}
+  if (!normalized) {
+    return null;
+  }
   return normalized.trim() || null;
 }
 
@@ -145,15 +151,23 @@ function hostMatches(host: string, domain: string): boolean {
 export function pickOfficialWebsite(
   websites: Array<{ url?: string | null; category?: number | null } | null> | null | undefined,
 ): string | null {
-  if (!Array.isArray(websites) || websites.length === 0) {return null;}
+  if (!Array.isArray(websites) || websites.length === 0) {
+    return null;
+  }
 
   const normalized = websites
     .map(site => {
       const url = normalizeWebsite(site?.url ?? null);
-      if (!url) {return null;}
+      if (!url) {
+        return null;
+      }
       const host = getHostname(url);
-      if (!host) {return null;}
-      if (REJECTED_WEBSITE_DOMAINS.some(domain => hostMatches(host, domain))) {return null;}
+      if (!host) {
+        return null;
+      }
+      if (REJECTED_WEBSITE_DOMAINS.some(domain => hostMatches(host, domain))) {
+        return null;
+      }
       return {
         url,
         host,
@@ -162,17 +176,23 @@ export function pickOfficialWebsite(
     })
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
-  if (normalized.length === 0) {return null;}
+  if (normalized.length === 0) {
+    return null;
+  }
 
   const official = normalized.find(
     item => item.category !== null && WEBSITE_CATEGORY_OFFICIAL.has(item.category),
   );
-  if (official) {return official.url;}
+  if (official) {
+    return official.url;
+  }
 
   const preferredDomain = normalized.find(item =>
     PREFERRED_STORE_DOMAINS.some(domain => hostMatches(item.host, domain)),
   );
-  if (preferredDomain) {return preferredDomain.url;}
+  if (preferredDomain) {
+    return preferredDomain.url;
+  }
 
   return normalized[0]?.url ?? null;
 }
@@ -226,7 +246,9 @@ limit ${Math.max(1, Math.min(limit, 50))};
 }
 
 export async function findIgdbGameIdBySteamAppId(steamAppId: number): Promise<number | null> {
-  if (!Number.isFinite(steamAppId) || steamAppId <= 0) {return null;}
+  if (!Number.isFinite(steamAppId) || steamAppId <= 0) {
+    return null;
+  }
 
   // IGDB external_games category=1 -> Steam
   const body = `
@@ -237,10 +259,16 @@ limit 1;
   const data = (await igdbPost('/external_games', body)) as Array<{
     game?: number | { id?: number | null } | null;
   }>;
-  if (!Array.isArray(data) || data.length === 0) {return null;}
+  if (!Array.isArray(data) || data.length === 0) {
+    return null;
+  }
   const gameField = data[0]?.game;
-  if (typeof gameField === 'number') {return gameField;}
-  if (typeof gameField?.id === 'number') {return gameField.id;}
+  if (typeof gameField === 'number') {
+    return gameField;
+  }
+  if (typeof gameField?.id === 'number') {
+    return gameField.id;
+  }
   return null;
 }
 
@@ -248,7 +276,9 @@ export async function fetchIgdbGameDetails(
   igdbId: number,
   options?: { mainGameOnly?: boolean },
 ): Promise<IgdbGame | null> {
-  if (!Number.isFinite(igdbId) || igdbId <= 0) {return null;}
+  if (!Number.isFinite(igdbId) || igdbId <= 0) {
+    return null;
+  }
   const mainGameOnly = options?.mainGameOnly ?? true;
   const whereClause = mainGameOnly
     ? `where id = ${Math.floor(igdbId)} & category = ${igdbAllowedCategoriesWhereClause()};`

@@ -93,7 +93,9 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
     // Handle dialog open/close
     React.useEffect(() => {
       const dialog = dialogRef.current;
-      if (!dialog) {return;}
+      if (!dialog) {
+        return;
+      }
 
       if (open) {
         if (!dialog.open) {
@@ -109,7 +111,9 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
     // Handle ESC key and close events
     React.useEffect(() => {
       const dialog = dialogRef.current;
-      if (!dialog) {return;}
+      if (!dialog) {
+        return;
+      }
 
       const handleClose = () => {
         onOpenChange(false);
@@ -163,7 +167,9 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
       }
     }, [open]);
 
-    if (typeof window === 'undefined') {return null;}
+    if (typeof window === 'undefined') {
+      return null;
+    }
 
     return createPortal(
       <dialog

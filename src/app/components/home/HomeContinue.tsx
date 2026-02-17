@@ -66,10 +66,14 @@ const continueItems: ContinueItem[] = [
 
 export function HomeContinue() {
   const user = useSelector(selectUser);
-  const userCategories = (user?.categories as string[] | undefined) ?? [];
+  const userCategories = user?.category_profile
+    ? Object.keys(user.category_profile).filter(key => key && typeof key === 'string')
+    : [];
 
   const visibleContinueItems = continueItems.filter(item => {
-    if (!item.requires) {return true;}
+    if (!item.requires) {
+      return true;
+    }
     return item.requires.some(cat => userCategories.includes(cat));
   });
 

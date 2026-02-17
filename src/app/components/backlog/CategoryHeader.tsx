@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { MediaCategory} from './types';
+import type { MediaCategory } from './types';
 import { CATEGORY_CONFIG } from './types';
 
 interface CategoryHeaderProps {

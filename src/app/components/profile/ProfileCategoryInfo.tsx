@@ -1,16 +1,16 @@
 'use client';
 
 import EmptyState from '@/components/ui/empty';
-import type { User } from '@/types/user';
 
 type ProfileCategoryInfoProps = {
   category: string;
-  user: User;
   categoryNotes: Record<string, unknown>;
 };
 
 function InfoRow({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
-  if (!children) {return null;}
+  if (!children) {
+    return null;
+  }
   return (
     <div className="flex flex-col gap-1">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -20,7 +20,9 @@ function InfoRow({ label, children }: Readonly<{ label: string; children: React.
 }
 
 function ChipList({ items, label }: Readonly<{ items: string[]; label: string }>) {
-  if (!items?.length) {return null;}
+  if (!items?.length) {
+    return null;
+  }
   return (
     <div>
       <p className="mb-2 text-xs text-muted-foreground">{label}</p>
@@ -40,20 +42,31 @@ function ChipList({ items, label }: Readonly<{ items: string[]; label: string }>
 
 export function ProfileCategoryInfo({
   category,
-  user,
   categoryNotes,
 }: Readonly<ProfileCategoryInfoProps>) {
   const notes = categoryNotes[category] as Record<string, unknown> | undefined;
 
   if (category === 'games') {
+    // Read from category_profile.games (NEW SOURCE)
+    const gamesNotes = notes as
+      | {
+          psn_id?: string;
+          xbox_gamertag?: string;
+          steam_id?: string;
+          nintendo_id?: string;
+          favorite_platform?: string;
+          gaming_since?: number;
+          user_favorite_genres?: string[];
+        }
+      | undefined;
+
     const hasGamingInfo =
-      user.psn_id ||
-      user.xbox_gamertag ||
-      user.steam_id ||
-      user.nintendo_id ||
-      user.favorite_platform ||
-      (user.favorite_genres && user.favorite_genres.length > 0) ||
-      user.gaming_since;
+      gamesNotes?.psn_id ||
+      gamesNotes?.xbox_gamertag ||
+      gamesNotes?.steam_id ||
+      gamesNotes?.nintendo_id ||
+      gamesNotes?.favorite_platform ||
+      (gamesNotes?.user_favorite_genres && gamesNotes.user_favorite_genres.length > 0);
 
     if (!hasGamingInfo) {
       return <EmptyState title="No gaming details saved yet." size="sm" />;
@@ -62,17 +75,20 @@ export function ProfileCategoryInfo({
     return (
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          {user.psn_id && <InfoRow label="PSN ID">{user.psn_id}</InfoRow>}
-          {user.xbox_gamertag && <InfoRow label="Xbox Gamertag">{user.xbox_gamertag}</InfoRow>}
-          {user.steam_id && <InfoRow label="Steam ID">{user.steam_id}</InfoRow>}
-          {user.nintendo_id && <InfoRow label="Nintendo ID">{user.nintendo_id}</InfoRow>}
-          {user.favorite_platform && (
-            <InfoRow label="Favorite Platform">{user.favorite_platform}</InfoRow>
+          {gamesNotes?.psn_id && <InfoRow label="PSN ID">{gamesNotes.psn_id}</InfoRow>}
+          {gamesNotes?.xbox_gamertag && (
+            <InfoRow label="Xbox Gamertag">{gamesNotes.xbox_gamertag}</InfoRow>
           )}
-          {user.gaming_since && <InfoRow label="Gaming Since">{user.gaming_since}</InfoRow>}
+          {gamesNotes?.steam_id && <InfoRow label="Steam ID">{gamesNotes.steam_id}</InfoRow>}
+          {gamesNotes?.nintendo_id && (
+            <InfoRow label="Nintendo ID">{gamesNotes.nintendo_id}</InfoRow>
+          )}
+          {gamesNotes?.favorite_platform && (
+            <InfoRow label="Favorite Platform">{gamesNotes.favorite_platform}</InfoRow>
+          )}
         </div>
-        {user.favorite_genres && user.favorite_genres.length > 0 && (
-          <ChipList items={user.favorite_genres} label="Favorite Genres" />
+        {gamesNotes?.user_favorite_genres && gamesNotes.user_favorite_genres.length > 0 && (
+          <ChipList items={gamesNotes.user_favorite_genres} label="Favorite Genres" />
         )}
       </div>
     );
@@ -102,8 +118,6 @@ export function ProfileCategoryInfo({
         {tvNotes.service_other && <InfoRow label="Other Service">{tvNotes.service_other}</InfoRow>}
         {tvNotes.genres?.length && <ChipList items={tvNotes.genres} label="Favorite Genres" />}
         {tvNotes.style && <InfoRow label="Watching Style">{tvNotes.style}</InfoRow>}
-        {tvNotes.since && <InfoRow label="Watching Since">{tvNotes.since}</InfoRow>}
-        {tvNotes.people && <InfoRow label="Favorite Actors / Directors">{tvNotes.people}</InfoRow>}
       </div>
     );
   }
@@ -137,11 +151,6 @@ export function ProfileCategoryInfo({
           <ChipList items={moviesNotes.genres} label="Favorite Genres" />
         )}
         {moviesNotes.style && <InfoRow label="Watching Style">{moviesNotes.style}</InfoRow>}
-        {moviesNotes.since && <InfoRow label="Watching Since">{moviesNotes.since}</InfoRow>}
-        {moviesNotes.directors && (
-          <InfoRow label="Favorite Directors">{moviesNotes.directors}</InfoRow>
-        )}
-        {moviesNotes.actors && <InfoRow label="Favorite Actors">{moviesNotes.actors}</InfoRow>}
       </div>
     );
   }
@@ -175,10 +184,6 @@ export function ProfileCategoryInfo({
           <ChipList items={animeNotes.genres} label="Favorite Genres" />
         )}
         {animeNotes.format && <InfoRow label="Watching Format">{animeNotes.format}</InfoRow>}
-        {animeNotes.since && <InfoRow label="Watching Since">{animeNotes.since}</InfoRow>}
-        {animeNotes.directors && (
-          <InfoRow label="Directors / Studios">{animeNotes.directors}</InfoRow>
-        )}
         {animeNotes.notes && <InfoRow label="Notes">{animeNotes.notes}</InfoRow>}
       </div>
     );
@@ -205,8 +210,6 @@ export function ProfileCategoryInfo({
           <ChipList items={booksNotes.genres} label="Favorite Genres" />
         )}
         {booksNotes.format && <InfoRow label="Reading Format">{booksNotes.format}</InfoRow>}
-        {booksNotes.since && <InfoRow label="Reading Since">{booksNotes.since}</InfoRow>}
-        {booksNotes.authors && <InfoRow label="Favorite Authors">{booksNotes.authors}</InfoRow>}
         {booksNotes.notes && <InfoRow label="Notes">{booksNotes.notes}</InfoRow>}
       </div>
     );
@@ -233,8 +236,6 @@ export function ProfileCategoryInfo({
           <ChipList items={mangaNotes.genres} label="Favorite Genres" />
         )}
         {mangaNotes.format && <InfoRow label="Reading Format">{mangaNotes.format}</InfoRow>}
-        {mangaNotes.since && <InfoRow label="Reading Since">{mangaNotes.since}</InfoRow>}
-        {mangaNotes.authors && <InfoRow label="Favorite Mangaka">{mangaNotes.authors}</InfoRow>}
         {mangaNotes.notes && <InfoRow label="Notes">{mangaNotes.notes}</InfoRow>}
       </div>
     );
@@ -261,7 +262,6 @@ export function ProfileCategoryInfo({
           <ChipList items={codingNotes.languages} label="Languages" />
         )}
         {codingNotes.focus?.length && <ChipList items={codingNotes.focus} label="Focus Areas" />}
-        {codingNotes.since && <InfoRow label="Coding Since">{codingNotes.since}</InfoRow>}
         {codingNotes.tools && <InfoRow label="Tools / Stack">{codingNotes.tools}</InfoRow>}
         {codingNotes.notes && <InfoRow label="Notes">{codingNotes.notes}</InfoRow>}
       </div>
@@ -288,7 +288,6 @@ export function ProfileCategoryInfo({
         {petNotes.type && <InfoRow label="Type">{petNotes.type}</InfoRow>}
         {petNotes.name && <InfoRow label="Name">{petNotes.name}</InfoRow>}
         {petNotes.breed && <InfoRow label="Breed">{petNotes.breed}</InfoRow>}
-        {petNotes.since && <InfoRow label="Since">{petNotes.since}</InfoRow>}
         {petNotes.notes && <InfoRow label="Stories">{petNotes.notes}</InfoRow>}
       </div>
     );
@@ -313,7 +312,6 @@ export function ProfileCategoryInfo({
       <div className="space-y-4">
         {vapeNotes.device && <InfoRow label="Device">{vapeNotes.device}</InfoRow>}
         {vapeNotes.nicotine && <InfoRow label="Nicotine (mg)">{vapeNotes.nicotine}</InfoRow>}
-        {vapeNotes.since && <InfoRow label="Vaping Since">{vapeNotes.since}</InfoRow>}
         {vapeNotes.flavors?.length && <ChipList items={vapeNotes.flavors} label="Flavors" />}
         {vapeNotes.notes && <InfoRow label="Notes">{vapeNotes.notes}</InfoRow>}
       </div>

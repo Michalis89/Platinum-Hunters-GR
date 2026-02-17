@@ -45,16 +45,73 @@ async function getTeam(): Promise<TeamMember[]> {
     const supabase = getSupabaseServer();
     const { data, error } = await supabase
       .from('users')
-      .select('id,username,display_name,roles,bio,avatar_url,country,favorite_platform')
-      .filter('roles', 'ov', '{owner,admin,moderator,author,reviewer}');
+      .select('id,username,display_name,roles,bio,avatar_url,country')
+      .overlaps('roles', ['owner', 'admin', 'moderator', 'author', 'reviewer']);
 
     if (error || !data) {
-      console.error('Failed to load team', error);
+      const details =
+        error && typeof error === 'object'
+          ? {
+              message: 'message' in error ? String(error.message) : undefined,
+              code: 'code' in error ? String(error.code) : undefined,
+              hint: 'hint' in error ? String(error.hint) : undefined,
+              details: 'details' in error ? String(error.details) : undefined,
+            }
+          : error;
+      console.warn('Failed to load team', details);
       return [];
     }
-    return data as TeamMember[];
+
+    const userIds = data.map(member => member.id);
+    if (userIds.length === 0) {
+      return [];
+    }
+
+    const { data: categoryProfiles, error: categoryProfilesError } = await supabase
+      .from('user_category_profiles')
+      .select('user_id,profiles')
+      .in('user_id', userIds);
+
+    if (categoryProfilesError) {
+      console.warn('Failed to load team category profiles', {
+        message: categoryProfilesError.message,
+        code: categoryProfilesError.code,
+      });
+    }
+
+    const favoritePlatformByUserId = new Map<string, string>();
+    for (const row of categoryProfiles || []) {
+      const rawProfiles = row && typeof row === 'object' && 'profiles' in row ? row.profiles : null;
+      let profiles: Record<string, unknown> | null = null;
+      if (rawProfiles && typeof rawProfiles === 'object') {
+        profiles = rawProfiles as Record<string, unknown>;
+      } else if (typeof rawProfiles === 'string') {
+        try {
+          const parsed = JSON.parse(rawProfiles) as unknown;
+          profiles =
+            parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null;
+        } catch {
+          profiles = null;
+        }
+      }
+      const games =
+        profiles && typeof profiles.games === 'object'
+          ? (profiles.games as Record<string, unknown>)
+          : null;
+      const favoritePlatform =
+        games && typeof games.favorite_platform === 'string' ? games.favorite_platform.trim() : '';
+
+      if (favoritePlatform) {
+        favoritePlatformByUserId.set(row.user_id, favoritePlatform);
+      }
+    }
+
+    return data.map(member => ({
+      ...member,
+      favorite_platform: favoritePlatformByUserId.get(member.id) ?? null,
+    })) as TeamMember[];
   } catch (err) {
-    console.error('Supabase server error', err);
+    console.warn('Supabase server error while loading team', err);
     return [];
   }
 }

@@ -2,9 +2,7 @@
 
 import { CoverThumbImage } from '@/components/ui/cover-image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type {
-  DragStartEvent,
-  DragEndEvent} from '@dnd-kit/core';
+import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import {
   DndContext,
   DragOverlay,
@@ -99,7 +97,9 @@ function mergeFavorites(
   const seen = new Set<number>();
 
   for (const item of [...topItems, ...favorites]) {
-    if (seen.has(item.entryId)) {continue;}
+    if (seen.has(item.entryId)) {
+      continue;
+    }
     seen.add(item.entryId);
     merged.push(item);
   }
@@ -186,7 +186,9 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
 
   const handleReorder = useCallback(
     async (newOrder: DashboardTopFiveItem[]) => {
-      if (!newOrder.length) {return;}
+      if (!newOrder.length) {
+        return;
+      }
 
       const response = await fetch('/api/dashboard/reorder-favorites', {
         method: 'POST',
@@ -208,12 +210,18 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
     async (event: DragEndEvent) => {
       const { active, over } = event;
       setActiveId(null);
-      if (!over) {return;}
-      if (typeof active.id !== 'number' || typeof over.id !== 'number') {return;}
+      if (!over) {
+        return;
+      }
+      if (typeof active.id !== 'number' || typeof over.id !== 'number') {
+        return;
+      }
 
       const oldIndex = order.findIndex(item => item.entryId === active.id);
       const newIndex = order.findIndex(item => item.entryId === over.id);
-      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) {return;}
+      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) {
+        return;
+      }
 
       const prevOrder = order;
       const nextOrder = arrayMove(order, oldIndex, newIndex);

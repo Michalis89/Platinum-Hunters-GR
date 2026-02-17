@@ -66,10 +66,14 @@ export async function getUserLocationCity(
     .eq('id', userId)
     .single();
 
-  if (!user) {return null;}
+  if (!user) {
+    return null;
+  }
 
   // Prefer new column
-  if (user.location_city) {return user.location_city;}
+  if (user.location_city) {
+    return user.location_city;
+  }
 
   // Fallback to social_links.location_city
   const socialLinks = (user.social_links as Record<string, unknown>) || {};
@@ -101,7 +105,9 @@ export async function getUserCategoryProfile(
     .eq('user_id', userId)
     .single();
 
-  if (!user) {return null;}
+  if (!user) {
+    return null;
+  }
 
   const socialLinks = (user.social_links as Record<string, unknown>) || {};
   return (socialLinks.category_notes as CategoryProfiles | undefined) || null;

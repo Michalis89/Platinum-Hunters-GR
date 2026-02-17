@@ -120,7 +120,9 @@ function normalizeTitle(value?: string | null): string {
 }
 
 function cleanTitleForStorage(value?: string | null): string {
-  if (!value) {return '';}
+  if (!value) {
+    return '';
+  }
   return value.replace(/[\u2122\u00AE\u00A9]/g, '').trim();
 }
 
@@ -363,7 +365,6 @@ function buildGameMetadataPatch(game: SteamOwnedGame, igdb: IgdbGame) {
     publisher: payload.publisher,
   } satisfies Database['public']['Tables']['media_items']['Update'];
 }
-
 
 function buildBacklogRedirect(requestUrl: string, status: 'success' | 'error', reason?: string) {
   const redirectUrl = new URL('/backlog?category=games', requestUrl);
@@ -647,7 +648,9 @@ async function syncSteamForUser(options?: {
       });
     } else {
       // Reject games without IGDB match - don't insert them
-      console.warn(`[Steam Sync] Rejecting: ${game.name} (Steam App ${game.appid}) - No IGDB match`);
+      console.warn(
+        `[Steam Sync] Rejecting: ${game.name} (Steam App ${game.appid}) - No IGDB match`,
+      );
       rejectedGames.push({
         appid: game.appid,
         name: game.name ?? `Steam App ${game.appid}`,
@@ -763,8 +766,12 @@ async function syncSteamForUser(options?: {
     } | null;
     const normalizedTitle = normalizeTitle(media?.title);
     const normalizedEnglishTitle = normalizeTitle(media?.title_english);
-    if (normalizedTitle) {userTitleSet.add(normalizedTitle);}
-    if (normalizedEnglishTitle) {userTitleSet.add(normalizedEnglishTitle);}
+    if (normalizedTitle) {
+      userTitleSet.add(normalizedTitle);
+    }
+    if (normalizedEnglishTitle) {
+      userTitleSet.add(normalizedEnglishTitle);
+    }
   }
 
   const userEntryPayload: Database['public']['Tables']['user_media_entries']['Insert'][] = [];
@@ -854,10 +861,15 @@ async function syncSteamForUser(options?: {
   await updateProgress('Finalizing sync...', totalSteps - completedSteps);
 
   const warnings: string[] = [];
-  if (failedMediaInsertCount > 0) {warnings.push(`Failed media inserts: ${failedMediaInsertCount}`);}
-  if (failedMediaUpdateCount > 0) {warnings.push(`Failed media updates: ${failedMediaUpdateCount}`);}
-  if (failedEntryUpsertCount > 0)
-    {warnings.push(`Failed entry inserts/updates: ${failedEntryUpsertCount}`);}
+  if (failedMediaInsertCount > 0) {
+    warnings.push(`Failed media inserts: ${failedMediaInsertCount}`);
+  }
+  if (failedMediaUpdateCount > 0) {
+    warnings.push(`Failed media updates: ${failedMediaUpdateCount}`);
+  }
+  if (failedEntryUpsertCount > 0) {
+    warnings.push(`Failed entry inserts/updates: ${failedEntryUpsertCount}`);
+  }
 
   const result: SyncResult = {
     totalFetched: uniqueGames.length,
@@ -981,4 +993,3 @@ async function GETHandler(req: Request) {
 
 export const POST = withApiRoute(POSTHandler);
 export const GET = withApiRoute(GETHandler);
-

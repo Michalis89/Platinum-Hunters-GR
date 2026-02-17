@@ -143,14 +143,18 @@ function chunk<T>(items: T[], size: number): T[][] {
 
 function summarizeFacet(values: string[] | null | undefined): string {
   const list = Array.isArray(values) ? values.filter(Boolean) : [];
-  if (list.length === 0) {return '-';}
+  if (list.length === 0) {
+    return '-';
+  }
   const preview = list.slice(0, 3);
   const overflow = list.length - preview.length;
   return overflow > 0 ? `${preview.join(', ')} +${overflow}` : preview.join(', ');
 }
 
 function getExcludedReason(row: MediaRow): string | null {
-  if (row.category !== 'games') {return null;}
+  if (row.category !== 'games') {
+    return null;
+  }
   if (typeof row.igdb_category === 'number' && !isAllowedIgdbCategory(row.igdb_category)) {
     return getIgdbCategoryLabel(row.igdb_category);
   }
@@ -186,7 +190,9 @@ export default function AdminMediaCurationTable() {
     params.set('limit', `${DEFAULT_LIMIT}`);
     params.set('offset', `${(page - 1) * DEFAULT_LIMIT}`);
     for (const [key, value] of Object.entries(filters)) {
-      if (value.trim()) {params.set(key, value.trim());}
+      if (value.trim()) {
+        params.set(key, value.trim());
+      }
     }
     return params.toString();
   }, [filters, page]);
@@ -211,7 +217,9 @@ export default function AdminMediaCurationTable() {
     try {
       const response = await fetch(`/api/admin/media/entries?${queryString}`);
       const payload = await response.json().catch(() => null);
-      if (!response.ok) {throw new Error(payload?.error || 'Failed to fetch media entries');}
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to fetch media entries');
+      }
 
       const nextRows = Array.isArray(payload?.data) ? (payload.data as MediaRow[]) : [];
       const nextMeta = payload?.meta as MetaState | undefined;
@@ -276,7 +284,9 @@ export default function AdminMediaCurationTable() {
         body: JSON.stringify({ updates: mergedUpdates }),
       });
       const payload = await response.json().catch(() => null);
-      if (!response.ok) {throw new Error(payload?.error || 'Failed to update entry');}
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to update entry');
+      }
 
       const updated = payload?.data as MediaRow | undefined;
       if (updated) {
@@ -297,7 +307,9 @@ export default function AdminMediaCurationTable() {
   };
 
   const syncIgdbForRow = async (row: MediaRow) => {
-    if (row.category !== 'games' || getExcludedReason(row) !== null) {return;}
+    if (row.category !== 'games' || getExcludedReason(row) !== null) {
+      return;
+    }
     setError(null);
     setSuccessMessage(null);
     setSyncingIds(prev => (prev.includes(row.id) ? prev : [...prev, row.id]));
@@ -312,7 +324,9 @@ export default function AdminMediaCurationTable() {
         }),
       });
       const payload = await response.json().catch(() => null);
-      if (!response.ok) {throw new Error(payload?.error || 'Failed to sync from IGDB');}
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to sync from IGDB');
+      }
 
       await fetchRows();
       setSuccessMessage(`Synced game #${row.id} from IGDB.`);
@@ -324,7 +338,9 @@ export default function AdminMediaCurationTable() {
   };
 
   const syncSelectedFromIgdb = async () => {
-    if (selectedSyncableGameRows.length === 0) {return;}
+    if (selectedSyncableGameRows.length === 0) {
+      return;
+    }
     setSyncingSelected(true);
     setError(null);
     setSuccessMessage(null);
@@ -340,7 +356,9 @@ export default function AdminMediaCurationTable() {
         const workers = [0, 1].map(async () => {
           while (queue.length > 0) {
             const mediaId = queue.shift();
-            if (!mediaId) {return;}
+            if (!mediaId) {
+              return;
+            }
             setSyncingIds(prev => (prev.includes(mediaId) ? prev : [...prev, mediaId]));
 
             try {
@@ -387,7 +405,9 @@ export default function AdminMediaCurationTable() {
       rowId: Number(id),
       updates,
     }));
-    if (!entries.length) {return;}
+    if (!entries.length) {
+      return;
+    }
 
     setSavingAll(true);
     setError(null);
@@ -409,7 +429,9 @@ export default function AdminMediaCurationTable() {
           continue;
         }
         const updated = payload?.data as MediaRow | undefined;
-        if (updated) {setRows(prev => prev.map(row => (row.id === rowId ? updated : row)));}
+        if (updated) {
+          setRows(prev => prev.map(row => (row.id === rowId ? updated : row)));
+        }
         successCount += 1;
       } catch {
         failedRows.push(rowId);
@@ -426,7 +448,9 @@ export default function AdminMediaCurationTable() {
   };
 
   const deleteRows = async (rowIds: number[]) => {
-    if (rowIds.length === 0) {return;}
+    if (rowIds.length === 0) {
+      return;
+    }
     setIsDeleting(true);
     setError(null);
     setSuccessMessage(null);

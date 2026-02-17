@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import type { MediaCategory} from './types';
+import type { MediaCategory } from './types';
 import { CATEGORY_CONFIG } from './types';
 
 interface CategoryStatsProps {

@@ -10,7 +10,9 @@ const SCRIPT_LOAD_TIMEOUT_MS = 12000;
 let turnstileLoader: Promise<void> | null = null;
 
 const ensureTurnstileScript = () => {
-  if (turnstileLoader) {return turnstileLoader;}
+  if (turnstileLoader) {
+    return turnstileLoader;
+  }
 
   turnstileLoader = new Promise((resolve, reject) => {
     if (typeof window === 'undefined') {
@@ -20,12 +22,16 @@ const ensureTurnstileScript = () => {
 
     let settled = false;
     const finalizeResolve = () => {
-      if (settled) {return;}
+      if (settled) {
+        return;
+      }
       settled = true;
       resolve();
     };
     const finalizeReject = (error: Error) => {
-      if (settled) {return;}
+      if (settled) {
+        return;
+      }
       settled = true;
       reject(error);
     };
@@ -110,8 +116,12 @@ export default function CaptchaWidget({
   }, [onTokenChange]);
 
   useEffect(() => {
-    if (!containerRef.current) {return;}
-    if (hasRenderedRef.current) {return;}
+    if (!containerRef.current) {
+      return;
+    }
+    if (hasRenderedRef.current) {
+      return;
+    }
 
     if (!SITE_KEY) {
       setError('CAPTCHA is not configured correctly.');
@@ -123,12 +133,20 @@ export default function CaptchaWidget({
     let cancelled = false;
 
     const renderWidget = () => {
-      if (!containerRef.current) {return;}
-      if (typeof window === 'undefined' || !(window as Window & { turnstile?: unknown }).turnstile)
-        {return;}
+      if (!containerRef.current) {
+        return;
+      }
+      if (
+        typeof window === 'undefined' ||
+        !(window as Window & { turnstile?: unknown }).turnstile
+      ) {
+        return;
+      }
 
       const loaderWindow = window as Window & { turnstile: TurnstileWindow };
-      if (!loaderWindow.turnstile) {return;}
+      if (!loaderWindow.turnstile) {
+        return;
+      }
 
       const widgetId = loaderWindow.turnstile.render(containerRef.current, {
         sitekey: SITE_KEY,
@@ -154,11 +172,15 @@ export default function CaptchaWidget({
 
     ensureTurnstileScript()
       .then(() => {
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
         renderWidget();
       })
       .catch(() => {
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
         setError('CAPTCHA failed to load. Please retry.');
         onTokenRef.current(null);
       });
@@ -169,13 +191,16 @@ export default function CaptchaWidget({
   }, [retryNonce]);
 
   useEffect(() => {
-    if (resetSignal === undefined) {return;}
+    if (resetSignal === undefined) {
+      return;
+    }
     if (
       widgetIdRef.current === null ||
       typeof window === 'undefined' ||
       !(window as Window & { turnstile?: unknown }).turnstile
-    )
-      {return;}
+    ) {
+      return;
+    }
 
     const loaderWindow = window as Window & { turnstile: TurnstileWindow };
     loaderWindow.turnstile.reset(widgetIdRef.current);

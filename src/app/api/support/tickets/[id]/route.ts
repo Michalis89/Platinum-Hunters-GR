@@ -97,9 +97,15 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
     let archived: boolean | null = null;
     let deleted: boolean | null = null;
 
-    if (action === 'archive') {archived = true;}
-    if (action === 'unarchive') {archived = false;}
-    if (action === 'delete') {deleted = true;}
+    if (action === 'archive') {
+      archived = true;
+    }
+    if (action === 'unarchive') {
+      archived = false;
+    }
+    if (action === 'delete') {
+      deleted = true;
+    }
 
     if (archived === null && deleted === null) {
       return fail({ error: 'Invalid action.' }, 400);

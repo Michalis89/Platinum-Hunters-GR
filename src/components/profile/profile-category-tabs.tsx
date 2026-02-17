@@ -13,28 +13,19 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { SelectField as Select } from '@/components/ui/select-field';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import {
-  ANIME_GENRES,
-  BOOK_GENRES,
   CATEGORY_SERVICES,
   CODING_FOCUS,
   CODING_LANGUAGES,
-  GENRES,
-  MOVIE_GENRES,
   MOVIE_STYLES,
   PET_TYPES,
   PLATFORMS,
-  TV_GENRES,
   TV_STYLES,
   VAPE_FLAVORS,
 } from '@/data/hobbyConstants';
 
 type ProfileCategoryTabsProps = {
   categories: string[];
-  animeFavoriteGenres: string[];
-  movieFavoriteGenres: string[];
-  bookFavoriteGenres: string[];
   codingFavoriteLanguages: string[];
   gameForm: {
     psn_id?: string | null;
@@ -51,13 +42,11 @@ type ProfileCategoryTabsProps = {
   };
   onGameFieldChange: (name: string, value: string) => void;
   onGamePlatformChange: (value: string) => void;
-  onGameGenreToggle: (genre: string) => void;
   categoryNotes: Record<string, unknown>;
   petTypes: string[];
   onPetTypeToggle: (type: string) => void;
   onPetEntryField: (type: string, key: string, value: string) => void;
   onCategoryFieldChange: (cat: string, key: string, value: string | number | string[]) => void;
-  onCategoryGenreToggle: (cat: string, genre: string) => void;
   onCategoryListToggle: (cat: string, key: string, item: string) => void;
 };
 
@@ -89,18 +78,21 @@ const ANIME_PLATFORMS = [
   'Blu-ray / Physical',
   'Other',
 ];
-const MANGA_GENRES = [
-  'Shonen',
-  'Seinen',
-  'Shojo',
-  'Josei',
-  'Fantasy',
-  'Action',
-  'Sci-Fi',
-  'Romance',
-];
 const MANGA_FORMATS = ['Physical', 'Digital', 'Webtoon', 'Mixed'];
 const BOOK_FORMATS = ['Physical books', 'eBooks', 'Audiobooks', 'Mixed', 'Depends on the book'];
+const GENRE_INSIGHTS_TOOLTIP = 'Genres are auto-generated from your Personal Insights.';
+const NO_INSIGHTS_GENRES_MESSAGE = 'You should import some data in order to see the genres.';
+const CATEGORY_TAB_ORDER = [
+  'games',
+  'anime',
+  'manga',
+  'movies',
+  'tv',
+  'books',
+  'coding',
+  'pet',
+  'vape',
+] as const;
 
 function chipClass(active: boolean) {
   return `rounded-full border px-3 py-1 text-xs transition ${
@@ -112,27 +104,27 @@ function chipClass(active: boolean) {
 
 export function ProfileCategoryTabs({
   categories,
-  animeFavoriteGenres,
-  movieFavoriteGenres,
-  bookFavoriteGenres,
   codingFavoriteLanguages,
   gameForm,
   vapeFallback,
   onGameFieldChange,
   onGamePlatformChange,
-  onGameGenreToggle,
   categoryNotes,
   petTypes,
   onPetTypeToggle,
   onPetEntryField,
   onCategoryFieldChange,
-  onCategoryGenreToggle,
   onCategoryListToggle,
 }: ProfileCategoryTabsProps) {
   const orderedCategories = useMemo(() => {
     const enabled = categories.filter(category => TAB_LABELS[category]);
-    if (!enabled.includes('games')) {return enabled;}
-    return ['games', ...enabled.filter(category => category !== 'games')];
+    return [...enabled].sort((a, b) => {
+      const aIdx = CATEGORY_TAB_ORDER.indexOf(a as (typeof CATEGORY_TAB_ORDER)[number]);
+      const bIdx = CATEGORY_TAB_ORDER.indexOf(b as (typeof CATEGORY_TAB_ORDER)[number]);
+      const aRank = aIdx === -1 ? Number.MAX_SAFE_INTEGER : aIdx;
+      const bRank = bIdx === -1 ? Number.MAX_SAFE_INTEGER : bIdx;
+      return aRank - bRank;
+    });
   }, [categories]);
 
   const [activeCategory, setActiveCategory] = useState(orderedCategories[0] ?? '');
@@ -153,6 +145,44 @@ export function ProfileCategoryTabs({
       string,
       unknown
     >;
+
+  const renderReadonlyGenres = (label: string, genres: string[]) => (
+    <div>
+      <div className="mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-foreground">{label}</label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 rounded-full text-muted-foreground opacity-80 transition-opacity hover:text-foreground hover:opacity-100"
+              aria-label={`${label} info`}
+            >
+              <CircleHelp className="h-3.5 w-3.5" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent side="top" align="start" className="w-72 text-sm">
+            {GENRE_INSIGHTS_TOOLTIP}
+          </PopoverContent>
+        </Popover>
+      </div>
+      {genres.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {genres.map(genre => (
+            <span
+              key={`${label}-${genre}`}
+              className="bg-primary/14 dark:bg-primary/22 rounded-full border border-primary/35 px-3 py-1 text-xs text-primary dark:border-primary/55 dark:text-[#8ec5ff]"
+            >
+              {genre}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">{NO_INSIGHTS_GENRES_MESSAGE}</p>
+      )}
+    </div>
+  );
 
   if (!orderedCategories.length) {
     return (
@@ -186,122 +216,86 @@ export function ProfileCategoryTabs({
               </CardHeader>
               <CardContent className="space-y-3">
                 {category === 'games' && (
-                  <CollapsibleCard className="">
-                    <CollapsibleCardHeader className="border-b border-border bg-card/50">
-                      <p className="mb-1 text-xs uppercase tracking-[0.25em] text-primary">
-                        Gaming
-                      </p>
-                      <CardTitle className="text-lg text-foreground">Gaming Information</CardTitle>
-                    </CollapsibleCardHeader>
-                    <CollapsibleCardContent className="space-y-4">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <Input
-                          label="PSN ID"
-                          type="text"
-                          value={gameForm.psn_id || ''}
-                          onChange={e => onGameFieldChange('psn_id', e.target.value)}
-                          placeholder="YourPSNID"
-                        />
+                  <div className="space-y-4">
+                    {renderReadonlyGenres(
+                      'Favorite Genres',
+                      Array.isArray(gameForm.favorite_genres)
+                        ? gameForm.favorite_genres.map(String)
+                        : [],
+                    )}
 
-                        <Input
-                          label="Xbox Gamertag"
-                          type="text"
-                          value={gameForm.xbox_gamertag || ''}
-                          onChange={e => onGameFieldChange('xbox_gamertag', e.target.value)}
-                          placeholder="YourGamertag"
-                        />
-
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <label className="text-sm font-medium text-foreground">Steam ID</label>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7 rounded-full text-muted-foreground opacity-80 transition-opacity hover:text-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                  aria-label="Steam import tips"
-                                >
-                                  <CircleHelp className="h-4 w-4" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                side="top"
-                                align="end"
-                                className="w-80 max-w-[90vw] p-4"
-                              >
-                                <h4 className="text-sm font-semibold">Steam import tips</h4>
-                                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                                  <li>Use your SteamID64 (17 digits, e.g. 7656119...)</li>
-                                  <li>Vanity URLs and profile links are also supported</li>
-                                  <li>Your profile must be public during import</li>
-                                  <li>You can make it private again afterwards</li>
-                                </ul>
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-                          <input
-                            type="text"
-                            value={gameForm.steam_id || ''}
-                            onChange={e => onGameFieldChange('steam_id', e.target.value)}
-                            placeholder="76561198083126936 or steamcommunity.com/id/yourname"
-                            className="w-full rounded-lg border border-border bg-card p-3 text-foreground transition placeholder:text-muted-foreground placeholder:opacity-80 focus:border-primary focus:placeholder-transparent focus:outline-none focus:ring-2 focus:ring-primary"
-                          />
-                        </div>
-
-                        <Input
-                          label="Nintendo ID"
-                          type="text"
-                          value={gameForm.nintendo_id || ''}
-                          onChange={e => onGameFieldChange('nintendo_id', e.target.value)}
-                          placeholder="YourNintendoID"
-                        />
-                      </div>
-
-                      <Select
-                        label="Favorite Platform"
-                        options={['', ...PLATFORMS]}
-                        value={String(gameForm.favorite_platform || '')}
-                        onChange={onGamePlatformChange}
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Input
+                        label="PSN ID"
+                        type="text"
+                        value={gameForm.psn_id || ''}
+                        onChange={e => onGameFieldChange('psn_id', e.target.value)}
+                        placeholder="YourPSNID"
                       />
 
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-foreground">
-                          Favorite Genres
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                          {GENRES.map(genre => {
-                            const active = (gameForm.favorite_genres || []).includes(genre);
-                            return (
+                      <Input
+                        label="Xbox Gamertag"
+                        type="text"
+                        value={gameForm.xbox_gamertag || ''}
+                        onChange={e => onGameFieldChange('xbox_gamertag', e.target.value)}
+                        placeholder="YourGamertag"
+                      />
+
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="text-sm font-medium text-foreground">Steam ID</label>
+                          <Popover>
+                            <PopoverTrigger asChild>
                               <Button
                                 type="button"
-                                key={genre}
-                                onClick={() => onGameGenreToggle(genre)}
-                                className={`rounded-full border px-3 py-1 text-xs transition ${
-                                  active
-                                    ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
-                                    : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
-                                }`}
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-full text-muted-foreground opacity-80 transition-opacity hover:text-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                aria-label="Steam import tips"
                               >
-                                {genre}
+                                <CircleHelp className="h-4 w-4" />
                               </Button>
-                            );
-                          })}
+                            </PopoverTrigger>
+                            <PopoverContent
+                              side="top"
+                              align="end"
+                              className="w-80 max-w-[90vw] p-4"
+                            >
+                              <h4 className="text-sm font-semibold">Steam import tips</h4>
+                              <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                                <li>Use your SteamID64 (17 digits, e.g. 7656119...)</li>
+                                <li>Vanity URLs and profile links are also supported</li>
+                                <li>Your profile must be public during import</li>
+                                <li>You can make it private again afterwards</li>
+                              </ul>
+                            </PopoverContent>
+                          </Popover>
                         </div>
+                        <input
+                          type="text"
+                          value={gameForm.steam_id || ''}
+                          onChange={e => onGameFieldChange('steam_id', e.target.value)}
+                          placeholder="76561198083126936 or steamcommunity.com/id/yourname"
+                          className="w-full rounded-lg border border-border bg-card p-3 text-foreground transition placeholder:text-muted-foreground placeholder:opacity-80 focus:border-primary focus:placeholder-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
                       </div>
 
                       <Input
-                        label="Gaming Since (Year)"
-                        type="number"
-                        value={String(gameForm.gaming_since ?? '')}
-                        onChange={e => onGameFieldChange('gaming_since', e.target.value)}
-                        placeholder="2005"
-                        min="1970"
-                        max={new Date().getFullYear()}
+                        label="Nintendo ID"
+                        type="text"
+                        value={gameForm.nintendo_id || ''}
+                        onChange={e => onGameFieldChange('nintendo_id', e.target.value)}
+                        placeholder="YourNintendoID"
                       />
-                    </CollapsibleCardContent>
-                  </CollapsibleCard>
+                    </div>
+
+                    <Select
+                      label="Favorite Platform"
+                      options={['', ...PLATFORMS]}
+                      value={String(gameForm.favorite_platform || '')}
+                      onChange={onGamePlatformChange}
+                    />
+                  </div>
                 )}
 
                 {category === 'anime' && (
@@ -310,7 +304,7 @@ export function ProfileCategoryTabs({
                       const animeGenres =
                         Array.isArray(note.genres) && (note.genres as string[]).length > 0
                           ? (note.genres as string[])
-                          : animeFavoriteGenres;
+                          : [];
                       const platformsList =
                         Array.isArray(note.platforms) && (note.platforms as string[]).length > 0
                           ? (note.platforms as string[])
@@ -318,26 +312,7 @@ export function ProfileCategoryTabs({
 
                       return (
                         <>
-                          <div>
-                            <label className="mb-2 block text-sm font-medium text-foreground">
-                              Favorite Anime Genres
-                            </label>
-                            <div className="flex flex-wrap gap-2">
-                              {ANIME_GENRES.map(genre => {
-                                const active = animeGenres.includes(genre);
-                                return (
-                                  <Button
-                                    type="button"
-                                    key={genre}
-                                    onClick={() => onCategoryGenreToggle('anime', genre)}
-                                    className={chipClass(active)}
-                                  >
-                                    {genre}
-                                  </Button>
-                                );
-                              })}
-                            </div>
-                          </div>
+                          {renderReadonlyGenres('Favorite Anime Genres', animeGenres)}
 
                           <div>
                             <label className="mb-2 block text-sm font-medium text-foreground">
@@ -396,30 +371,6 @@ export function ProfileCategoryTabs({
                               </div>
                             )}
                           </div>
-
-                          <Input
-                            label="Watching Anime Since (Year)"
-                            type="number"
-                            value={(note.since as string | number | undefined) || ''}
-                            onChange={e => onCategoryFieldChange('anime', 'since', e.target.value)}
-                            placeholder="e.g. 2004"
-                            min="1970"
-                            max={new Date().getFullYear()}
-                          />
-
-                          <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-foreground">
-                              Favorite Anime Directors / Studios
-                            </label>
-                            <Textarea
-                              value={(note.directors as string) || ''}
-                              onChange={e =>
-                                onCategoryFieldChange('anime', 'directors', e.target.value)
-                              }
-                              placeholder="Favorite directors / studios (e.g. Miyazaki, Ufotable)"
-                              rows={3}
-                            />
-                          </div>
                         </>
                       );
                     })()}
@@ -427,461 +378,249 @@ export function ProfileCategoryTabs({
                 )}
 
                 {category === 'manga' && (
-                  <CollapsibleCard className="">
-                    <CollapsibleCardHeader>
-                      <CardTitle className="text-foreground">Manga Information</CardTitle>
-                    </CollapsibleCardHeader>
-                    <CollapsibleCardContent className="space-y-4">
-                      {(() => {
-                        const mangaGenres =
-                          Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                            ? (note.genres as string[])
-                            : animeFavoriteGenres;
-                        return (
-                          <>
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Favorite Genres / Demographics
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {MANGA_GENRES.map(genre => {
-                                  const active = mangaGenres.includes(genre);
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={genre}
-                                      onClick={() => onCategoryGenreToggle('manga', genre)}
-                                      className={`rounded-full border px-3 py-1 text-xs transition ${
-                                        active
-                                          ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
-                                          : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
-                                      }`}
-                                    >
-                                      {genre}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                            </div>
+                  <div className="space-y-4">
+                    {(() => {
+                      const mangaGenres =
+                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
+                          ? (note.genres as string[])
+                          : [];
+                      return (
+                        <>
+                          {renderReadonlyGenres('Favorite Genres / Demographics', mangaGenres)}
 
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Preferred Reading Format
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {MANGA_FORMATS.map(format => {
-                                  const active = note.format === format;
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={format}
-                                      onClick={() =>
-                                        onCategoryFieldChange('manga', 'format', String(format))
-                                      }
-                                      className={`rounded-full border px-3 py-1 text-xs transition ${
-                                        active
-                                          ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
-                                          : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
-                                      }`}
-                                    >
-                                      {format}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-foreground">
+                              Preferred Reading Format
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {MANGA_FORMATS.map(format => {
+                                const active = note.format === format;
+                                return (
+                                  <Button
+                                    type="button"
+                                    key={format}
+                                    onClick={() =>
+                                      onCategoryFieldChange('manga', 'format', String(format))
+                                    }
+                                    className={`rounded-full border px-3 py-1 text-xs transition ${
+                                      active
+                                        ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                        : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
+                                    }`}
+                                  >
+                                    {format}
+                                  </Button>
+                                );
+                              })}
                             </div>
-
-                            <Input
-                              label="Reading Manga Since (Year)"
-                              type="number"
-                              value={(note.since as string | number | undefined) || ''}
-                              onChange={e =>
-                                onCategoryFieldChange('manga', 'since', e.target.value)
-                              }
-                              placeholder="e.g. 2018"
-                              min="1970"
-                              max={new Date().getFullYear()}
-                            />
-
-                            <div className="space-y-1.5">
-                              <label className="text-sm font-medium text-foreground">
-                                Favorite Mangaka / Artists
-                              </label>
-                              <Textarea
-                                value={(note.authors as string) || ''}
-                                onChange={e =>
-                                  onCategoryFieldChange('manga', 'authors', e.target.value)
-                                }
-                                placeholder="Favorite mangaka / artists"
-                                rows={3}
-                              />
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </CollapsibleCardContent>
-                  </CollapsibleCard>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                 )}
 
                 {category === 'books' && (
-                  <CollapsibleCard className="">
-                    <CollapsibleCardHeader>
-                      <CardTitle className="text-foreground">Books Information</CardTitle>
-                    </CollapsibleCardHeader>
-                    <CollapsibleCardContent className="space-y-4">
-                      {(() => {
-                        const bookGenres =
-                          Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                            ? (note.genres as string[])
-                            : bookFavoriteGenres;
-                        return (
-                          <>
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Favorite Book Genres
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {BOOK_GENRES.map(genre => {
-                                  const active = bookGenres.includes(genre);
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={genre}
-                                      onClick={() => onCategoryGenreToggle('books', genre)}
-                                      className={chipClass(active)}
-                                    >
-                                      {genre}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                            </div>
+                  <div className="space-y-4">
+                    {(() => {
+                      const bookGenres =
+                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
+                          ? (note.genres as string[])
+                          : [];
+                      return (
+                        <>
+                          {renderReadonlyGenres('Favorite Book Genres', bookGenres)}
 
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Preferred Reading Format
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {BOOK_FORMATS.map(format => {
-                                  const active = note.format === format;
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={format}
-                                      onClick={() =>
-                                        onCategoryFieldChange('books', 'format', String(format))
-                                      }
-                                      className={chipClass(active)}
-                                    >
-                                      {format}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-foreground">
+                              Preferred Reading Format
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {BOOK_FORMATS.map(format => {
+                                const active = note.format === format;
+                                return (
+                                  <Button
+                                    type="button"
+                                    key={format}
+                                    onClick={() =>
+                                      onCategoryFieldChange('books', 'format', String(format))
+                                    }
+                                    className={chipClass(active)}
+                                  >
+                                    {format}
+                                  </Button>
+                                );
+                              })}
                             </div>
-
-                            <Input
-                              label="Reading Since (Year)"
-                              type="number"
-                              value={(note.since as string | number | undefined) || ''}
-                              onChange={e =>
-                                onCategoryFieldChange('books', 'since', e.target.value)
-                              }
-                              placeholder="e.g. 2001"
-                              min="1970"
-                              max={new Date().getFullYear()}
-                            />
-
-                            <div className="space-y-1.5">
-                              <label className="text-sm font-medium text-foreground">
-                                Favorite Authors
-                              </label>
-                              <Textarea
-                                value={(note.authors as string) || ''}
-                                onChange={e =>
-                                  onCategoryFieldChange('books', 'authors', e.target.value)
-                                }
-                                placeholder="Favorite authors"
-                                rows={3}
-                              />
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </CollapsibleCardContent>
-                  </CollapsibleCard>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                 )}
 
                 {category === 'movies' && (
-                  <CollapsibleCard className="">
-                    <CollapsibleCardHeader>
-                      <CardTitle className="text-foreground">Movies Information</CardTitle>
-                    </CollapsibleCardHeader>
-                    <CollapsibleCardContent className="space-y-4">
-                      {(() => {
-                        const movieGenres =
-                          Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                            ? (note.genres as string[])
-                            : movieFavoriteGenres;
-                        const serviceOptions = CATEGORY_SERVICES.movies || ['Other'];
-                        const servicesList =
-                          Array.isArray(note.services) && (note.services as string[]).length > 0
-                            ? (note.services as string[])
-                            : [];
-                        return (
-                          <>
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Favorite Streaming / Watching Platforms
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {serviceOptions.map(service => {
-                                  const active = servicesList.includes(service);
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={service}
-                                      onClick={() =>
-                                        onCategoryListToggle('movies', 'services', service)
-                                      }
-                                      className={`rounded-full border px-3 py-1 text-xs transition ${
-                                        active
-                                          ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
-                                          : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
-                                      }`}
-                                    >
-                                      {service}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                              {servicesList.includes('Other') && (
-                                <div className="mt-3">
-                                  <Input
-                                    label="Other service"
-                                    value={(note.service_other as string) || ''}
-                                    onChange={e =>
-                                      onCategoryFieldChange(
-                                        'movies',
-                                        'service_other',
-                                        e.target.value,
-                                      )
+                  <div className="space-y-4">
+                    {(() => {
+                      const movieGenres =
+                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
+                          ? (note.genres as string[])
+                          : [];
+                      const serviceOptions = CATEGORY_SERVICES.movies || ['Other'];
+                      const servicesList =
+                        Array.isArray(note.services) && (note.services as string[]).length > 0
+                          ? (note.services as string[])
+                          : [];
+                      return (
+                        <>
+                          {renderReadonlyGenres('Favorite Movie Genres', movieGenres)}
+
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-foreground">
+                              Favorite Streaming / Watching Platforms
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {serviceOptions.map(service => {
+                                const active = servicesList.includes(service);
+                                return (
+                                  <Button
+                                    type="button"
+                                    key={service}
+                                    onClick={() =>
+                                      onCategoryListToggle('movies', 'services', service)
                                     }
-                                    placeholder="e.g. local cinema app"
-                                  />
-                                </div>
-                              )}
+                                    className={`rounded-full border px-3 py-1 text-xs transition ${
+                                      active
+                                        ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                        : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
+                                    }`}
+                                  >
+                                    {service}
+                                  </Button>
+                                );
+                              })}
                             </div>
-
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Favorite Movie Genres
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {MOVIE_GENRES.map(genre => {
-                                  const active = movieGenres.includes(genre);
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={genre}
-                                      onClick={() => onCategoryGenreToggle('movies', genre)}
-                                      className={`rounded-full border px-3 py-1 text-xs transition ${
-                                        active
-                                          ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
-                                          : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
-                                      }`}
-                                    >
-                                      {genre}
-                                    </Button>
-                                  );
-                                })}
+                            {servicesList.includes('Other') && (
+                              <div className="mt-3">
+                                <Input
+                                  label="Other service"
+                                  value={(note.service_other as string) || ''}
+                                  onChange={e =>
+                                    onCategoryFieldChange('movies', 'service_other', e.target.value)
+                                  }
+                                  placeholder="e.g. local cinema app"
+                                />
                               </div>
-                            </div>
+                            )}
+                          </div>
 
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Preferred Watching Style
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {MOVIE_STYLES.map(style => {
-                                  const active = note.style === style;
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={style}
-                                      onClick={() =>
-                                        onCategoryFieldChange('movies', 'style', String(style))
-                                      }
-                                      className={`rounded-full border px-3 py-1 text-xs transition ${
-                                        active
-                                          ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
-                                          : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
-                                      }`}
-                                    >
-                                      {style}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-foreground">
+                              Preferred Watching Style
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {MOVIE_STYLES.map(style => {
+                                const active = note.style === style;
+                                return (
+                                  <Button
+                                    type="button"
+                                    key={style}
+                                    onClick={() =>
+                                      onCategoryFieldChange('movies', 'style', String(style))
+                                    }
+                                    className={`rounded-full border px-3 py-1 text-xs transition ${
+                                      active
+                                        ? `bg-primary/14 dark:bg-primary/22 border-primary/35 text-primary dark:border-primary/55 dark:text-[#8ec5ff]`
+                                        : `hover:bg-primary/8 border-border bg-card text-muted-foreground hover:border-primary/35`
+                                    }`}
+                                  >
+                                    {style}
+                                  </Button>
+                                );
+                              })}
                             </div>
-
-                            <Input
-                              label="Watching Movies Since (Year)"
-                              type="number"
-                              value={(note.since as string | number | undefined) || ''}
-                              onChange={e =>
-                                onCategoryFieldChange('movies', 'since', e.target.value)
-                              }
-                              placeholder="e.g. 2008"
-                              min="1970"
-                              max={new Date().getFullYear()}
-                            />
-
-                            <div className="space-y-1.5">
-                              <label className="text-sm font-medium text-foreground">
-                                Favorite Actors / Directors
-                              </label>
-                              <Textarea
-                                value={(note.people as string) || ''}
-                                onChange={e =>
-                                  onCategoryFieldChange('movies', 'people', e.target.value)
-                                }
-                                placeholder="Favorite actors or directors that inspire you"
-                                rows={3}
-                              />
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </CollapsibleCardContent>
-                  </CollapsibleCard>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                 )}
 
                 {category === 'tv' && (
-                  <CollapsibleCard className="">
-                    <CollapsibleCardHeader>
-                      <CardTitle className="text-foreground">TV Series Information</CardTitle>
-                    </CollapsibleCardHeader>
-                    <CollapsibleCardContent className="space-y-4">
-                      {(() => {
-                        const tvGenres =
-                          Array.isArray(note.genres) && (note.genres as string[]).length > 0
-                            ? (note.genres as string[])
-                            : movieFavoriteGenres;
-                        const serviceOptions = CATEGORY_SERVICES.tv || ['Other'];
-                        const services =
-                          (note.services as string[] | undefined) && Array.isArray(note.services)
-                            ? (note.services as string[])
-                            : [];
-                        return (
-                          <>
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Favorite Streaming Platforms
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {serviceOptions.map(service => {
-                                  const active = services.includes(service);
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={service}
-                                      onClick={() =>
-                                        onCategoryListToggle('tv', 'services', service)
-                                      }
-                                      className={chipClass(active)}
-                                    >
-                                      {service}
-                                    </Button>
-                                  );
-                                })}
+                  <div className="space-y-4">
+                    {(() => {
+                      const tvGenres =
+                        Array.isArray(note.genres) && (note.genres as string[]).length > 0
+                          ? (note.genres as string[])
+                          : [];
+                      const serviceOptions = CATEGORY_SERVICES.tv || ['Other'];
+                      const services =
+                        (note.services as string[] | undefined) && Array.isArray(note.services)
+                          ? (note.services as string[])
+                          : [];
+                      return (
+                        <>
+                          {renderReadonlyGenres('Favorite TV Genres', tvGenres)}
+
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-foreground">
+                              Favorite Streaming Platforms
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {serviceOptions.map(service => {
+                                const active = services.includes(service);
+                                return (
+                                  <Button
+                                    type="button"
+                                    key={service}
+                                    onClick={() => onCategoryListToggle('tv', 'services', service)}
+                                    className={chipClass(active)}
+                                  >
+                                    {service}
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                            {services.includes('Other') && (
+                              <div className="mt-3">
+                                <Input
+                                  label="Other service"
+                                  value={(note.service_other as string) || ''}
+                                  onChange={e =>
+                                    onCategoryFieldChange('tv', 'service_other', e.target.value)
+                                  }
+                                  placeholder="e.g. Cosmote TV"
+                                />
                               </div>
-                              {services.includes('Other') && (
-                                <div className="mt-3">
-                                  <Input
-                                    label="Other service"
-                                    value={(note.service_other as string) || ''}
-                                    onChange={e =>
-                                      onCategoryFieldChange('tv', 'service_other', e.target.value)
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-foreground">
+                              Preferred Watching Style
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {TV_STYLES.map(style => {
+                                const active = note.style === style;
+                                return (
+                                  <Button
+                                    type="button"
+                                    key={style}
+                                    onClick={() =>
+                                      onCategoryFieldChange('tv', 'style', String(style))
                                     }
-                                    placeholder="e.g. Cosmote TV"
-                                  />
-                                </div>
-                              )}
+                                    className={chipClass(active)}
+                                  >
+                                    {style}
+                                  </Button>
+                                );
+                              })}
                             </div>
-
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Favorite TV Genres
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {TV_GENRES.map(genre => {
-                                  const active = tvGenres.includes(genre);
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={genre}
-                                      onClick={() => onCategoryGenreToggle('tv', genre)}
-                                      className={chipClass(active)}
-                                    >
-                                      {genre}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="mb-2 block text-sm font-medium text-foreground">
-                                Preferred Watching Style
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {TV_STYLES.map(style => {
-                                  const active = note.style === style;
-                                  return (
-                                    <Button
-                                      type="button"
-                                      key={style}
-                                      onClick={() =>
-                                        onCategoryFieldChange('tv', 'style', String(style))
-                                      }
-                                      className={chipClass(active)}
-                                    >
-                                      {style}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            <Input
-                              label="Watching Since (Year)"
-                              type="number"
-                              value={(note.since as string | number | undefined) || ''}
-                              onChange={e => onCategoryFieldChange('tv', 'since', e.target.value)}
-                              placeholder="e.g. 2010"
-                              min="1970"
-                              max={new Date().getFullYear()}
-                            />
-
-                            <div className="space-y-1.5">
-                              <label className="text-sm font-medium text-foreground">
-                                Favorite Actors / Directors
-                              </label>
-                              <Textarea
-                                value={(note.people as string) || ''}
-                                onChange={e =>
-                                  onCategoryFieldChange('tv', 'people', e.target.value)
-                                }
-                                placeholder="Favorite actors/directors or extra notes."
-                                rows={3}
-                              />
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </CollapsibleCardContent>
-                  </CollapsibleCard>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                 )}
 
                 {category === 'coding' && (
@@ -946,28 +685,15 @@ export function ProfileCategoryTabs({
                               </div>
                             </div>
 
-                            <div className="grid gap-4 md:grid-cols-2">
-                              <Input
-                                label="Coding Since (Year)"
-                                type="number"
-                                value={(note.since as string) || ''}
-                                onChange={e =>
-                                  onCategoryFieldChange('coding', 'since', e.target.value)
-                                }
-                                placeholder="2012"
-                                min="1970"
-                                max={new Date().getFullYear()}
-                              />
-                              <Input
-                                label="Tools / Stack"
-                                type="text"
-                                value={(note.tools as string) || ''}
-                                onChange={e =>
-                                  onCategoryFieldChange('coding', 'tools', e.target.value)
-                                }
-                                placeholder="VS Code, Git, React..."
-                              />
-                            </div>
+                            <Input
+                              label="Tools / Stack"
+                              type="text"
+                              value={(note.tools as string) || ''}
+                              onChange={e =>
+                                onCategoryFieldChange('coding', 'tools', e.target.value)
+                              }
+                              placeholder="VS Code, Git, React..."
+                            />
                           </>
                         );
                       })()}
@@ -991,11 +717,19 @@ export function ProfileCategoryTabs({
                           {};
                         const getPetEntryValue = (type: string, key: string) => {
                           const entry = petEntries[type] || {};
-                          if (entry[key]) {return entry[key];}
+                          if (entry[key]) {
+                            return entry[key];
+                          }
                           if (type === String(note.type)) {
-                            if (key === 'name') {return String(note.name || '');}
-                            if (key === 'breed') {return String(note.breed || '');}
-                            if (key === 'since') {return String(note.since || '');}
+                            if (key === 'name') {
+                              return String(note.name || '');
+                            }
+                            if (key === 'breed') {
+                              return String(note.breed || '');
+                            }
+                            if (key === 'since') {
+                              return String(note.since || '');
+                            }
                           }
                           return '';
                         };
@@ -1037,7 +771,7 @@ export function ProfileCategoryTabs({
                                     <p className="text-sm font-semibold text-foreground">
                                       {String(type)}
                                     </p>
-                                    <div className="grid gap-4 md:grid-cols-3">
+                                    <div className="grid gap-4 md:grid-cols-2">
                                       <Input
                                         label={`Name (${type})`}
                                         type="text"
@@ -1055,17 +789,6 @@ export function ProfileCategoryTabs({
                                           onPetEntryField(type, 'breed', e.target.value)
                                         }
                                         placeholder="e.g. Labrador"
-                                      />
-                                      <Input
-                                        label="Since (Year)"
-                                        type="number"
-                                        value={getPetEntryValue(type, 'since')}
-                                        onChange={e =>
-                                          onPetEntryField(type, 'since', e.target.value)
-                                        }
-                                        placeholder="2019"
-                                        min="1970"
-                                        max={new Date().getFullYear()}
                                       />
                                     </div>
                                   </div>
@@ -1117,17 +840,6 @@ export function ProfileCategoryTabs({
                                 placeholder="3"
                                 min="0"
                                 max="50"
-                              />
-                              <Input
-                                label="Vaping Since (Year)"
-                                type="number"
-                                value={(note.since as string) || ''}
-                                onChange={e =>
-                                  onCategoryFieldChange('vape', 'since', e.target.value)
-                                }
-                                placeholder="2018"
-                                min="1970"
-                                max={new Date().getFullYear()}
                               />
                             </div>
 

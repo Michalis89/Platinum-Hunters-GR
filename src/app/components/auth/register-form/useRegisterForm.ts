@@ -55,7 +55,9 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
   const passwordStrength = formData.password ? getPasswordStrength(formData.password) : null;
 
   const clearFieldError = (fieldName: keyof RegisterFormState) => {
-    if (!errors[fieldName]) {return;}
+    if (!errors[fieldName]) {
+      return;
+    }
     setErrors(prev => {
       const next = { ...prev };
       delete next[fieldName];
@@ -77,13 +79,19 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
     const nextErrors: Record<string, string> = {};
 
     const emailVal = validateEmail(formData.email);
-    if (!emailVal.isValid) {nextErrors.email = emailVal.error || 'Invalid email';}
+    if (!emailVal.isValid) {
+      nextErrors.email = emailVal.error || 'Invalid email';
+    }
 
     const usernameVal = validateUsername(formData.username);
-    if (!usernameVal.isValid) {nextErrors.username = usernameVal.error || 'Invalid username';}
+    if (!usernameVal.isValid) {
+      nextErrors.username = usernameVal.error || 'Invalid username';
+    }
 
     const passwordVal = validatePassword(formData.password);
-    if (!passwordVal.isValid) {nextErrors.password = passwordVal.error || 'Invalid password';}
+    if (!passwordVal.isValid) {
+      nextErrors.password = passwordVal.error || 'Invalid password';
+    }
 
     const passwordConfirmVal = validatePasswordConfirm(
       formData.password,
@@ -106,7 +114,9 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
     setAlert(null);
     setIsRedirecting(false);
 
-    if (!validateForm()) {return;}
+    if (!validateForm()) {
+      return;
+    }
 
     if (!isCaptchaDisabled && !captchaToken) {
       setCaptchaError('Complete CAPTCHA to continue.');

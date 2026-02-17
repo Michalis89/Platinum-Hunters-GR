@@ -37,7 +37,9 @@ limit 20;
   const normalized = (Array.isArray(response) ? response : [])
     .map(game => {
       const name = typeof game.name === 'string' ? game.name.trim() : '';
-      if (!name) {return null;}
+      if (!name) {
+        return null;
+      }
       const date = unixToDate(game.first_release_date ?? null);
       const imageId = game.cover?.image_id ?? null;
 

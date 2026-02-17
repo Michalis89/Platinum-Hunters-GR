@@ -99,13 +99,27 @@ export async function handleLibraryPatch(
 
     // Build update data
     const updateData: Database['public']['Tables']['user_media_entries']['Update'] = {};
-    if (body.status !== undefined) {updateData.status = body.status;}
-    if (body.is_favorite !== undefined) {updateData.is_favorite = body.is_favorite;}
-    if (body.selected_platform !== undefined) {updateData.selected_platform = body.selected_platform;}
-    if (body.priority !== undefined) {updateData.priority = body.priority;}
-    if (body.score !== undefined) {updateData.score = body.score;}
-    if (body.progress !== undefined) {updateData.progress = body.progress;}
-    if (body.notes !== undefined) {updateData.notes = body.notes;}
+    if (body.status !== undefined) {
+      updateData.status = body.status;
+    }
+    if (body.is_favorite !== undefined) {
+      updateData.is_favorite = body.is_favorite;
+    }
+    if (body.selected_platform !== undefined) {
+      updateData.selected_platform = body.selected_platform;
+    }
+    if (body.priority !== undefined) {
+      updateData.priority = body.priority;
+    }
+    if (body.score !== undefined) {
+      updateData.score = body.score;
+    }
+    if (body.progress !== undefined) {
+      updateData.progress = body.progress;
+    }
+    if (body.notes !== undefined) {
+      updateData.notes = body.notes;
+    }
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: NO_UPDATES_PROVIDED }, { status: 400 });

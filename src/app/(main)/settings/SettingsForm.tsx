@@ -27,8 +27,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import type {
-  ThemeSetting} from '@/lib/settings/types';
+import type { ThemeSetting } from '@/lib/settings/types';
 import {
   USER_SETTINGS_DEFAULTS,
   type UserSettingsData,

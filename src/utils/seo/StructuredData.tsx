@@ -3,7 +3,9 @@ interface Props {
 }
 
 export default function StructuredData({ data }: Props) {
-  if (!data) {return null;}
+  if (!data) {
+    return null;
+  }
 
   const jsonLd = JSON.stringify(data).replace(/</g, '\\u003c');
 

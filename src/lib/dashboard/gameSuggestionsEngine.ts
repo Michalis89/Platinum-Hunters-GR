@@ -117,7 +117,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   entries.forEach(entry => {
     const media = entry.media_items;
-    if (!media || !Array.isArray(media.genres)) {return;}
+    if (!media || !Array.isArray(media.genres)) {
+      return;
+    }
     const hours = Math.max(0, entry.progress ?? 0);
     const status = entry.status ?? 'planned';
     const rawScoreValue =
@@ -131,12 +133,16 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const entryValue = hours * statusWeight * (0.3 + 1.2 * scoreNorm) * favBoost * dropMultiplier;
 
     const validGenres = media.genres.map(genre => genre?.trim()).filter(Boolean) as string[];
-    if (!validGenres.length) {return;}
+    if (!validGenres.length) {
+      return;
+    }
     const genreShare = 1 / validGenres.length;
 
     validGenres.forEach(genre => {
       const normalized = normalizeText(genre);
-      if (!normalized) {return;}
+      if (!normalized) {
+        return;
+      }
 
       // REQUIREMENT A: genreHours must be weighted by statusWeight
       const hoursSoFar = genreHours.get(normalized) ?? 0;
@@ -281,10 +287,7 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
   const eligibleGenresSet = new Set(genreRanking.map(([genre]) => genre));
 
   // Debug: Log tracked titles
-  dbg(
-    `Tracked titles (${trackedTitles.size}):`,
-    Array.from(trackedTitles).slice(0, 20).join(', '),
-  );
+  dbg(`Tracked titles (${trackedTitles.size}):`, Array.from(trackedTitles).slice(0, 20).join(', '));
 
   if (!genreRanking.length) {
     return Array.from({ length: 4 }).map((_, index) => ({
@@ -320,7 +323,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     }
 
     const title = normalizeText(game.name);
-    if (!title) {return;}
+    if (!title) {
+      return;
+    }
 
     // Reject games with similar titles already in library (e.g., "The Walking Dead: Season 1" when user has "The Walking Dead")
     if (trackedTitles.has(title)) {
@@ -355,7 +360,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const candidateGenres = (game.genres ?? [])
       .map(igdbGenre => normalizeText(igdbGenre?.name))
       .filter(Boolean);
-    if (!candidateGenres.length) {return;}
+    if (!candidateGenres.length) {
+      return;
+    }
 
     // Use themes/modes as extra descriptors for filtering
     const candidateTags = [...(game.themes ?? []), ...(game.game_modes ?? [])]
@@ -368,7 +375,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
     // REQUIREMENT E: Only consider eligible genres for scoring
     const matchedEligible = candidateGenres.filter(genre => eligibleGenresSet.has(genre));
-    if (!matchedEligible.length) {return;}
+    if (!matchedEligible.length) {
+      return;
+    }
 
     // STRICT FILTER 1: Reject games with heavily dropped genres/tags (dropRate > 45%)
     const heavilyDroppedDescriptors = allGameDescriptors.filter(
@@ -411,7 +420,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
       (sum, genre) => sum + (finalGenreScore.get(genre) ?? 0),
       0,
     );
-    if (genreFit <= 0) {return;}
+    if (genreFit <= 0) {
+      return;
+    }
 
     // CUMULATIVE PENALTY: Apply penalty for each genre/tag with dropRate > 30%
     let cumulativePenalty = 0;
@@ -445,10 +456,14 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const primaryGenre = matchedEligible.sort(
       (a, b) => (finalGenreScore.get(b) ?? 0) - (finalGenreScore.get(a) ?? 0),
     )[0];
-    if (!primaryGenre) {return;}
+    if (!primaryGenre) {
+      return;
+    }
 
     const metadata = genreMetadata.get(primaryGenre);
-    if (!metadata) {return;}
+    if (!metadata) {
+      return;
+    }
 
     // REQUIREMENT F: Use goodHours for explanation (not total hours)
     const hoursSpent = Math.round(metadata.goodHours);
@@ -457,7 +472,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
     const avgScore = metadata.avgScore;
 
     // REQUIREMENT F: Only reference hours if goodHours > 0
-    if (hoursSpent === 0) {return;}
+    if (hoursSpent === 0) {
+      return;
+    }
 
     const reason = `You logged ${hoursSpent}h in ${primaryGenre} with avg score ${avgScore.toFixed(
       1,
@@ -500,7 +517,9 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
   const genreUsage = new Map<string, number>();
 
   for (const candidate of sortedCandidates) {
-    if (suggestions.length >= 4) {break;}
+    if (suggestions.length >= 4) {
+      break;
+    }
 
     const usage = genreUsage.get(candidate.primaryGenre) ?? 0;
     const diversityPenalty = usage >= 2 ? 0.15 : 0;
@@ -555,5 +574,3 @@ export async function buildGameSuggestions({ supabase, userId }: EngineParams) {
 
   return suggestions.slice(0, 4);
 }
-
-

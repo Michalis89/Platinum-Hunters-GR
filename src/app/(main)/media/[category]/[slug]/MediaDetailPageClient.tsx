@@ -84,11 +84,19 @@ const igdbImageUrl = (imageId: string, size: 't_1080p' | 't_screenshot_big' = 't
   `https://images.igdb.com/igdb/image/upload/${size}/${imageId}.jpg`;
 
 const getStatusLabel = (category: MediaCategory, entry: MediaEntryState | null) => {
-  if (!entry) {return 'Not in library';}
+  if (!entry) {
+    return 'Not in library';
+  }
   const config = CATEGORY_CONFIG[category];
-  if (entry.status === 'planned') {return config.plannedLabel;}
-  if (entry.status === 'current') {return config.currentLabel;}
-  if (entry.status === 'completed') {return config.completedLabel;}
+  if (entry.status === 'planned') {
+    return config.plannedLabel;
+  }
+  if (entry.status === 'current') {
+    return config.currentLabel;
+  }
+  if (entry.status === 'completed') {
+    return config.completedLabel;
+  }
   return config.droppedLabel;
 };
 
@@ -97,9 +105,13 @@ const getProgressDisplay = (
   entry: MediaEntryState | null,
   media: MediaItem,
 ): string => {
-  if (!entry || typeof entry.progress !== 'number') {return '-';}
+  if (!entry || typeof entry.progress !== 'number') {
+    return '-';
+  }
 
-  if (category === 'games') {return `${entry.progress}h played`;}
+  if (category === 'games') {
+    return `${entry.progress}h played`;
+  }
   if (category === 'books') {
     const total = media.page_count ?? null;
     return total ? `${entry.progress} / ${total} pages` : `${entry.progress} pages`;
@@ -175,7 +187,9 @@ function ScoreCluster({
       : null,
   ].filter(Boolean) as Array<{ label: string; value: string; icon: string }>;
 
-  if (scoreItems.length === 0) {return null;}
+  if (scoreItems.length === 0) {
+    return null;
+  }
 
   return (
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -198,19 +212,27 @@ function MetadataGrid({ category, mediaItem }: { category: MediaCategory; mediaI
   const fields: Array<{ label: string; value: string }> = [];
 
   if (category === 'games') {
-    if (mediaItem.platforms?.length)
-      {fields.push({ label: 'Platforms', value: mediaItem.platforms.join(', ') });}
-    if (mediaItem.developer) {fields.push({ label: 'Developer', value: mediaItem.developer });}
-    if (mediaItem.publisher) {fields.push({ label: 'Publisher', value: mediaItem.publisher });}
-    if (mediaItem.esrb_rating) {fields.push({ label: 'ESRB', value: mediaItem.esrb_rating });}
+    if (mediaItem.platforms?.length) {
+      fields.push({ label: 'Platforms', value: mediaItem.platforms.join(', ') });
+    }
+    if (mediaItem.developer) {
+      fields.push({ label: 'Developer', value: mediaItem.developer });
+    }
+    if (mediaItem.publisher) {
+      fields.push({ label: 'Publisher', value: mediaItem.publisher });
+    }
+    if (mediaItem.esrb_rating) {
+      fields.push({ label: 'ESRB', value: mediaItem.esrb_rating });
+    }
     if (mediaItem.release_date || mediaItem.first_release_date) {
       fields.push({
         label: 'Release date',
         value: mediaItem.release_date || mediaItem.first_release_date || '-',
       });
     }
-    if (mediaItem.igdb_game_modes?.length)
-      {fields.push({ label: 'Game modes', value: mediaItem.igdb_game_modes.join(', ') });}
+    if (mediaItem.igdb_game_modes?.length) {
+      fields.push({ label: 'Game modes', value: mediaItem.igdb_game_modes.join(', ') });
+    }
     if (mediaItem.igdb_player_perspectives?.length) {
       fields.push({
         label: 'Player perspective',
@@ -224,44 +246,66 @@ function MetadataGrid({ category, mediaItem }: { category: MediaCategory; mediaI
         value: `${mediaItem.number_of_episodes ?? mediaItem.episodes}`,
       });
     }
-    if (mediaItem.number_of_seasons)
-      {fields.push({ label: 'Seasons', value: `${mediaItem.number_of_seasons}` });}
+    if (mediaItem.number_of_seasons) {
+      fields.push({ label: 'Seasons', value: `${mediaItem.number_of_seasons}` });
+    }
     if (mediaItem.start_date || mediaItem.first_air_date) {
       fields.push({
         label: 'Air date',
         value: mediaItem.start_date || mediaItem.first_air_date || '-',
       });
     }
-    if (mediaItem.status) {fields.push({ label: 'Status', value: mediaItem.status });}
-    if (mediaItem.duration || mediaItem.runtime)
-      {fields.push({ label: 'Duration', value: `${mediaItem.duration ?? mediaItem.runtime} min` });}
+    if (mediaItem.status) {
+      fields.push({ label: 'Status', value: mediaItem.status });
+    }
+    if (mediaItem.duration || mediaItem.runtime) {
+      fields.push({ label: 'Duration', value: `${mediaItem.duration ?? mediaItem.runtime} min` });
+    }
   } else if (category === 'manga') {
-    if (mediaItem.volumes) {fields.push({ label: 'Volumes', value: `${mediaItem.volumes}` });}
-    if (mediaItem.chapters) {fields.push({ label: 'Chapters', value: `${mediaItem.chapters}` });}
-    if (mediaItem.release_date || mediaItem.start_date)
-      {fields.push({
+    if (mediaItem.volumes) {
+      fields.push({ label: 'Volumes', value: `${mediaItem.volumes}` });
+    }
+    if (mediaItem.chapters) {
+      fields.push({ label: 'Chapters', value: `${mediaItem.chapters}` });
+    }
+    if (mediaItem.release_date || mediaItem.start_date) {
+      fields.push({
         label: 'Release date',
         value: mediaItem.release_date || mediaItem.start_date || '-',
-      });}
-    if (mediaItem.status) {fields.push({ label: 'Status', value: mediaItem.status });}
+      });
+    }
+    if (mediaItem.status) {
+      fields.push({ label: 'Status', value: mediaItem.status });
+    }
   } else if (category === 'books') {
-    if (mediaItem.page_count)
-      {fields.push({ label: 'Page count', value: `${mediaItem.page_count}` });}
-    if (mediaItem.publisher) {fields.push({ label: 'Publisher', value: mediaItem.publisher });}
-    if (mediaItem.release_date)
-      {fields.push({ label: 'Release date', value: mediaItem.release_date });}
+    if (mediaItem.page_count) {
+      fields.push({ label: 'Page count', value: `${mediaItem.page_count}` });
+    }
+    if (mediaItem.publisher) {
+      fields.push({ label: 'Publisher', value: mediaItem.publisher });
+    }
+    if (mediaItem.release_date) {
+      fields.push({ label: 'Release date', value: mediaItem.release_date });
+    }
   } else if (category === 'movies') {
-    if (mediaItem.runtime) {fields.push({ label: 'Runtime', value: `${mediaItem.runtime} min` });}
-    if (mediaItem.release_date)
-      {fields.push({ label: 'Release date', value: mediaItem.release_date });}
-    if (mediaItem.status) {fields.push({ label: 'Status', value: mediaItem.status });}
+    if (mediaItem.runtime) {
+      fields.push({ label: 'Runtime', value: `${mediaItem.runtime} min` });
+    }
+    if (mediaItem.release_date) {
+      fields.push({ label: 'Release date', value: mediaItem.release_date });
+    }
+    if (mediaItem.status) {
+      fields.push({ label: 'Status', value: mediaItem.status });
+    }
   }
 
   if (mediaItem.official_website) {
     fields.push({ label: 'Website', value: mediaItem.official_website });
   }
 
-  if (fields.length === 0) {return null;}
+  if (fields.length === 0) {
+    return null;
+  }
 
   return (
     <section className="rounded-2xl border border-border/70 bg-card/60 p-5">
@@ -298,7 +342,9 @@ function MetadataGrid({ category, mediaItem }: { category: MediaCategory; mediaI
 function GallerySection({ title, images }: { title: string; images: GalleryImage[] }) {
   const [activeImage, setActiveImage] = useState<GalleryImage | null>(null);
 
-  if (images.length === 0) {return null;}
+  if (images.length === 0) {
+    return null;
+  }
 
   return (
     <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 p-5">
@@ -397,7 +443,9 @@ export default function MediaDetailPageClient({
     overviewText.length > 280 ? `${overviewText.slice(0, 280).trim()}...` : overviewText;
 
   const refreshEntry = async () => {
-    if (!mediaItem.id) {return;}
+    if (!mediaItem.id) {
+      return;
+    }
 
     setEntryLoading(true);
     setEntryError(null);
@@ -441,7 +489,9 @@ export default function MediaDetailPageClient({
   };
 
   const handleSaveEntry = async (editState: EditState) => {
-    if (!apiBase) {return;}
+    if (!apiBase) {
+      return;
+    }
 
     setDialogEntry(null);
     setActionLoading(true);
@@ -552,7 +602,9 @@ export default function MediaDetailPageClient({
   };
 
   const handleFavoriteToggle = async () => {
-    if (!apiBase) {return;}
+    if (!apiBase) {
+      return;
+    }
 
     if (!hasEntry) {
       openDialog({ isFavorite: true });

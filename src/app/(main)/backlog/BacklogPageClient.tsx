@@ -121,7 +121,9 @@ function BacklogPageContent() {
   }, [category, hasMounted, user, malParam, router, searchParams]);
 
   // Check if user has access to this category
-  const userCategories = (user?.categories as string[] | undefined) ?? [];
+  const userCategories = user?.category_profile
+    ? Object.keys(user.category_profile).filter(key => key && typeof key === 'string')
+    : [];
   const hasAccessToCategory = userCategories.length === 0 || userCategories.includes(category);
 
   // Show skeleton before client mount (prevents hydration mismatch) or while user loads

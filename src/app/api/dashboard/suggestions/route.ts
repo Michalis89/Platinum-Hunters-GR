@@ -109,10 +109,18 @@ async function GETHandler() {
 
     entries.forEach(entry => {
       const status = entry.status;
-      if (status === 'completed') {counts.completed++;}
-      if (status === 'dropped') {counts.dropped++;}
-      if (status === 'current') {counts.current++;}
-      if (status === 'planned') {counts.planned++;}
+      if (status === 'completed') {
+        counts.completed++;
+      }
+      if (status === 'dropped') {
+        counts.dropped++;
+      }
+      if (status === 'current') {
+        counts.current++;
+      }
+      if (status === 'planned') {
+        counts.planned++;
+      }
 
       const updatedAt = entry.updated_at ? new Date(entry.updated_at) : null;
       const createdAt = entry.created_at ? new Date(entry.created_at) : null;
@@ -130,8 +138,12 @@ async function GETHandler() {
         const platform = entry.selected_platform?.trim();
         if (platform) {
           const stats = platformStats.get(platform) ?? { completed: 0, dropped: 0, total: 0 };
-          if (status === 'completed') {stats.completed += 1;}
-          if (status === 'dropped') {stats.dropped += 1;}
+          if (status === 'completed') {
+            stats.completed += 1;
+          }
+          if (status === 'dropped') {
+            stats.dropped += 1;
+          }
           stats.total = stats.completed + stats.dropped;
           platformStats.set(platform, stats);
         }
@@ -162,9 +174,13 @@ async function GETHandler() {
       if (status === 'completed') {
         const genres = entry.media_items?.genres ?? [];
         genres.forEach(genre => {
-          if (!genre) {return;}
+          if (!genre) {
+            return;
+          }
           const normalized = genre.trim();
-          if (!normalized) {return;}
+          if (!normalized) {
+            return;
+          }
           const genreStat = genreStats.get(normalized) ?? {
             completed: 0,
             scoreSum: 0,

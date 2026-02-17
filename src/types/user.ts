@@ -1,4 +1,5 @@
 import type { Database } from '@/lib/supabase/database.types';
+import type { CategoryProfiles } from '@/lib/validation/profile';
 
 export type UserRole = 'user' | 'author' | 'reviewer' | 'moderator' | 'admin' | 'owner';
 export type AccountStatus = 'active' | 'suspended' | 'banned' | 'deleted';
@@ -31,7 +32,7 @@ export interface SocialLinks {
   reddit?: string;
   website?: string;
   portfolio?: string;
-  location_city?: string;
+  // location_city moved to users.location_city (dedicated column)
 }
 
 type UserRow = Database['public']['Tables']['users']['Row'];
@@ -46,6 +47,9 @@ export type User = Omit<
   favorite_genres: string[] | null;
   categories: string[] | null;
   roles: UserRole[] | null;
+  // New fields from refactor (returned by /api/me)
+  location_city?: string | null;
+  category_profile?: CategoryProfiles | null;
 };
 
 export interface PublicUserProfile {

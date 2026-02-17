@@ -27,7 +27,9 @@ export function normalizeTitle(value?: string | null): string {
  * Use this when STORING titles in the database.
  */
 export function cleanTitleForStorage(value?: string | null): string {
-  if (!value) {return '';}
+  if (!value) {
+    return '';
+  }
 
   // Remove all trademark, copyright, and decorative symbols
   return value
@@ -151,8 +153,12 @@ export function getSteamHours(game: SteamOwnedGame): number | null {
  * Simple implementation for fuzzy matching game titles
  */
 function calculateSimilarity(str1: string, str2: string): number {
-  if (str1 === str2) {return 1;}
-  if (!str1 || !str2) {return 0;}
+  if (str1 === str2) {
+    return 1;
+  }
+  if (!str1 || !str2) {
+    return 0;
+  }
 
   const len1 = str1.length;
   const len2 = str2.length;
@@ -397,4 +403,3 @@ export function buildGameMetadataPatch(game: SteamGameWithAchievements, igdbGame
     publisher: payload.publisher,
   } satisfies Database['public']['Tables']['media_items']['Update'];
 }
-

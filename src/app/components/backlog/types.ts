@@ -131,18 +131,34 @@ export const CATEGORY_CONFIG: Record<MediaCategory, CategoryConfig> = {
 };
 
 export const getApiBase = (category: MediaCategory): string | null => {
-  if (category === 'anime' || category === 'manga') {return '/api/anime';}
-  if (category === 'movies' || category === 'tv') {return '/api/movies';}
-  if (category === 'books') {return '/api/books';}
-  if (category === 'games') {return '/api/games';}
+  if (category === 'anime' || category === 'manga') {
+    return '/api/anime';
+  }
+  if (category === 'movies' || category === 'tv') {
+    return '/api/movies';
+  }
+  if (category === 'books') {
+    return '/api/books';
+  }
+  if (category === 'games') {
+    return '/api/games';
+  }
   return null;
 };
 
 export const getProgressLabel = (category: MediaCategory): string => {
-  if (category === 'manga') {return 'Volumes';}
-  if (category === 'movies') {return 'Minutes';}
-  if (category === 'books') {return 'Pages';}
-  if (category === 'games') {return 'Hours';}
+  if (category === 'manga') {
+    return 'Volumes';
+  }
+  if (category === 'movies') {
+    return 'Minutes';
+  }
+  if (category === 'books') {
+    return 'Pages';
+  }
+  if (category === 'games') {
+    return 'Hours';
+  }
   return 'Episodes';
 };
 

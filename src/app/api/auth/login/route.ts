@@ -187,9 +187,18 @@ async function POSTHandler(req: Request) {
     }
 
     // DETERMINE REDIRECT URL based on profile completeness
-    const hasCategories =
-      resolvedUserProfile.categories && resolvedUserProfile.categories.length > 0;
-    const redirectUrl = hasCategories ? '/dashboard' : '/profile/edit';
+    // Fetch category profile to check if user has data
+    const { data: categoryProfile } = await authedSupabase
+      .from('user_category_profiles')
+      .select('profiles')
+      .eq('user_id', authData.user.id)
+      .maybeSingle();
+
+    // User has data if they have at least one category in their profile
+    const hasCategoryData = categoryProfile?.profiles
+      ? Object.keys(categoryProfile.profiles).length > 0
+      : false;
+    const redirectUrl = hasCategoryData ? '/dashboard' : '/profile/edit';
 
     // RETURN SUCCESS
     return ok({

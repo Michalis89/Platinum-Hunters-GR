@@ -19,22 +19,7 @@ import {
   validateUsername,
   validatePassword,
   validateFullName,
-  validateDateOfBirth,
-  validatePSNId,
-  validateBio,
 } from '@/utils/validation/auth';
-
-const ALLOWED_CATEGORIES = new Set([
-  'games',
-  'anime',
-  'manga',
-  'movies',
-  'tv',
-  'books',
-  'coding',
-  'pet',
-  'vape',
-]);
 
 async function POSTHandler(req: Request) {
   const siteUrl = resolveSiteUrl(req);
@@ -61,21 +46,7 @@ async function POSTHandler(req: Request) {
       date_of_birth,
       country,
       bio,
-      psn_id,
-      xbox_gamertag,
       steam_id,
-      nintendo_id,
-      favorite_platform,
-      favorite_genres,
-      gaming_since,
-      categories,
-      favorite_anime_genres,
-      favorite_movie_genres,
-      favorite_book_genres,
-      favorite_languages,
-      pet_types,
-      vape_device,
-      vape_flavor,
       captchaToken,
     } = body;
 
@@ -135,40 +106,8 @@ async function POSTHandler(req: Request) {
       }
     }
 
-    if (date_of_birth) {
-      const dobValidation = validateDateOfBirth(date_of_birth);
-      if (!dobValidation.isValid) {
-        return fail({ error: dobValidation.error || 'Invalid date of birth' }, 400);
-      }
-    }
-
     const safeFullName =
       typeof full_name === 'string' && full_name.trim().length > 0 ? full_name.trim() : username;
-    const normalizedCategories = Array.isArray(categories)
-      ? Array.from(
-          new Set(
-            categories
-              .map((category: unknown) =>
-                typeof category === 'string' ? category.trim().toLowerCase() : '',
-              )
-              .filter(category => category && ALLOWED_CATEGORIES.has(category)),
-          ),
-        )
-      : [];
-
-    if (psn_id) {
-      const psnValidation = validatePSNId(psn_id);
-      if (!psnValidation.isValid) {
-        return fail({ error: psnValidation.error || 'Invalid PSN ID' }, 400);
-      }
-    }
-
-    if (bio) {
-      const bioValidation = validateBio(bio);
-      if (!bioValidation.isValid) {
-        return fail({ error: bioValidation.error || 'Invalid bio' }, 400);
-      }
-    }
 
     step = 'create_supabase_admin_client';
     const supabase = createSupabaseAdminClient();
@@ -197,20 +136,6 @@ async function POSTHandler(req: Request) {
     if (existingUsername) {
       console.warn('Signup attempt with existing username', username);
       return fail({ error: 'Username is already in use.' }, 409);
-    }
-
-    if (psn_id) {
-      step = 'check_existing_psn';
-      const { data: existingPSN } = await supabase
-        .from('users')
-        .select('id')
-        .eq('psn_id', psn_id)
-        .maybeSingle();
-
-      if (existingPSN) {
-        console.warn('Signup attempt with existing PSN ID', psn_id);
-        return fail({ error: 'PSN ID is already in use.' }, 409);
-      }
     }
 
     step = 'create_auth_user';
@@ -252,24 +177,10 @@ async function POSTHandler(req: Request) {
           date_of_birth: date_of_birth || null,
           country: country || null,
           bio: bio || null,
-          psn_id: psn_id || null,
-          xbox_gamertag: xbox_gamertag || null,
           steam_id: steam_id || null,
-          nintendo_id: nintendo_id || null,
-          favorite_platform: favorite_platform || null,
-          favorite_genres: favorite_genres || null,
-          gaming_since: gaming_since || null,
-          categories: normalizedCategories,
-          favorite_anime_genres: favorite_anime_genres || null,
-          favorite_movie_genres: favorite_movie_genres || null,
-          favorite_book_genres: favorite_book_genres || null,
-          favorite_languages: favorite_languages || null,
           privacy_settings: {
             legal_acceptance: legalAcceptance,
           },
-          pet_types: pet_types || null,
-          vape_device: vape_device || null,
-          vape_flavor: vape_flavor || null,
         },
         { onConflict: 'id' },
       )

@@ -41,48 +41,65 @@ export type LocationCity = z.infer<typeof locationCitySchema>;
 // Category Profile Patch (Partial Updates)
 // =====================================================
 // Games category profile
-export const gamesProfileSchema = z.object({
-  psn_id: z.string().optional(),
-  xbox_gamertag: z.string().optional(),
-  steam_id: z.string().optional(),
-  nintendo_id: z.string().optional(),
-  favorite_platform: z.string().optional(),
-  gaming_since: z.number().nullable().optional(),
-  user_favorite_genres: z.array(z.string()).optional(),
-});
+export const gamesProfileSchema = z
+  .object({
+    psn_id: z.string().optional(),
+    xbox_gamertag: z.string().optional(),
+    steam_id: z.string().optional(),
+    nintendo_id: z.string().optional(),
+    favorite_platform: z.string().optional(),
+    gaming_since: z.number().nullable().optional(),
+    user_favorite_genres: z.array(z.string()).optional(),
+  })
+  .passthrough();
 
 // Anime/Manga category profile
-export const animeProfileSchema = z.object({
-  genres: z.array(z.string()).optional(),
-  mal_username: z.string().optional(),
-});
+export const animeProfileSchema = z
+  .object({
+    genres: z.array(z.string()).optional(),
+    mal_username: z.string().optional(),
+  })
+  .passthrough();
 
 // Movies/TV category profile
-export const moviesProfileSchema = z.object({
-  genres: z.array(z.string()).optional(),
-});
+export const moviesProfileSchema = z
+  .object({
+    genres: z.array(z.string()).optional(),
+  })
+  .passthrough();
 
 // Books category profile
-export const booksProfileSchema = z.object({
-  genres: z.array(z.string()).optional(),
-  languages: z.array(z.string()).optional(),
-});
+export const booksProfileSchema = z
+  .object({
+    genres: z.array(z.string()).optional(),
+    languages: z.array(z.string()).optional(),
+  })
+  .passthrough();
 
 // Coding category profile
-export const codingProfileSchema = z.object({
-  languages: z.array(z.string()).optional(),
-});
+export const codingProfileSchema = z
+  .object({
+    languages: z.array(z.string()).optional(),
+  })
+  .passthrough();
 
 // Pet category profile
-export const petProfileSchema = z.object({
-  entries: z.record(z.string(), z.record(z.string(), z.string())).optional(),
-});
+export const petProfileSchema = z
+  .object({
+    entries: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  })
+  .passthrough();
 
 // Vape category profile
-export const vapeProfileSchema = z.object({
-  device: z.string().optional(),
-  flavors: z.array(z.string()).optional(),
-});
+export const vapeProfileSchema = z
+  .object({
+    device: z.string().optional(),
+    flavors: z.array(z.string()).optional(),
+    nicotine: z.string().optional(),
+    since: z.union([z.string(), z.number()]).optional(),
+    notes: z.string().optional(),
+  })
+  .passthrough();
 
 // Full category profiles map
 export const categoryProfilesSchema = z.object({

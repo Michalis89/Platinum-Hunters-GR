@@ -69,14 +69,18 @@ type CountEntry = {
 };
 
 const toTimestamp = (value: string | null | undefined) => {
-  if (!value) {return 0;}
+  if (!value) {
+    return 0;
+  }
   const parsed = Date.parse(value);
   return Number.isNaN(parsed) ? 0 : parsed;
 };
 
 const compareEntryDates = (a: ContinueEntry, b: ContinueEntry) => {
   const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-  if (updatedDiff !== 0) {return updatedDiff;}
+  if (updatedDiff !== 0) {
+    return updatedDiff;
+  }
   return toTimestamp(b.created_at) - toTimestamp(a.created_at);
 };
 
@@ -92,7 +96,9 @@ const normalizeSteamCoverForContinue = (
   url: string | null | undefined,
   steamAppId: number | null | undefined,
 ) => {
-  if (!url) {return null;}
+  if (!url) {
+    return null;
+  }
 
   if (
     steamAppId &&
@@ -125,40 +131,17 @@ async function GETHandler() {
     const session = await requireAuth(supabase);
     const userId = session.user.id;
 
-    const { data: userPrefs, error: userError } = await supabase
-      .from('users')
-      .select('categories')
-      .eq('id', userId)
+    // Calculate enabled categories from user_category_profiles
+    const { data: categoryProfile } = await supabase
+      .from('user_category_profiles')
+      .select('profiles')
+      .eq('user_id', userId)
       .maybeSingle();
 
-    if (userError) {
-      throw userError;
-    }
-
-    const preferredCategories = Array.isArray(userPrefs?.categories) ? userPrefs?.categories : [];
-
-    let enabledCategories = preferredCategories.length > 0 ? preferredCategories : ([] as string[]);
-
-    if (enabledCategories.length === 0) {
-      const { data: categoryRows, error: categoryError } = await supabase
-        .from('user_media_entries')
-        .select('media_items!inner(category)')
-        .eq('user_id', userId);
-
-      if (categoryError) {
-        throw categoryError;
-      }
-
-      const categorySet = new Set<string>();
-      for (const row of (categoryRows ?? []) as { media_items: { category: string | null } }[]) {
-        const category = row.media_items?.category;
-        if (category) {
-          categorySet.add(category);
-        }
-      }
-
-      enabledCategories = Array.from(categorySet);
-    }
+    // Categories are the keys in user_category_profiles.profiles
+    const enabledCategories = categoryProfile?.profiles
+      ? Object.keys(categoryProfile.profiles).filter(key => key && typeof key === 'string')
+      : [];
 
     const normalizedCategories = normalizeEnabledCategories(enabledCategories);
     const slideCategories = normalizedCategories.filter(category =>
@@ -251,7 +234,9 @@ async function GETHandler() {
 
     const slides = Array.from(latestByCategory.values()).sort((a, b) => {
       const updatedDiff = toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
-      if (updatedDiff !== 0) {return updatedDiff;}
+      if (updatedDiff !== 0) {
+        return updatedDiff;
+      }
       return toTimestamp(b.created_at) - toTimestamp(a.created_at);
     });
 
@@ -278,9 +263,13 @@ async function GETHandler() {
 
     for (const entry of (countEntries ?? []) as CountEntry[]) {
       const category = entry.media_items?.category;
-      if (!category || !(category in countsByCategory)) {continue;}
+      if (!category || !(category in countsByCategory)) {
+        continue;
+      }
 
-      if (!entry.status) {continue;}
+      if (!entry.status) {
+        continue;
+      }
       const status = entry.status;
       countsByCategory[category].total += 1;
 

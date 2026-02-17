@@ -102,12 +102,18 @@ export default function AuthInit() {
   const redirectInFlight = useRef<string | null>(null);
 
   const redirectAfterLogout = useCallback(() => {
-    if (typeof window === 'undefined') {return;}
+    if (typeof window === 'undefined') {
+      return;
+    }
     const { pathname, search } = window.location;
-    if (!shouldRedirectToLogin(pathname)) {return;}
+    if (!shouldRedirectToLogin(pathname)) {
+      return;
+    }
     const redirectTo = `${pathname}${search}`;
     const target = getLoginUrl(redirectTo);
-    if (redirectInFlight.current === target) {return;}
+    if (redirectInFlight.current === target) {
+      return;
+    }
     redirectInFlight.current = target;
     router.replace(target);
   }, [router]);
@@ -254,16 +260,24 @@ export default function AuthInit() {
 
     // Quick check on visibility - only validates localStorage expiry, no API call
     const quickCheckSession = async () => {
-      if (initialFetchInFlight.current) {return;}
-      if (!currentUser) {return;}
+      if (initialFetchInFlight.current) {
+        return;
+      }
+      if (!currentUser) {
+        return;
+      }
 
       // Debounce: don't check too frequently
       const now = Date.now();
-      if (now - lastCheckTime < VISIBILITY_CHECK_DEBOUNCE_MS) {return;}
+      if (now - lastCheckTime < VISIBILITY_CHECK_DEBOUNCE_MS) {
+        return;
+      }
       lastCheckTime = now;
 
       const { data, error } = await supabase.auth.getSession();
-      if (cancelled) {return;}
+      if (cancelled) {
+        return;
+      }
 
       // If the token is gone/invalid, clear user
       if (error || !data.session) {
@@ -285,14 +299,22 @@ export default function AuthInit() {
 
     // Full validation with server - scheduled during idle time to not block interactions
     const fullCheckSession = () => {
-      if (initialFetchInFlight.current) {return;}
-      if (!currentUser) {return;}
+      if (initialFetchInFlight.current) {
+        return;
+      }
+      if (!currentUser) {
+        return;
+      }
 
       // Schedule the actual validation during browser idle time
       pendingIdleCallback = scheduleIdleCallback(async () => {
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
         const isValid = await validateSession();
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
 
         if (!isValid) {
           await forceLogout();
@@ -301,7 +323,9 @@ export default function AuthInit() {
     };
 
     const onVisibility = () => {
-      if (document.visibilityState === 'visible') {quickCheckSession();}
+      if (document.visibilityState === 'visible') {
+        quickCheckSession();
+      }
     };
 
     document.addEventListener('visibilitychange', onVisibility);
@@ -333,10 +357,14 @@ export default function AuthInit() {
     let cancelled = false;
 
     const resetTimer = () => {
-      if (timer) {clearTimeout(timer);}
+      if (timer) {
+        clearTimeout(timer);
+      }
       timer = setTimeout(async () => {
         const { data } = await supabase.auth.getSession();
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
         // If there is still a valid session, keep it; otherwise logout hard
         if (!data.session) {
           await dispatch(logout());
@@ -350,7 +378,9 @@ export default function AuthInit() {
     // Debounced activity handler - prevents excessive calls from mousemove etc.
     const onActivity = () => {
       const now = Date.now();
-      if (now - lastActivityTime < ACTIVITY_DEBOUNCE_MS) {return;}
+      if (now - lastActivityTime < ACTIVITY_DEBOUNCE_MS) {
+        return;
+      }
       lastActivityTime = now;
       resetTimer();
     };
@@ -362,14 +392,20 @@ export default function AuthInit() {
 
     return () => {
       cancelled = true;
-      if (timer) {clearTimeout(timer);}
+      if (timer) {
+        clearTimeout(timer);
+      }
       activityEvents.forEach(ev => window.removeEventListener(ev, onActivity));
     };
   }, [dispatch, redirectAfterLogout]);
 
   useEffect(() => {
-    if (initialFetchInFlight.current) {return;}
-    if (currentUser) {return;}
+    if (initialFetchInFlight.current) {
+      return;
+    }
+    if (currentUser) {
+      return;
+    }
     redirectAfterLogout();
   }, [currentUser, redirectAfterLogout]);
 

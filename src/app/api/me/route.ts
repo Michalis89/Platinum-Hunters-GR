@@ -4,11 +4,15 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import type { User } from '@/types/user';
+import type { Json } from '@/lib/supabase/database.types';
+import type { CategoryProfiles } from '@/lib/validation/profile';
+import { enrichCategoryProfilesWithInsights } from '@/lib/profile/insight-genres';
 
 /**
  * GET /api/me
- * Fetch current authenticated user's profile with new fields
- * Includes backward-compatible fallback for location_city and category_profile
+ * Fetch current authenticated user's profile from new structure
+ * - location_city: users.location_city (dedicated column)
+ * - category_profile: user_category_profiles.profiles (dedicated table)
  */
 const handler = withApiRoute(async (request: Request) => {
   try {
@@ -28,24 +32,42 @@ const handler = withApiRoute(async (request: Request) => {
         return fail({ error: 'Failed to fetch user profile' }, 500);
       }
 
-      // Fetch category profile
+      // Fetch category profile from dedicated table
       const { data: categoryProfile } = await supabase
         .from('user_category_profiles')
         .select('profiles, created_at, updated_at')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      // Parse social_links for backward compatibility
-      const socialLinks = (user.social_links as Record<string, unknown>) || {};
+      let categoryProfileValue = (categoryProfile?.profiles as CategoryProfiles | null) || null;
+      if (categoryProfileValue) {
+        const enrichedProfiles = await enrichCategoryProfilesWithInsights(
+          supabase,
+          userId,
+          categoryProfileValue,
+        );
+        const oldSerialized = JSON.stringify(categoryProfileValue);
+        const newSerialized = JSON.stringify(enrichedProfiles);
+        if (oldSerialized !== newSerialized) {
+          const { error: syncError } = await supabase.from('user_category_profiles').upsert(
+            {
+              user_id: userId,
+              profiles: enrichedProfiles as unknown as Json,
+            },
+            { onConflict: 'user_id' },
+          );
+          if (!syncError) {
+            categoryProfileValue = enrichedProfiles;
+          }
+        } else {
+          categoryProfileValue = enrichedProfiles;
+        }
+      }
 
-      // Merge response with backward-compatible fallbacks
+      // Return user with category_profile from new table
       const response = {
         ...user,
-        // Prefer new location_city column, fallback to social_links.location_city
-        location_city: user.location_city || (socialLinks.location_city as string | undefined) || null,
-        // Add category_profile (preferred source)
-        category_profile: categoryProfile?.profiles || null,
-        // Keep social_links as-is for now (for backward compatibility)
+        category_profile: categoryProfileValue,
       };
 
       return ok(response as User & { category_profile: unknown });

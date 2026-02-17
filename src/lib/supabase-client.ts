@@ -13,10 +13,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 function getPersistencePreference(): boolean {
-  if (typeof window === 'undefined') {return true;}
+  if (typeof window === 'undefined') {
+    return true;
+  }
   try {
     const value = window.localStorage.getItem(AUTH_PERSISTENCE_KEY);
-    if (value === null) {return true;}
+    if (value === null) {
+      return true;
+    }
     return value === 'true';
   } catch {
     return true;
@@ -28,7 +32,9 @@ export function isAuthPersistenceEnabled(): boolean {
 }
 
 export function setAuthPersistence(enabled: boolean): void {
-  if (typeof window === 'undefined') {return;}
+  if (typeof window === 'undefined') {
+    return;
+  }
 
   try {
     window.localStorage.setItem(AUTH_PERSISTENCE_KEY, enabled ? 'true' : 'false');
@@ -59,7 +65,9 @@ export function setAuthPersistence(enabled: boolean): void {
 
 const supabaseStorage = {
   getItem: (key: string) => {
-    if (typeof window === 'undefined') {return null;}
+    if (typeof window === 'undefined') {
+      return null;
+    }
 
     try {
       const shouldPersist = getPersistencePreference();
@@ -83,7 +91,9 @@ const supabaseStorage = {
     }
   },
   setItem: (key: string, value: string) => {
-    if (typeof window === 'undefined') {return;}
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     try {
       const shouldPersist = getPersistencePreference();
@@ -96,7 +106,9 @@ const supabaseStorage = {
     }
   },
   removeItem: (key: string) => {
-    if (typeof window === 'undefined') {return;}
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     try {
       window.localStorage.removeItem(key);

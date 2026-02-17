@@ -30,17 +30,8 @@ import SuggestionsPanel from './SuggestionsPanel';
 import StatusFilterBar from './StatusFilterBar';
 import LibraryEntryList from './LibraryEntryList';
 import type { EditState } from './EntryEditDialog';
-import type {
-  MediaCategory,
-  MediaEntry,
-  MediaStatus,
-  SearchResult} from './types';
-import {
-  isMediaCategory,
-  getApiBase,
-  supportsExternalApi,
-  getTotalCount,
-} from './types';
+import type { MediaCategory, MediaEntry, MediaStatus, SearchResult } from './types';
+import { isMediaCategory, getApiBase, supportsExternalApi, getTotalCount } from './types';
 
 const EntryEditDialog = dynamic(() => import('./EntryEditDialog'), {
   ssr: false,
@@ -163,7 +154,9 @@ function categoryLibraryReducer(
     case 'clearAlert':
       return { ...state, alert: null };
     case 'applySelectedEntryDetails': {
-      if (!state.selectedEntry) {return state;}
+      if (!state.selectedEntry) {
+        return state;
+      }
       const details = action.payload;
       const totalRuntime = state.selectedEntry.totalRuntime ?? details.runtime ?? undefined;
       const totalEpisodes =
@@ -202,27 +195,41 @@ function categoryLibraryReducer(
 // Helper to check if IGDB rate limit is active
 const RATE_LIMIT_KEY = 'igdb_rate_limit_until';
 const isRateLimited = () => {
-  if (typeof window === 'undefined') {return false;}
+  if (typeof window === 'undefined') {
+    return false;
+  }
   const limitUntil = localStorage.getItem(RATE_LIMIT_KEY);
-  if (!limitUntil) {return false;}
+  if (!limitUntil) {
+    return false;
+  }
   const limitTime = parseInt(limitUntil, 10);
-  if (isNaN(limitTime)) {return false;}
+  if (isNaN(limitTime)) {
+    return false;
+  }
   return Date.now() < limitTime;
 };
 
 const setRateLimitCooldown = () => {
-  if (typeof window === 'undefined') {return;}
+  if (typeof window === 'undefined') {
+    return;
+  }
   // Set cooldown for 24 hours
   const cooldownUntil = Date.now() + 24 * 60 * 60 * 1000;
   localStorage.setItem(RATE_LIMIT_KEY, cooldownUntil.toString());
 };
 
 const getRateLimitResetTime = () => {
-  if (typeof window === 'undefined') {return null;}
+  if (typeof window === 'undefined') {
+    return null;
+  }
   const limitUntil = localStorage.getItem(RATE_LIMIT_KEY);
-  if (!limitUntil) {return null;}
+  if (!limitUntil) {
+    return null;
+  }
   const limitTime = parseInt(limitUntil, 10);
-  if (isNaN(limitTime)) {return null;}
+  if (isNaN(limitTime)) {
+    return null;
+  }
   return new Date(limitTime);
 };
 
@@ -366,7 +373,9 @@ export default function CategoryLibrary({
   }, [category, normalizedInitialStatus, normalizedInitialSearch, loadLibraryEntries]);
 
   useEffect(() => {
-    if (ctaMode !== 'create') {return;}
+    if (ctaMode !== 'create') {
+      return;
+    }
 
     if (!supportsExternal) {
       dispatch({ type: 'patch', payload: { createResults: [] } });
@@ -409,7 +418,9 @@ export default function CategoryLibrary({
   }, [category, createQuery, ctaMode, supportsExternal]);
 
   useEffect(() => {
-    if (ctaMode !== 'suggestions') {return;}
+    if (ctaMode !== 'suggestions') {
+      return;
+    }
     if (!supportsExternal) {
       dispatch({ type: 'patch', payload: { suggestions: [] } });
       return;
@@ -450,8 +461,12 @@ export default function CategoryLibrary({
     const base = libraryEntries;
     const normalized = search.trim().toLowerCase();
     return base.filter(entry => {
-      if (activeStatus !== 'all' && entry.status !== activeStatus) {return false;}
-      if (!normalized) {return true;}
+      if (activeStatus !== 'all' && entry.status !== activeStatus) {
+        return false;
+      }
+      if (!normalized) {
+        return true;
+      }
       return (
         entry.title.toLowerCase().includes(normalized) ||
         entry.subtitle.toLowerCase().includes(normalized) ||
@@ -523,7 +538,9 @@ export default function CategoryLibrary({
             };
           })
           .then(details => {
-            if (!details) {return;}
+            if (!details) {
+              return;
+            }
             startTransition(() => {
               dispatch({ type: 'applySelectedEntryDetails', payload: details });
             });
@@ -553,7 +570,9 @@ export default function CategoryLibrary({
             };
           })
           .then(details => {
-            if (!details) {return;}
+            if (!details) {
+              return;
+            }
             startTransition(() => {
               dispatch({
                 type: 'patch',
@@ -579,7 +598,9 @@ export default function CategoryLibrary({
   );
 
   const handleSaveEntry = async (editState: EditState) => {
-    if (!selectedEntry) {return;}
+    if (!selectedEntry) {
+      return;
+    }
     const progressValue = Number.parseInt(editState.progress, 10);
     const scoreValue = Number.parseFloat(editState.score);
     const nextProgress = Number.isFinite(progressValue) ? progressValue : null;
@@ -955,7 +976,8 @@ export default function CategoryLibrary({
           .slice(0, 10)
           .map(g => g.name)
           .join(', ');
-        const moreText = allRejectedGames.length > 10 ? ` and ${allRejectedGames.length - 10} more` : '';
+        const moreText =
+          allRejectedGames.length > 10 ? ` and ${allRejectedGames.length - 10} more` : '';
 
         showAlert({
           type: 'warning',
@@ -1124,18 +1146,20 @@ export default function CategoryLibrary({
           <div className="modal-surface pointer-events-auto w-full max-w-2xl p-6 shadow-2xl">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex-1">
-                <p className="text-lg font-semibold text-foreground">Steam sync with IGDB metadata</p>
+                <p className="text-lg font-semibold text-foreground">
+                  Steam sync with IGDB metadata
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {steamSyncProgress?.message ??
                     'Fetching metadata, cover images, and updating entries. Please wait...'}
                 </p>
                 {steamSyncProgress && steamSyncProgress.totalSteps > 0 && (
-                  <p className="mt-1 text-xs text-tertiary">
+                  <p className="text-tertiary mt-1 text-xs">
                     Processing with IGDB free tier (rate limited for stability)
                   </p>
                 )}
               </div>
-              <span className="rounded-full border border-border bg-surface-hover px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground">
+              <span className="bg-surface-hover rounded-full border border-border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground">
                 {statusLabel}
               </span>
             </div>
@@ -1144,7 +1168,7 @@ export default function CategoryLibrary({
                 <span>Progress</span>
                 <span>{normalizedProgressPercent}%</span>
               </div>
-              <div className="overflow-hidden rounded-full border border-border bg-surface-base">
+              <div className="bg-surface-base overflow-hidden rounded-full border border-border">
                 <div
                   className="h-3 rounded-full bg-primary shadow-[0_0_18px_hsl(var(--primary)/0.5)] transition-[width] duration-700 ease-out"
                   style={{ width: `${normalizedProgressPercent}%` }}
@@ -1154,7 +1178,11 @@ export default function CategoryLibrary({
                 <span className="text-foreground">{stepLabel}</span>
                 {steamSyncProgress && steamSyncProgress.totalSteps > 0 && (
                   <span className="text-muted-foreground">
-                    ~{Math.ceil((steamSyncProgress.totalSteps - steamSyncProgress.completedSteps) * 0.5)}s remaining
+                    ~
+                    {Math.ceil(
+                      (steamSyncProgress.totalSteps - steamSyncProgress.completedSteps) * 0.5,
+                    )}
+                    s remaining
                   </span>
                 )}
               </div>
@@ -1166,17 +1194,21 @@ export default function CategoryLibrary({
             )}
             {/* Live progress indicators during sync */}
             {steamSyncing && !steamSyncProgress?.result && steamSyncProgress?.message && (
-              <div className="mt-4 rounded-2xl border border-border bg-surface-hover p-4">
+              <div className="bg-surface-hover mt-4 rounded-2xl border border-border p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-primary"></div>
                   <p className="text-xs text-foreground">
-                    {steamSyncProgress.message.includes('matching') || steamSyncProgress.message.includes('IGDB')
+                    {steamSyncProgress.message.includes('matching') ||
+                    steamSyncProgress.message.includes('IGDB')
                       ? '🔍 Searching IGDB database...'
-                      : steamSyncProgress.message.includes('metadata') || steamSyncProgress.message.includes('enrichment')
+                      : steamSyncProgress.message.includes('metadata') ||
+                          steamSyncProgress.message.includes('enrichment')
                         ? '📥 Fetching game metadata...'
-                        : steamSyncProgress.message.includes('Catalog') || steamSyncProgress.message.includes('catalog')
+                        : steamSyncProgress.message.includes('Catalog') ||
+                            steamSyncProgress.message.includes('catalog')
                           ? '💾 Syncing with database...'
-                          : steamSyncProgress.message.includes('Entries') || steamSyncProgress.message.includes('entries')
+                          : steamSyncProgress.message.includes('Entries') ||
+                              steamSyncProgress.message.includes('entries')
                             ? '✨ Creating user entries...'
                             : '⚙️ Processing...'}
                   </p>
@@ -1187,23 +1219,29 @@ export default function CategoryLibrary({
             {/* Final results summary */}
             {steamSyncProgress?.result && (
               <div className="mt-4 space-y-3">
-                <div className="grid gap-3 rounded-2xl border border-border bg-surface-hover p-4 text-sm sm:grid-cols-3">
+                <div className="bg-surface-hover grid gap-3 rounded-2xl border border-border p-4 text-sm sm:grid-cols-3">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Games</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Games
+                    </p>
                     <p className="text-lg font-semibold text-foreground">
                       {steamSyncProgress.result.totalFetched ?? 0}
                     </p>
                     <p className="text-xs text-muted-foreground">from Steam</p>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Imported</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Imported
+                    </p>
                     <p className="text-lg font-semibold" style={{ color: 'hsl(142 76% 36%)' }}>
                       {steamSyncProgress.result.mediaInserted ?? 0}
                     </p>
                     <p className="text-xs text-muted-foreground">new entries</p>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Updated</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Updated
+                    </p>
                     <p className="text-lg font-semibold text-primary">
                       {steamSyncProgress.result.mediaUpdated ?? 0}
                     </p>
@@ -1212,22 +1250,23 @@ export default function CategoryLibrary({
                 </div>
 
                 {/* Show rejected games count if any */}
-                {steamSyncProgress.result.rejectedGames && steamSyncProgress.result.rejectedGames.length > 0 && (
-                  <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4">
-                    <div className="flex items-start gap-3">
-                      <span className="text-warning">⚠️</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-foreground">
-                          {steamSyncProgress.result.rejectedGames.length} games not found in IGDB
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          These games couldn&apos;t be matched with IGDB database and were skipped.
-                          Try searching for them manually.
-                        </p>
+                {steamSyncProgress.result.rejectedGames &&
+                  steamSyncProgress.result.rejectedGames.length > 0 && (
+                    <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-warning">⚠️</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-foreground">
+                            {steamSyncProgress.result.rejectedGames.length} games not found in IGDB
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            These games couldn&apos;t be matched with IGDB database and were
+                            skipped. Try searching for them manually.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             )}
           </div>

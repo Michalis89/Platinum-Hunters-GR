@@ -26,13 +26,17 @@ const publisher: Organization = {
 };
 
 const toAbsoluteUrl = (value: string) => {
-  if (!value) {return new URL(DEFAULT_OG_IMAGE, SITE_URL).toString();}
+  if (!value) {
+    return new URL(DEFAULT_OG_IMAGE, SITE_URL).toString();
+  }
   return value.startsWith('http') ? value : new URL(value, SITE_URL).toString();
 };
 
 const trimText = (value: string, maxLength = 160) => {
   const normalized = value.replace(/\s+/g, ' ').trim();
-  if (normalized.length <= maxLength) {return normalized;}
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
   return `${normalized.slice(0, maxLength - 1).trimEnd()}...`;
 };
 

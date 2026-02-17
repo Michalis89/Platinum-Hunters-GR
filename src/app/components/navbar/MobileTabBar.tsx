@@ -66,8 +66,12 @@ export default function MobileTabBar() {
   }
 
   const isActive = (href: string) => {
-    if (pathname === href) {return true;}
-    if (href !== '/home' && pathname?.startsWith(href)) {return true;}
+    if (pathname === href) {
+      return true;
+    }
+    if (href !== '/home' && pathname?.startsWith(href)) {
+      return true;
+    }
     return false;
   };
 

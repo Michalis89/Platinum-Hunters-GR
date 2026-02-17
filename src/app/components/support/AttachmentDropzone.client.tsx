@@ -77,7 +77,9 @@ export default function AttachmentDropzone({
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
-    if (files.length === 0) {return;}
+    if (files.length === 0) {
+      return;
+    }
     handleFiles(files);
     if (inputRef.current) {
       inputRef.current.value = '';
@@ -86,7 +88,9 @@ export default function AttachmentDropzone({
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if (disabled) {return;}
+    if (disabled) {
+      return;
+    }
     const files = Array.from(event.dataTransfer.files ?? []);
     if (files.length > 0) {
       handleFiles(files);

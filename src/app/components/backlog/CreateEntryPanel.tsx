@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import MediaSearchResultCard from './MediaSearchResultCard';
-import type { MediaCategory, MediaEntry, SearchResult} from './types';
+import type { MediaCategory, MediaEntry, SearchResult } from './types';
 import { CATEGORY_CONFIG } from './types';
 
 interface CreateEntryPanelProps {

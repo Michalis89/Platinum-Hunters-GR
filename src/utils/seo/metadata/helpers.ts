@@ -23,7 +23,9 @@ type MetadataInput = {
 const toAbsoluteUrl = (path: string) => new URL(path, SITE_URL).toString();
 const trimText = (value: string, maxLength = 160) => {
   const normalized = value.replace(/\s+/g, ' ').trim();
-  if (normalized.length <= maxLength) {return normalized;}
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
   return `${normalized.slice(0, maxLength - 1).trimEnd()}...`;
 };
 

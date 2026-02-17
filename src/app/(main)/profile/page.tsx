@@ -20,6 +20,7 @@ import {
 } from '@/app/components/profile';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
+import { useUserSettings } from '@/lib/settings/useUserSettings';
 
 function ProfilePageSkeleton() {
   return (
@@ -42,27 +43,38 @@ export default function ProfilePage() {
   const user = useSelector(selectUser);
   const [activityOpen, setActivityOpen] = useState(false);
   const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
+  const { settings } = useUserSettings(!!user);
+  const socialLayerEnabled = settings?.social_enabled ?? true;
 
-  const categories = useMemo(() => (user?.categories as string[] | undefined) ?? ['games'], [user]);
+  const categories = useMemo(
+    () =>
+      user?.category_profile
+        ? Object.keys(user.category_profile).filter(key => key && typeof key === 'string')
+        : ['games'],
+    [user],
+  );
   const isPrivileged = hasAnyRole(user, ['admin', 'owner', 'author', 'reviewer']);
 
   const showcaseCategories = useMemo(
     () =>
       ['games', 'anime', 'manga', 'books', 'movies', 'tv', 'coding', 'pet', 'vape'].filter(
-        cat => isPrivileged || categories.includes(cat),
+        cat =>
+          (isPrivileged || categories.includes(cat)) &&
+          (socialLayerEnabled || !['coding', 'pet', 'vape'].includes(cat)),
       ),
-    [categories, isPrivileged],
+    [categories, isPrivileged, socialLayerEnabled],
   );
 
   const categoryNotes = useMemo(() => {
-    return (
-      ((user?.social_links as Record<string, unknown> | undefined)?.category_notes as
-        | Record<string, unknown>
-        | undefined) || {}
-    );
+    // Read from new category_profile field (clean, no fallback)
+    const categoryProfile = (user as { category_profile?: Record<string, unknown> })
+      ?.category_profile;
+    return categoryProfile || {};
   }, [user]);
 
-  if (!user) {return <ProfilePageSkeleton />;}
+  if (!user) {
+    return <ProfilePageSkeleton />;
+  }
 
   const categoryCards = showcaseCategories.length ? (
     <div className="grid gap-4 md:grid-cols-2">
@@ -80,7 +92,7 @@ export default function ProfilePage() {
             </p>
           </header>
 
-          <ProfileCategoryInfo category={category} user={user} categoryNotes={categoryNotes} />
+          <ProfileCategoryInfo category={category} categoryNotes={categoryNotes} />
         </article>
       ))}
     </div>

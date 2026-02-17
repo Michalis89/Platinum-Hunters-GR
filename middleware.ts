@@ -53,9 +53,6 @@ export async function middleware(request: NextRequest) {
     const { user, response } = await createMiddlewareClient(request);
 
     if (!user) {
-      // Clear any stale/expired auth cookies when no valid user session exists
-      clearAuthCookiesFromResponse(response);
-
       if (isDashboardRoute) {
         const redirectResponse = NextResponse.redirect(new URL('/home', request.url));
         clearAuthCookiesFromResponse(redirectResponse);
@@ -68,6 +65,9 @@ export async function middleware(request: NextRequest) {
         clearAuthCookiesFromResponse(redirectResponse);
         return redirectResponse;
       }
+
+      // Public routes: do not clear auth cookies here.
+      // Clearing on every anonymous middleware pass can force logout in other tabs.
     }
 
     // Check email confirmation for protected routes
@@ -99,13 +99,11 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error('Middleware error:', error);
 
-    // Clear expired/invalid auth cookies
     const response = NextResponse.next({
       request: {
         headers: request.headers,
       },
     });
-    clearAuthCookiesFromResponse(response);
 
     if (isDashboardRoute) {
       const redirectResponse = NextResponse.redirect(new URL('/home', request.url));
@@ -120,7 +118,7 @@ export async function middleware(request: NextRequest) {
       return redirectResponse;
     }
 
-    // For non-protected routes, continue with cleared cookies
+    // For non-protected routes, continue without mutating auth cookies.
     const isProd = process.env.NODE_ENV === 'production';
     response.headers.set('Content-Security-Policy', buildCsp(isProd));
 

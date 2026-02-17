@@ -78,9 +78,13 @@ function normalizeStringArray(value: unknown): string[] | null {
 }
 
 function formatDbError(error: unknown) {
-  if (!error || typeof error !== 'object') {return null;}
+  if (!error || typeof error !== 'object') {
+    return null;
+  }
   const maybe = error as { code?: string; message?: string; details?: string; hint?: string };
-  if (!maybe.code && !maybe.message) {return null;}
+  if (!maybe.code && !maybe.message) {
+    return null;
+  }
   return maybe;
 }
 
@@ -105,7 +109,9 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
     const updates: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(input)) {
-      if (!EDITABLE_KEYS.has(key)) {continue;}
+      if (!EDITABLE_KEYS.has(key)) {
+        continue;
+      }
 
       switch (key) {
         case 'source':

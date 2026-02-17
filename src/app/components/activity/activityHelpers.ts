@@ -8,14 +8,18 @@ type ActivityItem = {
 };
 
 const readValue = (payload: ActivityPayload, key: string) => {
-  if (payload[key] === undefined || payload[key] === null) {return undefined;}
+  if (payload[key] === undefined || payload[key] === null) {
+    return undefined;
+  }
   return payload[key] as string | number;
 };
 
 export function getActivityHref(activity: ActivityItem): string | null {
   const payload = activity.payload || {};
   const category = readValue(payload, 'category');
-  if (!category || typeof category !== 'string') {return null;}
+  if (!category || typeof category !== 'string') {
+    return null;
+  }
 
   const slugValue =
     readValue(payload, 'slug') ||
@@ -28,7 +32,9 @@ export function getActivityHref(activity: ActivityItem): string | null {
     readValue(payload, 'rawg_id') ||
     readValue(payload, 'google_books_id');
 
-  if (!slugValue) {return null;}
+  if (!slugValue) {
+    return null;
+  }
 
   const slug = normalizeSlug(String(slugValue));
   return `/media/${category}/${slug}`;

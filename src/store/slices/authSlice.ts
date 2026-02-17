@@ -17,16 +17,19 @@ export const fetchSession = createAsyncThunk('auth/fetchSession', async () => {
     error,
   } = await supabase.auth.getSession();
 
-  if (error) {throw error;}
-  if (!session) {return null;}
+  if (error) {
+    throw error;
+  }
+  if (!session) {
+    return null;
+  }
 
-  const { data: userProfile, error: profileError } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', session.user.id)
-    .single();
-
-  if (profileError) {throw profileError;}
+  // Fetch user profile from /api/me (includes category_profile from user_category_profiles table)
+  const response = await fetch('/api/me');
+  if (!response.ok) {
+    throw new Error('Failed to fetch user profile');
+  }
+  const { data: userProfile } = await response.json();
 
   return userProfile as User;
 });
@@ -39,17 +42,18 @@ export const login = createAsyncThunk(
       password,
     });
 
-    if (error) {throw error;}
-
-    const { data: userProfile, error: profileError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
-
-    if (profileError) {throw profileError;}
+    if (error) {
+      throw error;
+    }
 
     await supabase.rpc('update_user_last_login', { user_id: data.user.id } as never);
+
+    // Fetch user profile from /api/me (includes category_profile from user_category_profiles table)
+    const response = await fetch('/api/me');
+    if (!response.ok) {
+      throw new Error('Failed to fetch user profile');
+    }
+    const { data: userProfile } = await response.json();
 
     return userProfile as User;
   },
@@ -57,7 +61,9 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk('auth/logout', async () => {
   const { error } = await supabase.auth.signOut();
-  if (error) {throw error;}
+  if (error) {
+    throw error;
+  }
 
   try {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -76,7 +82,9 @@ export const updateUserProfile = createAsyncThunk(
       .select()
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      throw error;
+    }
     return data as User;
   },
 );

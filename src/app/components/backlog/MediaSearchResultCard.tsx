@@ -19,7 +19,9 @@ export default function MediaSearchResultCard({
   isInLibrary = false,
 }: Readonly<MediaSearchResultCardProps>) {
   const handleOpenDialog = () => {
-    if (isInLibrary) {return;}
+    if (isInLibrary) {
+      return;
+    }
     onOpenDialog(entry);
   };
 
