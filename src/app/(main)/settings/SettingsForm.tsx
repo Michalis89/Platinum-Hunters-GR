@@ -56,16 +56,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   const [isResetDialogOpen, setResetDialogOpen] = useState(false);
   const [isMounted, setMounted] = useState(false);
   const { mutate } = useUserSettings(true);
-  const { setTheme } = useTheme();
-
-  const applyThemePreference = (preference: ThemeSetting) => {
-    if (preference === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light');
-      return;
-    }
-    setTheme(preference);
-  };
+  const { setThemePreference } = useTheme();
 
   const updateSetting = async (patch: Partial<UserSettingsValue>) => {
     if (isSaving) {
@@ -107,9 +98,10 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     setFormState(optimisticState);
     setIsSaving(true);
     setErrorMessage(null);
-    const previousThemePreference = formState.theme;
+
+    // Apply theme preference immediately for instant feedback
     if (sanitized.theme) {
-      applyThemePreference(sanitized.theme);
+      setThemePreference(sanitized.theme);
     }
 
     try {
@@ -130,8 +122,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       }
       toast.success('Settings saved');
     } catch (error) {
+      // Rollback theme preference on error
       if (sanitized.theme) {
-        applyThemePreference(previousThemePreference);
+        setThemePreference(previousState.theme);
       }
       setFormState(previousState);
       const message = error instanceof Error ? error.message : 'Unable to save settings.';

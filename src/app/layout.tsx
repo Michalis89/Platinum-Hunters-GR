@@ -28,10 +28,22 @@ const geistMono = Geist_Mono({
 });
 
 type Theme = 'dark' | 'light';
+type ThemePreference = 'system' | 'dark' | 'light';
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get('theme')?.value;
+  const themePreferenceCookie = cookieStore.get('theme-preference')?.value;
+
+  // Determine initial preference (defaults to 'system')
+  const initialPreference: ThemePreference =
+    themePreferenceCookie === 'system' ||
+    themePreferenceCookie === 'dark' ||
+    themePreferenceCookie === 'light'
+      ? themePreferenceCookie
+      : 'system';
+
+  // Determine resolved theme for SSR (defaults to 'dark')
   const initialTheme: Theme = themeCookie === 'light' ? 'light' : 'dark';
   const isVercelProd = process.env.NODE_ENV === 'production' && !!process.env.VERCEL;
 
@@ -58,7 +70,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           Skip to main content
         </a>
 
-        <Providers initialTheme={initialTheme}>
+        <Providers initialTheme={initialTheme} initialPreference={initialPreference}>
           <AuthInit />
           {children}
           {isVercelProd ? (

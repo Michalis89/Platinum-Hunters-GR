@@ -36,7 +36,7 @@ export default function Navbar() {
     canQuickAdd,
     canAccessAdminPanel,
   } = useSelector(selectNavbarAuth);
-  const { theme, setTheme } = useTheme();
+  const { theme, themePreference, setThemePreference } = useTheme();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -86,15 +86,28 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname, queryKey]);
 
+  // Sync theme preference from user settings when loaded
+  useEffect(() => {
+    if (shouldLoadSettings && settings?.theme && settings.theme !== themePreference) {
+      setThemePreference(settings.theme);
+    }
+  }, [shouldLoadSettings, settings?.theme, themePreference, setThemePreference]);
+
   const handleThemeToggle = useCallback(async () => {
     if (isThemeSaving) {
       return;
     }
 
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    const previousTheme = theme;
-    setTheme(nextTheme);
+    // Smart toggle logic:
+    // - If preference is 'system', change to the opposite of current resolved theme
+    // - If preference is explicit ('dark' or 'light'), toggle between them
+    const nextPreference: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark';
+    const previousPreference = themePreference;
 
+    // Update theme preference in context (this will also update localStorage and cookies)
+    setThemePreference(nextPreference);
+
+    // If user is not authenticated, just update local state
     if (!shouldLoadSettings) {
       return;
     }
@@ -102,15 +115,16 @@ export default function Navbar() {
     const previousSettings = settings;
     setIsThemeSaving(true);
 
+    // Optimistically update settings
     if (previousSettings) {
-      mutateSettings({ ...previousSettings, theme: nextTheme }, false);
+      mutateSettings({ ...previousSettings, theme: nextPreference }, false);
     }
 
     try {
       const response = await fetch('/api/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ theme: nextTheme }),
+        body: JSON.stringify({ theme: nextPreference }),
       });
       const payload = await response.json();
 
@@ -122,14 +136,15 @@ export default function Navbar() {
         mutateSettings(payload.data, false);
       }
     } catch {
-      setTheme(previousTheme);
+      // Rollback on error
+      setThemePreference(previousPreference);
       if (previousSettings) {
         mutateSettings(previousSettings, false);
       }
     } finally {
       setIsThemeSaving(false);
     }
-  }, [isThemeSaving, mutateSettings, setTheme, settings, shouldLoadSettings, theme]);
+  }, [isThemeSaving, mutateSettings, setThemePreference, settings, shouldLoadSettings, theme, themePreference]);
 
   const handleLogout = async () => {
     await dispatch(logout());

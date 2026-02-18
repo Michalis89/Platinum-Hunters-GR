@@ -8,17 +8,19 @@ import { Toaster } from '@/components/ui/sonner';
 import { swrConfig } from '@/lib/swr/config';
 
 type Theme = 'dark' | 'light';
+type ThemePreference = 'system' | 'dark' | 'light';
 
 interface Props {
   readonly children: React.ReactNode;
   readonly initialTheme?: Theme;
+  readonly initialPreference?: ThemePreference;
 }
 
-export default function Providers({ children, initialTheme }: Props) {
+export default function Providers({ children, initialTheme, initialPreference }: Props) {
   return (
     <Provider store={store}>
       <SWRConfig value={swrConfig}>
-        <ThemeProvider initialTheme={initialTheme}>
+        <ThemeProvider initialTheme={initialTheme} initialPreference={initialPreference}>
           {children}
           <Toaster />
         </ThemeProvider>
