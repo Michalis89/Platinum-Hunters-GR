@@ -178,8 +178,10 @@ export default function SupportTicketsList() {
           if (archivedFlag) {
             return false;
           }
-          return Boolean(ticket.unread_reply_count && ticket.unread_reply_count > 0)
-            || ticket.status_changed_since_read === true;
+          return (
+            Boolean(ticket.unread_reply_count && ticket.unread_reply_count > 0) ||
+            ticket.status_changed_since_read === true
+          );
         }
         return !archivedFlag;
       })
@@ -209,7 +211,7 @@ export default function SupportTicketsList() {
           title="No tickets yet"
           description="When you submit a support request, it will appear here."
           action={
-            <Button href="/pages/support" variant="primary">
+            <Button href="/support" variant="primary">
               Create a request
             </Button>
           }
@@ -440,7 +442,7 @@ export default function SupportTicketsList() {
           {content}
 
           <div className="mt-8 flex justify-center md:justify-end">
-            <Button href="/pages/support" variant="primary" size="lg">
+            <Button href="/support" variant="primary" size="lg">
               Create new request
             </Button>
           </div>
