@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 declare global {
@@ -18,16 +18,10 @@ type Props = {
 export function GoogleAnalytics({ gaId }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isFirstRender = useRef(true);
 
+  // Optional: track SPA navigations (keep this for App Router certainty)
   useEffect(() => {
     if (!gaId || !window.gtag) {
-      return;
-    }
-
-    // Skip first run (already tracked in init script)
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
       return;
     }
 
@@ -53,14 +47,8 @@ export function GoogleAnalytics({ gaId }: Props) {
           window.gtag = gtag;
           gtag('js', new Date());
 
-          gtag('config', '${gaId}', { send_page_view: false });
-
-          // Initial page view
-          gtag('event', 'page_view', {
-            page_location: window.location.href,
-            page_path: window.location.pathname + window.location.search,
-            page_title: document.title,
-          });
+          // Let GA send the initial page_view automatically
+          gtag('config', '${gaId}');
         `}
       </Script>
     </>
