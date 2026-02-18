@@ -1,5 +1,6 @@
 import { DEFAULT_COVER, UNTITLED_FALLBACK } from '@/lib/constants/messages';
 import { EXTERNAL_API_REVALIDATE_SECONDS } from '@/lib/constants/cache';
+import { cachedExternalFetch } from '@/lib/api-cache/external';
 import type { MediaSearchConfig, SearchLocalItem } from '../../handlers/search';
 
 type BooksCategory = 'books';
@@ -131,17 +132,17 @@ const fetchBooks = async (
   url.searchParams.set('printType', 'books');
   url.searchParams.set('key', apiKey);
 
-  const response = await fetch(url.toString(), {
-    next: { revalidate: EXTERNAL_API_REVALIDATE_SECONDS },
-  });
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.warn('Google Books error:', errorBody);
+  try {
+    const result = await cachedExternalFetch<{ items?: GoogleBook[] }>({
+      apiName: 'google-books-search',
+      endpoint: url.toString(),
+      ttlSeconds: EXTERNAL_API_REVALIDATE_SECONDS,
+    });
+    return result.items ?? [];
+  } catch (error) {
+    console.warn('Google Books error:', error);
     return [] as GoogleBook[];
   }
-
-  const result = (await response.json()) as { items?: GoogleBook[] };
-  return result.items ?? [];
 };
 
 export const booksSearchConfig: MediaSearchConfig<

@@ -1,5 +1,6 @@
 import { UNTITLED_FALLBACK, DEFAULT_COVER } from '@/lib/constants/messages';
 import { EXTERNAL_API_REVALIDATE_SECONDS } from '@/lib/constants/cache';
+import { cachedExternalFetch } from '@/lib/api-cache/external';
 
 /**
  * Media item types for each category (based on select fields)
@@ -253,16 +254,15 @@ export async function fetchTmdbPopular(category: 'movies' | 'tv', limit: number)
   url.searchParams.set('api_key', apiKey);
   url.searchParams.set('page', '1');
 
-  const response = await fetch(url.toString(), {
-    next: { revalidate: EXTERNAL_API_REVALIDATE_SECONDS },
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.warn('TMDB popular error:', errorBody);
+  try {
+    const result = await cachedExternalFetch<{ results?: TmdbMedia[] }>({
+      apiName: `tmdb-popular-${category}`,
+      endpoint: url.toString(),
+      ttlSeconds: EXTERNAL_API_REVALIDATE_SECONDS,
+    });
+    return (result.results ?? []).slice(0, limit);
+  } catch (error) {
+    console.warn('TMDB popular error:', error);
     return [] as TmdbMedia[];
   }
-
-  const result = (await response.json()) as { results?: TmdbMedia[] };
-  return (result.results ?? []).slice(0, limit);
 }

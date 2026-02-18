@@ -1,5 +1,6 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 
+import { unstable_cache } from 'next/cache';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import { validatePlainText, validatePlainTextArray } from '@/utils/validation/text';
@@ -11,7 +12,7 @@ import { API_ERRORS } from '@/lib/api/errors';
 import { UnauthorizedError } from '@/lib/api/auth';
 import { requireAuthorRole, ForbiddenError } from '@/lib/api/permissions';
 import { fail, ok, okWithMeta } from '@/lib/api/response';
-import { revalidateCache } from '@/lib/cache/tags';
+import { CACHE_CONFIG, CACHE_TAGS, revalidateCache } from '@/lib/cache/tags';
 
 type ArticlePayloadValidationInput = {
   title?: string | null;
@@ -86,6 +87,40 @@ async function GETHandler(req: Request) {
         offset,
       });
     };
+
+    const shouldUseCachedPublicQuery = status === 'published' && !authorId;
+    if (shouldUseCachedPublicQuery) {
+      const cacheKey = JSON.stringify({
+        category,
+        topic,
+        status,
+        featured: featured === 'true',
+        limit,
+        offset,
+      });
+
+      const getCachedArticles = unstable_cache(
+        async () => {
+          const { data: articles, error, count } = await runQuery(true);
+          if (error) {
+            throw new Error(error.message);
+          }
+
+          return {
+            articles: articles ?? [],
+            total: count ?? articles?.length ?? 0,
+          };
+        },
+        ['articles-list', cacheKey],
+        {
+          revalidate: CACHE_CONFIG.PUBLIC_DATA.revalidate,
+          tags: [CACHE_TAGS.ARTICLES],
+        },
+      );
+
+      const cachedResult = await getCachedArticles();
+      return okWithMeta(cachedResult.articles, { total: cachedResult.total, limit, offset });
+    }
 
     const shouldUsePublicContext = status === 'published';
     let { data: articles, error, count } = await runQuery(shouldUsePublicContext);

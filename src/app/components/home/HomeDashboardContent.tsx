@@ -6,10 +6,15 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { PersonalStats } from './types';
-import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
+import type {
+  CategoryDashboardSection,
+  DashboardCategoryKey,
+  MediaSuggestion,
+} from '@/lib/dashboard/category-data';
 import type { ContinueData } from '@/lib/dashboard/server-data';
 import { HomeDashboardHeader, ContinueHero } from '@/app/components/home';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
+import type { HomeSuggestionItem } from './HomeSuggestions';
 
 const DIVIDER_WRAP = 'mx-auto mt-12 max-w-screen-2xl px-4 md:mt-14 md:px-6';
 const DIVIDER_STYLE = '';
@@ -19,6 +24,20 @@ const HomeSocialSection = dynamic(
     ssr: false,
   },
 );
+
+function mapMediaSuggestionsToHomeSuggestions(suggestions: MediaSuggestion[]): HomeSuggestionItem[] {
+  return suggestions.slice(0, 4).map(item => ({
+    id: `server-suggest-${item.category}-${item.mediaId}`,
+    mediaId: item.mediaId,
+    title: item.title,
+    subtitle: item.reason,
+    score: (item.confidence * 10).toFixed(1),
+    tags: item.genres ?? item.tags ?? [],
+    cover: item.cover,
+    description: item.reason,
+    source: item.source === 'backlog' ? 'local' : 'external',
+  }));
+}
 
 type SocialPreferences = {
   socialEnabled: boolean;
@@ -31,9 +50,10 @@ type HomeDashboardContentProps = {
   displayName?: string | null;
   stats: PersonalStats;
   mediaCategories: DashboardCategoryKey[];
-  categorySections: Record<DashboardCategoryKey, CategoryDashboardSection>;
+  categorySections?: Record<DashboardCategoryKey, CategoryDashboardSection>;
   socialPreferences: SocialPreferences;
   continueData?: ContinueData;
+  showSections?: boolean;
 };
 
 export default function HomeDashboardContent({
@@ -44,13 +64,8 @@ export default function HomeDashboardContent({
   categorySections,
   socialPreferences,
   continueData,
+  showSections = true,
 }: HomeDashboardContentProps) {
-  const { socialEnabled, communityActivityEnabled, communitySuggestionsEnabled } =
-    socialPreferences;
-  const suggestionSectionVisible = communitySuggestionsEnabled && mediaCategories.length > 0;
-  const activitySectionVisible = communityActivityEnabled;
-  const showSocialSection = socialEnabled && (suggestionSectionVisible || activitySectionVisible);
-
   return (
     <main className="pb-20 pt-2 md:pb-24 md:pt-3">
       <HomeDashboardHeader username={username} displayName={displayName} />
@@ -88,17 +103,58 @@ export default function HomeDashboardContent({
         <ContinueHero fallbackData={continueData} />
       </section>
 
-      {mediaCategories.length > 0 && (
-        <>
-          <section className="mt-12 md:mt-14">
-            <CategoryDashboardTabs
-              enabledCategories={mediaCategories}
-              sections={categorySections}
-              stats={stats}
-            />
-          </section>
-        </>
+      {showSections && categorySections && (
+        <HomeDashboardSections
+          mediaCategories={mediaCategories}
+          categorySections={categorySections}
+          stats={stats}
+          socialPreferences={socialPreferences}
+        />
       )}
+    </main>
+  );
+}
+
+type HomeDashboardSectionsProps = {
+  mediaCategories: DashboardCategoryKey[];
+  categorySections: Record<DashboardCategoryKey, CategoryDashboardSection>;
+  stats: PersonalStats;
+  socialPreferences: SocialPreferences;
+};
+
+export function HomeDashboardSections({
+  mediaCategories,
+  categorySections,
+  stats,
+  socialPreferences,
+}: HomeDashboardSectionsProps) {
+  const { socialEnabled, communityActivityEnabled, communitySuggestionsEnabled } =
+    socialPreferences;
+  const suggestionSectionVisible = communitySuggestionsEnabled && mediaCategories.length > 0;
+  const activitySectionVisible = communityActivityEnabled;
+  const showSocialSection = socialEnabled && (suggestionSectionVisible || activitySectionVisible);
+  const suggestionFallbackByCategory: Record<string, HomeSuggestionItem[]> = mediaCategories.reduce(
+    (acc, category) => {
+      acc[category] = mapMediaSuggestionsToHomeSuggestions(
+        categorySections[category]?.mediaSuggestions ?? [],
+      );
+      return acc;
+    },
+    {} as Record<string, HomeSuggestionItem[]>,
+  );
+
+  return (
+    <>
+      {mediaCategories.length > 0 && (
+        <section className="mt-12 md:mt-14">
+          <CategoryDashboardTabs
+            enabledCategories={mediaCategories}
+            sections={categorySections}
+            stats={stats}
+          />
+        </section>
+      )}
+
       {showSocialSection && (
         <>
           <div className={DIVIDER_WRAP}>
@@ -108,9 +164,10 @@ export default function HomeDashboardContent({
             enabledCategories={mediaCategories}
             showSuggestions={suggestionSectionVisible}
             showActivity={activitySectionVisible}
+            suggestionFallbackByCategory={suggestionFallbackByCategory}
           />
         </>
       )}
-    </main>
+    </>
   );
 }

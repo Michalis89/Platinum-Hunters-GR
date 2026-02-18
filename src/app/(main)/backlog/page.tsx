@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import BacklogPageClient from '@/app/(main)/backlog/BacklogPageClient';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { getCategoryBySlug } from '@/config/hobbies';
@@ -6,8 +7,28 @@ import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
 import { SITE_URL } from '@/config/site';
 import { requireServerAuth } from '@/lib/auth/requireServerAuth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const revalidate = 300;
+
+function BacklogPageShellSkeleton() {
+  return (
+    <div className="space-y-4 px-4 py-6 md:px-6 md:py-8">
+      <Skeleton className="h-9 w-48" />
+      <div className="flex gap-2">
+        <Skeleton className="h-10 w-24 rounded-full" />
+        <Skeleton className="h-10 w-24 rounded-full" />
+        <Skeleton className="h-10 w-24 rounded-full" />
+      </div>
+      <Skeleton className="h-12 w-full rounded-xl" />
+      <div className="space-y-3">
+        <Skeleton className="h-28 w-full rounded-2xl" />
+        <Skeleton className="h-28 w-full rounded-2xl" />
+        <Skeleton className="h-28 w-full rounded-2xl" />
+      </div>
+    </div>
+  );
+}
 
 type BacklogPageProps = {
   searchParams: Promise<{ category?: string }>;
@@ -60,7 +81,9 @@ export default async function BacklogPage({ searchParams }: BacklogPageProps) {
   return (
     <>
       <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
-      <BacklogPageClient />
+      <Suspense fallback={<BacklogPageShellSkeleton />}>
+        <BacklogPageClient />
+      </Suspense>
     </>
   );
 }

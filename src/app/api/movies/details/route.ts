@@ -1,5 +1,6 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 import { EXTERNAL_API_REVALIDATE_SECONDS } from '@/lib/constants/cache';
+import { cachedExternalFetch, ExternalFetchError } from '@/lib/api-cache/external';
 
 import { NextResponse } from 'next/server';
 
@@ -33,15 +34,7 @@ async function GETHandler(req: Request) {
     const url = new URL(`https://api.themoviedb.org/3/${base}/${tmdbId}`);
     url.searchParams.set('api_key', apiKey);
 
-    const response = await fetch(url.toString(), {
-      next: { revalidate: EXTERNAL_API_REVALIDATE_SECONDS },
-    });
-    if (!response.ok) {
-      const errorBody = await response.text();
-      return NextResponse.json({ error: errorBody || 'TMDB fetch failed' }, { status: 502 });
-    }
-
-    const data = (await response.json()) as {
+    let data: {
       runtime?: number | null;
       episode_run_time?: number[] | null;
       number_of_seasons?: number | null;
@@ -50,6 +43,19 @@ async function GETHandler(req: Request) {
       poster_path?: string | null;
       backdrop_path?: string | null;
     };
+    try {
+      data = await cachedExternalFetch({
+        apiName: `tmdb-details-${category}`,
+        endpoint: url.toString(),
+        ttlSeconds: EXTERNAL_API_REVALIDATE_SECONDS,
+      });
+    } catch (error) {
+      if (error instanceof ExternalFetchError) {
+        const upstreamMessage = error.message.replace(/^\[[^\]]+\]\s*/, '');
+        return NextResponse.json({ error: upstreamMessage || 'TMDB fetch failed' }, { status: 502 });
+      }
+      throw error;
+    }
 
     const runtime =
       category === 'movies'

@@ -16,6 +16,14 @@ import { Textarea } from '@/components/ui/textarea';
 
 const RichTextEditor = dynamic(() => import('../editor/RichTextEditor.client'), {
   ssr: false,
+  loading: () => (
+    <div className="flex h-96 items-center justify-center rounded-xl border border-border/50 bg-card/30">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">Loading editor...</p>
+      </div>
+    </div>
+  ),
 });
 interface EditArticleDialogProps {
   isOpen: boolean;

@@ -1,6 +1,7 @@
 import type { MediaPayload } from '../types';
 import { MEDIA_CATEGORY_CONFIGS } from '../config';
 import { EXTERNAL_API_REVALIDATE_SECONDS } from '@/lib/constants/cache';
+import { cachedExternalFetch } from '@/lib/api-cache/external';
 
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
 
@@ -28,14 +29,7 @@ export async function fetchTmdbDetails(
   url.searchParams.set('api_key', apiKey);
 
   try {
-    const response = await fetch(url.toString(), {
-      next: { revalidate: EXTERNAL_API_REVALIDATE_SECONDS },
-    });
-    if (!response.ok) {
-      return {};
-    }
-
-    const data = (await response.json()) as {
+    const data = await cachedExternalFetch<{
       runtime?: number | null;
       episode_run_time?: number[] | null;
       number_of_seasons?: number | null;
@@ -43,7 +37,11 @@ export async function fetchTmdbDetails(
       genres?: { id: number; name: string }[] | null;
       poster_path?: string | null;
       backdrop_path?: string | null;
-    };
+    }>({
+      apiName: `tmdb-details-${category}`,
+      endpoint: url.toString(),
+      ttlSeconds: EXTERNAL_API_REVALIDATE_SECONDS,
+    });
 
     const runtime =
       category === 'movies'

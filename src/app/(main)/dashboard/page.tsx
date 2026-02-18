@@ -1,16 +1,19 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import HomeDashboardContent from '@/app/components/home/HomeDashboardContent';
+import HomeDashboardContent, {
+  HomeDashboardSections,
+} from '@/app/components/home/HomeDashboardContent';
 import { fetchUserStats, fetchContinueData } from '@/lib/dashboard/server-data';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { PageContainer } from '@/app/components/layout';
 import { getUserSettings } from '@/lib/settings';
-import type { DashboardCategoryKey } from '@/lib/dashboard/category-data';
+import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
 import {
   DASHBOARD_TAB_CATEGORIES,
   fetchCategoryDashboardData,
 } from '@/lib/dashboard/category-data';
+import type { PersonalStats } from '@/app/components/home/types';
 
 export const revalidate = 300;
 
@@ -67,6 +70,79 @@ function DashboardContentSkeleton() {
   );
 }
 
+function DashboardSectionsSkeleton() {
+  return (
+    <>
+      <section className="mt-12 px-4 md:mt-14 md:px-6">
+        <div className="mx-auto max-w-screen-2xl animate-pulse space-y-4">
+          <div className="h-10 w-full rounded-xl bg-muted/70" />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="h-64 rounded-2xl bg-muted/55" />
+            <div className="h-64 rounded-2xl bg-muted/55" />
+          </div>
+        </div>
+      </section>
+
+      <PageContainer size="xl">
+        <div className="mx-auto mt-12 max-w-screen-2xl animate-pulse space-y-4 px-4 md:mt-14 md:px-6">
+          <div className="h-[1px] w-full bg-muted/60" />
+          <div className="h-10 w-56 rounded-full bg-muted/70" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="h-72 rounded-2xl bg-muted/50" />
+            <div className="h-72 rounded-2xl bg-muted/50" />
+            <div className="h-72 rounded-2xl bg-muted/50" />
+            <div className="h-72 rounded-2xl bg-muted/50" />
+          </div>
+        </div>
+      </PageContainer>
+    </>
+  );
+}
+
+type SocialPreferences = {
+  socialEnabled: boolean;
+  communityActivityEnabled: boolean;
+  communitySuggestionsEnabled: boolean;
+};
+
+type DashboardBasePayload = {
+  userId: string;
+  username: string;
+  displayName: string | null;
+  stats: PersonalStats;
+  continueData: Awaited<ReturnType<typeof fetchContinueData>>;
+  mediaCategories: DashboardCategoryKey[];
+  socialPreferences: SocialPreferences;
+};
+
+async function DashboardSectionsData({
+  userId,
+  mediaCategories,
+  stats,
+  socialPreferences,
+}: {
+  userId: string;
+  mediaCategories: DashboardCategoryKey[];
+  stats: PersonalStats;
+  socialPreferences: SocialPreferences;
+}) {
+  if (mediaCategories.length === 0) {
+    return null;
+  }
+
+  const categorySections: Record<DashboardCategoryKey, CategoryDashboardSection> =
+    await fetchCategoryDashboardData(userId, mediaCategories);
+
+  return (
+    <HomeDashboardSections
+      mediaCategories={mediaCategories}
+      categorySections={categorySections}
+      stats={stats}
+      socialPreferences={socialPreferences}
+    />
+  );
+}
+
 // Server Component that fetches dashboard data
 async function DashboardData() {
   const supabase = await createRouteHandlerClient();
@@ -107,18 +183,36 @@ async function DashboardData() {
   );
   const mediaCategories = requestedCategories.length > 0 ? requestedCategories : fallbackCategories;
 
-  const categorySections = await fetchCategoryDashboardData(userId, mediaCategories);
+  const payload: DashboardBasePayload = {
+    userId,
+    username,
+    displayName,
+    stats,
+    continueData,
+    mediaCategories,
+    socialPreferences,
+  };
 
   return (
-    <HomeDashboardContent
-      username={username}
-      displayName={displayName}
-      stats={stats}
-      continueData={continueData}
-      mediaCategories={mediaCategories}
-      categorySections={categorySections}
-      socialPreferences={socialPreferences}
-    />
+    <>
+      <HomeDashboardContent
+        username={payload.username}
+        displayName={payload.displayName}
+        stats={payload.stats}
+        continueData={payload.continueData}
+        mediaCategories={payload.mediaCategories}
+        socialPreferences={payload.socialPreferences}
+        showSections={false}
+      />
+      <Suspense fallback={<DashboardSectionsSkeleton />}>
+        <DashboardSectionsData
+          userId={payload.userId}
+          mediaCategories={payload.mediaCategories}
+          stats={payload.stats}
+          socialPreferences={payload.socialPreferences}
+        />
+      </Suspense>
+    </>
   );
 }
 
@@ -127,7 +221,7 @@ export default function DashboardPage() {
     <section className="relative isolate min-h-screen text-foreground">
       <h1 className="sr-only">Dashboard</h1>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-20 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+        <div className="blur-effect absolute -top-20 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-primary/10 blur-xl" />
       </div>
       <div className="relative w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
         <Suspense fallback={<DashboardContentSkeleton />}>

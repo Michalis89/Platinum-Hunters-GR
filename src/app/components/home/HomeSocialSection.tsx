@@ -2,7 +2,7 @@
 
 import { Separator } from '@/components/ui/separator';
 import { HomeRecentActivity } from './HomeRecentActivity';
-import { HomeSuggestions } from './HomeSuggestions';
+import { HomeSuggestions, type HomeSuggestionItem } from './HomeSuggestions';
 
 const SECTION_SPACING = 'pt-10 md:pt-12';
 const DIVIDER_WRAP = 'mx-auto mt-8 max-w-screen-2xl px-4 md:mt-10 md:px-6';
@@ -12,12 +12,14 @@ type HomeSocialSectionProps = {
   enabledCategories: string[];
   showSuggestions: boolean;
   showActivity: boolean;
+  suggestionFallbackByCategory?: Record<string, HomeSuggestionItem[]>;
 };
 
 export function HomeSocialSection({
   enabledCategories,
   showSuggestions,
   showActivity,
+  suggestionFallbackByCategory,
 }: HomeSocialSectionProps) {
   const renderSuggestions = showSuggestions && enabledCategories.length > 0;
 
@@ -25,7 +27,10 @@ export function HomeSocialSection({
     <>
       {renderSuggestions && (
         <section className={SECTION_SPACING}>
-          <HomeSuggestions enabledCategories={enabledCategories} />
+          <HomeSuggestions
+            enabledCategories={enabledCategories}
+            fallbackByCategory={suggestionFallbackByCategory}
+          />
         </section>
       )}
 

@@ -273,6 +273,21 @@
     transform: translateZ(0);
     will-change: transform;
   }
+
+  .blur-effect {
+    will-change: filter;
+    transform: translateZ(0);
+  }
+
+  .virtual-row {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 148px;
+    will-change: transform;
+  }
+
+  .app-main-shell {
+    contain: layout style;
+  }
 }
 
 @media (hover: hover) {

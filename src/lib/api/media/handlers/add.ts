@@ -18,6 +18,7 @@ import { findExistingMedia } from '../utils/media-lookup';
 import '../handlers/enrichers'; // Import to initialize enricher functions in configs
 import { isAllowedIgdbGameCandidate } from '@/lib/igdb/categories';
 import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
+import { revalidateCache } from '@/lib/cache/tags';
 
 /**
  * Generic handler for POST /api/{category}/add
@@ -174,6 +175,7 @@ async function handleExternalSource(
     externalIdValue as number | string,
     payload!.category as string,
   );
+  let insertedNewMedia = false;
 
   // Insert new media if doesn't exist
   if (!mediaId) {
@@ -201,6 +203,7 @@ async function handleExternalSource(
       throw insertError;
     }
     mediaId = (inserted as { id?: number } | null)?.id ?? null;
+    insertedNewMedia = true;
   }
 
   if (!mediaId) {
@@ -248,6 +251,10 @@ async function handleExternalSource(
     display_name: (profileData as UserProfile)?.display_name,
     avatar_url: (profileData as UserProfile)?.avatar_url,
   });
+
+  if (insertedNewMedia) {
+    revalidateCache.publicStats();
+  }
 
   return NextResponse.json({ entry, mediaId });
 }

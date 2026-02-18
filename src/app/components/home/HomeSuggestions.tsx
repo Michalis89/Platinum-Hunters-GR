@@ -33,6 +33,7 @@ type SuggestionItem = {
   source: 'local' | 'external';
   payload?: Record<string, unknown>;
 };
+export type HomeSuggestionItem = SuggestionItem;
 
 type CategoryConfig = {
   key: string;
@@ -89,28 +90,39 @@ const categoryConfigs: CategoryConfig[] = [
 
 type HomeSuggestionsProps = {
   enabledCategories: string[];
+  fallbackByCategory?: Record<string, SuggestionItem[]>;
 };
 
-export function HomeSuggestions({ enabledCategories }: HomeSuggestionsProps) {
-  const [activeTab, setActiveTab] = useState<string | null>(null);
-
+export function HomeSuggestions({ enabledCategories, fallbackByCategory }: HomeSuggestionsProps) {
   const visibleConfigs = useMemo(
-    () => categoryConfigs.filter(c => enabledCategories.includes(c.key)),
+    () => categoryConfigs.filter(config => enabledCategories.includes(config.key)),
     [enabledCategories],
   );
+  const [activeTab, setActiveTab] = useState<string | null>(() => visibleConfigs[0]?.key ?? null);
 
   useEffect(() => {
-    if (visibleConfigs.length > 0 && !activeTab) {
+    if (visibleConfigs.length === 0) {
+      if (activeTab !== null) {
+        setActiveTab(null);
+      }
+      return;
+    }
+
+    const hasActiveTab = activeTab ? visibleConfigs.some(config => config.key === activeTab) : false;
+    if (!hasActiveTab) {
       setActiveTab(visibleConfigs[0].key);
     }
-  }, [visibleConfigs, activeTab]);
+  }, [activeTab, visibleConfigs]);
 
   const activeConfig = visibleConfigs.find(c => c.key === activeTab);
+  const activeFallbackItems = activeConfig ? fallbackByCategory?.[activeConfig.key] : undefined;
 
   const { data: suggestionsData } = useSWR<{ items?: SuggestionItem[] }>(
     activeConfig ? activeConfig.apiPath : null,
     fetcher,
     {
+      fallbackData: activeFallbackItems ? { items: activeFallbackItems } : undefined,
+      revalidateOnMount: !activeFallbackItems,
       revalidateOnFocus: false,
       dedupingInterval: 60000,
       keepPreviousData: true,

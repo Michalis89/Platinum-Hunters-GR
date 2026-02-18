@@ -1,5 +1,6 @@
 import { DEFAULT_COVER, UNTITLED_FALLBACK } from '@/lib/constants/messages';
 import { EXTERNAL_API_REVALIDATE_SECONDS } from '@/lib/constants/cache';
+import { cachedExternalFetch } from '@/lib/api-cache/external';
 import type { MediaSearchConfig, SearchLocalItem } from '../../handlers/search';
 
 type MoviesCategory = 'movies' | 'tv';
@@ -119,17 +120,17 @@ const fetchTmdb = async (
   url.searchParams.set('include_adult', 'false');
   url.searchParams.set('page', '1');
 
-  const response = await fetch(url.toString(), {
-    next: { revalidate: EXTERNAL_API_REVALIDATE_SECONDS },
-  });
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.warn('TMDB error:', errorBody);
+  try {
+    const result = await cachedExternalFetch<{ results?: TmdbMedia[] }>({
+      apiName: `tmdb-search-${category}`,
+      endpoint: url.toString(),
+      ttlSeconds: EXTERNAL_API_REVALIDATE_SECONDS,
+    });
+    return (result.results ?? []).slice(0, limit);
+  } catch (error) {
+    console.warn('TMDB error:', error);
     return [] as TmdbMedia[];
   }
-
-  const result = (await response.json()) as { results?: TmdbMedia[] };
-  return (result.results ?? []).slice(0, limit);
 };
 
 export const moviesSearchConfig: MediaSearchConfig<

@@ -1,5 +1,6 @@
 import { DEFAULT_COVER, UNTITLED_FALLBACK } from '@/lib/constants/messages';
 import { EXTERNAL_API_REVALIDATE_SECONDS } from '@/lib/constants/cache';
+import { cachedExternalFetch } from '@/lib/api-cache/external';
 import type { MediaSearchConfig, SearchLocalItem } from '../../handlers/search';
 
 type AnimeCategory = 'anime' | 'manga';
@@ -131,22 +132,24 @@ const fetchMal = async (
   url.searchParams.set('limit', String(limit));
   url.searchParams.set('fields', MAL_FIELDS);
 
-  const response = await fetch(url.toString(), {
-    next: { revalidate: EXTERNAL_API_REVALIDATE_SECONDS },
-    headers: {
-      Accept: 'application/json',
-      'X-MAL-CLIENT-ID': clientId,
-    },
-  });
+  try {
+    const result = await cachedExternalFetch<{ data?: { node: MalMedia }[] }>({
+      apiName: 'mal-search',
+      endpoint: url.toString(),
+      ttlSeconds: EXTERNAL_API_REVALIDATE_SECONDS,
+      init: {
+        headers: {
+          Accept: 'application/json',
+          'X-MAL-CLIENT-ID': clientId,
+        },
+      },
+    });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.warn('MAL error:', errorBody);
+    return (result.data ?? []).map(item => item.node);
+  } catch (error) {
+    console.warn('MAL error:', error);
     return [] as MalMedia[];
   }
-
-  const result = (await response.json()) as { data?: { node: MalMedia }[] };
-  return (result.data ?? []).map(item => item.node);
 };
 
 export const animeSearchConfig: MediaSearchConfig<

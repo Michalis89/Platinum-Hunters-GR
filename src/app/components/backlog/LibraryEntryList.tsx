@@ -31,8 +31,9 @@ function LibraryEntryList({
   const virtualizer = useVirtualizer({
     count: entries.length,
     getScrollElement: () => parentRef.current,
+    getItemKey: index => String(entries[index]?.entryId ?? entries[index]?.mediaId ?? index),
     estimateSize: () => 148,
-    overscan: 5,
+    overscan: 8,
   });
 
   return (
@@ -76,8 +77,8 @@ function LibraryEntryList({
                 key={`${entry.entryId ?? entry.mediaId ?? entry.id}`}
                 data-index={virtualItem.index}
                 ref={virtualizer.measureElement}
-                className="absolute left-0 top-0 w-full"
-                style={{ transform: `translateY(${virtualItem.start}px)` }}
+                className="virtual-row absolute left-0 top-0 w-full"
+                style={{ transform: `translate3d(0, ${virtualItem.start}px, 0)` }}
               >
                 <div className="pb-3">
                   <LibraryEntryRow

@@ -41,6 +41,29 @@ export const CACHE_TAGS = {
   // Global tags
   ACTIVITY_FEED: 'activity-feed',
   ANALYTICS: 'analytics',
+  PUBLIC_STATS: 'public-stats',
+} as const;
+
+/**
+ * Structured cache tag helpers for new code.
+ * Keep CACHE_TAGS for backward compatibility.
+ */
+export const cacheTags = {
+  articles: {
+    all: () => CACHE_TAGS.ARTICLES,
+    byId: (id: number | string) => CACHE_TAGS.ARTICLE(id),
+    comments: (id: number | string) => CACHE_TAGS.ARTICLE_COMMENTS(id),
+    likes: (id: number | string) => CACHE_TAGS.ARTICLE_LIKES(id),
+  },
+  users: {
+    backlog: (userId: string) => CACHE_TAGS.USER_BACKLOG(userId),
+    profile: (userId: string) => CACHE_TAGS.USER_PROFILE(userId),
+    activity: (userId: string) => CACHE_TAGS.USER_ACTIVITY(userId),
+  },
+  public: {
+    stats: () => CACHE_TAGS.PUBLIC_STATS,
+    activityFeed: () => CACHE_TAGS.ACTIVITY_FEED,
+  },
 } as const;
 
 /**
@@ -58,6 +81,7 @@ export const revalidateCache = {
       revalidateTag(CACHE_TAGS.ARTICLE_LIKES(articleId));
     }
     revalidateTag(CACHE_TAGS.ACTIVITY_FEED);
+    revalidateTag(CACHE_TAGS.PUBLIC_STATS);
   },
 
   /**
@@ -146,6 +170,13 @@ export const revalidateCache = {
    */
   allGamePages() {
     revalidatePath('/games', 'layout');
+  },
+
+  /**
+   * Revalidate global public stats endpoint/cache.
+   */
+  publicStats() {
+    revalidateTag(CACHE_TAGS.PUBLIC_STATS);
   },
 };
 

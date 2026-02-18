@@ -1,5 +1,3 @@
-'use client';
-
 import {
   CheckCircle2,
   Gamepad2,
@@ -13,12 +11,9 @@ import {
   Heart,
   Eye,
   Clock,
-  Info,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
-import { memo } from 'react';
+import { ProfileStatsInfoTooltip } from './ProfileStatsInfoTooltip.client';
 
 type Stat = {
   value: number | string;
@@ -67,7 +62,7 @@ const readingTips: Record<string, string> = {
     'Approximate: ~35-45 pages/hour (depending on difficulty), based on an average reading speed.',
 };
 
-function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsProps>) {
+export function ProfileStats({ category, mediaStats }: Readonly<ProfileStatsProps>) {
   const titles = categoryTitles[category] || { eyebrow: 'Stats', title: 'Your stats' };
 
   const labels: Record<string, { completed: string; current: string; planned: string }> = {
@@ -176,28 +171,7 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
                     <p className="flex items-center justify-center gap-2 text-sm font-medium text-foreground">
                       {stat.label}
                       {tipText && (
-                        <TooltipProvider delayDuration={150}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                aria-label="Calculation details"
-                                className="grid h-7 w-7 place-items-center rounded-full border border-border bg-card text-primary transition hover:border-primary hover:bg-primary/10"
-                              >
-                                <Info className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="bottom"
-                              align="center"
-                              sideOffset={8}
-                              className="z-[9999] w-[min(280px,80vw)] rounded-2xl border border-border bg-card p-3 text-xs leading-relaxed text-foreground shadow-md"
-                            >
-                              {tipText}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <ProfileStatsInfoTooltip text={tipText} />
                       )}
                     </p>
                     {stat.note && <p className="mt-1 text-xs text-muted-foreground">{stat.note}</p>}
@@ -211,5 +185,3 @@ function ProfileStatsComponent({ category, mediaStats }: Readonly<ProfileStatsPr
     </section>
   );
 }
-
-export const ProfileStats = memo(ProfileStatsComponent);
