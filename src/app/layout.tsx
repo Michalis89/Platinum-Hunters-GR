@@ -11,6 +11,7 @@ import {
   websiteStructuredData,
 } from '@/utils/seo/metadata/structuredData';
 import Providers from '@/store/Providers';
+import { GoogleAnalytics } from './components/analytics/GoogleAnalytics';
 export { metadata } from '@/utils/seo/metadata/metadata';
 
 // Font optimization: removed 'latin-ext' subset (~10KB savings)
@@ -46,6 +47,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   // Determine resolved theme for SSR (defaults to 'dark')
   const initialTheme: Theme = themeCookie === 'light' ? 'light' : 'dark';
   const isVercelProd = process.env.NODE_ENV === 'production' && !!process.env.VERCEL;
+  const isProd = process.env.NODE_ENV === 'production';
+  const gaId = isProd ? process.env.NEXT_PUBLIC_GA_ID : undefined;
 
   return (
     <html
@@ -73,6 +76,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <Providers initialTheme={initialTheme} initialPreference={initialPreference}>
           <AuthInit />
           {children}
+          {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
           {isVercelProd ? (
             <>
               <Analytics />
