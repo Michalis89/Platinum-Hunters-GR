@@ -29,7 +29,9 @@ type UserMenuProps = {
   user: UserEntity;
   canQuickAdd: boolean;
   canAccessAdminPanel: boolean;
-  ticketUnreadCount: number;
+  userTicketUnreadCount: number;
+  adminTicketUnreadCount: number;
+  hasAnyTicketUnread: boolean;
   onAdd: () => void;
   onLogout: () => Promise<void>;
 };
@@ -41,7 +43,9 @@ export const UserMenu = React.memo(function UserMenu({
   user,
   canQuickAdd,
   canAccessAdminPanel,
-  ticketUnreadCount,
+  userTicketUnreadCount,
+  adminTicketUnreadCount,
+  hasAnyTicketUnread,
   onAdd,
   onLogout,
 }: UserMenuProps) {
@@ -64,7 +68,7 @@ export const UserMenu = React.memo(function UserMenu({
                 {fallbackInitial}
               </AvatarFallback>
             </Avatar>
-            {ticketUnreadCount > 0 ? (
+            {hasAnyTicketUnread ? (
               <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-background" />
             ) : null}
           </span>
@@ -123,9 +127,9 @@ export const UserMenu = React.memo(function UserMenu({
             <Link href="/support/tickets" prefetch={false}>
               <Ticket className="size-4" />
               <span>My tickets</span>
-              {ticketUnreadCount > 0 ? (
+              {userTicketUnreadCount > 0 ? (
                 <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
-                  {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                  {userTicketUnreadCount > 99 ? '99+' : userTicketUnreadCount}
                 </span>
               ) : null}
             </Link>
@@ -135,9 +139,9 @@ export const UserMenu = React.memo(function UserMenu({
               <Link href="/admin" prefetch={false}>
                 <ShieldCheck className="size-4" />
                 <span>Admin Panel</span>
-                {ticketUnreadCount > 0 ? (
+                {adminTicketUnreadCount > 0 ? (
                   <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
-                    {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                    {adminTicketUnreadCount > 99 ? '99+' : adminTicketUnreadCount}
                   </span>
                 ) : null}
               </Link>

@@ -29,7 +29,9 @@ type DesktopNavProps = {
   user: UserEntity | null;
   canQuickAdd: boolean;
   canAccessAdminPanel: boolean;
-  ticketUnreadCount: number;
+  userTicketUnreadCount: number;
+  adminTicketUnreadCount: number;
+  hasAnyTicketUnread: boolean;
   onAdd: () => void;
   onLogout: () => Promise<void>;
   theme: Theme;
@@ -48,7 +50,9 @@ export const DesktopNav = React.memo(function DesktopNav({
   user,
   canQuickAdd,
   canAccessAdminPanel,
-  ticketUnreadCount,
+  userTicketUnreadCount,
+  adminTicketUnreadCount,
+  hasAnyTicketUnread,
   onAdd,
   onLogout,
   theme,
@@ -136,7 +140,9 @@ export const DesktopNav = React.memo(function DesktopNav({
               user={user}
               canQuickAdd={canQuickAdd}
               canAccessAdminPanel={canAccessAdminPanel}
-              ticketUnreadCount={ticketUnreadCount}
+              userTicketUnreadCount={userTicketUnreadCount}
+              adminTicketUnreadCount={adminTicketUnreadCount}
+              hasAnyTicketUnread={hasAnyTicketUnread}
               onAdd={onAdd}
               onLogout={onLogout}
             />

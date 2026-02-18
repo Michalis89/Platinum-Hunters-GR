@@ -5,15 +5,27 @@ import { supabase } from '@/lib/supabase-client';
 
 type TicketNotificationSummary = {
   unread_count: number;
+  user_unread_count: number;
+  admin_unread_count: number;
   enabled: boolean;
 };
 
 export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000) {
-  const [count, setCount] = useState(0);
+  const [summary, setSummary] = useState<TicketNotificationSummary>({
+    unread_count: 0,
+    user_unread_count: 0,
+    admin_unread_count: 0,
+    enabled,
+  });
 
   const load = useCallback(async () => {
     if (!enabled) {
-      setCount(0);
+      setSummary({
+        unread_count: 0,
+        user_unread_count: 0,
+        admin_unread_count: 0,
+        enabled: false,
+      });
       return;
     }
 
@@ -24,13 +36,28 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
         | null;
 
       if (!response.ok) {
-        setCount(0);
+        setSummary({
+          unread_count: 0,
+          user_unread_count: 0,
+          admin_unread_count: 0,
+          enabled: true,
+        });
         return;
       }
 
-      setCount(payload?.data?.unread_count ?? 0);
+      setSummary({
+        unread_count: payload?.data?.unread_count ?? 0,
+        user_unread_count: payload?.data?.user_unread_count ?? 0,
+        admin_unread_count: payload?.data?.admin_unread_count ?? 0,
+        enabled: payload?.data?.enabled ?? true,
+      });
     } catch {
-      setCount(0);
+      setSummary({
+        unread_count: 0,
+        user_unread_count: 0,
+        admin_unread_count: 0,
+        enabled,
+      });
     }
   }, [enabled]);
 
@@ -76,5 +103,11 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
     };
   }, [enabled, intervalMs, load]);
 
-  return { count, refresh: load };
+  return {
+    count: summary.unread_count,
+    userCount: summary.user_unread_count,
+    adminCount: summary.admin_unread_count,
+    totalCount: summary.unread_count,
+    refresh: load,
+  };
 }

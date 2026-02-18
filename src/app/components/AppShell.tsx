@@ -1,7 +1,6 @@
 import React from 'react';
 import NavbarWrapper from './NavbarWrapper';
 import { Footer } from './layout/Footer';
-import MobileTabBar from './navbar/MobileTabBar';
 
 type Props = {
   children: React.ReactNode;
@@ -27,7 +26,6 @@ export default function AppShell({ children }: Props) {
           {children}
         </main>
         <Footer />
-        <MobileTabBar />
       </div>
     </div>
   );

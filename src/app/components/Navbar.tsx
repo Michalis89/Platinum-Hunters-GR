@@ -59,7 +59,11 @@ export default function Navbar() {
 
   const shouldLoadSettings = isAuthenticated && authResolved;
   const { settings, mutate: mutateSettings } = useUserSettings(shouldLoadSettings);
-  const { count: ticketUnreadCount } = useTicketNotificationCount(shouldLoadSettings);
+  const {
+    userCount: userTicketUnreadCount,
+    adminCount: adminTicketUnreadCount,
+    totalCount: totalTicketUnreadCount,
+  } = useTicketNotificationCount(shouldLoadSettings);
   const [isThemeSaving, setIsThemeSaving] = useState(false);
 
   const isNavbarLoading = !authResolved;
@@ -201,7 +205,9 @@ export default function Navbar() {
           user={user}
           canQuickAdd={canQuickAdd}
           canAccessAdminPanel={canAccessAdminPanel}
-          ticketUnreadCount={ticketUnreadCount}
+          userTicketUnreadCount={userTicketUnreadCount}
+          adminTicketUnreadCount={adminTicketUnreadCount}
+          hasAnyTicketUnread={totalTicketUnreadCount > 0}
           onAdd={() => setAddDialogOpen(true)}
           onLogout={handleLogout}
           theme={theme}
@@ -222,7 +228,9 @@ export default function Navbar() {
           user={user}
           canQuickAdd={canQuickAdd}
           canAccessAdminPanel={canAccessAdminPanel}
-          ticketUnreadCount={ticketUnreadCount}
+          userTicketUnreadCount={userTicketUnreadCount}
+          adminTicketUnreadCount={adminTicketUnreadCount}
+          hasAnyTicketUnread={totalTicketUnreadCount > 0}
           onAdd={() => setAddDialogOpen(true)}
           onLogout={handleLogout}
           theme={theme}

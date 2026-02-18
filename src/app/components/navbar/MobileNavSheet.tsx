@@ -35,7 +35,9 @@ type MobileNavSheetProps = {
   user: UserEntity | null;
   canQuickAdd: boolean;
   canAccessAdminPanel: boolean;
-  ticketUnreadCount: number;
+  userTicketUnreadCount: number;
+  adminTicketUnreadCount: number;
+  hasAnyTicketUnread: boolean;
   onAdd: () => void;
   onLogout: () => Promise<void>;
   theme: Theme;
@@ -55,7 +57,9 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
   user,
   canQuickAdd,
   canAccessAdminPanel,
-  ticketUnreadCount,
+  userTicketUnreadCount,
+  adminTicketUnreadCount,
+  hasAnyTicketUnread,
   onAdd,
   onLogout,
   theme,
@@ -81,9 +85,12 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
             variant="secondary"
             size="icon"
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className="h-11 w-11 border border-[var(--border)] bg-card text-foreground transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
+            className="relative h-11 w-11 border border-[var(--border)] bg-card text-foreground transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
           >
             <Menu className="size-5" />
+            {hasAnyTicketUnread ? (
+              <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-card" />
+            ) : null}
           </Button>
         </SheetTrigger>
         <SheetContent
@@ -235,7 +242,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                         </AvatarFallback>
                       </Avatar>
                       <span className="truncate text-sm">{user.username}</span>
-                      {ticketUnreadCount > 0 ? (
+                      {hasAnyTicketUnread ? (
                         <span className="ml-auto inline-flex h-2.5 w-2.5 rounded-full bg-destructive" />
                       ) : null}
                     </div>
@@ -281,9 +288,9 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       <Link href="/support/tickets">
                         <Ticket className="size-4" />
                         <span>My tickets</span>
-                        {ticketUnreadCount > 0 ? (
+                        {userTicketUnreadCount > 0 ? (
                           <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
-                            {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                            {userTicketUnreadCount > 99 ? '99+' : userTicketUnreadCount}
                           </span>
                         ) : null}
                       </Link>
@@ -297,9 +304,9 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                         <Link href="/admin">
                           <ShieldCheck className="size-4" />
                           <span>Admin Panel</span>
-                          {ticketUnreadCount > 0 ? (
+                          {adminTicketUnreadCount > 0 ? (
                             <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
-                              {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                              {adminTicketUnreadCount > 99 ? '99+' : adminTicketUnreadCount}
                             </span>
                           ) : null}
                         </Link>
