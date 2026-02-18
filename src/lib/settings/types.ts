@@ -12,6 +12,9 @@ export type UserSettingsValue = {
   diary_enabled: boolean;
   dnd_enabled: boolean;
   dnd_role: DndRole | null;
+  ticket_notifications_enabled: boolean;
+  follows_notifications_enabled: boolean;
+  dms_notifications_enabled: boolean;
 };
 
 export type UserSettingsData = UserSettingsValue & {
@@ -33,4 +36,7 @@ export const USER_SETTINGS_DEFAULTS: UserSettingsValue = {
   diary_enabled: false,
   dnd_enabled: false,
   dnd_role: null,
+  ticket_notifications_enabled: true,
+  follows_notifications_enabled: false,
+  dms_notifications_enabled: false,
 };

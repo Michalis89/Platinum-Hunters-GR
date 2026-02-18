@@ -35,6 +35,7 @@ type MobileNavSheetProps = {
   user: UserEntity | null;
   canQuickAdd: boolean;
   canAccessAdminPanel: boolean;
+  ticketUnreadCount: number;
   onAdd: () => void;
   onLogout: () => Promise<void>;
   theme: Theme;
@@ -54,6 +55,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
   user,
   canQuickAdd,
   canAccessAdminPanel,
+  ticketUnreadCount,
   onAdd,
   onLogout,
   theme,
@@ -233,6 +235,9 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                         </AvatarFallback>
                       </Avatar>
                       <span className="truncate text-sm">{user.username}</span>
+                      {ticketUnreadCount > 0 ? (
+                        <span className="ml-auto inline-flex h-2.5 w-2.5 rounded-full bg-destructive" />
+                      ) : null}
                     </div>
                     {canQuickAdd ? (
                       <Button
@@ -276,6 +281,11 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       <Link href="/support/tickets">
                         <Ticket className="size-4" />
                         <span>My tickets</span>
+                        {ticketUnreadCount > 0 ? (
+                          <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
+                            {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                          </span>
+                        ) : null}
                       </Link>
                     </Button>
                     {canAccessAdminPanel ? (
@@ -287,6 +297,11 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                         <Link href="/admin">
                           <ShieldCheck className="size-4" />
                           <span>Admin Panel</span>
+                          {ticketUnreadCount > 0 ? (
+                            <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
+                              {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                            </span>
+                          ) : null}
                         </Link>
                       </Button>
                     ) : null}

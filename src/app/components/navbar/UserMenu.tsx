@@ -29,6 +29,7 @@ type UserMenuProps = {
   user: UserEntity;
   canQuickAdd: boolean;
   canAccessAdminPanel: boolean;
+  ticketUnreadCount: number;
   onAdd: () => void;
   onLogout: () => Promise<void>;
 };
@@ -40,6 +41,7 @@ export const UserMenu = React.memo(function UserMenu({
   user,
   canQuickAdd,
   canAccessAdminPanel,
+  ticketUnreadCount,
   onAdd,
   onLogout,
 }: UserMenuProps) {
@@ -55,12 +57,17 @@ export const UserMenu = React.memo(function UserMenu({
             'h-9 gap-2 rounded-md border border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-foreground shadow-none transition-[background-color,color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent-muted))/0.35] hover:text-primary active:scale-[0.99]',
           )}
         >
-          <Avatar className="h-7 w-7 border border-border">
-            <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
-            <AvatarFallback className="bg-accent/10 text-xs font-semibold text-foreground">
-              {fallbackInitial}
-            </AvatarFallback>
-          </Avatar>
+          <span className="relative inline-flex">
+            <Avatar className="h-7 w-7 border border-border">
+              <AvatarImage src={user.avatar_url || undefined} alt={user.username || 'User'} />
+              <AvatarFallback className="bg-accent/10 text-xs font-semibold text-foreground">
+                {fallbackInitial}
+              </AvatarFallback>
+            </Avatar>
+            {ticketUnreadCount > 0 ? (
+              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-background" />
+            ) : null}
+          </span>
           <span className="max-w-[130px] truncate text-[13px] font-medium tracking-[-0.01em]">
             {user.username ?? 'Hobbistas User'}
           </span>
@@ -116,6 +123,11 @@ export const UserMenu = React.memo(function UserMenu({
             <Link href="/support/tickets" prefetch={false}>
               <Ticket className="size-4" />
               <span>My tickets</span>
+              {ticketUnreadCount > 0 ? (
+                <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
+                  {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                </span>
+              ) : null}
             </Link>
           </DropdownMenuItem>
           {canAccessAdminPanel ? (
@@ -123,6 +135,11 @@ export const UserMenu = React.memo(function UserMenu({
               <Link href="/admin" prefetch={false}>
                 <ShieldCheck className="size-4" />
                 <span>Admin Panel</span>
+                {ticketUnreadCount > 0 ? (
+                  <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
+                    {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
+                  </span>
+                ) : null}
               </Link>
             </DropdownMenuItem>
           ) : null}

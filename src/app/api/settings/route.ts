@@ -17,6 +17,9 @@ const settingsSchema = z.object({
   diary_enabled: z.boolean().optional(),
   dnd_enabled: z.boolean().optional(),
   dnd_role: z.enum(['dm', 'player']).nullable().optional(),
+  ticket_notifications_enabled: z.boolean().optional(),
+  follows_notifications_enabled: z.boolean().optional(),
+  dms_notifications_enabled: z.boolean().optional(),
 });
 
 const handler = withApiRoute(async (request: Request) => {

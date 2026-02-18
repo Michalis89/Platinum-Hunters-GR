@@ -60,7 +60,7 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     title: 'Personal Suggestions',
     description: 'Optional, context-based suggestions inside library and import flows.',
-    status: 'in-progress',
+    status: 'done',
     area: 'core',
     icon: Sparkles,
   },
@@ -141,7 +141,7 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
     title: 'Diary Module',
     description:
       'Private personal journal for notes and reflection. Optional and disabled by default.',
-    status: 'planned',
+    status: 'in-progress',
     area: 'diary',
     icon: BookOpen,
   },

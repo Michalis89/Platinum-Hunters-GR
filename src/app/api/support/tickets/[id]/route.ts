@@ -35,6 +35,13 @@ async function GETHandler(_req: Request, context: { params: Promise<{ id: string
       return fail(API_ERRORS.NOT_FOUND, API_ERRORS.NOT_FOUND.status);
     }
 
+    const { error: markReadError } = await supabase.rpc('mark_support_ticket_as_read', {
+      p_ticket_id: ticketId,
+    });
+    if (markReadError) {
+      console.error('Support ticket mark-as-read error:', markReadError);
+    }
+
     const { data: messages, error: messagesError } = await supabase
       .from('support_messages')
       .select('*')

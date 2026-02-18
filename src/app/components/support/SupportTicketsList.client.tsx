@@ -56,6 +56,11 @@ type TicketItem = {
   created_at: string;
   updated_at: string;
   user_archived?: boolean;
+  unread_reply_count?: number;
+  has_unread_reply?: boolean;
+  status_changed_since_read?: boolean;
+  status_changed_to?: string | null;
+  status_changed_at?: string | null;
 };
 
 const mapAlertVariant = (type: TicketsAlert['type']) => (type === 'error' ? 'destructive' : type);
@@ -75,8 +80,18 @@ export default function SupportTicketsList() {
     endpoint: '/api/support/tickets',
     enabled: true,
   });
-  const [view, setView] = useState<'active' | 'all' | 'archive'>('active');
+  const [view, setView] = useState<'active' | 'unread' | 'all' | 'archive'>('active');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const unreadTicketsCount = useMemo(
+    () =>
+      tickets.filter(
+        ticket =>
+          ticket.user_archived !== true &&
+          (Boolean(ticket.unread_reply_count && ticket.unread_reply_count > 0) ||
+            ticket.status_changed_since_read === true),
+      ).length,
+    [tickets],
+  );
 
   const handleArchiveToggle = async (id: string, archived: boolean) => {
     if (actionLoading) {
@@ -159,6 +174,13 @@ export default function SupportTicketsList() {
         if (view === 'archive') {
           return archivedFlag || archivedStatuses.includes(ticket.status);
         }
+        if (view === 'unread') {
+          if (archivedFlag) {
+            return false;
+          }
+          return Boolean(ticket.unread_reply_count && ticket.unread_reply_count > 0)
+            || ticket.status_changed_since_read === true;
+        }
         return !archivedFlag;
       })
       .filter(ticket => (categoryFilter ? ticket.category === categoryFilter : true));
@@ -201,6 +223,20 @@ export default function SupportTicketsList() {
           <SupportTicketCard
             key={ticket.id}
             subject={ticket.subject}
+            subjectBadge={
+              <span className="ml-1 flex items-center gap-1">
+                {ticket.unread_reply_count && ticket.unread_reply_count > 0 ? (
+                  <Badge variant="destructive" className="h-6">
+                    Reply {ticket.unread_reply_count > 99 ? '99+' : ticket.unread_reply_count}
+                  </Badge>
+                ) : null}
+                {ticket.status_changed_since_read ? (
+                  <Badge variant="outline" className="h-6 border-primary/40 text-primary">
+                    Status changed
+                  </Badge>
+                ) : null}
+              </span>
+            }
             statusText={statusLabels[ticket.status] || ticket.status}
             statusColor={SUPPORT_STATUS_COLORS[ticket.status] || 'gray'}
             categoryText={categoryLabels[ticket.category] || ticket.category}
@@ -211,10 +247,41 @@ export default function SupportTicketsList() {
             }
             updatedAt={ticket.updated_at}
             updatedLabel="Last updated"
-            titleIcon={<span className="h-2 w-2 rounded-full bg-primary/50" aria-hidden />}
+            titleIcon={
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  (ticket.unread_reply_count && ticket.unread_reply_count > 0) ||
+                  ticket.status_changed_since_read
+                    ? 'bg-destructive'
+                    : 'bg-primary/50'
+                }`}
+                aria-hidden
+              />
+            }
+            meta={
+              ticket.unread_reply_count || ticket.status_changed_since_read ? (
+                <div className="text-xs text-muted-foreground">
+                  {ticket.unread_reply_count && ticket.unread_reply_count > 0 ? (
+                    <span>
+                      New {ticket.unread_reply_count === 1 ? 'reply' : 'replies'} from support.
+                    </span>
+                  ) : null}
+                  {ticket.status_changed_since_read ? (
+                    <span>
+                      {' '}
+                      Status changed
+                      {ticket.status_changed_to
+                        ? ` to ${statusLabels[ticket.status_changed_to] || ticket.status_changed_to}`
+                        : ''}
+                      .
+                    </span>
+                  ) : null}
+                </div>
+              ) : null
+            }
             actions={
               <div className="flex items-center gap-3 pt-2">
-                <Button href={`/pages/support/tickets/${ticket.id}`} variant="primary" size="sm">
+                <Button href={`/support/tickets/${ticket.id}`} variant="primary" size="sm">
                   View details
                 </Button>
                 {view === 'archive' ? (
@@ -274,103 +341,109 @@ export default function SupportTicketsList() {
           subtitleClassName="mb-6 max-w-2xl text-base text-muted-foreground md:mb-8 md:text-lg"
         />
         <div className="w-full">
-            {alert && (
-              <div className="mb-4">
-                <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">
-                  <div className="flex flex-col gap-2">
-                    <AlertDescription>{alert.message}</AlertDescription>
-                    {(alert.onConfirm || alert.onCancel) && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {alert.onConfirm && (
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={alert.onConfirm}
-                            className="font-medium"
-                          >
-                            Delete
-                          </Button>
-                        )}
-                        {alert.onCancel && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              alert.onCancel?.();
-                              setAlert(null);
-                            }}
-                            className="font-medium"
-                          >
-                            Cancel
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-3 top-3 h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
-                    aria-label="Close alert"
-                    onClick={() => setAlert(null)}
+          {alert && (
+            <div className="mb-4">
+              <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">
+                <div className="flex flex-col gap-2">
+                  <AlertDescription>{alert.message}</AlertDescription>
+                  {(alert.onConfirm || alert.onCancel) && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {alert.onConfirm && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={alert.onConfirm}
+                          className="font-medium"
+                        >
+                          Delete
+                        </Button>
+                      )}
+                      {alert.onCancel && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            alert.onCancel?.();
+                            setAlert(null);
+                          }}
+                          className="font-medium"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-3 top-3 h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Close alert"
+                  onClick={() => setAlert(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </Alert>
+            </div>
+          )}
+
+          <div className="mb-6 rounded-xl border border-border/30 bg-muted/20 p-4 md:flex md:items-center md:justify-between">
+            <Tabs
+              value={view}
+              onValueChange={value => setView(value as typeof view)}
+              className="w-full md:w-auto"
+            >
+              <TabsList className="h-10 w-full flex-wrap gap-2 rounded-xl border border-border/30 bg-card p-1 md:w-auto">
+                {[
+                  { value: 'active', label: 'Active' },
+                  { value: 'unread', label: 'Unread' },
+                  { value: 'all', label: 'All' },
+                  { value: 'archive', label: 'Archived' },
+                ].map(option => (
+                  <TabsTrigger
+                    key={option.value}
+                    value={option.value}
+                    className="h-8 rounded-lg px-4 text-sm font-medium"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </Alert>
-              </div>
-            )}
+                    {option.label}
+                    {option.value === 'unread' && unreadTicketsCount > 0 ? (
+                      <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold leading-5 text-destructive-foreground">
+                        {unreadTicketsCount > 99 ? '99+' : unreadTicketsCount}
+                      </span>
+                    ) : null}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
 
-            <div className="mb-6 rounded-xl border border-border/30 bg-muted/20 p-4 md:flex md:items-center md:justify-between">
-              <Tabs
-                value={view}
-                onValueChange={value => setView(value as typeof view)}
-                className="w-full md:w-auto"
-              >
-                <TabsList className="h-10 w-full flex-wrap gap-2 rounded-xl border border-border/30 bg-card p-1 md:w-auto">
-                  {[
-                    { value: 'active', label: 'Active' },
-                    { value: 'all', label: 'All' },
-                    { value: 'archive', label: 'Archived' },
-                  ].map(option => (
-                    <TabsTrigger
-                      key={option.value}
-                      value={option.value}
-                      className="h-8 rounded-lg px-4 text-sm font-medium"
-                    >
-                      {option.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-
-              <div className="mt-3 md:mt-0 md:w-64">
-                <Select
-                  options={['', 'bug', 'feature', 'author_rights', 'general']}
-                  optionLabels={{
-                    '': 'Category',
-                    bug: 'Bug',
-                    feature: 'Feature request',
-                    author_rights: 'Author rights',
-                    general: 'General',
-                  }}
-                  value={categoryFilter}
-                  onChange={setCategoryFilter}
-                  className="h-10"
-                  placeholder="Category"
-                />
-              </div>
+            <div className="mt-3 md:mt-0 md:w-64">
+              <Select
+                options={['', 'bug', 'feature', 'author_rights', 'general']}
+                optionLabels={{
+                  '': 'Category',
+                  bug: 'Bug',
+                  feature: 'Feature request',
+                  author_rights: 'Author rights',
+                  general: 'General',
+                }}
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                className="h-10"
+                placeholder="Category"
+              />
             </div>
+          </div>
 
-            {content}
+          {content}
 
-            <div className="mt-8 flex justify-center md:justify-end">
-              <Button href="/pages/support" variant="primary" size="lg">
-                Create new request
-              </Button>
-            </div>
+          <div className="mt-8 flex justify-center md:justify-end">
+            <Button href="/pages/support" variant="primary" size="lg">
+              Create new request
+            </Button>
+          </div>
         </div>
       </div>
     </div>

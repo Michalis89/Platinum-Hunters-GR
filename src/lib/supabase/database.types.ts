@@ -1172,6 +1172,39 @@ export type Database = {
           },
         ]
       }
+      support_ticket_reads: {
+        Row: {
+          last_read_at: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_reads_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_category_profiles: {
         Row: {
           created_at: string | null
@@ -1351,11 +1384,14 @@ export type Database = {
           community_suggestions_enabled: boolean
           created_at: string | null
           diary_enabled: boolean
+          dms_notifications_enabled: boolean
           dnd_enabled: boolean
           dnd_role: string | null
+          follows_notifications_enabled: boolean
           reviews_enabled: boolean
           social_enabled: boolean
           social_profile_enabled: boolean
+          ticket_notifications_enabled: boolean
           theme: string
           updated_at: string | null
           user_id: string
@@ -1366,11 +1402,14 @@ export type Database = {
           community_suggestions_enabled?: boolean
           created_at?: string | null
           diary_enabled?: boolean
+          dms_notifications_enabled?: boolean
           dnd_enabled?: boolean
           dnd_role?: string | null
+          follows_notifications_enabled?: boolean
           reviews_enabled?: boolean
           social_enabled?: boolean
           social_profile_enabled?: boolean
+          ticket_notifications_enabled?: boolean
           theme?: string
           updated_at?: string | null
           user_id: string
@@ -1381,11 +1420,14 @@ export type Database = {
           community_suggestions_enabled?: boolean
           created_at?: string | null
           diary_enabled?: boolean
+          dms_notifications_enabled?: boolean
           dnd_enabled?: boolean
           dnd_role?: string | null
+          follows_notifications_enabled?: boolean
           reviews_enabled?: boolean
           social_enabled?: boolean
           social_profile_enabled?: boolean
+          ticket_notifications_enabled?: boolean
           theme?: string
           updated_at?: string | null
           user_id?: string
@@ -1488,8 +1530,10 @@ export type Database = {
       }
       cleanup_expired_steam_sync_jobs: { Args: never; Returns: undefined }
       has_any_role: { Args: { required_roles: string[] }; Returns: boolean }
+      get_ticket_unread_count: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       is_admin_or_moderator: { Args: never; Returns: boolean }
+      mark_support_ticket_as_read: { Args: { p_ticket_id: string }; Returns: boolean }
       reorder_pins: {
         Args: { p_category: string; p_order: Json; p_user_id: string }
         Returns: undefined

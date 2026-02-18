@@ -3,8 +3,8 @@ import { withApiRoute } from '@/lib/observability/withApiRoute';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, okWithMeta } from '@/lib/api/response';
-import { UnauthorizedError } from '@/lib/api/auth';
-import { ForbiddenError } from '@/lib/api/permissions';
+import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
+import { hasAnyRole } from '@/lib/roles';
 import {
   SUPPORT_STATUS_OPTIONS,
   SUPPORT_CATEGORY_OPTIONS,
@@ -33,6 +33,17 @@ function isSupportSeverity(value: string): value is SupportSeverity {
 async function GETHandler(req: Request) {
   try {
     const supabase = await createRouteHandlerClient();
+    const session = await requireAuth(supabase);
+    const { data: userData } = await supabase
+      .from('users')
+      .select('roles')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!userData || !hasAnyRole(userData, ['admin', 'owner', 'moderator'])) {
+      return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
+    }
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
     const category = searchParams.get('category');
@@ -81,13 +92,79 @@ async function GETHandler(req: Request) {
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    return okWithMeta(data ?? [], { total: count ?? 0, limit, offset });
+    const tickets = data ?? [];
+    const ticketIds = tickets.map(ticket => ticket.id);
+
+    if (ticketIds.length === 0) {
+      return okWithMeta([], { total: count ?? 0, limit, offset });
+    }
+
+    const { data: reads, error: readsError } = await supabase
+      .from('support_ticket_reads')
+      .select('ticket_id, last_read_at')
+      .eq('user_id', session.user.id)
+      .in('ticket_id', ticketIds);
+
+    if (readsError) {
+      console.error('Admin support reads list error:', readsError);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    const { data: userMessages, error: messagesError } = await supabase
+      .from('support_messages')
+      .select('ticket_id, created_at')
+      .in('ticket_id', ticketIds)
+      .eq('author_role', 'user')
+      .eq('is_internal', false)
+      .order('created_at', { ascending: false });
+
+    if (messagesError) {
+      console.error('Admin support unread messages list error:', messagesError);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    const readAtByTicket = new Map<string, string>();
+    for (const entry of reads ?? []) {
+      if (entry.last_read_at) {
+        readAtByTicket.set(entry.ticket_id, entry.last_read_at);
+      }
+    }
+
+    const ticketCreatedAt = new Map<string, string | null>();
+    for (const ticket of tickets) {
+      ticketCreatedAt.set(ticket.id, ticket.created_at ?? null);
+    }
+
+    const unreadCountByTicket = new Map<string, number>();
+    for (const message of userMessages ?? []) {
+      const readAt = readAtByTicket.get(message.ticket_id);
+      const fallbackAt = ticketCreatedAt.get(message.ticket_id);
+      const baseline = readAt ?? fallbackAt;
+      const isUnread =
+        !baseline ||
+        (message.created_at ? new Date(message.created_at) > new Date(baseline) : false);
+
+      if (isUnread) {
+        unreadCountByTicket.set(
+          message.ticket_id,
+          (unreadCountByTicket.get(message.ticket_id) ?? 0) + 1,
+        );
+      }
+    }
+
+    const enrichedTickets = tickets.map(ticket => {
+      const unread_count = unreadCountByTicket.get(ticket.id) ?? 0;
+      return {
+        ...ticket,
+        unread_count,
+        is_unread: unread_count > 0,
+      };
+    });
+
+    return okWithMeta(enrichedTickets, { total: count ?? 0, limit, offset });
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
-    }
-    if (error instanceof ForbiddenError) {
-      return fail(API_ERRORS.FORBIDDEN, API_ERRORS.FORBIDDEN.status);
     }
     console.error('Admin support list error:', error);
     return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);

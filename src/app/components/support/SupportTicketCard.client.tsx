@@ -15,6 +15,7 @@ type SupportTicketCardProps = {
   updatedAt: string;
   updatedLabel?: string;
   titleIcon?: ReactNode;
+  subjectBadge?: ReactNode;
   meta?: ReactNode;
   actions: ReactNode;
 };
@@ -28,6 +29,7 @@ export default function SupportTicketCard({
   updatedAt,
   updatedLabel,
   titleIcon,
+  subjectBadge,
   meta,
   actions,
 }: SupportTicketCardProps) {
@@ -45,6 +47,7 @@ export default function SupportTicketCard({
           <span className="flex items-center gap-2 text-base font-semibold">
             {titleIcon}
             {subject}
+            {subjectBadge}
           </span>
           <Badge
             variant={badgeVariant}

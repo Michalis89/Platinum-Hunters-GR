@@ -12,6 +12,7 @@ import { Spinner } from '@/components/ui/spinner';
 import EmptyState from '@/components/ui/empty';
 import { Alert, AlertDescription, ErrorAlert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import SupportTicketCard from '@/app/components/support/SupportTicketCard.client';
 import {
   SUPPORT_STATUS_OPTIONS as STATUS_OPTIONS,
@@ -35,6 +36,8 @@ type AdminTicket = {
   updated_at: string;
   email: string | null;
   name: string | null;
+  unread_count?: number;
+  is_unread?: boolean;
   users?: {
     id: string;
     username: string;
@@ -218,6 +221,13 @@ export default function AdminSupportTicketsPane() {
                   <SupportTicketCard
                     key={ticket.id}
                     subject={ticket.subject}
+                    subjectBadge={
+                      ticket.unread_count && ticket.unread_count > 0 ? (
+                        <Badge variant="destructive" className="ml-1">
+                          Unread {ticket.unread_count > 99 ? '99+' : ticket.unread_count}
+                        </Badge>
+                      ) : null
+                    }
                     statusText={statusLabels[ticket.status] || ticket.status}
                     statusColor={statusColors[ticket.status] || 'gray'}
                     categoryText={categoryLabels[ticket.category] || ticket.category}

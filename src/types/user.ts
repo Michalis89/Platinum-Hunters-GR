@@ -21,6 +21,9 @@ export interface NotificationSettings {
   comments: boolean;
   replies: boolean;
   weekly_digest: boolean;
+  tickets?: boolean;
+  follows?: boolean;
+  dms?: boolean;
 }
 
 export interface SocialLinks {

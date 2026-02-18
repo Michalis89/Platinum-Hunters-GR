@@ -54,6 +54,9 @@ const toFormState = (settings: UserSettingsData): UserSettingsValue => ({
   diary_enabled: settings.diary_enabled,
   dnd_enabled: settings.dnd_enabled,
   dnd_role: settings.dnd_role,
+  ticket_notifications_enabled: settings.ticket_notifications_enabled,
+  follows_notifications_enabled: settings.follows_notifications_enabled,
+  dms_notifications_enabled: settings.dms_notifications_enabled,
 });
 
 type SettingsFormProps = {
@@ -118,6 +121,15 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     }
     if (normalized.dnd_role !== undefined) {
       sanitized.dnd_role = normalized.dnd_role;
+    }
+    if (normalized.ticket_notifications_enabled !== undefined) {
+      sanitized.ticket_notifications_enabled = normalized.ticket_notifications_enabled;
+    }
+    if (normalized.follows_notifications_enabled !== undefined) {
+      sanitized.follows_notifications_enabled = normalized.follows_notifications_enabled;
+    }
+    if (normalized.dms_notifications_enabled !== undefined) {
+      sanitized.dms_notifications_enabled = normalized.dms_notifications_enabled;
     }
 
     if (Object.keys(sanitized).length === 0) {
@@ -198,6 +210,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     diary_enabled,
     dnd_enabled,
     dnd_role,
+    ticket_notifications_enabled,
+    follows_notifications_enabled,
+    dms_notifications_enabled,
   } = formState;
 
   return (
@@ -420,6 +435,64 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               )}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CardTitle>Notifications</CardTitle>
+            {isFeaturePreviewMode ? (
+              <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
+                Expandable
+              </Badge>
+            ) : null}
+          </div>
+          <CardDescription>
+            Tickets are active now. Follows and direct messages are ready as opt-in channels for
+            upcoming social features.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold">Support ticket updates</p>
+              <p className="text-xs text-muted-foreground">
+                Show unread ticket replies in your badges.
+              </p>
+            </div>
+            <Switch
+              checked={ticket_notifications_enabled}
+              onCheckedChange={checked => handleToggle('ticket_notifications_enabled', checked)}
+              disabled={isSaving}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold">Follow activity</p>
+              <p className="text-xs text-muted-foreground">
+                Enable notifications when users follow your profile.
+              </p>
+            </div>
+            <Switch
+              checked={follows_notifications_enabled}
+              onCheckedChange={checked => handleToggle('follows_notifications_enabled', checked)}
+              disabled={isSaving || isFeaturePreviewMode}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold">Direct messages</p>
+              <p className="text-xs text-muted-foreground">
+                Enable unread message badges for private conversations.
+              </p>
+            </div>
+            <Switch
+              checked={dms_notifications_enabled}
+              onCheckedChange={checked => handleToggle('dms_notifications_enabled', checked)}
+              disabled={isSaving || isFeaturePreviewMode}
+            />
+          </div>
         </CardContent>
       </Card>
 

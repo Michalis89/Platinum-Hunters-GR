@@ -21,6 +21,7 @@ import {
   type NavbarFeatureFilters,
 } from './navbar/navbar.data';
 import { useUserSettings } from '@/lib/settings/useUserSettings';
+import { useTicketNotificationCount } from '@/lib/hooks/useTicketNotificationCount';
 
 const AddArticleDialog = dynamic(() => import('./articles/AddArticleDialog'), { ssr: false });
 
@@ -58,6 +59,7 @@ export default function Navbar() {
 
   const shouldLoadSettings = isAuthenticated && authResolved;
   const { settings, mutate: mutateSettings } = useUserSettings(shouldLoadSettings);
+  const { count: ticketUnreadCount } = useTicketNotificationCount(shouldLoadSettings);
   const [isThemeSaving, setIsThemeSaving] = useState(false);
 
   const isNavbarLoading = !authResolved;
@@ -199,6 +201,7 @@ export default function Navbar() {
           user={user}
           canQuickAdd={canQuickAdd}
           canAccessAdminPanel={canAccessAdminPanel}
+          ticketUnreadCount={ticketUnreadCount}
           onAdd={() => setAddDialogOpen(true)}
           onLogout={handleLogout}
           theme={theme}
@@ -219,6 +222,7 @@ export default function Navbar() {
           user={user}
           canQuickAdd={canQuickAdd}
           canAccessAdminPanel={canAccessAdminPanel}
+          ticketUnreadCount={ticketUnreadCount}
           onAdd={() => setAddDialogOpen(true)}
           onLogout={handleLogout}
           theme={theme}

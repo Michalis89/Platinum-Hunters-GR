@@ -98,7 +98,127 @@ async function GETHandler() {
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }
 
-    return ok(data ?? []);
+    const tickets = data ?? [];
+    const ticketIds = tickets.map(ticket => ticket.id);
+
+    if (ticketIds.length === 0) {
+      return ok([]);
+    }
+
+    const { data: reads, error: readsError } = await supabase
+      .from('support_ticket_reads')
+      .select('ticket_id, last_read_at')
+      .eq('user_id', session.user.id)
+      .in('ticket_id', ticketIds);
+
+    if (readsError) {
+      console.error('Support ticket reads fetch error:', readsError);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    const { data: adminMessages, error: messagesError } = await supabase
+      .from('support_messages')
+      .select('ticket_id, created_at')
+      .in('ticket_id', ticketIds)
+      .eq('author_role', 'admin')
+      .eq('is_internal', false)
+      .order('created_at', { ascending: false });
+
+    if (messagesError) {
+      console.error('Support ticket admin messages fetch error:', messagesError);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    const { data: statusEvents, error: eventsError } = await supabase
+      .from('support_ticket_events')
+      .select('ticket_id, created_at, payload')
+      .in('ticket_id', ticketIds)
+      .eq('type', 'status_change')
+      .order('created_at', { ascending: false });
+
+    if (eventsError) {
+      console.error('Support ticket status events fetch error:', eventsError);
+      return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    }
+
+    const readAtByTicket = new Map<string, string>();
+    for (const entry of reads ?? []) {
+      if (entry.last_read_at) {
+        readAtByTicket.set(entry.ticket_id, entry.last_read_at);
+      }
+    }
+
+    const ticketCreatedAt = new Map<string, string | null>();
+    for (const ticket of tickets) {
+      ticketCreatedAt.set(ticket.id, ticket.created_at ?? null);
+    }
+
+    const unreadReplyCountByTicket = new Map<string, number>();
+    for (const message of adminMessages ?? []) {
+      const readAt = readAtByTicket.get(message.ticket_id);
+      const fallbackAt = ticketCreatedAt.get(message.ticket_id);
+      const baseline = readAt ?? fallbackAt;
+      const isUnread =
+        !baseline ||
+        (message.created_at ? new Date(message.created_at) > new Date(baseline) : false);
+
+      if (isUnread) {
+        unreadReplyCountByTicket.set(
+          message.ticket_id,
+          (unreadReplyCountByTicket.get(message.ticket_id) ?? 0) + 1,
+        );
+      }
+    }
+
+    const latestUnreadStatusEventByTicket = new Map<
+      string,
+      { created_at: string | null; to_status: string | null }
+    >();
+    for (const event of statusEvents ?? []) {
+      if (latestUnreadStatusEventByTicket.has(event.ticket_id)) {
+        continue;
+      }
+
+      const readAt = readAtByTicket.get(event.ticket_id);
+      const fallbackAt = ticketCreatedAt.get(event.ticket_id);
+      const baseline = readAt ?? fallbackAt;
+      const isUnread =
+        !baseline || (event.created_at ? new Date(event.created_at) > new Date(baseline) : false);
+
+      if (!isUnread) {
+        continue;
+      }
+
+      let to_status: string | null = null;
+      if (event.payload && typeof event.payload === 'object' && !Array.isArray(event.payload)) {
+        const candidate = (event.payload as { to?: unknown }).to;
+        if (typeof candidate === 'string' && candidate.trim()) {
+          to_status = candidate;
+        }
+      }
+
+      latestUnreadStatusEventByTicket.set(event.ticket_id, {
+        created_at: event.created_at,
+        to_status,
+      });
+    }
+
+    const enrichedTickets = tickets.map(ticket => {
+      const unread_reply_count = unreadReplyCountByTicket.get(ticket.id) ?? 0;
+      const statusChange = latestUnreadStatusEventByTicket.get(ticket.id);
+      const status_changed_since_read = Boolean(statusChange);
+
+      return {
+        ...ticket,
+        unread_reply_count,
+        has_unread_reply: unread_reply_count > 0,
+        status_changed_since_read,
+        status_changed_to: statusChange?.to_status ?? null,
+        status_changed_at: statusChange?.created_at ?? null,
+      };
+    });
+
+    return ok(enrichedTickets);
   } catch (error) {
     console.error('Support tickets list error:', error);
     if (error instanceof UnauthorizedError) {
