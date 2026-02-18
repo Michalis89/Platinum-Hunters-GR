@@ -32,7 +32,10 @@ function setThemePreferenceCookie(preference: ThemePreference) {
 }
 
 function getSystemTheme(): Theme {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') {
+    return 'dark';
+  }
+
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
@@ -85,7 +88,12 @@ export function ThemeProvider({
     try {
       const storedPreference = localStorage.getItem(THEME_STORAGE_KEY) as ThemePreference | null;
 
-      if (storedPreference && (storedPreference === 'system' || storedPreference === 'dark' || storedPreference === 'light')) {
+      if (
+        storedPreference &&
+        (storedPreference === 'system' ||
+          storedPreference === 'dark' ||
+          storedPreference === 'light')
+      ) {
         setThemePreferenceState(storedPreference);
         const resolvedTheme = resolveThemePreference(storedPreference);
         setThemeState(resolvedTheme);

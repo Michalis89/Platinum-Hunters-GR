@@ -12,21 +12,21 @@ export default function HomeGuestPageClient() {
     <main className="pb-12 md:pb-20">
       <HomeHero />
 
-      <PageContainer size="xl">
+      <PageContainer size="lg">
         <HomeFeatures />
       </PageContainer>
 
-      <PageContainer size="xl">
+      <PageContainer size="lg">
         <div className="mx-auto w-full max-w-5xl" />
       </PageContainer>
 
       <HomeHowItWorks />
 
-      <PageContainer size="xl">
+      <PageContainer size="lg">
         <div className="mx-auto w-full max-w-5xl" />
       </PageContainer>
 
-      <PageContainer size="xl">
+      <PageContainer size="lg">
         <HomeRoadmapPreview />
       </PageContainer>
 

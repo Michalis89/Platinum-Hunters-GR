@@ -8,7 +8,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
       <div className="relative flex min-h-screen flex-col">
         <NavbarWrapper />
         <main className="flex-1 pb-12 pt-4">
-          <PageContainer size="sm" noPadding>
+          <PageContainer size="lg" noPadding>
             {children}
           </PageContainer>
         </main>

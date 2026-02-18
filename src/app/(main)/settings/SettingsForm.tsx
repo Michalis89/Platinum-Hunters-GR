@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -24,10 +25,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import type { ThemeSetting } from '@/lib/settings/types';
 import {
   USER_SETTINGS_DEFAULTS,
   type UserSettingsData,
@@ -41,8 +48,12 @@ const toFormState = (settings: UserSettingsData): UserSettingsValue => ({
   social_enabled: settings.social_enabled,
   community_activity_enabled: settings.community_activity_enabled,
   community_suggestions_enabled: settings.community_suggestions_enabled,
+  social_profile_enabled: settings.social_profile_enabled,
   articles_enabled: settings.articles_enabled,
   reviews_enabled: settings.reviews_enabled,
+  diary_enabled: settings.diary_enabled,
+  dnd_enabled: settings.dnd_enabled,
+  dnd_role: settings.dnd_role,
 });
 
 type SettingsFormProps = {
@@ -58,6 +69,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   const { mutate } = useUserSettings(true);
   const { setThemePreference } = useTheme();
 
+  const isProd = process.env.NODE_ENV === 'production';
+  const isFeaturePreviewMode = isProd;
+
   const updateSetting = async (patch: Partial<UserSettingsValue>) => {
     if (isSaving) {
       return;
@@ -67,6 +81,11 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     if (patch.social_enabled === false) {
       normalized.community_activity_enabled = false;
       normalized.community_suggestions_enabled = false;
+      normalized.social_profile_enabled = false;
+    }
+
+    if (patch.dnd_enabled === false) {
+      normalized.dnd_role = null;
     }
 
     const sanitized: Partial<UserSettingsValue> = {};
@@ -82,11 +101,23 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     if (normalized.community_suggestions_enabled !== undefined) {
       sanitized.community_suggestions_enabled = normalized.community_suggestions_enabled;
     }
+    if (normalized.social_profile_enabled !== undefined) {
+      sanitized.social_profile_enabled = normalized.social_profile_enabled;
+    }
     if (normalized.articles_enabled !== undefined) {
       sanitized.articles_enabled = normalized.articles_enabled;
     }
     if (normalized.reviews_enabled !== undefined) {
       sanitized.reviews_enabled = normalized.reviews_enabled;
+    }
+    if (normalized.diary_enabled !== undefined) {
+      sanitized.diary_enabled = normalized.diary_enabled;
+    }
+    if (normalized.dnd_enabled !== undefined) {
+      sanitized.dnd_enabled = normalized.dnd_enabled;
+    }
+    if (normalized.dnd_role !== undefined) {
+      sanitized.dnd_role = normalized.dnd_role;
     }
 
     if (Object.keys(sanitized).length === 0) {
@@ -145,6 +176,12 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     void updateSetting({ [key]: value });
   };
 
+  const handleDndRoleChange = (value: string) => {
+    if (value === 'dm' || value === 'player') {
+      void updateSetting({ dnd_role: value });
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -153,7 +190,15 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     void updateSetting(USER_SETTINGS_DEFAULTS);
   };
 
-  const { social_enabled, community_activity_enabled, community_suggestions_enabled } = formState;
+  const {
+    social_enabled,
+    community_activity_enabled,
+    community_suggestions_enabled,
+    social_profile_enabled,
+    diary_enabled,
+    dnd_enabled,
+    dnd_role,
+  } = formState;
 
   return (
     <div className="space-y-6">
@@ -196,7 +241,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Social Layer</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>Social Layer</CardTitle>
+            {isFeaturePreviewMode ? (
+              <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
+                Coming Soon
+              </Badge>
+            ) : null}
+          </div>
           <CardDescription>Social is optional—opt in whenever you want.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -210,7 +262,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             <Switch
               checked={social_enabled}
               onCheckedChange={checked => handleToggle('social_enabled', checked)}
-              disabled={isSaving}
+              disabled={isSaving || isFeaturePreviewMode}
             />
           </div>
 
@@ -232,7 +284,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <Switch
                   checked={community_activity_enabled}
                   onCheckedChange={checked => handleToggle('community_activity_enabled', checked)}
-                  disabled={isSaving}
+                  disabled={isSaving || isFeaturePreviewMode}
                 />
               </div>
               <div className="flex items-start justify-between gap-3">
@@ -247,9 +299,125 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                   onCheckedChange={checked =>
                     handleToggle('community_suggestions_enabled', checked)
                   }
-                  disabled={isSaving}
+                  disabled={isSaving || isFeaturePreviewMode}
                 />
               </div>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold">Enable Social Profile</p>
+                  <p className="text-xs text-muted-foreground">
+                    Create a public profile visible to other community members.
+                  </p>
+                </div>
+                <Switch
+                  checked={social_profile_enabled}
+                  onCheckedChange={checked => handleToggle('social_profile_enabled', checked)}
+                  disabled={isSaving || isFeaturePreviewMode}
+                />
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CardTitle>Digital Personal Diary</CardTitle>
+            {isFeaturePreviewMode ? (
+              <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
+                Coming Soon
+              </Badge>
+            ) : null}
+          </div>
+          <CardDescription>A private space for your thoughts—100% yours.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">Enable Personal Diary</p>
+              <p className="text-xs text-muted-foreground">
+                Keep private notes and journal entries. Only you can see them—ever.
+              </p>
+            </div>
+            <Switch
+              checked={diary_enabled}
+              onCheckedChange={checked => handleToggle('diary_enabled', checked)}
+              disabled={isSaving || isFeaturePreviewMode}
+            />
+          </div>
+
+          {diary_enabled && (
+            <div className="rounded-xl border border-dashed border-border p-4">
+              <p className="text-sm text-muted-foreground">
+                Your diary entries are encrypted and 100% private. Not even platform administrators can access your content.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CardTitle>Dungeons & Dragons Tools</CardTitle>
+            {isFeaturePreviewMode ? (
+              <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
+                Coming Soon
+              </Badge>
+            ) : null}
+          </div>
+          <CardDescription>Campaign management with zero-knowledge encryption.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">Enable D&D Features</p>
+              <p className="text-xs text-muted-foreground">
+                Access DM tools or join campaigns as a player with end-to-end encryption.
+              </p>
+            </div>
+            <Switch
+              checked={dnd_enabled}
+              onCheckedChange={checked => handleToggle('dnd_enabled', checked)}
+              disabled={isSaving || isFeaturePreviewMode}
+            />
+          </div>
+
+          {dnd_enabled && (
+            <div className="space-y-4 rounded-xl border border-dashed border-border p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold">Your Role</p>
+                  <p className="text-xs text-muted-foreground">
+                    Choose whether you&apos;re a Dungeon Master or a Player.
+                  </p>
+                </div>
+                <Select
+                  value={dnd_role ?? 'player'}
+                  onValueChange={handleDndRoleChange}
+                  disabled={isSaving || isFeaturePreviewMode}
+                >
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dm">Dungeon Master</SelectItem>
+                    <SelectItem value="player">Player</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {dnd_role === 'dm' && (
+                <p className="text-sm text-muted-foreground">
+                  As a DM, you can create campaigns, manage sessions, and share specific tools with your players.
+                </p>
+              )}
+              {dnd_role === 'player' && (
+                <p className="text-sm text-muted-foreground">
+                  As a Player, you can join campaigns and access tools shared by your DM.
+                </p>
+              )}
             </div>
           )}
         </CardContent>
@@ -289,6 +457,16 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           </div>
         </CardContent>
       </Card>
+
+      {isFeaturePreviewMode && (
+        <Alert>
+          <AlertTitle>Production Environment</AlertTitle>
+          <AlertDescription>
+            Social Layer, Digital Personal Diary, and Dungeons & Dragons Tools are currently
+            read-only in production and marked as Coming Soon.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>

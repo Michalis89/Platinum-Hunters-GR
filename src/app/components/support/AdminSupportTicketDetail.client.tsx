@@ -255,7 +255,7 @@ export default function AdminSupportTicketDetail() {
 
   if (!isAdmin) {
     return (
-      <PageContainer size="md" className="py-20">
+      <PageContainer size="lg" className="py-20">
         <ErrorAlert message="You do not have access to this page." />
         <div className="mt-6 flex justify-center">
           <Button variant={'link'} onClick={() => router.push('/')}>

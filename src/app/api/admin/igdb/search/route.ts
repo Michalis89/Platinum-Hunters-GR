@@ -4,6 +4,7 @@ import { igdbImage, igdbPost, unixToDate } from '@/lib/igdb/igdbClient';
 import {
   getIgdbCategoryLabel,
   igdbAllowedCategoriesWhereClause,
+  isAllowedIgdbGameCandidate,
   isAllowedIgdbCategory,
 } from '@/lib/igdb/categories';
 
@@ -26,15 +27,25 @@ async function GETHandler(req: Request) {
   }
 
   const escaped = q.replace(/"/g, '\\"');
-  const body = `
+  const strictBody = `
 fields id,name,category,slug,first_release_date,cover.image_id,summary;
 search "${escaped}";
 where category = ${igdbAllowedCategoriesWhereClause()};
 limit 20;
 `;
+  const fallbackBody = `
+fields id,name,category,slug,first_release_date,cover.image_id,summary;
+search "${escaped}";
+limit 40;
+`;
 
-  const response = (await igdbPost('/games', body)) as IgdbSearchGame[];
-  const normalized = (Array.isArray(response) ? response : [])
+  const strictResponse = (await igdbPost('/games', strictBody)) as IgdbSearchGame[];
+  const strictRows = Array.isArray(strictResponse) ? strictResponse : [];
+  const fallbackResponse =
+    strictRows.length === 0 ? ((await igdbPost('/games', fallbackBody)) as IgdbSearchGame[]) : [];
+  const mergedRows = strictRows.length > 0 ? strictRows : Array.isArray(fallbackResponse) ? fallbackResponse : [];
+
+  const normalized = mergedRows
     .map(game => {
       const name = typeof game.name === 'string' ? game.name.trim() : '';
       if (!name) {
@@ -58,7 +69,15 @@ limit 20;
       };
     })
     .filter((game): game is NonNullable<typeof game> => Boolean(game))
-    .filter(game => isAllowedIgdbCategory(game.category));
+    .filter(game =>
+      isAllowedIgdbCategory(game.category) ||
+      isAllowedIgdbGameCandidate({
+        category: game.category,
+        name: game.name,
+        slug: game.slug ?? null,
+      }),
+    )
+    .slice(0, 20);
 
   return NextResponse.json({ results: normalized });
 }

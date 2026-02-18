@@ -2,7 +2,7 @@
 
 import type { ComponentType } from 'react';
 import Link from 'next/link';
-import { Database, ScrollText, Ticket } from 'lucide-react';
+import { Database, ScrollText, Ticket, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type AdminSupportNavProps = {
@@ -26,6 +26,7 @@ const NAV_ITEMS: NavItem[] = [
       pathname === '/admin/support' ||
       (pathname.startsWith('/admin/support/') &&
         !pathname.startsWith('/admin/support/data-curation') &&
+        !pathname.startsWith('/admin/support/users') &&
         !pathname.startsWith('/admin/support/logs')),
   },
   {
@@ -33,6 +34,12 @@ const NAV_ITEMS: NavItem[] = [
     href: '/admin/support/data-curation',
     icon: Database,
     isActive: pathname => pathname.startsWith('/admin/support/data-curation'),
+  },
+  {
+    label: 'Users',
+    href: '/admin/support/users',
+    icon: Users,
+    isActive: pathname => pathname.startsWith('/admin/support/users'),
   },
   {
     label: 'Logs',

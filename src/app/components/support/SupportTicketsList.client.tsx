@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { PageContainer } from '@/app/components/layout/PageContainer';
 import PageHero from '@/app/components/shared/PageHero';
 import { Spinner } from '@/components/ui/spinner';
 import EmptyState from '@/components/ui/empty';
@@ -260,11 +259,8 @@ export default function SupportTicketsList() {
   }, [filteredTickets, loading, error, view]);
 
   return (
-    <div className={UI_CLASSNAMES.pageShell}>
-      <div className={UI_CLASSNAMES.pageBackdrop}>
-        <div className={UI_CLASSNAMES.pageGradient} />
-      </div>
-      <div className="relative">
+    <div className="relative min-h-screen px-3 py-12 text-foreground sm:px-4 sm:py-16">
+      <div className="relative mx-auto flex w-full max-w-screen-2xl flex-col gap-5 sm:gap-6">
         <PageHero
           eyebrow={null}
           title={
@@ -277,8 +273,7 @@ export default function SupportTicketsList() {
           sectionClassName="pt-3 md:pt-4"
           subtitleClassName="mb-6 max-w-2xl text-base text-muted-foreground md:mb-8 md:text-lg"
         />
-        <PageContainer size="md" className="pb-20">
-          <div className="mx-auto max-w-4xl">
+        <div className="w-full">
             {alert && (
               <div className="mb-4">
                 <Alert variant={mapAlertVariant(alert.type)} className="relative pr-12">
@@ -376,8 +371,7 @@ export default function SupportTicketsList() {
                 Create new request
               </Button>
             </div>
-          </div>
-        </PageContainer>
+        </div>
       </div>
     </div>
   );

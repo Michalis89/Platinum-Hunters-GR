@@ -99,6 +99,23 @@ type CategoryNotes = Record<string, unknown>;
 type ProfileFormData = Partial<User> & {
   categories?: string[];
   category_notes?: CategoryNotes;
+  // Legacy fields for UI state (mapped to category_profile in the backend)
+  // Game fields (now in profiles.games.*)
+  psn_id?: string;
+  xbox_gamertag?: string;
+  steam_id?: string;
+  nintendo_id?: string;
+  favorite_platform?: string;
+  gaming_since?: number | null;
+  // Genre fields (now in profiles.{category}.genres)
+  favorite_anime_genres?: string[];
+  favorite_movie_genres?: string[];
+  favorite_book_genres?: string[];
+  // Other category fields
+  favorite_languages?: string[];
+  pet_types?: string[];
+  vape_device?: string;
+  vape_flavor?: string;
 };
 const EMPTY_CATEGORY_NOTES = {} as CategoryNotes;
 
@@ -206,7 +223,9 @@ export default function EditProfilePage() {
         gaming_since: (gamesProfile.gaming_since as number) || null,
         categories: hasNoCategories ? [] : userCategories,
         category_notes: initialCategoryNotes,
-        pet_types: [],
+        pet_types: ((initialCategoryNotes.pet as Record<string, unknown>)?.type as string)
+          ? [((initialCategoryNotes.pet as Record<string, unknown>)?.type as string)]
+          : [],
         vape_device:
           ((initialCategoryNotes.vape as Record<string, unknown>)?.device as string) || '',
         vape_flavor:
@@ -259,7 +278,9 @@ export default function EditProfilePage() {
           gaming_since: (gamesProfile.gaming_since as number) || null,
           categories: userCategories.length > 0 ? userCategories : ['games'],
           category_notes: initialCategoryNotes,
-          pet_types: [],
+          pet_types: ((initialCategoryNotes.pet as Record<string, unknown>)?.type as string)
+            ? [((initialCategoryNotes.pet as Record<string, unknown>)?.type as string)]
+            : [],
           vape_device:
             ((initialCategoryNotes.vape as Record<string, unknown>)?.device as string) || '',
           vape_flavor:
@@ -621,19 +642,8 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="relative min-h-screen text-foreground">
-      {/* Background gradient - Performance-first: no blur */}
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.08), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.06), transparent 44%)',
-          }}
-        />
-      </div>
-
-      <div className="relative px-4 py-10 md:px-6">
+    <div className="min-h-screen text-foreground">
+      <div className="px-4 py-10 md:px-6">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6">
           <Breadcrumbs
             items={[

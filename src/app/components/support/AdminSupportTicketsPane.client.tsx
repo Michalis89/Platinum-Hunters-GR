@@ -78,11 +78,8 @@ export default function AdminSupportTicketsPane() {
   });
 
   return (
-    <div className={UI_CLASSNAMES.pageShell}>
-      <div className={UI_CLASSNAMES.pageBackdrop}>
-        <div className={UI_CLASSNAMES.pageGradient} />
-      </div>
-      <div className="relative mt-10">
+    <div className="min-h-screen text-foreground">
+      <div className="mt-10">
         <PageHero
           eyebrow="Management"
           title={<span className="text-3xl text-foreground md:text-5xl">Support Inbox</span>}

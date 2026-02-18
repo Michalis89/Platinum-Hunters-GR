@@ -164,6 +164,27 @@ async function POSTHandler(req: Request) {
       }
     }
 
+    // Build a map of existing games by normalized title to catch duplicates
+    const { data: allGamesRows } = await adminSupabase
+      .from('media_items')
+      .select('id,title,title_english,steam_app_id,rawg_id,source')
+      .eq('category', 'games');
+
+    const existingMediaByNormalizedTitle = new Map<
+      string,
+      { id: number; steam_app_id: number | null; rawg_id: number | null; source: string | null }
+    >();
+    for (const row of allGamesRows ?? []) {
+      const normalizedTitle = normalizeTitle(row.title);
+      const normalizedEnglishTitle = normalizeTitle(row.title_english);
+      if (normalizedTitle) {
+        existingMediaByNormalizedTitle.set(normalizedTitle, row);
+      }
+      if (normalizedEnglishTitle && normalizedEnglishTitle !== normalizedTitle) {
+        existingMediaByNormalizedTitle.set(normalizedEnglishTitle, row);
+      }
+    }
+
     const mediaIdByAppId = new Map<number, number>();
     const insertTasks: Array<{
       appid: number;
@@ -208,6 +229,22 @@ async function POSTHandler(req: Request) {
             steam_app_id: game.appid,
             runtime: getSteamHours(game),
           });
+          continue;
+        }
+
+        // Check for duplicates by normalized title
+        const normalizedGameTitle = normalizeTitle(game.name);
+        const existingByTitle = normalizedGameTitle
+          ? existingMediaByNormalizedTitle.get(normalizedGameTitle)
+          : null;
+
+        if (existingByTitle) {
+          mediaIdByAppId.set(game.appid, existingByTitle.id);
+          console.warn(
+            `[Steam Sync] Found duplicate by title: ${game.name} - Updating existing media ID ${existingByTitle.id} instead of inserting`,
+          );
+          // Update the existing media item with IGDB data + steam_app_id
+          updateByMediaId.set(existingByTitle.id, buildGameMetadataPatch(game, matchedIgdb));
           continue;
         }
 

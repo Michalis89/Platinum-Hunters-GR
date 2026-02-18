@@ -315,11 +315,16 @@ export const SheetDescription = React.forwardRef<
 SheetDescription.displayName = 'SheetDescription';
 
 /* Sheet Close - For custom close buttons */
+interface SheetCloseProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean;
+}
+
 export function SheetClose({
   children,
   onClick,
+  asChild,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: SheetCloseProps) {
   const { onOpenChange } = useSheetContext();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -327,7 +332,7 @@ export function SheetClose({
     onOpenChange(false);
   };
 
-  if (React.isValidElement(children)) {
+  if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       onClick: handleClick,
     } as React.HTMLAttributes<HTMLElement>);

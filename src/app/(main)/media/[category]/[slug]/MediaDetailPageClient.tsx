@@ -657,7 +657,7 @@ export default function MediaDetailPageClient({
   ];
 
   return (
-    <PageContainer size="xl" className="py-8">
+    <PageContainer size="lg" className="py-8">
       {alert && (
         <Alert
           key={`${alert.type}-${alert.title}`}

@@ -13,6 +13,8 @@ import { DesktopNav } from './navbar/DesktopNav';
 import { LogoBrand } from './navbar/LogoBrand';
 import { MobileNavSheet } from './navbar/MobileNavSheet';
 import {
+  DND_TOOLS,
+  getVisibleDndTools,
   getVisibleHobbyItems,
   getVisibleNavItems,
   HOBBY_ITEMS,
@@ -43,6 +45,7 @@ export default function Navbar() {
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
 
   const isDev = process.env.NODE_ENV === 'development';
+  const isProd = process.env.NODE_ENV === 'production';
   const authResolved = !isAuthLoading && (!isAuthenticated || Boolean(user));
   const logoHref = authResolved && isAuthenticated ? '/dashboard' : '/home';
   const userCategories = useMemo(
@@ -62,8 +65,20 @@ export default function Navbar() {
     () => ({
       articles: settings?.articles_enabled ?? true,
       reviews: settings?.reviews_enabled ?? true,
+      social_profile: isProd ? false : (settings?.social_profile_enabled ?? false),
+      diary: isProd ? false : (settings?.diary_enabled ?? false),
+      dnd: isProd ? false : (settings?.dnd_enabled ?? false),
+      dnd_role: settings?.dnd_role ?? null,
     }),
-    [settings?.articles_enabled, settings?.reviews_enabled],
+    [
+      isProd,
+      settings?.articles_enabled,
+      settings?.reviews_enabled,
+      settings?.social_profile_enabled,
+      settings?.diary_enabled,
+      settings?.dnd_enabled,
+      settings?.dnd_role,
+    ],
   );
 
   const navItems = useMemo(
@@ -81,6 +96,13 @@ export default function Navbar() {
       ),
     [authResolved, isAuthenticated, userCategories, featureFilters],
   );
+
+  const dndTools = useMemo(() => {
+    if (!featureFilters.dnd) {
+      return [];
+    }
+    return getVisibleDndTools(DND_TOOLS, featureFilters.dnd_role ?? null);
+  }, [featureFilters.dnd, featureFilters.dnd_role]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -170,6 +192,8 @@ export default function Navbar() {
           pathname={pathname}
           navItems={navItems}
           hobbyItems={hobbyItems}
+          dndTools={dndTools}
+          dndEnabled={featureFilters.dnd ?? false}
           authResolved={authResolved}
           isAuthenticated={isAuthenticated}
           user={user}
@@ -188,6 +212,8 @@ export default function Navbar() {
           pathname={pathname}
           hobbyItems={hobbyItems}
           navItems={navItems}
+          dndTools={dndTools}
+          dndEnabled={featureFilters.dnd ?? false}
           authResolved={authResolved}
           isAuthenticated={isAuthenticated}
           user={user}

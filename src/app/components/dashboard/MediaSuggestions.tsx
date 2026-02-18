@@ -126,7 +126,7 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
 
               {suggestion.genres && suggestion.genres.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
-                  {suggestion.genres.slice(0, 3).map((genre, idx) => (
+                  {suggestion.genres.slice(0, 5).map((genre, idx) => (
                     <span
                       key={`${suggestion.mediaId}-genre-${idx}`}
                       className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground"

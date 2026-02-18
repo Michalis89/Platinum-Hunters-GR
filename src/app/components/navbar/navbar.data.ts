@@ -3,20 +3,25 @@
   BookOpen,
   Cloud,
   Code,
+  Dice5,
   FileText,
   Film,
   Gamepad2,
   Home,
   ListChecks,
   MessageCircle,
+  NotebookPen,
   PawPrint,
   Sparkles,
   Star,
   Tv,
+  User,
+  Users,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react';
 
-export type NavbarFeatureName = 'articles' | 'reviews';
+export type NavbarFeatureName = 'articles' | 'reviews' | 'social_profile' | 'diary' | 'dnd';
 
 export type NavbarLinkItem = {
   href: string;
@@ -44,6 +49,8 @@ export const NAV_ITEMS: NavbarLinkItem[] = [
   { href: '/about', label: 'About', icon: Book },
   { href: '/articles', label: 'Articles', icon: FileText, feature: 'articles' },
   { href: '/review', label: 'Reviews', icon: Star, feature: 'reviews' },
+  { href: '/explore', label: 'Explore', icon: Users, requiresAuth: true, feature: 'social_profile' },
+  { href: '/diary', label: 'Personal Diary', icon: NotebookPen, requiresAuth: true, feature: 'diary' },
   { href: '/support', label: 'Support', icon: MessageCircle, requiresAuth: true },
 ];
 
@@ -245,6 +252,20 @@ export const HOBBY_ITEMS: HobbyItem[] = [
   },
 ];
 
+export type DndToolItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  requiredRole?: 'dm' | 'player' | null; // null = visible to all
+};
+
+export const DND_TOOLS: DndToolItem[] = [
+  { href: '/dnd/campaigns', label: 'My Campaigns', icon: Dice5, requiredRole: null },
+  { href: '/dnd/dm', label: 'DM Dashboard', icon: Sparkles, requiredRole: 'dm' },
+  { href: '/dnd/characters', label: 'My Characters', icon: User, requiredRole: 'player' },
+  { href: '/dnd/tools', label: 'Shared Tools', icon: Wrench, requiredRole: 'player' },
+];
+
 export const normalizeHref = (href: string) => href.split('?')[0];
 
 export const isHrefActive = (pathname: string, href: string) => {
@@ -258,6 +279,10 @@ export const isHrefActive = (pathname: string, href: string) => {
 export type NavbarFeatureFilters = {
   articles?: boolean;
   reviews?: boolean;
+  social_profile?: boolean;
+  diary?: boolean;
+  dnd?: boolean;
+  dnd_role?: 'dm' | 'player' | null;
 };
 
 const featureEnabled = (feature: NavbarFeatureName | undefined, filters: NavbarFeatureFilters) => {
@@ -269,6 +294,15 @@ const featureEnabled = (feature: NavbarFeatureName | undefined, filters: NavbarF
   }
   if (feature === 'reviews') {
     return filters.reviews ?? true;
+  }
+  if (feature === 'social_profile') {
+    return filters.social_profile ?? false;
+  }
+  if (feature === 'diary') {
+    return filters.diary ?? false;
+  }
+  if (feature === 'dnd') {
+    return filters.dnd ?? false;
   }
   return true;
 };
@@ -283,11 +317,11 @@ export const getVisibleNavItems = (
     if (item.devOnly && !isDev) {
       return false;
     }
-    if (item.requiresAuth) {
-      return authResolved && isAuthenticated;
-    }
     if (!featureEnabled(item.feature, filters)) {
       return false;
+    }
+    if (item.requiresAuth) {
+      return authResolved && isAuthenticated;
     }
     return true;
   });
@@ -320,4 +354,16 @@ export const getVisibleHobbyItems = (
         ? item.children.filter(child => featureEnabled(child.feature, filters))
         : [],
     }));
+};
+
+export const getVisibleDndTools = (
+  tools: DndToolItem[],
+  userRole: 'dm' | 'player' | null,
+) => {
+  return tools.filter(tool => {
+    if (!tool.requiredRole) {
+      return true; // Visible to all
+    }
+    return tool.requiredRole === userRole;
+  });
 };

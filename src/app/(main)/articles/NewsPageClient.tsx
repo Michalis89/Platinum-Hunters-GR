@@ -325,7 +325,7 @@ function NewsPageContent() {
   ];
 
   return (
-    <PageContainer size="xl" className="py-10 sm:py-12">
+    <PageContainer size="lg" className="py-10 sm:py-12">
       <div className="rounded-lg p-3 sm:p-4">
         <section className="animate-fade-in-up mb-6 rounded-lg p-5 sm:p-7">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

@@ -77,6 +77,18 @@ export const gamesSearchConfig: MediaSearchConfig<GamesCategory, IgdbGame, GameS
     return typeof igdbId === 'number' ? igdbId : null;
   },
   getExternalId: item => item.id,
+  shouldIncludeLocalItem: item =>
+    isAllowedIgdbGameCandidate({
+      category: typeof item.igdb_category === 'number' ? item.igdb_category : null,
+      name:
+        typeof item.title_english === 'string'
+          ? item.title_english
+          : typeof item.title === 'string'
+            ? item.title
+            : null,
+      slug: typeof item.igdb_slug === 'string' ? item.igdb_slug : null,
+    }),
+  shouldIncludeExternalItem: isSearchAllowedGameCandidate,
   fetchExternal: async (search, { limit }) => {
     const strict = await searchIgdbGames(search, limit);
     if (strict.length > 0) {

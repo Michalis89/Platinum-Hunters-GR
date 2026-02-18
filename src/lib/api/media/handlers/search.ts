@@ -25,6 +25,8 @@ export type MediaSearchConfig<TCategory extends string, TExternalItem, TResultIt
     context: SearchFetchContext<TCategory>,
   ) => Promise<TExternalItem[]>;
   normalizeSearchTerm?: (value: string) => string;
+  shouldIncludeLocalItem?: (item: SearchLocalItem) => boolean;
+  shouldIncludeExternalItem?: (item: TExternalItem) => boolean;
 };
 
 function resolveSource(localCount: number, externalCount: number): SearchSource {
@@ -92,7 +94,10 @@ export async function handleMediaSearch<TCategory extends string, TExternalItem,
       console.warn(`Local ${config.logPrefix.toLowerCase()} search error:`, localError);
     }
 
-    const typedLocalItems = (localItems as SearchLocalItem[] | null) ?? [];
+    const typedLocalItemsRaw = (localItems as SearchLocalItem[] | null) ?? [];
+    const typedLocalItems = config.shouldIncludeLocalItem
+      ? typedLocalItemsRaw.filter(config.shouldIncludeLocalItem)
+      : typedLocalItemsRaw;
     const localResults = typedLocalItems.map(config.mapLocalItem);
     const remaining = Math.max(limit - localResults.length, 0);
     const localExternalIds = new Set(
@@ -112,7 +117,11 @@ export async function handleMediaSearch<TCategory extends string, TExternalItem,
       );
     }
 
-    const externalResults = externalFetched
+    const filteredExternalFetched = config.shouldIncludeExternalItem
+      ? externalFetched.filter(config.shouldIncludeExternalItem)
+      : externalFetched;
+
+    const externalResults = filteredExternalFetched
       .filter(item => !localExternalIds.has(config.getExternalId(item)))
       .slice(0, remaining)
       .map(item => config.mapExternalItem(item, category));
@@ -132,9 +141,13 @@ export async function handleMediaSearch<TCategory extends string, TExternalItem,
       config.fetchExternal,
     );
 
+    const fallbackFiltered = config.shouldIncludeExternalItem
+      ? fallback.filter(config.shouldIncludeExternalItem)
+      : fallback;
+
     return NextResponse.json({
       source: 'external' as SearchSource,
-      items: fallback.map(item => config.mapExternalItem(item, category)),
+      items: fallbackFiltered.map(item => config.mapExternalItem(item, category)),
     });
   } catch (error) {
     console.error(`${config.logPrefix} search error:`, error);

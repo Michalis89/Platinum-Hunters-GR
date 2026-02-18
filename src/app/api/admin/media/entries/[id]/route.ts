@@ -254,7 +254,7 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
       .update(updates as never)
       .eq('id', mediaId)
       .select(
-        'id,mal_id,category,source,title,title_english,title_romaji,title_native,description,summary,storyline,format,status,season_year,episodes,start_date,end_date,first_release_date,release_date,runtime,rating,rating_count,aggregated_rating,aggregated_rating_count,metacritic,esrb_rating,rawg_id,igdb_id,igdb_category,igdb_slug,steam_app_id,developer,publisher,platforms,genres,igdb_themes,igdb_game_modes,igdb_player_perspectives,igdb_artwork_image_ids,igdb_screenshot_image_ids,official_website,cover_image_id,cover_url_thumb,cover_url_big,cover_image_large,cover_image_medium,igdb_updated_at,updated_at',
+        'id,mal_id,category,source,title,title_english,title_romaji,title_native,description,summary,storyline,format,status,season_year,episodes,start_date,end_date,first_release_date,release_date,runtime,rating,rating_count,aggregated_rating,aggregated_rating_count,metacritic,esrb_rating,rawg_id,igdb_id,igdb_category,igdb_slug,steam_app_id,developer,publisher,platforms,genres,igdb_themes,igdb_game_modes,igdb_player_perspectives,igdb_artwork_image_ids,igdb_screenshot_image_ids,official_website,cover_image_id,cover_url_thumb,cover_url_big,cover_image_large,cover_image_medium,igdb_updated_at,created_at,updated_at',
       )
       .maybeSingle();
 

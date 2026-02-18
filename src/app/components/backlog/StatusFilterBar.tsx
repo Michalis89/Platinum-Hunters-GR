@@ -54,7 +54,7 @@ export default function StatusFilterBar({
           value={activeStatus}
           onValueChange={value => onStatusChange(value as MediaStatus | 'all')}
         >
-          <TabsList className="h-11 w-full justify-start gap-1 rounded-xl border border-border/70 bg-card/70 p-1">
+          <TabsList className="h-11 w-full justify-center gap-1 rounded-xl border border-border/70 bg-card/70 p-1">
             {filters.map(filter => (
               <TabsTrigger
                 key={filter.key}

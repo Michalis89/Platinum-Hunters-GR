@@ -65,6 +65,7 @@ type MediaRow = {
   cover_url_big: string | null;
   cover_image_medium: string | null;
   cover_image_large: string | null;
+  created_at: string | null;
   updated_at: string | null;
 };
 
@@ -116,7 +117,80 @@ type AdminRowUpdate = EditingState & {
   official_website?: string | null;
 };
 
+type TmdbImportResult = {
+  category: 'movies' | 'tv';
+  requested: number;
+  inserted: number;
+  skippedExisting: number;
+  failed: number;
+  pagesScanned: number;
+  startPage: number;
+  nextCursorPage: number;
+  reachedTarget: boolean;
+};
+
+type MalImportResult = {
+  category: 'anime' | 'manga';
+  requested: number;
+  inserted: number;
+  skippedExisting: number;
+  failed: number;
+  pagesScanned: number;
+  startOffset: number;
+  nextCursorOffset: number;
+  reachedTarget: boolean;
+};
+
+type BooksImportResult = {
+  category: 'books';
+  requested: number;
+  query: string;
+  inserted: number;
+  skippedExisting: number;
+  failed: number;
+  pagesScanned: number;
+  startOffset: number;
+  nextCursorOffset: number;
+  reachedTarget: boolean;
+};
+
+type IgdbImportResult = {
+  category: 'games';
+  requested: number;
+  fetchedCandidates: number;
+  inserted: number;
+  skippedExisting: number;
+  skippedUnsupported: number;
+  failed: number;
+  pagesScanned: number;
+  startOffset: number;
+  nextCursorOffset: number;
+  reachedTarget: boolean;
+};
+
 const DEFAULT_LIMIT = 20;
+const NEW_WINDOW_DAYS = 7;
+const BOOKS_SUBJECT_OPTIONS = [
+  'subject:fiction',
+  'subject:fantasy',
+  'subject:science_fiction',
+  'subject:mystery',
+  'subject:thriller',
+  'subject:horror',
+  'subject:romance',
+  'subject:history',
+  'subject:biography',
+  'subject:self-help',
+  'subject:business',
+  'subject:psychology',
+  'subject:philosophy',
+  'subject:science',
+  'subject:technology',
+  'subject:art',
+  'subject:comics',
+  'subject:young_adult',
+  'custom',
+] as const;
 
 const initialFilters: FiltersState = {
   source: '',
@@ -149,6 +223,18 @@ function summarizeFacet(values: string[] | null | undefined): string {
   const preview = list.slice(0, 3);
   const overflow = list.length - preview.length;
   return overflow > 0 ? `${preview.join(', ')} +${overflow}` : preview.join(', ');
+}
+
+function isRecentDate(value: string | null | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) {
+    return false;
+  }
+  const cutoff = Date.now() - NEW_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  return time >= cutoff;
 }
 
 function getExcludedReason(row: MediaRow): string | null {
@@ -184,18 +270,35 @@ export default function AdminMediaCurationTable() {
   const [deleteTarget, setDeleteTarget] = useState<MediaRow | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<number[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [onlyNew, setOnlyNew] = useState(false);
+  const [catalogImportCategory, setCatalogImportCategory] = useState<'movies' | 'tv'>('movies');
+  const [catalogImportCount, setCatalogImportCount] = useState('200');
+  const [isImportingCatalog, setIsImportingCatalog] = useState(false);
+  const [malImportCategory, setMalImportCategory] = useState<'anime' | 'manga'>('anime');
+  const [malImportCount, setMalImportCount] = useState('200');
+  const [isImportingMalCatalog, setIsImportingMalCatalog] = useState(false);
+  const [booksImportCount, setBooksImportCount] = useState('200');
+  const [booksImportQuery, setBooksImportQuery] = useState('subject:fiction');
+  const [booksImportSubject, setBooksImportSubject] =
+    useState<(typeof BOOKS_SUBJECT_OPTIONS)[number]>('subject:fiction');
+  const [isImportingBooksCatalog, setIsImportingBooksCatalog] = useState(false);
+  const [igdbImportCount, setIgdbImportCount] = useState('200');
+  const [isImportingIgdbCatalog, setIsImportingIgdbCatalog] = useState(false);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
     params.set('limit', `${DEFAULT_LIMIT}`);
     params.set('offset', `${(page - 1) * DEFAULT_LIMIT}`);
+    if (onlyNew) {
+      params.set('only_new', '1');
+    }
     for (const [key, value] of Object.entries(filters)) {
       if (value.trim()) {
         params.set(key, value.trim());
       }
     }
     return params.toString();
-  }, [filters, page]);
+  }, [filters, onlyNew, page]);
 
   const totalPages = Math.max(1, Math.ceil((meta?.total ?? 0) / DEFAULT_LIMIT));
   const draftCount = Object.keys(draftUpdatesById).length;
@@ -210,6 +313,7 @@ export default function AdminMediaCurationTable() {
       ),
     [rows, selectedRowIds],
   );
+  const visibleRows = rows;
 
   const fetchRows = useCallback(async () => {
     setLoading(true);
@@ -447,6 +551,155 @@ export default function AdminMediaCurationTable() {
     setSavingAll(false);
   };
 
+  const importTmdbCatalog = async () => {
+    setError(null);
+    setSuccessMessage(null);
+    setIsImportingCatalog(true);
+
+    const requestedCount = Number.parseInt(catalogImportCount, 10);
+
+    try {
+      const response = await fetch('/api/admin/media/import/tmdb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: catalogImportCategory,
+          count: Number.isFinite(requestedCount) ? requestedCount : 200,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { data?: TmdbImportResult; error?: string }
+        | null;
+
+      if (!response.ok || !payload?.data) {
+        throw new Error(payload?.error || 'TMDB import failed');
+      }
+
+      const result = payload.data;
+      const categoryLabel = result.category === 'tv' ? 'TV' : 'Movies';
+      setSuccessMessage(
+        `TMDB ${categoryLabel} import complete: inserted ${result.inserted}, skipped existing ${result.skippedExisting}, failed ${result.failed} (scanned ${result.pagesScanned} pages, cursor ${result.startPage} -> ${result.nextCursorPage}).`,
+      );
+      await fetchRows();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'TMDB import failed');
+    } finally {
+      setIsImportingCatalog(false);
+    }
+  };
+
+  const importMalCatalog = async () => {
+    setError(null);
+    setSuccessMessage(null);
+    setIsImportingMalCatalog(true);
+
+    const requestedCount = Number.parseInt(malImportCount, 10);
+
+    try {
+      const response = await fetch('/api/admin/media/import/mal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: malImportCategory,
+          count: Number.isFinite(requestedCount) ? requestedCount : 200,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { data?: MalImportResult; error?: string }
+        | null;
+
+      if (!response.ok || !payload?.data) {
+        throw new Error(payload?.error || 'MAL import failed');
+      }
+
+      const result = payload.data;
+      const categoryLabel = result.category === 'manga' ? 'Manga' : 'Anime';
+      setSuccessMessage(
+        `MAL ${categoryLabel} import complete: inserted ${result.inserted}, skipped existing ${result.skippedExisting}, failed ${result.failed} (scanned ${result.pagesScanned} pages, cursor ${result.startOffset} -> ${result.nextCursorOffset}).`,
+      );
+      await fetchRows();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'MAL import failed');
+    } finally {
+      setIsImportingMalCatalog(false);
+    }
+  };
+
+  const importBooksCatalog = async () => {
+    setError(null);
+    setSuccessMessage(null);
+    setIsImportingBooksCatalog(true);
+
+    const requestedCount = Number.parseInt(booksImportCount, 10);
+
+    try {
+      const response = await fetch('/api/admin/media/import/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          count: Number.isFinite(requestedCount) ? requestedCount : 200,
+          query: booksImportSubject === 'custom' ? booksImportQuery : booksImportSubject,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { data?: BooksImportResult; error?: string }
+        | null;
+
+      if (!response.ok || !payload?.data) {
+        throw new Error(payload?.error || 'Books import failed');
+      }
+
+      const result = payload.data;
+      setSuccessMessage(
+        `Books import complete: inserted ${result.inserted}, skipped existing ${result.skippedExisting}, failed ${result.failed} (query "${result.query}", scanned ${result.pagesScanned} pages, cursor ${result.startOffset} -> ${result.nextCursorOffset}).`,
+      );
+      await fetchRows();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Books import failed');
+    } finally {
+      setIsImportingBooksCatalog(false);
+    }
+  };
+
+  const importIgdbCatalog = async () => {
+    setError(null);
+    setSuccessMessage(null);
+    setIsImportingIgdbCatalog(true);
+
+    const requestedCount = Number.parseInt(igdbImportCount, 10);
+
+    try {
+      const response = await fetch('/api/admin/media/import/igdb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          count: Number.isFinite(requestedCount) ? requestedCount : 200,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { data?: IgdbImportResult; error?: string }
+        | null;
+
+      if (!response.ok || !payload?.data) {
+        throw new Error(payload?.error || 'IGDB import failed');
+      }
+
+      const result = payload.data;
+      setSuccessMessage(
+        `IGDB Games import complete: fetched ${result.fetchedCandidates}, inserted ${result.inserted}, skipped existing ${result.skippedExisting}, skipped unsupported ${result.skippedUnsupported}, failed ${result.failed} (scanned ${result.pagesScanned} pages, cursor ${result.startOffset} -> ${result.nextCursorOffset}).`,
+      );
+      await fetchRows();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'IGDB import failed');
+    } finally {
+      setIsImportingIgdbCatalog(false);
+    }
+  };
+
   const deleteRows = async (rowIds: number[]) => {
     if (rowIds.length === 0) {
       return;
@@ -488,7 +741,7 @@ export default function AdminMediaCurationTable() {
     }
   };
 
-  const hasRows = rows.length > 0;
+  const hasRows = visibleRows.length > 0;
 
   return (
     <Card>
@@ -531,6 +784,173 @@ export default function AdminMediaCurationTable() {
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
+        <div className="rounded-xl border border-border bg-card/50 p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">TMDB Catalog Import</p>
+            <p className="text-xs text-muted-foreground">
+              Insert-only: new `tmdb_id + category` only, existing rows are skipped.
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[160px,160px,auto]">
+            <Select
+              label="Category"
+              value={catalogImportCategory}
+              onChange={value => setCatalogImportCategory(value === 'tv' ? 'tv' : 'movies')}
+              options={['movies', 'tv']}
+              optionLabels={{ movies: 'Movies', tv: 'TV' }}
+            />
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-foreground">Count</label>
+              <Input
+                type="number"
+                min={1}
+                max={500}
+                value={catalogImportCount}
+                onChange={event => setCatalogImportCount(event.target.value)}
+                placeholder="200"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button type="button" onClick={importTmdbCatalog} disabled={isImportingCatalog}>
+                {isImportingCatalog ? 'Importing...' : 'Import from TMDB'}
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-card/50 p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">MAL Catalog Import</p>
+            <p className="text-xs text-muted-foreground">
+              Insert-only: new `mal_id + category` only, existing rows are skipped.
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[160px,160px,auto]">
+            <Select
+              label="Category"
+              value={malImportCategory}
+              onChange={value => setMalImportCategory(value === 'manga' ? 'manga' : 'anime')}
+              options={['anime', 'manga']}
+              optionLabels={{ anime: 'Anime', manga: 'Manga' }}
+            />
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-foreground">Count</label>
+              <Input
+                type="number"
+                min={1}
+                max={500}
+                value={malImportCount}
+                onChange={event => setMalImportCount(event.target.value)}
+                placeholder="200"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button type="button" onClick={importMalCatalog} disabled={isImportingMalCatalog}>
+                {isImportingMalCatalog ? 'Importing...' : 'Import from MAL'}
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-card/50 p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">Google Books Catalog Import</p>
+            <p className="text-xs text-muted-foreground">
+              Insert-only: new `google_books_id + category` only, existing rows are skipped.
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[160px,220px,1fr,auto]">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-foreground">Count</label>
+              <Input
+                type="number"
+                min={1}
+                max={500}
+                value={booksImportCount}
+                onChange={event => setBooksImportCount(event.target.value)}
+                placeholder="200"
+              />
+            </div>
+            <Select
+              label="Subject"
+              value={booksImportSubject}
+              onChange={value =>
+                setBooksImportSubject(
+                  BOOKS_SUBJECT_OPTIONS.includes(
+                    value as (typeof BOOKS_SUBJECT_OPTIONS)[number],
+                  )
+                    ? (value as (typeof BOOKS_SUBJECT_OPTIONS)[number])
+                    : 'subject:fiction',
+                )
+              }
+              options={[...BOOKS_SUBJECT_OPTIONS]}
+              optionLabels={{
+                'subject:fiction': 'Fiction',
+                'subject:fantasy': 'Fantasy',
+                'subject:science_fiction': 'Science Fiction',
+                'subject:mystery': 'Mystery',
+                'subject:thriller': 'Thriller',
+                'subject:horror': 'Horror',
+                'subject:romance': 'Romance',
+                'subject:history': 'History',
+                'subject:biography': 'Biography',
+                'subject:self-help': 'Self Help',
+                'subject:business': 'Business',
+                'subject:psychology': 'Psychology',
+                'subject:philosophy': 'Philosophy',
+                'subject:science': 'Science',
+                'subject:technology': 'Technology',
+                'subject:art': 'Art',
+                'subject:comics': 'Comics',
+                'subject:young_adult': 'Young Adult',
+                custom: 'Custom Query',
+              }}
+            />
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-foreground">Query</label>
+              <Input
+                value={booksImportQuery}
+                onChange={event => setBooksImportQuery(event.target.value)}
+                placeholder="subject:fiction"
+                disabled={booksImportSubject !== 'custom'}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="button"
+                onClick={importBooksCatalog}
+                disabled={isImportingBooksCatalog}
+              >
+                {isImportingBooksCatalog ? 'Importing...' : 'Import from Google Books'}
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-card/50 p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">IGDB Games Catalog Import</p>
+            <p className="text-xs text-muted-foreground">
+              Insert-only with game safety filters (allowed IGDB categories + heuristics).
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[160px,auto]">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-foreground">Count</label>
+              <Input
+                type="number"
+                min={1}
+                max={500}
+                value={igdbImportCount}
+                onChange={event => setIgdbImportCount(event.target.value)}
+                placeholder="200"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button type="button" onClick={importIgdbCatalog} disabled={isImportingIgdbCatalog}>
+                {isImportingIgdbCatalog ? 'Importing...' : 'Import from IGDB'}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-5">
           <Select
             label="Source"
@@ -584,6 +1004,21 @@ export default function AdminMediaCurationTable() {
             />
           </div>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={onlyNew ? 'primary' : 'secondary'}
+            className="rounded-full"
+            onClick={() => {
+              setPage(1);
+              setOnlyNew(prev => !prev);
+            }}
+          >
+            {onlyNew ? 'Only New: ON' : 'Only New'}
+          </Button>
+          <span className="text-xs text-muted-foreground">New = last {NEW_WINDOW_DAYS} days</span>
+        </div>
 
         {error ? <ErrorAlert message={error} /> : null}
         {successMessage ? (
@@ -604,9 +1039,9 @@ export default function AdminMediaCurationTable() {
                 <TableRow>
                   <TableHead className="w-[48px]">
                     <Checkbox
-                      checked={hasRows && rows.every(row => selectedRowIds.includes(row.id))}
+                      checked={hasRows && visibleRows.every(row => selectedRowIds.includes(row.id))}
                       onCheckedChange={checked => {
-                        setSelectedRowIds(checked === true ? rows.map(row => row.id) : []);
+                        setSelectedRowIds(checked === true ? visibleRows.map(row => row.id) : []);
                       }}
                       aria-label="Select all rows"
                       disabled={!hasRows}
@@ -638,10 +1073,11 @@ export default function AdminMediaCurationTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map(row => {
+                {visibleRows.map(row => {
                   const isEditing = editingId === row.id;
                   const isSyncing = syncingIds.includes(row.id);
                   const excludedReason = getExcludedReason(row);
+                  const isNew = isRecentDate(row.created_at ?? row.updated_at);
                   return (
                     <TableRow key={row.id}>
                       <TableCell>
@@ -673,7 +1109,16 @@ export default function AdminMediaCurationTable() {
                           (row.source ?? '-')
                         )}
                       </TableCell>
-                      <TableCell className="min-w-[220px]">{row.title ?? '-'}</TableCell>
+                      <TableCell className="min-w-[220px]">
+                        <div className="flex items-center gap-2">
+                          <span>{row.title ?? '-'}</span>
+                          {isNew ? (
+                            <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                              New
+                            </span>
+                          ) : null}
+                        </div>
+                      </TableCell>
                       <TableCell className="min-w-[220px]">
                         {isEditing ? (
                           <Input
@@ -753,8 +1198,21 @@ export default function AdminMediaCurationTable() {
                           ? getIgdbCategoryLabel(row.igdb_category)
                           : '-'}
                       </TableCell>
-                      <TableCell className="max-w-[220px] truncate">
-                        {row.igdb_slug ?? '-'}
+                      <TableCell className="max-w-[220px]">
+                        {isEditing ? (
+                          <Input
+                            value={editingState.igdb_slug ?? ''}
+                            onChange={event =>
+                              setEditingState(prev => ({
+                                ...prev,
+                                igdb_slug: event.target.value,
+                              }))
+                            }
+                            placeholder="slug-name"
+                          />
+                        ) : (
+                          <span className="truncate">{row.igdb_slug ?? '-'}</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {row.cover_url_thumb ||

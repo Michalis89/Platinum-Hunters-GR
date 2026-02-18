@@ -136,18 +136,7 @@ export default async function AboutPage() {
   return (
     <>
       <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
-      <main className="relative min-h-screen text-foreground">
-        <div className="pointer-events-none absolute inset-0">
-          <div
-            className="absolute inset-0 opacity-80"
-            style={{
-              background:
-                'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.12), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.08), transparent 44%), radial-gradient(circle at 50% 100%, hsl(var(--accent-primary) / 0.06), transparent 50%)',
-            }}
-          />
-        </div>
-
-        <div className="relative pb-14 md:pb-20">
+      <main className="pb-14 md:pb-20">
           <AboutHero isAuthenticated={isAuthenticated} />
 
           <AboutSectionShell>
@@ -189,7 +178,6 @@ export default async function AboutPage() {
               <AboutFinalCTA isAuthenticated={isAuthenticated} />
             </AboutSectionShell>
           </div>
-        </div>
       </main>
     </>
   );

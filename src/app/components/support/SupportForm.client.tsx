@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
-import { PageContainer } from '@/app/components/layout/PageContainer';
 import {
   Card,
   CardContent,
@@ -39,7 +38,6 @@ import AttachmentDropzone, {
   type AttachmentItem,
 } from '@/app/components/support/AttachmentDropzone.client';
 import { SUPPORT_SEVERITY_OPTIONS } from '@/lib/constants/support';
-import { UI_CLASSNAMES } from '@/lib/constants/ui';
 
 const CATEGORY_OPTIONS = [
   { id: 'bug', label: 'Bug report', description: 'Something is not working as expected' },
@@ -378,13 +376,9 @@ export default function SupportForm({}: Readonly<{
   };
 
   return (
-    <div className={UI_CLASSNAMES.pageShell}>
-      <div className={UI_CLASSNAMES.pageBackdrop}>
-        <div className={UI_CLASSNAMES.pageGradient} />
-      </div>
-
-      <PageContainer size="md" className="relative pb-16 pt-8 md:pt-10">
-        <section className="relative mx-auto max-w-3xl overflow-hidden rounded-2xl border border-border/40 bg-card/30 px-6 py-7 text-center shadow-sm shadow-black/5 md:px-10 md:py-9">
+    <div className="relative min-h-screen px-3 py-12 text-foreground sm:px-4 sm:py-16">
+      <div className="relative mx-auto flex w-full max-w-screen-2xl flex-col gap-5 sm:gap-6">
+        <section className="relative w-full overflow-hidden rounded-2xl border border-border/40 bg-card/30 px-6 py-7 text-center shadow-sm shadow-black/5 md:px-10 md:py-9">
           <div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 -translate-y-1/3 rounded-full"
@@ -420,7 +414,7 @@ export default function SupportForm({}: Readonly<{
           </div>
         </section>
 
-        <Card className="mx-auto mt-6 max-w-4xl rounded-2xl border-border/40 bg-card/60 shadow-lg shadow-black/10 transition-shadow duration-200">
+        <Card className="w-full rounded-2xl border-border/40 bg-card/60 shadow-lg shadow-black/10 transition-shadow duration-200">
           <form onSubmit={handleSubmit} id="support-request-form" className="contents">
             <CardHeader className="border-b border-border/50 pb-5">
               <CardTitle className="flex items-center gap-3 text-lg text-foreground">
@@ -981,7 +975,7 @@ export default function SupportForm({}: Readonly<{
             </CardFooter>
           </form>
         </Card>
-      </PageContainer>
+      </div>
     </div>
   );
 }

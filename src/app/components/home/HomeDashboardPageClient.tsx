@@ -192,7 +192,7 @@ function HomeDashboardLoadingShell() {
         </div>
       </section>
 
-      <PageContainer size="xl">
+      <PageContainer size="lg">
         <div className="grid gap-3.5 md:grid-cols-4 md:gap-4">
           <div className="h-24 animate-pulse bg-card" />
           <div className="h-24 animate-pulse bg-card" />

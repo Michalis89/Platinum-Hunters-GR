@@ -319,7 +319,11 @@ function normalizeTasteProfileLabels(item: CategoryTasteProfileItem): string[] {
 }
 
 function normalizeBucketLabels(item: CategoryTasteProfileItem, bucket: InsightTagBucket): string[] {
-  return pickTopBucketLabels(bucket, item.bucketTags?.[bucket] ?? []);
+  const labels = pickTopBucketLabels(bucket, item.bucketTags?.[bucket] ?? []);
+  if (bucket !== 'subgenre') {
+    return labels;
+  }
+  return labels.filter(label => !GENERIC_GAME_SUBGENRE_SET.has(label));
 }
 
 function canonicalizeBucketLabel(bucket: InsightTagBucket, label: string): string {
@@ -1697,6 +1701,7 @@ const PERSONAL_PROGRESS_BOOST_MAX = {
   current: 0.55,
 } as const;
 const GENERIC_GENRE_NOISE_SET = new Set(['fantasy', 'drama', 'comedy', 'romance', 'sci-fi']);
+const GENERIC_GAME_SUBGENRE_SET = new Set(['adventure']);
 const GENRE_ALIAS_MAP: Record<string, string> = {
   'role-playing': 'rpg',
   'role playing': 'rpg',

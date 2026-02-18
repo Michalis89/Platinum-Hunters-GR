@@ -11,8 +11,12 @@ const settingsSchema = z.object({
   social_enabled: z.boolean().optional(),
   community_activity_enabled: z.boolean().optional(),
   community_suggestions_enabled: z.boolean().optional(),
+  social_profile_enabled: z.boolean().optional(),
   articles_enabled: z.boolean().optional(),
   reviews_enabled: z.boolean().optional(),
+  diary_enabled: z.boolean().optional(),
+  dnd_enabled: z.boolean().optional(),
+  dnd_role: z.enum(['dm', 'player']).nullable().optional(),
 });
 
 const handler = withApiRoute(async (request: Request) => {

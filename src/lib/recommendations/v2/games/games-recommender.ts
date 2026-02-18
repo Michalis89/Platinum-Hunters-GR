@@ -12,6 +12,7 @@ import { RECOMMENDATION_LIMITS, MIN_POPULARITY } from '../core/scoring-engine';
 import type { Recommendation, UserGenreAffinity, UserMediaEntry } from '../types';
 
 type SupabaseClient = Awaited<ReturnType<typeof createRouteHandlerClient>>;
+const DATABASE_FETCH_PAGE_SIZE = 500;
 
 /**
  * Database query result types (matching Supabase nullability)
@@ -106,7 +107,7 @@ export async function generateGameRecommendationsV2(userId: string): Promise<Rec
     cover: item.entry.media.coverImageLarge || item.entry.media.coverImageMedium || '',
     slug: titleToSlug(item.entry.media.title),
     reason: item.reason,
-    confidence: 1.0,
+    confidence: item.finalScore / 100, // Direct mapping from score (0-100) to confidence (0-1)
     source: 'backlog' as const,
     genres: item.entry.media.genres,
     tags: [],
@@ -116,9 +117,22 @@ export async function generateGameRecommendationsV2(userId: string): Promise<Rec
 
   // Load and score database games
   const existingMediaIds = new Set(mediaHistory.map(e => e.mediaId));
-  const databaseGames = await loadDatabaseGames(supabase, existingMediaIds, numFromDatabase * 10);
+  const ownedGameIdentityKeys = new Set(
+    mediaHistory.map(entry => normalizeGameIdentityKey(entry.media.title)).filter(Boolean),
+  );
+  const databaseGames = await loadDatabaseGames(supabase, existingMediaIds, ownedGameIdentityKeys);
 
-  const scoredDatabase = scoreDatabaseGames(databaseGames, preferences, coverageMap);
+  const scoredDatabase = scoreDatabaseGames(
+    databaseGames,
+    preferences,
+    coverageMap,
+    mediaHistory.map(entry => ({
+      title: entry.media.title,
+      score: entry.score,
+      isFavorite: entry.isFavorite,
+      status: entry.status,
+    })),
+  );
 
   const databaseRecommendations = scoredDatabase.slice(0, numFromDatabase).map(item => ({
     mediaId: item.mediaId,
@@ -127,7 +141,7 @@ export async function generateGameRecommendationsV2(userId: string): Promise<Rec
     cover: item.cover,
     slug: item.slug,
     reason: item.matchReason,
-    confidence: Math.min(0.95, item.finalScore / 100),
+    confidence: item.finalScore / 100, // Direct mapping from score (0-100) to confidence (0-1)
     source: 'database' as const,
     genres: item.genres,
     tags: [],
@@ -200,7 +214,7 @@ async function loadUserMediaHistory(
       )
     `,
     )
-    .eq('media_items.category', 'games')
+    .in('media_items.category', ['games', 'game'])
     .eq('user_id', userId);
 
   if (error) {
@@ -258,7 +272,7 @@ async function loadUserCategoryProfile(
 async function loadDatabaseGames(
   supabase: SupabaseClient,
   existingMediaIds: Set<number>,
-  limit: number,
+  ownedGameIdentityKeys: Set<string>,
 ): Promise<
   Array<{
     id: number;
@@ -272,41 +286,65 @@ async function loadDatabaseGames(
     popularityScore?: number;
   }>
 > {
-  const notInClause = existingMediaIds.size > 0 ? Array.from(existingMediaIds) : null;
+  const allRows: MediaItemRow[] = [];
+  let offset = 0;
 
-  let query = supabase
-    .from('media_items')
-    .select(
-      `
-      id,
-      title,
-      igdb_slug,
-      genres,
-      igdb_themes,
-      platforms,
-      cover_image_large,
-      cover_image_medium
-    `,
-    )
-    .in('category', ['games', 'game'])
-    .order('id', { ascending: false })
-    .limit(limit);
+  while (true) {
+    const { data, error } = await supabase
+      .from('media_items')
+      .select(
+        `
+        id,
+        title,
+        igdb_slug,
+        genres,
+        igdb_themes,
+        platforms,
+        cover_image_large,
+        cover_image_medium
+      `,
+      )
+      .in('category', ['games', 'game'])
+      .order('id', { ascending: false })
+      .range(offset, offset + DATABASE_FETCH_PAGE_SIZE - 1);
 
-  if (notInClause) {
-    query = query.not('id', 'in', `(${notInClause.join(',')})`);
+    if (error) {
+      console.error('[GameRecommenderV2] Error loading database games:', error);
+      return [];
+    }
+
+    const pageRows = (data || []) as MediaItemRow[];
+    if (pageRows.length === 0) {
+      break;
+    }
+
+    allRows.push(...pageRows);
+    if (pageRows.length < DATABASE_FETCH_PAGE_SIZE) {
+      break;
+    }
+
+    offset += DATABASE_FETCH_PAGE_SIZE;
   }
 
-  const { data, error } = await query;
+  // Client-side filtering to exclude existing media IDs (more reliable than SQL NOT IN)
+  const filteredData = allRows.filter((game: MediaItemRow) => {
+    if (existingMediaIds.has(game.id)) {
+      return false;
+    }
 
-  if (error) {
-    console.error('[GameRecommenderV2] Error loading database games:', error);
-    return [];
-  }
+    const identitySource = game.igdb_slug || game.title || '';
+    if (!identitySource) {
+      return true;
+    }
 
-  const gameIds = (data || []).map((g: MediaItemRow) => g.id);
+    const baseIdentityKey = normalizeGameIdentityKey(identitySource);
+    return !ownedGameIdentityKeys.has(baseIdentityKey);
+  });
+
+  const gameIds = filteredData.map((g: MediaItemRow) => g.id);
   const popularityMap = await loadPopularityScores(supabase, gameIds);
 
-  return (data || []).map((row: MediaItemRow) => ({
+  return filteredData.map((row: MediaItemRow) => ({
     id: row.id,
     title: row.title ?? 'Untitled',
     coverImageLarge: row.cover_image_large ?? undefined,
@@ -386,4 +424,87 @@ function titleToSlug(title: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+/**
+ * Normalize game title/slug to a base identity key so edition variants collapse together.
+ */
+function normalizeGameIdentityKey(value: string): string {
+  const original = titleToSlug(value);
+  if (!original) {
+    return '';
+  }
+
+  let normalized = normalizeSequelNumberTokens(normalizePossessiveTokens(original));
+
+  // Remove common suffixes that usually indicate the same base game in a different edition.
+  let previous = '';
+  while (normalized && normalized !== previous) {
+    previous = normalized;
+    normalized = normalized
+      .replace(/-(?:game-of-the-year(?:-edition)?|goty(?:-edition)?)$/, '')
+      .replace(/-(?:director-s-cut|directors-cut)$/, '')
+      .replace(/-(?:definitive|complete|enhanced|ultimate|deluxe|gold|anniversary|standard)-edition$/, '')
+      .replace(/-(?:hd-remaster(?:ed)?|remaster(?:ed)?|remake)$/, '')
+      .replace(/-(?:definitive|complete|enhanced|ultimate|deluxe|gold|anniversary|standard|edition)$/, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  return normalized || original;
+}
+
+function normalizeSequelNumberTokens(value: string): string {
+  const romanToArabic = new Map<string, string>([
+    ['i', '1'],
+    ['ii', '2'],
+    ['iii', '3'],
+    ['iv', '4'],
+    ['v', '5'],
+    ['vi', '6'],
+    ['vii', '7'],
+    ['viii', '8'],
+    ['ix', '9'],
+    ['x', '10'],
+    ['xi', '11'],
+    ['xii', '12'],
+    ['xiii', '13'],
+    ['xiv', '14'],
+    ['xv', '15'],
+    ['xvi', '16'],
+    ['xvii', '17'],
+    ['xviii', '18'],
+    ['xix', '19'],
+    ['xx', '20'],
+  ]);
+
+  const tokens = value.split('-').map(token => {
+    const roman = romanToArabic.get(token);
+    if (roman) {
+      return roman;
+    }
+
+    if (/^\d+$/.test(token)) {
+      return String(parseInt(token, 10));
+    }
+
+    return token;
+  });
+
+  return tokens.join('-');
+}
+
+function normalizePossessiveTokens(value: string): string {
+  const tokens = value.split('-');
+  const normalized: string[] = [];
+
+  for (const token of tokens) {
+    if (token === 's' && normalized.length > 0) {
+      normalized[normalized.length - 1] = `${normalized[normalized.length - 1]}s`;
+      continue;
+    }
+    normalized.push(token);
+  }
+
+  return normalized.join('-');
 }

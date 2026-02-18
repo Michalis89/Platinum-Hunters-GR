@@ -72,7 +72,7 @@ async function handleLocalSource(
   // Fetch media details for title and category
   const { data: mediaRow, error: mediaError } = await supabase
     .from('media_items')
-    .select(config.titlePriority.join(',') + ',category')
+    .select(config.titlePriority.join(',') + ',category,igdb_category,igdb_slug')
     .eq('id', body.mediaId!)
     .maybeSingle();
 
@@ -84,6 +84,31 @@ async function handleLocalSource(
     (mediaRow && !mediaError
       ? ((mediaRow as unknown as Record<string, unknown>).category as string)
       : null) ?? config.defaultCategory;
+
+  // Hard guard: prevent category mismatch and excluded IGDB game types from being added as entries
+  if (mediaRow && !mediaError) {
+    const row = mediaRow as unknown as Record<string, unknown>;
+    const rowCategory = typeof row.category === 'string' ? row.category : null;
+    if (!rowCategory || !config.subcategories.includes(rowCategory)) {
+      return NextResponse.json({ error: 'Media does not belong to this category' }, { status: 422 });
+    }
+
+    if (config.key === 'games') {
+      const candidateAllowed = isAllowedIgdbGameCandidate({
+        category: typeof row.igdb_category === 'number' ? row.igdb_category : null,
+        name:
+          typeof row.title_english === 'string'
+            ? row.title_english
+            : typeof row.title === 'string'
+              ? row.title
+              : null,
+        slug: typeof row.igdb_slug === 'string' ? row.igdb_slug : null,
+      });
+      if (!candidateAllowed) {
+        return NextResponse.json({ ok: false, error: 'Unsupported IGDB category' }, { status: 422 });
+      }
+    }
+  }
 
   // Upsert user media entry
   const updatedAt = new Date().toISOString();
@@ -144,7 +169,17 @@ async function handleExternalSource(
   if (!externalIdValue || !payload!.category) {
     return NextResponse.json({ error: MISSING_PAYLOAD }, { status: 400 });
   }
-  if (config.key === 'games' && typeof payload?.igdb_id === 'number') {
+  if (config.key === 'games') {
+    // Strict guard for games: only IGDB-backed payloads are accepted for external add
+    if (payload?.category !== 'games') {
+      return NextResponse.json({ error: 'Invalid games category payload' }, { status: 422 });
+    }
+    if (payload?.source !== 'igdb') {
+      return NextResponse.json({ error: 'Only IGDB source is allowed for games' }, { status: 422 });
+    }
+    if (typeof payload?.igdb_id !== 'number' || !Number.isFinite(payload.igdb_id)) {
+      return NextResponse.json({ error: 'Missing or invalid igdb_id' }, { status: 422 });
+    }
     if (
       !isAllowedIgdbGameCandidate({
         category: typeof payload?.igdb_category === 'number' ? payload.igdb_category : null,

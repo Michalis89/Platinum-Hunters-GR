@@ -18,6 +18,7 @@ import type {
 } from '../types';
 
 type SupabaseClient = Awaited<ReturnType<typeof createRouteHandlerClient>>;
+const DATABASE_FETCH_PAGE_SIZE = 500;
 
 /**
  * Database query result types (matching Supabase nullability)
@@ -107,12 +108,22 @@ export async function generateGenericRecommendations(
     supabase,
     category,
     existingMediaIds,
-    numFromDatabase * 10,
   );
 
   const scoredDatabase = scoreDatabaseItems(databaseItems, preferences);
+  const scoredDatabasePrimary = scoredDatabase.slice(0, numFromDatabase);
 
-  const databaseRecommendations = scoredDatabase.slice(0, numFromDatabase).map(item => ({
+  let scoredDatabaseFinal = scoredDatabasePrimary;
+  if (scoredDatabasePrimary.length < numFromDatabase) {
+    const selectedIds = new Set(scoredDatabasePrimary.map(item => item.mediaId));
+    const remainingItems = databaseItems.filter(item => !selectedIds.has(item.id));
+    const fallbackScored = scoreDatabaseItems(remainingItems, preferences, 0);
+    const needed = numFromDatabase - scoredDatabasePrimary.length;
+    scoredDatabaseFinal = [...scoredDatabasePrimary, ...fallbackScored.slice(0, needed)];
+  }
+
+  const strictIds = new Set(scoredDatabasePrimary.map(item => item.mediaId));
+  const databaseRecommendations = scoredDatabaseFinal.map(item => ({
     mediaId: item.mediaId,
     category,
     title: item.title,
@@ -120,7 +131,7 @@ export async function generateGenericRecommendations(
     slug: item.slug,
     reason: item.reason,
     confidence: Math.min(0.95, item.score / 100),
-    source: 'database' as const,
+    source: strictIds.has(item.mediaId) ? ('database' as const) : ('database-fallback' as const),
     genres: item.genres,
     tags: [],
     primaryGenre: item.primaryGenre,
@@ -189,6 +200,7 @@ function scoreDatabaseItems(
     popularityScore: number;
   }>,
   preferences: UserPreferences,
+  minGenreAffinity: number = 30.0,
 ): Array<{
   mediaId: number;
   title: string;
@@ -199,8 +211,6 @@ function scoreDatabaseItems(
   score: number;
   reason: string;
 }> {
-  const MIN_GENRE_AFFINITY = 30.0;
-
   // Filter by minimum affinity
   const candidates = items.filter(item =>
     item.genres.some(g => {
@@ -208,7 +218,7 @@ function scoreDatabaseItems(
       if (!canonicalKey) {
         return false;
       }
-      return (preferences.genreAffinities.get(canonicalKey)?.score ?? 0) >= MIN_GENRE_AFFINITY;
+      return (preferences.genreAffinities.get(canonicalKey)?.score ?? 0) >= minGenreAffinity;
     }),
   );
 
@@ -452,7 +462,6 @@ async function loadDatabaseItems(
   supabase: SupabaseClient,
   category: string,
   existingMediaIds: Set<number>,
-  limit: number,
 ): Promise<
   Array<{
     id: number;
@@ -464,53 +473,71 @@ async function loadDatabaseItems(
     popularityScore: number;
   }>
 > {
-  const notInClause = existingMediaIds.size > 0 ? Array.from(existingMediaIds) : null;
+  const allRows: MediaItemRow[] = [];
+  let offset = 0;
 
   // Anime/manga use different title fields, other categories use 'title'
-  let data, error;
   if (category === 'anime' || category === 'manga') {
-    let query = supabase
-      .from('media_items')
-      .select(
-        'id, title_english, title_romaji, title_native, genres, cover_image_large, cover_image_medium',
-      )
-      .eq('category', category)
-      .order('id', { ascending: false })
-      .limit(limit);
+    while (true) {
+      const { data, error } = await supabase
+        .from('media_items')
+        .select(
+          'id, title_english, title_romaji, title_native, genres, cover_image_large, cover_image_medium',
+        )
+        .eq('category', category)
+        .order('id', { ascending: false })
+        .range(offset, offset + DATABASE_FETCH_PAGE_SIZE - 1);
 
-    if (notInClause) {
-      query = query.not('id', 'in', `(${notInClause.join(',')})`);
+      if (error) {
+        console.error(`[GenericRecommender] Error loading database items for ${category}:`, error);
+        return [];
+      }
+
+      const pageRows = (data || []) as MediaItemRow[];
+      if (pageRows.length === 0) {
+        break;
+      }
+
+      allRows.push(...pageRows);
+      if (pageRows.length < DATABASE_FETCH_PAGE_SIZE) {
+        break;
+      }
+
+      offset += DATABASE_FETCH_PAGE_SIZE;
     }
-
-    const result = await query;
-    data = result.data;
-    error = result.error;
   } else {
-    let query = supabase
-      .from('media_items')
-      .select('id, title, genres, cover_image_large, cover_image_medium')
-      .eq('category', category)
-      .order('id', { ascending: false })
-      .limit(limit);
+    while (true) {
+      const { data, error } = await supabase
+        .from('media_items')
+        .select('id, title, genres, cover_image_large, cover_image_medium')
+        .eq('category', category)
+        .order('id', { ascending: false })
+        .range(offset, offset + DATABASE_FETCH_PAGE_SIZE - 1);
 
-    if (notInClause) {
-      query = query.not('id', 'in', `(${notInClause.join(',')})`);
+      if (error) {
+        console.error(`[GenericRecommender] Error loading database items for ${category}:`, error);
+        return [];
+      }
+
+      const pageRows = (data || []) as MediaItemRow[];
+      if (pageRows.length === 0) {
+        break;
+      }
+
+      allRows.push(...pageRows);
+      if (pageRows.length < DATABASE_FETCH_PAGE_SIZE) {
+        break;
+      }
+
+      offset += DATABASE_FETCH_PAGE_SIZE;
     }
-
-    const result = await query;
-    data = result.data;
-    error = result.error;
   }
 
-  if (error) {
-    console.error(`[GenericRecommender] Error loading database items for ${category}:`, error);
-    return [];
-  }
-
-  const itemIds = (data || []).map((item: MediaItemRow) => item.id);
+  const filteredRows = allRows.filter((item: MediaItemRow) => !existingMediaIds.has(item.id));
+  const itemIds = filteredRows.map((item: MediaItemRow) => item.id);
   const popularityMap = await loadPopularityScores(supabase, itemIds);
 
-  return (data || []).map((row: MediaItemRow) => {
+  return filteredRows.map((row: MediaItemRow) => {
     // Get title based on category
     const itemTitle =
       category === 'anime' || category === 'manga'

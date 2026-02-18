@@ -20,7 +20,7 @@ export default function TermsPage() {
   return (
     <>
       <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
-      <PageContainer size="sm" className="py-12">
+      <PageContainer size="lg" className="py-12">
         <div className="flex flex-col gap-6">
           {/* Header / Hero */}
           <section className="rounded-3xl border border-border bg-card p-6 shadow-2xl md:p-8">

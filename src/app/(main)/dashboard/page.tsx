@@ -7,7 +7,6 @@ import HomeDashboardContent, {
 import { fetchUserStats, fetchContinueData } from '@/lib/dashboard/server-data';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { PageContainer } from '@/app/components/layout';
-import { getUserSettings } from '@/lib/settings';
 import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
 import {
   DASHBOARD_TAB_CATEGORIES,
@@ -58,7 +57,7 @@ function DashboardContentSkeleton() {
         </div>
       </section>
 
-      <PageContainer size="xl">
+      <PageContainer size="lg">
         <div className="grid gap-3.5 md:grid-cols-4 md:gap-4">
           <div className="h-24 animate-pulse bg-muted" />
           <div className="h-24 animate-pulse bg-muted" />
@@ -83,7 +82,7 @@ function DashboardSectionsSkeleton() {
         </div>
       </section>
 
-      <PageContainer size="xl">
+      <PageContainer size="lg">
         <div className="mx-auto mt-12 max-w-screen-2xl animate-pulse space-y-4 px-4 md:mt-14 md:px-6">
           <div className="h-[1px] w-full bg-muted/60" />
           <div className="h-10 w-56 rounded-full bg-muted/70" />
@@ -99,12 +98,6 @@ function DashboardSectionsSkeleton() {
   );
 }
 
-type SocialPreferences = {
-  socialEnabled: boolean;
-  communityActivityEnabled: boolean;
-  communitySuggestionsEnabled: boolean;
-};
-
 type DashboardBasePayload = {
   userId: string;
   username: string;
@@ -112,19 +105,16 @@ type DashboardBasePayload = {
   stats: PersonalStats;
   continueData: Awaited<ReturnType<typeof fetchContinueData>>;
   mediaCategories: DashboardCategoryKey[];
-  socialPreferences: SocialPreferences;
 };
 
 async function DashboardSectionsData({
   userId,
   mediaCategories,
   stats,
-  socialPreferences,
 }: {
   userId: string;
   mediaCategories: DashboardCategoryKey[];
   stats: PersonalStats;
-  socialPreferences: SocialPreferences;
 }) {
   if (mediaCategories.length === 0) {
     return null;
@@ -138,7 +128,6 @@ async function DashboardSectionsData({
       mediaCategories={mediaCategories}
       categorySections={categorySections}
       stats={stats}
-      socialPreferences={socialPreferences}
     />
   );
 }
@@ -159,13 +148,6 @@ async function DashboardData() {
   const userId = session.user.id;
   const username = session.user.user_metadata?.username ?? 'User';
   const displayName = session.user.user_metadata?.display_name ?? null;
-
-  const settings = await getUserSettings(userId, { supabase });
-  const socialPreferences = {
-    socialEnabled: settings.social_enabled,
-    communityActivityEnabled: settings.community_activity_enabled,
-    communitySuggestionsEnabled: settings.community_suggestions_enabled,
-  };
 
   // Fetch data in parallel for better performance
   const [stats, continueData] = await Promise.all([
@@ -190,7 +172,6 @@ async function DashboardData() {
     stats,
     continueData,
     mediaCategories,
-    socialPreferences,
   };
 
   return (
@@ -201,7 +182,6 @@ async function DashboardData() {
         stats={payload.stats}
         continueData={payload.continueData}
         mediaCategories={payload.mediaCategories}
-        socialPreferences={payload.socialPreferences}
         showSections={false}
       />
       <Suspense fallback={<DashboardSectionsSkeleton />}>
@@ -209,7 +189,6 @@ async function DashboardData() {
           userId={payload.userId}
           mediaCategories={payload.mediaCategories}
           stats={payload.stats}
-          socialPreferences={payload.socialPreferences}
         />
       </Suspense>
     </>
@@ -218,12 +197,9 @@ async function DashboardData() {
 
 export default function DashboardPage() {
   return (
-    <section className="relative isolate min-h-screen text-foreground">
+    <section className="min-h-screen text-foreground">
       <h1 className="sr-only">Dashboard</h1>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="blur-effect absolute -top-20 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-primary/10 blur-xl" />
-      </div>
-      <div className="relative w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
+      <div className="w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
         <Suspense fallback={<DashboardContentSkeleton />}>
           <DashboardData />
         </Suspense>

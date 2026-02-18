@@ -228,7 +228,7 @@ export default function SupportTicketDetail() {
           }
         />
 
-        <PageContainer size="md" className="pb-20">
+        <PageContainer size="lg" className="pb-20">
           <Card className={`${UI_CLASSNAMES.panelCard} `}>
             <CardHeader className="bg-transparent">
               <CardTitle className="flex items-center gap-2 text-foreground">
