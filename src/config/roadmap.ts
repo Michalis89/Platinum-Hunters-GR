@@ -105,7 +105,7 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     title: 'Notifications (Optional)',
     description: 'Activity notifications for community interactions when enabled.',
-    status: 'in-progress',
+    status: 'done',
     area: 'community',
     icon: Bell,
   },

@@ -242,9 +242,6 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                         </AvatarFallback>
                       </Avatar>
                       <span className="truncate text-sm">{user.username}</span>
-                      {hasAnyTicketUnread ? (
-                        <span className="ml-auto inline-flex h-2.5 w-2.5 rounded-full bg-destructive" />
-                      ) : null}
                     </div>
                     {canQuickAdd ? (
                       <Button
