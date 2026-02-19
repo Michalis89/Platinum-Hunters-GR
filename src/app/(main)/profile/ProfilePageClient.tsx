@@ -24,7 +24,7 @@ import { useUserSettings } from '@/lib/settings/useUserSettings';
 
 function ProfilePageSkeleton() {
   return (
-    <div className="min-h-screen">
+    <div>
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-16 md:px-6">
         <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-6">
           <Skeleton className="h-24 w-24 rounded-[32px]" />
@@ -105,7 +105,7 @@ export default function ProfilePageClient() {
   );
 
   return (
-    <div className="min-h-screen text-foreground">
+    <div>
       <div className="relative">
         <ProfileHeader user={user} />
 

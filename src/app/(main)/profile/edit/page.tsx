@@ -38,7 +38,7 @@ import { useUserSettings } from '@/lib/settings/useUserSettings';
 
 function ProfileEditSkeleton() {
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-16">
         <div className="flex items-center gap-4">
           <Skeleton className="h-16 w-16 rounded-full" />
@@ -642,8 +642,8 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="min-h-screen text-foreground">
-      <div className="px-4 py-10 md:px-6">
+    <div className="pb-10 pt-6 md:pb-16 md:pt-8">
+      <div className="px-4 md:px-6">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6">
           <Breadcrumbs
             items={[

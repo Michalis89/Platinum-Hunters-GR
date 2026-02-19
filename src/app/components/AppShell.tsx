@@ -8,15 +8,18 @@ type Props = {
 
 export default function AppShell({ children }: Props) {
   return (
-    <div
-      className="relative flex min-h-screen flex-col bg-background text-foreground"
-      style={{
-        backgroundImage:
-          'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.08), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.06), transparent 44%)',
-      }}
-    >
+    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+      {/* Ambient gradient - fixed to viewport so it doesn't scale with page height */}
+      <div
+        className="pointer-events-none fixed inset-0"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 4% -12%, hsl(var(--accent-primary) / 0.08), transparent 48%), radial-gradient(circle at 88% -10%, hsl(var(--accent-primary) / 0.06), transparent 44%)',
+        }}
+      />
+
       {/* Content wrapper with flex layout for sticky footer */}
-      <div className="flex min-h-screen flex-col">
+      <div className="relative flex min-h-screen flex-col">
         <NavbarWrapper />
         <main
           id="main-content"

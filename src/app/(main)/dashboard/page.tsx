@@ -197,13 +197,11 @@ async function DashboardData() {
 
 export default function DashboardPage() {
   return (
-    <section className="min-h-screen text-foreground">
+    <div className="w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
       <h1 className="sr-only">Dashboard</h1>
-      <div className="w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
-        <Suspense fallback={<DashboardContentSkeleton />}>
-          <DashboardData />
-        </Suspense>
-      </div>
-    </section>
+      <Suspense fallback={<DashboardContentSkeleton />}>
+        <DashboardData />
+      </Suspense>
+    </div>
   );
 }

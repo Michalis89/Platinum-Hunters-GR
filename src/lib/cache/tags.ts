@@ -74,44 +74,44 @@ export const revalidateCache = {
    * Revalidate article caches after create/update/delete
    */
   article(articleId?: number | string) {
-    revalidateTag(CACHE_TAGS.ARTICLES);
+    revalidateTag(CACHE_TAGS.ARTICLES, 'max');
     if (articleId) {
-      revalidateTag(CACHE_TAGS.ARTICLE(articleId));
-      revalidateTag(CACHE_TAGS.ARTICLE_COMMENTS(articleId));
-      revalidateTag(CACHE_TAGS.ARTICLE_LIKES(articleId));
+      revalidateTag(CACHE_TAGS.ARTICLE(articleId), 'max');
+      revalidateTag(CACHE_TAGS.ARTICLE_COMMENTS(articleId), 'max');
+      revalidateTag(CACHE_TAGS.ARTICLE_LIKES(articleId), 'max');
     }
-    revalidateTag(CACHE_TAGS.ACTIVITY_FEED);
-    revalidateTag(CACHE_TAGS.PUBLIC_STATS);
+    revalidateTag(CACHE_TAGS.ACTIVITY_FEED, 'max');
+    revalidateTag(CACHE_TAGS.PUBLIC_STATS, 'max');
   },
 
   /**
    * Revalidate article comments after add/delete
    */
   articleComment(articleId: number | string) {
-    revalidateTag(CACHE_TAGS.ARTICLE_COMMENTS(articleId));
-    revalidateTag(CACHE_TAGS.ARTICLE(articleId)); // Comment count may change
-    revalidateTag(CACHE_TAGS.ACTIVITY_FEED);
+    revalidateTag(CACHE_TAGS.ARTICLE_COMMENTS(articleId), 'max');
+    revalidateTag(CACHE_TAGS.ARTICLE(articleId), 'max'); // Comment count may change
+    revalidateTag(CACHE_TAGS.ACTIVITY_FEED, 'max');
   },
 
   /**
    * Revalidate article likes after toggle
    */
   articleLike(articleId: number | string) {
-    revalidateTag(CACHE_TAGS.ARTICLE_LIKES(articleId));
-    revalidateTag(CACHE_TAGS.ARTICLE(articleId)); // Like count may change
+    revalidateTag(CACHE_TAGS.ARTICLE_LIKES(articleId), 'max');
+    revalidateTag(CACHE_TAGS.ARTICLE(articleId), 'max'); // Like count may change
   },
 
   /**
    * Revalidate game caches after update
    */
   game(gameId?: number | string, slug?: string) {
-    revalidateTag(CACHE_TAGS.GAMES);
+    revalidateTag(CACHE_TAGS.GAMES, 'max');
     if (gameId) {
-      revalidateTag(CACHE_TAGS.GAME(gameId));
-      revalidateTag(CACHE_TAGS.GAME_TROPHIES(gameId));
+      revalidateTag(CACHE_TAGS.GAME(gameId), 'max');
+      revalidateTag(CACHE_TAGS.GAME_TROPHIES(gameId), 'max');
     }
     if (slug) {
-      revalidateTag(CACHE_TAGS.GAME_BY_SLUG(slug));
+      revalidateTag(CACHE_TAGS.GAME_BY_SLUG(slug), 'max');
     }
   },
 
@@ -119,17 +119,17 @@ export const revalidateCache = {
    * Revalidate user backlog after add/update/remove
    */
   userBacklog(userId: string) {
-    revalidateTag(CACHE_TAGS.USER_BACKLOG(userId));
-    revalidateTag(CACHE_TAGS.USER_ACTIVITY(userId));
-    revalidateTag(CACHE_TAGS.ACTIVITY_FEED);
+    revalidateTag(CACHE_TAGS.USER_BACKLOG(userId), 'max');
+    revalidateTag(CACHE_TAGS.USER_ACTIVITY(userId), 'max');
+    revalidateTag(CACHE_TAGS.ACTIVITY_FEED, 'max');
   },
 
   /**
    * Revalidate user profile after update
    */
   userProfile(userId: string) {
-    revalidateTag(CACHE_TAGS.USER_PROFILE(userId));
-    revalidateTag(CACHE_TAGS.USER_ACTIVITY(userId));
+    revalidateTag(CACHE_TAGS.USER_PROFILE(userId), 'max');
+    revalidateTag(CACHE_TAGS.USER_ACTIVITY(userId), 'max');
   },
 
   /**
@@ -138,17 +138,17 @@ export const revalidateCache = {
   userLibrary(userId: string, type: 'anime' | 'books' | 'movies') {
     switch (type) {
       case 'anime':
-        revalidateTag(CACHE_TAGS.USER_ANIME_LIBRARY(userId));
+        revalidateTag(CACHE_TAGS.USER_ANIME_LIBRARY(userId), 'max');
         break;
       case 'books':
-        revalidateTag(CACHE_TAGS.USER_BOOKS_LIBRARY(userId));
+        revalidateTag(CACHE_TAGS.USER_BOOKS_LIBRARY(userId), 'max');
         break;
       case 'movies':
-        revalidateTag(CACHE_TAGS.USER_MOVIES_LIBRARY(userId));
+        revalidateTag(CACHE_TAGS.USER_MOVIES_LIBRARY(userId), 'max');
         break;
     }
-    revalidateTag(CACHE_TAGS.USER_ACTIVITY(userId));
-    revalidateTag(CACHE_TAGS.ACTIVITY_FEED);
+    revalidateTag(CACHE_TAGS.USER_ACTIVITY(userId), 'max');
+    revalidateTag(CACHE_TAGS.ACTIVITY_FEED, 'max');
   },
 
   /**
@@ -176,7 +176,7 @@ export const revalidateCache = {
    * Revalidate global public stats endpoint/cache.
    */
   publicStats() {
-    revalidateTag(CACHE_TAGS.PUBLIC_STATS);
+    revalidateTag(CACHE_TAGS.PUBLIC_STATS, 'max');
   },
 };
 

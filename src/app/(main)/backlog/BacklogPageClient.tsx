@@ -17,7 +17,7 @@ import {
 
 function BacklogFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-[60vh] items-center justify-center">
       <Spinner className="size-8" />
     </div>
   );
@@ -25,8 +25,8 @@ function BacklogFallback() {
 
 function BacklogPageSkeleton() {
   return (
-    <div className="min-h-screen bg-background px-4 py-16">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+    <div className="pb-10 pt-6 md:pb-16 md:pt-8">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 md:px-6">
         {Array.from({ length: 4 }).map((_, index) => (
           <Skeleton key={`backlog-skeleton-${index}`} className="h-28 w-full rounded-[32px]" />
         ))}

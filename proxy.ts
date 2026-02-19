@@ -27,7 +27,7 @@ function buildCsp(isProd: boolean) {
   ].join('; ');
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const redirectBack = `${pathname}${request.nextUrl.search}`;
 
