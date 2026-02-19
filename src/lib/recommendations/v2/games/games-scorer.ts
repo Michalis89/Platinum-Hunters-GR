@@ -227,19 +227,60 @@ function calculatePlatformBoost(
     return PLATFORM_BOOSTS.NONE;
   }
 
-  const normalizedPlatforms = platforms.map(p => p.toLowerCase().trim());
-  const favoritePlatform = preferences.favoritePlatform?.toLowerCase().trim();
-  const secondFavoritePlatform = preferences.secondFavoritePlatform?.toLowerCase().trim();
+  const normalizedPlatforms = new Set(platforms.map(normalizePlatformFamily).filter(Boolean));
+  const favoritePlatform = normalizePlatformFamily(preferences.favoritePlatform ?? '');
+  const secondFavoritePlatform = normalizePlatformFamily(preferences.secondFavoritePlatform ?? '');
 
-  if (favoritePlatform && normalizedPlatforms.includes(favoritePlatform)) {
+  if (favoritePlatform && normalizedPlatforms.has(favoritePlatform)) {
     return PLATFORM_BOOSTS.FAVORITE;
   }
 
-  if (secondFavoritePlatform && normalizedPlatforms.includes(secondFavoritePlatform)) {
+  if (secondFavoritePlatform && normalizedPlatforms.has(secondFavoritePlatform)) {
     return PLATFORM_BOOSTS.SECOND_FAVORITE;
   }
 
   return PLATFORM_BOOSTS.NONE;
+}
+
+function normalizePlatformFamily(value: string): string {
+  const normalized = value.toLowerCase().trim();
+  if (!normalized) {
+    return '';
+  }
+  if (
+    normalized.includes('android') ||
+    normalized.includes('ios') ||
+    normalized.includes('iphone') ||
+    normalized.includes('ipad') ||
+    normalized.includes('mobile')
+  ) {
+    return 'mobile';
+  }
+  if (
+    normalized.includes('pc') ||
+    normalized.includes('windows') ||
+    normalized.includes('linux') ||
+    normalized.includes('mac') ||
+    normalized.includes('steam')
+  ) {
+    return 'pc';
+  }
+  if (normalized.includes('playstation') || normalized.startsWith('ps')) {
+    return 'playstation';
+  }
+  if (normalized.includes('xbox')) {
+    return 'xbox';
+  }
+  if (
+    normalized.includes('switch') ||
+    normalized.includes('nintendo') ||
+    normalized.includes('wii') ||
+    normalized.includes('3ds') ||
+    normalized.includes('ds')
+  ) {
+    return 'nintendo';
+  }
+  return normalized;
 }
 
 /**

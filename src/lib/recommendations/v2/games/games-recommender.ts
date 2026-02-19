@@ -34,6 +34,8 @@ type UserMediaEntryRow = {
     genres: string[] | null;
     igdb_themes: string[] | null;
     platforms: string[] | null;
+    cover_url_big: string | null;
+    cover_url_thumb: string | null;
     cover_image_large: string | null;
     cover_image_medium: string | null;
   };
@@ -46,6 +48,8 @@ type MediaItemRow = {
   genres: string[] | null;
   igdb_themes: string[] | null;
   platforms: string[] | null;
+  cover_url_big: string | null;
+  cover_url_thumb: string | null;
   cover_image_large: string | null;
   cover_image_medium: string | null;
 };
@@ -63,22 +67,53 @@ type CategoryProfile = {
  * @param userId - User ID
  * @returns Array of recommendations (max 4)
  */
-export async function generateGameRecommendationsV2(userId: string): Promise<Recommendation[]> {
+type RecommendationLimitsOverride = {
+  backlog?: number;
+  database?: number;
+  databaseFallback?: number;
+  total?: number;
+};
+
+type PlatformFilterMode = 'off' | 'owned-only';
+
+type GameRecommendationOptions = {
+  platformFilterMode?: PlatformFilterMode;
+};
+
+export async function generateGameRecommendationsV2(
+  userId: string,
+  options?: GameRecommendationOptions,
+): Promise<Recommendation[]> {
+  return generateGameRecommendationsV2WithLimits(userId, undefined, options);
+}
+
+export async function generateGameRecommendationsV2WithLimits(
+  userId: string,
+  limits?: RecommendationLimitsOverride,
+  options?: GameRecommendationOptions,
+): Promise<Recommendation[]> {
   const supabase = await createRouteHandlerClient();
+  const maxBacklog = limits?.backlog ?? RECOMMENDATION_LIMITS.BACKLOG;
+  const maxDatabase = limits?.database ?? RECOMMENDATION_LIMITS.DATABASE;
+  const maxDatabaseFallback = limits?.databaseFallback ?? RECOMMENDATION_LIMITS.DATABASE_FALLBACK;
+  const maxTotal = limits?.total ?? RECOMMENDATION_LIMITS.TOTAL;
+  const platformFilterMode = options?.platformFilterMode ?? 'off';
 
   // Load genre coverage first (for generic detection)
   const coverageMap = await calculateGenreCoverage(supabase, 'games');
 
   // Load user data
-  const [genreAffinities, mediaHistory, categoryProfile] = await Promise.all([
+  const [genreAffinities, mediaHistory, categoryProfile, selectedPlatforms] = await Promise.all([
     loadUserGenreAffinities(supabase, userId),
     loadUserMediaHistory(supabase, userId),
     loadUserCategoryProfile(supabase, userId),
+    loadUserSelectedPlatforms(supabase, userId),
   ]);
 
   // Extract platform preferences
   const favoritePlatform = categoryProfile?.games?.favorite_platform ?? null;
   const secondFavoritePlatform = null; // TODO: Add to profile
+  const userOwnedPlatforms = buildUserOwnedPlatformSet(selectedPlatforms, favoritePlatform);
 
   // Build user preferences (with quality signals)
   const preferences = buildUserPreferences(
@@ -93,18 +128,19 @@ export async function generateGameRecommendationsV2(userId: string): Promise<Rec
   const scoredBacklog = scoreBacklogItems(backlogEntries, preferences, coverageMap);
 
   // Determine split
-  const numFromBacklog = Math.min(scoredBacklog.length, RECOMMENDATION_LIMITS.BACKLOG);
+  const numFromBacklog = Math.min(scoredBacklog.length, maxBacklog);
   const numFromDatabase =
-    numFromBacklog < RECOMMENDATION_LIMITS.BACKLOG
-      ? RECOMMENDATION_LIMITS.DATABASE_FALLBACK - numFromBacklog
-      : RECOMMENDATION_LIMITS.DATABASE;
+    numFromBacklog < maxBacklog
+      ? maxDatabaseFallback - numFromBacklog
+      : maxDatabase;
 
   // Get backlog recommendations
   const backlogRecommendations = scoredBacklog.slice(0, numFromBacklog).map(item => ({
     mediaId: item.entry.mediaId,
     category: 'games' as const,
     title: item.entry.media.title,
-    cover: item.entry.media.coverImageLarge || item.entry.media.coverImageMedium || '',
+    cover:
+      item.entry.media.coverImageLarge || item.entry.media.coverImageMedium || '',
     slug: titleToSlug(item.entry.media.title),
     reason: item.reason,
     confidence: item.finalScore / 100, // Direct mapping from score (0-100) to confidence (0-1)
@@ -121,9 +157,13 @@ export async function generateGameRecommendationsV2(userId: string): Promise<Rec
     mediaHistory.map(entry => normalizeGameIdentityKey(entry.media.title)).filter(Boolean),
   );
   const databaseGames = await loadDatabaseGames(supabase, existingMediaIds, ownedGameIdentityKeys);
+  const platformCompatibleDatabaseGames =
+    platformFilterMode === 'owned-only'
+      ? databaseGames.filter(game => isPlatformCompatible(game.platforms, userOwnedPlatforms))
+      : databaseGames;
 
   const scoredDatabase = scoreDatabaseGames(
-    databaseGames,
+    platformCompatibleDatabaseGames,
     preferences,
     coverageMap,
     mediaHistory.map(entry => ({
@@ -149,9 +189,110 @@ export async function generateGameRecommendationsV2(userId: string): Promise<Rec
     score: item.finalScore,
   }));
 
-  const recommendations = [...backlogRecommendations, ...databaseRecommendations];
+  const recommendations = [...backlogRecommendations, ...databaseRecommendations].slice(0, maxTotal);
 
   return recommendations;
+}
+
+async function loadUserSelectedPlatforms(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('user_media_entries')
+    .select('selected_platform, media_items!inner(category)')
+    .eq('user_id', userId)
+    .in('media_items.category', ['games', 'game']);
+
+  if (error) {
+    console.error('[GameRecommenderV2] Error loading selected platforms:', error);
+    return [];
+  }
+
+  const platforms = new Set<string>();
+  for (const row of data ?? []) {
+    const value = typeof row.selected_platform === 'string' ? row.selected_platform.trim() : '';
+    if (value) {
+      platforms.add(value);
+    }
+  }
+  return Array.from(platforms);
+}
+
+function buildUserOwnedPlatformSet(
+  selectedPlatforms: string[],
+  favoritePlatform: string | null,
+): Set<string> {
+  const normalized = new Set<string>();
+  for (const platform of selectedPlatforms) {
+    const key = normalizePlatformKey(platform);
+    if (key) {
+      normalized.add(key);
+    }
+  }
+
+  const favoriteKey = normalizePlatformKey(favoritePlatform ?? '');
+  if (favoriteKey) {
+    normalized.add(favoriteKey);
+  }
+
+  return normalized;
+}
+
+function isPlatformCompatible(candidatePlatforms: string[], userPlatforms: Set<string>): boolean {
+  if (userPlatforms.size === 0 || candidatePlatforms.length === 0) {
+    return true;
+  }
+
+  const candidateKeys = candidatePlatforms.map(normalizePlatformKey).filter(Boolean);
+  if (candidateKeys.length === 0) {
+    return true;
+  }
+
+  return candidateKeys.some(key => userPlatforms.has(key));
+}
+
+function normalizePlatformKey(value: string): string {
+  const normalized = value.toLowerCase().trim();
+  if (!normalized) {
+    return '';
+  }
+
+  if (
+    normalized.includes('android') ||
+    normalized.includes('ios') ||
+    normalized.includes('iphone') ||
+    normalized.includes('ipad') ||
+    normalized.includes('mobile')
+  ) {
+    return 'mobile';
+  }
+  if (
+    normalized.includes('pc') ||
+    normalized.includes('windows') ||
+    normalized.includes('linux') ||
+    normalized.includes('mac') ||
+    normalized.includes('steam')
+  ) {
+    return 'pc';
+  }
+  if (normalized.includes('playstation') || normalized.startsWith('ps')) {
+    return 'playstation';
+  }
+  if (normalized.includes('xbox')) {
+    return 'xbox';
+  }
+  if (
+    normalized.includes('switch') ||
+    normalized.includes('nintendo') ||
+    normalized.includes('wii') ||
+    normalized.includes('3ds') ||
+    normalized.includes('ds')
+  ) {
+    return 'nintendo';
+  }
+
+  return normalized;
 }
 
 /**
@@ -209,6 +350,8 @@ async function loadUserMediaHistory(
         genres,
         igdb_themes,
         platforms,
+        cover_url_big,
+        cover_url_thumb,
         cover_image_large,
         cover_image_medium
       )
@@ -239,8 +382,14 @@ async function loadUserMediaHistory(
       genres: row.media_items.genres || [],
       themes: row.media_items.igdb_themes || [],
       platforms: row.media_items.platforms || [],
-      coverImageLarge: row.media_items.cover_image_large ?? undefined,
-      coverImageMedium: row.media_items.cover_image_medium ?? undefined,
+      coverImageLarge:
+        row.media_items.cover_url_big ??
+        row.media_items.cover_image_large ??
+        row.media_items.cover_url_thumb ??
+        row.media_items.cover_image_medium ??
+        undefined,
+      coverImageMedium:
+        row.media_items.cover_url_thumb ?? row.media_items.cover_image_medium ?? undefined,
     },
   }));
 }
@@ -300,6 +449,8 @@ async function loadDatabaseGames(
         genres,
         igdb_themes,
         platforms,
+        cover_url_big,
+        cover_url_thumb,
         cover_image_large,
         cover_image_medium
       `,
@@ -347,8 +498,13 @@ async function loadDatabaseGames(
   return filteredData.map((row: MediaItemRow) => ({
     id: row.id,
     title: row.title ?? 'Untitled',
-    coverImageLarge: row.cover_image_large ?? undefined,
-    coverImageMedium: row.cover_image_medium ?? undefined,
+    coverImageLarge:
+      row.cover_url_big ??
+      row.cover_image_large ??
+      row.cover_url_thumb ??
+      row.cover_image_medium ??
+      undefined,
+    coverImageMedium: row.cover_url_thumb ?? row.cover_image_medium ?? undefined,
     slug: row.igdb_slug || titleToSlug(row.title ?? 'untitled'),
     genres: row.genres || [],
     themes: row.igdb_themes || [],

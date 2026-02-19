@@ -56,8 +56,8 @@ export const SCORING_WEIGHTS = {
  * Platform boost multipliers
  */
 export const PLATFORM_BOOSTS = {
-  FAVORITE: 1.08, // +8% if game is on user's favorite platform
-  SECOND_FAVORITE: 1.04, // +4% if game is on 2nd favorite platform
+  FAVORITE: 1.2, // +20% if game is on user's favorite platform
+  SECOND_FAVORITE: 1.08, // +8% if game is on 2nd favorite platform
   NONE: 1.0, // No boost
 } as const;
 

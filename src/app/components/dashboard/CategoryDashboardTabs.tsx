@@ -85,7 +85,7 @@ export default function CategoryDashboardTabs({
     const dropped = categoryStats.dropped ?? 0;
     const hours = categoryStats.hours ?? 0;
     const planned = Math.max(0, total - completed - current - dropped);
-    const favorites = sections[category]?.favorites?.length ?? 0;
+    const favorites = sections[category]?.favoritesCount ?? 0;
 
     return { total, completed, current, planned, dropped, favorites, hours };
   };

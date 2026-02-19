@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 const TOP_FIVE_LIMIT = 5;
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
     .select('id, media_items!inner(category)')
     .eq('user_id', session.user.id)
     .eq('is_favorite', true)
+    .eq('status', 'completed')
     .in('id', normalizedOrder)
     .eq('media_items.category', category);
 
@@ -64,21 +66,20 @@ export async function POST(request: NextRequest) {
       .filter((id): id is number => typeof id === 'number' && Number.isFinite(id)),
   );
 
-  if (validIds.size !== normalizedOrder.length) {
-    return NextResponse.json(
-      { error: 'Some entries are invalid for this category' },
-      { status: 400 },
-    );
+  const filteredOrder = normalizedOrder.filter(entryId => validIds.has(entryId));
+  if (!filteredOrder.length) {
+    return NextResponse.json({ error: 'No valid entries to reorder' }, { status: 400 });
   }
 
-  const updates = normalizedOrder.map((entryId, index) =>
+  const updates = filteredOrder.map((entryId, index) =>
     supabase
       .from('user_media_entries')
       .update({
-        priority: (normalizedOrder.length - index) * 10,
-        updated_at: new Date().toISOString(),
+        priority: (filteredOrder.length - index) * 10,
       })
       .eq('user_id', session.user.id)
+      .eq('status', 'completed')
+      .eq('is_favorite', true)
       .eq('id', entryId),
   );
 
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  const topFiveOrder = normalizedOrder.slice(0, TOP_FIVE_LIMIT);
+  const topFiveOrder = filteredOrder.slice(0, TOP_FIVE_LIMIT);
   const { error: pinError } = await supabase.rpc('reorder_pins', {
     p_user_id: session.user.id,
     p_category: category,
@@ -99,5 +100,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: pinError.message }, { status: 500 });
   }
 
+  revalidatePath('/dashboard');
   return NextResponse.json({ success: true });
 }

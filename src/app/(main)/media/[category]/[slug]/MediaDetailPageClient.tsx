@@ -2,12 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Heart, Star, CheckCircle, XCircle, Plus, CalendarDays, Globe, Pencil } from 'lucide-react';
+import { Heart, Star, CheckCircle, XCircle, CalendarDays, Globe, Pencil } from 'lucide-react';
 import { CoverHeroImage } from '@/components/ui/cover-image';
 import { PageContainer } from '@/app/components/layout';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import EmptyState from '@/components/ui/empty';
 import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
 import {
   Dialog,
@@ -422,6 +421,7 @@ export default function MediaDetailPageClient({
   const apiBase = getApiBase(category);
   const baseEntry = useMemo(() => buildEntry(mediaItem, entryState), [mediaItem, entryState]);
   const hasEntry = Boolean(entryState?.entryId);
+  const shouldRenderMyEntrySection = entryLoading || Boolean(entryError) || hasEntry;
 
   const galleryImages = useMemo<GalleryImage[]>(() => {
     const artworks = (mediaItem.igdb_artwork_image_ids ?? []).map((id, idx) => ({
@@ -793,64 +793,53 @@ export default function MediaDetailPageClient({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border/70 bg-card/60 p-5">
-          <h3 className="text-lg font-semibold text-foreground">My Entry</h3>
+        {shouldRenderMyEntrySection ? (
+          <section className="rounded-2xl border border-border/70 bg-card/60 p-5">
+            <h3 className="text-lg font-semibold text-foreground">My Entry</h3>
 
-          {entryLoading ? (
-            <div className="mt-4 inline-flex items-center gap-2">
-              <Spinner className="size-4" />
-              <span className="text-sm text-muted-foreground">Fetching entry data...</span>
-            </div>
-          ) : entryError ? (
-            <div className="mt-4">
-              <ErrorAlert message={entryError} />
-            </div>
-          ) : hasEntry ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Status
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">{statusLabel}</p>
+            {entryLoading ? (
+              <div className="mt-4 inline-flex items-center gap-2">
+                <Spinner className="size-4" />
+                <span className="text-sm text-muted-foreground">Fetching entry data...</span>
               </div>
-              <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Progress
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  {getProgressDisplay(category, entryState, mediaItem)}
-                </p>
+            ) : entryError ? (
+              <div className="mt-4">
+                <ErrorAlert message={entryError} />
               </div>
-              <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                  My rating
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">{ratingLabel}</p>
+            ) : (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl border border-border/70 bg-card/70 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Status
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{statusLabel}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card/70 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Progress
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-foreground">
+                    {getProgressDisplay(category, entryState, mediaItem)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card/70 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                    My rating
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{ratingLabel}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card/70 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Notes
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-sm text-foreground/90">
+                    {entryState?.notes || 'No notes yet.'}
+                  </p>
+                </div>
               </div>
-              <div className="rounded-xl border border-border/70 bg-card/70 p-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Notes
-                </p>
-                <p className="mt-1 line-clamp-2 text-sm text-foreground/90">
-                  {entryState?.notes || 'No notes yet.'}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4 max-w-md">
-              <EmptyState
-                title="No entry yet"
-                description="Add this title to your library to start tracking your progress."
-                action={
-                  <Button variant="primary" onClick={() => openDialog({ status: 'planned' })}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Entry
-                  </Button>
-                }
-              />
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        ) : null}
 
         <section className="rounded-2xl border border-border/70 bg-card/60 p-5">
           <h3 className="text-lg font-semibold text-foreground">Overview</h3>

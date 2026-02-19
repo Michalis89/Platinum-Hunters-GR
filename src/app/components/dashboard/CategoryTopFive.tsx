@@ -1,23 +1,20 @@
 'use client';
 
 import { CoverThumbImage } from '@/components/ui/cover-image';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  DndContext,
+  DragDropProvider,
   DragOverlay,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+  PointerSensor,
+  type DragDropEventHandlers,
+} from '@dnd-kit/react';
+import { isSortableOperation, useSortable } from '@dnd-kit/react/sortable';
+import { arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
 import type { DashboardCategoryKey, DashboardTopFiveItem } from '@/lib/dashboard/category-data';
 
 const TOP_FIVE_LIMIT = 5;
+const SORTABLE_GROUP_ID = 'dashboard-favorites';
 
 type CategoryTopFiveProps = {
   category: DashboardCategoryKey;
@@ -25,65 +22,146 @@ type CategoryTopFiveProps = {
   favorites?: DashboardTopFiveItem[];
 };
 
-function SortableFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank: number }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+type DragStartPayload = Parameters<NonNullable<DragDropEventHandlers['onDragStart']>>[0];
+type DragEndPayload = Parameters<NonNullable<DragDropEventHandlers['onDragEnd']>>[0];
+
+function normalizeEntryId(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function SortableFavoriteCard({
+  item,
+  rank,
+  index,
+}: {
+  item: DashboardTopFiveItem;
+  rank: number;
+  index: number;
+}) {
+  const { ref, isDragging } = useSortable({
     id: item.entryId,
+    index,
+    group: SORTABLE_GROUP_ID,
+    transition: {
+      duration: 300,
+      easing: 'cubic-bezier(0.18, 0.9, 0.22, 1)',
+    },
   });
 
   const isTopFive = rank <= TOP_FIVE_LIMIT;
   const isPriorityImage = rank === 1;
-
   return (
     <article
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition: isDragging ? undefined : transition,
-      }}
-      className={`relative flex h-full w-full cursor-grab select-none flex-col gap-2.5 rounded-2xl border p-3 shadow-sm transition-all active:cursor-grabbing ${
-        isTopFive
-          ? 'border-primary/35 bg-card/80 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]'
-          : 'border-border/40 bg-card/60'
-      } ${isDragging ? 'z-10 opacity-50 shadow-lg' : ''}`}
+      ref={ref}
+      className={[
+        // Base
+        'group relative h-full w-full cursor-grab touch-none select-none overflow-hidden rounded-3xl',
+        'border border-border/35 bg-card/40',
+        'shadow-[0_18px_60px_-40px_rgba(0,0,0,0.85)]',
+        'ease-[cubic-bezier(0.18,0.9,0.22,1)] transition-all delay-0 duration-300 will-change-transform active:cursor-grabbing group-hover:delay-75',
+        // Lift / glow on hover
+        'hover:-translate-y-0.5 hover:border-border/50 hover:bg-card/50',
+        // Drag state
+        isDragging ? 'z-10 opacity-60 shadow-2xl' : '',
+        // Top-5 highlight (subtle but premium)
+        isTopFive ? 'ring-1 ring-primary/15' : 'ring-1 ring-white/5',
+      ].join(' ')}
       aria-label={`Reorder favorite ${item.title}`}
     >
-      <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-border/40 bg-muted/60">
+      {/* Cinematic Poster Stage */}
+      <div className="relative aspect-[16/10] w-full bg-black">
         <CoverThumbImage
           src={item.cover}
           alt={item.title}
-          sizes="(max-width: 768px) 90vw, 200px"
-          className="object-cover"
+          sizes="(max-width: 768px) 90vw, 240px"
           priority={isPriorityImage}
           loading={isPriorityImage ? undefined : 'lazy'}
+          // Cinematic crop (faces/top composition survives more often)
+          className="ease-[cubic-bezier(0.18,0.9,0.22,1)] object-cover object-[50%_25%] transition-transform delay-0 duration-300 will-change-transform [backface-visibility:hidden] group-hover:scale-[1.04] group-hover:delay-75"
         />
-      </div>
-      <div className="space-y-1.5 text-sm">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          {isTopFive ? `Top ${rank}` : `#${rank}`}
-        </p>
-        <h3 className="font-semibold">{item.title}</h3>
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
-          {item.rating ? (
-            <p className="shrink-0 text-xs font-medium text-foreground">Rating: {item.rating}</p>
+
+        <div
+          className="duration-220 ease-[cubic-bezier(0.18,0.9,0.22,1)] pointer-events-none absolute -inset-px transition-opacity delay-0 group-hover:opacity-95 dark:hidden"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(0,0,0,0.14), rgba(0,0,0,0) 45%, rgba(0,0,0,0.48)),' +
+              'linear-gradient(to top, rgba(0,0,0,0.58), rgba(0,0,0,0.16) 55%, rgba(0,0,0,0)),' +
+              'radial-gradient(900px circle at 15% 0%, rgba(255,255,255,0.08), transparent 55%)',
+          }}
+        />
+        <div
+          className="duration-220 ease-[cubic-bezier(0.18,0.9,0.22,1)] pointer-events-none absolute -inset-px hidden transition-opacity delay-0 group-hover:opacity-95 dark:block"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(0,0,0,0.22), rgba(0,0,0,0) 45%, rgba(0,0,0,0.70)),' +
+              'linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.22) 55%, rgba(0,0,0,0)),' +
+              'radial-gradient(900px circle at 15% 0%, rgba(255,255,255,0.10), transparent 55%)',
+          }}
+        />
+
+        {/* Top badge */}
+        <div className="absolute left-3 top-3 flex items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white ring-1 ring-white/10 backdrop-blur-sm">
+            {isTopFive ? `Top ${rank}` : `#${rank}`}
+          </span>
+
+          {item.status === 'current' ? (
+            <span className="inline-flex items-center rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
+              Current
+            </span>
           ) : null}
         </div>
-        {item.status === 'current' && item.progressPercent !== undefined && (
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center justify-between">
-              <span>Progress</span>
-              <span>{item.progressPercent}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-border/40">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${item.progressPercent}%` }}
-              />
-            </div>
+
+        {/* Rating badge */}
+        {item.rating ? (
+          <div className="absolute right-3 top-3">
+            <span
+              className={[
+                'inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1',
+                'text-[10px] font-semibold tracking-[0.12em] text-white ring-1 ring-white/10 backdrop-blur-sm',
+                // subtle violet glow (fits violet-bloom without hardcoding neon)
+                'shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_18px_40px_-20px_rgba(124,58,237,0.55)]',
+              ].join(' ')}
+            >
+              <span className="text-white/90">★</span>
+              <span>{item.rating}</span>
+            </span>
           </div>
-        )}
+        ) : null}
+
+        {/* Bottom text */}
+        <div className="absolute inset-x-0 bottom-0 p-4">
+          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-white drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)]">
+            {item.title}
+          </h3>
+
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <p className="truncate text-xs text-white/70">{item.subtitle}</p>
+          </div>
+
+          {/* Progress (only current) */}
+          {item.status === 'current' && item.progressPercent !== undefined ? (
+            <div className="mt-3 space-y-1">
+              <div className="flex items-center justify-between text-[10px] font-medium text-white/70">
+                <span>Progress</span>
+                <span>{item.progressPercent}%</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${item.progressPercent}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
     </article>
   );
@@ -112,46 +190,42 @@ function OverlayFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank:
 
   return (
     <article
-      className={`relative flex w-[320px] flex-col gap-4 rounded-2xl border p-3 pb-12 shadow-2xl ${
-        isTopFive
-          ? 'border-primary/35 bg-card/90 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]'
-          : 'border-border/40 bg-card/80'
-      }`}
+      className={[
+        'relative w-[min(340px,92vw)] overflow-hidden rounded-3xl border p-0',
+        isTopFive ? 'border-primary/35 bg-card/70' : 'border-border/40 bg-card/60',
+        'shadow-[0_30px_120px_-60px_rgba(0,0,0,0.9)]',
+      ].join(' ')}
     >
-      <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-border/40 bg-muted/60">
+      <div className="relative aspect-[16/10] w-full bg-black">
         <CoverThumbImage
           src={item.cover}
           alt={item.title}
-          sizes="260px"
-          className="object-cover"
+          sizes="340px"
           loading="eager"
+          className="object-cover object-[50%_25%] [backface-visibility:hidden]"
         />
-      </div>
-      <div className="space-y-1.5 text-sm">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          {isTopFive ? `Top ${rank}` : `#${rank}`}
-        </p>
-        <h3 className="font-semibold">{item.title}</h3>
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
-          {item.rating ? (
-            <p className="shrink-0 text-xs font-medium text-foreground">Rating: {item.rating}</p>
-          ) : null}
+        <div className="via-black/18 pointer-events-none absolute -inset-px bg-gradient-to-t from-black/65 to-transparent dark:hidden" />
+        <div className="pointer-events-none absolute -inset-px hidden bg-gradient-to-t from-black/85 via-black/25 to-transparent dark:block" />
+        <div className="absolute left-3 top-3">
+          <span className="inline-flex items-center rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white ring-1 ring-white/10 backdrop-blur-sm">
+            {isTopFive ? `Top ${rank}` : `#${rank}`}
+          </span>
         </div>
-        {item.status === 'current' && item.progressPercent !== undefined && (
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center justify-between">
-              <span>Progress</span>
-              <span>{item.progressPercent}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-border/40">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${item.progressPercent}%` }}
-              />
-            </div>
+        {item.rating ? (
+          <div className="absolute right-3 top-3">
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold tracking-[0.12em] text-white ring-1 ring-white/10 backdrop-blur-sm">
+              <span className="text-white/90">★</span>
+              <span>{item.rating}</span>
+            </span>
           </div>
-        )}
+        ) : null}
+
+        <div className="absolute inset-x-0 bottom-0 p-4">
+          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-white drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)]">
+            {item.title}
+          </h3>
+          <p className="mt-1 truncate text-xs text-white/70">{item.subtitle}</p>
+        </div>
       </div>
     </article>
   );
@@ -161,20 +235,40 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
   const initialOrder = useMemo(() => mergeFavorites(items, favorites), [items, favorites]);
   const [order, setOrder] = useState<DashboardTopFiveItem[]>(initialOrder);
   const [activeId, setActiveId] = useState<number | null>(null);
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: { distance: 4 },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 120, tolerance: 8 },
-    }),
+  const [hasLocalReorder, setHasLocalReorder] = useState(false);
+  const lastCategoryRef = useRef(category);
+
+  const initialOrderKey = useMemo(
+    () => initialOrder.map(item => item.entryId).join(','),
+    [initialOrder],
   );
+  const orderKey = useMemo(() => order.map(item => item.entryId).join(','), [order]);
 
   useEffect(() => {
+    if (lastCategoryRef.current === category) {
+      return;
+    }
+    lastCategoryRef.current = category;
+    setHasLocalReorder(false);
     setOrder(initialOrder);
-  }, [initialOrder]);
+  }, [category, initialOrder]);
 
-  const orderedIds = useMemo(() => order.map(item => item.entryId), [order]);
+  useEffect(() => {
+    if (activeId !== null) {
+      return;
+    }
+
+    if (hasLocalReorder) {
+      // Keep local optimistic order until upstream props catch up.
+      if (initialOrderKey === orderKey) {
+        setHasLocalReorder(false);
+      }
+      return;
+    }
+
+    setOrder(initialOrder);
+  }, [activeId, hasLocalReorder, initialOrder, initialOrderKey, orderKey]);
+
   const activeItem = useMemo(
     () => (activeId === null ? null : (order.find(item => item.entryId === activeId) ?? null)),
     [activeId, order],
@@ -207,44 +301,43 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
   );
 
   const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      const { active, over } = event;
+    async (event: DragEndPayload) => {
       setActiveId(null);
-      if (!over) {
-        return;
-      }
-      if (typeof active.id !== 'number' || typeof over.id !== 'number') {
+      if (event.canceled) {
         return;
       }
 
-      const oldIndex = order.findIndex(item => item.entryId === active.id);
-      const newIndex = order.findIndex(item => item.entryId === over.id);
-      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) {
+      if (!isSortableOperation(event.operation) || !event.operation.source) {
+        return;
+      }
+
+      const oldIndex = event.operation.source.initialIndex;
+      const newIndex = event.operation.source.index;
+      if (oldIndex === newIndex) {
         return;
       }
 
       const prevOrder = order;
       const nextOrder = arrayMove(order, oldIndex, newIndex);
       setOrder(nextOrder);
+      setHasLocalReorder(true);
 
       try {
         await handleReorder(nextOrder);
       } catch {
         setOrder(prevOrder);
+        setHasLocalReorder(false);
         toast.error('Unable to save the new order. Please try again.');
       }
     },
     [handleReorder, order],
   );
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    if (typeof event.active.id === 'number') {
-      setActiveId(event.active.id);
+  const handleDragStart = useCallback((event: DragStartPayload) => {
+    const sourceId = normalizeEntryId(event.operation.source?.id);
+    if (sourceId !== null) {
+      setActiveId(sourceId);
     }
-  }, []);
-
-  const handleDragCancel = useCallback(() => {
-    setActiveId(null);
   }, []);
 
   if (!order.length) {
@@ -270,12 +363,10 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
         </p>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
+      <DragDropProvider
+        sensors={[PointerSensor]}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
       >
         <div className="rounded-3xl border border-border/40 bg-card/65 p-5 shadow-[0_8px_24px_-22px_rgba(0,0,0,0.8)] md:p-6">
           <div className="mb-4 flex items-center justify-between">
@@ -284,18 +375,21 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
             </p>
             <span className="text-[10px] text-muted-foreground/80">5 cards per row</span>
           </div>
-          <SortableContext items={orderedIds} strategy={rectSortingStrategy}>
-            <div className="grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {order.map((item, index) => (
-                <SortableFavoriteCard key={item.entryId} item={item} rank={index + 1} />
-              ))}
-            </div>
-          </SortableContext>
+          <div className="grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {order.map((item, index) => (
+              <SortableFavoriteCard key={item.entryId} item={item} rank={index + 1} index={index} />
+            ))}
+          </div>
         </div>
-        <DragOverlay>
+        <DragOverlay
+          dropAnimation={{
+            duration: 260,
+            easing: 'cubic-bezier(0.18, 0.9, 0.22, 1)',
+          }}
+        >
           {activeItem ? <OverlayFavoriteCard item={activeItem} rank={activeRank} /> : null}
         </DragOverlay>
-      </DndContext>
+      </DragDropProvider>
     </section>
   );
 }

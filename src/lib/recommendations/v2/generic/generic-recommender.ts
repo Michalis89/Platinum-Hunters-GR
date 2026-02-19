@@ -41,6 +41,8 @@ type UserMediaEntryRow = {
     title?: string | null;
     category: string | null;
     genres: string[] | null;
+    cover_url_big: string | null;
+    cover_url_thumb: string | null;
     cover_image_large: string | null;
     cover_image_medium: string | null;
   };
@@ -53,6 +55,8 @@ type MediaItemRow = {
   title_native?: string | null;
   title?: string | null;
   genres: string[] | null;
+  cover_url_big: string | null;
+  cover_url_thumb: string | null;
   cover_image_large: string | null;
   cover_image_medium: string | null;
 };
@@ -64,7 +68,26 @@ export async function generateGenericRecommendations(
   userId: string,
   category: Exclude<RecommendationCategory, 'games'>,
 ): Promise<Recommendation[]> {
+  return generateGenericRecommendationsWithLimits(userId, category);
+}
+
+type RecommendationLimitsOverride = {
+  backlog?: number;
+  database?: number;
+  databaseFallback?: number;
+  total?: number;
+};
+
+export async function generateGenericRecommendationsWithLimits(
+  userId: string,
+  category: Exclude<RecommendationCategory, 'games'>,
+  limits?: RecommendationLimitsOverride,
+): Promise<Recommendation[]> {
   const supabase = await createRouteHandlerClient();
+  const maxBacklog = limits?.backlog ?? RECOMMENDATION_LIMITS.BACKLOG;
+  const maxDatabase = limits?.database ?? RECOMMENDATION_LIMITS.DATABASE;
+  const maxDatabaseFallback = limits?.databaseFallback ?? RECOMMENDATION_LIMITS.DATABASE_FALLBACK;
+  const maxTotal = limits?.total ?? RECOMMENDATION_LIMITS.TOTAL;
 
   // Load user data
   const [genreAffinities, mediaHistory] = await Promise.all([
@@ -80,11 +103,11 @@ export async function generateGenericRecommendations(
   const scoredBacklog = scoreBacklogItems(backlogEntries, preferences);
 
   // Determine split
-  const numFromBacklog = Math.min(scoredBacklog.length, RECOMMENDATION_LIMITS.BACKLOG);
+  const numFromBacklog = Math.min(scoredBacklog.length, maxBacklog);
   const numFromDatabase =
-    numFromBacklog < RECOMMENDATION_LIMITS.BACKLOG
-      ? RECOMMENDATION_LIMITS.DATABASE_FALLBACK - numFromBacklog
-      : RECOMMENDATION_LIMITS.DATABASE;
+    numFromBacklog < maxBacklog
+      ? maxDatabaseFallback - numFromBacklog
+      : maxDatabase;
 
   // Get backlog recommendations
   const backlogRecommendations = scoredBacklog.slice(0, numFromBacklog).map(item => ({
@@ -138,7 +161,7 @@ export async function generateGenericRecommendations(
     score: item.score,
   }));
 
-  const recommendations = [...backlogRecommendations, ...databaseRecommendations];
+  const recommendations = [...backlogRecommendations, ...databaseRecommendations].slice(0, maxTotal);
 
   return recommendations;
 }
@@ -408,6 +431,8 @@ async function loadUserMediaHistory(
         ${titleFields},
         category,
         genres,
+        cover_url_big,
+        cover_url_thumb,
         cover_image_large,
         cover_image_medium
       )
@@ -448,8 +473,14 @@ async function loadUserMediaHistory(
         genres: row.media_items.genres || [],
         themes: [],
         platforms: [],
-        coverImageLarge: row.media_items.cover_image_large ?? undefined,
-        coverImageMedium: row.media_items.cover_image_medium ?? undefined,
+        coverImageLarge:
+          row.media_items.cover_url_big ??
+          row.media_items.cover_image_large ??
+          row.media_items.cover_url_thumb ??
+          row.media_items.cover_image_medium ??
+          undefined,
+        coverImageMedium:
+          row.media_items.cover_url_thumb ?? row.media_items.cover_image_medium ?? undefined,
       },
     };
   });
@@ -482,7 +513,7 @@ async function loadDatabaseItems(
       const { data, error } = await supabase
         .from('media_items')
         .select(
-          'id, title_english, title_romaji, title_native, genres, cover_image_large, cover_image_medium',
+          'id, title_english, title_romaji, title_native, genres, cover_url_big, cover_url_thumb, cover_image_large, cover_image_medium',
         )
         .eq('category', category)
         .order('id', { ascending: false })
@@ -509,7 +540,9 @@ async function loadDatabaseItems(
     while (true) {
       const { data, error } = await supabase
         .from('media_items')
-        .select('id, title, genres, cover_image_large, cover_image_medium')
+        .select(
+          'id, title, genres, cover_url_big, cover_url_thumb, cover_image_large, cover_image_medium',
+        )
         .eq('category', category)
         .order('id', { ascending: false })
         .range(offset, offset + DATABASE_FETCH_PAGE_SIZE - 1);
@@ -547,8 +580,13 @@ async function loadDatabaseItems(
     return {
       id: row.id,
       title: itemTitle,
-      coverImageLarge: row.cover_image_large ?? undefined,
-      coverImageMedium: row.cover_image_medium ?? undefined,
+      coverImageLarge:
+        row.cover_url_big ??
+        row.cover_image_large ??
+        row.cover_url_thumb ??
+        row.cover_image_medium ??
+        undefined,
+      coverImageMedium: row.cover_url_thumb ?? row.cover_image_medium ?? undefined,
       slug: titleToSlug(itemTitle),
       genres: row.genres || [],
       popularityScore: popularityMap.get(row.id) ?? 0,

@@ -134,6 +134,7 @@ export type CategoryDashboardSection = {
   platformInsight: PlatformInsightPayload | null;
   tasteProfileItems: CategoryTasteProfileItem[];
   favorites: DashboardTopFiveItem[];
+  favoritesCount: number;
   mediaSuggestions: MediaSuggestion[];
 };
 
@@ -307,6 +308,7 @@ const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSe
   platformInsight: null,
   tasteProfileItems: [],
   favorites: [],
+  favoritesCount: 0,
   mediaSuggestions: [],
 });
 
@@ -650,9 +652,16 @@ export async function fetchCategoryDashboardData(
   const mediaSuggestionsPromises = requestedCategories.map(async category => {
     if (category === 'games') {
       // Use V2 recommendation system for games (data-driven, adaptive)
-      const { generateGameRecommendationsV2 } =
+      const { generateGameRecommendationsV2WithLimits } =
         await import('@/lib/recommendations/v2/games/games-recommender');
-      const recommendations = await generateGameRecommendationsV2(userId);
+      const recommendations = await generateGameRecommendationsV2WithLimits(userId, {
+        backlog: 4,
+        database: 4,
+        databaseFallback: 8,
+        total: 8,
+      }, {
+        platformFilterMode: 'owned-only',
+      });
 
       // Convert to MediaSuggestion format
       return recommendations.map(rec => ({
@@ -670,11 +679,17 @@ export async function fetchCategoryDashboardData(
     }
 
     // Use generic V2 recommender for other categories
-    const { generateGenericRecommendations } =
+    const { generateGenericRecommendationsWithLimits } =
       await import('@/lib/recommendations/v2/generic/generic-recommender');
-    const recommendations = await generateGenericRecommendations(
+    const recommendations = await generateGenericRecommendationsWithLimits(
       userId,
       category as Exclude<'games' | 'anime' | 'manga' | 'movies' | 'tv' | 'books', 'games'>,
+      {
+        backlog: 4,
+        database: 4,
+        databaseFallback: 8,
+        total: 8,
+      },
     );
 
     // Convert to MediaSuggestion format
@@ -717,6 +732,7 @@ export async function fetchCategoryDashboardData(
     const chartRows = chartResults[index] ?? [];
     const topFive = buildTopFive(entries, category);
     const excludedIds = new Set(topFive.map(item => item.entryId));
+    const favoritesCount = entries.filter(entry => Boolean(entry.is_favorite)).length;
 
     sections[category] = {
       topFive,
@@ -729,6 +745,7 @@ export async function fetchCategoryDashboardData(
         gameTagMapByCategory.get(category),
       ),
       favorites: buildFavoriteEntryCards(entries, excludedIds, category),
+      favoritesCount,
       mediaSuggestions: mediaSuggestionsResults[index] ?? [],
     };
   });
@@ -987,7 +1004,6 @@ function enrichEntry(
   };
 }
 
-const PINNED_PRIORITY_THRESHOLD = 50;
 
 function buildTopFive(
   entries: CategoryEntryRow[],
@@ -1000,7 +1016,9 @@ function buildTopFive(
   let topCandidates = pinnedEntries.slice(0, 5);
 
   if (!topCandidates.length) {
-    const favoriteEntries = entries.filter(entry => entry.is_favorite);
+    const favoriteEntries = entries.filter(
+      entry => entry.is_favorite && entry.status === 'completed',
+    );
     if (!favoriteEntries.length) {
       return [];
     }
@@ -1012,10 +1030,10 @@ function buildTopFive(
 
 function sortEntries(entries: CategoryEntryRow[], category: DashboardCategoryKey) {
   return [...entries].sort((a, b) => {
-    const pinnedA = (a.priority ?? 0) >= PINNED_PRIORITY_THRESHOLD ? 1 : 0;
-    const pinnedB = (b.priority ?? 0) >= PINNED_PRIORITY_THRESHOLD ? 1 : 0;
-    if (pinnedA !== pinnedB) {
-      return pinnedB - pinnedA;
+    const priorityA = a.priority ?? 0;
+    const priorityB = b.priority ?? 0;
+    if (priorityB !== priorityA) {
+      return priorityB - priorityA;
     }
     const ratingA = a.score ?? 0;
     const ratingB = b.score ?? 0;
@@ -1039,7 +1057,9 @@ function buildFavoriteEntryCards(
   category: DashboardCategoryKey,
 ): DashboardTopFiveItem[] {
   return sortEntries(
-    entries.filter(entry => entry.is_favorite && !excludedIds.has(entry.id)),
+    entries.filter(
+      entry => entry.is_favorite && entry.status === 'completed' && !excludedIds.has(entry.id),
+    ),
     category,
   ).map(entry => enrichEntry(entry, category));
 }
