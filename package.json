@@ -120,5 +120,9 @@
   },
   "resolutions": {
     "merge-deep": "3.0.2"
+  },
+  "overrides": {
+    "minimatch": "^10.2.1",
+    "ajv": "^8.18.0"
   }
 }
