@@ -36,6 +36,13 @@ export async function handleMediaAdd(req: Request, config: MediaCategoryConfig):
 
     // 2. Parse request body
     const body = (await req.json()) as AddMediaRequestBody;
+    const normalizedSelectedPlatform =
+      typeof body.selected_platform === 'string' ? body.selected_platform.trim() : body.selected_platform;
+    body.selected_platform = normalizedSelectedPlatform || null;
+
+    if (config.key === 'games' && !body.selected_platform) {
+      return NextResponse.json({ error: 'Platform selection is required for games' }, { status: 400 });
+    }
 
     // 3. Handle local source (existing media in database)
     if (body.source === 'local' && body.mediaId) {

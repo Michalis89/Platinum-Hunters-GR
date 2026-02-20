@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DASHBOARD_TAB_CATEGORIES } from '@/lib/dashboard/category-data';
@@ -9,20 +8,8 @@ import type { PersonalStats } from '@/app/components/home/types';
 import CategoryTopFive from './CategoryTopFive';
 import CategorySuggestions from './CategorySuggestions';
 import MediaSuggestions from './MediaSuggestions';
-import PlatformInsight from './PlatformInsight';
+import CategoryInsightsGrid from './CategoryInsightsGrid';
 import DashboardCategoryStats from './DashboardCategoryStats';
-
-const CategoryInsightChart = dynamic(() => import('./CategoryInsightChart'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-64 items-center justify-center rounded-2xl border border-border/50 bg-card/30">
-      <div className="flex flex-col items-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        <p className="text-sm text-muted-foreground">Loading chart...</p>
-      </div>
-    </div>
-  ),
-});
 
 const CATEGORY_TITLES: Record<DashboardCategoryKey, string> = {
   games: 'Games',
@@ -127,14 +114,21 @@ export default function CategoryDashboardTabs({
               category={category}
               items={sections[category]?.tasteProfileItems ?? []}
             />
-            {category === 'games' && (
-              <PlatformInsight payload={sections[category]?.platformInsight ?? null} />
-            )}
-            <CategoryInsightChart
-              payload={sections[category]?.chart ?? { data: [], insight: '' }}
+            <CategoryInsightsGrid
               category={category}
+              insights={
+                sections[category]?.insights ?? {
+                  statusCounts: { planned: 0, current: 0, completed: 0, dropped: 0 },
+                  completionRate: 0,
+                  completionNumerator: 0,
+                  completionDenominator: 0,
+                  updatedLast7Days: 0,
+                  updatedLast30Days: 0,
+                }
+              }
+              platformInsight={sections[category]?.platformInsight ?? null}
             />
-          </TabsContent>
+            </TabsContent>
         ))}
       </div>
     </Tabs>

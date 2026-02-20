@@ -630,6 +630,17 @@ export default function CategoryLibrary({
     }
     const nextFavorite = editState.isFavorite;
     const previousStatus = selectedEntry.status;
+    const isAddingEntry = !selectedEntry.entryId;
+    const normalizedSelectedPlatform = editState.selectedPlatform.trim();
+
+    if (category === 'games' && isAddingEntry && !normalizedSelectedPlatform) {
+      showAlert({
+        type: 'warning',
+        title: 'Platform required',
+        message: 'Select a platform before adding a game.',
+      });
+      return;
+    }
 
     // Close dialog immediately for instant feedback (improves INP)
     startTransition(() => {
@@ -652,7 +663,7 @@ export default function CategoryLibrary({
             status: finalStatus,
             is_favorite: nextFavorite,
             selected_platform:
-              category === 'games' ? editState.selectedPlatform || null : undefined,
+              category === 'games' ? normalizedSelectedPlatform || null : undefined,
             progress: nextProgressValue,
             score: nextScore,
             notes: editState.notes || null,
@@ -697,7 +708,7 @@ export default function CategoryLibrary({
             status: finalStatus,
             is_favorite: nextFavorite,
             selected_platform:
-              category === 'games' ? editState.selectedPlatform || null : undefined,
+              category === 'games' ? normalizedSelectedPlatform || null : undefined,
             progress: nextProgressValue ?? undefined,
             score: nextScore ?? undefined,
             notes: editState.notes || null,

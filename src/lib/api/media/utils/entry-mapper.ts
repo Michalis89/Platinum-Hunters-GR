@@ -112,11 +112,6 @@ export function mapLibraryEntry(
   // Genres/tags
   const tags = Array.isArray(media.genres) ? media.genres.map(String) : [];
   const platforms = Array.isArray(media.platforms) ? media.platforms.map(String) : [];
-  const defaultPlatform = platforms.includes('PC')
-    ? 'PC'
-    : platforms.length > 0
-      ? platforms[0]
-      : undefined;
 
   // Cover image
   const mediaSource = (media.source as string | null) ?? undefined;
@@ -155,9 +150,7 @@ export function mapLibraryEntry(
     score: row.score?.toString() ?? undefined,
     progress: row.progress ?? undefined,
     notes: row.notes ?? undefined,
-    selectedPlatform:
-      row.selected_platform ??
-      (inferredSource === 'steam' ? 'PC' : config.key === 'games' ? defaultPlatform : undefined),
+    selectedPlatform: row.selected_platform ?? undefined,
     title,
     subtitle,
     year,

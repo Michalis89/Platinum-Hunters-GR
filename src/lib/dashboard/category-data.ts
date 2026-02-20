@@ -53,6 +53,15 @@ export type CategoryChartPayload = {
   insight: string;
 };
 
+export type CategoryInsightsPayload = {
+  statusCounts: Record<TasteProfileStatus, number>;
+  completionRate: number;
+  completionNumerator: number;
+  completionDenominator: number;
+  updatedLast7Days: number;
+  updatedLast30Days: number;
+};
+
 export type PlatformInsightRow = {
   platform: string;
   total: number;
@@ -131,6 +140,7 @@ export type CategoryDashboardSection = {
   topFive: DashboardTopFiveItem[];
   spotlights: CategorySpotlightCard[];
   chart: CategoryChartPayload;
+  insights: CategoryInsightsPayload;
   platformInsight: PlatformInsightPayload | null;
   tasteProfileItems: CategoryTasteProfileItem[];
   favorites: DashboardTopFiveItem[];
@@ -304,6 +314,19 @@ const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSe
   chart: {
     data: [],
     insight: `Add ${CATEGORY_LABELS[category]} entries to unlock completion trends.`,
+  },
+  insights: {
+    statusCounts: {
+      planned: 0,
+      current: 0,
+      completed: 0,
+      dropped: 0,
+    },
+    completionRate: 0,
+    completionNumerator: 0,
+    completionDenominator: 0,
+    updatedLast7Days: 0,
+    updatedLast30Days: 0,
   },
   platformInsight: null,
   tasteProfileItems: [],
@@ -654,14 +677,18 @@ export async function fetchCategoryDashboardData(
       // Use V2 recommendation system for games (data-driven, adaptive)
       const { generateGameRecommendationsV2WithLimits } =
         await import('@/lib/recommendations/v2/games/games-recommender');
-      const recommendations = await generateGameRecommendationsV2WithLimits(userId, {
-        backlog: 4,
-        database: 4,
-        databaseFallback: 8,
-        total: 8,
-      }, {
-        platformFilterMode: 'owned-only',
-      });
+      const recommendations = await generateGameRecommendationsV2WithLimits(
+        userId,
+        {
+          backlog: 4,
+          database: 4,
+          databaseFallback: 8,
+          total: 8,
+        },
+        {
+          platformFilterMode: 'owned-only',
+        },
+      );
 
       // Convert to MediaSuggestion format
       return recommendations.map(rec => ({
@@ -738,6 +765,7 @@ export async function fetchCategoryDashboardData(
       topFive,
       spotlights: [],
       chart: buildCategoryChart(category, chartRows),
+      insights: buildCategoryInsights(entries),
       platformInsight: category === 'games' ? buildGamePlatformInsight(entries) : null,
       tasteProfileItems: buildCategoryTasteProfileItems(
         entries,
@@ -1004,7 +1032,6 @@ function enrichEntry(
   };
 }
 
-
 function buildTopFive(
   entries: CategoryEntryRow[],
   category: DashboardCategoryKey,
@@ -1069,22 +1096,59 @@ const MIN_PLATFORM_ENTRIES_FOR_COMPARISON = 3;
 
 function normalizePlatformLabel(platform: string | null | undefined): string {
   const value = platform?.trim();
-  return value ? value : 'Unspecified';
+  if (!value) {
+    return 'Unspecified';
+  }
+
+  const normalized = value.toLowerCase();
+  if (
+    normalized === 'pc' ||
+    normalized === 'pc (microsoft windows)' ||
+    normalized === 'microsoft windows' ||
+    normalized === 'windows'
+  ) {
+    return 'PC';
+  }
+
+  return value;
+}
+
+function resolvePlatformForInsight(entry: CategoryEntryRow): string {
+  const selected = entry.selected_platform?.trim();
+  if (selected) {
+    return selected;
+  }
+
+  const mediaPlatforms = Array.isArray(entry.media_items?.platforms)
+    ? entry.media_items.platforms.map(item => item?.trim()).filter(Boolean)
+    : [];
+
+  // If we only have one catalog platform, use it as a safe fallback.
+  if (mediaPlatforms.length === 1) {
+    return mediaPlatforms[0];
+  }
+
+  return 'Unspecified';
 }
 
 function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightPayload {
-  const platformMap = new Map<string, { total: number; completed: number; dropped: number }>();
+  const platformMap = new Map<
+    string,
+    { total: number; completed: number; dropped: number; attempts: number }
+  >();
 
   for (const entry of entries) {
-    const platform = normalizePlatformLabel(entry.selected_platform);
-    const current = platformMap.get(platform) ?? { total: 0, completed: 0, dropped: 0 };
+    const platform = normalizePlatformLabel(resolvePlatformForInsight(entry));
+    const current = platformMap.get(platform) ?? { total: 0, completed: 0, dropped: 0, attempts: 0 };
 
     current.total += 1;
     if (entry.status === 'completed') {
       current.completed += 1;
+      current.attempts += 1;
     }
     if (entry.status === 'dropped') {
       current.dropped += 1;
+      current.attempts += 1;
     }
 
     platformMap.set(platform, current);
@@ -1093,10 +1157,11 @@ function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightP
   const rows: PlatformInsightRow[] = Array.from(platformMap.entries())
     .map(([platform, counts]) => ({
       platform,
-      total: counts.total,
+      total: counts.attempts,
       completed: counts.completed,
       dropped: counts.dropped,
-      completionRate: counts.total > 0 ? Math.round((counts.completed / counts.total) * 100) : 0,
+      completionRate:
+        counts.attempts > 0 ? Math.round((counts.completed / counts.attempts) * 100) : 0,
     }))
     .sort((a, b) => {
       if (b.completionRate !== a.completionRate) {
@@ -1168,6 +1233,53 @@ function buildCategoryChart(
   return {
     data,
     insight,
+  };
+}
+
+function buildCategoryInsights(entries: CategoryEntryRow[]): CategoryInsightsPayload {
+  const statusCounts: Record<TasteProfileStatus, number> = {
+    planned: 0,
+    current: 0,
+    completed: 0,
+    dropped: 0,
+  };
+  const now = new Date();
+  const cutoff7Days = subDays(now, 7).getTime();
+  const cutoff30Days = subDays(now, 30).getTime();
+  let updatedLast7Days = 0;
+  let updatedLast30Days = 0;
+
+  for (const entry of entries) {
+    statusCounts[entry.status] += 1;
+
+    const updatedAt = entry.updated_at ?? entry.created_at;
+    if (!updatedAt) {
+      continue;
+    }
+    const ts = new Date(updatedAt).getTime();
+    if (!Number.isFinite(ts)) {
+      continue;
+    }
+    if (ts >= cutoff30Days) {
+      updatedLast30Days += 1;
+    }
+    if (ts >= cutoff7Days) {
+      updatedLast7Days += 1;
+    }
+  }
+
+  const completionNumerator = statusCounts.completed;
+  const completionDenominator = statusCounts.completed + statusCounts.dropped;
+  const completionRate =
+    completionDenominator > 0 ? Math.round((completionNumerator / completionDenominator) * 100) : 0;
+
+  return {
+    statusCounts,
+    completionRate,
+    completionNumerator,
+    completionDenominator,
+    updatedLast7Days,
+    updatedLast30Days,
   };
 }
 

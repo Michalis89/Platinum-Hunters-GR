@@ -114,13 +114,7 @@ export default function EntryEditDialog({
       score: entry.entryId ? (entry.score ?? '') : '',
       notes: entry.notes ?? '',
       isFavorite: entry.isFavorite ?? false,
-      selectedPlatform:
-        entry.selectedPlatform ??
-        (category === 'games'
-          ? (entry.platforms ?? []).includes('PC')
-            ? 'PC'
-            : ((entry.platforms ?? [])[0] ?? '')
-          : ''),
+      selectedPlatform: entry.selectedPlatform ?? '',
     });
   }, [category, entry]);
 

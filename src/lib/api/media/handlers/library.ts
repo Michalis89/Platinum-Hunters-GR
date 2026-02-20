@@ -93,6 +93,8 @@ export async function handleLibraryPatch(
 
     // Parse request body
     const body = (await req.json()) as UpdateLibraryRequestBody;
+    const normalizedSelectedPlatform =
+      typeof body.selected_platform === 'string' ? body.selected_platform.trim() : body.selected_platform;
 
     if (!body.mediaId) {
       return NextResponse.json({ error: MISSING_MEDIA_ID }, { status: 400 });
@@ -107,7 +109,7 @@ export async function handleLibraryPatch(
       updateData.is_favorite = body.is_favorite;
     }
     if (body.selected_platform !== undefined) {
-      updateData.selected_platform = body.selected_platform;
+      updateData.selected_platform = normalizedSelectedPlatform || null;
     }
     if (body.priority !== undefined) {
       updateData.priority = body.priority;
@@ -136,6 +138,10 @@ export async function handleLibraryPatch(
       .eq('user_id', session.user.id)
       .eq('media_id', body.mediaId)
       .maybeSingle();
+
+    if (config.key === 'games' && !existingEntry && !normalizedSelectedPlatform) {
+      return NextResponse.json({ error: 'Platform selection is required for games' }, { status: 400 });
+    }
 
     // Upsert entry
     const { data, error } = await supabase

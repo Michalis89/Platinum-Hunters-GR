@@ -1,6 +1,6 @@
 {
   "name": "hobbistas",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,8 @@
     "build": "next build",
     "postbuild": "next-sitemap",
     "start": "next start",
-    "analyze": "set ANALYZE=true && next build",
+    "analyze": "set ANALYZE=true && next build --webpack",
+    "analyze:turbopack": "next experimental-analyze",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs",
     "test": "jest --coverage",
     "format": "prettier --write .",

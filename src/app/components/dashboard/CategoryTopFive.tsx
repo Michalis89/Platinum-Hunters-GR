@@ -236,7 +236,11 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
   const [order, setOrder] = useState<DashboardTopFiveItem[]>(initialOrder);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [hasLocalReorder, setHasLocalReorder] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [collapsedHeight, setCollapsedHeight] = useState<number | null>(null);
+  const [expandedHeight, setExpandedHeight] = useState<number | null>(null);
   const lastCategoryRef = useRef(category);
+  const gridRef = useRef<HTMLDivElement | null>(null);
 
   const initialOrderKey = useMemo(
     () => initialOrder.map(item => item.entryId).join(','),
@@ -251,6 +255,7 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
     lastCategoryRef.current = category;
     setHasLocalReorder(false);
     setOrder(initialOrder);
+    setIsExpanded(false);
   }, [category, initialOrder]);
 
   useEffect(() => {
@@ -340,6 +345,51 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
     }
   }, []);
 
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) {
+      return;
+    }
+
+    const measureHeights = () => {
+      const cards = Array.from(grid.children) as HTMLElement[];
+      if (!cards.length) {
+        setCollapsedHeight(null);
+        setExpandedHeight(null);
+        return;
+      }
+
+      const firstRowTop = cards[0].offsetTop;
+      const secondRowCard = cards.find(card => card.offsetTop > firstRowTop);
+      setExpandedHeight(grid.scrollHeight);
+
+      if (!secondRowCard) {
+        setCollapsedHeight(null);
+        return;
+      }
+
+      const nextRowHalfVisible = secondRowCard.offsetTop + secondRowCard.offsetHeight / 2;
+      setCollapsedHeight(nextRowHalfVisible);
+    };
+
+    measureHeights();
+
+    const resizeObserver = new ResizeObserver(() => {
+      measureHeights();
+    });
+    resizeObserver.observe(grid);
+    for (const child of Array.from(grid.children)) {
+      resizeObserver.observe(child);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [orderKey]);
+
+  const canCollapse = collapsedHeight !== null;
+  const gridMaxHeight = isExpanded ? expandedHeight : collapsedHeight;
+
   if (!order.length) {
     return (
       <section className="space-y-5">
@@ -375,11 +425,33 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
             </p>
             <span className="text-[10px] text-muted-foreground/80">5 cards per row</span>
           </div>
-          <div className="grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-            {order.map((item, index) => (
-              <SortableFavoriteCard key={item.entryId} item={item} rank={index + 1} index={index} />
-            ))}
+          <div
+            className={[
+              'relative overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.18,0.9,0.22,1)]',
+              canCollapse && !isExpanded ? 'after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-16 after:bg-gradient-to-t after:from-background/95 after:to-transparent' : '',
+            ].join(' ')}
+            style={gridMaxHeight ? { maxHeight: `${gridMaxHeight}px` } : undefined}
+          >
+            <div
+              ref={gridRef}
+              className="grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+            >
+              {order.map((item, index) => (
+                <SortableFavoriteCard key={item.entryId} item={item} rank={index + 1} index={index} />
+              ))}
+            </div>
           </div>
+          {canCollapse ? (
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setIsExpanded(prev => !prev)}
+                className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-4 py-1.5 text-xs font-medium text-foreground/90 transition-colors hover:bg-background"
+              >
+                {isExpanded ? 'Show less' : 'Show all'}
+              </button>
+            </div>
+          ) : null}
         </div>
         <DragOverlay
           dropAnimation={{
