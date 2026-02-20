@@ -31,13 +31,41 @@ export default function CreateEntryPanel({
   libraryEntries,
 }: Readonly<CreateEntryPanelProps>) {
   const config = CATEGORY_CONFIG[category];
+  const normalizeLookupValue = (value: string | undefined) =>
+    (value ?? '')
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s]+/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
 
   const libraryMediaIds = useMemo(() => {
     return new Set(libraryEntries.map(entry => entry.mediaId).filter(Boolean));
   }, [libraryEntries]);
+  const libraryTitleYearKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const entry of libraryEntries) {
+      const normalizedTitle = normalizeLookupValue(entry.title);
+      if (!normalizedTitle) {
+        continue;
+      }
+      keys.add(`${normalizedTitle}::${entry.year ?? ''}`);
+      keys.add(`${normalizedTitle}::`);
+    }
+    return keys;
+  }, [libraryEntries]);
 
   const isInLibrary = (entry: SearchResult): boolean => {
     if (entry.mediaId && libraryMediaIds.has(entry.mediaId)) {
+      return true;
+    }
+    const normalizedTitle = normalizeLookupValue(entry.title);
+    if (!normalizedTitle) {
+      return false;
+    }
+    if (libraryTitleYearKeys.has(`${normalizedTitle}::${entry.year ?? ''}`)) {
+      return true;
+    }
+    if (libraryTitleYearKeys.has(`${normalizedTitle}::`)) {
       return true;
     }
     return false;

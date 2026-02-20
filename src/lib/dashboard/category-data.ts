@@ -62,6 +62,19 @@ export type CategoryInsightsPayload = {
   updatedLast30Days: number;
 };
 
+export type CategoryRhythmEntry = {
+  updatedAt: string | null;
+  createdAt: string | null;
+  status: TasteProfileStatus;
+  score: number | null;
+  progress: number | null;
+  isFavorite: boolean;
+  selectedPlatform: string | null;
+  genres: string[];
+  themes: string[];
+  runtime: number | null;
+};
+
 export type PlatformInsightRow = {
   platform: string;
   total: number;
@@ -141,6 +154,7 @@ export type CategoryDashboardSection = {
   spotlights: CategorySpotlightCard[];
   chart: CategoryChartPayload;
   insights: CategoryInsightsPayload;
+  rhythmEntries: CategoryRhythmEntry[];
   platformInsight: PlatformInsightPayload | null;
   tasteProfileItems: CategoryTasteProfileItem[];
   favorites: DashboardTopFiveItem[];
@@ -328,6 +342,7 @@ const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSe
     updatedLast7Days: 0,
     updatedLast30Days: 0,
   },
+  rhythmEntries: [],
   platformInsight: null,
   tasteProfileItems: [],
   favorites: [],
@@ -766,7 +781,8 @@ export async function fetchCategoryDashboardData(
       spotlights: [],
       chart: buildCategoryChart(category, chartRows),
       insights: buildCategoryInsights(entries),
-      platformInsight: category === 'games' ? buildGamePlatformInsight(entries) : null,
+      rhythmEntries: buildRhythmEntries(entries),
+      platformInsight: buildGamePlatformInsight(entries),
       tasteProfileItems: buildCategoryTasteProfileItems(
         entries,
         category,
@@ -1163,6 +1179,7 @@ function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightP
       completionRate:
         counts.attempts > 0 ? Math.round((counts.completed / counts.attempts) * 100) : 0,
     }))
+    .filter(row => row.total > 0)
     .sort((a, b) => {
       if (b.completionRate !== a.completionRate) {
         return b.completionRate - a.completionRate;
@@ -1281,6 +1298,45 @@ function buildCategoryInsights(entries: CategoryEntryRow[]): CategoryInsightsPay
     updatedLast7Days,
     updatedLast30Days,
   };
+}
+
+function buildRhythmEntries(entries: CategoryEntryRow[]): CategoryRhythmEntry[] {
+  return entries.map(entry => {
+    const media = entry.media_items;
+    const genres = Array.isArray(media?.genres)
+      ? media.genres.map(genre => (typeof genre === 'string' ? genre.trim() : '')).filter(Boolean)
+      : [];
+    const themes = Array.isArray(media?.igdb_themes)
+      ? media.igdb_themes
+          .map(theme => (typeof theme === 'string' ? theme.trim() : ''))
+          .filter(Boolean)
+      : [];
+    const runtime =
+      typeof media?.runtime === 'number' && Number.isFinite(media.runtime)
+        ? media.runtime
+        : typeof media?.duration === 'number' && Number.isFinite(media.duration)
+          ? media.duration
+          : null;
+
+    return {
+      updatedAt: entry.updated_at,
+      createdAt: entry.created_at,
+      status: entry.status,
+      score: typeof entry.score === 'number' && Number.isFinite(entry.score) ? entry.score : null,
+      progress:
+        typeof entry.progress === 'number' && Number.isFinite(entry.progress)
+          ? entry.progress
+          : null,
+      isFavorite: Boolean(entry.is_favorite),
+      selectedPlatform:
+        typeof entry.selected_platform === 'string' && entry.selected_platform.trim().length > 0
+          ? entry.selected_platform.trim()
+          : null,
+      genres,
+      themes,
+      runtime,
+    };
+  });
 }
 
 // ============================================================================

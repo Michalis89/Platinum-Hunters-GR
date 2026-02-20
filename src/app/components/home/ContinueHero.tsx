@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 import type { CarouselApi } from '@/components/ui/carousel';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
@@ -202,47 +201,110 @@ const getProgressLabel = (category: string, progress: number | null) => {
   return null;
 };
 
-const SlideCard = ({ item }: { item: SlideItem }) => {
+const HeroSurface = ({ children, className = '' }: { children: ReactNode; className?: string }) => {
+  return (
+    <div className={`relative bg-background ${className}`}>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_circle_at_14%_44%,rgba(139,92,246,0.29),transparent_61%),radial-gradient(900px_circle_at_42%_12%,rgba(99,102,241,0.13),transparent_56%),radial-gradient(860px_circle_at_30%_58%,rgba(129,140,248,0.07),transparent_67%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(760px_circle_at_78%_52%,rgba(139,92,246,0.13),transparent_62%),radial-gradient(540px_circle_at_82%_34%,rgba(255,255,255,0.05),transparent_66%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.18)_24%,rgba(255,255,255,0.04)_42%,rgba(255,255,255,0.1)_58%,transparent_100%)] dark:bg-[linear-gradient(90deg,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0.14)_22%,rgba(255,255,255,0.03)_38%,rgba(0,0,0,0.2)_56%,transparent_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(920px_circle_at_34%_48%,rgba(255,255,255,0.22),transparent_63%)] dark:bg-[radial-gradient(920px_circle_at_34%_48%,rgba(255,255,255,0.055),transparent_63%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_45%,transparent_66%,rgba(255,255,255,0.26)_100%)] dark:bg-[radial-gradient(140%_95%_at_50%_45%,transparent_54%,rgba(0,0,0,0.46)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.28] via-transparent to-white/[0.18] dark:from-black/[0.24] dark:to-black/[0.34]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-[18%] bg-gradient-to-l from-white/[0.24] to-transparent dark:from-black/[0.34]"
+      />
+      <div className="relative z-10">{children}</div>
+    </div>
+  );
+};
+
+const SlideCard = ({ item, isActive }: { item: SlideItem; isActive: boolean }) => {
   const imageUrl = getSlideImage(item.slide);
   const progressLabel = getProgressLabel(item.slide.category, item.slide.progress);
 
   return (
-    <div className="grid min-h-[324px] items-center gap-8 rounded-2xl border border-border/35 bg-card p-6 shadow-[0_10px_35px_-22px_rgba(0,0,0,0.8)] md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)] md:p-7">
-      <div className="space-y-5 md:space-y-6">
-        <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.08em] text-muted-foreground">
+    <div className="group relative isolate flex flex-col gap-6 motion-safe:duration-300 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 md:grid md:grid-cols-[1.14fr,0.86fr] md:items-center md:gap-14">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(42%_58%_at_76%_52%,rgba(167,139,250,0.12),transparent_76%)] md:block"
+      />
+      <div className="w-full min-w-0 md:order-2 md:flex md:justify-end">
+        <div className="relative aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-2xl border border-white/15 bg-muted/10 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.7)] md:w-[436px] md:max-w-none">
+          {imageUrl ? (
+            <>
+              <div className="absolute inset-0 md:transition-transform md:duration-500 md:ease-out md:[transform:perspective(1100px)_rotateY(-4deg)_scale(1.02)] md:group-hover:[transform:perspective(1100px)_rotateY(-4deg)_scale(1.05)]">
+                <CoverHeroImage
+                  src={imageUrl}
+                  alt={item.slide.title ?? 'Title'}
+                  sizes="(max-width: 768px) 85vw, 436px"
+                  className="absolute inset-0 rounded-2xl object-cover"
+                  priority={isActive}
+                />
+              </div>
+              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-white/20 via-transparent to-transparent dark:from-black/45" />
+            </>
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-2xl bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.12),transparent_62%)] dark:bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.18),transparent_62%)]">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/50 bg-background/70">
+                {item.config.icon}
+              </span>
+              <p className="text-xs font-medium tracking-[0.06em] text-muted-foreground">
+                No image
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="min-w-0 space-y-5 md:order-1 md:space-y-7 md:pl-4 lg:pl-8">
+        <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">
           <span>{item.config.icon}</span>
           {item.config.label}
         </div>
 
-        <div className="space-y-2.5">
-          <h2 className="text-3xl font-semibold leading-[1.05] tracking-[-0.03em] text-foreground md:text-4xl">
-            Continue where you left off
-          </h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {item.config.verb(item.currentCount)}
-          </p>
-        </div>
+        <p className="text-muted-foreground/78 text-sm">{item.config.verb(item.currentCount)}</p>
 
-        <div className="space-y-1.5">
-          <p className="text-lg font-semibold tracking-[-0.02em] text-foreground">
+        <div className="space-y-2.5">
+          <h2 className="text-balance break-words text-[2.16rem] font-semibold tracking-tight text-foreground md:text-[2.68rem]">
+            Pick up where you left off
+          </h2>
+          <p className="text-balance break-words text-[1.72rem] font-semibold tracking-tight text-foreground md:text-[2.05rem]">
             {item.slide.title ?? 'Untitled'}
           </p>
-          <p className="text-sm text-muted-foreground">
-            Last updated: <RelativeTimeDisplay date={item.slide.updated_at} /> ago
+          <p className="text-muted-foreground/62 text-sm md:text-[15px]">
+            {progressLabel ? (
+              <span>
+                {progressLabel} <span aria-hidden="true">&bull;</span>{' '}
+              </span>
+            ) : null}
+            Updated <RelativeTimeDisplay date={item.slide.updated_at} /> ago
           </p>
         </div>
 
-        {progressLabel && (
-          <div className="inline-flex items-center rounded-full border border-border/50 bg-muted/20 px-3 py-1 text-xs text-foreground/90">
-            {progressLabel}
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        <div className="flex flex-col items-start gap-3 pt-1.5">
           <Button
             variant="primary"
             href={getCategoryRoute(item.slide.category, item.slide.title)}
-            className="min-h-11 rounded-[20px] px-5 py-3 text-[13px] font-semibold tracking-[-0.01em] shadow-sm"
+            className="min-h-11 w-full justify-center rounded-[20px] bg-violet-600 px-5 py-3 text-[13px] font-semibold tracking-[-0.01em] text-white shadow-sm transition-colors hover:bg-violet-500 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 sm:w-auto"
           >
             Continue
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -250,35 +312,11 @@ const SlideCard = ({ item }: { item: SlideItem }) => {
           <Button
             variant="secondary"
             href={getCategoryRoute(item.slide.category)}
-            className="min-h-11 rounded-[20px] border-border/60 px-5 py-3 text-[13px] font-medium tracking-[-0.01em]"
+            className="min-h-11 w-full justify-center rounded-[20px] border border-black/10 px-5 py-3 text-[13px] font-medium tracking-[-0.01em] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 dark:border-white/10 sm:w-auto"
           >
             All {item.config.label} in progress
           </Button>
         </div>
-      </div>
-
-      <div className="w-full md:w-[260px] md:min-w-[240px] md:max-w-[260px]">
-        <AspectRatio ratio={4 / 5} className="relative">
-          {imageUrl ? (
-            <>
-              <CoverHeroImage
-                src={imageUrl}
-                alt={item.slide.title ?? 'Title'}
-                sizes="(max-width: 768px) 88vw, 300px"
-                className="absolute inset-0 object-contain p-2"
-                priority
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
-            </>
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                {item.config.icon}
-              </span>
-              <p className="text-xs font-medium tracking-[0.06em] text-white/65">No image</p>
-            </div>
-          )}
-        </AspectRatio>
       </div>
     </div>
   );
@@ -364,57 +402,59 @@ export function ContinueHero({ fallbackData }: ContinueHeroProps = {}) {
 
   if (isInitialLoading) {
     return (
-      <section className="px-4 py-7 md:px-6 md:py-8">
-        <div className="mx-auto max-w-screen-2xl">
-          <div className="min-h-[304px] animate-pulse rounded-3xl border border-border/30 bg-card/90 p-6 md:p-7">
-            <div className="grid min-h-[260px] items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
-              <div className="space-y-4">
-                <div className="h-4 w-24 rounded bg-card/60" />
-                <div className="h-8 w-3/4 rounded bg-card/70" />
-                <div className="h-4 w-1/2 rounded bg-card/50" />
+      <section className="relative w-full overflow-hidden">
+        <HeroSurface>
+          <div className="relative mx-auto flex min-h-[468px] max-w-7xl items-center px-6 py-9 md:py-12">
+            <div className="grid min-h-[300px] w-full items-center gap-8 md:grid-cols-[1.14fr,0.86fr] md:gap-14">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 w-24 rounded bg-card/50" />
+                <div className="h-10 w-3/4 rounded bg-card/60" />
+                <div className="h-5 w-1/2 rounded bg-card/40" />
                 <div className="flex gap-3 pt-4">
                   <div className="h-12 w-32 rounded-full bg-card/60" />
                   <div className="h-12 w-48 rounded-full bg-card/40" />
                 </div>
               </div>
-              <div className="aspect-[4/5] w-full rounded-2xl bg-card/30 md:w-[340px]" />
+              <div className="aspect-[4/5] w-full max-w-[320px] rounded-2xl border border-white/15 bg-card/30 md:w-[436px] md:max-w-none md:justify-self-end" />
             </div>
           </div>
-        </div>
+        </HeroSurface>
       </section>
     );
   }
 
   if (slideItems.length === 0) {
     return (
-      <section className="px-4 py-7 md:px-6 md:py-8">
-        <div className="mx-auto max-w-screen-2xl">
-          <div className="rounded-3xl border border-border/30 bg-card/90 p-7 shadow-[0_10px_35px_-22px_rgba(0,0,0,0.8)]">
-            <h2 className="text-3xl font-semibold tracking-[-0.03em]">
-              Continue where you left off
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              You don&apos;t have anything in progress yet.
-            </p>
-            <div className="mt-6">
-              <Link
-                href={getFallbackRoute(enabledCategories)}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:brightness-95"
-              >
-                View backlog
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
+      <section className="relative w-full overflow-hidden">
+        <HeroSurface>
+          <div className="relative mx-auto flex min-h-[468px] max-w-7xl items-center px-6 py-9 md:py-12">
+            <div className="w-full max-w-2xl">
+              <h2 className="text-balance text-3xl font-semibold tracking-tight md:text-4xl">
+                Pick up where you left off
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                You don&apos;t have anything in progress yet.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href={getFallbackRoute(enabledCategories)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
+                >
+                  View backlog
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        </HeroSurface>
       </section>
     );
   }
 
   return (
-    <section className="px-4 py-7 md:px-6 md:py-8">
-      <div className="mx-auto max-w-screen-2xl">
-        <div className="rounded-3xl border border-border/30 bg-card/95 p-7 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.85)] md:p-8">
+    <section className="relative w-full overflow-hidden">
+      <HeroSurface>
+        <div className="relative mx-auto flex min-h-[468px] w-full max-w-7xl flex-col justify-center px-6 py-9 md:py-12">
           <Carousel
             setApi={setCarouselApi}
             opts={{
@@ -422,59 +462,64 @@ export function ContinueHero({ fallbackData }: ContinueHeroProps = {}) {
               loop: slideItems.length > 1,
               containScroll: 'trimSnaps',
             }}
-            className="w-full overflow-hidden"
+            className="w-full"
           >
-            <CarouselContent>
-              {slideItems.map(item => (
-                <CarouselItem key={`slide-${item.slide.entry_id}`} className="min-w-0 basis-full">
-                  <SlideCard item={item} />
+            <CarouselContent className="w-full gap-12">
+              {slideItems.map((item, index) => (
+                <CarouselItem
+                  key={`slide-${item.slide.entry_id}`}
+                  className="min-w-0 shrink-0 grow-0 basis-full pl-0"
+                >
+                  <SlideCard item={item} isActive={index === selectedIndex} />
                 </CarouselItem>
               ))}
             </CarouselContent>
           </Carousel>
 
           {slideItems.length > 1 && (
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
-              <Button
-                variant="secondary"
-                size="icon"
-                type="button"
-                aria-label="Previous slide"
-                className="h-8 w-8 rounded-full"
-                onClick={() => carouselApi?.scrollPrev()}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
+            <div className="mt-6 flex w-full justify-center md:justify-end">
+              <div className="flex w-full max-w-[420px] items-center justify-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  type="button"
+                  aria-label="Previous slide"
+                  className="h-10 w-10 rounded-full focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 md:h-8 md:w-8"
+                  onClick={() => carouselApi?.scrollPrev()}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
 
-              {slideItems.map((_, index) => {
-                const isActive = index === selectedIndex;
-                return (
-                  <button
-                    key={`dot-${index}`}
-                    type="button"
-                    onClick={() => carouselApi?.scrollTo(index)}
-                    aria-label={`Go to slide ${index + 1}`}
-                    className={`h-2.5 w-2.5 rounded-full border transition ${
-                      isActive ? 'border-foreground bg-foreground' : 'border-input bg-card'
-                    }`}
-                  />
-                );
-              })}
+                {slideItems.map((_, index) => {
+                  const isActive = index === selectedIndex;
+                  return (
+                    <button
+                      key={`dot-${index}`}
+                      type="button"
+                      onClick={() => carouselApi?.scrollTo(index)}
+                      aria-label={`Go to slide ${index + 1}`}
+                      className={`h-2.5 w-2.5 rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${
+                        isActive ? 'border-foreground bg-foreground' : 'border-input bg-card'
+                      }`}
+                    />
+                  );
+                })}
 
-              <Button
-                variant="secondary"
-                size="icon"
-                type="button"
-                aria-label="Next slide"
-                className="h-8 w-8 rounded-full"
-                onClick={() => carouselApi?.scrollNext()}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  type="button"
+                  aria-label="Next slide"
+                  className="h-10 w-10 rounded-full focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 md:h-8 md:w-8"
+                  onClick={() => carouselApi?.scrollNext()}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </div>
-      </div>
+      </HeroSurface>
     </section>
   );
 }

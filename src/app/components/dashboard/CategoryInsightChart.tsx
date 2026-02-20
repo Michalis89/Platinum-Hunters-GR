@@ -67,10 +67,12 @@ function CategoryInsightChart({ payload, category }: CategoryInsightChartProps) 
       <CardHeader className="flex flex-col gap-4 border-b border-border/35 pb-5 pt-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-base font-semibold">Your {label} patterns</CardTitle>
-            <p className="text-xs text-muted-foreground/80">Derived from your library activity.</p>
+            <CardTitle className="text-balance text-sm font-semibold leading-tight text-foreground sm:text-base">
+              Your {label} activity trends
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">Derived from your library activity.</p>
           </div>
-          <div className="flex w-full max-w-[220px] md:w-auto">
+          <div className="flex w-full max-w-full sm:max-w-[220px] md:w-auto">
             <Select defaultValue={RANGE_OPTIONS[0].value}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Last 30 days" />

@@ -38,9 +38,9 @@ export default function GameSuggestions() {
     return (
       <section className="pt-10 md:pt-12">
         <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
-          <div className="flex items-center justify-between pb-4">
-            <h2 className="text-lg font-semibold">Game picks based on your history</h2>
-          </div>
+        <div className="flex items-center justify-between pb-4">
+            <h2 className="text-lg font-semibold">Your next games</h2>
+        </div>
           <div className="grid gap-4 md:grid-cols-2">
             {Array.from({ length: 4 }).map((_, index) => (
               <SkeletonCard key={`skeleton-${index}`} />
@@ -59,7 +59,7 @@ export default function GameSuggestions() {
     <section className="pt-10 md:pt-12">
       <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
         <div className="flex items-center justify-between pb-4">
-          <h2 className="text-lg font-semibold">Game picks based on your history</h2>
+          <h2 className="text-lg font-semibold">Your next games</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {data.slice(0, 4).map(suggestion => (

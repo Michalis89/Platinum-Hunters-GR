@@ -13,15 +13,15 @@ function generateSuggestionsLabel(suggestions: MediaSuggestion[]): string {
   }
 
   if (backlogCount === 0) {
-    return dbCount === 1 ? '1 pick for you' : `${dbCount} picks for you`;
+    return dbCount === 1 ? '1 possible next title' : `${dbCount} possible next titles`;
   }
 
   if (dbCount === 0) {
-    return backlogCount === 1 ? '1 backlog pick' : `${backlogCount} backlog picks`;
+    return backlogCount === 1 ? '1 from your backlog' : `${backlogCount} from your backlog`;
   }
 
   // Both exist
-  return `${backlogCount} backlog + ${dbCount} database picks`;
+  return `${backlogCount} from backlog + ${dbCount} possible next`;
 }
 
 const createMockSuggestion = (
@@ -41,7 +41,7 @@ const createMockSuggestion = (
 });
 
 describe('MediaSuggestions label generation', () => {
-  it('should show "N picks for you" when all are database suggestions', () => {
+  it('should show "N possible next titles" when all are database suggestions', () => {
     const suggestions = [
       createMockSuggestion('database', 'Game 1'),
       createMockSuggestion('database', 'Game 2'),
@@ -49,28 +49,28 @@ describe('MediaSuggestions label generation', () => {
       createMockSuggestion('database', 'Game 4'),
     ];
 
-    expect(generateSuggestionsLabel(suggestions)).toBe('4 picks for you');
+    expect(generateSuggestionsLabel(suggestions)).toBe('4 possible next titles');
   });
 
-  it('should show "N backlog picks" when all are backlog suggestions', () => {
+  it('should show "N from your backlog" when all are backlog suggestions', () => {
     const suggestions = [
       createMockSuggestion('backlog', 'Game 1'),
       createMockSuggestion('backlog', 'Game 2'),
     ];
 
-    expect(generateSuggestionsLabel(suggestions)).toBe('2 backlog picks');
+    expect(generateSuggestionsLabel(suggestions)).toBe('2 from your backlog');
   });
 
-  it('should show "1 backlog pick" for single backlog item', () => {
+  it('should show "1 from your backlog" for single backlog item', () => {
     const suggestions = [createMockSuggestion('backlog', 'Game 1')];
 
-    expect(generateSuggestionsLabel(suggestions)).toBe('1 backlog pick');
+    expect(generateSuggestionsLabel(suggestions)).toBe('1 from your backlog');
   });
 
-  it('should show "1 pick for you" for single database item', () => {
+  it('should show "1 possible next title" for single database item', () => {
     const suggestions = [createMockSuggestion('database', 'Game 1')];
 
-    expect(generateSuggestionsLabel(suggestions)).toBe('1 pick for you');
+    expect(generateSuggestionsLabel(suggestions)).toBe('1 possible next title');
   });
 
   it('should show mixed label when both backlog and database suggestions exist', () => {
@@ -81,7 +81,7 @@ describe('MediaSuggestions label generation', () => {
       createMockSuggestion('database-fallback', 'Game 4'),
     ];
 
-    expect(generateSuggestionsLabel(suggestions)).toBe('2 backlog + 2 database picks');
+    expect(generateSuggestionsLabel(suggestions)).toBe('2 from backlog + 2 possible next');
   });
 
   it('should return empty string for no suggestions', () => {
@@ -97,7 +97,7 @@ describe('MediaSuggestions label generation', () => {
     ];
 
     const label = generateSuggestionsLabel(suggestions);
-    expect(label).toBe('4 picks for you');
+    expect(label).toBe('4 possible next titles');
     expect(label).not.toContain('backlog');
   });
 
@@ -109,6 +109,6 @@ describe('MediaSuggestions label generation', () => {
       createMockSuggestion('database', 'Game 4'),
     ];
 
-    expect(generateSuggestionsLabel(suggestions)).toBe('1 backlog + 3 database picks');
+    expect(generateSuggestionsLabel(suggestions)).toBe('1 from backlog + 3 possible next');
   });
 });

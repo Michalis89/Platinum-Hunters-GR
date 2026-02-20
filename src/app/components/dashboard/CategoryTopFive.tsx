@@ -12,6 +12,14 @@ import { isSortableOperation, useSortable } from '@dnd-kit/react/sortable';
 import { arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
 import type { DashboardCategoryKey, DashboardTopFiveItem } from '@/lib/dashboard/category-data';
+import DashboardSectionHeader from './DashboardSectionHeader';
+import {
+  DASH_BORDER,
+  DASH_PADDING_LARGE,
+  DASH_PADDING_STANDARD,
+  DASH_RADIUS_SECTION,
+  DASH_SURFACE_SECTION,
+} from './dashboard-ui-tokens';
 
 const TOP_FIVE_LIMIT = 5;
 const SORTABLE_GROUP_ID = 'dashboard-favorites';
@@ -91,8 +99,8 @@ function SortableFavoriteCard({
           className="duration-220 ease-[cubic-bezier(0.18,0.9,0.22,1)] pointer-events-none absolute -inset-px transition-opacity delay-0 group-hover:opacity-95 dark:hidden"
           style={{
             background:
-              'linear-gradient(to bottom, rgba(0,0,0,0.14), rgba(0,0,0,0) 45%, rgba(0,0,0,0.48)),' +
-              'linear-gradient(to top, rgba(0,0,0,0.58), rgba(0,0,0,0.16) 55%, rgba(0,0,0,0)),' +
+              'linear-gradient(to bottom, rgba(255,255,255,0.14), rgba(255,255,255,0) 45%, rgba(255,255,255,0.48)),' +
+              'linear-gradient(to top, rgba(255,255,255,0.58), rgba(255,255,255,0.16) 55%, rgba(255,255,255,0)),' +
               'radial-gradient(900px circle at 15% 0%, rgba(255,255,255,0.08), transparent 55%)',
           }}
         />
@@ -138,22 +146,24 @@ function SortableFavoriteCard({
 
         {/* Bottom text */}
         <div className="absolute inset-x-0 bottom-0 p-4">
-          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-white drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)]">
+          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-foreground dark:text-white dark:drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)]">
             {item.title}
           </h3>
 
           <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="truncate text-xs text-white/70">{item.subtitle}</p>
+            <p className="truncate text-xs font-semibold text-foreground/70 dark:text-white/70">
+              {item.subtitle}
+            </p>
           </div>
 
           {/* Progress (only current) */}
           {item.status === 'current' && item.progressPercent !== undefined ? (
             <div className="mt-3 space-y-1">
-              <div className="flex items-center justify-between text-[10px] font-medium text-white/70">
+              <div className="flex items-center justify-between text-[10px] font-medium text-foreground/70 dark:text-white/70">
                 <span>Progress</span>
                 <span>{item.progressPercent}%</span>
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+              <div className="h-1.5 overflow-hidden rounded-full bg-black/15 dark:bg-white/15">
                 <div
                   className="h-full rounded-full bg-primary"
                   style={{ width: `${item.progressPercent}%` }}
@@ -204,7 +214,7 @@ function OverlayFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank:
           loading="eager"
           className="object-cover object-[50%_25%] [backface-visibility:hidden]"
         />
-        <div className="via-black/18 pointer-events-none absolute -inset-px bg-gradient-to-t from-black/65 to-transparent dark:hidden" />
+        <div className="via-white/18 pointer-events-none absolute -inset-px bg-gradient-to-t from-white/65 to-transparent dark:hidden" />
         <div className="pointer-events-none absolute -inset-px hidden bg-gradient-to-t from-black/85 via-black/25 to-transparent dark:block" />
         <div className="absolute left-3 top-3">
           <span className="inline-flex items-center rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white ring-1 ring-white/10 backdrop-blur-sm">
@@ -221,10 +231,12 @@ function OverlayFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank:
         ) : null}
 
         <div className="absolute inset-x-0 bottom-0 p-4">
-          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-white drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)]">
+          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-foreground drop-shadow-none dark:text-white dark:drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)]">
             {item.title}
           </h3>
-          <p className="mt-1 truncate text-xs text-white/70">{item.subtitle}</p>
+          <p className="mt-1 truncate text-xs text-foreground/70 dark:text-white/70">
+            {item.subtitle}
+          </p>
         </div>
       </div>
     </article>
@@ -393,10 +405,10 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
   if (!order.length) {
     return (
       <section className="space-y-5">
-        <div className="space-y-1 text-center">
-          <p className="text-sm font-semibold tracking-tight">Favorites</p>
-          <p className="text-xs text-muted-foreground">Pin what defines your taste.</p>
-        </div>
+        <DashboardSectionHeader
+          eyebrow="Your favorites"
+          title="The titles you always want close by."
+        />
         <div className="rounded-2xl border border-dashed border-muted/60 p-6 text-center text-sm text-muted-foreground">
           No favorites yet.
         </div>
@@ -406,29 +418,41 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
 
   return (
     <section className="space-y-6 py-1 md:py-2">
-      <div className="space-y-1.5 text-center">
-        <p className="text-sm font-semibold tracking-tight">Favorites</p>
-        <p className="text-xs text-muted-foreground/85">
-          All favorites in one list. Top 5 are highlighted.
-        </p>
-      </div>
+      <DashboardSectionHeader
+        eyebrow="Your favorites"
+        title="The titles you always want close by."
+        rightSlot={
+          canCollapse ? (
+            <button
+              type="button"
+              onClick={() => setIsExpanded(prev => !prev)}
+              className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/90 transition-colors hover:bg-background"
+            >
+              {isExpanded ? 'Show less' : 'See all'}
+            </button>
+          ) : undefined
+        }
+      />
 
       <DragDropProvider
         sensors={[PointerSensor]}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="rounded-3xl border border-border/40 bg-card/65 p-5 shadow-[0_8px_24px_-22px_rgba(0,0,0,0.8)] md:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground/90">
-              Drag And Reorder
-            </p>
-            <span className="text-[10px] text-muted-foreground/80">5 cards per row</span>
-          </div>
+        <div
+          className={`${DASH_RADIUS_SECTION} ${DASH_BORDER} ${DASH_SURFACE_SECTION} ${DASH_PADDING_STANDARD} ${DASH_PADDING_LARGE} shadow-sm`}
+        >
+          <DashboardSectionHeader
+            eyebrow="Drag And Reorder"
+            title="Reorder your favorites"
+            className="mb-4"
+          />
           <div
             className={[
-              'relative overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.18,0.9,0.22,1)]',
-              canCollapse && !isExpanded ? 'after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-16 after:bg-gradient-to-t after:from-background/95 after:to-transparent' : '',
+              'ease-[cubic-bezier(0.18,0.9,0.22,1)] relative overflow-hidden transition-[max-height] duration-300',
+              canCollapse && !isExpanded
+                ? 'after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-16 after:bg-gradient-to-t after:from-background/95 after:to-transparent'
+                : '',
             ].join(' ')}
             style={gridMaxHeight ? { maxHeight: `${gridMaxHeight}px` } : undefined}
           >
@@ -437,21 +461,15 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
               className="grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
             >
               {order.map((item, index) => (
-                <SortableFavoriteCard key={item.entryId} item={item} rank={index + 1} index={index} />
+                <SortableFavoriteCard
+                  key={item.entryId}
+                  item={item}
+                  rank={index + 1}
+                  index={index}
+                />
               ))}
             </div>
           </div>
-          {canCollapse ? (
-            <div className="mt-4 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setIsExpanded(prev => !prev)}
-                className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-4 py-1.5 text-xs font-medium text-foreground/90 transition-colors hover:bg-background"
-              >
-                {isExpanded ? 'Show less' : 'Show all'}
-              </button>
-            </div>
-          ) : null}
         </div>
         <DragOverlay
           dropAnimation={{

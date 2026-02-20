@@ -1,14 +1,4 @@
-import {
-  BookOpen,
-  Film,
-  Gamepad2,
-  Library,
-  Music,
-  Sparkles,
-  Tv,
-  type LucideIcon,
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
   buildTasteProfile,
@@ -16,6 +6,14 @@ import {
   type DashboardCategoryKey,
   type InsightTagBucket,
 } from '@/lib/dashboard/category-data';
+import DashboardSectionHeader from './DashboardSectionHeader';
+import {
+  DASH_BORDER,
+  DASH_RADIUS_CARD,
+  DASH_RADIUS_SECTION,
+  DASH_SURFACE_CARD,
+  DASH_SURFACE_SECTION,
+} from './dashboard-ui-tokens';
 
 const CATEGORY_LABELS: Record<DashboardCategoryKey, string> = {
   games: 'Games',
@@ -24,16 +22,6 @@ const CATEGORY_LABELS: Record<DashboardCategoryKey, string> = {
   movies: 'Movies',
   tv: 'TV',
   books: 'Books',
-};
-
-const CATEGORY_ICONS: Record<DashboardCategoryKey | 'music', LucideIcon> = {
-  games: Gamepad2,
-  anime: Sparkles,
-  manga: BookOpen,
-  movies: Film,
-  tv: Tv,
-  books: Library,
-  music: Music,
 };
 
 const BUCKET_LABELS: Record<InsightTagBucket | 'genre', string> = {
@@ -71,7 +59,6 @@ export default function CategoryTasteProfileCard({
   items,
 }: CategoryTasteProfileCardProps) {
   const tasteProfile = buildTasteProfile(items, category);
-  const Icon = CATEGORY_ICONS[category] ?? Sparkles;
   const categoryLabel = CATEGORY_LABELS[category] ?? 'Category';
   const profileBuckets: TasteProfileBarBucket[] =
     category === 'games'
@@ -112,20 +99,18 @@ export default function CategoryTasteProfileCard({
     .filter(bucket => (category === 'games' ? true : bucket.traits.length > 0));
 
   return (
-    <Card className="col-span-full w-full border-border/40 bg-card/75 shadow-[0_8px_24px_-24px_rgba(0,0,0,0.85)]">
-      <CardHeader className="space-y-1.5 border-b border-border/35 pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold tracking-tight">
-            {categoryLabel} Taste Profile
-          </CardTitle>
-          <Icon className="h-4 w-4 text-primary/90" />
-        </div>
-        <p className="text-xs text-muted-foreground/80">
-          Based on {tasteProfile.totalItems} completed + in-progress{' '}
-          {category === 'games' ? 'games' : 'items'}
-        </p>
+    <Card
+      className={`col-span-full w-full min-w-0 ${DASH_RADIUS_SECTION} ${DASH_BORDER} bg-muted/[0.055] shadow-none`}
+    >
+      <CardHeader className="pb-3">
+        <DashboardSectionHeader
+          eyebrow={`${categoryLabel} Taste Profile`}
+          title={`Based on ${tasteProfile.totalItems} completed + in-progress ${
+            category === 'games' ? 'games' : 'items'
+          }`}
+        />
       </CardHeader>
-      <CardContent className="space-y-5 pt-5">
+      <CardContent className="space-y-5 overflow-hidden pt-2">
         {visibleBuckets.length === 0 ? (
           <p className="text-sm text-muted-foreground">No data yet.</p>
         ) : (
@@ -137,7 +122,7 @@ export default function CategoryTasteProfileCard({
             {visibleBuckets.map(bucket => (
               <section
                 key={bucket.bucketKey}
-                className="space-y-3 rounded-xl border border-border/30 bg-muted/[0.07] p-3.5"
+                className={`min-w-0 space-y-3 ${DASH_RADIUS_CARD} ${DASH_BORDER} ${DASH_SURFACE_CARD} p-3.5 shadow-none`}
               >
                 <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
                   {BUCKET_LABELS[bucket.bucketKey]}
@@ -147,9 +132,9 @@ export default function CategoryTasteProfileCard({
                     <p className="text-xs text-muted-foreground/80">No data yet.</p>
                   ) : (
                     bucket.traits.map(trait => (
-                      <div key={`${bucket.bucketKey}-${trait.name}`} className="space-y-1.5">
+                      <div key={`${bucket.bucketKey}-${trait.name}`} className="min-w-0 space-y-1.5">
                         <div className="flex items-center justify-between gap-3 text-sm leading-tight">
-                          <span className="truncate text-foreground">{trait.name}</span>
+                          <span className="min-w-0 break-words text-foreground">{trait.name}</span>
                           <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
                             {trait.percentageLabel}
                           </span>

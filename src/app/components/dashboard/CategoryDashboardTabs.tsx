@@ -81,15 +81,15 @@ export default function CategoryDashboardTabs({
     <Tabs
       value={activeCategory}
       onValueChange={value => setActiveCategory(value as DashboardCategoryKey)}
-      className="space-y-8 md:space-y-10"
+      className="min-w-0 space-y-8 overflow-x-hidden md:space-y-10"
     >
-      <div className="pb-1 sm:flex sm:justify-center">
-        <TabsList className="inline-flex h-auto min-w-full items-center justify-start gap-1 rounded-xl border border-border/45 bg-card/70 p-1 supports-[backdrop-filter]:bg-card/65 sm:min-w-0 sm:flex-wrap sm:justify-center">
+      <div className="-mx-4 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:px-0 sm:flex sm:justify-center">
+        <TabsList className="inline-flex h-auto min-w-max items-center justify-start gap-1 rounded-2xl border border-black/10 bg-card/80 p-1 shadow-sm dark:border-white/10 sm:min-w-0 sm:flex-wrap sm:justify-center">
           {visibleCategories.map(category => (
             <TabsTrigger
               key={category}
               value={category}
-              className="h-9 px-3 text-xs uppercase tracking-[0.12em] sm:text-[11px]"
+              className="h-9 shrink-0 whitespace-nowrap rounded-xl border border-transparent px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75 transition-colors data-[state=active]:border-black/10 data-[state=active]:bg-card/90 data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:border-white/10"
             >
               {CATEGORY_TITLES[category]}
             </TabsTrigger>
@@ -97,38 +97,49 @@ export default function CategoryDashboardTabs({
         </TabsList>
       </div>
 
-      <div className="min-w-0 space-y-8">
+      <div className="min-w-0 space-y-8 md:space-y-10">
         {visibleCategories.map(category => (
-          <TabsContent key={category} value={category} className="mt-0 space-y-7 md:space-y-8">
-            <DashboardCategoryStats category={category} stats={resolveStatsForCategory(category)} />
-            <CategoryTopFive
-              category={category}
-              items={sections[category]?.topFive ?? []}
-              favorites={sections[category]?.favorites ?? []}
-            />
-            <MediaSuggestions
-              suggestions={sections[category]?.mediaSuggestions ?? []}
-              category={CATEGORY_TITLES[category]}
-            />
-            <CategorySuggestions
-              category={category}
-              items={sections[category]?.tasteProfileItems ?? []}
-            />
-            <CategoryInsightsGrid
-              category={category}
-              insights={
-                sections[category]?.insights ?? {
-                  statusCounts: { planned: 0, current: 0, completed: 0, dropped: 0 },
-                  completionRate: 0,
-                  completionNumerator: 0,
-                  completionDenominator: 0,
-                  updatedLast7Days: 0,
-                  updatedLast30Days: 0,
-                }
-              }
-              platformInsight={sections[category]?.platformInsight ?? null}
-            />
-            </TabsContent>
+          <TabsContent key={category} value={category} className="mt-0">
+            <div className="flex flex-col">
+              <DashboardCategoryStats category={category} stats={resolveStatsForCategory(category)} />
+              <div className="mt-9 md:mt-11">
+                <CategoryTopFive
+                  category={category}
+                  items={sections[category]?.topFive ?? []}
+                  favorites={sections[category]?.favorites ?? []}
+                />
+              </div>
+              <div className="mt-9 md:mt-11">
+                <CategorySuggestions
+                  category={category}
+                  items={sections[category]?.tasteProfileItems ?? []}
+                />
+              </div>
+              <div className="mt-11 md:mt-14">
+                <MediaSuggestions
+                  suggestions={sections[category]?.mediaSuggestions ?? []}
+                  category={CATEGORY_TITLES[category]}
+                />
+              </div>
+              <div className="mt-11 md:mt-14">
+                <CategoryInsightsGrid
+                  category={category}
+                  insights={
+                    sections[category]?.insights ?? {
+                      statusCounts: { planned: 0, current: 0, completed: 0, dropped: 0 },
+                      completionRate: 0,
+                      completionNumerator: 0,
+                      completionDenominator: 0,
+                      updatedLast7Days: 0,
+                      updatedLast30Days: 0,
+                    }
+                  }
+                  rhythmEntries={sections[category]?.rhythmEntries ?? []}
+                  platformInsight={sections[category]?.platformInsight ?? null}
+                />
+              </div>
+            </div>
+          </TabsContent>
         ))}
       </div>
     </Tabs>

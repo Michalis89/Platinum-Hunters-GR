@@ -2,6 +2,12 @@
 
 import { CheckCircle2, Gamepad2, Heart, ListTodo, Play, Sparkles, Tv, XCircle } from 'lucide-react';
 import type { DashboardCategoryKey } from '@/lib/dashboard/category-data';
+import {
+  DASH_RADIUS_CARD,
+  DASH_SURFACE_CARD,
+  DASH_SURFACE_CARD_ELEVATED,
+} from './dashboard-ui-tokens';
+import DashboardSectionHeader from './DashboardSectionHeader';
 
 type DashboardCategoryStatsData = {
   total: number;
@@ -19,12 +25,12 @@ type DashboardCategoryStatsProps = {
 };
 
 const TITLES: Record<DashboardCategoryKey, { eyebrow: string; title: string }> = {
-  games: { eyebrow: 'Gaming Stats', title: 'Your progress in games' },
-  anime: { eyebrow: 'Anime Stats', title: 'Your progress in anime' },
-  manga: { eyebrow: 'Manga Stats', title: 'Your progress in manga' },
-  movies: { eyebrow: 'Movies Stats', title: 'Your progress in movies' },
-  tv: { eyebrow: 'TV Stats', title: 'Your progress in series' },
-  books: { eyebrow: 'Books Stats', title: 'Your progress in books' },
+  games: { eyebrow: 'Your Games', title: 'Your game progress' },
+  anime: { eyebrow: 'Your Anime', title: 'Your anime progress' },
+  manga: { eyebrow: 'Your Manga', title: 'Your manga progress' },
+  movies: { eyebrow: 'Your Movies', title: 'Your movie progress' },
+  tv: { eyebrow: 'Your Series', title: 'Your series progress' },
+  books: { eyebrow: 'Your Books', title: 'Your reading progress' },
 };
 
 const CATEGORY_ICONS = {
@@ -81,10 +87,10 @@ export default function DashboardCategoryStats({ category, stats }: DashboardCat
     return (
       <article
         key={card.key}
-        className={`rounded-xl border p-4 text-center ${
+        className={`${DASH_RADIUS_CARD} min-w-0 border border-black/[0.06] p-5 text-center dark:border-white/[0.06] ${
           isPrimary
-            ? 'border-border/45 bg-card/90 shadow-[0_8px_26px_-22px_rgba(0,0,0,0.85)] md:p-5'
-            : 'border-border/35 bg-card/70'
+            ? `${DASH_SURFACE_CARD_ELEVATED} shadow-[0_10px_30px_-24px_rgba(0,0,0,0.75)]`
+            : `${DASH_SURFACE_CARD} shadow-none`
         }`}
       >
         <div
@@ -115,17 +121,20 @@ export default function DashboardCategoryStats({ category, stats }: DashboardCat
 
   return (
     <section className="space-y-6">
-      <div className="space-y-1.5 text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground/85">
-          {labels.eyebrow}
-        </p>
-        <h3 className="text-2xl font-semibold tracking-tight">{labels.title}</h3>
-      </div>
+      <DashboardSectionHeader
+        eyebrow={labels.eyebrow}
+        title={labels.title}
+        rightSlot={
+          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80">
+            {stats.total} entries
+          </span>
+        }
+      />
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+      <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
         {primaryStats.map(renderCard)}
       </div>
-      <div className="grid grid-cols-2 gap-3 pt-1 md:grid-cols-4 md:gap-3.5">
+      <div className="grid min-w-0 grid-cols-2 gap-3 pt-1 md:grid-cols-4 md:gap-3.5">
         {secondaryStats.map(renderCard)}
       </div>
     </section>

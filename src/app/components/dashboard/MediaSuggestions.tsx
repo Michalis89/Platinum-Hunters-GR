@@ -2,11 +2,19 @@
 
 import Link from 'next/link';
 import { CoverThumbImage, IMAGE_SIZES } from '@/components/ui/cover-image';
-import { Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import type { MediaSuggestion } from '@/lib/dashboard/category-data';
 import { DEFAULT_COVER } from '@/lib/constants/messages';
+import DashboardSectionHeader from './DashboardSectionHeader';
+import {
+  DASH_BORDER,
+  DASH_RADIUS_CARD,
+  DASH_PADDING_LARGE,
+  DASH_PADDING_STANDARD,
+  DASH_RADIUS_SECTION,
+  DASH_SURFACE_SECTION,
+} from './dashboard-ui-tokens';
 
 type MediaSuggestionsProps = {
   suggestions: MediaSuggestion[];
@@ -14,46 +22,70 @@ type MediaSuggestionsProps = {
 };
 
 function SuggestionCard({ suggestion }: { suggestion: MediaSuggestion }) {
-  return (
-    <Card className="relative min-h-[170px] overflow-hidden border-border/45 bg-card/85 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.85)]">
+  const href = suggestion.slug ? `/media/${suggestion.category}/${suggestion.slug}` : null;
+
+  const cardContent = (
+    <>
       <div className="absolute inset-0">
         <CoverThumbImage
           src={suggestion.cover || DEFAULT_COVER}
           alt={suggestion.title}
-          className="object-cover"
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           sizes={IMAGE_SIZES.grid3}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/46 to-white/10 dark:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/34 via-transparent to-white/10 dark:hidden" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white/80 via-white/42 to-transparent dark:hidden" />
+        <div className="absolute inset-0 hidden bg-gradient-to-t from-black/90 via-black/46 to-black/10 dark:block" />
+        <div className="absolute inset-0 hidden bg-gradient-to-r from-black/34 via-transparent to-black/10 dark:block" />
+        <div className="absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-black/80 via-black/42 to-transparent dark:block" />
       </div>
 
-      <div className="relative z-10 flex h-full flex-col justify-end p-3 sm:p-4">
-        <div className="space-y-1.5">
-          <p className="line-clamp-2 text-sm font-semibold leading-tight text-white sm:text-base">
-            {suggestion.title}
-          </p>
-          <p className="line-clamp-2 text-xs text-white/85">{suggestion.reason}</p>
-        </div>
-
-        <div className="mt-3 flex items-end justify-between gap-2">
-          <div className="flex flex-col gap-0.5">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-white/75">Confidence</p>
-            <p className="text-xs font-semibold text-white sm:text-sm">
-              {Math.round(suggestion.confidence * 100)}%
+        <div className="relative z-10 flex h-full min-w-0 flex-col justify-end p-3.5 sm:p-4">
+          <div className="space-y-2">
+            <p className="min-w-0 text-balance break-words text-base font-semibold leading-tight text-black dark:text-white dark:drop-shadow-[0_10px_24px_rgba(0,0,0,0.9)] sm:text-[18px]">
+              {suggestion.title}
+            </p>
+            <p className="min-w-0 break-words text-xs leading-relaxed text-black/82 dark:text-white/84 dark:drop-shadow-[0_6px_18px_rgba(0,0,0,0.8)] sm:text-[13px]">
+              {suggestion.reason}
             </p>
           </div>
-          {suggestion.slug && (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-8 border-white/30 bg-white/15 px-2.5 text-xs font-semibold text-white backdrop-blur-sm hover:bg-white/25"
-              asChild
-            >
-              <Link href={`/media/${suggestion.category}/${suggestion.slug}`}>View details</Link>
-            </Button>
+
+          <div className="mt-3.5 flex items-end justify-between gap-3">
+            <div className="min-w-0 space-y-0.5">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-black/68 dark:text-white/74 dark:drop-shadow-[0_6px_18px_rgba(0,0,0,0.8)]">Confidence</p>
+              <p className="text-xs font-semibold text-black dark:text-white/95 dark:drop-shadow-[0_8px_20px_rgba(0,0,0,0.88)] sm:text-sm">
+                {Math.round(suggestion.confidence * 100)}%
+              </p>
+            </div>
+          {href && (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-black/80 dark:text-white/92 dark:drop-shadow-[0_8px_20px_rgba(0,0,0,0.88)] transition-transform duration-200 group-hover:translate-x-0.5 group-focus-within:translate-x-0.5">
+              View details
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </span>
           )}
         </div>
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Card
+        className={`group relative min-h-[184px] min-w-0 overflow-hidden bg-card/[0.98] shadow-[0_14px_34px_-26px_rgba(255,255,255,0.96)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-28px_rgba(255,255,255,1)] focus-within:ring-2 focus-within:ring-primary/70 focus-within:ring-offset-2 focus-within:ring-offset-background dark:bg-card/90 dark:shadow-[0_18px_34px_-26px_rgba(0,0,0,0.82)] dark:hover:shadow-[0_18px_34px_-26px_rgba(0,0,0,0.82)] ${DASH_RADIUS_CARD} ${DASH_BORDER}`}
+      >
+        <Link href={href} className="block h-full focus-visible:outline-none">
+          {cardContent}
+        </Link>
+      </Card>
+    );
+  }
+
+  return (
+    <Card
+      className={`group relative min-h-[184px] min-w-0 overflow-hidden bg-card/[0.98] shadow-[0_14px_34px_-26px_rgba(255,255,255,0.96)] dark:bg-card/90 dark:shadow-[0_18px_34px_-26px_rgba(0,0,0,0.82)] ${DASH_RADIUS_CARD} ${DASH_BORDER}`}
+    >
+      {cardContent}
     </Card>
   );
 }
@@ -68,7 +100,7 @@ function SuggestionColumn({
   emptyLabel: string;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3.5">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/90">
           {title}
@@ -81,7 +113,7 @@ function SuggestionColumn({
           {emptyLabel}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
           {items.map(suggestion => (
             <SuggestionCard
               key={`media-suggestion-${suggestion.source}-${suggestion.mediaId}`}
@@ -102,11 +134,9 @@ function EmptyState({ category }: { category: string }) {
           <Sparkles className="h-6 w-6 text-muted-foreground" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-base font-semibold text-foreground">
-            Not enough data yet for {category}
-          </h3>
+          <h3 className="text-base font-semibold text-foreground">Not enough activity yet for {category}</h3>
           <p className="text-sm text-muted-foreground">
-            We need more data to show personalized recommendations based on your preferences.
+            Add a few more titles and this space will start to fill in.
           </p>
         </div>
       </div>
@@ -128,18 +158,19 @@ function generateSuggestionsLabel(suggestions: MediaSuggestion[]): string {
   }
 
   if (backlogCount === 0) {
-    return dbCount === 1 ? '1 strong pick for you' : `${dbCount} strong picks for you`;
+    return dbCount === 1 ? '1 possible next title' : `${dbCount} possible next titles`;
   }
 
   if (dbCount === 0) {
-    return backlogCount === 1 ? '1 backlog pick' : `${backlogCount} backlog picks`;
+    return backlogCount === 1 ? '1 from your backlog' : `${backlogCount} from your backlog`;
   }
 
   // Both exist
-  return `${backlogCount} backlog + ${dbCount} database picks`;
+  return `${backlogCount} from backlog + ${dbCount} possible next`;
 }
 
 export default function MediaSuggestions({ suggestions, category }: MediaSuggestionsProps) {
+  const categoryLabelForSentence = category === 'TV' ? category : category.toLowerCase();
   const backlogSuggestions = suggestions.filter(s => s.source === 'backlog').slice(0, 4);
   const databaseSuggestions = suggestions
     .filter(s => s.source === 'database' || s.source === 'database-fallback')
@@ -148,34 +179,34 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
   const suggestionsLabel = generateSuggestionsLabel(visibleSuggestions);
 
   return (
-    <section className="space-y-5 rounded-2xl border border-border/40 bg-muted/[0.08] p-5 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <h3 className="text-base font-semibold">Recommended for you</h3>
-          <span className="rounded-full border border-border/50 bg-card/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/90">
-            Personalized
-          </span>
-        </div>
-        {visibleSuggestions.length > 0 && suggestionsLabel && (
-          <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
-            {suggestionsLabel}
-          </span>
-        )}
-      </div>
+    <section
+      className={`space-y-5 ${DASH_RADIUS_SECTION} ${DASH_BORDER} bg-muted/[0.12] ${DASH_PADDING_STANDARD} ${DASH_PADDING_LARGE} md:space-y-6`}
+    >
+      <DashboardSectionHeader
+        eyebrow="Why these fit you"
+        title={`Your next ${categoryLabelForSentence}`}
+        rightSlot={
+          visibleSuggestions.length > 0 && suggestionsLabel ? (
+            <span className="text-xs uppercase tracking-[0.16em] text-muted-foreground/85">
+              {suggestionsLabel}
+            </span>
+          ) : undefined
+        }
+      />
 
       {visibleSuggestions.length === 0 ? (
         <EmptyState category={category} />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 md:gap-5">
           <SuggestionColumn
-            title="Backlog Picks"
+            title="From your backlog"
             items={backlogSuggestions}
-            emptyLabel="No backlog suggestions right now."
+            emptyLabel="Nothing to show from your backlog right now."
           />
           <SuggestionColumn
-            title="Database Picks"
+            title="Possible next titles"
             items={databaseSuggestions}
-            emptyLabel="No database suggestions right now."
+            emptyLabel="No additional titles right now."
           />
         </div>
       )}

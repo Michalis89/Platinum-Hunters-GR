@@ -91,19 +91,18 @@ type MetaState = {
   filters: FilterOptions;
 };
 
-type EditingState = Partial<
-  Pick<
-    MediaRow,
-    | 'source'
-    | 'title_english'
-    | 'description'
-    | 'status'
-    | 'season_year'
-    | 'release_date'
-    | 'igdb_id'
-    | 'igdb_slug'
-  >
->;
+type EditingState = {
+  source?: MediaRow['source'];
+  title_english?: MediaRow['title_english'];
+  description?: MediaRow['description'];
+  status?: MediaRow['status'];
+  season_year?: MediaRow['season_year'];
+  release_date?: MediaRow['release_date'];
+  igdb_id?: MediaRow['igdb_id'];
+  igdb_slug?: MediaRow['igdb_slug'];
+  platforms?: string[];
+  genres?: string[];
+};
 
 type AdminRowUpdate = EditingState & {
   developer?: string | null;
@@ -223,6 +222,17 @@ function summarizeFacet(values: string[] | null | undefined): string {
   const preview = list.slice(0, 3);
   const overflow = list.length - preview.length;
   return overflow > 0 ? `${preview.join(', ')} +${overflow}` : preview.join(', ');
+}
+
+function parseListInput(value: string): string[] {
+  return Array.from(
+    new Set(
+      value
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean),
+    ),
+  );
 }
 
 function isRecentDate(value: string | null | undefined): boolean {
@@ -369,6 +379,8 @@ export default function AdminMediaCurationTable() {
       release_date: row.release_date,
       igdb_id: row.igdb_id,
       igdb_slug: row.igdb_slug,
+      platforms: row.platforms ?? [],
+      genres: row.genres ?? [],
     });
   };
 
@@ -1252,10 +1264,40 @@ export default function AdminMediaCurationTable() {
                       </TableCell>
                       <TableCell>{row.developer ?? '-'}</TableCell>
                       <TableCell className="min-w-[220px]">
-                        {(row.platforms ?? []).length ? (row.platforms ?? []).join(', ') : '-'}
+                        {isEditing ? (
+                          <Input
+                            value={(editingState.platforms ?? []).join(', ')}
+                            onChange={event =>
+                              setEditingState(prev => ({
+                                ...prev,
+                                platforms: parseListInput(event.target.value),
+                              }))
+                            }
+                            placeholder="PC, PlayStation 5, Xbox Series X|S"
+                          />
+                        ) : (row.platforms ?? []).length ? (
+                          (row.platforms ?? []).join(', ')
+                        ) : (
+                          '-'
+                        )}
                       </TableCell>
                       <TableCell className="min-w-[220px]">
-                        {(row.genres ?? []).length ? (row.genres ?? []).join(', ') : '-'}
+                        {isEditing ? (
+                          <Input
+                            value={(editingState.genres ?? []).join(', ')}
+                            onChange={event =>
+                              setEditingState(prev => ({
+                                ...prev,
+                                genres: parseListInput(event.target.value),
+                              }))
+                            }
+                            placeholder="Action, RPG, Adventure"
+                          />
+                        ) : (row.genres ?? []).length ? (
+                          (row.genres ?? []).join(', ')
+                        ) : (
+                          '-'
+                        )}
                       </TableCell>
                       <TableCell className="max-w-[240px]">
                         {summarizeFacet(row.igdb_themes)}

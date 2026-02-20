@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { PersonalStats } from './types';
+import { DASHBOARD_TAB_CATEGORIES } from '@/lib/dashboard/category-data';
 import type {
   CategoryDashboardSection,
   DashboardCategoryKey,
@@ -11,6 +12,9 @@ import type {
 import type { ContinueData } from '@/lib/dashboard/server-data';
 import { HomeDashboardHeader, ContinueHero } from '@/app/components/home';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
+import UnifiedOverviewRow from '@/app/components/dashboard/UnifiedOverviewRow';
+import type { UnifiedOverviewCategory } from '@/lib/dashboard/unified-overview';
+import type { UnifiedOverviewInput } from '@/lib/dashboard/unified-overview';
 
 type HomeDashboardContentProps = {
   username: string;
@@ -64,7 +68,7 @@ export default function HomeDashboardContent({
         </section>
       )}
 
-      <section className="pt-1 md:pt-2">
+      <section className="pt-2 md:pt-3">
         <ContinueHero fallbackData={continueData} />
       </section>
 
@@ -85,16 +89,61 @@ type HomeDashboardSectionsProps = {
   stats: PersonalStats;
 };
 
+function buildUnifiedOverviewCategories(
+  mediaCategories: DashboardCategoryKey[],
+  categorySections: Record<DashboardCategoryKey, CategoryDashboardSection>,
+  stats: PersonalStats,
+): UnifiedOverviewCategory[] {
+  const resolveStatsForCategory = (category: DashboardCategoryKey) => {
+    if (category === 'games') {
+      return stats.games;
+    }
+    if (category === 'anime') {
+      return stats.anime;
+    }
+    if (category === 'manga') {
+      return stats.manga;
+    }
+    if (category === 'movies') {
+      return stats.movies;
+    }
+    if (category === 'tv') {
+      return stats.tv;
+    }
+    return stats.books;
+  };
+
+  return DASHBOARD_TAB_CATEGORIES.map(category => {
+    const categoryStats = resolveStatsForCategory(category);
+    const recentlyFinished = Math.max(0, categorySections[category]?.insights?.updatedLast7Days ?? 0);
+
+    return {
+      key: category,
+      enabled: mediaCategories.includes(category),
+      inProgress: categoryStats.in_progress ?? 0,
+      completed: categoryStats.completed ?? 0,
+      recentlyFinished,
+    };
+  });
+}
+
 export function HomeDashboardSections({
   mediaCategories,
   categorySections,
   stats,
 }: HomeDashboardSectionsProps) {
+  const overviewData: UnifiedOverviewInput = {
+    categories: buildUnifiedOverviewCategories(mediaCategories, categorySections, stats),
+    totalMinutes: Math.max(0, (stats.total_hours ?? 0) * 60),
+    hasFullTimeCoverage: true,
+  };
+
   return (
     <>
       {mediaCategories.length > 0 && (
-        <section className="mt-12 md:mt-14">
+        <section className="mt-10 md:mt-12">
           <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-6">
+            <UnifiedOverviewRow data={overviewData} />
             <CategoryDashboardTabs
               enabledCategories={mediaCategories}
               sections={categorySections}

@@ -27,6 +27,32 @@ interface LibraryEntryRowProps {
   onDelete: (entry: MediaEntry) => void;
 }
 
+const ANIME_PLATFORM_LABELS: Record<string, string> = {
+  crunchyroll: 'Crunchyroll',
+  netflix: 'Netflix',
+  prime_video: 'Amazon Prime Video',
+  disney_plus: 'Disney+',
+  tv: 'TV Broadcast',
+  bluray: 'Blu-ray / DVD',
+  youtube: 'YouTube',
+  other: 'Other',
+};
+const READING_FORMAT_LABELS: Record<string, string> = {
+  physical: 'Physical',
+  digital: 'Digital',
+};
+const WATCH_PLATFORM_LABELS: Record<string, string> = {
+  netflix: 'Netflix',
+  prime_video: 'Amazon Prime Video',
+  disney_plus: 'Disney+',
+  hbo_max: 'HBO Max',
+  apple_tv: 'Apple TV+',
+  tv: 'TV Broadcast',
+  cinema: 'Cinema',
+  bluray: 'Blu-ray / DVD',
+  other: 'Other',
+};
+
 const toMediaSlug = (value: string) =>
   value
     .toLowerCase()
@@ -45,6 +71,19 @@ function LibraryEntryRow({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const config = CATEGORY_CONFIG[category];
   const total = getTotalCount(entry, category);
+  const isReadingCategory = category === 'manga' || category === 'books';
+  const isVisualWatchCategory = category === 'movies' || category === 'tv';
+  const displayPlatform =
+    category === 'anime'
+      ? ANIME_PLATFORM_LABELS[entry.selectedPlatform?.trim().toLowerCase() ?? ''] ??
+        entry.selectedPlatform
+      : isVisualWatchCategory
+        ? WATCH_PLATFORM_LABELS[entry.selectedPlatform?.trim().toLowerCase() ?? ''] ??
+          entry.selectedPlatform
+      : isReadingCategory
+        ? READING_FORMAT_LABELS[entry.selectedPlatform?.trim().toLowerCase() ?? ''] ??
+          entry.selectedPlatform
+        : entry.selectedPlatform;
 
   const statusLabel =
     entry.status === 'current'
@@ -115,9 +154,10 @@ function LibraryEntryRow({
               {entry.subtitle}
               {entry.year ? ` - ${entry.year}` : ''}
             </p>
-            {category === 'games' && entry.selectedPlatform ? (
+            {category === 'anime' || category === 'games' || isReadingCategory || isVisualWatchCategory ? (
               <p className="text-xs font-medium text-muted-foreground">
-                Platform: {entry.selectedPlatform}
+                {isReadingCategory ? 'Reading format' : isVisualWatchCategory ? 'Watched on' : 'Platform'}:{' '}
+                {displayPlatform || '-'}
               </p>
             ) : null}
             <p className="line-clamp-1 text-xs text-muted-foreground">

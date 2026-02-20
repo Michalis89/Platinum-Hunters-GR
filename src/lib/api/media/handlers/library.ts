@@ -134,7 +134,7 @@ export async function handleLibraryPatch(
     // Fetch existing entry for activity comparison
     const { data: existingEntry } = await supabase
       .from('user_media_entries')
-      .select('status,is_favorite')
+      .select('status,is_favorite,progress,selected_platform,priority,score,notes')
       .eq('user_id', session.user.id)
       .eq('media_id', body.mediaId)
       .maybeSingle();
@@ -143,24 +143,37 @@ export async function handleLibraryPatch(
       return NextResponse.json({ error: 'Platform selection is required for games' }, { status: 400 });
     }
 
+    const existingStatus =
+      typeof existingEntry?.status === 'string' ? (existingEntry.status as string) : null;
+    const existingProgress =
+      typeof existingEntry?.progress === 'number' && Number.isFinite(existingEntry.progress)
+        ? existingEntry.progress
+        : null;
+    const nextStatus =
+      typeof body.status === 'string' ? body.status : (existingStatus ?? 'planned');
+    const nextProgress =
+      typeof body.progress === 'number' && Number.isFinite(body.progress) ? body.progress : null;
+    const statusChanged = body.status !== undefined && body.status !== existingStatus;
+    const progressChanged = body.progress !== undefined && body.progress !== existingProgress;
+    const shouldTouchUpdatedAt = !existingEntry || statusChanged || progressChanged;
+
     // Upsert entry
+    const upsertPayload: Database['public']['Tables']['user_media_entries']['Insert'] = {
+      user_id: session.user.id,
+      media_id: body.mediaId,
+      status: nextStatus as Database['public']['Tables']['user_media_entries']['Insert']['status'],
+      is_favorite: updateData.is_favorite ?? existingEntry?.is_favorite ?? false,
+      selected_platform: updateData.selected_platform ?? existingEntry?.selected_platform ?? null,
+      priority: updateData.priority ?? existingEntry?.priority ?? null,
+      score: updateData.score ?? existingEntry?.score ?? null,
+      progress: updateData.progress ?? existingEntry?.progress ?? null,
+      notes: updateData.notes ?? existingEntry?.notes ?? null,
+      ...(shouldTouchUpdatedAt ? { updated_at: updatedAt } : {}),
+    };
+
     const { data, error } = await supabase
       .from('user_media_entries')
-      .upsert(
-        {
-          user_id: session.user.id,
-          media_id: body.mediaId,
-          status: body.status ?? (existingEntry?.status as string) ?? 'planned',
-          is_favorite: updateData.is_favorite,
-          selected_platform: updateData.selected_platform,
-          priority: updateData.priority,
-          score: updateData.score,
-          progress: updateData.progress,
-          notes: updateData.notes,
-          updated_at: updatedAt,
-        },
-        { onConflict: 'user_id,media_id' },
-      )
+      .upsert(upsertPayload, { onConflict: 'user_id,media_id' })
       .select('*')
       .single();
 

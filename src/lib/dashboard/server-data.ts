@@ -523,6 +523,7 @@ export async function fetchContinueData(userId: string): Promise<ContinueData> {
       )
       .eq('user_id', userId)
       .eq('status', 'current')
+      .gt('progress', 0)
       .in('media_items.category', slideCategories)
       .order('updated_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false, nullsFirst: false })

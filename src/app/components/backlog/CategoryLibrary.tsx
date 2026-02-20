@@ -102,7 +102,22 @@ type SelectedEntryDetails = {
 const shouldRevalidateContinueHero = (
   previousStatus: MediaStatus | null | undefined,
   nextStatus: MediaStatus | null | undefined,
-) => previousStatus === 'current' || nextStatus === 'current';
+  previousProgress: number | null | undefined,
+  nextProgress: number | null | undefined,
+) => {
+  if (previousStatus !== nextStatus) {
+    return previousStatus === 'current' || nextStatus === 'current';
+  }
+
+  if (nextStatus !== 'current') {
+    return false;
+  }
+
+  const prev = typeof previousProgress === 'number' && Number.isFinite(previousProgress) ? previousProgress : null;
+  const next = typeof nextProgress === 'number' && Number.isFinite(nextProgress) ? nextProgress : null;
+
+  return next !== null && next > 0 && prev !== next;
+};
 
 type CategoryLibraryAction =
   | { type: 'patch'; payload: Partial<CategoryLibraryState> }
@@ -632,6 +647,13 @@ export default function CategoryLibrary({
     const previousStatus = selectedEntry.status;
     const isAddingEntry = !selectedEntry.entryId;
     const normalizedSelectedPlatform = editState.selectedPlatform.trim();
+    const shouldPersistPlatform =
+      category === 'anime' ||
+      category === 'games' ||
+      category === 'manga' ||
+      category === 'books' ||
+      category === 'movies' ||
+      category === 'tv';
 
     if (category === 'games' && isAddingEntry && !normalizedSelectedPlatform) {
       showAlert({
@@ -651,6 +673,22 @@ export default function CategoryLibrary({
     await yieldToMain();
 
     if (supportsExternal && selectedEntry.mediaId) {
+      const previousEntries = libraryEntries;
+      const optimisticEntries = libraryEntries.map(entry =>
+        entry.id === selectedEntry.id
+          ? {
+              ...entry,
+              status: finalStatus,
+              isFavorite: nextFavorite,
+              selectedPlatform: shouldPersistPlatform ? normalizedSelectedPlatform || undefined : undefined,
+              progress: nextProgressValue ?? undefined,
+              score: editState.score || undefined,
+              notes: editState.notes || undefined,
+            }
+          : entry,
+      );
+      dispatch({ type: 'patch', payload: { libraryEntries: optimisticEntries } });
+
       try {
         if (!apiBase) {
           throw new Error('Missing API base');
@@ -662,8 +700,7 @@ export default function CategoryLibrary({
             mediaId: selectedEntry.mediaId,
             status: finalStatus,
             is_favorite: nextFavorite,
-            selected_platform:
-              category === 'games' ? normalizedSelectedPlatform || null : undefined,
+            selected_platform: shouldPersistPlatform ? normalizedSelectedPlatform || null : undefined,
             progress: nextProgressValue,
             score: nextScore,
             notes: editState.notes || null,
@@ -673,11 +710,15 @@ export default function CategoryLibrary({
           throw new Error('Failed to update entry');
         }
 
-        // Defer expensive operations
         await yieldToMain();
-        await loadLibraryEntries();
-        await yieldToMain();
-        if (shouldRevalidateContinueHero(previousStatus, finalStatus)) {
+        if (
+          shouldRevalidateContinueHero(
+            previousStatus,
+            finalStatus,
+            selectedEntry.progress ?? null,
+            nextProgressValue,
+          )
+        ) {
           await mutate('/api/user/continue');
         }
 
@@ -687,6 +728,7 @@ export default function CategoryLibrary({
           message: 'Changes saved.',
         });
       } catch (error) {
+        dispatch({ type: 'patch', payload: { libraryEntries: previousEntries } });
         console.warn('Update entry failed:', error);
         showAlert({
           type: 'error',
@@ -707,8 +749,7 @@ export default function CategoryLibrary({
             payload: selectedEntry.payload,
             status: finalStatus,
             is_favorite: nextFavorite,
-            selected_platform:
-              category === 'games' ? normalizedSelectedPlatform || null : undefined,
+            selected_platform: shouldPersistPlatform ? normalizedSelectedPlatform || null : undefined,
             progress: nextProgressValue ?? undefined,
             score: nextScore ?? undefined,
             notes: editState.notes || null,
@@ -717,12 +758,37 @@ export default function CategoryLibrary({
         if (!response.ok) {
           throw new Error('Failed to add entry');
         }
+        const addData = (await response.json()) as { mediaId?: number };
+        const createdMediaId = addData.mediaId;
+
+        if (typeof createdMediaId === 'number' && Number.isFinite(createdMediaId)) {
+          dispatch({
+            type: 'patch',
+            payload: {
+              createResults: createResults.map(result => {
+                const sameResult =
+                  result.id === selectedEntry.id ||
+                  (result.externalId !== undefined &&
+                    selectedEntry.externalId !== undefined &&
+                    result.externalId === selectedEntry.externalId);
+                if (!sameResult) {
+                  return result;
+                }
+                return {
+                  ...result,
+                  mediaId: createdMediaId,
+                  source: 'local',
+                };
+              }),
+            },
+          });
+        }
 
         // Defer expensive operations
         await yieldToMain();
         await loadLibraryEntries();
         await yieldToMain();
-        if (shouldRevalidateContinueHero(undefined, finalStatus)) {
+        if (shouldRevalidateContinueHero(undefined, finalStatus, null, nextProgressValue)) {
           await mutate('/api/user/continue');
         }
 
@@ -747,9 +813,10 @@ export default function CategoryLibrary({
             entry.id === selectedEntry.id
               ? {
                   ...entry,
-                  status: nextStatus,
+                  status: finalStatus,
                   isFavorite: nextFavorite,
-                  selectedPlatform: editState.selectedPlatform || undefined,
+                  selectedPlatform:
+                    shouldPersistPlatform ? normalizedSelectedPlatform || undefined : undefined,
                   progress: nextProgressValue ?? undefined,
                   score: editState.score || undefined,
                   notes: editState.notes || undefined,
@@ -811,7 +878,7 @@ export default function CategoryLibrary({
             throw new Error('Failed to delete entry');
           }
           await loadLibraryEntries();
-          if (shouldRevalidateContinueHero(entry.status, undefined)) {
+          if (entry.status === 'current') {
             await mutate('/api/user/continue');
           }
           clearSelection();
