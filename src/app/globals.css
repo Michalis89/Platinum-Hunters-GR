@@ -381,6 +381,30 @@
       0 0 0 2px hsl(var(--ring) / 0.25),
       0 0 0 4px hsl(var(--background) / 0.95);
   }
+
+  /* Ensure code blocks never inherit underline/decoration marks from rich text content */
+  .ProseMirror pre,
+  .ProseMirror pre *,
+  .article-content pre,
+  .article-content pre * {
+    text-decoration: none !important;
+  }
+
+  .ProseMirror pre *,
+  .article-content pre * {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+  }
+
+  .ProseMirror pre u,
+  .ProseMirror pre ins,
+  .article-content pre u,
+  .article-content pre ins {
+    text-decoration: none !important;
+    border-bottom: 0 !important;
+  }
 }
 
 /* =============================================================================

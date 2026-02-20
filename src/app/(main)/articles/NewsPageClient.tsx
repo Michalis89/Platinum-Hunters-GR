@@ -70,11 +70,11 @@ const ArticleCard = memo(function ArticleCard({
               <FileText size={42} className="text-muted-foreground" />
             </div>
           )}
-          <div className="absolute left-3 top-3 flex items-center gap-2">
-            <span className="px-3 py-1 text-[11px] font-semibold text-foreground">
+          <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2">
+            <span className="rounded-full border border-white/20 bg-black/65 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
               {CATEGORY_LABELS[article.category] ?? article.category}
             </span>
-            <span className="px-3 py-1 text-[11px] font-semibold text-foreground">
+            <span className="rounded-full border border-white/20 bg-black/65 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
               {TOPIC_LABELS[article.topic]}
             </span>
           </div>

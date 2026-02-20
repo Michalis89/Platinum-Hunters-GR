@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 type FAQItem = {
   question: string;
@@ -43,12 +47,6 @@ const faqItems: FAQItem[] = [
 ];
 
 export function AboutFAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const toggleFAQ = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
   return (
     <section className="px-4 py-20 md:px-6 md:py-28">
       <div className="mx-auto max-w-3xl">
@@ -62,38 +60,26 @@ export function AboutFAQ() {
           </p>
         </div>
 
-        <div className="space-y-3">
-          {faqItems.map((item, index) => (
-            <div
-              key={index}
-              className="rounded-xl border border-border bg-card transition-colors hover:border-primary/30"
+        <Accordion type="single" collapsible className="space-y-3">
+          {faqItems.map((item, i) => (
+            <AccordionItem
+              key={i}
+              value={`item-${i}`}
+              className="rounded-xl border border-border bg-card px-0 transition-colors hover:border-primary/30"
             >
-              <Button
-                onClick={() => toggleFAQ(index)}
-                className="flex w-full items-center justify-between gap-4 p-5 text-left"
-                aria-expanded={openIndex === index}
-              >
-                <span className="font-medium text-foreground">{item.question}</span>
-                <ChevronDown
-                  className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 ${
-                    openIndex === index ? 'rotate-180' : ''
-                  }`}
-                />
-              </Button>
-              <div
-                className={`grid transition-all duration-200 ease-in-out ${
-                  openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                }`}
-              >
-                <div className="">
-                  <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">
-                    {item.answer}
-                  </p>
+              <AccordionTrigger className="px-5 py-5 text-left no-underline hover:no-underline [&>svg]:hidden">
+                <div className="flex w-full items-center justify-between gap-4">
+                  <span className="font-medium text-foreground">{item.question}</span>
+                  <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
                 </div>
-              </div>
-            </div>
+              </AccordionTrigger>
+
+              <AccordionContent className="px-5 pb-5 pt-0 text-sm leading-relaxed text-muted-foreground">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </section>
   );

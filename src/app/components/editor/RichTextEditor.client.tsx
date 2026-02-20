@@ -63,7 +63,7 @@ const ToolbarButton = ({
     size="icon"
     iconOnly
     title={title}
-    className="h-12 w-12 rounded-[12px] border border-border bg-card text-foreground shadow-none transition-all hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:size-[38px]"
+    className="h-10 w-10 rounded-[10px] border border-border bg-card text-foreground shadow-none transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:size-[18px]"
   >
     {children}
   </Button>
@@ -183,14 +183,14 @@ export default function RichTextEditor({
             disabled={!editor.can().undo()}
             title="Undo"
           >
-            <Undo size={30} />
+            <Undo size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
             title="Redo"
           >
-            <Redo size={30} />
+            <Redo size={18} />
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -200,21 +200,21 @@ export default function RichTextEditor({
             isActive={editor.isActive('heading', { level: 1 })}
             title="Heading 1"
           >
-            <Heading1 size={30} />
+            <Heading1 size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
             isActive={editor.isActive('heading', { level: 2 })}
             title="Heading 2"
           >
-            <Heading2 size={30} />
+            <Heading2 size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
             isActive={editor.isActive('heading', { level: 3 })}
             title="Heading 3"
           >
-            <Heading3 size={30} />
+            <Heading3 size={18} />
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -224,35 +224,35 @@ export default function RichTextEditor({
             isActive={editor.isActive('bold')}
             title="Bold (Ctrl+B)"
           >
-            <Bold size={30} />
+            <Bold size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
             isActive={editor.isActive('italic')}
             title="Italic (Ctrl+I)"
           >
-            <Italic size={30} />
+            <Italic size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleUnderline().run()}
             isActive={editor.isActive('underline')}
             title="Underline (Ctrl+U)"
           >
-            <UnderlineIcon size={30} />
+            <UnderlineIcon size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleStrike().run()}
             isActive={editor.isActive('strike')}
             title="Strikethrough"
           >
-            <Strikethrough size={30} />
+            <Strikethrough size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleCode().run()}
             isActive={editor.isActive('code')}
             title="Inline code"
           >
-            <Code size={30} />
+            <Code size={18} />
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -262,28 +262,28 @@ export default function RichTextEditor({
             isActive={editor.isActive('bulletList')}
             title="Bullet list"
           >
-            <List size={30} />
+            <List size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             isActive={editor.isActive('orderedList')}
             title="Numbered list"
           >
-            <ListOrdered size={30} />
+            <ListOrdered size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             isActive={editor.isActive('blockquote')}
             title="Quote"
           >
-            <Quote size={30} />
+            <Quote size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
             isActive={editor.isActive('codeBlock')}
             title="Code block"
           >
-            <Code size={30} />
+            <Code size={18} />
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -293,36 +293,36 @@ export default function RichTextEditor({
             isActive={editor.isActive({ textAlign: 'left' })}
             title="Align left"
           >
-            <AlignLeft size={30} />
+            <AlignLeft size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().setTextAlign('center').run()}
             isActive={editor.isActive({ textAlign: 'center' })}
             title="Align center"
           >
-            <AlignCenter size={30} />
+            <AlignCenter size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().setTextAlign('right').run()}
             isActive={editor.isActive({ textAlign: 'right' })}
             title="Align right"
           >
-            <AlignRight size={30} />
+            <AlignRight size={18} />
           </ToolbarButton>
 
           <ToolbarDivider />
 
           <ToolbarButton onClick={setLink} isActive={editor.isActive('link')} title="Link">
-            <LinkIcon size={30} />
+            <LinkIcon size={18} />
           </ToolbarButton>
           <ToolbarButton onClick={addImage} title="Image">
-            <ImageIcon size={30} />
+            <ImageIcon size={18} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().setHorizontalRule().run()}
             title="Horizontal rule"
           >
-            <Minus size={30} />
+            <Minus size={18} />
           </ToolbarButton>
         </div>
 

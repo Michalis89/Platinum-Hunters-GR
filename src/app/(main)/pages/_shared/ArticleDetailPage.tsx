@@ -1,11 +1,9 @@
 import { CoverHeroImage, CoverThumbImage } from '@/components/ui/cover-image';
-import { AvatarImage } from '@/components/ui/avatar-image';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Calendar, Clock, Eye, FileText, Heart, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Eye, FileText, Heart } from 'lucide-react';
 import type { ArticleRow, ArticleTopic } from '@/types/database';
-import ActionRow from '@/app/components/article/ActionRow.client';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import ReadingProgress from '@/app/components/article/ReadingProgress.client';
@@ -21,8 +19,12 @@ import { normalizeSlug } from '@/utils/slugify';
 import ArticleComments from '@/app/components/article/ArticleComments.client';
 import ArticleAuthHint from '@/app/components/article/ArticleAuthHint.client';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { getUserSettings } from '@/lib/settings';
 import { FormattedDate } from '@/utils/components/FormattedDate';
 import { buildArticleJsonLd, buildReviewJsonLd } from '@/lib/seo/jsonld';
+import MetaActionsBar from '@/app/components/article/MetaActionsBar';
+import { ArticleContent } from '@/components/article/ArticleContent';
+import { ARTICLE_SUBTITLE, ARTICLE_TITLE } from '@/components/article/typography';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -69,11 +71,6 @@ interface ArticleMetadataArgs {
   options: ArticleDetailPageOptions;
 }
 
-type HeadingData = {
-  id: string;
-  title: string;
-};
-
 type RelatedArticle = Pick<
   ArticleRow,
   | 'id'
@@ -99,7 +96,6 @@ const buildSlugCandidates = (value: string) => {
   );
 };
 
-const TOC_MIN_HEADINGS = 3;
 const HEADING_REGEX = /<h2([^>]*)>(.*?)<\/h2>/gi;
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
@@ -113,7 +109,6 @@ const truncateForMeta = (value: string, maxLength = 160) => {
 };
 
 function enrichContentHeadings(html: string) {
-  const headings: HeadingData[] = [];
   const slugCounts = new Map<string, number>();
 
   const enriched = html.replace(HEADING_REGEX, (match, attrs, inner) => {
@@ -142,11 +137,10 @@ function enrichContentHeadings(html: string) {
     const attrWithId = attrsWithoutId ? `${attrsWithoutId} id="${headingId}"` : `id="${headingId}"`;
     const normalizedAttrString = attrWithId.trim() ? ` ${attrWithId.trim()}` : '';
 
-    headings.push({ id: headingId, title: decodedTitle });
     return `<h2${normalizedAttrString}>${inner}</h2>`;
   });
 
-  return { html: enriched, headings };
+  return enriched;
 }
 
 async function fetchRelatedArticles(
@@ -306,15 +300,22 @@ export default async function ArticleDetailPage({
 }: ArticleDetailPageProps) {
   const { slug } = await params;
   let currentUserId: string | null = null;
+  let showSocialLayerSections = true;
   try {
     const sessionClient = await createRouteHandlerClient();
     const {
       data: { session },
     } = await sessionClient.auth.getSession();
     currentUserId = session?.user.id ?? null;
+    if (currentUserId) {
+      const settings = await getUserSettings(currentUserId, { supabase: sessionClient });
+      showSocialLayerSections = settings.social_enabled;
+    }
   } catch {
-    // Public article rendering should not fail when auth cookies are stale/expired.
+    // Public article rendering should not fail when auth cookies are stale/expired
+    // or settings fetch fails.
     currentUserId = null;
+    showSocialLayerSections = true;
   }
   const article = await fetchArticle(slug, topicFilter);
 
@@ -362,8 +363,7 @@ export default async function ArticleDetailPage({
   const articlePath = `${basePath}/${articleSlug}`;
   const articleUrl = `${SITE_URL}${articlePath}`;
   const sanitizedContentHtml = sanitizeHtmlContent(article.content_html).trim();
-  const { html: contentWithHeadingIds, headings } = enrichContentHeadings(sanitizedContentHtml);
-  const shouldShowTOC = headings.length >= TOC_MIN_HEADINGS;
+  const contentWithHeadingIds = enrichContentHeadings(sanitizedContentHtml);
   const relatedArticles = await fetchRelatedArticles(article);
   const relatedContentLabel = article.topic === 'reviews' ? 'reviews' : 'articles';
   const categoryLabel = CATEGORY_LABELS[article.category] ?? article.category;
@@ -431,7 +431,7 @@ export default async function ArticleDetailPage({
       {/* Masthead + Body */}
       <div className="relative mx-auto -mt-14 max-w-5xl px-3 pb-16 sm:px-4 md:-mt-20">
         <article className="rounded-3xl border border-border bg-card p-4 shadow-2xl sm:p-6 md:p-10">
-          <header className="mx-auto max-w-[760px]">
+          <header className="mx-auto">
             <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
               <span className="rounded-full border border-border bg-card/80 px-3 py-1">
                 {categoryLabel}
@@ -441,133 +441,30 @@ export default async function ArticleDetailPage({
               </span>
             </div>
 
-            <h1 className="mt-4 text-[24px] font-bold leading-[1.15] tracking-tight text-foreground sm:text-[28px] md:text-[38px]">
-              {article.title}
-            </h1>
+            <h1 className={ARTICLE_TITLE}>{article.title}</h1>
 
-            {article.description && (
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
-                {article.description}
-              </p>
-            )}
+            {article.description && <p className={ARTICLE_SUBTITLE}>{article.description}</p>}
           </header>
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="mt-8">
             <div>
-              <div className="mt-6 rounded-3xl border border-border bg-card/60 p-4 text-muted-foreground shadow-md">
-                <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.2em]">
-                  <span className="flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1">
-                    {categoryLabel}
-                  </span>
-                  <span className="flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1">
-                    {TOPIC_LABELS[article.topic]}
-                  </span>
-                  {article.published_at && (
-                    <span className="flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1">
-                      <Calendar size={12} />
-                      <FormattedDate
-                        date={article.published_at}
-                        options={ARTICLE_HEADER_DATE_OPTIONS}
-                        fallback=""
-                        className="text-[10px]"
-                      />
-                    </span>
-                  )}
-                  {readTime && (
-                    <span className="flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1">
-                      <Clock size={12} />
-                      <span className="text-[10px]">{readTime}</span>
-                    </span>
-                  )}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-3">
-                  {article.users && (
-                    <div className="flex items-center gap-2 rounded-full border border-border px-3 py-1 text-muted-foreground">
-                      {article.users.avatar_url ? (
-                        <div className="h-5 w-5 rounded-full">
-                          <AvatarImage
-                            src={article.users.avatar_url}
-                            alt={article.users.username}
-                            size={20}
-                            className="rounded-full"
-                          />
-                        </div>
-                      ) : (
-                        <User size={12} />
-                      )}
-                      <span>{article.users.display_name || article.users.username}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1 rounded-full border border-border px-3 py-1">
-                    <Eye size={12} />
-                    <span>{article.views ?? 0} views</span>
-                  </div>
-                  <div className="flex items-center gap-1 rounded-full border border-border px-3 py-1">
-                    <Heart size={12} />
-                    <span>{article.likes ?? 0} likes</span>
-                  </div>
-                </div>
-              </div>
+              {showSocialLayerSections && (
+                <MetaActionsBar
+                  article={article}
+                  readTime={readTime}
+                  dateOptions={ARTICLE_HEADER_DATE_OPTIONS}
+                />
+              )}
 
-              {shouldShowTOC && (
-                <section className="mt-8 w-full">
-                  <div className="w-full rounded-3xl border border-border bg-card shadow-md">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                      <span>Table of Contents</span>
-                      <span>{headings.length} sections</span>
-                    </div>
-                    <div className="px-5 py-4">
-                      <details className="md:hidden">
-                        <summary className="cursor-pointer rounded-2xl border border-border px-3 py-2 text-sm font-semibold text-foreground transition hover:border-primary">
-                          Show contents
-                        </summary>
-                        <ul className="mt-3 space-y-2">
-                          {headings.map(heading => (
-                            <li key={heading.id}>
-                              <a
-                                href={`#${heading.id}`}
-                                className="inline-flex w-full rounded-md px-2 py-1 text-sm text-foreground transition hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                              >
-                                {heading.title}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
-                      <div className="hidden md:block">
-                        <ul className="grid gap-3 md:grid-cols-2">
-                          {headings.map(heading => (
-                            <li key={heading.id}>
-                              <a
-                                href={`#${heading.id}`}
-                                className="inline-flex w-full rounded-md px-2 py-1 text-sm text-foreground transition hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                              >
-                                {heading.title}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+              {showSocialLayerSections && (
+                <section className="mt-3 space-y-3">
+                  <ArticleAuthHint />
                 </section>
               )}
 
-              {contentWithHeadingIds && (
-                <section
-                  className="article-content mx-auto max-w-[760px] pt-8 text-base leading-[1.8] text-foreground sm:text-[17px] [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-4 [&_a]:focus-visible:outline-primary [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:bg-primary/5 [&_blockquote]:px-4 [&_blockquote]:py-2 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-card [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-primary [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground sm:[&_h1]:text-3xl [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:scroll-mt-32 [&_h2]:text-xl [&_h2]:font-semibold sm:[&_h2]:text-2xl [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:scroll-mt-28 [&_h3]:text-lg [&_h3]:font-semibold sm:[&_h3]:text-xl [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:bg-card [&_pre]:p-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
-                  dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
-                />
-              )}
-              <ArticleComments articleId={article.id} />
+              {contentWithHeadingIds && <ArticleContent html={contentWithHeadingIds} />}
+              {showSocialLayerSections && <ArticleComments articleId={article.id} />}
             </div>
-
-            <aside className="space-y-4">
-              <div className="mt-4 flex justify-center">
-                <ActionRow article={article} />
-              </div>
-              <ArticleAuthHint />
-            </aside>
           </div>
 
           <div className="mt-12 border-t border-border pt-10">

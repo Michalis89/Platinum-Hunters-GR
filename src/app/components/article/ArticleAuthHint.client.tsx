@@ -11,7 +11,7 @@ export default function ArticleAuthHint() {
   }
 
   return (
-    <p className="mt-2 text-xs text-muted-foreground">
+    <p className="mt-2 text-center text-xs text-muted-foreground">
       Want to leave a like or comment? You need an account.{' '}
       <Link href="/auth/login" className="text-primary underline-offset-4 hover:underline">
         Log in

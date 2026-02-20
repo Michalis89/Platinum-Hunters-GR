@@ -9,9 +9,11 @@ import { selectCanEditArticles, selectIsAuthorOf } from '@/store/slices/authSlic
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type ActionRowProps = {
   article: ArticleRow;
+  className?: string;
 };
 
 type LikeState = {
@@ -19,7 +21,10 @@ type LikeState = {
   count: number;
 };
 
-export default function ActionRow({ article }: ActionRowProps) {
+const ACTION_BUTTON_BASE =
+  'h-9 w-9 rounded-full border border-transparent bg-transparent text-muted-foreground shadow-none transition-colors duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:bg-muted/70';
+
+export default function ActionRow({ article, className }: ActionRowProps) {
   const router = useRouter();
   const canEdit = useSelector(selectCanEditArticles);
   const isAuthor = useSelector(selectIsAuthorOf(article.author_id));
@@ -166,7 +171,7 @@ export default function ActionRow({ article }: ActionRowProps) {
 
   return (
     <>
-      <div className="flex min-h-[44px] items-center justify-center gap-3">
+      <div className={cn('flex items-center justify-center gap-1', className)}>
         <Button
           type="button"
           iconOnly
@@ -175,9 +180,9 @@ export default function ActionRow({ article }: ActionRowProps) {
           onClick={handleShare}
           aria-label="Share"
           title="Share"
-          className="h-12 w-12 rounded-full border border-border bg-card text-foreground shadow-sm transition-all hover:scale-110 hover:text-primary active:scale-95"
+          className={ACTION_BUTTON_BASE}
         >
-          <Share2 size={28} strokeWidth={2.2} /> {/* Larger icon & thicker stroke */}
+          <Share2 size={18} strokeWidth={2.2} />
         </Button>
 
         <Button
@@ -188,11 +193,9 @@ export default function ActionRow({ article }: ActionRowProps) {
           onClick={handleCopyLink}
           aria-label="Copy link"
           title={copied ? 'Link copied!' : 'Copy link'}
-          className={`h-12 w-12 rounded-full border border-border bg-card shadow-sm transition-all active:scale-95 ${
-            copied ? 'text-primary' : 'text-foreground hover:text-primary'
-          }`}
+          className={cn(ACTION_BUTTON_BASE, copied ? 'text-primary' : 'hover:text-primary')}
         >
-          <ClipboardCopy size={28} strokeWidth={2.2} />
+          <ClipboardCopy size={18} strokeWidth={2.2} />
         </Button>
 
         <Button
@@ -202,11 +205,13 @@ export default function ActionRow({ article }: ActionRowProps) {
           variant="secondary"
           onClick={toggleLike}
           disabled={likeLoading || isAuthor}
-          className={`h-12 w-12 rounded-full border border-border bg-card shadow-sm transition-all active:scale-90 ${
-            likeState.liked ? 'text-primary' : 'text-foreground'
-          } ${isAuthor ? 'cursor-not-allowed opacity-40' : 'hover:text-primary'}`}
+          className={cn(
+            ACTION_BUTTON_BASE,
+            likeState.liked ? 'text-primary' : 'hover:text-primary',
+            isAuthor && 'cursor-not-allowed opacity-40',
+          )}
         >
-          <Heart size={28} fill={likeState.liked ? 'currentColor' : 'none'} strokeWidth={2.2} />
+          <Heart size={18} fill={likeState.liked ? 'currentColor' : 'none'} strokeWidth={2.2} />
         </Button>
 
         {canEdit && (
@@ -216,9 +221,9 @@ export default function ActionRow({ article }: ActionRowProps) {
             size="icon"
             variant="secondary"
             onClick={() => setIsEditOpen(true)}
-            className="h-12 w-12 rounded-full border border-border bg-card text-foreground shadow-sm transition-all hover:text-primary active:scale-95"
+            className={cn(ACTION_BUTTON_BASE, 'hover:text-primary')}
           >
-            <Pencil size={28} strokeWidth={2.2} />
+            <Pencil size={18} strokeWidth={2.2} />
           </Button>
         )}
 
@@ -230,12 +235,15 @@ export default function ActionRow({ article }: ActionRowProps) {
             size="icon"
             onClick={handleDelete}
             disabled={isDeleteLoading}
-            className="h-12 w-12 rounded-full border border-border bg-card text-destructive shadow-sm transition-all hover:bg-destructive/10 active:scale-95"
+            className={cn(
+              ACTION_BUTTON_BASE,
+              'text-destructive hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive',
+            )}
           >
             {isDeleteLoading ? (
               <Spinner className="size-4 text-destructive" />
             ) : (
-              <Trash2 size={28} strokeWidth={2.2} />
+              <Trash2 size={18} strokeWidth={2.2} />
             )}
           </Button>
         )}

@@ -77,7 +77,7 @@ export function AboutStats({
 
   return (
     <section className="relative px-4 py-20 md:px-6 md:py-28">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.03] to-background" />
+      <div className="absolute inset-0" />
 
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-12 text-center">

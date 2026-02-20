@@ -1,3 +1,5 @@
+import { SITE_LOCALE } from '@/config/site';
+
 const DEFAULT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
   month: 'numeric',
@@ -30,7 +32,7 @@ export function FormattedDate({
     if (Number.isNaN(parsed.getTime())) {
       return fallback;
     }
-    return new Intl.DateTimeFormat(locale, options).format(parsed);
+    return new Intl.DateTimeFormat(locale ?? SITE_LOCALE, options).format(parsed);
   })();
 
   // suppressHydrationWarning handles potential timezone differences between server/client
