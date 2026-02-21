@@ -108,10 +108,12 @@ type DashboardBasePayload = {
 };
 
 async function DashboardSectionsData({
+  supabase,
   userId,
   mediaCategories,
   stats,
 }: {
+  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>;
   userId: string;
   mediaCategories: DashboardCategoryKey[];
   stats: PersonalStats;
@@ -121,7 +123,7 @@ async function DashboardSectionsData({
   }
 
   const categorySections: Record<DashboardCategoryKey, CategoryDashboardSection> =
-    await fetchCategoryDashboardData(userId, mediaCategories);
+    await fetchCategoryDashboardData(supabase, userId, mediaCategories);
 
   return (
     <HomeDashboardSections
@@ -151,8 +153,8 @@ async function DashboardData() {
 
   // Fetch data in parallel for better performance
   const [stats, continueData] = await Promise.all([
-    fetchUserStats(userId),
-    fetchContinueData(userId),
+    fetchUserStats(supabase, userId),
+    fetchContinueData(supabase, userId),
   ]);
 
   const requestedCategories = (continueData.enabledCategories ?? []).filter(
@@ -186,6 +188,7 @@ async function DashboardData() {
       />
       <Suspense fallback={<DashboardSectionsSkeleton />}>
         <DashboardSectionsData
+          supabase={supabase}
           userId={payload.userId}
           mediaCategories={payload.mediaCategories}
           stats={payload.stats}

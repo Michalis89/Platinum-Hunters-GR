@@ -33,7 +33,7 @@ export default async function ExplorePage() {
     redirect('/settings');
   }
 
-  const stats = await fetchUserStats(userId);
+  const stats = await fetchUserStats(supabase, userId);
   const enabledCategories = (stats.active_categories ?? []).filter(
     (category): category is DashboardCategoryKey =>
       DASHBOARD_TAB_CATEGORIES.includes(category as DashboardCategoryKey),

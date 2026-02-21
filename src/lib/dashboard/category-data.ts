@@ -655,10 +655,10 @@ export function buildTasteProfile(
 type DashboardSupabaseClient = Awaited<ReturnType<typeof createRouteHandlerClient>>;
 
 export async function fetchCategoryDashboardData(
+  supabase: DashboardSupabaseClient,
   userId: string,
   enabledCategories: string[],
 ): Promise<Record<DashboardCategoryKey, CategoryDashboardSection>> {
-  const supabase = await createRouteHandlerClient();
   const requestedCategories = enabledCategories
     .map(cat => cat as DashboardCategoryKey)
     .filter(category => DASHBOARD_TAB_CATEGORIES.includes(category));
