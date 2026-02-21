@@ -128,7 +128,7 @@ export function ProfilePersonalInfo({
               <div>
                 <p className="text-xs text-muted-foreground">Full Name</p>
                 <p className="break-words text-sm font-medium text-foreground">
-                  {user.full_name || '�'}
+                  {user.full_name || '-'}
                 </p>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function ProfilePersonalInfo({
                     className="break-words text-sm font-medium text-foreground"
                     suppressHydrationWarning
                   >
-                    {age ? `${age} years old` : '�'}
+                    {age ? `${age} years old` : '-'}
                   </p>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export function ProfilePersonalInfo({
                 <p className="text-xs text-muted-foreground">Location</p>
                 <p className="break-words text-sm font-medium text-foreground">
                   {showLocation
-                    ? [locationCity, user.country].filter(Boolean).join(', ') || '�'
+                    ? [locationCity, user.country].filter(Boolean).join(', ') || '-'
                     : 'Hidden'}
                 </p>
               </div>
@@ -183,7 +183,7 @@ export function ProfilePersonalInfo({
               <div>
                 <p className="text-xs text-muted-foreground">Time Zone</p>
                 <p className="break-words text-sm font-medium text-foreground">
-                  {showLocation ? user.timezone || '�' : 'Hidden'}
+                  {showLocation ? user.timezone || '-' : 'Hidden'}
                 </p>
               </div>
             </div>
