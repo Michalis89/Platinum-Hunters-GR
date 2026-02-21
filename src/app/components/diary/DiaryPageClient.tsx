@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { NotebookPen } from 'lucide-react';
 import { useSelector } from 'react-redux';
@@ -14,6 +15,7 @@ import { selectUser } from '@/store/slices/authSlice';
 
 export function DiaryPageClient() {
   const user = useSelector(selectUser);
+  const [isUnlockDialogOpen, setUnlockDialogOpen] = useState(true);
   const {
     entries,
     selectedEntry,
@@ -36,6 +38,14 @@ export function DiaryPageClient() {
   } = useDiaryEntries();
 
   const { settings, isLoading: isLoadingSettings } = useUserSettings(true);
+
+  useEffect(() => {
+    if (isLocked) {
+      setUnlockDialogOpen(true);
+      return;
+    }
+    setUnlockDialogOpen(false);
+  }, [isLocked]);
 
   return (
     <main className="diary-route-root relative flex min-h-screen flex-col px-3 pb-6 pt-12 text-foreground sm:px-4 sm:pb-8 sm:pt-16">
@@ -70,6 +80,15 @@ export function DiaryPageClient() {
                 className="h-11 self-start rounded-xl border border-border/60 bg-card/60 px-5 text-muted-foreground hover:bg-[hsl(var(--surface-hover)/0.76)] hover:text-foreground lg:self-auto"
               >
                 Lock
+              </Button>
+            ) : settings?.diary_enabled ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setUnlockDialogOpen(true)}
+                className="h-11 self-start rounded-xl border border-border/60 bg-card/60 px-5 text-muted-foreground hover:bg-[hsl(var(--surface-hover)/0.76)] hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 lg:self-auto"
+              >
+                Unlock diary
               </Button>
             ) : null}
           </div>
@@ -128,9 +147,10 @@ export function DiaryPageClient() {
           <DiaryUnlockDialog
             hasSalt={hasSalt}
             isInitializing={isLocked && isLoading}
-            isOpen={isLocked}
+            isOpen={isLocked && isUnlockDialogOpen}
             isResetting={isResetting}
             isUnlocking={isUnlocking}
+            onDismiss={() => setUnlockDialogOpen(false)}
             onResetEncryption={resetDiary}
             onUnlock={unlockDiary}
           />

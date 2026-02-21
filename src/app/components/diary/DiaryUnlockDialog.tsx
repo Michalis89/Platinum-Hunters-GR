@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, Lock } from 'lucide-react';
+import { Loader2, Lock, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +31,7 @@ type DiaryUnlockDialogProps = {
   isOpen: boolean;
   isResetting: boolean;
   isUnlocking: boolean;
+  onDismiss?: () => void;
   onResetEncryption: () => Promise<boolean>;
   onUnlock: (passphrase: string) => Promise<boolean>;
 };
@@ -41,6 +42,7 @@ export function DiaryUnlockDialog({
   isOpen,
   isResetting,
   isUnlocking,
+  onDismiss,
   onResetEncryption,
   onUnlock,
 }: DiaryUnlockDialogProps) {
@@ -99,8 +101,23 @@ export function DiaryUnlockDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) {
+          onDismiss?.();
+        }
+      }}
+    >
       <DialogContent showCloseButton={false} className="max-w-[480px]">
+        <button
+          type="button"
+          onClick={() => onDismiss?.()}
+          className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-md border border-border/60 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border"
+          aria-label="Close dialog"
+        >
+          <X className="h-4 w-4" />
+        </button>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lock className="h-4 w-4" />
