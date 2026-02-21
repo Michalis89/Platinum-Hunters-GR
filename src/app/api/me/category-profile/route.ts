@@ -4,11 +4,7 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import type { Json } from '@/lib/supabase/database.types';
-import {
-  categoryProfilePatchSchema,
-  mergeCategoryProfiles,
-  type CategoryProfiles,
-} from '@/lib/validation/profile';
+import { categoryProfilesSchema } from '@/lib/validation/profile';
 
 const handler = withApiRoute(async (request: Request) => {
   try {
@@ -51,8 +47,8 @@ const handler = withApiRoute(async (request: Request) => {
         );
       }
 
-      // Validate patch
-      const parsed = categoryProfilePatchSchema.safeParse(body);
+      // Validate complete category profile payload (PUT = replace)
+      const parsed = categoryProfilesSchema.safeParse(body);
       if (!parsed.success) {
         return fail(
           {
@@ -64,24 +60,13 @@ const handler = withApiRoute(async (request: Request) => {
         );
       }
 
-      // Fetch existing profile
-      const { data: existing } = await supabase
-        .from('user_category_profiles')
-        .select('profiles')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      // Merge patch into existing profiles (genres are NOT stored here anymore)
-      const existingProfiles = (existing?.profiles as CategoryProfiles) || {};
-      const mergedProfiles = mergeCategoryProfiles(existingProfiles, parsed.data);
-
       // Upsert
       const { data: updated, error: upsertError } = await supabase
         .from('user_category_profiles')
         .upsert(
           {
             user_id: userId,
-            profiles: mergedProfiles as unknown as Json,
+            profiles: parsed.data as unknown as Json,
           },
           {
             onConflict: 'user_id',

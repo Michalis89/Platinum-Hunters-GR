@@ -521,15 +521,35 @@ export default function EditProfilePage() {
         console.warn('Failed to update location (non-critical):', error);
       }
 
-      // Update category profile using new endpoint
-      try {
-        await fetch('/api/me/category-profile', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(category_notes || {}),
-        });
-      } catch (error) {
-        console.warn('Failed to update category profile (non-critical):', error);
+      // Build category profile from selected categories (keys define enabled categories)
+      const selectedCategories = ((formData.categories as string[] | undefined) ?? [])
+        .map(String)
+        .filter(Boolean);
+      const noteMap = (category_notes as Record<string, unknown> | undefined) || {};
+      const categoryProfilePayload = Object.fromEntries(
+        selectedCategories.map(cat => {
+          const existingNote = noteMap[cat];
+          const normalizedNote =
+            existingNote && typeof existingNote === 'object' && !Array.isArray(existingNote)
+              ? existingNote
+              : {};
+          return [cat, normalizedNote];
+        }),
+      );
+
+      // Update category profile (critical for category activation and library routing)
+      const categoryProfileResponse = await fetch('/api/me/category-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryProfilePayload),
+      });
+      if (!categoryProfileResponse.ok) {
+        const failure = await categoryProfileResponse.json().catch(() => null);
+        const failureMessage =
+          typeof failure?.error === 'string'
+            ? failure.error
+            : 'Failed to update category profile';
+        throw new Error(failureMessage);
       }
 
       // Refetch user to update Redux store with latest data (including category_profile)
