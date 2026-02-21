@@ -20,6 +20,7 @@ type MediaSuggestionsProps = {
   suggestions: MediaSuggestion[];
   category: string;
 };
+const MIN_POSSIBLE_NEXT_CONFIDENCE = 0.2;
 
 function SuggestionCard({ suggestion }: { suggestion: MediaSuggestion }) {
   const href = suggestion.slug ? `/media/${suggestion.category}/${suggestion.slug}` : null;
@@ -173,7 +174,11 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
   const categoryLabelForSentence = category === 'TV' ? category : category.toLowerCase();
   const backlogSuggestions = suggestions.filter(s => s.source === 'backlog').slice(0, 4);
   const databaseSuggestions = suggestions
-    .filter(s => s.source === 'database' || s.source === 'database-fallback')
+    .filter(
+      s =>
+        (s.source === 'database' || s.source === 'database-fallback') &&
+        s.confidence >= MIN_POSSIBLE_NEXT_CONFIDENCE,
+    )
     .slice(0, 4);
   const visibleSuggestions = [...backlogSuggestions, ...databaseSuggestions];
   const suggestionsLabel = generateSuggestionsLabel(visibleSuggestions);
@@ -206,7 +211,7 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
           <SuggestionColumn
             title="Possible next titles"
             items={databaseSuggestions}
-            emptyLabel="No additional titles right now."
+            emptyLabel="Not enough data yet to suggest possible next titles."
           />
         </div>
       )}

@@ -148,7 +148,8 @@ export function DiaryUnlockDialog({
               />
               <span>
                 I understand this passphrase cannot be recovered. If I lose it, existing diary entries are
-                unrecoverable.
+                unrecoverable. If I reset and set a new passphrase, existing entries are deleted
+                automatically.
               </span>
             </label>
           ) : null}
