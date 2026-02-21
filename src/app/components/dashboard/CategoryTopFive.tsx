@@ -73,7 +73,7 @@ function SortableFavoriteCard({
         'group relative h-full w-full cursor-grab touch-none select-none overflow-hidden rounded-3xl',
         'border border-border/35 bg-card/40',
         'shadow-[0_18px_60px_-40px_rgba(0,0,0,0.85)]',
-        'ease-[cubic-bezier(0.18,0.9,0.22,1)] transition-all delay-0 duration-300 will-change-transform active:cursor-grabbing group-hover:delay-75',
+        'ease-snappy transition-all delay-0 duration-300 will-change-transform active:cursor-grabbing group-hover:delay-75',
         // Lift / glow on hover
         'hover:-translate-y-0.5 hover:border-border/50 hover:bg-card/50',
         // Drag state
@@ -92,11 +92,11 @@ function SortableFavoriteCard({
           priority={isPriorityImage}
           loading={isPriorityImage ? undefined : 'lazy'}
           // Cinematic crop (faces/top composition survives more often)
-          className="ease-[cubic-bezier(0.18,0.9,0.22,1)] object-cover object-[50%_25%] transition-transform delay-0 duration-300 will-change-transform [backface-visibility:hidden] group-hover:scale-[1.04] group-hover:delay-75"
+          className="ease-snappy object-cover object-[50%_25%] transition-transform delay-0 duration-300 will-change-transform [backface-visibility:hidden] group-hover:scale-[1.04] group-hover:delay-75"
         />
 
         <div
-          className="duration-220 ease-[cubic-bezier(0.18,0.9,0.22,1)] pointer-events-none absolute -inset-px transition-opacity delay-0 group-hover:opacity-95 dark:hidden"
+          className="duration-220 ease-snappy pointer-events-none absolute -inset-px transition-opacity delay-0 group-hover:opacity-95 dark:hidden"
           style={{
             background:
               'linear-gradient(to bottom, rgba(255,255,255,0.14), rgba(255,255,255,0) 45%, rgba(255,255,255,0.48)),' +
@@ -105,7 +105,7 @@ function SortableFavoriteCard({
           }}
         />
         <div
-          className="duration-220 ease-[cubic-bezier(0.18,0.9,0.22,1)] pointer-events-none absolute -inset-px hidden transition-opacity delay-0 group-hover:opacity-95 dark:block"
+          className="duration-220 ease-snappy pointer-events-none absolute -inset-px hidden transition-opacity delay-0 group-hover:opacity-95 dark:block"
           style={{
             background:
               'linear-gradient(to bottom, rgba(0,0,0,0.22), rgba(0,0,0,0) 45%, rgba(0,0,0,0.70)),' +
@@ -449,7 +449,7 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
           />
           <div
             className={[
-              'ease-[cubic-bezier(0.18,0.9,0.22,1)] relative overflow-hidden transition-[max-height] duration-300',
+              'ease-snappy relative overflow-hidden transition-[max-height] duration-300',
               canCollapse && !isExpanded
                 ? 'after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-16 after:bg-gradient-to-t after:from-background/95 after:to-transparent'
                 : '',

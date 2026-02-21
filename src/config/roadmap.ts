@@ -98,7 +98,7 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     title: 'Profiles & Social Graph (Optional)',
     description: 'Public profiles and follow relationships, available only with Community enabled.',
-    status: 'planned',
+    status: 'in-progress',
     area: 'community',
     icon: Users,
   },
@@ -112,7 +112,7 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     title: 'Direct Messages (Optional)',
     description: 'Private messaging between users when Community features are enabled.',
-    status: 'planned',
+    status: 'in-progress',
     area: 'community',
     icon: MessageCircle,
   },
@@ -141,7 +141,7 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
     title: 'Diary Module',
     description:
       'Private personal journal for notes and reflection. Optional and disabled by default.',
-    status: 'in-progress',
+    status: 'done',
     area: 'diary',
     icon: BookOpen,
   },

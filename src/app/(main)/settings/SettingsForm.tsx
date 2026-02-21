@@ -73,7 +73,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   const { setThemePreference } = useTheme();
 
   const isProd = process.env.NODE_ENV === 'production';
-  const isFeaturePreviewMode = isProd;
+  const isSocialPreviewMode = isProd;
+  const isDiaryPreviewMode = false;
+  const isDndPreviewMode = isProd;
 
   const updateSetting = async (patch: Partial<UserSettingsValue>) => {
     if (isSaving) {
@@ -258,7 +260,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle>Social Layer</CardTitle>
-            {isFeaturePreviewMode ? (
+            {isSocialPreviewMode ? (
               <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
                 Coming Soon
               </Badge>
@@ -277,7 +279,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             <Switch
               checked={social_enabled}
               onCheckedChange={checked => handleToggle('social_enabled', checked)}
-              disabled={isSaving || isFeaturePreviewMode}
+              disabled={isSaving || isSocialPreviewMode}
             />
           </div>
 
@@ -299,7 +301,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <Switch
                   checked={community_activity_enabled}
                   onCheckedChange={checked => handleToggle('community_activity_enabled', checked)}
-                  disabled={isSaving || isFeaturePreviewMode}
+                  disabled={isSaving || isSocialPreviewMode}
                 />
               </div>
               <div className="flex items-start justify-between gap-3">
@@ -314,7 +316,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                   onCheckedChange={checked =>
                     handleToggle('community_suggestions_enabled', checked)
                   }
-                  disabled={isSaving || isFeaturePreviewMode}
+                  disabled={isSaving || isSocialPreviewMode}
                 />
               </div>
               <div className="flex items-start justify-between gap-3">
@@ -327,7 +329,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <Switch
                   checked={social_profile_enabled}
                   onCheckedChange={checked => handleToggle('social_profile_enabled', checked)}
-                  disabled={isSaving || isFeaturePreviewMode}
+                  disabled={isSaving || isSocialPreviewMode}
                 />
               </div>
             </div>
@@ -339,7 +341,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle>Digital Personal Diary</CardTitle>
-            {isFeaturePreviewMode ? (
+            {isDiaryPreviewMode ? (
               <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
                 Coming Soon
               </Badge>
@@ -358,7 +360,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             <Switch
               checked={diary_enabled}
               onCheckedChange={checked => handleToggle('diary_enabled', checked)}
-              disabled={isSaving || isFeaturePreviewMode}
+              disabled={isSaving || isDiaryPreviewMode}
             />
           </div>
 
@@ -376,7 +378,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle>Dungeons & Dragons Tools</CardTitle>
-            {isFeaturePreviewMode ? (
+            {isDndPreviewMode ? (
               <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
                 Coming Soon
               </Badge>
@@ -395,7 +397,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             <Switch
               checked={dnd_enabled}
               onCheckedChange={checked => handleToggle('dnd_enabled', checked)}
-              disabled={isSaving || isFeaturePreviewMode}
+              disabled={isSaving || isDndPreviewMode}
             />
           </div>
 
@@ -411,7 +413,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <Select
                   value={dnd_role ?? 'player'}
                   onValueChange={handleDndRoleChange}
-                  disabled={isSaving || isFeaturePreviewMode}
+                  disabled={isSaving || isDndPreviewMode}
                 >
                   <SelectTrigger className="w-[160px]">
                     <SelectValue placeholder="Select role" />
@@ -442,7 +444,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle>Notifications</CardTitle>
-            {isFeaturePreviewMode ? (
+            {isSocialPreviewMode ? (
               <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
                 Expandable
               </Badge>
@@ -477,7 +479,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             <Switch
               checked={follows_notifications_enabled}
               onCheckedChange={checked => handleToggle('follows_notifications_enabled', checked)}
-              disabled={isSaving || isFeaturePreviewMode}
+              disabled={isSaving || isSocialPreviewMode}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -490,7 +492,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             <Switch
               checked={dms_notifications_enabled}
               onCheckedChange={checked => handleToggle('dms_notifications_enabled', checked)}
-              disabled={isSaving || isFeaturePreviewMode}
+              disabled={isSaving || isSocialPreviewMode}
             />
           </div>
         </CardContent>
@@ -531,12 +533,12 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </CardContent>
       </Card>
 
-      {isFeaturePreviewMode && (
+      {(isSocialPreviewMode || isDndPreviewMode) && (
         <Alert>
           <AlertTitle>Production Environment</AlertTitle>
           <AlertDescription>
-            Social Layer, Digital Personal Diary, and Dungeons & Dragons Tools are currently
-            read-only in production and marked as Coming Soon.
+            Social Layer and Dungeons & Dragons Tools are currently read-only in production and
+            marked as Coming Soon. Digital Personal Diary is available now.
           </AlertDescription>
         </Alert>
       )}

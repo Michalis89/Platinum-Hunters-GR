@@ -4,7 +4,7 @@ import { ArrowRight, LogIn } from 'lucide-react';
 export function HomeFinalCTA() {
   return (
     <section className="relative px-4 pb-8 pt-14 md:px-6 md:pb-12 md:pt-16">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent" />
+      <div className="pointer-events-none absolute inset-0" />
 
       <div className="relative mx-auto max-w-3xl rounded-xl p-7 text-center md:p-10">
         <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">

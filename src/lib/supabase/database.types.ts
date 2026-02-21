@@ -377,35 +377,47 @@ export type Database = {
       }
       diary_entries: {
         Row: {
-          content: string
+          content: string | null
+          content_encrypted: string
           created_at: string
           entry_date: string
           id: string
+          iv: string
           mood: string | null
           tags: string[] | null
-          title: string
+          title: string | null
+          title_encrypted: string
+          title_iv: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          content: string
+          content?: string | null
+          content_encrypted: string
           created_at?: string
           entry_date?: string
           id?: string
+          iv: string
           mood?: string | null
           tags?: string[] | null
-          title: string
+          title?: string | null
+          title_encrypted: string
+          title_iv: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          content?: string
+          content?: string | null
+          content_encrypted?: string
           created_at?: string
           entry_date?: string
           id?: string
+          iv?: string
           mood?: string | null
           tags?: string[] | null
-          title?: string
+          title?: string | null
+          title_encrypted?: string
+          title_iv?: string
           updated_at?: string
           user_id?: string
         }
@@ -414,6 +426,35 @@ export type Database = {
             foreignKeyName: "diary_entries_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diary_key_salts: {
+        Row: {
+          created_at: string
+          salt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          salt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          salt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_key_salts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },

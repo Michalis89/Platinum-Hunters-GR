@@ -72,7 +72,7 @@ export default function Navbar() {
       articles: settings?.articles_enabled ?? true,
       reviews: settings?.reviews_enabled ?? true,
       social_profile: isProd ? false : (settings?.social_profile_enabled ?? false),
-      diary: isProd ? false : (settings?.diary_enabled ?? false),
+      diary: settings?.diary_enabled ?? false,
       dnd: isProd ? false : (settings?.dnd_enabled ?? false),
       dnd_role: settings?.dnd_role ?? null,
     }),

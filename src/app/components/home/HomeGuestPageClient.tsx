@@ -9,7 +9,7 @@ import {
 
 export default function HomeGuestPageClient() {
   return (
-    <main className="pb-12 md:pb-20">
+    <main className="pb-0 md:pb-0">
       <HomeHero />
 
       <PageContainer size="lg">

@@ -34,6 +34,11 @@
     --accent-primary: 248 83% 62%;
     --accent-hover: 248 83% 68%;
     --accent-muted: 248 40% 18%;
+    --surface-warm: 246 12% 10%;
+    --surface-warm-2: 246 14% 13%;
+    --shadow-diary:
+      0px 14px 30px -24px hsl(248 70% 8% / 0.65),
+      0px 6px 14px -10px hsl(248 70% 6% / 0.45);
 
     /* --------------------------
        SEMANTIC
@@ -148,6 +153,11 @@
     --text-tertiary: 240 6% 52%;
 
     --accent-muted: 248 80% 94%;
+    --surface-warm: 248 35% 96%;
+    --surface-warm-2: 248 42% 93%;
+    --shadow-diary:
+      0px 12px 24px -22px hsl(248 38% 46% / 0.38),
+      0px 4px 10px -8px hsl(240 16% 24% / 0.2);
 
     --shadow-sm: 0 1px 2px hsl(240 10% 10% / 0.1);
     --shadow-md: 0 1px 3px hsl(240 10% 10% / 0.14);
@@ -261,6 +271,10 @@
     }
   }
 
+  .ease-snappy {
+    transition-timing-function: cubic-bezier(0.18, 0.9, 0.22, 1);
+  }
+
   .content-visibility-auto {
     content-visibility: auto;
   }
@@ -304,6 +318,10 @@
 
 @supports selector(body:has(.admin-support-root)) {
   body:has(.admin-support-root) footer[data-app-footer='true'] {
+    display: none;
+  }
+
+  body:has(.diary-route-root) footer[data-app-footer='true'] {
     display: none;
   }
 }

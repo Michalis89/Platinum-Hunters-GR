@@ -46,11 +46,24 @@ export type HobbyItem = NavbarLinkItem & {
 
 export const NAV_ITEMS: NavbarLinkItem[] = [
   { href: '/home', label: 'Home', icon: Home },
+  {
+    href: '/explore',
+    label: 'Explore',
+    icon: Users,
+    requiresAuth: true,
+    feature: 'social_profile',
+  },
   { href: '/about', label: 'About', icon: Book },
+  {
+    href: '/diary',
+    label: 'Personal Diary',
+    icon: NotebookPen,
+    requiresAuth: true,
+    feature: 'diary',
+  },
   { href: '/articles', label: 'Articles', icon: FileText, feature: 'articles' },
   { href: '/review', label: 'Reviews', icon: Star, feature: 'reviews' },
-  { href: '/explore', label: 'Explore', icon: Users, requiresAuth: true, feature: 'social_profile' },
-  { href: '/diary', label: 'Personal Diary', icon: NotebookPen, requiresAuth: true, feature: 'diary' },
+
   { href: '/support', label: 'Support', icon: MessageCircle, requiresAuth: true },
 ];
 
@@ -356,10 +369,7 @@ export const getVisibleHobbyItems = (
     }));
 };
 
-export const getVisibleDndTools = (
-  tools: DndToolItem[],
-  userRole: 'dm' | 'player' | null,
-) => {
+export const getVisibleDndTools = (tools: DndToolItem[], userRole: 'dm' | 'player' | null) => {
   return tools.filter(tool => {
     if (!tool.requiredRole) {
       return true; // Visible to all

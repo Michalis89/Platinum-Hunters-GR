@@ -6,6 +6,7 @@ import {
   StickyNote,
   Trophy,
   Film,
+  NotebookPen,
   RefreshCw,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -39,6 +40,12 @@ const features: Feature[] = [
     description:
       'Rate each entry on a 1–10 scale and add short reflections to capture your thoughts.',
     icon: <Star className="h-6 w-6" />,
+  },
+  {
+    title: 'Digital Personal Diary',
+    description:
+      'Write private entries in a dedicated diary module with local encryption controls and optional auto-lock.',
+    icon: <NotebookPen className="h-6 w-6" />,
   },
   {
     title: 'Status Management',
