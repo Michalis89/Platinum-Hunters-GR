@@ -74,6 +74,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
   const isProd = process.env.NODE_ENV === 'production';
   const isSocialPreviewMode = isProd;
+  const isSocialMasterToggleLocked = isProd;
   const isDiaryPreviewMode = false;
   const isDndPreviewMode = isProd;
 
@@ -279,7 +280,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             <Switch
               checked={social_enabled}
               onCheckedChange={checked => handleToggle('social_enabled', checked)}
-              disabled={isSaving || isSocialPreviewMode}
+              disabled={isSaving || isSocialMasterToggleLocked}
             />
           </div>
 
@@ -301,7 +302,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <Switch
                   checked={community_activity_enabled}
                   onCheckedChange={checked => handleToggle('community_activity_enabled', checked)}
-                  disabled={isSaving || isSocialPreviewMode}
+                  disabled={isSaving}
                 />
               </div>
               <div className="flex items-start justify-between gap-3">
@@ -316,7 +317,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                   onCheckedChange={checked =>
                     handleToggle('community_suggestions_enabled', checked)
                   }
-                  disabled={isSaving || isSocialPreviewMode}
+                  disabled={isSaving}
                 />
               </div>
               <div className="flex items-start justify-between gap-3">
@@ -329,7 +330,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <Switch
                   checked={social_profile_enabled}
                   onCheckedChange={checked => handleToggle('social_profile_enabled', checked)}
-                  disabled={isSaving || isSocialPreviewMode}
+                  disabled={isSaving}
                 />
               </div>
             </div>
@@ -537,8 +538,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <Alert>
           <AlertTitle>Production Environment</AlertTitle>
           <AlertDescription>
-            Social Layer and Dungeons & Dragons Tools are currently read-only in production and
-            marked as Coming Soon. Digital Personal Diary is available now.
+            In production, only the "Enable social features" master toggle and Dungeons & Dragons
+            Tools are locked and marked as Coming Soon. Digital Personal Diary is available now.
           </AlertDescription>
         </Alert>
       )}

@@ -18,6 +18,8 @@ import {
   CONTENT_PUBLISHED_EVENT,
   type ContentPublishedEventDetail,
 } from '@/app/constants/contentEvents';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '@/store/slices/authSlice';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -44,9 +46,11 @@ const SKELETON_COUNT = 6;
 const ArticleCard = memo(function ArticleCard({
   article,
   priority = false,
+  showEngagementMetrics = true,
 }: {
   article: ArticleWithAuthor;
   priority?: boolean;
+  showEngagementMetrics?: boolean;
 }) {
   const normalizedSlug = normalizeSlug(article.slug);
   const readTimeLabel = article.reading_time_minutes
@@ -132,16 +136,18 @@ const ArticleCard = memo(function ArticleCard({
             </div>
           ) : null}
 
-          <div className="ml-auto inline-flex items-center gap-3">
-            <span className="inline-flex items-center gap-1">
-              <Eye size={12} />
-              {article.views}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Heart size={12} />
-              {article.likes}
-            </span>
-          </div>
+          {showEngagementMetrics ? (
+            <div className="ml-auto inline-flex items-center gap-3">
+              <span className="inline-flex items-center gap-1">
+                <Eye size={12} />
+                {article.views ?? 0}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Heart size={12} />
+                {article.likes ?? 0}
+              </span>
+            </div>
+          ) : null}
         </div>
       </CardContent>
     </Card>
@@ -223,6 +229,7 @@ export default function NewsPageClient() {
 }
 
 function NewsPageContent() {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const searchParams = useSearchParams();
   const availableCategories = getVisibleCategories({ scope: 'news' });
 
@@ -390,7 +397,12 @@ function NewsPageContent() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {articles.map((article, idx) => (
-              <ArticleCard key={article.id} article={article} priority={idx < 2} />
+              <ArticleCard
+                key={article.id}
+                article={article}
+                priority={idx < 2}
+                showEngagementMetrics={isAuthenticated}
+              />
             ))}
           </div>
         )}

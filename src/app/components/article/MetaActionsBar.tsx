@@ -18,6 +18,8 @@ interface MetaActionsBarProps {
   article: ArticleWithAuthorMeta;
   readTime: string | null;
   dateOptions: Intl.DateTimeFormatOptions;
+  showEngagementMetrics?: boolean;
+  showActions?: boolean;
 }
 
 const META_PILL_BASE = ARTICLE_META;
@@ -26,6 +28,8 @@ export default function MetaActionsBar({
   article,
   readTime,
   dateOptions,
+  showEngagementMetrics = true,
+  showActions = true,
 }: MetaActionsBarProps) {
   return (
     <section className="mt-6 rounded-2xl border border-border/70 bg-card/55 p-3 shadow-sm">
@@ -68,21 +72,27 @@ export default function MetaActionsBar({
             </span>
           )}
 
-          <span className={cn(ARTICLE_BADGE, 'normal-case tracking-normal')}>
-            <Eye size={12} />
-            <span>{article.views ?? 0} views</span>
-          </span>
-          <span className={cn(ARTICLE_BADGE, 'normal-case tracking-normal')}>
-            <Heart size={12} />
-            <span>{article.likes ?? 0} likes</span>
-          </span>
+          {showEngagementMetrics ? (
+            <>
+              <span className={cn(ARTICLE_BADGE, 'normal-case tracking-normal')}>
+                <Eye size={12} />
+                <span>{article.views ?? 0} views</span>
+              </span>
+              <span className={cn(ARTICLE_BADGE, 'normal-case tracking-normal')}>
+                <Heart size={12} />
+                <span>{article.likes ?? 0} likes</span>
+              </span>
+            </>
+          ) : null}
         </div>
 
-        <div className="flex justify-center md:ml-4 md:justify-end">
-          <div className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card px-1.5 py-1 shadow-sm">
-            <ActionRow article={article} className="flex items-center gap-1" />
+        {showActions ? (
+          <div className="flex justify-center md:ml-4 md:justify-end">
+            <div className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card px-1.5 py-1 shadow-sm">
+              <ActionRow article={article} className="flex items-center gap-1" />
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );

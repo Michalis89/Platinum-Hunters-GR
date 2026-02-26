@@ -1,6 +1,7 @@
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { insertActivity } from '@/lib/services/activityService';
 import { getUserBasicInfo, getUserFullInfo } from '@/lib/services/userService';
 import { API_ERRORS } from '@/lib/api/errors';
@@ -153,14 +154,25 @@ async function DELETEHandler(req: Request, { params }: { params: Promise<{ id: s
     }
 
     // Delete comment
-    const { error: deleteError } = await supabase
+    const deleteClient = !isOwner && isAdmin ? createSupabaseAdminClient() : supabase;
+    const parsedCommentId = Number.parseInt(commentId, 10);
+    const parsedArticleId = Number.parseInt(articleId, 10);
+
+    const { data: deletedComment, error: deleteError } = await deleteClient
       .from('article_comments')
       .delete()
-      .eq('id', Number.parseInt(commentId, 10));
+      .eq('id', parsedCommentId)
+      .eq('article_id', parsedArticleId)
+      .select('id')
+      .maybeSingle();
 
     if (deleteError) {
       console.error('Error deleting comment:', deleteError);
       return fail({ error: 'Failed to delete comment' }, 500);
+    }
+
+    if (!deletedComment) {
+      return fail({ error: 'Comment could not be deleted' }, 409);
     }
 
     // Revalidate comment caches
@@ -215,7 +227,9 @@ async function PATCHHandler(req: Request, { params }: { params: Promise<{ id: st
       return fail({ error: 'Access forbidden' }, 403);
     }
 
-    const { data: updatedComment, error: updateError } = await supabase
+    const updateClient = !isOwner && isAdmin ? createSupabaseAdminClient() : supabase;
+
+    const { data: updatedComment, error: updateError } = await updateClient
       .from('article_comments')
       .update({
         content,

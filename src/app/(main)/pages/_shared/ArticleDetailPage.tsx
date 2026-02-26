@@ -211,6 +211,17 @@ async function fetchArticle(
     return null;
   }
 
+  // Use live likes count from the relation table so UI stays accurate even if
+  // the denormalized `articles.likes` column is stale.
+  const { count: liveLikesCount } = await supabase
+    .from('article_likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('article_id', article.id);
+
+  if (typeof liveLikesCount === 'number') {
+    article.likes = liveLikesCount;
+  }
+
   return article;
 }
 
@@ -287,27 +298,27 @@ export default async function ArticleDetailPage({
   const { slug } = await params;
   const isPublicReviewPage = basePath === '/review';
   let currentUserId: string | null = null;
-  let showSocialLayerSections = true;
-  if (!isPublicReviewPage) {
-    try {
-      const { createRouteHandlerClient } = await import('@/lib/supabase-route-handler');
+  let showSocialLayerSections = false;
+  try {
+    const { createRouteHandlerClient } = await import('@/lib/supabase-route-handler');
+    const sessionClient = await createRouteHandlerClient();
+    const {
+      data: { session },
+    } = await sessionClient.auth.getSession();
+    currentUserId = session?.user.id ?? null;
+
+    if (currentUserId) {
       const { getUserSettings } = await import('@/lib/settings');
-      const sessionClient = await createRouteHandlerClient();
-      const {
-        data: { session },
-      } = await sessionClient.auth.getSession();
-      currentUserId = session?.user.id ?? null;
-      if (currentUserId) {
-        const settings = await getUserSettings(currentUserId, { supabase: sessionClient });
-        showSocialLayerSections = settings.social_enabled;
-      }
-    } catch {
-      // Public article rendering should not fail when auth cookies are stale/expired
-      // or settings fetch fails.
-      currentUserId = null;
-      showSocialLayerSections = true;
+      const settings = await getUserSettings(currentUserId, { supabase: sessionClient });
+      showSocialLayerSections = settings.social_enabled;
     }
+  } catch {
+    // Public rendering should not fail when auth cookies are stale/expired
+    // or settings fetch fails.
+    currentUserId = null;
+    showSocialLayerSections = false;
   }
+  const showEngagementUi = Boolean(currentUserId) && showSocialLayerSections;
   const article = await fetchArticle(slug, topicFilter);
 
   if (!article) {
@@ -437,22 +448,22 @@ export default async function ArticleDetailPage({
 
           <div className="mt-8">
             <div>
-              {showSocialLayerSections && (
-                <MetaActionsBar
-                  article={article}
-                  readTime={readTime}
-                  dateOptions={ARTICLE_HEADER_DATE_OPTIONS}
-                />
-              )}
+              <MetaActionsBar
+                article={article}
+                readTime={readTime}
+                dateOptions={ARTICLE_HEADER_DATE_OPTIONS}
+                showEngagementMetrics={showEngagementUi}
+                showActions={showEngagementUi}
+              />
 
-              {showSocialLayerSections && (
+              {showEngagementUi && (
                 <section className="mt-3 space-y-3">
                   <ArticleAuthHint />
                 </section>
               )}
 
               {contentWithHeadingIds && <ArticleContent html={contentWithHeadingIds} />}
-              {showSocialLayerSections && <ArticleComments articleId={article.id} />}
+              {showEngagementUi && <ArticleComments articleId={article.id} />}
             </div>
           </div>
 
@@ -516,14 +527,18 @@ export default async function ArticleDetailPage({
                               />
                             </div>
                           )}
-                          <div className="flex items-center gap-1">
-                            <Eye size={12} />
-                            <span>{related.views ?? 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Heart size={12} />
-                            <span>{related.likes ?? 0}</span>
-                          </div>
+                          {showEngagementUi ? (
+                            <>
+                              <div className="flex items-center gap-1">
+                                <Eye size={12} />
+                                <span>{related.views ?? 0}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Heart size={12} />
+                                <span>{related.likes ?? 0}</span>
+                              </div>
+                            </>
+                          ) : null}
                         </div>
                       </CardContent>
                     </Card>

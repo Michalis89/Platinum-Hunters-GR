@@ -17,8 +17,14 @@ async function GETHandler(_req: Request, { params }: { params: Promise<{ id: str
       data: { session },
     } = await supabase.auth.getSession();
 
+    // Get total likes count (public)
+    const { count } = await supabase
+      .from('article_likes')
+      .select('*', { count: 'exact', head: true })
+      .eq('article_id', Number.parseInt(id, 10));
+
     if (!session) {
-      return ok({ liked: false, count: 0 });
+      return ok({ liked: false, count: count || 0 });
     }
 
     // Check if user has liked
@@ -28,12 +34,6 @@ async function GETHandler(_req: Request, { params }: { params: Promise<{ id: str
       .eq('article_id', Number.parseInt(id, 10))
       .eq('user_id', session.user.id)
       .maybeSingle();
-
-    // Get total likes count
-    const { count } = await supabase
-      .from('article_likes')
-      .select('*', { count: 'exact', head: true })
-      .eq('article_id', Number.parseInt(id, 10));
 
     return ok({
       liked: !!like,

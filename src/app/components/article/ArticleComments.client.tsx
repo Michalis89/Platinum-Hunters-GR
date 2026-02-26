@@ -49,6 +49,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   const [editError, setEditError] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  const [pendingDeleteConfirmId, setPendingDeleteConfirmId] = useState<number | null>(null);
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -139,11 +140,20 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     if (!user) {
       return;
     }
-    if (!window.confirm('Do you want to delete this comment?')) {
+    if (pendingDeleteConfirmId !== commentId) {
+      setPendingDeleteConfirmId(commentId);
       return;
     }
+    const previousComments = comments;
     setDeleteLoading(commentId);
     setError(null);
+    setPendingDeleteConfirmId(null);
+    setComments(prev => prev.filter(comment => comment.id !== commentId));
+    if (editingCommentId === commentId) {
+      setEditingCommentId(null);
+      setEditContent('');
+      setEditError(null);
+    }
     try {
       const response = await fetch(`/api/articles/${articleId}/comments?commentId=${commentId}`, {
         method: 'DELETE',
@@ -153,9 +163,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         throw new Error(payload?.error || 'Failed to delete comment');
       }
       setSuccessMessage('Comment deleted.');
-      await fetchComments();
     } catch (err) {
+      setComments(previousComments);
       setError(err instanceof Error ? err.message : 'Something went wrong');
+      await fetchComments();
     } finally {
       setDeleteLoading(null);
     }
@@ -230,25 +241,49 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                     <p className="mt-2 text-sm leading-relaxed">{comment.content}</p>
                     {user && canManageComment(comment) && (
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          variant="primary"
-                          onClick={() => {
-                            setEditingCommentId(comment.id);
-                            setEditContent(comment.content);
-                            setEditError(null);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          type="button"
-                          onClick={() => handleDelete(comment.id)}
-                          disabled={deleteLoading === comment.id}
-                        >
-                          {deleteLoading === comment.id ? 'Deleting...' : 'Delete'}
-                        </Button>
+                        {pendingDeleteConfirmId === comment.id ? (
+                          <>
+                            <Button
+                              variant="secondary"
+                              type="button"
+                              onClick={() => handleDelete(comment.id)}
+                              disabled={deleteLoading === comment.id}
+                            >
+                              {deleteLoading === comment.id ? 'Deleting...' : 'Confirm delete'}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="primary"
+                              onClick={() => setPendingDeleteConfirmId(null)}
+                              disabled={deleteLoading === comment.id}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              type="button"
+                              variant="primary"
+                              onClick={() => {
+                                setPendingDeleteConfirmId(null);
+                                setEditingCommentId(comment.id);
+                                setEditContent(comment.content);
+                                setEditError(null);
+                              }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              type="button"
+                              onClick={() => handleDelete(comment.id)}
+                              disabled={deleteLoading === comment.id}
+                            >
+                              {deleteLoading === comment.id ? 'Deleting...' : 'Delete'}
+                            </Button>
+                          </>
+                        )}
                       </div>
                     )}
                   </>

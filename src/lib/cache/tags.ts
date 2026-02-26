@@ -97,6 +97,7 @@ export const revalidateCache = {
    * Revalidate article likes after toggle
    */
   articleLike(articleId: number | string) {
+    revalidateTag(CACHE_TAGS.ARTICLES, 'max');
     revalidateTag(CACHE_TAGS.ARTICLE_LIKES(articleId), 'max');
     revalidateTag(CACHE_TAGS.ARTICLE(articleId), 'max'); // Like count may change
   },

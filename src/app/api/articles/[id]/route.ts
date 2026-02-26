@@ -47,14 +47,16 @@ async function GETHandler(_req: Request, { params }: { params: Promise<{ id: str
       data: { session },
     } = await supabase.auth.getSession();
 
-    try {
-      const viewPayload: Database['public']['Tables']['article_views']['Insert'] = {
-        article_id: article.id,
-        user_id: session?.user?.id || null,
-      };
-      await supabase.from('article_views').insert(viewPayload);
-    } catch {
-      // Views tracking is optional, don't fail if it errors
+    if (session?.user?.id) {
+      try {
+        const viewPayload: Database['public']['Tables']['article_views']['Insert'] = {
+          article_id: article.id,
+          user_id: session.user.id,
+        };
+        await supabase.from('article_views').insert(viewPayload);
+      } catch {
+        // Views tracking is optional, don't fail if it errors
+      }
     }
 
     return ok(article);

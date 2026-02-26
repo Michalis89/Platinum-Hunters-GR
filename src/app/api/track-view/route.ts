@@ -1,4 +1,4 @@
-import getSupabaseServer from '@/lib/supabase-server';
+import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { withApiRoute } from '@/lib/observability/withApiRoute';
 
 async function POSTHandler(req: Request) {
@@ -13,10 +13,18 @@ async function POSTHandler(req: Request) {
       });
     }
 
-    const supabase = getSupabaseServer();
+    const supabase = await createRouteHandlerClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.user?.id) {
+      return new Response(null, { status: 204 });
+    }
+
     const { error } = await supabase.from('article_views').insert({
       article_id: articleId,
-      user_id: null,
+      user_id: session.user.id,
     });
 
     if (error) {

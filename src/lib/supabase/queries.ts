@@ -58,5 +58,31 @@ export async function getArticlesWithFilters(
   }
 
   const { data, error, count } = await query;
-  return { data: data as ArticleWithAuthor[] | null, error, count };
+
+  const articles = data as ArticleWithAuthor[] | null;
+  if (!articles || articles.length === 0 || error) {
+    return { data: articles, error, count };
+  }
+
+  // Keep list-card like counts in sync with the source of truth (`article_likes`)
+  // in case the denormalized `articles.likes` column is stale.
+  const articleIds = articles.map(article => article.id);
+  const { data: likeRows } = await supabase
+    .from('article_likes')
+    .select('article_id')
+    .in('article_id', articleIds);
+
+  if (likeRows) {
+    const likesByArticleId = new Map<number, number>();
+    for (const row of likeRows) {
+      const nextCount = (likesByArticleId.get(row.article_id) ?? 0) + 1;
+      likesByArticleId.set(row.article_id, nextCount);
+    }
+
+    for (const article of articles) {
+      article.likes = likesByArticleId.get(article.id) ?? 0;
+    }
+  }
+
+  return { data: articles, error, count };
 }

@@ -17,6 +17,8 @@ import {
   CONTENT_PUBLISHED_EVENT,
   type ContentPublishedEventDetail,
 } from '@/app/constants/contentEvents';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '@/store/slices/authSlice';
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
@@ -47,7 +49,13 @@ const PRIMARY_CATEGORIES: ArticleCategory[] = [
 
 const SKELETON_COUNT = 6;
 
-const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithAuthor }) {
+const ReviewCard = memo(function ReviewCard({
+  article,
+  showEngagementMetrics = true,
+}: {
+  article: ArticleWithAuthor;
+  showEngagementMetrics?: boolean;
+}) {
   const normalizedSlug = normalizeSlug(article.slug);
   const readTimeLabel = article.reading_time_minutes
     ? `${article.reading_time_minutes} min read`
@@ -132,16 +140,18 @@ const ReviewCard = memo(function ReviewCard({ article }: { article: ArticleWithA
             </div>
           ) : null}
 
-          <div className="ml-auto inline-flex items-center gap-3">
-            <span className="inline-flex items-center gap-1">
-              <Eye size={12} />
-              {article.views}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Heart size={12} />
-              {article.likes}
-            </span>
-          </div>
+          {showEngagementMetrics ? (
+            <div className="ml-auto inline-flex items-center gap-3">
+              <span className="inline-flex items-center gap-1">
+                <Eye size={12} />
+                {article.views ?? 0}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Heart size={12} />
+                {article.likes ?? 0}
+              </span>
+            </div>
+          ) : null}
         </div>
       </CardContent>
     </Card>
@@ -228,6 +238,7 @@ function ReviewsPageContent({
   initialCategory,
   initialTag,
 }: Required<ReviewsPageClientProps>) {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const allowedCategories = getVisibleCategories({ scope: 'reviews' });
   const category =
     initialCategory && allowedCategories.includes(initialCategory) ? initialCategory : null;
@@ -404,7 +415,11 @@ function ReviewsPageContent({
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {articles.map(article => (
-              <ReviewCard key={article.id} article={article} />
+              <ReviewCard
+                key={article.id}
+                article={article}
+                showEngagementMetrics={isAuthenticated}
+              />
             ))}
           </div>
         )}
