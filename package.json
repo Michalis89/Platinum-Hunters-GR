@@ -1,10 +1,10 @@
 {
   "name": "hobbistas",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev",
     "ci": "npm run lint && npm test && npm run build",
     "build": "next build --webpack",
     "postbuild": "next-sitemap",

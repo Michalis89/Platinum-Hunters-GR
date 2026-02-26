@@ -248,7 +248,7 @@ const SlideCard = ({ item, isActive }: { item: SlideItem; isActive: boolean }) =
         className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(42%_58%_at_76%_52%,rgba(167,139,250,0.12),transparent_76%)] md:block"
       />
       <div className="w-full min-w-0 md:order-2 md:flex md:justify-end">
-        <div className="relative aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-2xl border border-white/15 bg-muted/10 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.7)] md:w-[436px] md:max-w-none">
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-2xl border border-white/15 bg-muted/10 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.7)] md:mx-0 md:w-[436px] md:max-w-none">
           {imageUrl ? (
             <>
               <div className="absolute inset-0 md:transition-transform md:duration-500 md:ease-out md:[transform:perspective(1100px)_rotateY(-4deg)_scale(1.02)] md:group-hover:[transform:perspective(1100px)_rotateY(-4deg)_scale(1.05)]">
