@@ -18,7 +18,7 @@ const NAV_LINKS = [
 
 const CONTACT = [
   { label: 'GitHub', href: 'https://github.com/Michalis89/hobbistas-hub' },
-  { label: 'Email', href: 'mailto:mouzakitis.m89+supporthobbistas-hub@gmail.com' },
+  { label: 'Email', href: 'mailto:support@hobbistas-hub.com' },
 ];
 
 function FooterTextLink({ href, children }: { href: string; children: ReactNode }) {

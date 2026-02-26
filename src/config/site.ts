@@ -12,7 +12,7 @@ export const DEFAULT_OG_IMAGE_ALT =
   'Hobbistas - Track your hobbies across games, anime, movies, and books';
 
 export const SITE_CONTACT_EMAIL =
-  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'mouzakitis.m89+HobbistasSupport@gmail.com';
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'support@hobbistas-hub.com';
 
 export const DEFAULT_DESCRIPTION =
   'Track your hobbies across games, anime, movies, and books. Hobbistas is your personal hub for reviews, articles, and backlog management.';
