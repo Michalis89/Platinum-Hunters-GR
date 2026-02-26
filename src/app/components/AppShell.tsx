@@ -1,6 +1,10 @@
 import React from 'react';
 import NavbarWrapper from './NavbarWrapper';
 import { Footer } from './layout/Footer';
+import OfflineBanner from './shared/OfflineBanner';
+import SWUpdateBanner from './shared/SWUpdateBanner';
+import IOSInstallHint from './shared/IOSInstallHint';
+import InstallPrompt from './shared/InstallPrompt';
 
 type Props = {
   children: React.ReactNode;
@@ -9,6 +13,11 @@ type Props = {
 export default function AppShell({ children }: Props) {
   return (
     <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+      <OfflineBanner />
+      <SWUpdateBanner />
+      <InstallPrompt />
+      <IOSInstallHint />
+
       {/* Ambient gradient - fixed to viewport so it doesn't scale with page height */}
       <div
         className="pointer-events-none fixed inset-0"

@@ -54,12 +54,12 @@ export default function StatusFilterBar({
           value={activeStatus}
           onValueChange={value => onStatusChange(value as MediaStatus | 'all')}
         >
-          <TabsList className="h-11 w-full justify-center gap-1 rounded-xl border border-border/70 bg-card/70 p-1">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl border border-border/70 bg-card/70 p-1 sm:flex sm:h-11 sm:justify-center">
             {filters.map(filter => (
               <TabsTrigger
                 key={filter.key}
                 value={filter.key}
-                className="h-9 shrink-0 rounded-lg px-4 text-xs font-semibold sm:text-sm"
+                className="h-9 min-w-0 rounded-lg px-2 text-[11px] font-semibold sm:shrink-0 sm:px-4 sm:text-sm"
               >
                 {filter.label}
               </TabsTrigger>

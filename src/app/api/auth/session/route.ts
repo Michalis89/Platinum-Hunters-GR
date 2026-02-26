@@ -5,6 +5,12 @@ import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import { clearAuthCookies } from '@/lib/auth';
 
+const NO_STORE_HEADERS = {
+  headers: {
+    'Cache-Control': 'no-store',
+  },
+} satisfies ResponseInit;
+
 async function GETHandler() {
   try {
     const supabase = await createRouteHandlerClient();
@@ -16,11 +22,11 @@ async function GETHandler() {
 
     if (sessionError) {
       console.error('Session error:', sessionError);
-      return fail({ error: 'Session check error' }, 500);
+      return fail({ error: 'Session check error' }, 500, NO_STORE_HEADERS);
     }
 
     if (!session) {
-      return ok({ user: null, session: null });
+      return ok({ user: null, session: null }, NO_STORE_HEADERS);
     }
 
     const { data: userProfile, error: profileError } = await supabase
@@ -31,7 +37,7 @@ async function GETHandler() {
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
-      return fail({ error: 'Profile loading error' }, 500);
+      return fail({ error: 'Profile loading error' }, 500, NO_STORE_HEADERS);
     }
 
     const typedUserProfile = userProfile as Database['public']['Tables']['users']['Row'];
@@ -40,7 +46,7 @@ async function GETHandler() {
       await supabase.auth.signOut();
       await clearAuthCookies();
 
-      return ok({ user: null, session: null });
+      return ok({ user: null, session: null }, NO_STORE_HEADERS);
     }
 
     if (
@@ -58,16 +64,20 @@ async function GETHandler() {
               : 'Your account has been blocked',
         },
         403,
+        NO_STORE_HEADERS,
       );
     }
 
-    return ok({
-      user: typedUserProfile,
-      session,
-    });
+    return ok(
+      {
+        user: typedUserProfile,
+        session,
+      },
+      NO_STORE_HEADERS,
+    );
   } catch (error) {
     console.error('Session error:', error);
-    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
+    return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status, NO_STORE_HEADERS);
   }
 }
 

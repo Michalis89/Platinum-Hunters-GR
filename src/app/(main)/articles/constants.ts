@@ -6,7 +6,7 @@ export const CATEGORY_LABELS: Partial<Record<ArticleCategory, string>> = {
   manga: 'Manga',
   books: 'Books',
   movies: 'Movies',
-  tv: 'TV Shows',
+  tv: 'TV',
   coding: 'Coding',
   pet: 'Pets',
   vape: 'Vape',

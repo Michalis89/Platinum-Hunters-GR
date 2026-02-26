@@ -373,27 +373,27 @@ export default function AddArticleDialog({
     contentType === 'review' ? REVIEW_CATEGORIES : (Object.keys(CATEGORIES) as ArticleCategory[]);
 
   return isOpen ? (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
       {/* Backdrop */}
       <div className="hb-dialog-overlay absolute inset-0" onClick={onClose} />
 
       {/* Dialog Container - Centered */}
       <dialog
         ref={dialogRef}
-        className="hb-dialog-surface fixed left-1/2 top-1/2 z-10 m-0 max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border p-0 backdrop:bg-transparent"
+        className="hb-dialog-surface fixed inset-x-0 bottom-0 top-auto z-10 m-0 h-[100dvh] max-h-[100dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-none border border-border p-0 backdrop:bg-transparent sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:inset-x-auto sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
         onClose={onClose}
       >
-        <div className="animate-fade-in-up flex h-full max-h-[90vh] flex-col">
+        <div className="animate-fade-in-up flex h-full max-h-[100dvh] flex-col sm:max-h-[90vh]">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
-            <h2 className="text-xl font-semibold text-foreground">{dialogTitle}</h2>
+          <div className="flex items-center justify-between border-b border-border px-4 py-4 sm:px-6">
+            <h2 className="text-lg font-semibold text-foreground sm:text-xl">{dialogTitle}</h2>
             <Button variant="secondary" onClick={onClose}>
               <X size={20} />
             </Button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             <div className="space-y-6">
               {/* Error message */}
               {error && <ErrorAlert message={error} />}
@@ -586,16 +586,18 @@ export default function AddArticleDialog({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-border px-6 py-4">
-            <Button variant="secondary" onClick={onClose}>
+          <div className="border-t border-border px-4 py-4 sm:px-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <Button variant="secondary" onClick={onClose} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto sm:gap-3">
               <Button
                 variant="ghost"
                 icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
                 onClick={() => handleSubmit('draft')}
                 disabled={isSubmitting || hasPlainTextError || noPermission}
+                className="w-full sm:w-auto"
               >
                 Save as Draft
               </Button>
@@ -604,9 +606,11 @@ export default function AddArticleDialog({
                 icon={isSubmitting ? <Spinner className="size-4" /> : <Eye size={16} />}
                 onClick={() => handleSubmit('published')}
                 disabled={isSubmitting || hasPlainTextError || noPermission}
+                className="w-full sm:w-auto"
               >
                 Publish
               </Button>
+            </div>
             </div>
           </div>
         </div>

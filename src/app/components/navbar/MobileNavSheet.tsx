@@ -5,6 +5,7 @@ import {
   LogOut,
   Menu,
   PenLine,
+  Settings,
   Plus,
   ShieldCheck,
   Ticket,
@@ -12,13 +13,12 @@ import {
   UserPlus,
 } from 'lucide-react';
 import type { User as UserEntity } from '@/types/user';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { isHrefActive, type DndToolItem, type HobbyItem, type NavbarLinkItem } from './navbar.data';
-import { getUserInitials, mobileChipClass, NavItemContent } from './navbar.helpers';
+import { mobileChipClass, NavItemContent } from './navbar.helpers';
 
 type Theme = 'dark' | 'light';
 
@@ -67,6 +67,13 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
 }: MobileNavSheetProps) {
   const closeSheet = () => onOpenChange(false);
   const [isMounted, setIsMounted] = React.useState(false);
+  const mobileHobbyItems = React.useMemo(
+    () =>
+      hobbyItems.filter(
+        item => !['coding', 'pet', 'vape'].includes(item.label.trim().toLowerCase()),
+      ),
+    [hobbyItems],
+  );
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -95,15 +102,15 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
         </SheetTrigger>
         <SheetContent
           side="right"
-          className="hb-dialog-surface w-[92vw] max-w-sm touch-pan-y border-border p-0 text-foreground"
+          className="hb-dialog-surface h-[100dvh] w-full max-w-none touch-pan-y border-y-0 border-l border-r-0 border-border p-0 text-foreground sm:w-[92vw] sm:max-w-sm sm:border-y sm:border-r-0"
         >
-          <SheetHeader className="border-b border-[var(--border)] px-5 py-4">
+          <SheetHeader className="px-5 py-4">
             <SheetTitle className="text-left text-sm font-semibold tracking-[-0.015em] text-foreground">
               Hobbistas Menu
             </SheetTitle>
           </SheetHeader>
 
-          <div className="h-[calc(100vh-72px)] overflow-y-auto px-5 py-4 [scrollbar-width:thin]">
+          <div className="h-[calc(100dvh-72px)] overflow-y-auto px-5 py-4 [scrollbar-width:thin]">
             <div className="space-y-4 pr-1">
               <section className="space-y-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -125,7 +132,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                 </div>
               </section>
 
-              {hobbyItems.length > 0 ? (
+              {mobileHobbyItems.length > 0 ? (
                 <>
                   <Separator className="h-[0.5px] bg-[var(--border)]" />
 
@@ -135,7 +142,7 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                     </h3>
                     <div className="-mx-1 touch-pan-x overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
                       <div className="flex w-max min-w-max gap-2">
-                        {hobbyItems.map(item => (
+                        {mobileHobbyItems.map(item => (
                           <Button
                             key={item.href}
                             asChild
@@ -231,18 +238,6 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                   <NavbarAuthSkeletonMobile />
                 ) : isAuthenticated && user ? (
                   <div className="grid gap-2">
-                    <div className="flex h-11 items-center gap-2 border border-[var(--border)] bg-card px-3">
-                      <Avatar className="h-7 w-7 border border-[var(--border)]">
-                        <AvatarImage
-                          src={user.avatar_url || undefined}
-                          alt={user.username || 'User'}
-                        />
-                        <AvatarFallback className="bg-[hsl(var(--accent))/10] text-xs font-semibold text-foreground">
-                          {getUserInitials(user.username)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="truncate text-sm">{user.username}</span>
-                    </div>
                     {canQuickAdd ? (
                       <Button
                         type="button"
@@ -265,6 +260,16 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                       <Link href="/profile">
                         <User className="size-4" />
                         <span>Profile</span>
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="h-11 justify-start border border-[var(--border)] bg-card px-3 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,border-color,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/10] active:scale-[0.98]"
+                    >
+                      <Link href="/settings">
+                        <Settings className="size-4" />
+                        <span>Settings</span>
                       </Link>
                     </Button>
                     <Button

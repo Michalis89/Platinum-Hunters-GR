@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { MediaCategory, MediaEntry, MediaStatus, SearchResult } from './types';
 import { CATEGORY_CONFIG, getProgressLabel, getTotalCount } from './types';
 
@@ -91,6 +93,30 @@ const READING_FORMATS = [
   { key: 'digital', label: 'Digital' },
 ] as const;
 
+function formatMediaFormatLabel(value?: string | null) {
+  const raw = value?.trim();
+  if (!raw) return '-';
+
+  const normalized = raw.toLowerCase();
+  const specialMap: Record<string, string> = {
+    tv: 'TV',
+    ova: 'OVA',
+    ona: 'ONA',
+    oad: 'OAD',
+  };
+
+  if (specialMap[normalized]) {
+    return specialMap[normalized];
+  }
+
+  return raw
+    .replace(/[_-]+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export default function EntryEditDialog({
   entry,
   category,
@@ -98,6 +124,7 @@ export default function EntryEditDialog({
   onSave,
   onDelete,
 }: Readonly<EntryEditDialogProps>) {
+  const isMobile = useIsMobile();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectPortalContainer, setSelectPortalContainer] = useState<HTMLDivElement | null>(null);
   const [editState, setEditState] = useState<EditState>({
@@ -112,8 +139,10 @@ export default function EntryEditDialog({
   const config = CATEGORY_CONFIG[category];
   const progressLabel = getProgressLabel(category);
   const isAnime = category === 'anime';
+  const isGames = category === 'games';
   const isReadingCategory = category === 'manga' || category === 'books';
   const isVisualWatchCategory = category === 'movies' || category === 'tv';
+  const hasFormatValue = Boolean(entry?.format?.trim());
   const total = entry ? getTotalCount(entry, category) : undefined;
   const shouldAutoCompleteProgress = category !== 'games';
   const platformValue = editState.selectedPlatform || NO_PLATFORM_VALUE;
@@ -206,348 +235,372 @@ export default function EntryEditDialog({
     setEditState(prev => ({ ...prev, score: normalized }));
   };
 
-  return (
-    <>
-      <Dialog open={!!entry} onOpenChange={open => !open && onClose()}>
-        {entry && (
-          <DialogContent
-            withBlurBackdrop
-            portalContainerRef={handleSelectPortalMount}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-5xl -translate-x-1/2 -translate-y-1/2 gap-0 border-border bg-card p-0 max-sm:bottom-0 max-sm:left-0 max-sm:top-auto max-sm:h-[96dvh] max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:border-x-0 max-sm:border-b-0 sm:max-h-[90vh] sm:rounded-3xl"
-          >
-            <div className="flex h-[96dvh] max-h-[96dvh] flex-col overflow-hidden sm:h-[90vh] sm:max-h-[90vh]">
-              <DialogHeader className="border-b border-border px-4 py-4 sm:px-6 sm:py-5">
-                <DialogTitle className="text-base font-semibold text-foreground sm:text-lg">
-                  {isAnime ? 'Anime Entry' : `${config.title} Entry`}
-                </DialogTitle>
-              </DialogHeader>
+  const editorPanel = entry ? (
+    <div className="flex h-[96dvh] max-h-[96dvh] flex-col overflow-hidden sm:h-[90vh] sm:max-h-[90vh]">
+      <DialogHeader className="border-b border-border px-4 py-4 sm:px-6 sm:py-5">
+        <DialogTitle className="text-base font-semibold text-foreground sm:text-lg">
+          {isAnime ? 'Anime Entry' : `${config.title} Entry`}
+        </DialogTitle>
+      </DialogHeader>
 
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                <section className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-                  <aside className="rounded-2xl border border-border bg-card/70 p-3 sm:p-4">
-                    <div className="relative mx-auto aspect-[2/3] w-full max-w-[220px] overflow-hidden rounded-xl border border-border bg-muted/20">
-                      <Image
-                        src={entry.cover}
-                        alt={entry.title}
-                        fill
-                        sizes="(max-width: 1024px) 220px, 280px"
-                        className="object-cover"
-                      />
-                    </div>
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <section className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="rounded-2xl border border-border bg-card/70 p-3 sm:p-4">
+            <div className="relative mx-auto aspect-[2/3] w-full max-w-[220px] overflow-hidden rounded-xl border border-border bg-muted/20">
+              <Image
+                src={entry.cover}
+                alt={entry.title}
+                fill
+                sizes="(max-width: 1024px) 220px, 280px"
+                className="object-cover"
+              />
+            </div>
 
-                    <div className="mt-4 space-y-3">
-                      <div>
-                        <p className="text-lg font-semibold leading-tight text-foreground">
-                          {entry.title}
-                        </p>
-                        {entry.subtitle ? (
-                          <p className="mt-1 text-sm text-muted-foreground">{entry.subtitle}</p>
-                        ) : null}
-                      </div>
-
-                      {entry.tags.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {entry.tags.slice(0, 8).map(tag => (
-                            <span
-                              key={tag}
-                              className="rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-
-                      <Separator className="bg-border" />
-
-                      <div className="grid grid-cols-3 gap-y-2 text-xs">
-                        <span className="text-muted-foreground">Format</span>
-                        <span className="col-span-2 text-right font-medium text-foreground">
-                          {entry.format || '-'}
-                        </span>
-                        <span className="text-muted-foreground">Year</span>
-                        <span className="col-span-2 text-right font-medium text-foreground">
-                          {entry.year || '-'}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {category === 'movies' ? 'Runtime' : progressLabel}
-                        </span>
-                        <span className="col-span-2 text-right font-medium text-foreground">
-                          {total ?? '-'}
-                        </span>
-                      </div>
-                    </div>
-                  </aside>
-
-                  <div className="space-y-4 rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="entry-status-trigger"
-                          className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-                        >
-                          Status
-                        </label>
-                        <Select
-                          value={editState.status}
-                          onValueChange={value => handleStatusChange(value as MediaStatus)}
-                        >
-                          <SelectTrigger id="entry-status-trigger" className="h-10 !min-h-0">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent portalContainer={selectPortalContainer}>
-                            <SelectItem value="planned">{config.plannedLabel}</SelectItem>
-                            {category !== 'movies' ? (
-                              <SelectItem value="current">{config.currentLabel}</SelectItem>
-                            ) : null}
-                            <SelectItem value="completed">{config.completedLabel}</SelectItem>
-                            <SelectItem value="dropped">{config.droppedLabel}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {isAnime ||
-                      category === 'games' ||
-                      isReadingCategory ||
-                      isVisualWatchCategory ? (
-                        <div className="space-y-2">
-                          <label
-                            htmlFor="entry-platform-trigger"
-                            className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-                          >
-                            {isAnime || isVisualWatchCategory
-                              ? 'Watched on'
-                              : isReadingCategory
-                                ? 'Reading format'
-                                : 'Platform'}
-                          </label>
-                          <Select
-                            value={platformValue}
-                            onValueChange={value =>
-                              setEditState(prev => ({
-                                ...prev,
-                                selectedPlatform: value === NO_PLATFORM_VALUE ? '' : value,
-                              }))
-                            }
-                          >
-                            <SelectTrigger id="entry-platform-trigger" className="h-10 !min-h-0">
-                              <SelectValue placeholder="Not selected" />
-                            </SelectTrigger>
-                            <SelectContent portalContainer={selectPortalContainer}>
-                              <SelectItem value={NO_PLATFORM_VALUE}>Not selected</SelectItem>
-                              {isAnime
-                                ? ANIME_PLATFORMS.map(platform => (
-                                    <SelectItem key={platform.key} value={platform.key}>
-                                      {platform.label}
-                                    </SelectItem>
-                                  ))
-                                : isReadingCategory
-                                  ? READING_FORMATS.map(format => (
-                                      <SelectItem key={format.key} value={format.key}>
-                                        {format.label}
-                                      </SelectItem>
-                                    ))
-                                  : category === 'movies'
-                                    ? MOVIES_PLATFORMS.map(platform => (
-                                        <SelectItem key={platform.key} value={platform.key}>
-                                          {platform.label}
-                                        </SelectItem>
-                                      ))
-                                    : category === 'tv'
-                                      ? TV_PLATFORMS.map(platform => (
-                                          <SelectItem key={platform.key} value={platform.key}>
-                                            {platform.label}
-                                          </SelectItem>
-                                        ))
-                                      : (entry.platforms ?? []).map(platform => (
-                                          <SelectItem key={platform} value={platform}>
-                                            {platform}
-                                          </SelectItem>
-                                        ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="entry-progress"
-                          className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-                        >
-                          Progress
-                        </label>
-                        <span className="text-xs text-muted-foreground">
-                          {clampedProgress}
-                          {total ? ` / ${total}` : ''}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={() => setProgress((hasNumericProgress ? safeProgress : 0) - 1)}
-                          className="h-9 min-w-10 px-0"
-                        >
-                          -
-                        </Button>
-                        <Input
-                          id="entry-progress"
-                          value={editState.progress}
-                          onChange={event => handleProgressInputChange(event.target.value)}
-                          className="h-9 text-center"
-                          inputMode="numeric"
-                          placeholder="0"
-                          aria-label="Progress value"
-                        />
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={() => setProgress((hasNumericProgress ? safeProgress : 0) + 1)}
-                          className="h-9 min-w-10 px-0"
-                        >
-                          +
-                        </Button>
-                        {total ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setProgress(total)}
-                            className="h-9"
-                          >
-                            Max
-                          </Button>
-                        ) : null}
-                      </div>
-                      {progressPercent !== null ? (
-                        <div className="h-2 overflow-hidden rounded-full bg-border/60">
-                          <div
-                            className="h-full rounded-full bg-primary transition-[width] duration-300"
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="entry-score"
-                          className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-                        >
-                          Score
-                        </label>
-                        <span className="text-sm font-semibold text-foreground">
-                          {editState.score === '' ? '-' : editState.score}
-                        </span>
-                      </div>
-
-                      <Slider
-                        value={[Number.isFinite(scoreNumber) ? scoreNumber : 0]}
-                        min={0}
-                        max={10}
-                        step={0.5}
-                        onValueChange={value =>
-                          setEditState(prev => ({
-                            ...prev,
-                            score: String(value[0] ?? 0),
-                          }))
-                        }
-                        aria-label="Score slider"
-                        className="[&_[data-slot=slider-track]]:h-1.5"
-                      />
-
-                      <div className="flex items-center gap-2">
-                        <Input
-                          id="entry-score"
-                          value={editState.score}
-                          inputMode="decimal"
-                          placeholder="0-10"
-                          onChange={event => handleScoreChange(event.target.value)}
-                          className="h-9 max-w-24 text-center"
-                        />
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={() => setEditState(prev => ({ ...prev, score: '' }))}
-                          className="h-9"
-                        >
-                          Reset
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                        Favorite
-                      </label>
-                      <Button
-                        type="button"
-                        variant={editState.isFavorite ? 'primary' : 'secondary'}
-                        onClick={() =>
-                          setEditState(prev => ({ ...prev, isFavorite: !prev.isFavorite }))
-                        }
-                        aria-pressed={editState.isFavorite}
-                        className="h-10 w-full justify-start gap-2"
-                      >
-                        <Heart
-                          className="h-4 w-4"
-                          fill={editState.isFavorite ? 'currentColor' : 'none'}
-                        />
-                        {editState.isFavorite ? 'Favorited' : 'Mark as favorite'}
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="entry-notes"
-                        className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-                      >
-                        Notes
-                      </label>
-                      <Textarea
-                        id="entry-notes"
-                        value={editState.notes}
-                        onChange={event =>
-                          setEditState(prev => ({ ...prev, notes: event.target.value }))
-                        }
-                        className="min-h-[92px]"
-                        placeholder="Add personal notes..."
-                      />
-                    </div>
-                  </div>
-                </section>
+            <div className="mt-4 space-y-3">
+              <div>
+                <p className="text-lg font-semibold leading-tight text-foreground">{entry.title}</p>
+                {entry.subtitle ? (
+                  <p className="mt-1 text-sm text-muted-foreground">{entry.subtitle}</p>
+                ) : null}
               </div>
 
-              <DialogFooter className="border-t border-border bg-card px-4 py-4 sm:px-6">
-                <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    {entry.mediaId ? (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        icon={<Trash2 className="h-4 w-4" />}
-                      >
-                        Delete
-                      </Button>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button type="button" variant="outline" onClick={onClose}>
-                      Cancel
-                    </Button>
-                    <Button type="button" variant="primary" onClick={() => onSave(editState)}>
-                      Save
-                    </Button>
-                  </div>
+              {entry.tags.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {entry.tags.slice(0, 8).map(tag => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-              </DialogFooter>
+              ) : null}
+
+              <Separator className="bg-border" />
+
+              <div className="grid grid-cols-3 gap-y-2 text-xs">
+                {!isGames && hasFormatValue ? (
+                  <>
+                    <span className="text-muted-foreground">Format</span>
+                    <span className="col-span-2 text-right font-medium text-foreground">
+                      {formatMediaFormatLabel(entry.format)}
+                    </span>
+                  </>
+                ) : null}
+                <span className="text-muted-foreground">Year</span>
+                <span className="col-span-2 text-right font-medium text-foreground">
+                  {entry.year || '-'}
+                </span>
+                {!isGames ? (
+                  <>
+                    <span className="text-muted-foreground">
+                      {category === 'movies' ? 'Runtime' : progressLabel}
+                    </span>
+                    <span className="col-span-2 text-right font-medium text-foreground">
+                      {total ?? '-'}
+                    </span>
+                  </>
+                ) : null}
+              </div>
             </div>
-          </DialogContent>
-        )}
-      </Dialog>
+          </aside>
+
+          <div className="space-y-4 rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label
+                  htmlFor="entry-status-trigger"
+                  className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+                >
+                  Status
+                </label>
+                <Select
+                  value={editState.status}
+                  onValueChange={value => handleStatusChange(value as MediaStatus)}
+                >
+                  <SelectTrigger id="entry-status-trigger" className="h-10 !min-h-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent portalContainer={selectPortalContainer}>
+                    <SelectItem value="planned">{config.plannedLabel}</SelectItem>
+                    {category !== 'movies' ? (
+                      <SelectItem value="current">{config.currentLabel}</SelectItem>
+                    ) : null}
+                    <SelectItem value="completed">{config.completedLabel}</SelectItem>
+                    <SelectItem value="dropped">{config.droppedLabel}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {isAnime || category === 'games' || isReadingCategory || isVisualWatchCategory ? (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="entry-platform-trigger"
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+                  >
+                    {isAnime || isVisualWatchCategory
+                      ? 'Watched on'
+                      : isReadingCategory
+                        ? 'Reading format'
+                        : 'Platform'}
+                  </label>
+                  <Select
+                    value={platformValue}
+                    onValueChange={value =>
+                      setEditState(prev => ({
+                        ...prev,
+                        selectedPlatform: value === NO_PLATFORM_VALUE ? '' : value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger id="entry-platform-trigger" className="h-10 !min-h-0">
+                      <SelectValue placeholder="Not selected" />
+                    </SelectTrigger>
+                    <SelectContent portalContainer={selectPortalContainer}>
+                      <SelectItem value={NO_PLATFORM_VALUE}>Not selected</SelectItem>
+                      {isAnime
+                        ? ANIME_PLATFORMS.map(platform => (
+                            <SelectItem key={platform.key} value={platform.key}>
+                              {platform.label}
+                            </SelectItem>
+                          ))
+                        : isReadingCategory
+                          ? READING_FORMATS.map(format => (
+                              <SelectItem key={format.key} value={format.key}>
+                                {format.label}
+                              </SelectItem>
+                            ))
+                          : category === 'movies'
+                            ? MOVIES_PLATFORMS.map(platform => (
+                                <SelectItem key={platform.key} value={platform.key}>
+                                  {platform.label}
+                                </SelectItem>
+                              ))
+                            : category === 'tv'
+                              ? TV_PLATFORMS.map(platform => (
+                                  <SelectItem key={platform.key} value={platform.key}>
+                                    {platform.label}
+                                  </SelectItem>
+                                ))
+                              : (entry.platforms ?? []).map(platform => (
+                                  <SelectItem key={platform} value={platform}>
+                                    {platform}
+                                  </SelectItem>
+                                ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="entry-progress"
+                  className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+                >
+                  Progress
+                </label>
+                {!isGames ? (
+                  <span className="text-xs text-muted-foreground">
+                    {clampedProgress}
+                    {total ? ` / ${total}` : ''}
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setProgress((hasNumericProgress ? safeProgress : 0) - 1)}
+                  className="h-9 min-w-10 px-0"
+                >
+                  -
+                </Button>
+                <Input
+                  id="entry-progress"
+                  value={editState.progress}
+                  onChange={event => handleProgressInputChange(event.target.value)}
+                  className="h-9 text-center"
+                  inputMode="numeric"
+                  placeholder="0"
+                  aria-label="Progress value"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setProgress((hasNumericProgress ? safeProgress : 0) + 1)}
+                  className="h-9 min-w-10 px-0"
+                >
+                  +
+                </Button>
+                {total ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setProgress(total)}
+                    className="h-9"
+                  >
+                    Max
+                  </Button>
+                ) : null}
+              </div>
+              {progressPercent !== null ? (
+                <div className="h-2 overflow-hidden rounded-full bg-border/60">
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-300"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="entry-score"
+                  className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+                >
+                  Score
+                </label>
+                <span className="text-sm font-semibold text-foreground">
+                  {editState.score === '' ? '-' : editState.score}
+                </span>
+              </div>
+
+              <Slider
+                value={[Number.isFinite(scoreNumber) ? scoreNumber : 0]}
+                min={0}
+                max={10}
+                step={0.5}
+                onValueChange={value =>
+                  setEditState(prev => ({
+                    ...prev,
+                    score: String(value[0] ?? 0),
+                  }))
+                }
+                aria-label="Score slider"
+                className="[&_[data-slot=slider-track]]:h-1.5"
+              />
+
+              <div className="flex items-center gap-2">
+                <Input
+                  id="entry-score"
+                  value={editState.score}
+                  inputMode="decimal"
+                  placeholder="0-10"
+                  onChange={event => handleScoreChange(event.target.value)}
+                  className="h-9 max-w-24 text-center"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setEditState(prev => ({ ...prev, score: '' }))}
+                  className="h-9"
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Favorite
+              </label>
+              <Button
+                type="button"
+                variant={editState.isFavorite ? 'primary' : 'secondary'}
+                onClick={() => setEditState(prev => ({ ...prev, isFavorite: !prev.isFavorite }))}
+                aria-pressed={editState.isFavorite}
+                className="h-10 w-full justify-start gap-2"
+              >
+                <Heart
+                  className="h-4 w-4"
+                  fill={editState.isFavorite ? 'currentColor' : 'none'}
+                />
+                {editState.isFavorite ? 'Favorited' : 'Mark as favorite'}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="entry-notes"
+                className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+              >
+                Notes
+              </label>
+              <Textarea
+                id="entry-notes"
+                value={editState.notes}
+                onChange={event => setEditState(prev => ({ ...prev, notes: event.target.value }))}
+                className="min-h-[92px]"
+                placeholder="Add personal notes..."
+              />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <DialogFooter className="border-t border-border bg-card px-4 py-4 sm:px-6">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full sm:w-auto">
+            {entry.mediaId ? (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                icon={<Trash2 className="h-4 w-4" />}
+                className="w-full sm:w-auto"
+              >
+                Delete
+              </Button>
+            ) : null}
+          </div>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+            <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => onSave(editState)}
+              className="w-full sm:w-auto"
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      </DialogFooter>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      {isMobile ? (
+        <Sheet open={!!entry} onOpenChange={open => !open && onClose()}>
+          {entry ? (
+            <SheetContent
+              side="bottom"
+              className="h-[100dvh] w-full max-w-none gap-0 border-x-0 border-b-0 border-t border-border bg-card p-0"
+            >
+              {editorPanel}
+            </SheetContent>
+          ) : null}
+        </Sheet>
+      ) : (
+        <Dialog open={!!entry} onOpenChange={open => !open && onClose()}>
+          {entry ? (
+            <DialogContent
+              withBlurBackdrop
+              portalContainerRef={handleSelectPortalMount}
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-5xl -translate-x-1/2 -translate-y-1/2 gap-0 border-border bg-card p-0 sm:max-h-[90vh] sm:rounded-3xl"
+            >
+              {editorPanel}
+            </DialogContent>
+          ) : null}
+        </Dialog>
+      )}
 
       {entry?.mediaId ? (
         <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>

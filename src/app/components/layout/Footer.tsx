@@ -10,10 +10,10 @@ const LEGAL_LINKS = [
 
 const NAV_LINKS = [
   { label: 'Home', href: '/home' },
-  { label: 'Backlog', href: '/backlog' },
+  { label: 'About', href: '/about' },
+  { label: 'Hobbies', href: '/hobbies' },
   { label: 'Articles', href: '/articles' },
   { label: 'Reviews', href: '/review' },
-  { label: 'About', href: '/about' },
 ];
 
 const CONTACT = [
@@ -41,8 +41,8 @@ export function Footer() {
           <div className="relative grid gap-8 md:grid-cols-[1.55fr_1fr_1fr]">
             <section className="space-y-4">
               <Link href="/" className="inline-flex w-fit items-center gap-3 rounded-2xl px-1 py-1">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl text-[11px] font-semibold text-white">
-                  HB
+                <div className="grid h-10 w-10 place-items-center rounded-xl border border-[hsl(var(--accent-primary))/0.35] bg-[hsl(var(--accent-muted))]">
+                  <span className="text-lg font-black leading-none text-primary">H</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export function Footer() {
               </div>
             </section>
 
-            <section>
+            <section className="hidden md:block">
               <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-foreground">
                 Navigation
               </h2>
@@ -105,14 +105,6 @@ export function Footer() {
               <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                 &copy; {currentYear} Hobbistas. All rights reserved.
               </p>
-
-              <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
-                {LEGAL_LINKS.map(link => (
-                  <Link key={link.href} href={link.href}>
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
             </div>
           </div>
         </div>

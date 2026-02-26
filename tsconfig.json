@@ -18,6 +18,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
+    "types": [
+      "node"
+    ],
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
     "strictNullChecks": true,

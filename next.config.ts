@@ -1,10 +1,171 @@
 import { join } from 'node:path';
 import type { NextConfig } from 'next';
 import bundleAnalyzer from '@next/bundle-analyzer';
+import withPWAInit from '@ducanh2912/next-pwa';
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: !!process.env.ANALYZE,
   openAnalyzer: true,
+});
+
+const withPWA = withPWAInit({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  reloadOnOnline: true,
+  fallbacks: {
+    document: '/offline',
+  },
+  cacheOnFrontEndNav: false,
+  aggressiveFrontEndNavCaching: false,
+  workboxOptions: {
+    skipWaiting: true,
+    cleanupOutdatedCaches: true,
+    clientsClaim: true,
+    navigationPreload: true,
+    runtimeCaching: [
+      {
+        urlPattern: ({ request }: { request: Request }) =>
+          request.headers.has('authorization') || request.headers.has('Authorization'),
+        handler: 'NetworkOnly',
+      },
+      {
+        urlPattern: /\/api\/(auth|admin)\//i,
+        handler: 'NetworkOnly',
+      },
+      {
+        urlPattern: /\/api\/me\//i,
+        handler: 'NetworkOnly',
+      },
+      {
+        urlPattern: /\/api\/(articles|public)\//i,
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'api-public',
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 10 * 60,
+          },
+          cacheableResponse: {
+            statuses: [200],
+          },
+        },
+      },
+      {
+        urlPattern: /\/_next\/static\//i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'static-assets',
+          expiration: {
+            maxEntries: 200,
+            maxAgeSeconds: 365 * 24 * 60 * 60,
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
+        urlPattern: /\/_next\/static\/chunks\/.*(tiptap|lowlight|prosemirror|codemirror).*/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'editor-bundles',
+          expiration: {
+            maxEntries: 12,
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
+        urlPattern: ({ url }: { url: URL }) => {
+          const publicPaths = ['/home', '/about', '/articles', '/review', '/media', '/terms', '/privacy'];
+          return url.origin === 'http://localhost:3000' || url.origin === 'https://hobbistas-hub.com'
+            ? publicPaths.some(path => url.pathname.startsWith(path))
+            : false;
+        },
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'public-pages',
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 24 * 60 * 60,
+          },
+          cacheableResponse: {
+            statuses: [200],
+          },
+        },
+      },
+      {
+        urlPattern: ({ url }: { url: URL }) => {
+          const authPaths = ['/dashboard', '/diary', '/backlog', '/profile', '/settings', '/dnd'];
+          return url.origin === 'http://localhost:3000' || url.origin === 'https://hobbistas-hub.com'
+            ? authPaths.some(path => url.pathname.startsWith(path))
+            : false;
+        },
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'auth-pages',
+          networkTimeoutSeconds: 5,
+          expiration: {
+            maxEntries: 10,
+            maxAgeSeconds: 60 * 60,
+          },
+          cacheableResponse: {
+            statuses: [200],
+          },
+        },
+      },
+      {
+        urlPattern: /jolfksxuhyktpwncniks\.supabase\.co\/rest\//i,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'supabase-rest',
+          networkTimeoutSeconds: 5,
+          expiration: {
+            maxEntries: 30,
+            maxAgeSeconds: 5 * 60,
+          },
+          cacheableResponse: {
+            statuses: [200],
+          },
+        },
+      },
+      {
+        urlPattern: /jolfksxuhyktpwncniks\.supabase\.co\/storage\//i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'supabase-images',
+          expiration: {
+            maxEntries: 200,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+            purgeOnQuotaError: true,
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
+        urlPattern:
+          /^https:\/\/(media\.rawg\.io|images\.igdb\.com|image\.tmdb\.org|s4\.anilist\.co|cdn\.myanimelist\.net|cdn\.cloudflare\.steamstatic\.com|books\.google\.com)\//i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'external-media-images',
+          expiration: {
+            maxEntries: 500,
+            maxAgeSeconds: 14 * 24 * 60 * 60,
+            purgeOnQuotaError: true,
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+    ],
+  },
 });
 
 type NextConfigWithInstrumentation = NextConfig & {
@@ -14,6 +175,7 @@ type NextConfigWithInstrumentation = NextConfig & {
 };
 
 const nextConfig: NextConfigWithInstrumentation = {
+  turbopack: {},
   htmlLimitedBots: /Googlebot|Bingbot|DuckDuckBot|Slurp|baiduspider|facebot|ia_archiver/,
   productionBrowserSourceMaps: false,
   outputFileTracingRoot: join(process.cwd()),
@@ -82,6 +244,22 @@ const nextConfig: NextConfigWithInstrumentation = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store' }],
+      },
+      {
+        source: '/api/admin/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store' }],
+      },
+      {
+        source: '/api/me/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store' }],
+      },
+    ];
+  },
   async redirects() {
     return [
       {
@@ -120,6 +298,11 @@ const nextConfig: NextConfigWithInstrumentation = {
         permanent: true,
       },
       {
+        source: '/pages/hobbies',
+        destination: '/hobbies',
+        permanent: true,
+      },
+      {
         source: '/reviews',
         destination: '/review',
         permanent: true,
@@ -143,4 +326,4 @@ const nextConfig: NextConfigWithInstrumentation = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withPWA(withBundleAnalyzer(nextConfig));

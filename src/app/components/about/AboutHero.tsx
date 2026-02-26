@@ -39,7 +39,7 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
           </Link>
 
           <Link
-            href="/pages/hobbies"
+            href="/hobbies"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-base font-semibold text-foreground transition hover:border-primary/60 hover:text-foreground"
           >
             <Compass className="h-4 w-4" />

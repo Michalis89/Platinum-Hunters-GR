@@ -169,14 +169,17 @@
   }
 
   html {
+    background: hsl(var(--background));
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
   }
 
   html,
   body {
     overflow-x: hidden;
+    overscroll-behavior-x: none;
   }
   @supports (overflow-x: clip) {
     html,
@@ -199,6 +202,13 @@
     font-family: var(--font-sans);
     font-weight: var(--weight-normal);
     line-height: var(--leading-normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @supports (height: 100svh) {
+    body {
+      min-height: 100svh;
+    }
   }
 
   img,
@@ -281,6 +291,10 @@
 
   .safe-area-inset-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
   }
 
   .gpu-accelerate {

@@ -19,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { apiClient } from '@/lib/api/client';
 import { yieldToMain } from '@/lib/performance';
 import dynamic from 'next/dynamic';
@@ -266,6 +267,7 @@ export default function CategoryLibrary({
   initialStatus?: MediaStatus | 'all';
   initialSearch?: string;
 }>) {
+  const isMobile = useIsMobile();
   const [steamSyncing, setSteamSyncing] = useState(false);
   const [steamSyncProgress, setSteamSyncProgress] = useState<SteamSyncJobSnapshot | null>(null);
   const [steamRateLimited, setSteamRateLimited] = useState(isRateLimited());
@@ -1132,7 +1134,7 @@ export default function CategoryLibrary({
       <div className="relative mx-auto flex w-full max-w-screen-2xl flex-col gap-5 sm:gap-6">
         <div className="pointer-events-none absolute inset-0 -z-10 opacity-40">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,hsl(var(--primary)/0.2),transparent_54%)]" />
-          <div className="absolute inset-y-10 right-0 w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--primary)/0.16),transparent_58%)]" />
+          <div className="absolute inset-y-10 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--primary)/0.16),transparent_58%)] md:block" />
         </div>
 
         <section className="space-y-6">
@@ -1150,7 +1152,7 @@ export default function CategoryLibrary({
             }
           />
 
-          {ctaMode === 'create' && (
+          {!isMobile && ctaMode === 'create' && (
             <CreateEntryPanel
               category={category}
               searchQuery={createQuery}
@@ -1210,18 +1212,50 @@ export default function CategoryLibrary({
       </div>
 
       <Sheet
+        open={isMobile && ctaMode === 'create'}
+        onOpenChange={open => {
+          dispatch({ type: 'patch', payload: { ctaMode: open ? 'create' : null } });
+        }}
+      >
+        <SheetContent
+          side="bottom"
+          className="h-[100dvh] w-full max-w-none gap-0 border-x-0 border-b-0 border-t border-border bg-card p-0 md:hidden"
+        >
+          <div className="h-full overflow-y-auto px-3 py-4">
+            <CreateEntryPanel
+              category={category}
+              searchQuery={createQuery}
+              onSearchChange={value => dispatch({ type: 'patch', payload: { createQuery: value } })}
+              searchResults={createResults}
+              isLoading={createLoading}
+              onOpenDialog={openEntryDialog}
+              onClose={() => dispatch({ type: 'patch', payload: { ctaMode: null } })}
+              libraryEntries={libraryEntries}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet
         open={ctaMode === 'suggestions'}
         onOpenChange={open => {
           dispatch({ type: 'patch', payload: { ctaMode: open ? 'suggestions' : null } });
         }}
       >
-        <SheetContent side="right" className="w-full max-w-xl border-border/70 bg-card p-0">
+        <SheetContent
+          side={isMobile ? 'bottom' : 'right'}
+          className={
+            isMobile
+              ? 'h-[100dvh] w-full max-w-none gap-0 border-x-0 border-b-0 border-t border-border bg-card p-0'
+              : 'w-full max-w-xl border-border/70 bg-card p-0'
+          }
+        >
           <div className="flex h-full flex-col">
-            <SheetHeader className="border-b border-border/70 px-6 py-5">
+            <SheetHeader className="border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
               <SheetTitle>Personal Suggestions</SheetTitle>
               <SheetDescription>Recommendations based on your taste profile.</SheetDescription>
             </SheetHeader>
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <SuggestionsPanel
                 suggestions={suggestions}
                 isLoading={suggestionsLoading}

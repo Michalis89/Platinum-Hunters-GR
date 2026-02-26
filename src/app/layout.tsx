@@ -1,3 +1,4 @@
+import type { Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { cookies } from 'next/headers';
 import './globals.css';
@@ -13,6 +14,16 @@ import {
 import Providers from '@/store/Providers';
 import { GoogleAnalytics } from './components/analytics/GoogleAnalytics';
 export { metadata } from '@/utils/seo/metadata/metadata';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0b0b0f' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+  ],
+  viewportFit: 'cover',
+};
 
 // Font optimization: removed 'latin-ext' subset (~10KB savings)
 // 'swap' ensures text is visible immediately with fallback font

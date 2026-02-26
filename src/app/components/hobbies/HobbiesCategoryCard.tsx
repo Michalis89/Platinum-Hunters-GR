@@ -123,7 +123,7 @@ export function HobbiesCategoryCard({ category }: HobbiesCategoryCardProps) {
 
       <div className="flex flex-wrap gap-2">
         <ModuleButton
-          label="Backlog"
+          label="Library"
           href={category.routes.backlog}
           status={category.modules.backlog}
           requiresAuth={category.requiresAuth.backlog}

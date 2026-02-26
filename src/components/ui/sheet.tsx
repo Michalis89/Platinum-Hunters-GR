@@ -232,7 +232,7 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
                 onClose?.();
               }}
               className={cn(
-                'absolute right-4 top-4',
+                'absolute right-4 top-2',
                 'rounded-sm',
                 'opacity-70 hover:opacity-100',
                 'transition-opacity duration-150',
@@ -319,12 +319,7 @@ interface SheetCloseProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   asChild?: boolean;
 }
 
-export function SheetClose({
-  children,
-  onClick,
-  asChild,
-  ...props
-}: SheetCloseProps) {
+export function SheetClose({ children, onClick, asChild, ...props }: SheetCloseProps) {
   const { onOpenChange } = useSheetContext();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
