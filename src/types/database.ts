@@ -62,6 +62,7 @@ export interface ArticleRow {
   views: number;
   likes: number;
   reading_time_minutes: number | null;
+  score: number | null;
   created_at: string;
   updated_at: string;
   published_at: string | null;
@@ -85,6 +86,7 @@ export interface ArticleInsert {
   author_id: string;
   status?: ArticleStatus;
   is_featured?: boolean;
+  score?: number | null;
 }
 
 /**
@@ -104,6 +106,7 @@ export interface ArticleUpdate {
   meta_description?: string | null;
   status?: ArticleStatus;
   is_featured?: boolean;
+  score?: number | null;
   published_at?: string | null;
 }
 

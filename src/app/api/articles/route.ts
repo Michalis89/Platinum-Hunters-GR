@@ -167,6 +167,7 @@ async function POSTHandler(req: Request) {
       status = 'draft',
       is_featured = false,
       published_at,
+      score = null,
     } = body;
     const articlePayloadValidation = validateArticlePayload({
       title,
@@ -224,6 +225,7 @@ async function POSTHandler(req: Request) {
         status,
         is_featured,
         published_at: status === 'published' ? published_at || new Date().toISOString() : null,
+        ...(score != null ? { score: Number(score) } : {}),
       })
       .select('*')
       .single();

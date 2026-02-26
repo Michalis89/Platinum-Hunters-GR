@@ -145,6 +145,7 @@ export default function EditArticleDialog({
   const coverFileInputRef = useRef<HTMLInputElement>(null);
   const [contentHtml, setContentHtml] = useState(article.content_html ?? '');
   const [tags, setTags] = useState((article.tags ?? []).join(', '));
+  const [score, setScore] = useState(article.score != null ? String(article.score) : '');
   const [status, setStatus] = useState<ArticleStatus>(article.status);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -173,6 +174,7 @@ export default function EditArticleDialog({
     setCoverImage(article.cover_image ?? '');
     setContentHtml(article.content_html ?? '');
     setTags((article.tags ?? []).join(', '));
+    setScore(article.score != null ? String(article.score) : '');
     setStatus(article.status);
     setError(null);
     setWarning(null);
@@ -272,6 +274,7 @@ export default function EditArticleDialog({
           cover_image: coverImage.trim() || null,
           content_html: sanitizedContentHtml || null,
           status,
+          score: topic === 'reviews' && score !== '' ? Number.parseFloat(score) : null,
         }),
       });
 
@@ -504,6 +507,20 @@ export default function EditArticleDialog({
                 <p className="text-xs text-red-400">
                   {tagsValidation.error || 'Tags must not contain HTML.'}
                 </p>
+              )}
+
+              {topic === 'reviews' && (
+                <Input
+                  label="Score (0–10)"
+                  type="number"
+                  placeholder="e.g. 8.5"
+                  min={0}
+                  max={10}
+                  step={0.1}
+                  value={score}
+                  onChange={event => setScore(event.target.value)}
+                  description="Your rating out of 10. Enables ⭐ in Google Search results."
+                />
               )}
             </div>
           </div>

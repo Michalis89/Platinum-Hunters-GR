@@ -178,6 +178,7 @@ export default function AddArticleDialog({
   const coverFileInputRef = useRef<HTMLInputElement>(null);
   const [contentHtml, setContentHtml] = useState('');
   const [tags, setTags] = useState('');
+  const [score, setScore] = useState('');
   const [isCoverPreviewValid, setIsCoverPreviewValid] = useState(true);
 
   // UI state
@@ -206,6 +207,7 @@ export default function AddArticleDialog({
       setCoverImage('');
       setContentHtml('');
       setTags('');
+      setScore('');
       setError(null);
       setWarning(null);
       setIsCoverPreviewValid(true);
@@ -339,6 +341,7 @@ export default function AddArticleDialog({
           content_html: sanitizedContentHtml || null,
           status: saveStatus,
           published_at: saveStatus === 'published' ? new Date().toISOString() : null,
+          score: contentType === 'review' && score !== '' ? Number.parseFloat(score) : null,
         }),
       });
 
@@ -564,6 +567,20 @@ export default function AddArticleDialog({
                 <p className="text-xs text-red-400">
                   {tagsValidation.error || 'Tags must not contain HTML.'}
                 </p>
+              )}
+
+              {contentType === 'review' && (
+                <Input
+                  label="Score (0–10)"
+                  type="number"
+                  placeholder="e.g. 8.5"
+                  min={0}
+                  max={10}
+                  step={0.1}
+                  value={score}
+                  onChange={e => setScore(e.target.value)}
+                  description="Your rating out of 10. Enables ⭐ in Google Search results."
+                />
               )}
             </div>
           </div>

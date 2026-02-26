@@ -61,6 +61,7 @@ type ReviewJsonLdInput = {
   authorName?: string | null;
   category?: ArticleCategory | null;
   tags?: string[] | null;
+  score?: number | null;
 };
 
 type MediaJsonLdInput = {
@@ -128,6 +129,7 @@ export function buildReviewJsonLd({
   authorName,
   category,
   tags,
+  score,
 }: ReviewJsonLdInput) {
   const author: Person = {
     '@type': 'Person',
@@ -139,12 +141,21 @@ export function buildReviewJsonLd({
     '@context': 'https://schema.org',
     '@type': 'Review',
     name: title,
-    reviewBody: trimText(description || ''),
+    reviewBody: description || '',
     datePublished: publishedAt ?? undefined,
     dateModified: updatedAt ?? publishedAt ?? undefined,
     author,
     publisher,
     image: [toAbsoluteUrl(image || DEFAULT_OG_IMAGE)],
+    reviewRating:
+      score != null
+        ? {
+            '@type': 'Rating',
+            ratingValue: score,
+            bestRating: 10,
+            worstRating: 1,
+          }
+        : undefined,
     itemReviewed: {
       '@type': itemType,
       name: title,

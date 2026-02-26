@@ -676,17 +676,29 @@ export async function fetchCategoryDashboardData(
     return sections;
   }
 
-  const entryPromises = requestedCategories.map(category =>
-    fetchCategoryEntries(supabase, userId, category),
-  );
-  const chartPromises = requestedCategories.map(category =>
-    fetchCategoryChartPoints(supabase, userId, category),
+  // Start entries immediately and chain gameTagMap to fire as soon as entries resolve
+  const entryResultsPromise = Promise.all(
+    requestedCategories.map(category => fetchCategoryEntries(supabase, userId, category)),
   );
 
-  const entryResults = await Promise.all(entryPromises);
-  const chartResults = await Promise.all(chartPromises);
+  // gameTagMap starts as soon as entries resolve — runs in parallel with charts & suggestions
+  const gameTagMapPromise = entryResultsPromise.then(async results => {
+    const gameTagMap = new Map<
+      DashboardCategoryKey,
+      Map<number, Partial<Record<InsightTagBucket, string[]>>>
+    >();
+    const gameIndex = requestedCategories.indexOf('games');
+    if (gameIndex !== -1) {
+      const entries = results[gameIndex] ?? [];
+      const mediaIds = entries
+        .map(entry => entry.media_items?.id)
+        .filter((mediaId): mediaId is number => typeof mediaId === 'number');
+      const tagMap = await fetchGameInsightTagMap(supabase, mediaIds);
+      gameTagMap.set('games', tagMap);
+    }
+    return gameTagMap;
+  });
 
-  // Fetch media suggestions in parallel
   const mediaSuggestionsPromises = requestedCategories.map(async category => {
     if (category === 'games') {
       // Use V2 recommendation system for games (data-driven, adaptive)
@@ -749,25 +761,18 @@ export async function fetchCategoryDashboardData(
     }));
   });
 
-  const mediaSuggestionsResults = await Promise.all(mediaSuggestionsPromises);
-  const gameTagMapByCategory = new Map<
-    DashboardCategoryKey,
-    Map<number, Partial<Record<InsightTagBucket, string[]>>>
-  >();
-
-  await Promise.all(
-    requestedCategories.map(async (category, index) => {
-      if (category !== 'games') {
-        return;
-      }
-      const entries = entryResults[index] ?? [];
-      const mediaIds = entries
-        .map(entry => entry.media_items?.id)
-        .filter((mediaId): mediaId is number => typeof mediaId === 'number');
-      const tagMap = await fetchGameInsightTagMap(supabase, mediaIds);
-      gameTagMapByCategory.set(category, tagMap);
-    }),
-  );
+  // All 4 operations run as concurrently as possible:
+  // entries, charts, suggestions start simultaneously;
+  // gameTagMap starts as soon as entries resolve (chained above)
+  const [entryResults, chartResults, mediaSuggestionsResults, gameTagMapByCategory] =
+    await Promise.all([
+      entryResultsPromise,
+      Promise.all(
+        requestedCategories.map(category => fetchCategoryChartPoints(supabase, userId, category)),
+      ),
+      Promise.all(mediaSuggestionsPromises),
+      gameTagMapPromise,
+    ]);
 
   requestedCategories.forEach((category, index) => {
     const entries = entryResults[index] ?? [];

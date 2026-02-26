@@ -110,7 +110,15 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
       meta_description,
       status,
       is_featured,
+      score,
     } = body;
+
+    if (score !== undefined && score !== null) {
+      const numScore = Number(score);
+      if (Number.isNaN(numScore) || numScore < 0 || numScore > 10) {
+        return fail({ error: 'Score must be between 0 and 10' }, 400);
+      }
+    }
     if (title !== undefined) {
       const titleValidation = validatePlainText(title, 'Title');
       if (!titleValidation.isValid) {
@@ -179,6 +187,9 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
     }
     if (is_featured !== undefined) {
       updateData.is_featured = is_featured;
+    }
+    if (score !== undefined) {
+      updateData.score = score !== null ? Number(score) : null;
     }
 
     // Handle status change

@@ -2,7 +2,7 @@ import { CoverHeroImage, CoverThumbImage } from '@/components/ui/cover-image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, Eye, FileText, Heart } from 'lucide-react';
-import type { ArticleRow, ArticleTopic } from '@/types/database';
+import type { ArticleCategory, ArticleRow, ArticleTopic } from '@/types/database';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import ReadingProgress from '@/app/components/article/ReadingProgress.client';
@@ -374,29 +374,32 @@ export default async function ArticleDetailPage({
   ];
   const articleDescription =
     article.meta_description || article.description || 'Explore this entry on Hobbistas.';
-  const jsonLd =
-    article.topic === 'reviews'
-      ? buildReviewJsonLd({
-          title: article.title,
-          description: articleDescription,
-          url: articleUrl,
-          image: article.cover_image,
-          publishedAt: article.published_at,
-          updatedAt: article.updated_at,
-          authorName: article.users?.display_name || article.users?.username || null,
-          category: article.category,
-          tags: article.tags,
-        })
-      : buildArticleJsonLd({
-          title: article.title,
-          description: articleDescription,
-          url: articleUrl,
-          image: article.cover_image,
-          publishedAt: article.published_at,
-          updatedAt: article.updated_at,
-          authorName: article.users?.display_name || article.users?.username || null,
-          tags: article.tags,
-        });
+  const NON_REVIEW_SCHEMA_CATEGORIES: ArticleCategory[] = ['coding'];
+  const useReviewSchema =
+    article.topic === 'reviews' && !NON_REVIEW_SCHEMA_CATEGORIES.includes(article.category);
+  const jsonLd = useReviewSchema
+    ? buildReviewJsonLd({
+        title: article.title,
+        description: articleDescription,
+        url: articleUrl,
+        image: article.cover_image,
+        publishedAt: article.published_at,
+        updatedAt: article.updated_at,
+        authorName: article.users?.display_name || article.users?.username || null,
+        category: article.category,
+        tags: article.tags,
+        score: article.score,
+      })
+    : buildArticleJsonLd({
+        title: article.title,
+        description: articleDescription,
+        url: articleUrl,
+        image: article.cover_image,
+        publishedAt: article.published_at,
+        updatedAt: article.updated_at,
+        authorName: article.users?.display_name || article.users?.username || null,
+        tags: article.tags,
+      });
   const jsonLdMarkup = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 
   return (
@@ -439,6 +442,11 @@ export default async function ArticleDetailPage({
               <span className="rounded-full border border-border bg-card/80 px-3 py-1">
                 {TOPIC_LABELS[article.topic]}
               </span>
+              {article.topic === 'reviews' && article.score != null && (
+                <span className="rounded-full border border-border bg-card/80 px-3 py-1">
+                  ⭐ {article.score} / 10
+                </span>
+              )}
             </div>
 
             <h1 className={ARTICLE_TITLE}>{article.title}</h1>

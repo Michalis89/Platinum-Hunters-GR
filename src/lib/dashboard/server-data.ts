@@ -230,49 +230,58 @@ export async function fetchContinueData(
     };
   }
 
-  let entries: ContinueEntry[] = [];
-  if (slideCategories.length > 0) {
-    const { data: currentEntries, error: currentError } = await supabase
+  // Both queries only depend on normalizedCategories/slideCategories from the profile fetch above
+  const [
+    { data: currentEntriesData, error: currentError },
+    { data: countEntries, error: countError },
+  ] = await Promise.all([
+    slideCategories.length > 0
+      ? supabase
+          .from('user_media_entries')
+          .select(
+            `
+            id,
+            media_id,
+            status,
+            progress,
+            score,
+            updated_at,
+            created_at,
+            media_items!inner (
+              category,
+              source,
+              steam_app_id,
+              title,
+              title_english,
+              title_romaji,
+              title_native,
+              original_title,
+              season_year,
+              release_date,
+              cover_image_large,
+              cover_image_medium
+            )
+          `,
+          )
+          .eq('user_id', userId)
+          .eq('status', 'current')
+          .gt('progress', 0)
+          .in('media_items.category', slideCategories)
+          .order('updated_at', { ascending: false, nullsFirst: false })
+          .order('created_at', { ascending: false, nullsFirst: false })
+          .order('id', { ascending: false })
+      : Promise.resolve({ data: null, error: null }),
+    supabase
       .from('user_media_entries')
-      .select(
-        `
-        id,
-        media_id,
-        status,
-        progress,
-        score,
-        updated_at,
-        created_at,
-        media_items!inner (
-          category,
-          source,
-          steam_app_id,
-          title,
-          title_english,
-          title_romaji,
-          title_native,
-          original_title,
-          season_year,
-          release_date,
-          cover_image_large,
-          cover_image_medium
-        )
-      `,
-      )
+      .select('status, media_items!inner(category)')
       .eq('user_id', userId)
-      .eq('status', 'current')
-      .gt('progress', 0)
-      .in('media_items.category', slideCategories)
-      .order('updated_at', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false, nullsFirst: false })
-      .order('id', { ascending: false });
+      .in('media_items.category', normalizedCategories),
+  ]);
 
-    if (currentError) {
-      throw currentError;
-    }
+  if (currentError) throw currentError;
+  if (countError) throw countError;
 
-    entries = Array.isArray(currentEntries) ? (currentEntries as ContinueEntry[]) : [];
-  }
+  const entries = Array.isArray(currentEntriesData) ? (currentEntriesData as ContinueEntry[]) : [];
 
   const sortedEntries = entries
     .filter(entry => entry.media_items?.category)
@@ -323,16 +332,6 @@ export async function fetchContinueData(
 
     return b.entry_id - a.entry_id;
   });
-
-  const { data: countEntries, error: countError } = await supabase
-    .from('user_media_entries')
-    .select('status, media_items!inner(category)')
-    .eq('user_id', userId)
-    .in('media_items.category', normalizedCategories);
-
-  if (countError) {
-    throw countError;
-  }
 
   const countsByCategory: Record<string, CountBucket> = {};
   for (const category of normalizedCategories) {
