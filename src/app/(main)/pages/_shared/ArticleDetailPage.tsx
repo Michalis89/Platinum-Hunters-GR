@@ -1,6 +1,5 @@
 import { CoverHeroImage, CoverThumbImage } from '@/components/ui/cover-image';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, Eye, FileText, Heart } from 'lucide-react';
 import type { ArticleRow, ArticleTopic } from '@/types/database';
@@ -18,13 +17,12 @@ import getSupabaseServer from '@/lib/supabase-server';
 import { normalizeSlug } from '@/utils/slugify';
 import ArticleComments from '@/app/components/article/ArticleComments.client';
 import ArticleAuthHint from '@/app/components/article/ArticleAuthHint.client';
-import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import { getUserSettings } from '@/lib/settings';
 import { FormattedDate } from '@/utils/components/FormattedDate';
 import { buildArticleJsonLd, buildReviewJsonLd } from '@/lib/seo/jsonld';
 import MetaActionsBar from '@/app/components/article/MetaActionsBar';
 import { ArticleContent } from '@/components/article/ArticleContent';
 import { ARTICLE_SUBTITLE, ARTICLE_TITLE } from '@/components/article/typography';
+import TrackArticleView from '@/app/components/article/TrackArticleView.client';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -243,18 +241,6 @@ async function fetchArticleMetadata(
   return article;
 }
 
-async function trackArticleView(articleId: number, userId: string | null) {
-  const supabase = getSupabaseServer();
-  try {
-    await supabase.from('article_views').insert({
-      article_id: articleId,
-      user_id: userId ?? null,
-    });
-  } catch {
-    // Tracking views is optional, swallow failures
-  }
-}
-
 export async function buildArticleDetailMetadata({
   params,
   options: { basePath, topicFilter },
@@ -299,23 +285,28 @@ export default async function ArticleDetailPage({
   topicFilter,
 }: ArticleDetailPageProps) {
   const { slug } = await params;
+  const isPublicReviewPage = basePath === '/review';
   let currentUserId: string | null = null;
   let showSocialLayerSections = true;
-  try {
-    const sessionClient = await createRouteHandlerClient();
-    const {
-      data: { session },
-    } = await sessionClient.auth.getSession();
-    currentUserId = session?.user.id ?? null;
-    if (currentUserId) {
-      const settings = await getUserSettings(currentUserId, { supabase: sessionClient });
-      showSocialLayerSections = settings.social_enabled;
+  if (!isPublicReviewPage) {
+    try {
+      const { createRouteHandlerClient } = await import('@/lib/supabase-route-handler');
+      const { getUserSettings } = await import('@/lib/settings');
+      const sessionClient = await createRouteHandlerClient();
+      const {
+        data: { session },
+      } = await sessionClient.auth.getSession();
+      currentUserId = session?.user.id ?? null;
+      if (currentUserId) {
+        const settings = await getUserSettings(currentUserId, { supabase: sessionClient });
+        showSocialLayerSections = settings.social_enabled;
+      }
+    } catch {
+      // Public article rendering should not fail when auth cookies are stale/expired
+      // or settings fetch fails.
+      currentUserId = null;
+      showSocialLayerSections = true;
     }
-  } catch {
-    // Public article rendering should not fail when auth cookies are stale/expired
-    // or settings fetch fails.
-    currentUserId = null;
-    showSocialLayerSections = true;
   }
   const article = await fetchArticle(slug, topicFilter);
 
@@ -323,32 +314,29 @@ export default async function ArticleDetailPage({
     notFound();
   }
 
-  const isAuthorViewer =
-    !!currentUserId && !!article.author_id && currentUserId === article.author_id;
-  if (!isAuthorViewer) {
-    await trackArticleView(article.id, currentUserId);
-  }
-
-  const headersList = await headers();
-  const protocol = headersList.get('x-forwarded-proto') ?? 'http';
-  const host = headersList.get('host');
-  const referer = headersList.get('referer');
-  const baseUrl = host ? `${protocol}://${host}` : '';
   const listBasePath = article.topic === 'reviews' ? '/review' : '/articles';
   const hasCategory = Boolean(article.category);
   const fallbackHref = hasCategory ? `${listBasePath}?category=${article.category}` : listBasePath;
   let backHref = fallbackHref;
 
-  if (referer && baseUrl && referer.startsWith(baseUrl)) {
-    try {
-      const url = new URL(referer);
-      const path = `${url.pathname}${url.search}`;
-      const isListPath = url.pathname === listBasePath || url.pathname === `${listBasePath}/`;
-      if (isListPath) {
-        backHref = path;
+  if (!isPublicReviewPage) {
+    const headersList = await (await import('next/headers')).headers();
+    const protocol = headersList.get('x-forwarded-proto') ?? 'http';
+    const host = headersList.get('host');
+    const referer = headersList.get('referer');
+    const baseUrl = host ? `${protocol}://${host}` : '';
+
+    if (referer && baseUrl && referer.startsWith(baseUrl)) {
+      try {
+        const url = new URL(referer);
+        const path = `${url.pathname}${url.search}`;
+        const isListPath = url.pathname === listBasePath || url.pathname === `${listBasePath}/`;
+        if (isListPath) {
+          backHref = path;
+        }
+      } catch {
+        backHref = fallbackHref;
       }
-    } catch {
-      backHref = fallbackHref;
     }
   }
 
@@ -402,6 +390,7 @@ export default async function ArticleDetailPage({
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
+      {isPublicReviewPage ? <TrackArticleView articleId={article.id} /> : null}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdMarkup }} />
       <StructuredData data={getBreadcrumbStructuredData(breadcrumbItems)} />
       <ReadingProgress />

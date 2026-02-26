@@ -14,6 +14,7 @@ type NextConfigWithInstrumentation = NextConfig & {
 };
 
 const nextConfig: NextConfigWithInstrumentation = {
+  htmlLimitedBots: /.*/,
   productionBrowserSourceMaps: false,
   outputFileTracingRoot: join(process.cwd()),
   images: {

@@ -1,7 +1,6 @@
 'use client';
 
-import { Suspense, memo, useEffect, useState, useTransition } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { memo, useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { CoverThumbImage } from '@/components/ui/cover-image';
 import { Calendar, Clock, Eye, Heart, Star, Tag, User } from 'lucide-react';
@@ -21,11 +20,18 @@ import {
 
 interface ArticleWithAuthor extends ArticleRow {
   users?: {
-    username: string;
+    username: string | null;
     display_name: string | null;
     avatar_url: string | null;
   } | null;
 }
+
+type ReviewsPageClientProps = {
+  initialArticles?: ArticleWithAuthor[];
+  initialTotal?: number;
+  initialCategory?: ArticleCategory | null;
+  initialTag?: string | null;
+};
 
 const PRIMARY_CATEGORIES: ArticleCategory[] = [
   'games',
@@ -164,14 +170,6 @@ function ReviewSkeletonGrid({ count = SKELETON_COUNT }: { count?: number }) {
   );
 }
 
-function ReviewsFallback() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <ReviewSkeletonGrid />
-    </div>
-  );
-}
-
 function buildHref({ category, tag }: { category: ArticleCategory | null; tag: string | null }) {
   const params = new URLSearchParams();
   if (category) {
@@ -208,36 +206,60 @@ function FilterSegment({
   );
 }
 
-export default function ReviewsPageClient() {
+export default function ReviewsPageClient({
+  initialArticles = [],
+  initialTotal = 0,
+  initialCategory = null,
+  initialTag = null,
+}: ReviewsPageClientProps) {
   return (
-    <Suspense fallback={<ReviewsFallback />}>
-      <ReviewsPageContent />
-    </Suspense>
+    <ReviewsPageContent
+      initialArticles={initialArticles}
+      initialTotal={initialTotal}
+      initialCategory={initialCategory}
+      initialTag={initialTag}
+    />
   );
 }
 
-function ReviewsPageContent() {
-  const searchParams = useSearchParams();
+function ReviewsPageContent({
+  initialArticles,
+  initialTotal,
+  initialCategory,
+  initialTag,
+}: Required<ReviewsPageClientProps>) {
   const allowedCategories = getVisibleCategories({ scope: 'reviews' });
-
-  const rawCategory = searchParams.get('category');
   const category =
-    rawCategory && allowedCategories.includes(rawCategory as ArticleCategory)
-      ? (rawCategory as ArticleCategory)
-      : null;
+    initialCategory && allowedCategories.includes(initialCategory) ? initialCategory : null;
+  const tag = initialTag || null;
+  const skipInitialFetchRef = useRef(true);
 
-  const rawTag = searchParams.get('tag');
-  const tag = rawTag || null;
-
-  const [articles, setArticles] = useState<ArticleWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [articles, setArticles] = useState<ArticleWithAuthor[]>(
+    initialArticles,
+  );
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState(initialTotal);
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    setArticles(initialArticles);
+    setTotal(initialTotal);
+    setError(null);
+    setLoading(false);
+    skipInitialFetchRef.current = true;
+  }, [initialArticles, initialTotal, initialCategory, initialTag]);
+
+  useEffect(() => {
     let isMounted = true;
+
+    if (skipInitialFetchRef.current && refreshSignal === 0) {
+      skipInitialFetchRef.current = false;
+      return () => {
+        isMounted = false;
+      };
+    }
 
     const fetchReviews = async () => {
       setLoading(true);
