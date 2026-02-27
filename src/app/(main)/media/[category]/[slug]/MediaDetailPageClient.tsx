@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -6,6 +6,7 @@ import { Heart, Star, CheckCircle, XCircle, CalendarDays, Globe, Pencil } from '
 import { CoverHeroImage } from '@/components/ui/cover-image';
 import { PageContainer } from '@/app/components/layout';
 import { Button } from '@/components/ui/button';
+import BackButton from '@/app/components/shared/BackButton';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert, AlertDescription, AlertTitle, ErrorAlert } from '@/components/ui/alert';
 import {
@@ -131,7 +132,7 @@ const buildEntry = (item: MediaItem, entryState: MediaEntryState | null) => {
   const title = resolveTitle(item);
   const subtitle = resolveSubtitle(item, title);
   const year = resolveYear(item);
-  const cover = item.cover_image_large || item.cover_image_medium || '/og-image.png';
+  const cover = item.cover_image_large || item.cover_image_medium || '/og-image.jpg';
 
   return {
     id: `media-${item.id}`,
@@ -173,16 +174,16 @@ function ScoreCluster({
 }) {
   const scoreItems = [
     typeof entryState?.rating === 'number'
-      ? { label: 'My rating', value: entryState.rating.toFixed(1), icon: '★' }
+      ? { label: 'My rating', value: entryState.rating.toFixed(1), icon: '?' }
       : null,
     typeof mediaItem.aggregated_rating === 'number'
-      ? { label: 'Aggregated', value: mediaItem.aggregated_rating.toFixed(1), icon: '☆' }
+      ? { label: 'Aggregated', value: mediaItem.aggregated_rating.toFixed(1), icon: '?' }
       : null,
     typeof mediaItem.metacritic === 'number'
       ? { label: 'Metacritic', value: `${mediaItem.metacritic}`, icon: 'M' }
       : null,
     typeof mediaItem.aggregated_rating_count === 'number'
-      ? { label: 'Ratings', value: mediaItem.aggregated_rating_count.toLocaleString(), icon: '👥' }
+      ? { label: 'Ratings', value: mediaItem.aggregated_rating_count.toLocaleString(), icon: '??' }
       : null,
   ].filter(Boolean) as Array<{ label: string; value: string; icon: string }>;
 
@@ -675,6 +676,7 @@ export default function MediaDetailPageClient({
       )}
 
       <Breadcrumbs items={breadcrumbs} className="mb-6" />
+      <BackButton fallbackHref={`/backlog?category=${category}`} className="mb-4" />
 
       <div className="relative space-y-6">
         <div className="absolute inset-0 -z-10 opacity-30">

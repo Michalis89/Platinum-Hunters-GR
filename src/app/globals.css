@@ -182,6 +182,14 @@
     overscroll-behavior-x: none;
   }
 
+  [data-radix-scroll-area-viewport] {
+    overscroll-behavior: contain;
+  }
+
+  [role='dialog'] {
+    overscroll-behavior: contain;
+  }
+
   @media (max-width: 767px) {
     html,
     body {

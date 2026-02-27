@@ -1,10 +1,10 @@
 import { CoverHeroImage, CoverThumbImage } from '@/components/ui/cover-image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Calendar, Eye, FileText, Heart } from 'lucide-react';
+import { Calendar, Eye, FileText, Heart } from 'lucide-react';
 import type { ArticleCategory, ArticleRow, ArticleTopic } from '@/types/database';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import BackButton from '@/app/components/shared/BackButton';
 import ReadingProgress from '@/app/components/article/ReadingProgress.client';
 import EmptyState from '@/components/ui/empty';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
@@ -425,9 +425,7 @@ export default async function ArticleDetailPage({
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
 
         <div className="absolute left-4 top-4 z-10">
-          <Button href={backHref} variant="secondary" icon={<ArrowLeft size={16} />}>
-            Back
-          </Button>
+          <BackButton fallbackHref={backHref} />
         </div>
       </div>
 

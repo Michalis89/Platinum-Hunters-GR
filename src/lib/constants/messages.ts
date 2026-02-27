@@ -5,7 +5,7 @@ export const INVALID_PAYLOAD = 'Invalid media payload';
 export const UNSUPPORTED_CATEGORY = 'Unsupported category';
 
 export const UNTITLED_FALLBACK = 'Untitled';
-export const DEFAULT_COVER = '/og-image.png';
+export const DEFAULT_COVER = '/og-image.jpg';
 
 export const INTERNAL_SERVER_ERROR = 'Internal server error';
 export const NO_UPDATES_PROVIDED = 'No updates provided';

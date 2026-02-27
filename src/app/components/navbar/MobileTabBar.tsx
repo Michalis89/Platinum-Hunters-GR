@@ -80,7 +80,7 @@ function MobileTabBar() {
 
       {/* Tab Bar */}
       <nav
-        className="safe-area-inset-bottom fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="safe-area-inset-bottom fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] will-change-transform md:hidden"
         aria-label="Mobile navigation"
       >
         <div className="border-t">

@@ -1,15 +1,25 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { DASHBOARD_TAB_CATEGORIES } from '@/lib/dashboard/category-data';
 import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
 import type { PersonalStats } from '@/app/components/home/types';
-import CategoryTopFive from './CategoryTopFive';
 import CategorySuggestions from './CategorySuggestions';
 import MediaSuggestions from './MediaSuggestions';
-import CategoryInsightsGrid from './CategoryInsightsGrid';
 import DashboardCategoryStats from './DashboardCategoryStats';
+
+const CategoryTopFive = dynamic(() => import('./CategoryTopFive'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-80 w-full rounded-2xl" />,
+});
+
+const CategoryInsightsGrid = dynamic(() => import('./CategoryInsightsGrid'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-96 w-full rounded-2xl" />,
+});
 
 const CATEGORY_TITLES: Record<DashboardCategoryKey, string> = {
   games: 'Games',

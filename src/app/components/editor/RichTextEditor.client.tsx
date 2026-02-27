@@ -63,7 +63,7 @@ const ToolbarButton = ({
     size="icon"
     iconOnly
     title={title}
-    className="h-10 w-10 rounded-[10px] border border-border bg-card text-foreground shadow-none transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:size-[18px]"
+    className="min-h-11 min-w-11 rounded-[10px] border border-border bg-card text-foreground shadow-none transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:size-[18px]"
   >
     {children}
   </Button>
@@ -97,6 +97,8 @@ export default function RichTextEditor({
       Image.configure({
         HTMLAttributes: {
           class: 'rounded-lg max-w-full h-auto my-4',
+          loading: 'lazy',
+          decoding: 'async',
         },
       }),
       TextAlign.configure({

@@ -93,7 +93,7 @@ function ProfileFavoritesComponent({
           {/* Cover image */}
           <div className="relative h-12 w-12 flex-shrink-0 rounded-xl bg-card sm:h-14 sm:w-14">
             <Image
-              src={fav.game?.cover_image || fav.game?.background_image || '/og-image.png'}
+              src={fav.game?.cover_image || fav.game?.background_image || '/og-image.jpg'}
               alt={fav.game?.title || 'Item'}
               width={48}
               height={48}

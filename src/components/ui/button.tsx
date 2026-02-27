@@ -39,7 +39,7 @@ const buttonVariants = cva(
         sm: 'h-8 px-3 text-xs',
         lg: 'h-11 px-6',
         xl: 'h-12 w-full px-6 text-lg font-semibold',
-        icon: 'h-9 w-9 p-0',
+        icon: 'min-h-11 min-w-11 p-0',
       },
     },
     defaultVariants: {

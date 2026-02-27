@@ -20,5 +20,5 @@ self.addEventListener('message', event => {
     return;
   }
 
-  (event as ExtendableMessageEvent).waitUntil(clearAuthCaches());
+  (event as unknown as ExtendableMessageEvent).waitUntil(clearAuthCaches());
 });

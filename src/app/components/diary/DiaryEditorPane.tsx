@@ -137,7 +137,7 @@ export const DiaryEditorPane = memo(function DiaryEditorPane({
               size="icon"
               variant="ghost"
               iconOnly
-              className="h-10 w-10 rounded-[var(--radius-md)] border border-[hsl(var(--border-subtle)/0.8)] bg-[hsl(var(--surface-overlay)/0.45)] text-[hsl(var(--text-secondary))] hover:bg-[hsl(var(--surface-hover)/0.74)] hover:text-[hsl(var(--text-primary))]"
+              className="min-h-11 min-w-11 rounded-[var(--radius-md)] border border-[hsl(var(--border-subtle)/0.8)] bg-[hsl(var(--surface-overlay)/0.45)] text-[hsl(var(--text-secondary))] hover:bg-[hsl(var(--surface-hover)/0.74)] hover:text-[hsl(var(--text-primary))]"
               onClick={onBack}
             >
               <ArrowLeft className="h-4 w-4" />

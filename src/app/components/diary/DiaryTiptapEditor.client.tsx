@@ -35,7 +35,7 @@ function ToolbarButton({
       variant={isActive ? 'primary' : 'ghost'}
       iconOnly
       className={[
-        'h-10 w-10 rounded-[var(--radius-md)] border',
+        'min-h-11 min-w-11 rounded-[var(--radius-md)] border',
         isActive
           ? 'border-[hsl(var(--accent-primary)/0.45)] bg-[hsl(var(--accent-muted)/0.92)] text-[hsl(var(--text-primary))]'
           : 'border-[hsl(var(--border-subtle)/0.76)] bg-[hsl(var(--surface-overlay)/0.45)] text-[hsl(var(--text-secondary))] hover:bg-[hsl(var(--surface-hover)/0.76)] hover:text-[hsl(var(--text-primary))]',

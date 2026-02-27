@@ -7,7 +7,7 @@ export const SITE_URL =
 export const SITE_LOCALE = 'en-US';
 export const SITE_LANGUAGE = 'en';
 
-export const DEFAULT_OG_IMAGE = '/og-image.png';
+export const DEFAULT_OG_IMAGE = '/og-image.jpg';
 export const DEFAULT_OG_IMAGE_ALT =
   'Hobbistas - Track your hobbies across games, anime, movies, and books';
 

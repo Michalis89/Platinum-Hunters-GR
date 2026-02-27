@@ -1242,6 +1242,7 @@ export default function AdminMediaCurationTable() {
                             alt={row.title_english ?? row.title ?? `Game ${row.id}`}
                             width={36}
                             height={48}
+                            sizes="36px"
                             className="h-12 w-9 rounded object-cover"
                           />
                         ) : (

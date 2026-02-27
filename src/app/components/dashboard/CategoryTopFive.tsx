@@ -87,7 +87,7 @@ function SortableFavoriteCard({
         isMobile ? 'cursor-default' : 'cursor-grab active:cursor-grabbing',
         'border border-border/35 bg-card/40',
         'shadow-[0_18px_60px_-40px_rgba(0,0,0,0.85)]',
-        'ease-snappy transition-all delay-0 duration-300 will-change-transform group-hover:delay-75',
+        'ease-snappy transition-all delay-0 duration-300 group-hover:delay-75',
         // Lift / glow on hover
         'hover:-translate-y-0.5 hover:border-border/50 hover:bg-card/50',
         // Drag state
@@ -106,7 +106,7 @@ function SortableFavoriteCard({
           priority={isPriorityImage}
           loading={isPriorityImage ? undefined : 'lazy'}
           // Cinematic crop (faces/top composition survives more often)
-          className="ease-snappy object-cover object-[50%_25%] transition-transform delay-0 duration-300 will-change-transform [backface-visibility:hidden] group-hover:scale-[1.04] group-hover:delay-75"
+          className="ease-snappy object-cover object-[50%_25%] transition-transform delay-0 duration-300 [backface-visibility:hidden] group-hover:scale-[1.04] group-hover:delay-75"
         />
 
         <div
@@ -148,7 +148,7 @@ function SortableFavoriteCard({
               aria-label={`Move ${item.title} up`}
               onClick={onMoveUp}
               disabled={!canMoveUp}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
             >
               <ChevronUp className="h-4 w-4" />
             </button>
@@ -157,7 +157,7 @@ function SortableFavoriteCard({
               aria-label={`Move ${item.title} down`}
               onClick={onMoveDown}
               disabled={!canMoveDown}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
             >
               <ChevronDown className="h-4 w-4" />
             </button>
@@ -238,7 +238,7 @@ function MobileFavoriteCard({
         'group relative h-full w-full touch-auto select-none overflow-hidden rounded-3xl',
         'cursor-default border border-border/35 bg-card/40',
         'shadow-[0_18px_60px_-40px_rgba(0,0,0,0.85)]',
-        'ease-snappy transition-all delay-0 duration-300 will-change-transform group-hover:delay-75',
+        'ease-snappy transition-all delay-0 duration-300 group-hover:delay-75',
         'hover:-translate-y-0.5 hover:border-border/50 hover:bg-card/50',
         isTopFive ? 'ring-1 ring-primary/15' : 'ring-1 ring-white/5',
       ].join(' ')}
@@ -251,7 +251,7 @@ function MobileFavoriteCard({
           sizes="(max-width: 768px) 90vw, 240px"
           priority={isPriorityImage}
           loading={isPriorityImage ? undefined : 'lazy'}
-          className="ease-snappy object-cover object-[50%_25%] transition-transform delay-0 duration-300 will-change-transform [backface-visibility:hidden] group-hover:scale-[1.04] group-hover:delay-75"
+          className="ease-snappy object-cover object-[50%_25%] transition-transform delay-0 duration-300 [backface-visibility:hidden] group-hover:scale-[1.04] group-hover:delay-75"
         />
 
         <div
@@ -290,7 +290,7 @@ function MobileFavoriteCard({
             aria-label={`Move ${item.title} up`}
             onClick={onMoveUp}
             disabled={!canMoveUp}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
           >
             <ChevronUp className="h-4 w-4" />
           </button>
@@ -299,7 +299,7 @@ function MobileFavoriteCard({
             aria-label={`Move ${item.title} down`}
             onClick={onMoveDown}
             disabled={!canMoveDown}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
           >
             <ChevronDown className="h-4 w-4" />
           </button>
