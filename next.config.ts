@@ -10,6 +10,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const withPWA = withPWAInit({
   dest: 'public',
+  customWorkerSrc: 'src/worker',
   disable: process.env.NODE_ENV === 'development',
   register: true,
   reloadOnOnline: true,
@@ -82,9 +83,10 @@ const withPWA = withPWAInit({
       {
         urlPattern: ({ url }: { url: URL }) => {
           const publicPaths = ['/home', '/about', '/articles', '/review', '/media', '/terms', '/privacy'];
-          return url.origin === 'http://localhost:3000' || url.origin === 'https://hobbistas-hub.com'
-            ? publicPaths.some(path => url.pathname.startsWith(path))
-            : false;
+          return (
+            url.origin === self.location.origin &&
+            publicPaths.some(path => url.pathname.startsWith(path))
+          );
         },
         handler: 'StaleWhileRevalidate',
         options: {
@@ -101,9 +103,10 @@ const withPWA = withPWAInit({
       {
         urlPattern: ({ url }: { url: URL }) => {
           const authPaths = ['/dashboard', '/diary', '/backlog', '/profile', '/settings', '/dnd'];
-          return url.origin === 'http://localhost:3000' || url.origin === 'https://hobbistas-hub.com'
-            ? authPaths.some(path => url.pathname.startsWith(path))
-            : false;
+          return (
+            url.origin === self.location.origin &&
+            authPaths.some(path => url.pathname.startsWith(path))
+          );
         },
         handler: 'NetworkFirst',
         options: {

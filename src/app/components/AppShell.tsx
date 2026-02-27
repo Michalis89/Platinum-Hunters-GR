@@ -5,6 +5,7 @@ import OfflineBanner from './shared/OfflineBanner';
 import SWUpdateBanner from './shared/SWUpdateBanner';
 import IOSInstallHint from './shared/IOSInstallHint';
 import InstallPrompt from './shared/InstallPrompt';
+import OnlineReconnectToast from './shared/OnlineReconnectToast';
 
 type Props = {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ export default function AppShell({ children }: Props) {
       <SWUpdateBanner />
       <InstallPrompt />
       <IOSInstallHint />
+      <OnlineReconnectToast />
 
       {/* Ambient gradient - fixed to viewport so it doesn't scale with page height */}
       <div

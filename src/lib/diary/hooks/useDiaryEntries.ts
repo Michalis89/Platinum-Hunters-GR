@@ -4,6 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import type { DiaryEntryDecrypted, DiaryEntryDraft, DiaryEntryEncryptedRow } from '@/lib/diary/types';
 import { useDiaryCrypto } from '@/lib/diary/hooks/useDiaryCrypto';
+import {
+  deleteOfflineDraft,
+  listOfflineDrafts,
+  saveOfflineDraft,
+} from '@/lib/diary/offlineStorage';
+import { DIARY_FLUSH_EVENT } from '@/lib/diary/offlineEvents';
 
 const AUTOSAVE_MS = 3000;
 const AUTOLOCK_INACTIVITY_MS = 15 * 60 * 1000;
@@ -62,10 +68,12 @@ export function useDiaryEntries() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [isOnline, setIsOnline] = useState(true);
+  const [offlineDraftIds, setOfflineDraftIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
   const entriesRef = useRef(entries);
   const persistedIdsRef = useRef(persistedEntryIds);
+  const syncInFlightRef = useRef<Promise<number> | null>(null);
   const autosaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inactivityTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -78,18 +86,21 @@ export function useDiaryEntries() {
   }, [persistedEntryIds]);
 
   useEffect(() => {
-    if (typeof navigator === 'undefined') {
-      return;
-    }
+    let mounted = true;
 
-    const syncOnline = () => setIsOnline(navigator.onLine);
-    syncOnline();
-    window.addEventListener('online', syncOnline);
-    window.addEventListener('offline', syncOnline);
+    void listOfflineDrafts()
+      .then(drafts => {
+        if (!mounted) {
+          return;
+        }
+        setOfflineDraftIds(new Set(drafts.map(draft => draft.id)));
+      })
+      .catch(() => {
+        // ignore IndexedDB bootstrap errors
+      });
 
     return () => {
-      window.removeEventListener('online', syncOnline);
-      window.removeEventListener('offline', syncOnline);
+      mounted = false;
     };
   }, []);
 
@@ -240,6 +251,15 @@ export function useDiaryEntries() {
           next.add(entryId);
           return next;
         });
+        await deleteOfflineDraft(entryId).catch(() => undefined);
+        setOfflineDraftIds(prev => {
+          if (!prev.has(entryId)) {
+            return prev;
+          }
+          const next = new Set(prev);
+          next.delete(entryId);
+          return next;
+        });
         setSaveStatus('saved');
       } catch {
         setSaveStatus(isOnline ? 'error' : 'offline');
@@ -250,6 +270,128 @@ export function useDiaryEntries() {
     },
     [decryptEntry, encryptEntry, getCurrentUser, isOnline],
   );
+
+  const syncOfflineDrafts = useCallback(async (): Promise<number> => {
+    if (syncInFlightRef.current) {
+      return syncInFlightRef.current;
+    }
+
+    const runSync = async (): Promise<number> => {
+      if (!isReady || isLocked) {
+        return 0;
+      }
+
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        return 0;
+      }
+
+      const user = await getCurrentUser();
+      if (!user) {
+        return 0;
+      }
+
+      const storedDrafts = await listOfflineDrafts().catch(() => []);
+      const draftsToSync = storedDrafts.filter(draft => draft.userId === user.id);
+
+      if (draftsToSync.length === 0) {
+        return 0;
+      }
+
+      let syncedCount = 0;
+
+      for (const draft of draftsToSync) {
+        try {
+          const encrypted = await encryptEntry(draft.id, draft.title, draft.content);
+          const payload = {
+            id: draft.id,
+            user_id: user.id,
+            entry_date: draft.entryDate,
+            mood: draft.mood,
+            tags: [],
+            ...encrypted,
+          };
+
+          const { data: savedRow, error: saveError } = await supabase
+            .from('diary_entries')
+            .upsert(payload, { onConflict: 'id' })
+            .select('*')
+            .single();
+
+          if (saveError || !savedRow) {
+            continue;
+          }
+
+          const decoded = await decryptEntry(savedRow);
+          const persisted = normalizeEntry(savedRow, decoded);
+
+          setEntries(prev => {
+            const filtered = prev.filter(item => item.id !== persisted.id);
+            return sortByDateDesc([persisted, ...filtered]);
+          });
+
+          setPersistedEntryIds(prev => {
+            const next = new Set(prev);
+            next.add(persisted.id);
+            return next;
+          });
+
+          await deleteOfflineDraft(draft.id).catch(() => undefined);
+          setOfflineDraftIds(prev => {
+            if (!prev.has(draft.id)) {
+              return prev;
+            }
+            const next = new Set(prev);
+            next.delete(draft.id);
+            return next;
+          });
+
+          syncedCount += 1;
+        } catch {
+          // keep local draft so reconnect can retry
+        }
+      }
+
+      if (syncedCount > 0) {
+        setSaveStatus('saved');
+      }
+
+      return syncedCount;
+    };
+
+    const syncPromise = runSync().finally(() => {
+      syncInFlightRef.current = null;
+    });
+
+    syncInFlightRef.current = syncPromise;
+    return syncPromise;
+  }, [decryptEntry, encryptEntry, getCurrentUser, isLocked, isReady]);
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined') {
+      return;
+    }
+
+    const syncOnline = () => setIsOnline(navigator.onLine);
+    const triggerSync = () => {
+      if (!navigator.onLine) {
+        return;
+      }
+      void syncOfflineDrafts();
+    };
+
+    syncOnline();
+    window.addEventListener('online', syncOnline);
+    window.addEventListener('offline', syncOnline);
+    window.addEventListener('online', triggerSync);
+    window.addEventListener(DIARY_FLUSH_EVENT, triggerSync as EventListener);
+
+    return () => {
+      window.removeEventListener('online', syncOnline);
+      window.removeEventListener('offline', syncOnline);
+      window.removeEventListener('online', triggerSync);
+      window.removeEventListener(DIARY_FLUSH_EVENT, triggerSync as EventListener);
+    };
+  }, [syncOfflineDrafts]);
 
   const scheduleAutosave = useCallback(
     (entryId: string) => {
@@ -370,6 +512,18 @@ export function useDiaryEntries() {
 
   const updateDraft = useCallback(
     (partial: DraftUpdate) => {
+      const nowIso = new Date().toISOString();
+      const offlineSnapshot = selectedEntryId
+        ? entriesRef.current.find(entry => entry.id === selectedEntryId)
+        : null;
+      const nextOfflineSnapshot = offlineSnapshot
+        ? {
+            ...offlineSnapshot,
+            ...partial,
+            updated_at: nowIso,
+          }
+        : null;
+
       setEntries(prev => {
         if (!selectedEntryId) {
           return prev;
@@ -383,7 +537,7 @@ export function useDiaryEntries() {
           return {
             ...entry,
             ...partial,
-            updated_at: new Date().toISOString(),
+            updated_at: nowIso,
           };
         });
 
@@ -395,6 +549,33 @@ export function useDiaryEntries() {
       }
 
       setSaveStatus(isOnline ? 'idle' : 'offline');
+
+      if (!isOnline && nextOfflineSnapshot) {
+        const snapshotId = nextOfflineSnapshot.id;
+        void saveOfflineDraft({
+          id: snapshotId,
+          userId: nextOfflineSnapshot.user_id,
+          title: nextOfflineSnapshot.title,
+          content: nextOfflineSnapshot.content,
+          mood: nextOfflineSnapshot.mood,
+          entryDate: nextOfflineSnapshot.entry_date,
+          updatedAt: nextOfflineSnapshot.updated_at,
+        })
+          .then(() => {
+            setOfflineDraftIds(prev => {
+              if (prev.has(snapshotId)) {
+                return prev;
+              }
+              const next = new Set(prev);
+              next.add(snapshotId);
+              return next;
+            });
+          })
+          .catch(() => {
+            // ignore IndexedDB write errors
+          });
+      }
+
       scheduleAutosave(selectedEntryId);
     },
     [isOnline, scheduleAutosave, selectedEntryId],
@@ -418,6 +599,15 @@ export function useDiaryEntries() {
       return remainingEntries[0]?.id ?? null;
     });
     setSaveStatus('idle');
+    void deleteOfflineDraft(entryId).catch(() => undefined);
+    setOfflineDraftIds(prev => {
+      if (!prev.has(entryId)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.delete(entryId);
+      return next;
+    });
 
     if (!persistedIdsRef.current.has(entryId)) {
       return;
@@ -485,7 +675,9 @@ export function useDiaryEntries() {
       isResetting,
       isUnlocking,
       saveStatus: isOnline ? saveStatus : 'offline',
+      hasOfflineDraftForSelected: selectedEntryId ? offlineDraftIds.has(selectedEntryId) : false,
       loadEntries,
+      syncOfflineDrafts,
       lockDiary: lockDiarySession,
       selectEntry,
       createNewEntry,
@@ -505,6 +697,7 @@ export function useDiaryEntries() {
       isLocked,
       isOnline,
       isSaving,
+      offlineDraftIds,
       isResetting,
       isUnlocking,
       loadEntries,
@@ -514,6 +707,7 @@ export function useDiaryEntries() {
       selectEntry,
       selectedEntry,
       selectedEntryId,
+      syncOfflineDrafts,
       unlockDiary,
       updateDraft,
     ],

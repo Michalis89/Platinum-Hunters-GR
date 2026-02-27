@@ -27,6 +27,8 @@ type DiaryEditorPaneProps = {
   entry: DiaryEntryDecrypted | null;
   saveStatus: SaveStatus;
   isSaving: boolean;
+  hasOfflineDraft?: boolean;
+  onSyncOfflineDrafts?: () => Promise<number>;
   showBackButton?: boolean;
   onBack?: () => void;
   onDelete: (entryId: string) => Promise<void>;
@@ -43,6 +45,8 @@ const DiaryTiptapEditor = dynamic(() => import('./DiaryTiptapEditor.client'), {
   onChange: (value: string) => void;
   language?: 'en' | 'el' | 'und';
   placeholder?: string;
+  showOfflineDraftHint?: boolean;
+  onReconnectSync?: () => Promise<number>;
 }>;
 
 type DiaryWritingLanguage = 'en' | 'el' | 'und';
@@ -92,6 +96,8 @@ export const DiaryEditorPane = memo(function DiaryEditorPane({
   entry,
   saveStatus,
   isSaving,
+  hasOfflineDraft = false,
+  onSyncOfflineDrafts,
   showBackButton = false,
   onBack,
   onDelete,
@@ -234,6 +240,8 @@ export const DiaryEditorPane = memo(function DiaryEditorPane({
           onChange={value => onUpdateDraft({ content: value })}
           language={writingLanguage}
           placeholder="Write freely. Your words stay encrypted before they ever leave this browser."
+          showOfflineDraftHint={saveStatus === 'offline' && hasOfflineDraft}
+          onReconnectSync={onSyncOfflineDrafts}
         />
       </div>
     </section>

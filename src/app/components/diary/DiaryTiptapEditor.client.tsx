@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Bold, Italic, List, Quote } from 'lucide-react';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
 type DiaryTiptapEditorProps = {
@@ -12,6 +13,8 @@ type DiaryTiptapEditorProps = {
   onChange: (value: string) => void;
   language?: 'en' | 'el' | 'und';
   placeholder?: string;
+  showOfflineDraftHint?: boolean;
+  onReconnectSync?: () => Promise<number>;
 };
 
 function ToolbarButton({
@@ -51,6 +54,8 @@ export default function DiaryTiptapEditor({
   onChange,
   language = 'und',
   placeholder = 'Write freely. Your words stay encrypted before they ever leave this browser.',
+  showOfflineDraftHint = false,
+  onReconnectSync,
 }: DiaryTiptapEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -92,6 +97,28 @@ export default function DiaryTiptapEditor({
     }
     editor.view.dom.setAttribute('lang', language);
   }, [editor, language]);
+
+  useEffect(() => {
+    if (!onReconnectSync) {
+      return;
+    }
+
+    const handleOnline = async () => {
+      const syncedCount = await onReconnectSync();
+      if (syncedCount > 0) {
+        toast.success('Draft synced');
+      }
+    };
+    const onOnline = () => {
+      void handleOnline();
+    };
+
+    window.addEventListener('online', onOnline);
+
+    return () => {
+      window.removeEventListener('online', onOnline);
+    };
+  }, [onReconnectSync]);
 
   if (!editor) {
     return (
@@ -136,6 +163,11 @@ export default function DiaryTiptapEditor({
         editor={editor}
         className="min-h-0 flex-1 overflow-y-auto pb-8 [&_.ProseMirror]:min-h-full [&_.ProseMirror_blockquote]:my-4 [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-[hsl(var(--accent-primary)/0.6)] [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_li]:my-1 [&_.ProseMirror_p]:my-2.5 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6"
       />
+      {showOfflineDraftHint ? (
+        <p className="border-t border-[hsl(var(--border-subtle)/0.7)] px-4 py-2 text-xs text-muted-foreground sm:px-5">
+          Saved offline - will sync on reconnect
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -13,6 +13,8 @@ type DiarySplitViewProps = {
   selectedEntryId: string | null;
   saveStatus: SaveStatus;
   isSaving: boolean;
+  hasOfflineDraftForSelected?: boolean;
+  onSyncOfflineDrafts?: () => Promise<number>;
   onSelectEntry: (entryId: string) => void;
   onCreateNew: () => void;
   onUpdateDraft: (partial: Partial<Pick<DiaryEntryDraft, 'title' | 'content' | 'mood' | 'entry_date'>>) => void;
@@ -25,6 +27,8 @@ export function DiarySplitView({
   selectedEntryId,
   saveStatus,
   isSaving,
+  hasOfflineDraftForSelected = false,
+  onSyncOfflineDrafts,
   onSelectEntry,
   onCreateNew,
   onUpdateDraft,
@@ -89,6 +93,8 @@ export function DiarySplitView({
           entry={selectedEntry}
           saveStatus={saveStatus}
           isSaving={isSaving}
+          hasOfflineDraft={hasOfflineDraftForSelected}
+          onSyncOfflineDrafts={onSyncOfflineDrafts}
           onDelete={onDeleteEntry}
           onUpdateDraft={onUpdateDraft}
         />
@@ -100,6 +106,8 @@ export function DiarySplitView({
             entry={selectedEntry}
             saveStatus={saveStatus}
             isSaving={isSaving}
+            hasOfflineDraft={hasOfflineDraftForSelected}
+            onSyncOfflineDrafts={onSyncOfflineDrafts}
             showBackButton
             onBack={() => setMobileMode('list')}
             onDelete={onDeleteEntry}

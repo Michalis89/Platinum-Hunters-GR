@@ -28,6 +28,8 @@ export function DiaryPageClient() {
     isSaving,
     isUnlocking,
     saveStatus,
+    hasOfflineDraftForSelected,
+    syncOfflineDrafts,
     lockDiary,
     selectEntry,
     createNewEntry,
@@ -133,6 +135,8 @@ export function DiaryPageClient() {
               selectedEntryId={selectedEntryId}
               saveStatus={saveStatus}
               isSaving={isSaving}
+              hasOfflineDraftForSelected={hasOfflineDraftForSelected}
+              onSyncOfflineDrafts={syncOfflineDrafts}
               onSelectEntry={selectEntry}
               onCreateNew={() => {
                 void createNewEntry();

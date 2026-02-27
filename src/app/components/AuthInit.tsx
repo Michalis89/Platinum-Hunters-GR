@@ -68,6 +68,29 @@ function clearAuthStorage() {
   }
 }
 
+async function clearAuthCachesInServiceWorker() {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+    return;
+  }
+
+  const message = { type: 'CLEAR_AUTH_CACHE' };
+
+  try {
+    navigator.serviceWorker.controller?.postMessage(message);
+  } catch {
+    // ignore SW controller race conditions
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    registration.active?.postMessage(message);
+    registration.waiting?.postMessage(message);
+    registration.installing?.postMessage(message);
+  } catch {
+    // ignore SW readiness failures
+  }
+}
+
 /**
  * Sync session tokens to httpOnly cookies via API
  * This ensures the backend can read the latest tokens
@@ -145,6 +168,7 @@ export default function AuthInit() {
     }
 
     clearAuthStorage();
+    await clearAuthCachesInServiceWorker();
     try {
       await dispatch(logout());
     } catch {
@@ -218,6 +242,7 @@ export default function AuthInit() {
       if (!session || event === 'SIGNED_OUT') {
         dispatch(setUser(null));
         clearAuthStorage();
+        await clearAuthCachesInServiceWorker();
         redirectAfterLogout();
         return;
       }
