@@ -17,6 +17,12 @@ export default function SWUpdateBanner() {
       return;
     }
 
+    // Skip showing banner on the first load after a user-triggered refresh
+    if (sessionStorage.getItem('sw-update-applied')) {
+      sessionStorage.removeItem('sw-update-applied');
+      return;
+    }
+
     let mounted = true;
 
     const bindRegistration = (registration: ServiceWorkerRegistration) => {
@@ -74,6 +80,7 @@ export default function SWUpdateBanner() {
           <Button
             size="sm"
             onClick={() => {
+              sessionStorage.setItem('sw-update-applied', '1');
               postSkipWaiting(waitingWorkerRef.current);
               window.location.reload();
             }}
