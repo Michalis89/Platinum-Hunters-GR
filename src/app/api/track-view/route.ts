@@ -22,6 +22,17 @@ async function POSTHandler(req: Request) {
       return new Response(null, { status: 204 });
     }
 
+    // Skip view if the viewer is the article's author
+    const { data: articleMeta } = await supabase
+      .from('articles')
+      .select('author_id')
+      .eq('id', articleId)
+      .maybeSingle();
+
+    if (articleMeta?.author_id === session.user.id) {
+      return new Response(null, { status: 204 });
+    }
+
     const { error } = await supabase.from('article_views').insert({
       article_id: articleId,
       user_id: session.user.id,

@@ -251,14 +251,12 @@ export default function AuthInit() {
         if (currentUserRef.current) {
           return;
         }
-        // Sync cookies on sign in
-        const syncOk = await syncCookies(session);
-        if (!syncOk) {
-          // Failed to sync - clear auth state
-          dispatch(setUser(null));
-          clearAuthStorage();
-          return;
-        }
+        // Sync cookies on sign in, but don't force-logout if it fails.
+        // On mobile PWA, cookies set by the login API may not yet be available
+        // when this event fires after a page navigation (iOS timing quirk).
+        // The session is already confirmed valid by Supabase — a sync failure
+        // here does not mean the session itself is invalid.
+        await syncCookies(session);
         dispatch(fetchSession());
         return;
       }

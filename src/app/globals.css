@@ -220,6 +220,8 @@
     font-weight: var(--weight-normal);
     line-height: var(--leading-normal);
     -webkit-tap-highlight-color: transparent;
+    /* Prevent pull-to-refresh in PWA standalone mode */
+    overscroll-behavior-y: contain;
   }
 
   @supports (height: 100svh) {

@@ -404,7 +404,9 @@ export default async function ArticleDetailPage({
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
-      {isPublicReviewPage ? <TrackArticleView articleId={article.id} /> : null}
+      {isPublicReviewPage && currentUserId !== article.author_id ? (
+        <TrackArticleView articleId={article.id} />
+      ) : null}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdMarkup }} />
       <StructuredData data={getBreadcrumbStructuredData(breadcrumbItems)} />
       <ReadingProgress />

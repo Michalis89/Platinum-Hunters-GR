@@ -54,12 +54,16 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
 
     const { data: article, error: articleError } = await supabase
       .from('articles')
-      .select('id, title, slug')
+      .select('id, title, slug, author_id')
       .eq('id', Number.parseInt(id, 10))
       .single();
 
     if (articleError || !article) {
       return fail({ error: 'Article not found' }, 404);
+    }
+
+    if (article.author_id === session.user.id) {
+      return fail({ error: 'Cannot like your own article' }, 403);
     }
 
     const { data: existingLike } = await supabase
