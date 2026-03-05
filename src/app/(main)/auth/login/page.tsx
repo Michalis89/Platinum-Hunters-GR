@@ -9,7 +9,6 @@ export const metadata = buildMetadata({
   title: 'Login | Hobbistas',
   description: 'Sign in to Hobbistas and keep all your hobbies organized in one place.',
   path: '/auth/login',
-  noindex: true,
 });
 
 const highlights = [
@@ -43,8 +42,8 @@ export default function LoginPage() {
           ].join(' ')}
         >
           {/* Ambient blobs */}
-          <div className="blur-effect pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full bg-primary/10 blur-xl" />
-          <div className="blur-effect pointer-events-none absolute -bottom-16 right-0 h-56 w-56 rounded-full bg-primary/10 blur-xl" />
+          <div className="blur-effect pointer-events-none absolute -left-12 -top-12 hidden h-48 w-48 rounded-full bg-primary/10 blur-xl md:block" />
+          <div className="blur-effect pointer-events-none absolute -bottom-16 right-0 hidden h-56 w-56 rounded-full bg-primary/10 blur-xl md:block" />
 
           <div className="relative grid items-start gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8">
             <aside className="hidden space-y-6 lg:block">

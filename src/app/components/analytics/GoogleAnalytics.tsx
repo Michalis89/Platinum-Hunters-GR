@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 declare global {
@@ -18,10 +18,30 @@ type Props = {
 export function GoogleAnalytics({ gaId }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isAuthRoute = (pathname ?? '').startsWith('/auth/');
+  const [shouldLoadScripts, setShouldLoadScripts] = useState(false);
+
+  useEffect(() => {
+    if (!gaId || typeof window === 'undefined') {
+      return;
+    }
+
+    const isHomeRoute = pathname === '/home';
+    const isMobile =
+      window.matchMedia('(max-width: 768px)').matches ||
+      window.matchMedia('(hover: none)').matches;
+
+    if (isHomeRoute && isMobile) {
+      const timerId = window.setTimeout(() => setShouldLoadScripts(true), 12000);
+      return () => window.clearTimeout(timerId);
+    }
+
+    setShouldLoadScripts(true);
+  }, [gaId, pathname]);
 
   // Optional: track SPA navigations (keep this for App Router certainty)
   useEffect(() => {
-    if (!gaId || !window.gtag) {
+    if (!gaId || !window.gtag || isAuthRoute || !shouldLoadScripts) {
       return;
     }
 
@@ -32,7 +52,11 @@ export function GoogleAnalytics({ gaId }: Props) {
       page_path: url,
       page_title: document.title,
     });
-  }, [gaId, pathname, searchParams]);
+  }, [gaId, pathname, searchParams, isAuthRoute, shouldLoadScripts]);
+
+  if (isAuthRoute || !shouldLoadScripts) {
+    return null;
+  }
 
   return (
     <>

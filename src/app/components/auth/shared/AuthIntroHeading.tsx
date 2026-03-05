@@ -27,7 +27,7 @@ export function AuthIntroHeading({ eyebrow, title, description, variant }: AuthI
 
       {/* Description */}
       <p
-        className={['text-muted-foreground', isMobile ? 'mt-2 text-sm' : 'max-w-xl text-base'].join(
+        className={['text-foreground/80', isMobile ? 'mt-2 text-sm' : 'max-w-xl text-base'].join(
           ' ',
         )}
       >

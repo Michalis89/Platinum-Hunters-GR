@@ -1,14 +1,15 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { UserPlus, CheckCircle, XCircle } from 'lucide-react';
 import { FieldError } from '@/components/ui/field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
 import { AuthPasswordField } from '@/app/components/auth/shared/AuthPasswordField';
 import { AuthSubmitButton } from '@/app/components/auth/shared/AuthSubmitButton';
 import { AuthTextField } from '@/app/components/auth/shared/AuthTextField';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 
 export type PasswordStrength = {
@@ -17,6 +18,16 @@ export type PasswordStrength = {
   label: string;
   errors: string[];
 };
+
+const CaptchaWidget = dynamic(() => import('@/app/components/auth/CaptchaWidget'), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-3 px-4 py-4">
+      <Skeleton className="h-4 w-40 rounded-full bg-card" />
+      <Skeleton className="h-10 w-full bg-card" />
+    </div>
+  ),
+});
 
 type RegisterAlert = { type: 'success' | 'error'; message: string } | null;
 
@@ -201,11 +212,11 @@ export function RegisterTermsRow({ checked, error, loading, onChange }: Register
           className="text-[13px] font-medium tracking-[-0.008em] text-foreground"
         >
           I accept the{' '}
-          <Link href="/terms" className="font-semibold text-primary transition hover:opacity-80">
+          <Link href="/terms" className="font-semibold text-[hsl(var(--link))] transition hover:opacity-80">
             terms of use
           </Link>{' '}
           and the{' '}
-          <Link href="/privacy" className="font-semibold text-primary transition hover:opacity-80">
+          <Link href="/privacy" className="font-semibold text-[hsl(var(--link))] transition hover:opacity-80">
             privacy policy
           </Link>
         </Label>
@@ -217,6 +228,7 @@ export function RegisterTermsRow({ checked, error, loading, onChange }: Register
 
 type RegisterCaptchaSectionProps = {
   isCaptchaDisabled: boolean;
+  captchaVisible: boolean;
   captchaResetKey: number;
   captchaError: string | null;
   onTokenChange: (token: string | null) => void;
@@ -224,6 +236,7 @@ type RegisterCaptchaSectionProps = {
 
 export function RegisterCaptchaSection({
   isCaptchaDisabled,
+  captchaVisible,
   captchaResetKey,
   captchaError,
   onTokenChange,
@@ -234,11 +247,16 @@ export function RegisterCaptchaSection({
         <div className="px-4 py-4 text-xs text-muted-foreground">
           CAPTCHA is disabled in development mode.
         </div>
-      ) : (
+      ) : captchaVisible ? (
         <CaptchaWidget
           onTokenChange={token => onTokenChange(token)}
           resetSignal={captchaResetKey}
         />
+      ) : (
+        <div className="space-y-3 px-4 py-4">
+          <Skeleton className="h-4 w-40 rounded-full bg-card" />
+          <Skeleton className="h-10 w-full bg-card" />
+        </div>
       )}
 
       {!isCaptchaDisabled && captchaError ? <FieldError>{captchaError}</FieldError> : null}
@@ -306,7 +324,7 @@ export function LoginPrompt({ redirectParam }: LoginPromptProps) {
               ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}`
               : '/auth/login'
           }
-          className="font-semibold text-primary transition hover:opacity-80"
+          className="font-semibold text-[hsl(var(--link))] transition hover:opacity-80"
         >
           Login
         </Link>

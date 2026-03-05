@@ -28,6 +28,8 @@ const AddArticleDialog = dynamic(() => import('./articles/AddArticleDialog'), { 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname() || '';
+  const isAuthRoute = pathname.startsWith('/auth/');
+  const isHomeRoute = pathname === '/home';
   const searchParams = useSearchParams();
   const queryKey = searchParams.toString();
   const currentFullPath = queryKey ? `${pathname}?${queryKey}` : pathname;
@@ -43,11 +45,22 @@ export default function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [isMobileClient, setIsMobileClient] = useState(false);
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
+
+  useEffect(() => {
+    setIsMobileClient(
+      window.matchMedia('(max-width: 768px)').matches ||
+        window.matchMedia('(hover: none)').matches,
+    );
+  }, []);
 
   const isDev = process.env.NODE_ENV === 'development';
   const isProd = process.env.NODE_ENV === 'production';
-  const authResolved = !isAuthLoading && (!isAuthenticated || Boolean(user));
+  const authResolved =
+    isAuthRoute ||
+    (isHomeRoute && isMobileClient) ||
+    (!isAuthLoading && (!isAuthenticated || Boolean(user)));
   const logoHref = authResolved && isAuthenticated ? '/dashboard' : '/home';
   const userCategories = useMemo(
     () =>

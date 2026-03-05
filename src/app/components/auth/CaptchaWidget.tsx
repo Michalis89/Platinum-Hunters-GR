@@ -224,11 +224,11 @@ export default function CaptchaWidget({
   return (
     <div className="space-y-2 px-4 py-4">
       <div ref={containerRef} />
-      {helperText && <p className="text-xs text-muted-foreground">{helperText}</p>}
+      {helperText && <p className="text-xs text-foreground/75">{helperText}</p>}
       {error && (
         <div className="space-y-2">
           <p className="text-xs text-destructive">{error}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-foreground/75">
             If this keeps happening, retry CAPTCHA and then refresh the page.
           </p>
           <button
@@ -240,7 +240,7 @@ export default function CaptchaWidget({
           </button>
         </div>
       )}
-      {!error && !ready && <p className="text-xs text-muted-foreground">Loading CAPTCHA...</p>}
+      {!error && !ready && <p className="text-xs text-foreground/75">Loading CAPTCHA...</p>}
     </div>
   );
 }

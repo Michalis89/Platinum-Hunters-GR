@@ -23,6 +23,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { apiClient } from '@/lib/api/client';
 import { yieldToMain } from '@/lib/performance';
 import dynamic from 'next/dynamic';
+import { enqueueLibraryAddRequest, requestLibraryAddSync } from '@/lib/pwa/libraryAddQueue';
 
 import CategoryHeader from './CategoryHeader';
 import CategoryStats from './CategoryStats';
@@ -743,19 +744,32 @@ export default function CategoryLibrary({
         if (!apiBase) {
           throw new Error('Missing API base');
         }
+        const addPayload: Record<string, unknown> = {
+          source: 'external',
+          payload: selectedEntry.payload,
+          status: finalStatus,
+          is_favorite: nextFavorite,
+          selected_platform: shouldPersistPlatform ? normalizedSelectedPlatform || null : undefined,
+          progress: nextProgressValue ?? undefined,
+          score: nextScore ?? undefined,
+          notes: editState.notes || null,
+        };
+
+        if (!navigator.onLine) {
+          await enqueueLibraryAddRequest(apiBase, addPayload);
+          await requestLibraryAddSync();
+          showAlert({
+            type: 'info',
+            title: 'Saved offline',
+            message: 'Entry queued and will sync automatically when you are back online.',
+          });
+          return;
+        }
+
         const response = await apiClient.request(`${apiBase}/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            source: 'external',
-            payload: selectedEntry.payload,
-            status: finalStatus,
-            is_favorite: nextFavorite,
-            selected_platform: shouldPersistPlatform ? normalizedSelectedPlatform || null : undefined,
-            progress: nextProgressValue ?? undefined,
-            score: nextScore ?? undefined,
-            notes: editState.notes || null,
-          }),
+          body: JSON.stringify(addPayload),
         });
         if (!response.ok) {
           throw new Error('Failed to add entry');

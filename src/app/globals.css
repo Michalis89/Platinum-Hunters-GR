@@ -33,6 +33,7 @@
        -------------------------- */
     --accent-primary: 248 83% 62%;
     --accent-hover: 248 83% 68%;
+    --link: 248 83% 72%;         /* text links — higher lightness for contrast on dark bg */
     --accent-muted: 248 40% 18%;
     --surface-warm: 246 12% 10%;
     --surface-warm-2: 246 14% 13%;
@@ -152,6 +153,7 @@
     --text-secondary: 240 6% 38%;
     --text-tertiary: 240 6% 52%;
 
+    --link: 248 83% 50%;           /* text links — lower lightness for contrast on light bg */
     --accent-muted: 248 80% 94%;
     --surface-warm: 248 35% 96%;
     --surface-warm-2: 248 42% 93%;

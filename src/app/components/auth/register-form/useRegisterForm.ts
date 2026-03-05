@@ -49,6 +49,7 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const [captchaVisible, setCaptchaVisible] = useState(false);
   const [formData, setFormData] = useState<RegisterFormState>(initialState);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -65,12 +66,21 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
     });
   };
 
+  const revealCaptchaIfNeeded = () => {
+    if (isCaptchaDisabled || captchaVisible) {
+      return;
+    }
+    setCaptchaVisible(true);
+  };
+
   const handleInputChange = (fieldName: keyof RegisterFormState, value: string) => {
+    revealCaptchaIfNeeded();
     setFormData(prev => ({ ...prev, [fieldName]: value }));
     clearFieldError(fieldName);
   };
 
   const handleTermsChange = (checked: boolean) => {
+    revealCaptchaIfNeeded();
     setFormData(prev => ({ ...prev, agree_to_terms: checked }));
     clearFieldError('agree_to_terms');
   };
@@ -115,6 +125,12 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
     setIsRedirecting(false);
 
     if (!validateForm()) {
+      return;
+    }
+
+    if (!isCaptchaDisabled && !captchaVisible) {
+      setCaptchaVisible(true);
+      setCaptchaError('Load the CAPTCHA first, then try again.');
       return;
     }
 
@@ -215,6 +231,7 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
     showPasswordConfirm,
     captchaToken,
     captchaError,
+    captchaVisible,
     captchaResetKey,
     formData,
     errors,

@@ -42,6 +42,7 @@ import {
 } from '@/lib/settings/types';
 import { useTheme } from '@/context/ThemeContext';
 import { useUserSettings } from '@/lib/settings/useUserSettings';
+import NotificationSettings from '@/app/components/settings/NotificationSettings';
 
 const toFormState = (settings: UserSettingsData): UserSettingsValue => ({
   theme: settings.theme,
@@ -498,6 +499,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           </div>
         </CardContent>
       </Card>
+
+      <NotificationSettings />
 
       <Card>
         <CardHeader>

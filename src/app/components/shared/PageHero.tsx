@@ -26,7 +26,7 @@ export default function PageHero({
     <section className={cn('relative px-4 py-2 md:px-6', sectionClassName)}>
       <div className="mx-auto max-w-4xl text-center">
         {eyebrow ? (
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-primary">{eyebrow}</p>
+          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-foreground/80">{eyebrow}</p>
         ) : null}
 
         <h1 className={cn('font-extrabold leading-tight', titleClassName)}>{title}</h1>

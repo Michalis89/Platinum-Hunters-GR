@@ -5,7 +5,7 @@ import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import StructuredData from '@/utils/seo/StructuredData';
-import AuthInit from './components/AuthInit';
+import RouteAwareAuthInit from './components/RouteAwareAuthInit';
 
 import {
   organizationStructuredData,
@@ -85,7 +85,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         </a>
 
         <Providers initialTheme={initialTheme} initialPreference={initialPreference}>
-          <AuthInit />
+          <RouteAwareAuthInit />
           {children}
           {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
           {isVercelProd ? (

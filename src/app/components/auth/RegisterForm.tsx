@@ -27,6 +27,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     showPassword,
     showPasswordConfirm,
     captchaError,
+    captchaVisible,
     captchaResetKey,
     formData,
     errors,
@@ -86,6 +87,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
           <RegisterCaptchaSection
             isCaptchaDisabled={isCaptchaDisabled}
+            captchaVisible={captchaVisible}
             captchaResetKey={captchaResetKey}
             captchaError={captchaError}
             onTokenChange={token => {

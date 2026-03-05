@@ -181,6 +181,9 @@ const nextConfig: NextConfigWithInstrumentation = {
   turbopack: {},
   htmlLimitedBots: /Googlebot|Bingbot|DuckDuckBot|Slurp|baiduspider|facebot|ia_archiver/,
   productionBrowserSourceMaps: false,
+  experimental: {
+    optimizeCss: true,
+  },
   outputFileTracingRoot: join(process.cwd()),
   images: {
     minimumCacheTTL: 86400,

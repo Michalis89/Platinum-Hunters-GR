@@ -77,7 +77,9 @@ export function HomeFeatures() {
     <section className="px-4 py-12 md:px-6 md:py-16">
       <div className="mx-auto max-w-screen-2xl">
         <div className="mb-10 text-center md:mb-12">
-          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">What you can do</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.28em] text-foreground/80">
+            What you can do
+          </p>
           <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
             Add, track, and organize
           </h2>

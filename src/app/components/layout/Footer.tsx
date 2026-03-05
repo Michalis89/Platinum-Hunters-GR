@@ -35,8 +35,7 @@ export function Footer() {
   return (
     <footer className="relative mt-auto" data-app-footer="true">
       <PageContainer size="full" noPadding className="relative">
-        <div className="relative rounded-lg px-6 py-8 md:px-8 md:py-10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,hsl(var(--primary)/0.12),transparent_46%)]" />
+        <div className="relative rounded-lg bg-[radial-gradient(circle_at_0%_0%,hsl(var(--primary)/0.12),transparent_46%)] px-6 py-8 md:px-8 md:py-10">
 
           <div className="relative grid gap-8 md:grid-cols-[1.55fr_1fr_1fr]">
             <section className="space-y-4">

@@ -50,30 +50,12 @@ export function useLoginForm() {
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
   const [captchaVisible, setCaptchaVisible] = useState(false);
 
-  useEffect(() => {
-    if (isCaptchaDisabled) {
+  const revealCaptchaIfNeeded = () => {
+    if (isCaptchaDisabled || captchaVisible) {
       return;
     }
-
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    let idleId: number | null = null;
-    const revealCaptcha = () => setCaptchaVisible(true);
-
-    if (typeof requestIdleCallback !== 'undefined') {
-      idleId = requestIdleCallback(revealCaptcha, { timeout: 2500 });
-    } else {
-      timeoutId = setTimeout(revealCaptcha, 1200);
-    }
-
-    return () => {
-      if (idleId !== null && typeof cancelIdleCallback !== 'undefined') {
-        cancelIdleCallback(idleId);
-      }
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, []);
+    setCaptchaVisible(true);
+  };
 
   useEffect(() => {
     if (!forgotMode && !expiredResetLink && !resetError) {
@@ -117,20 +99,24 @@ export function useLoginForm() {
   };
 
   const handleIdentifierChange = (value: string) => {
+    revealCaptchaIfNeeded();
     setFormData(prev => ({ ...prev, identifier: value }));
     clearFieldError('identifier');
   };
 
   const handlePasswordChange = (value: string) => {
+    revealCaptchaIfNeeded();
     setFormData(prev => ({ ...prev, password: value }));
     clearFieldError('password');
   };
 
   const handleRememberChange = (checked: boolean) => {
+    revealCaptchaIfNeeded();
     setFormData(prev => ({ ...prev, remember: checked }));
   };
 
   const handleForgotPasswordClick = () => {
+    revealCaptchaIfNeeded();
     setShowResetPanel(true);
     setResetAlert(null);
     if (formData.identifier.includes('@')) {

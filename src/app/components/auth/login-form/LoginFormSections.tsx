@@ -1,6 +1,6 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { AlertCircle, CheckCircle2, LogIn, Mail } from 'lucide-react';
-import CaptchaWidget from '@/app/components/auth/CaptchaWidget';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,6 +12,16 @@ import { AuthSubmitButton } from '@/app/components/auth/shared/AuthSubmitButton'
 import { AuthTextField } from '@/app/components/auth/shared/AuthTextField';
 import { alertToneClass, isCaptchaDisabled } from './constants';
 import type { AlertState } from './useLoginForm';
+
+const CaptchaWidget = dynamic(() => import('@/app/components/auth/CaptchaWidget'), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-3 px-4 py-4">
+      <Skeleton className="h-4 w-40 rounded-full bg-card" />
+      <Skeleton className="h-10 w-full bg-card" />
+    </div>
+  ),
+});
 
 type BaseProps = {
   loading: boolean;
@@ -165,7 +175,7 @@ export function CaptchaSection({
   return (
     <div>
       {isCaptchaDisabled ? (
-        <div className="px-4 py-4 text-xs text-muted-foreground">
+        <div className="px-4 py-4 text-xs text-foreground/75">
           CAPTCHA is disabled in development mode.
         </div>
       ) : captchaVisible ? (
@@ -234,7 +244,7 @@ export function SignUpPrompt({ redirectParam }: SignUpPromptProps) {
     <>
       <Separator className="bg-border" />
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="text-center text-sm text-foreground/80">
         Don&apos;t have an account?{' '}
         <Link
           href={
@@ -242,7 +252,7 @@ export function SignUpPrompt({ redirectParam }: SignUpPromptProps) {
               ? `/auth/register?redirect=${encodeURIComponent(redirectParam)}`
               : '/auth/register'
           }
-          className="font-semibold text-primary transition hover:opacity-80"
+          className="font-semibold text-primary transition hover:text-primary/80"
         >
           Create one
         </Link>
@@ -281,7 +291,7 @@ export function ResetPanel({
         Password recovery
       </div>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-foreground/80">
         We&apos;ll send a recovery link to this email.
       </p>
 
