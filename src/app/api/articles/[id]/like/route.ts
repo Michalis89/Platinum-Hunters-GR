@@ -66,27 +66,27 @@ async function POSTHandler(_req: Request, { params }: { params: Promise<{ id: st
       return fail({ error: 'Cannot like your own article' }, 403);
     }
 
-    const { data: existingLike } = await supabase
-      .from('article_likes')
-      .select('id')
-      .eq('article_id', Number.parseInt(id, 10))
-      .eq('user_id', session.user.id)
-      .maybeSingle();
-
-    if (existingLike) {
-      return fail({ error: 'Article is already liked', code: 'CONFLICT' }, 409);
-    }
-
     const userData = await getUserBasicInfo(supabase, session.user.id);
 
-    const { error: insertError } = await supabase.from('article_likes').insert({
-      article_id: Number.parseInt(id, 10),
-      user_id: session.user.id,
-    });
+    // Atomic upsert (DO NOTHING on conflict) eliminates the SELECT→INSERT race
+    // window. ignoreDuplicates=true returns an empty array when the row already
+    // exists — we treat that as a no-op 409, consistent with the old sequential 409.
+    const { data: inserted, error: insertError } = await supabase
+      .from('article_likes')
+      .upsert(
+        { article_id: Number.parseInt(id, 10), user_id: session.user.id },
+        { onConflict: 'article_id,user_id', ignoreDuplicates: true },
+      )
+      .select('id');
 
     if (insertError) {
       console.error('Error inserting like:', insertError);
       return fail({ error: 'Article like failed' }, 500);
+    }
+
+    if (!inserted || inserted.length === 0) {
+      // Row already existed (concurrent or sequential double-like)
+      return fail({ error: 'Article is already liked', code: 'CONFLICT' }, 409);
     }
 
     await insertActivity(supabase, session.user.id, 'article_liked', {

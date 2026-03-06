@@ -3,7 +3,7 @@
  * Generic data fetching hook with loading, error state, and cleanup
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 export type FetchState<T> = {
   data: T | null;
@@ -78,6 +78,10 @@ export function useFetch<T>(url: string | null, options?: UseFetchOptions): Fetc
     [url, options?.skip],
   );
 
+  // Track the AbortController for manual refetch() calls so that rapid
+  // re-invocations cancel the prior in-flight request, matching useEffect behavior.
+  const refetchControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
     const controller = new AbortController();
     void fetchData(controller.signal);
@@ -92,7 +96,10 @@ export function useFetch<T>(url: string | null, options?: UseFetchOptions): Fetc
     loading,
     error,
     refetch: () => {
-      void fetchData();
+      refetchControllerRef.current?.abort();
+      const controller = new AbortController();
+      refetchControllerRef.current = controller;
+      void fetchData(controller.signal);
     },
   };
 }

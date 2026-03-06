@@ -4,6 +4,8 @@ type TokenCache = {
 };
 
 let cache: TokenCache | null = null;
+// Coalesce concurrent token fetches into one in-flight request
+let inflight: Promise<string> | null = null;
 
 function assertEnv(name: string): string {
   const v = process.env[name];
@@ -21,32 +23,43 @@ export async function getIgdbAccessToken(): Promise<string> {
     return cache.accessToken;
   }
 
-  const clientId = assertEnv('TWITCH_CLIENT_ID');
-  const clientSecret = assertEnv('TWITCH_CLIENT_SECRET');
-
-  const url = new URL('https://id.twitch.tv/oauth2/token');
-  url.searchParams.set('client_id', clientId);
-  url.searchParams.set('client_secret', clientSecret);
-  url.searchParams.set('grant_type', 'client_credentials');
-
-  const res = await fetch(url.toString(), { method: 'POST' });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Twitch token error: ${res.status} ${res.statusText} ${text}`);
+  // If a fetch is already in-flight, reuse it instead of stampeding
+  if (inflight) {
+    return inflight;
   }
 
-  const data = (await res.json()) as {
-    access_token: string;
-    expires_in: number;
-    token_type: string;
-  };
+  inflight = (async () => {
+    const clientId = assertEnv('TWITCH_CLIENT_ID');
+    const clientSecret = assertEnv('TWITCH_CLIENT_SECRET');
 
-  cache = {
-    accessToken: data.access_token,
-    expiresAtMs: now + data.expires_in * 1000,
-  };
+    const url = new URL('https://id.twitch.tv/oauth2/token');
+    url.searchParams.set('client_id', clientId);
+    url.searchParams.set('client_secret', clientSecret);
+    url.searchParams.set('grant_type', 'client_credentials');
 
-  return cache.accessToken;
+    const res = await fetch(url.toString(), { method: 'POST' });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Twitch token error: ${res.status} ${res.statusText} ${text}`);
+    }
+
+    const data = (await res.json()) as {
+      access_token: string;
+      expires_in: number;
+      token_type: string;
+    };
+
+    cache = {
+      accessToken: data.access_token,
+      expiresAtMs: now + data.expires_in * 1000,
+    };
+
+    return cache.accessToken;
+  })().finally(() => {
+    inflight = null;
+  });
+
+  return inflight;
 }
 
 export function getIgdbClientId(): string {

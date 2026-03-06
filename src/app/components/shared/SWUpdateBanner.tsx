@@ -81,8 +81,15 @@ export default function SWUpdateBanner() {
             size="sm"
             onClick={() => {
               sessionStorage.setItem('sw-update-applied', '1');
+              // Wait for the new SW to claim the page (controllerchange)
+              // before reloading, so the reloaded page is served by the new worker.
+              // The banner is only visible when navigator.serviceWorker exists.
+              const onControllerChange = () => {
+                navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+                window.location.reload();
+              };
+              navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
               postSkipWaiting(waitingWorkerRef.current);
-              window.location.reload();
             }}
           >
             Refresh

@@ -97,7 +97,23 @@ async function deleteQueuedLibraryAdd(id: number) {
   }
 }
 
+// Mutex flag — prevents concurrent flush runs from processing the same queued
+// items twice (message + sync events can both fire at the same time).
+let flushInProgress = false;
+
 async function flushLibrarySyncQueue() {
+  if (flushInProgress) {
+    return 0;
+  }
+  flushInProgress = true;
+  try {
+    return await _doFlush();
+  } finally {
+    flushInProgress = false;
+  }
+}
+
+async function _doFlush() {
   const queue = await getQueuedLibraryAdds();
   if (queue.length === 0) {
     return 0;
