@@ -4,16 +4,20 @@ import ProfilePageClient from './ProfilePageClient';
 
 function ProfilePageShellSkeleton() {
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-16 md:px-6">
-        <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-6">
-          <Skeleton className="h-24 w-24 rounded-[32px]" />
-          <div className="flex-1 space-y-3">
-            <Skeleton className="h-6 w-2/3 rounded-full" />
-            <Skeleton className="h-4 w-1/2 rounded-full" />
+    <div className="px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto max-w-7xl space-y-4">
+        <Skeleton className="h-56 w-full rounded-3xl" />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
+          <div className="space-y-4">
+            <Skeleton className="h-44 w-full rounded-2xl" />
+            <Skeleton className="h-64 w-full rounded-2xl" />
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-96 w-full rounded-2xl" />
+            <Skeleton className="h-56 w-full rounded-2xl" />
+            <Skeleton className="h-56 w-full rounded-2xl" />
           </div>
         </div>
-        <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     </div>
   );

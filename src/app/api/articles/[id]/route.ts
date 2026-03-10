@@ -111,6 +111,7 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
       status,
       is_featured,
       score,
+      media_id,
     } = body;
 
     if (score !== undefined && score !== null) {
@@ -190,6 +191,9 @@ async function PUTHandler(req: Request, { params }: { params: Promise<{ id: stri
     }
     if (score !== undefined) {
       updateData.score = score !== null ? Number(score) : null;
+    }
+    if (media_id !== undefined) {
+      updateData.media_id = media_id !== null ? Number(media_id) : null;
     }
 
     // Handle status change

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { X, Save, Eye, ImageIcon } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { X, Save, Eye, ImageIcon, Search, Link2 } from 'lucide-react';
 import { CoverThumbImage, THUMB_SIZES_SM } from '@/components/ui/cover-image';
 import { useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
@@ -110,6 +110,22 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
   },
 };
 
+type MediaSearchItem = {
+  mediaId: number;
+  title: string;
+  cover: string;
+  source: string;
+};
+
+const MEDIA_LINKABLE: Partial<Record<ArticleCategory, string>> = {
+  anime: '/api/anime/search?category=anime',
+  manga: '/api/anime/search?category=manga',
+  games: '/api/games/search',
+  movies: '/api/movies/search?category=movies',
+  tv: '/api/movies/search?category=tv',
+  books: '/api/books/search',
+};
+
 const generateSlug = (title: string): string => {
   return title
     .toLowerCase()
@@ -175,6 +191,11 @@ export default function AddArticleDialog({
   const [tags, setTags] = useState('');
   const [score, setScore] = useState('');
   const [isCoverPreviewValid, setIsCoverPreviewValid] = useState(true);
+  const [mediaId, setMediaId] = useState<number | null>(null);
+  const [linkedMediaTitle, setLinkedMediaTitle] = useState<string | null>(null);
+  const [mediaSearch, setMediaSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<MediaSearchItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -203,6 +224,10 @@ export default function AddArticleDialog({
       setContentHtml('');
       setTags('');
       setScore('');
+      setMediaId(null);
+      setLinkedMediaTitle(null);
+      setMediaSearch('');
+      setSearchResults([]);
       setError(null);
       setWarning(null);
       setIsCoverPreviewValid(true);
@@ -241,6 +266,41 @@ export default function AddArticleDialog({
   useEffect(() => {
     setIsCoverPreviewValid(true);
   }, [coverImage]);
+
+  const searchEndpoint = category ? (MEDIA_LINKABLE[category as ArticleCategory] ?? null) : null;
+
+  useEffect(() => {
+    if (!searchEndpoint || !mediaSearch.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const sep = searchEndpoint.includes('?') ? '&' : '?';
+        const res = await fetch(`${searchEndpoint}${sep}q=${encodeURIComponent(mediaSearch.trim())}`);
+        if (res.ok) {
+          const data = (await res.json()) as { items?: MediaSearchItem[] };
+          setSearchResults((data.items ?? []).filter(i => i.mediaId).slice(0, 5));
+        }
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [mediaSearch, searchEndpoint]);
+
+  const handleSelectMedia = useCallback((item: MediaSearchItem) => {
+    setMediaId(item.mediaId);
+    setLinkedMediaTitle(item.title);
+    setMediaSearch('');
+    setSearchResults([]);
+  }, []);
+
+  const handleUnlinkMedia = useCallback(() => {
+    setMediaId(null);
+    setLinkedMediaTitle(null);
+  }, []);
 
   const handleCoverUploadClick = () => {
     coverFileInputRef.current?.click();
@@ -337,6 +397,7 @@ export default function AddArticleDialog({
           status: saveStatus,
           published_at: saveStatus === 'published' ? new Date().toISOString() : null,
           score: contentType === 'review' && score !== '' ? Number.parseFloat(score) : null,
+          media_id: searchEndpoint ? mediaId : undefined,
         }),
       });
 
@@ -375,7 +436,7 @@ export default function AddArticleDialog({
       {/* Dialog Container - Centered */}
       <dialog
         ref={dialogRef}
-        className="hb-dialog-surface fixed inset-x-0 bottom-0 top-auto z-10 m-0 h-[100dvh] max-h-[100dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-none border border-border p-0 backdrop:bg-transparent sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:inset-x-auto sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
+        className="hb-dialog-surface fixed inset-x-0 bottom-0 top-auto z-10 m-0 h-[100dvh] max-h-[100dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-none border border-border p-0 backdrop:bg-transparent sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
         onClose={onClose}
       >
         <div className="animate-fade-in-up flex h-full max-h-[100dvh] flex-col sm:max-h-[90vh]">
@@ -574,38 +635,99 @@ export default function AddArticleDialog({
                   step={0.1}
                   value={score}
                   onChange={e => setScore(e.target.value)}
-                  description="Your rating out of 10. Enables ⭐ in Google Search results."
+                  description="Your rating out of 10."
                 />
               )}
+
+              {searchEndpoint ? (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Linked item
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">(optional)</span>
+                  </label>
+
+                  {mediaId ? (
+                    <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/5 px-3 py-2">
+                      <Link2 className="h-3.5 w-3.5 shrink-0 text-primary" />
+                      <span className="flex-1 truncate text-sm">{linkedMediaTitle}</span>
+                      <button
+                        type="button"
+                        onClick={handleUnlinkMedia}
+                        className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : null}
+
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder={`Search ${category}...`}
+                      value={mediaSearch}
+                      onChange={e => setMediaSearch(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-card py-2.5 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                    {isSearching ? (
+                      <Spinner className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2" />
+                    ) : null}
+                  </div>
+
+                  {searchResults.length > 0 ? (
+                    <ul className="overflow-hidden rounded-xl border border-border bg-card">
+                      {searchResults.map(item => (
+                        <li key={item.mediaId}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectMedia(item)}
+                            className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted/50"
+                          >
+                            {item.cover ? (
+                              <img src={item.cover} alt="" className="h-9 w-6 shrink-0 rounded object-cover" />
+                            ) : (
+                              <div className="h-9 w-6 shrink-0 rounded bg-muted" />
+                            )}
+                            <span className="truncate">{item.title}</span>
+                            <span className="ml-auto shrink-0 text-xs capitalize text-muted-foreground">
+                              {item.source}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
 
           {/* Footer */}
           <div className="border-t border-border px-4 py-4 sm:px-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <Button variant="secondary" onClick={onClose} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto sm:gap-3">
-              <Button
-                variant="ghost"
-                icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
-                onClick={() => handleSubmit('draft')}
-                disabled={isSubmitting || hasPlainTextError || noPermission}
-                className="w-full sm:w-auto"
-              >
-                Save as Draft
+              <Button variant="secondary" onClick={onClose} className="w-full sm:w-auto">
+                Cancel
               </Button>
-              <Button
-                variant="primary"
-                icon={isSubmitting ? <Spinner className="size-4" /> : <Eye size={16} />}
-                onClick={() => handleSubmit('published')}
-                disabled={isSubmitting || hasPlainTextError || noPermission}
-                className="w-full sm:w-auto"
-              >
-                Publish
-              </Button>
-            </div>
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto sm:gap-3">
+                <Button
+                  variant="ghost"
+                  icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
+                  onClick={() => handleSubmit('draft')}
+                  disabled={isSubmitting || hasPlainTextError || noPermission}
+                  className="w-full sm:w-auto"
+                >
+                  Save as Draft
+                </Button>
+                <Button
+                  variant="primary"
+                  icon={isSubmitting ? <Spinner className="size-4" /> : <Eye size={16} />}
+                  onClick={() => handleSubmit('published')}
+                  disabled={isSubmitting || hasPlainTextError || noPermission}
+                  className="w-full sm:w-auto"
+                >
+                  Publish
+                </Button>
+              </div>
             </div>
           </div>
         </div>

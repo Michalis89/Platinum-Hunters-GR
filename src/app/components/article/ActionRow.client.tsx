@@ -26,9 +26,15 @@ const ACTION_BUTTON_BASE =
 
 export default function ActionRow({ article, className }: ActionRowProps) {
   const router = useRouter();
-  const canEdit = useSelector(selectCanEditArticles);
-  const isAuthor = useSelector(selectIsAuthorOf(article.author_id));
+  const canEditRaw = useSelector(selectCanEditArticles);
+  const isAuthorRaw = useSelector(selectIsAuthorOf(article.author_id));
+  const [mounted, setMounted] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const canEdit = mounted && canEditRaw;
+  const isAuthor = mounted && isAuthorRaw;
   const [likeState, setLikeState] = useState<LikeState>({
     liked: false,
     count: article.likes || 0,

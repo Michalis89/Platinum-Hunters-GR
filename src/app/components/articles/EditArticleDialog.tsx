@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { X, Save, ImageIcon } from 'lucide-react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { X, Save, ImageIcon, Search, Link2 } from 'lucide-react';
 import { CoverThumbImage, THUMB_SIZES_SM } from '@/components/ui/cover-image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,6 +105,22 @@ const CATEGORIES: Record<ArticleCategory, CategoryConfig> = {
   },
 };
 
+type MediaSearchItem = {
+  mediaId: number;
+  title: string;
+  cover: string;
+  source: string;
+};
+
+const MEDIA_LINKABLE: Partial<Record<ArticleCategory, string>> = {
+  anime: '/api/anime/search?category=anime',
+  manga: '/api/anime/search?category=manga',
+  games: '/api/games/search',
+  movies: '/api/movies/search?category=movies',
+  tv: '/api/movies/search?category=tv',
+  books: '/api/books/search',
+};
+
 const STATUS_OPTIONS: { value: ArticleStatus; label: string }[] = [
   { value: 'draft', label: 'Draft' },
   { value: 'published', label: 'Published' },
@@ -142,6 +158,11 @@ export default function EditArticleDialog({
   const [tags, setTags] = useState((article.tags ?? []).join(', '));
   const [score, setScore] = useState(article.score != null ? String(article.score) : '');
   const [status, setStatus] = useState<ArticleStatus>(article.status);
+  const [mediaId, setMediaId] = useState<number | null>(article.media_id ?? null);
+  const [linkedMediaTitle, setLinkedMediaTitle] = useState<string | null>(null);
+  const [mediaSearch, setMediaSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<MediaSearchItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
@@ -171,6 +192,10 @@ export default function EditArticleDialog({
     setTags((article.tags ?? []).join(', '));
     setScore(article.score != null ? String(article.score) : '');
     setStatus(article.status);
+    setMediaId(article.media_id ?? null);
+    setLinkedMediaTitle(null);
+    setMediaSearch('');
+    setSearchResults([]);
     setError(null);
     setWarning(null);
     setIsCoverPreviewValid(true);
@@ -188,6 +213,43 @@ export default function EditArticleDialog({
   useEffect(() => {
     setIsCoverPreviewValid(true);
   }, [coverImage]);
+
+  const searchEndpoint = MEDIA_LINKABLE[category] ?? null;
+
+  useEffect(() => {
+    if (!searchEndpoint || !mediaSearch.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const sep = searchEndpoint.includes('?') ? '&' : '?';
+        const res = await fetch(
+          `${searchEndpoint}${sep}q=${encodeURIComponent(mediaSearch.trim())}`,
+        );
+        if (res.ok) {
+          const data = (await res.json()) as { items?: MediaSearchItem[] };
+          setSearchResults((data.items ?? []).filter(i => i.mediaId).slice(0, 5));
+        }
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [mediaSearch, searchEndpoint]);
+
+  const handleSelectMedia = useCallback((item: MediaSearchItem) => {
+    setMediaId(item.mediaId);
+    setLinkedMediaTitle(item.title);
+    setMediaSearch('');
+    setSearchResults([]);
+  }, []);
+
+  const handleUnlinkMedia = useCallback(() => {
+    setMediaId(null);
+    setLinkedMediaTitle(null);
+  }, []);
 
   const handleCoverUploadClick = () => {
     coverFileInputRef.current?.click();
@@ -270,6 +332,7 @@ export default function EditArticleDialog({
           content_html: sanitizedContentHtml || null,
           status,
           score: topic === 'reviews' && score !== '' ? Number.parseFloat(score) : null,
+          media_id: searchEndpoint ? mediaId : undefined,
         }),
       });
 
@@ -333,7 +396,7 @@ export default function EditArticleDialog({
 
       <dialog
         ref={dialogRef}
-        className="hb-dialog-surface fixed inset-x-0 bottom-0 top-auto z-10 m-0 h-[100dvh] max-h-[100dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-none border border-border p-0 backdrop:bg-transparent sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:inset-x-auto sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
+        className="hb-dialog-surface fixed inset-x-0 bottom-0 top-auto z-10 m-0 h-[100dvh] max-h-[100dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-none border border-border p-0 backdrop:bg-transparent sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
         onClose={onClose}
       >
         <div className="animate-fade-in-up flex h-full max-h-[100dvh] flex-col sm:max-h-[90vh]">
@@ -514,36 +577,105 @@ export default function EditArticleDialog({
                   step={0.1}
                   value={score}
                   onChange={event => setScore(event.target.value)}
-                  description="Your rating out of 10. Enables ⭐ in Google Search results."
+                  description="Your rating out of 10."
                 />
               )}
+
+              {searchEndpoint ? (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Linked item
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      (optional)
+                    </span>
+                  </label>
+
+                  {mediaId ? (
+                    <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/5 px-3 py-2">
+                      <Link2 className="h-3.5 w-3.5 shrink-0 text-primary" />
+                      <span className="flex-1 truncate text-sm">
+                        {linkedMediaTitle ?? `Item #${mediaId}`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleUnlinkMedia}
+                        className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : null}
+
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder={`Search ${category}...`}
+                      value={mediaSearch}
+                      onChange={e => setMediaSearch(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-card py-2.5 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                    {isSearching ? (
+                      <Spinner className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2" />
+                    ) : null}
+                  </div>
+
+                  {searchResults.length > 0 ? (
+                    <ul className="overflow-hidden rounded-xl border border-border bg-card">
+                      {searchResults.map(item => (
+                        <li key={item.mediaId}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectMedia(item)}
+                            className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted/50"
+                          >
+                            {item.cover ? (
+                              <img
+                                src={item.cover}
+                                alt=""
+                                className="h-9 w-6 shrink-0 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="h-9 w-6 shrink-0 rounded bg-muted" />
+                            )}
+                            <span className="truncate">{item.title}</span>
+                            <span className="ml-auto shrink-0 text-xs capitalize text-muted-foreground">
+                              {item.source}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
 
           <div className="border-t border-border px-4 py-4 sm:px-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-              <Button variant={'secondary'} onClick={onClose} className="w-full sm:w-auto">
-                Cancel
-              </Button>
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+                <Button variant={'secondary'} onClick={onClose} className="w-full sm:w-auto">
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isSubmitting || isDeleting}
+                  className="w-full sm:w-auto"
+                >
+                  {isDeleting ? <Spinner className="size-4" /> : 'Delete article'}
+                </Button>
+              </div>
               <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isSubmitting || isDeleting}
+                variant="primary"
+                icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
+                onClick={handleSubmit}
+                disabled={isSubmitting || hasPlainTextError}
                 className="w-full sm:w-auto"
               >
-                {isDeleting ? <Spinner className="size-4" /> : 'Delete article'}
+                Save
               </Button>
-            </div>
-            <Button
-              variant="primary"
-              icon={isSubmitting ? <Spinner className="size-4" /> : <Save size={16} />}
-              onClick={handleSubmit}
-              disabled={isSubmitting || hasPlainTextError}
-              className="w-full sm:w-auto"
-            >
-              Save
-            </Button>
             </div>
           </div>
         </div>

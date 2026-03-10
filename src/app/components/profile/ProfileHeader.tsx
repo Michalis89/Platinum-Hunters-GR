@@ -24,7 +24,7 @@ export function ProfileHeader({ user }: Readonly<ProfileHeaderProps>) {
 
   return (
     <section className="relative px-4 pb-10 pt-8 md:px-6 md:pb-12 md:pt-10">
-      <div className="mx-auto max-w-4xl rounded-3xl border border-border/60 bg-card/40 p-5 sm:p-6">
+      <div className="mx-auto max-w-5xl rounded-3xl border border-border/60 bg-card/40 p-5 sm:p-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="flex min-w-0 items-start gap-4 sm:gap-5">
             {avatarUrl ? (

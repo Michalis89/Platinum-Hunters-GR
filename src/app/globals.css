@@ -4,172 +4,169 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
+    --background: 0 0% 99.2157%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 99.2157%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 98.8235%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 257.9412 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214.2857 24.1379% 94.3137%;
+    --secondary-foreground: 0 0% 3.1373%;
+    --muted: 0 0% 96.0784%;
+    --muted-foreground: 0 0% 32.1569%;
+    --accent: 221.3793 100% 94.3137%;
+    --accent-foreground: 216.3158 76% 49.0196%;
+    --destructive: 358.4416 74.7573% 59.6078%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 17.0732% 91.9608%;
+    --input: 0 0% 92.1569%;
+    --ring: 0 0% 0%;
+    --chart-1: 148.0952 53.3898% 53.7255%;
+    --chart-2: 257.9412 100% 60%;
+    --chart-3: 24.8571 98.1308% 58.0392%;
+    --chart-4: 217.0787 76.7241% 54.5098%;
+    --chart-5: 0 0% 45.4902%;
+    --sidebar: 210 42.8571% 97.2549%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 92.1569%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 92.1569%;
+    --sidebar-ring: 0 0% 0%;
+    --font-sans: Plus Jakarta Sans, sans-serif;
+    --font-serif: Lora, serif;
+    --font-mono: IBM Plex Mono, monospace;
+    --radius: 1.4rem;
+    --shadow-x: 0px;
+    --shadow-y: 2px;
+    --shadow-blur: 3px;
+    --shadow-spread: 0px;
+    --shadow-opacity: 0.16;
+    --shadow-color: hsl(0 0% 0%);
+    --shadow-2xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
+    --shadow-xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
+    --shadow-sm: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 1px 2px -1px hsl(0 0% 0% / 0.16);
+    --shadow: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 1px 2px -1px hsl(0 0% 0% / 0.16);
+    --shadow-md: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 2px 4px -1px hsl(0 0% 0% / 0.16);
+    --shadow-lg: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 4px 6px -1px hsl(0 0% 0% / 0.16);
+    --shadow-xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 8px 10px -1px hsl(0 0% 0% / 0.16);
+    --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.40);
+    --tracking-normal: -0.025em;
+    --spacing: 0.27rem;
 
-    /* --------------------------
-       SURFACES (DARK)
-       -------------------------- */
-    --surface-base: 240 10% 4%;
-    --surface-raised: 240 8% 8%;
-    --surface-overlay: 240 6% 12%;
-    --surface-hover: 240 5% 16%;
-
-    /* --------------------------
-       BORDERS (DARK)
-       -------------------------- */
-    --border-subtle: 240 6% 18%;
-    --border-default: 240 5% 24%;
-    --border-strong: 240 4% 32%;
-
-    /* --------------------------
-       TEXT (DARK)
-       -------------------------- */
-    --text-primary: 0 0% 98%;
-    --text-secondary: 240 4% 70%;
-    --text-tertiary: 240 4% 50%;
-
-    /* --------------------------
-       BRAND ACCENT (INDIGO)
-       -------------------------- */
-    --accent-primary: 248 83% 62%;
-    --accent-hover: 248 83% 68%;
-    --link: 248 83% 72%;         /* text links — higher lightness for contrast on dark bg */
-    --accent-muted: 248 40% 18%;
-    --surface-warm: 246 12% 10%;
-    --surface-warm-2: 246 14% 13%;
-    --shadow-diary:
-      0px 14px 30px -24px hsl(248 70% 8% / 0.65),
-      0px 6px 14px -10px hsl(248 70% 6% / 0.45);
-
-    /* --------------------------
-       SEMANTIC
-       -------------------------- */
+    --surface-base: var(--background);
+    --surface-raised: var(--card);
+    --surface-overlay: var(--popover);
+    --surface-hover: 214.2857 24.1379% 90.5%;
+    --surface-warm: 248 35% 96%;
+    --surface-warm-2: 248 42% 93%;
+    --border-subtle: var(--border);
+    --border-default: var(--input);
+    --border-strong: 240 10% 72%;
+    --text-primary: var(--foreground);
+    --text-secondary: var(--muted-foreground);
+    --text-tertiary: 0 0% 45.4902%;
+    --accent-primary: var(--primary);
+    --accent-hover: 257.6687 100% 68.0392%;
+    --accent-muted: 248 80% 94%;
+    --link: 257.9412 100% 60%;
     --success: 142 76% 36%;
     --warning: 38 92% 50%;
-    --error: 0 84% 60%;
+    --error: var(--destructive);
     --info: 210 90% 60%;
-
-    /* --------------------------
-       RADII / TYPO / MOTION
-       -------------------------- */
+    --sidebar-background: var(--sidebar);
+    --touch-min: 44px;
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
     --radius-xl: 22px;
-
-    /* shadcn expects --radius */
-    --radius: 1.4rem;
-
-    --touch-min: 44px;
-
-    --font-sans: Plus Jakarta Sans, system-ui, , Segoe UI, Roboto, sans-serif;
-    --font-mono: IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, monospace;
-
     --leading-tight: 1.25;
     --leading-normal: 1.5;
     --leading-relaxed: 1.75;
-
     --weight-normal: 400;
     --weight-medium: 500;
     --weight-bold: 600;
-
     --duration-fast: 150ms;
     --duration-normal: 200ms;
     --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
     --easing-out: cubic-bezier(0, 0, 0.2, 1);
-
-    /* Shadows (keep cheap) */
-    --shadow-sm: 0px 2px 3px hsl(0 0% 0% / 0.16), 0px 1px 2px -1px hsl(0 0% 0% / 0.16);
-    --shadow-md: 0px 2px 3px hsl(0 0% 0% / 0.16), 0px 2px 4px -1px hsl(0 0% 0% / 0.16);
-    --shadow-lg: 0px 2px 3px hsl(0 0% 0% / 0.16), 0px 4px 6px -1px hsl(0 0% 0% / 0.16);
-
-    /* Scrollbar */
-    --scrollbar-track: 240 6% 12%;
-    --scrollbar-thumb: 240 4% 30%;
-    --scrollbar-thumb-hover: 240 4% 40%;
-
-    /* --------------------------
-       shadcn/ui TOKENS (mapped)
-       -------------------------- */
-    --background: var(--surface-base);
-    --foreground: var(--text-primary);
-
-    --card: var(--surface-raised);
-    --card-foreground: var(--text-primary);
-
-    --popover: var(--surface-overlay);
-    --popover-foreground: var(--text-primary);
-
-    --primary: var(--accent-primary);
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: var(--surface-raised);
-    --secondary-foreground: var(--text-primary);
-
-    --muted: var(--surface-raised);
-    --muted-foreground: var(--text-secondary);
-
-    --accent: var(--accent-primary);
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: var(--error);
-    --destructive-foreground: 0 0% 100%;
-
-    --border: var(--border-subtle);
-    --input: var(--border-default);
-    --ring: var(--accent-primary);
-
-    /* Charts (optional) */
-    --chart-1: var(--accent-primary);
-    --chart-2: 210 90% 60%;
-    --chart-3: 142 76% 36%;
-    --chart-4: 38 92% 50%;
-    --chart-5: 0 84% 60%;
-    --sidebar-background: var(--surface-raised);
-    --sidebar-foreground: var(--text-primary);
-    --sidebar-primary: var(--accent-primary);
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: var(--accent-muted);
-    --sidebar-accent-foreground: var(--text-primary);
-    --sidebar-border: var(--border-default);
-    --sidebar-ring: var(--accent-primary);
-  }
-
-  /* LIGHT THEME */
-  html[data-theme='light'],
-  body[data-theme='light'] {
-    color-scheme: light;
-
-    --surface-base: 0 0% 100%;
-    --surface-raised: 240 20% 97%;
-    --surface-overlay: 240 20% 95%;
-    --surface-hover: 240 18% 92%;
-
-    --border-subtle: 240 10% 88%;
-    --border-default: 240 10% 82%;
-    --border-strong: 240 10% 72%;
-
-    --text-primary: 240 12% 12%;
-    --text-secondary: 240 6% 38%;
-    --text-tertiary: 240 6% 52%;
-
-    --link: 248 83% 50%;           /* text links — lower lightness for contrast on light bg */
-    --accent-muted: 248 80% 94%;
-    --surface-warm: 248 35% 96%;
-    --surface-warm-2: 248 42% 93%;
-    --shadow-diary:
-      0px 12px 24px -22px hsl(248 38% 46% / 0.38),
-      0px 4px 10px -8px hsl(240 16% 24% / 0.2);
-
-    --shadow-sm: 0 1px 2px hsl(240 10% 10% / 0.1);
-    --shadow-md: 0 1px 3px hsl(240 10% 10% / 0.14);
-    --shadow-lg: 0 2px 4px hsl(240 10% 10% / 0.18);
-
     --scrollbar-track: 240 20% 95%;
     --scrollbar-thumb: 240 10% 70%;
     --scrollbar-thumb-hover: 240 10% 60%;
+    --shadow-diary:
+      0px 12px 24px -22px hsl(248 38% 46% / 0.38),
+      0px 4px 10px -8px hsl(240 16% 24% / 0.2);
+    --shadow-offset-x: 0px;
+    --shadow-offset-y: 2px;
+    --letter-spacing: -0.025em;
   }
 
+  .dark,
+  html[data-theme='dark'],
+  body[data-theme='dark'] {
+    color-scheme: dark;
+    --background: 225 7.1429% 10.9804%;
+    --foreground: 0 0% 94.1176%;
+    --card: 228 6.8493% 14.3137%;
+    --card-foreground: 0 0% 94.1176%;
+    --popover: 228 6.8493% 14.3137%;
+    --popover-foreground: 0 0% 94.1176%;
+    --primary: 257.6687 100% 68.0392%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 226.6667 9.6774% 18.2353%;
+    --secondary-foreground: 0 0% 94.1176%;
+    --muted: 226.6667 9.6774% 18.2353%;
+    --muted-foreground: 0 0% 62.7451%;
+    --accent: 217.2414 32.5843% 17.451%;
+    --accent-foreground: 208.209 100% 73.7255%;
+    --destructive: 0 90.604% 70.7843%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222.8571 6.422% 21.3725%;
+    --input: 222.8571 6.422% 21.3725%;
+    --ring: 257.6687 100% 68.0392%;
+    --chart-1: 141.8919 69.1589% 58.0392%;
+    --chart-2: 257.6687 100% 68.0392%;
+    --chart-3: 0 93.5484% 81.7647%;
+    --chart-4: 217.5484 87.5706% 65.2941%;
+    --chart-5: 0 0% 62.7451%;
+    --sidebar: 240 4.3478% 9.0196%;
+    --sidebar-foreground: 0 0% 94.1176%;
+    --sidebar-primary: 257.6687 100% 68.0392%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 226.6667 9.6774% 18.2353%;
+    --sidebar-accent-foreground: 257.6687 100% 68.0392%;
+    --sidebar-border: 222.8571 6.422% 21.3725%;
+    --sidebar-ring: 257.6687 100% 68.0392%;
+
+    --surface-base: var(--background);
+    --surface-raised: var(--card);
+    --surface-overlay: var(--popover);
+    --surface-hover: 226.6667 9.6774% 22%;
+    --surface-warm: 246 12% 10%;
+    --surface-warm-2: 246 14% 13%;
+    --border-subtle: var(--border);
+    --border-default: var(--input);
+    --border-strong: 223 6.5% 30%;
+    --text-primary: var(--foreground);
+    --text-secondary: var(--muted-foreground);
+    --text-tertiary: 0 0% 48%;
+    --accent-primary: var(--primary);
+    --accent-hover: 257.6687 100% 72%;
+    --accent-muted: 226.6667 9.6774% 18.2353%;
+    --link: 257.6687 100% 72%;
+    --error: var(--destructive);
+    --sidebar-background: var(--sidebar);
+    --scrollbar-track: 240 6% 12%;
+    --scrollbar-thumb: 240 4% 30%;
+    --scrollbar-thumb-hover: 240 4% 40%;
+    --shadow-diary:
+      0px 14px 30px -24px hsl(248 70% 8% / 0.65),
+      0px 6px 14px -10px hsl(248 70% 6% / 0.45);
+  }
   html {
     background: hsl(var(--background));
     text-rendering: optimizeLegibility;
@@ -205,7 +202,7 @@
     }
   }
 
-  /* Keep this modest—global border overrides can surprise you */
+  /* Keep this modest--global border overrides can surprise you */
   *,
   *::before,
   *::after {
@@ -222,6 +219,7 @@
     -webkit-tap-highlight-color: transparent;
     /* Prevent pull-to-refresh in PWA standalone mode */
     overscroll-behavior-y: contain;
+    letter-spacing: var(--tracking-normal);
   }
 
   @supports (height: 100svh) {
@@ -236,7 +234,9 @@
   canvas {
     max-width: 100%;
   }
-  .dark {
+  .dark,
+  html[data-theme='dark'],
+  body[data-theme='dark'] {
     --sidebar-background: var(--surface-raised);
     --sidebar-foreground: var(--text-primary);
     --sidebar-primary: var(--accent-primary);
@@ -245,6 +245,17 @@
     --sidebar-accent-foreground: var(--text-primary);
     --sidebar-border: var(--border-default);
     --sidebar-ring: var(--accent-primary);
+  }
+  .theme {
+    --font-sans: Plus Jakarta Sans, sans-serif;
+    --font-mono: IBM Plex Mono, monospace;
+    --font-serif: Lora, serif;
+    --radius: 1.4rem;
+    --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+    --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+    --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+    --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+    --tracking-widest: calc(var(--tracking-normal) + 0.1em);
   }
 }
 

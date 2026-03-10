@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { Calendar, Eye, FileText, Heart } from 'lucide-react';
 import type { ArticleCategory, ArticleRow, ArticleTopic } from '@/types/database';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
-import BackButton from '@/app/components/shared/BackButton';
+import Breadcrumbs from '@/components/ui/breadcrumbs';
 import ReadingProgress from '@/app/components/article/ReadingProgress.client';
 import EmptyState from '@/components/ui/empty';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
@@ -327,30 +327,6 @@ export default async function ArticleDetailPage({
 
   const listBasePath = article.topic === 'reviews' ? '/review' : '/articles';
   const hasCategory = Boolean(article.category);
-  const fallbackHref = hasCategory ? `${listBasePath}?category=${article.category}` : listBasePath;
-  let backHref = fallbackHref;
-
-  if (!isPublicReviewPage) {
-    const headersList = await (await import('next/headers')).headers();
-    const protocol = headersList.get('x-forwarded-proto') ?? 'http';
-    const host = headersList.get('host');
-    const referer = headersList.get('referer');
-    const baseUrl = host ? `${protocol}://${host}` : '';
-
-    if (referer && baseUrl && referer.startsWith(baseUrl)) {
-      try {
-        const url = new URL(referer);
-        const path = `${url.pathname}${url.search}`;
-        const isListPath = url.pathname === listBasePath || url.pathname === `${listBasePath}/`;
-        if (isListPath) {
-          backHref = path;
-        }
-      } catch {
-        backHref = fallbackHref;
-      }
-    }
-  }
-
   const ARTICLE_HEADER_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'long',
@@ -366,6 +342,13 @@ export default async function ArticleDetailPage({
   const relatedArticles = await fetchRelatedArticles(article);
   const relatedContentLabel = article.topic === 'reviews' ? 'reviews' : 'articles';
   const categoryLabel = CATEGORY_LABELS[article.category] ?? article.category;
+  const uiBreadcrumbs = [
+    { label: 'Home', href: '/dashboard' },
+    { label: breadcrumbLabel, href: basePath },
+    ...(hasCategory ? [{ label: categoryLabel, href: `${basePath}?category=${article.category}` }] : []),
+    { label: article.title },
+  ];
+
   const breadcrumbItems = [
     { name: 'Home', url: `${SITE_URL}/` },
     { name: breadcrumbLabel, url: `${SITE_URL}${basePath}` },
@@ -426,15 +409,14 @@ export default async function ArticleDetailPage({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
 
-        <div className="absolute left-4 top-4 z-10">
-          <BackButton fallbackHref={backHref} />
-        </div>
       </div>
 
       {/* Masthead + Body */}
       <div className="relative mx-auto -mt-14 max-w-5xl px-3 pb-16 sm:px-4 md:-mt-20">
         <article className="rounded-3xl border border-border bg-card p-4 shadow-2xl sm:p-6 md:p-10">
           <header className="mx-auto">
+            <Breadcrumbs items={uiBreadcrumbs} className="mb-4" />
+
             <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
               <span className="rounded-full border border-border bg-card/80 px-3 py-1">
                 {categoryLabel}

@@ -92,9 +92,7 @@ export function AboutStats({
               className="w-[calc(50%-0.5rem)] rounded-2xl border border-border bg-card p-5 text-center shadow-md transition hover:border-primary/40 sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.8rem)]"
             >
               <div className="mb-2 flex justify-center text-primary">{stat.icon}</div>
-              <p className="mb-1 bg-gradient-to-r from-primary to-accent bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
-                {stat.value}
-              </p>
+              <p className="mb-1 text-2xl font-extrabold text-primary md:text-3xl">{stat.value}</p>
               <p className="text-sm font-medium text-foreground">{stat.label}</p>
             </div>
           ))}

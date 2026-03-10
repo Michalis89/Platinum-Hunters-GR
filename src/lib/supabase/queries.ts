@@ -18,6 +18,7 @@ type GetArticlesParams = {
   authorId?: string | null;
   featured?: boolean;
   tag?: string | null;
+  mediaId?: number | null;
   limit: number;
   offset: number;
 };
@@ -30,7 +31,7 @@ export async function getArticlesWithFilters(
   error: PostgrestError | null;
   count: number | null;
 }> {
-  const { category, topic, status, authorId, featured, limit, offset, tag } = params;
+  const { category, topic, status, authorId, featured, limit, offset, tag, mediaId } = params;
   const resolvedStatus = status ?? 'published';
 
   let query = supabase
@@ -55,6 +56,9 @@ export async function getArticlesWithFilters(
   }
   if (tag) {
     query = query.contains('tags', [tag]);
+  }
+  if (mediaId != null) {
+    query = query.eq('media_id', mediaId);
   }
 
   const { data, error, count } = await query;

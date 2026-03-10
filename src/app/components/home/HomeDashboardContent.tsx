@@ -5,10 +5,7 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { PersonalStats } from './types';
 import { DASHBOARD_TAB_CATEGORIES } from '@/lib/dashboard/category-data';
-import type {
-  CategoryDashboardSection,
-  DashboardCategoryKey,
-} from '@/lib/dashboard/category-data';
+import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
 import type { ContinueData } from '@/lib/dashboard/server-data';
 import { HomeDashboardHeader, ContinueHero } from '@/app/components/home';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
@@ -36,7 +33,7 @@ export default function HomeDashboardContent({
   showSections = true,
 }: HomeDashboardContentProps) {
   return (
-    <main className="pb-20 pt-2 md:pb-24 md:pt-3">
+    <main className="pt-2 md:pt-3">
       <HomeDashboardHeader username={username} displayName={displayName} />
 
       {mediaCategories.length === 0 && (
@@ -115,7 +112,10 @@ function buildUnifiedOverviewCategories(
 
   return DASHBOARD_TAB_CATEGORIES.map(category => {
     const categoryStats = resolveStatsForCategory(category);
-    const recentlyFinished = Math.max(0, categorySections[category]?.insights?.updatedLast7Days ?? 0);
+    const recentlyFinished = Math.max(
+      0,
+      categorySections[category]?.insights?.updatedLast7Days ?? 0,
+    );
 
     return {
       key: category,

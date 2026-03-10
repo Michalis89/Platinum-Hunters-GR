@@ -20,10 +20,11 @@ const CATEGORY_LABELS: Record<DashboardCategoryKey, string> = {
 
 export default function CategorySuggestions({ category, items }: CategorySuggestionsProps) {
   const categoryLabel = CATEGORY_LABELS[category];
-  const categoryLabelForSentence = categoryLabel === 'TV' ? categoryLabel : categoryLabel.toLowerCase();
+  const categoryLabelForSentence =
+    categoryLabel === 'TV' ? categoryLabel : categoryLabel.toLowerCase();
 
   return (
-    <section className="space-y-4 border-t border-border/40 pt-5">
+    <section className="space-y-4">
       <DashboardSectionHeader
         eyebrow="Why these fit you"
         title={`A closer look at your ${categoryLabelForSentence} habits`}

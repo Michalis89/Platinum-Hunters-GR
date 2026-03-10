@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Heart, Star, CheckCircle, XCircle, CalendarDays, Globe, Pencil } from 'lucide-react';
+import { Heart, Star, CheckCircle, XCircle, CalendarDays, Globe, Pencil, Users, BookOpen } from 'lucide-react';
 import { CoverHeroImage } from '@/components/ui/cover-image';
 import { PageContainer } from '@/app/components/layout';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,8 @@ import {
   type SearchResult,
 } from '@/app/components/backlog/types';
 import type { MediaEntryState, MediaItem } from '@/lib/media/types';
+import type { ArticleRow } from '@/types/database';
+import { useUserSettings } from '@/lib/settings/useUserSettings';
 
 type AlertState = {
   type: 'success' | 'error';
@@ -174,18 +176,18 @@ function ScoreCluster({
 }) {
   const scoreItems = [
     typeof entryState?.rating === 'number'
-      ? { label: 'My rating', value: entryState.rating.toFixed(1), icon: '?' }
+      ? { label: 'My rating', value: entryState.rating.toFixed(1), icon: <Star className="inline-block h-3.5 w-3.5" /> }
       : null,
     typeof mediaItem.aggregated_rating === 'number'
-      ? { label: 'Aggregated', value: mediaItem.aggregated_rating.toFixed(1), icon: '?' }
+      ? { label: 'Aggregated', value: mediaItem.aggregated_rating.toFixed(1), icon: <Globe className="inline-block h-3.5 w-3.5" /> }
       : null,
     typeof mediaItem.metacritic === 'number'
-      ? { label: 'Metacritic', value: `${mediaItem.metacritic}`, icon: 'M' }
+      ? { label: 'Metacritic', value: `${mediaItem.metacritic}`, icon: <span className="text-xs font-bold">M</span> }
       : null,
     typeof mediaItem.aggregated_rating_count === 'number'
-      ? { label: 'Ratings', value: mediaItem.aggregated_rating_count.toLocaleString(), icon: '??' }
+      ? { label: 'Ratings', value: mediaItem.aggregated_rating_count.toLocaleString(), icon: <Users className="inline-block h-3.5 w-3.5" /> }
       : null,
-  ].filter(Boolean) as Array<{ label: string; value: string; icon: string }>;
+  ].filter(Boolean) as Array<{ label: string; value: string; icon: React.ReactNode }>;
 
   if (scoreItems.length === 0) {
     return null;
@@ -418,6 +420,9 @@ export default function MediaDetailPageClient({
   const [alert, setAlert] = useState<AlertState>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [overviewExpanded, setOverviewExpanded] = useState(false);
+  const [linkedArticles, setLinkedArticles] = useState<ArticleRow[]>([]);
+
+  const { settings } = useUserSettings(true);
 
   const apiBase = getApiBase(category);
   const baseEntry = useMemo(() => buildEntry(mediaItem, entryState), [mediaItem, entryState]);
@@ -479,6 +484,20 @@ export default function MediaDetailPageClient({
     void refreshEntry();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, mediaItem.id]);
+
+  const refreshLinkedArticles = async () => {
+    if (!mediaItem.id) return;
+    const res = await fetch(`/api/articles?media_id=${mediaItem.id}&limit=20`);
+    if (res.ok) {
+      const data = (await res.json()) as { data?: ArticleRow[] };
+      setLinkedArticles(data.data ?? []);
+    }
+  };
+
+  useEffect(() => {
+    void refreshLinkedArticles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediaItem.id]);
 
   const openDialog = (overrides?: Partial<MediaEntry>) => {
     setDialogEntry({
@@ -643,6 +662,10 @@ export default function MediaDetailPageClient({
     }
   };
 
+  const visibleLinkedReviews = linkedArticles.filter(
+    a => a.topic === 'reviews' && (settings?.reviews_enabled ?? true),
+  );
+
   const statusLabel = getStatusLabel(category, entryState);
   const ratingLabel =
     entryState?.rating !== null && entryState?.rating !== undefined
@@ -788,6 +811,15 @@ export default function MediaDetailPageClient({
                   <Heart className="mr-2 h-4 w-4" />
                   {entryState?.favorite ? 'In favorites' : 'Add to favorites'}
                 </Button>
+
+                {visibleLinkedReviews.length > 0 ? (
+                  <Button variant="secondary" asChild className="rounded-full">
+                    <a href={`/review/${visibleLinkedReviews[0].slug}`}>
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      Read Review
+                    </a>
+                  </Button>
+                ) : null}
               </div>
 
               <ScoreCluster mediaItem={mediaItem} entryState={entryState} />
@@ -879,6 +911,7 @@ export default function MediaDetailPageClient({
 
         <GallerySection title={baseEntry.title} images={galleryImages} />
       </div>
+
 
       <MediaEntryDialogController
         category={category}

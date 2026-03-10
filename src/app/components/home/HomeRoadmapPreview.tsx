@@ -28,10 +28,10 @@ export function HomeRoadmapPreview() {
           {previewItems.map(item => (
             <div
               key={item.title}
-              className="group rounded-lg p-5 transition hover:-translate-y-0.5 hover:border-primary/30"
+              className="duration-400 group rounded-lg p-6 transition-[transform,box-shadow,border-color] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
             >
               <div className="mb-4 flex items-start justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-card text-muted-foreground transition-colors group-hover:text-primary">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-card text-muted-foreground transition-colors group-hover:bg-primary/10">
                   <item.icon className="h-5 w-5" aria-hidden />
                 </div>
                 <span

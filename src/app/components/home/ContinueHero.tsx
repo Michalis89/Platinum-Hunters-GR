@@ -204,34 +204,13 @@ const getProgressLabel = (category: string, progress: number | null) => {
 const HeroSurface = ({ children, className = '' }: { children: ReactNode; className?: string }) => {
   return (
     <div className={`relative bg-background ${className}`}>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_circle_at_14%_44%,rgba(139,92,246,0.29),transparent_61%),radial-gradient(900px_circle_at_42%_12%,rgba(99,102,241,0.13),transparent_56%),radial-gradient(860px_circle_at_30%_58%,rgba(129,140,248,0.07),transparent_67%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(760px_circle_at_78%_52%,rgba(139,92,246,0.13),transparent_62%),radial-gradient(540px_circle_at_82%_34%,rgba(255,255,255,0.05),transparent_66%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.18)_24%,rgba(255,255,255,0.04)_42%,rgba(255,255,255,0.1)_58%,transparent_100%)] dark:bg-[linear-gradient(90deg,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0.14)_22%,rgba(255,255,255,0.03)_38%,rgba(0,0,0,0.2)_56%,transparent_100%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(920px_circle_at_34%_48%,rgba(255,255,255,0.22),transparent_63%)] dark:bg-[radial-gradient(920px_circle_at_34%_48%,rgba(255,255,255,0.055),transparent_63%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_45%,transparent_66%,rgba(255,255,255,0.26)_100%)] dark:bg-[radial-gradient(140%_95%_at_50%_45%,transparent_54%,rgba(0,0,0,0.46)_100%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.28] via-transparent to-white/[0.18] dark:from-black/[0.24] dark:to-black/[0.34]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 w-[18%] bg-gradient-to-l from-white/[0.24] to-transparent dark:from-black/[0.34]"
-      />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0" />
       <div className="relative z-10">{children}</div>
     </div>
   );

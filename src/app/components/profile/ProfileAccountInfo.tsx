@@ -15,7 +15,7 @@ type ProfileAccountInfoProps = {
 export function ProfileAccountInfo({ user }: Readonly<ProfileAccountInfoProps>) {
   return (
     <section className="px-4 py-12 md:px-6 md:py-14">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-6 text-center md:mb-8">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             Account

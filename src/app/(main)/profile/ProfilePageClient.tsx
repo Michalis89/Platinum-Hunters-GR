@@ -1,39 +1,74 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useSelector } from 'react-redux';
-import { ChevronDown } from 'lucide-react';
+import type { User as SupabaseAuthUser } from '@supabase/supabase-js';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { cn } from '@/lib/utils';
-import {
-  ActivityFeed,
-  type ActivityItem,
-  renderActivityText,
-} from '@/app/components/activity/ActivityFeed';
-import {
-  ProfileHeader,
-  ProfileCategoryInfo,
-  ProfileAccountInfo,
-  ProfilePersonalInfo,
-  categoryMeta,
-} from '@/app/components/profile';
 import { selectUser } from '@/store/slices/authSlice';
 import { hasAnyRole } from '@/lib/roles';
+import { supabase } from '@/lib/supabase-client';
 import { useUserSettings } from '@/lib/settings/useUserSettings';
+import { AboutSection, AccountInfo, GenreAffinity, HobbySection, ProfileHero } from '@/app/components/profile';
+import { getEnabledCategories, resolveProfileIdentity } from '@/app/components/profile/profileData';
+
+const ActivityTimeline = dynamic(
+  () => import('@/app/components/profile/ActivityTimeline').then(mod => mod.ActivityTimeline),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-64 w-full rounded-2xl" />,
+  },
+);
+
+const ContentList = dynamic(
+  () => import('@/app/components/profile/ContentList').then(mod => mod.ContentList),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-80 w-full rounded-2xl" />,
+  },
+);
+
+type HeroStats = {
+  articles: number | null;
+  reviews: number | null;
+  entries: number | null;
+  lists: number | null;
+};
+
+function MobileCollapse({
+  title,
+  children,
+}: Readonly<{
+  title: string;
+  children: ReactNode;
+}>) {
+  return (
+    <details className="group rounded-2xl border border-border/60 bg-card/35 lg:hidden" open>
+      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-foreground">
+        {title}
+      </summary>
+      <div className="px-2 pb-2">{children}</div>
+    </details>
+  );
+}
 
 function ProfilePageSkeleton() {
   return (
-    <div>
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-16 md:px-6">
-        <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-6">
-          <Skeleton className="h-24 w-24 rounded-[32px]" />
-          <div className="flex-1 space-y-3">
-            <Skeleton className="h-6 w-2/3 rounded-full" />
-            <Skeleton className="h-4 w-1/2 rounded-full" />
+    <div className="px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <Skeleton className="h-64 w-full rounded-3xl" />
+        <div className="grid grid-cols-12 gap-5">
+          <div className="col-span-12 space-y-5 lg:col-span-8">
+            <Skeleton className="h-[28rem] w-full rounded-2xl" />
+            <Skeleton className="h-80 w-full rounded-2xl" />
+            <Skeleton className="h-[32rem] w-full rounded-2xl" />
+          </div>
+          <div className="col-span-12 space-y-5 lg:col-span-4">
+            <Skeleton className="h-72 w-full rounded-2xl" />
+            <Skeleton className="h-72 w-full rounded-2xl" />
+            <Skeleton className="h-60 w-full rounded-2xl" />
           </div>
         </div>
-        <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     </div>
   );
@@ -41,128 +76,129 @@ function ProfilePageSkeleton() {
 
 export default function ProfilePageClient() {
   const user = useSelector(selectUser);
-  const [activityOpen, setActivityOpen] = useState(false);
-  const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const { settings } = useUserSettings(!!user);
   const socialLayerEnabled = settings?.social_enabled ?? true;
+  const isPrivileged = hasAnyRole(user, ['admin', 'owner', 'author', 'reviewer']);
+  const [authUser, setAuthUser] = useState<SupabaseAuthUser | null>(null);
+  const [heroStats, setHeroStats] = useState<HeroStats>({
+    articles: null,
+    reviews: null,
+    entries: null,
+    lists: null,
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    let cancelled = false;
+    setLoadingStats(true);
+    Promise.all([
+      fetch('/api/articles?author_id=me&status=published&topic=articles&limit=1').then(r =>
+        r.ok ? r.json() : null,
+      ),
+      fetch('/api/articles?author_id=me&status=published&topic=reviews&limit=1').then(r =>
+        r.ok ? r.json() : null,
+      ),
+    ])
+      .then(([articleResult, reviewResult]) => {
+        if (cancelled) {
+          return;
+        }
+        setHeroStats({
+          articles: Number(articleResult?.meta?.total ?? 0),
+          reviews: Number(reviewResult?.meta?.total ?? 0),
+          entries: null,
+          lists: null,
+        });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingStats(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setAuthUser(null);
+      return;
+    }
+
+    let cancelled = false;
+    supabase.auth
+      .getUser()
+      .then(({ data }) => {
+        if (!cancelled) {
+          setAuthUser(data.user ?? null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAuthUser(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const categories = useMemo(
-    () =>
-      user?.category_profile
-        ? Object.keys(user.category_profile).filter(key => key && typeof key === 'string')
-        : ['games'],
-    [user],
+    () => getEnabledCategories(user, isPrivileged, socialLayerEnabled),
+    [isPrivileged, socialLayerEnabled, user],
   );
-  const isPrivileged = hasAnyRole(user, ['admin', 'owner', 'author', 'reviewer']);
-
-  const showcaseCategories = useMemo(
-    () =>
-      ['games', 'anime', 'manga', 'books', 'movies', 'tv', 'coding', 'pet', 'vape'].filter(
-        cat =>
-          (isPrivileged || categories.includes(cat)) &&
-          (socialLayerEnabled || !['coding', 'pet', 'vape'].includes(cat)),
-      ),
-    [categories, isPrivileged, socialLayerEnabled],
+  const identity = useMemo(
+    () => (user ? resolveProfileIdentity(user, authUser) : null),
+    [authUser, user],
   );
-
-  const categoryNotes = useMemo(() => {
-    // Read from new category_profile field (clean, no fallback)
-    const categoryProfile = (user as { category_profile?: Record<string, unknown> })
-      ?.category_profile;
-    return categoryProfile || {};
-  }, [user]);
 
   if (!user) {
     return <ProfilePageSkeleton />;
   }
 
-  const categoryCards = showcaseCategories.length ? (
-    <div className="grid gap-4 md:grid-cols-2">
-      {showcaseCategories.map(category => (
-        <article
-          key={category}
-          className="rounded-2xl border border-border/60 bg-card/50 p-4 sm:p-5"
-        >
-          <header className="mb-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              {categoryMeta[category]?.title || category}
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {categoryMeta[category]?.desc || ''}
-            </p>
-          </header>
-
-          <ProfileCategoryInfo
-            category={category}
-            categoryNotes={categoryNotes}
-            genreAffinity={user.genre_affinity}
-          />
-        </article>
-      ))}
-    </div>
-  ) : (
-    <p className="text-sm text-muted-foreground">No categories selected yet.</p>
-  );
-
   return (
-    <div>
-      <div className="relative">
-        <ProfileHeader user={user} />
+    <main className="px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto max-w-7xl space-y-5">
+        <ProfileHero user={user} identity={identity} stats={heroStats} loadingStats={loadingStats} />
 
-        <ProfilePersonalInfo user={user} interestsSection={categoryCards} />
+        <div className="grid grid-cols-12 gap-5">
+          <div className="col-span-12 space-y-5 lg:col-span-8">
+            <HobbySection
+              categories={categories}
+              categoryProfile={user.category_profile}
+              genreAffinity={user.genre_affinity}
+              showPsnId={user.privacy_settings?.show_psn_id ?? true}
+            />
+            <ActivityTimeline />
+            {isPrivileged ? <ContentList /> : null}
 
-        <section className="px-4 py-12 md:px-6 md:py-14">
-          <div className="mx-auto max-w-4xl">
-            <Collapsible open={activityOpen} onOpenChange={setActivityOpen}>
-              <div className="rounded-2xl border border-border/60 bg-card/40 p-3 sm:p-4">
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold sm:text-base">Recent activity</span>
-                      <span className="inline-flex min-w-6 items-center justify-center rounded-full border border-border/70 bg-muted/35 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                        {activityItems.length}
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={cn(
-                        'h-4 w-4 text-muted-foreground transition-transform duration-200',
-                        activityOpen && 'rotate-180',
-                      )}
-                    />
-                  </button>
-                </CollapsibleTrigger>
-
-                {!activityOpen && (
-                  <div className="mt-2 rounded-xl border border-border/50 bg-card/50 px-3 py-2 text-sm text-muted-foreground">
-                    {activityItems[0]
-                      ? renderActivityText(activityItems[0])
-                      : 'No recent activity yet.'}
-                  </div>
-                )}
-
-                <CollapsibleContent forceMount className="overflow-hidden">
-                  <div
-                    className={cn('mt-3 border-t border-border/40 pt-3', !activityOpen && 'hidden')}
-                  >
-                    <ActivityFeed
-                      scope="me"
-                      limit={30}
-                      compact
-                      showHeader={false}
-                      onActivitiesChange={setActivityItems}
-                    />
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
+            <MobileCollapse title="About">
+              <AboutSection user={user} identity={identity} />
+            </MobileCollapse>
+            <MobileCollapse title="Genre Affinity">
+              <GenreAffinity genreAffinity={user.genre_affinity} />
+            </MobileCollapse>
+            <MobileCollapse title="Account Info">
+              <AccountInfo user={user} identity={identity} />
+            </MobileCollapse>
           </div>
-        </section>
 
-        <ProfileAccountInfo user={user} />
+          <aside className="col-span-12 hidden lg:col-span-4 lg:block">
+            <div className="space-y-5 lg:sticky lg:top-24">
+              <AboutSection user={user} identity={identity} />
+              <GenreAffinity genreAffinity={user.genre_affinity} />
+              <AccountInfo user={user} identity={identity} />
+            </div>
+          </aside>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

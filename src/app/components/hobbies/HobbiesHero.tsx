@@ -7,12 +7,7 @@ export function HobbiesHero() {
       eyebrow="The hobbies catalog"
       title={
         <>
-          <span className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
-            Explore
-          </span>{' '}
-          <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-            Hobbies
-          </span>
+          Explore <span className="text-primary">Hobbies</span>
         </>
       }
       subtitle="Choose the category that interests you and start organizing: library, articles, and reviews - all in one place."

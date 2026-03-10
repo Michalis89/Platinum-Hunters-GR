@@ -61,7 +61,9 @@ function applyThemeTransitionClass() {
 }
 
 function applyThemeToDom(theme: Theme) {
-  document.documentElement.setAttribute('data-theme', theme);
+  const htmlEl = document.documentElement;
+  htmlEl.setAttribute('data-theme', theme);
+  htmlEl.classList.toggle('dark', theme === 'dark');
   setThemeCookie(theme);
 }
 

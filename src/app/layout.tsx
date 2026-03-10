@@ -1,5 +1,5 @@
 import type { Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { IBM_Plex_Mono, Lora, Plus_Jakarta_Sans } from 'next/font/google';
 import { cookies } from 'next/headers';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
@@ -25,17 +25,22 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-// Font optimization: removed 'latin-ext' subset (~10KB savings)
-// 'swap' ensures text is visible immediately with fallback font
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const fontSans = Plus_Jakarta_Sans({
+  variable: '--font-sans',
   subsets: ['latin'],
   display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const fontSerif = Lora({
+  variable: '--font-serif',
   subsets: ['latin'],
+  display: 'swap',
+});
+
+const fontMono = IBM_Plex_Mono({
+  variable: '--font-mono',
+  subsets: ['latin'],
+  weight: ['400', '500'],
   display: 'swap',
 });
 
@@ -73,7 +78,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <StructuredData data={websiteStructuredData} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
         suppressHydrationWarning
       >
         {/* Skip to main content link for keyboard navigation accessibility */}

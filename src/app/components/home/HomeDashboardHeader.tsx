@@ -32,10 +32,7 @@ export function HomeDashboardHeader({ username, displayName }: HomeDashboardHead
             {greeting}
           </p>
           <h1 className="text-5xl font-semibold leading-[1.02] tracking-tight text-foreground md:text-6xl lg:text-[4.25rem]">
-            Welcome back,{' '}
-            <span className="bg-gradient-to-r from-[hsl(var(--text-primary))] via-[hsl(var(--text-primary))] to-[hsl(var(--text-secondary))] bg-clip-text text-transparent">
-              {name}
-            </span>
+            Welcome back, <span className="text-primary">{name}</span>
           </h1>
           <p className="max-w-2xl text-base leading-relaxed tracking-normal text-muted-foreground/80">
             Keep your backlog organized, pick up where you left off, and explore community

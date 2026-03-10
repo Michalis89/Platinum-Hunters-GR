@@ -69,8 +69,21 @@ async function GETHandler(req: Request) {
     const category = searchParams.get('category');
     const topic = searchParams.get('topic');
     const status = searchParams.get('status') || 'published';
-    const authorId = searchParams.get('author_id');
+    const authorIdParam = searchParams.get('author_id');
     const featured = searchParams.get('featured');
+
+    // Resolve 'me' to the authenticated user's ID
+    let authorId = authorIdParam;
+    if (authorIdParam === 'me') {
+      const supabase = await createRouteHandlerClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
+      }
+      authorId = session.user.id;
+    }
+    const mediaIdRaw = searchParams.get('media_id');
+    const mediaId = mediaIdRaw ? parseInt(mediaIdRaw, 10) : null;
     const MAX_LIMIT = 100;
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), MAX_LIMIT);
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0);
@@ -83,12 +96,13 @@ async function GETHandler(req: Request) {
         status,
         authorId,
         featured: featured === 'true',
+        mediaId,
         limit,
         offset,
       });
     };
 
-    const shouldUseCachedPublicQuery = status === 'published' && !authorId;
+    const shouldUseCachedPublicQuery = status === 'published' && !authorId && !mediaId;
     if (shouldUseCachedPublicQuery) {
       const cacheKey = JSON.stringify({
         category,
@@ -168,6 +182,7 @@ async function POSTHandler(req: Request) {
       is_featured = false,
       published_at,
       score = null,
+      media_id = null,
     } = body;
     const articlePayloadValidation = validateArticlePayload({
       title,
@@ -226,6 +241,7 @@ async function POSTHandler(req: Request) {
         is_featured,
         published_at: status === 'published' ? published_at || new Date().toISOString() : null,
         ...(score != null ? { score: Number(score) } : {}),
+        ...(media_id != null ? { media_id: Number(media_id) } : {}),
       })
       .select('*')
       .single();

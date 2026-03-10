@@ -15,7 +15,7 @@ export function NavItemContent({
   return (
     <span className={cn('inline-flex items-center gap-2 leading-none', className)}>
       <Icon className={cn('size-4 shrink-0', iconClassName)} />
-      <span className="leading-none">{label}</span>
+      <span className="cursor-pointer leading-none">{label}</span>
     </span>
   );
 }

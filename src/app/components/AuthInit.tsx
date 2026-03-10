@@ -214,12 +214,36 @@ export default function AuthInit() {
   useEffect(() => {
     const initAuth = async () => {
       initialFetchInFlight.current = true;
+      let authSucceeded = false;
 
       // Check if there's stored auth data and validate it
-      const isValid = await validateSession();
+      let isValid = await validateSession();
 
       if (!isValid) {
-        // Clear invalid session immediately
+        // localStorage session is missing or expired.
+        // Before logging out, check if httpOnly cookies are still valid —
+        // this covers the common dev-server-restart case where cookies survive
+        // but localStorage was cleared.
+        try {
+          const cookieRes = await fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' });
+          if (cookieRes.ok) {
+            const cookieData = await cookieRes.json();
+            if (cookieData?.data?.session && cookieData?.data?.user) {
+              // Restore the client-side Supabase session from cookie-backed tokens
+              await supabase.auth.setSession({
+                access_token: cookieData.data.session.access_token,
+                refresh_token: cookieData.data.session.refresh_token,
+              });
+              isValid = true;
+            }
+          }
+        } catch {
+          // Network error during cookie check — fall through to forceLogout
+        }
+      }
+
+      if (!isValid) {
+        // No valid session anywhere — clear and redirect
         await forceLogout();
       } else {
         // Valid session - sync cookies and fetch profile
@@ -230,10 +254,34 @@ export default function AuthInit() {
           // This prevents logout when opening multiple tabs where cookies may not be ready
           await syncCookies(sessionData.session);
         }
-        await dispatch(fetchSession());
+        const result = await dispatch(fetchSession());
+
+        if (fetchSession.fulfilled.match(result) && result.payload !== null) {
+          authSucceeded = true;
+        } else {
+          // fetchSession failed (rejected) OR returned null.
+          // Could be a transient error (dev server warm-up, brief API unavailability).
+          // Retry once after a short delay.
+          await new Promise(r => setTimeout(r, 400));
+          const { data: retrySessionData } = await supabase.auth.getSession();
+          if (retrySessionData.session) {
+            await syncCookies(retrySessionData.session);
+            const retryResult = await dispatch(fetchSession());
+            authSucceeded = fetchSession.fulfilled.match(retryResult) && !!retryResult.payload;
+          }
+        }
       }
 
       initialFetchInFlight.current = false;
+
+      // Safety net: useEffect([currentUser]) only re-runs when currentUser *changes*.
+      // If fetchSession failed and currentUser was already null (initial Redux state),
+      // the effect never fires again after initialFetchInFlight becomes false.
+      // Redirect to /home (safe public page) when auth init ends without a user and
+      // we are on a route that requires authentication.
+      if (!authSucceeded && typeof window !== 'undefined' && shouldRedirectToLogin(window.location.pathname)) {
+        router.replace('/home');
+      }
     };
 
     initAuth();

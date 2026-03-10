@@ -322,7 +322,7 @@ export default function EntryEditDialog({
                   <SelectTrigger id="entry-status-trigger" className="h-10 !min-h-0">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent portalContainer={selectPortalContainer}>
+                  <SelectContent portalContainer={selectPortalContainer ?? undefined}>
                     <SelectItem value="planned">{config.plannedLabel}</SelectItem>
                     {category !== 'movies' ? (
                       <SelectItem value="current">{config.currentLabel}</SelectItem>
@@ -357,7 +357,7 @@ export default function EntryEditDialog({
                     <SelectTrigger id="entry-platform-trigger" className="h-10 !min-h-0">
                       <SelectValue placeholder="Not selected" />
                     </SelectTrigger>
-                    <SelectContent portalContainer={selectPortalContainer}>
+                    <SelectContent portalContainer={selectPortalContainer ?? undefined}>
                       <SelectItem value={NO_PLATFORM_VALUE}>Not selected</SelectItem>
                       {isAnime
                         ? ANIME_PLATFORMS.map(platform => (
@@ -581,6 +581,7 @@ export default function EntryEditDialog({
         <Sheet open={!!entry} onOpenChange={open => !open && onClose()}>
           {entry ? (
             <SheetContent
+              ref={handleSelectPortalMount}
               side="bottom"
               className="h-[100dvh] w-full max-w-none gap-0 border-x-0 border-b-0 border-t border-border bg-card p-0"
             >

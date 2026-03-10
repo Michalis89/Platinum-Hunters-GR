@@ -15,13 +15,9 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
       eyebrow="About Hobbistas"
       title={
         <>
-          <span className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
-            Not a catalog. Not a feed.
-          </span>
+          <span className="text-foreground">Not a catalog. Not a feed.</span>
           <br />
-          <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-            A personal space for your hobbies.
-          </span>
+          <span className="text-primary">A personal space for your hobbies.</span>
         </>
       }
       subtitle="Hobbistas is a modular tracking system built for privacy, clarity, and control. Here's why it exists, how it works, and what makes it different."
