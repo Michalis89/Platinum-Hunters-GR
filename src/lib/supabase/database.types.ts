@@ -307,6 +307,7 @@ export type Database = {
           id: number
           is_featured: boolean | null
           likes: number | null
+          media_id: number | null
           meta_description: string | null
           meta_title: string | null
           published_at: string | null
@@ -331,6 +332,7 @@ export type Database = {
           id?: number
           is_featured?: boolean | null
           likes?: number | null
+          media_id?: number | null
           meta_description?: string | null
           meta_title?: string | null
           published_at?: string | null
@@ -355,6 +357,7 @@ export type Database = {
           id?: number
           is_featured?: boolean | null
           likes?: number | null
+          media_id?: number | null
           meta_description?: string | null
           meta_title?: string | null
           published_at?: string | null
@@ -374,6 +377,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media_items"
             referencedColumns: ["id"]
           },
         ]
