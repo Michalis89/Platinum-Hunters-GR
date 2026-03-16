@@ -153,7 +153,7 @@ const withPWA = withPWAInit({
       },
       {
         urlPattern:
-          /^https:\/\/(media\.rawg\.io|images\.igdb\.com|image\.tmdb\.org|s4\.anilist\.co|cdn\.myanimelist\.net|cdn\.cloudflare\.steamstatic\.com|books\.google\.com)\//i,
+          /^https:\/\/(media\.rawg\.io|images\.igdb\.com|image\.tmdb\.org|s4\.anilist\.co|cdn\.myanimelist\.net|api-cdn\.myanimelist\.net|cdn\.cloudflare\.steamstatic\.com|books\.google\.com)\//i,
         handler: 'CacheFirst',
         options: {
           cacheName: 'external-media-images',
@@ -221,7 +221,11 @@ const nextConfig: NextConfigWithInstrumentation = {
       },
       {
         protocol: 'https',
-        hostname: 'cdn.myanimelist.net',
+        hostname: 'myanimelist.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.myanimelist.net',
       },
       {
         protocol: 'https',
