@@ -405,7 +405,7 @@ async function loadUserCategoryProfile(
     .from('user_category_profiles')
     .select('profiles')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('[GameRecommenderV2] Error loading category profile:', error);

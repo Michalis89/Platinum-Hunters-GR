@@ -173,6 +173,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
+    scrollbar-gutter: stable;
   }
 
   html,
@@ -220,6 +221,30 @@
     /* Prevent pull-to-refresh in PWA standalone mode */
     overscroll-behavior-y: contain;
     letter-spacing: var(--tracking-normal);
+  }
+
+  /* Radix Select uses react-remove-scroll, which injects margin-right compensation
+     and causes visible layout shift on this app's pages. Keep layout stable. */
+  html body.with-scroll-bars-hidden {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+    --removed-body-scroll-bar-size: 0px !important;
+  }
+
+  html body[data-scroll-locked] {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+    overflow: visible !important;
+    --removed-body-scroll-bar-size: 0px !important;
+  }
+
+  html body .width-before-scroll-bar {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  html body .right-scroll-bar-position {
+    right: 0 !important;
   }
 
   @supports (height: 100svh) {

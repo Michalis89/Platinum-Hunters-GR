@@ -1,9 +1,8 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-import HomeDashboardContent, {
-  HomeDashboardSections,
-} from '@/app/components/home/HomeDashboardContent';
+import HomeDashboardContent from '@/app/components/home/HomeDashboardContent';
+import { HomeDashboardSections } from '@/app/components/home/HomeDashboardSections';
 import { fetchUserStats, fetchContinueData } from '@/lib/dashboard/server-data';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import { PageContainer } from '@/app/components/layout';
@@ -184,7 +183,6 @@ async function DashboardData() {
         stats={payload.stats}
         continueData={payload.continueData}
         mediaCategories={payload.mediaCategories}
-        showSections={false}
       />
       <Suspense fallback={<DashboardSectionsSkeleton />}>
         <DashboardSectionsData

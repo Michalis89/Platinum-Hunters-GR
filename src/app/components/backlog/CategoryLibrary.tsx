@@ -261,12 +261,20 @@ export default function CategoryLibrary({
   steamId,
   initialStatus = 'all',
   initialSearch,
+  isReadOnly = false,
+  canToggleFavorite = false,
+  publicUserId,
+  shareToken,
 }: Readonly<{
   category: MediaCategory;
   username?: string | null;
   steamId?: string | null;
   initialStatus?: MediaStatus | 'all';
   initialSearch?: string;
+  isReadOnly?: boolean;
+  canToggleFavorite?: boolean;
+  publicUserId?: string;
+  shareToken?: string;
 }>) {
   const isMobile = useIsMobile();
   const [steamSyncing, setSteamSyncing] = useState(false);
@@ -337,20 +345,31 @@ export default function CategoryLibrary({
 
   const loadLibraryEntries = useCallback(
     async (forceMocks = false, refreshSelectedEntry = false) => {
-      if (!supportsExternal || forceMocks) {
+      if ((!supportsExternal || forceMocks) && !isReadOnly) {
         dispatch({ type: 'patch', payload: { libraryEntries: [] } });
         return;
       }
 
       dispatch({ type: 'patch', payload: { libraryLoading: true, libraryError: null } });
       try {
-        if (!apiBase) {
+        const fetchUrl =
+          isReadOnly && publicUserId
+            ? (() => {
+                const params = new URLSearchParams({ userId: publicUserId, category });
+                if (shareToken) {
+                  params.set('token', shareToken);
+                }
+                return `/api/public/library?${params.toString()}`;
+              })()
+            : apiBase
+              ? `${apiBase}/library?category=${category}`
+              : null;
+
+        if (!fetchUrl) {
           dispatch({ type: 'patch', payload: { libraryEntries: [] } });
           return;
         }
-        const data = await apiClient.getJsonOrThrow<{ items?: MediaEntry[] }>(
-          `${apiBase}/library?category=${category}`,
-        );
+        const data = await apiClient.getJsonOrThrow<{ items?: MediaEntry[] }>(fetchUrl);
         const items = Array.isArray(data.items) ? data.items : [];
         dispatch({ type: 'patch', payload: { libraryEntries: items } });
         if (refreshSelectedEntry && selectedEntryRef.current) {
@@ -380,7 +399,7 @@ export default function CategoryLibrary({
         dispatch({ type: 'patch', payload: { libraryLoading: false } });
       }
     },
-    [apiBase, category, supportsExternal],
+    [apiBase, category, isReadOnly, publicUserId, shareToken, supportsExternal],
   );
 
   useEffect(() => {
@@ -849,6 +868,51 @@ export default function CategoryLibrary({
     }
   };
 
+  const handleToggleFavorite = useCallback(
+    async (entry: MediaEntry) => {
+      if (!canToggleFavorite || !entry.mediaId) {
+        return;
+      }
+
+      const nextFavorite = !entry.isFavorite;
+      const previousEntries = libraryEntries;
+      dispatch({
+        type: 'patch',
+        payload: {
+          libraryEntries: libraryEntries.map(item =>
+            item.id === entry.id ? { ...item, isFavorite: nextFavorite } : item,
+          ),
+        },
+      });
+
+      try {
+        if (!apiBase) {
+          throw new Error('Missing API base');
+        }
+        const response = await apiClient.request(`${apiBase}/library`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mediaId: entry.mediaId,
+            is_favorite: nextFavorite,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error('Failed to update favorite');
+        }
+      } catch (error) {
+        dispatch({ type: 'patch', payload: { libraryEntries: previousEntries } });
+        console.warn('Favorite toggle failed:', error);
+        showAlert({
+          type: 'error',
+          title: 'Error',
+          message: 'Could not update favorite. Try again.',
+        });
+      }
+    },
+    [apiBase, canToggleFavorite, libraryEntries, showAlert],
+  );
+
   const normalizedProgressPercent = (() => {
     const percent = steamSyncProgress?.percent;
     if (typeof percent === 'number' && Number.isFinite(percent)) {
@@ -1164,9 +1228,10 @@ export default function CategoryLibrary({
             onSuggestionsClick={() =>
               dispatch({ type: 'patch', payload: { ctaMode: 'suggestions' } })
             }
+            isReadOnly={isReadOnly}
           />
 
-          {!isMobile && ctaMode === 'create' && (
+          {!isReadOnly && !isMobile && ctaMode === 'create' && (
             <CreateEntryPanel
               category={category}
               searchQuery={createQuery}
@@ -1209,24 +1274,30 @@ export default function CategoryLibrary({
             category={category}
             entries={entries}
             isLoading={libraryLoading}
+            activeStatus={activeStatus}
             onOpenDialog={openEntryDialog}
             onDelete={handleDeleteEntry}
+            onToggleFavorite={handleToggleFavorite}
             onCreateClick={() => dispatch({ type: 'patch', payload: { ctaMode: 'create' } })}
+            isReadOnly={isReadOnly}
+            canToggleFavorite={canToggleFavorite}
           />
         </div>
 
-        <EntryEditDialog
-          entry={selectedEntry}
-          category={category}
-          onClose={() => dispatch({ type: 'patch', payload: { selectedEntry: null } })}
-          onSave={handleSaveEntry}
-          onDelete={handleDeleteEntry}
-          onRefreshEntry={loadLibraryEntries}
-        />
+        {!isReadOnly && (
+          <EntryEditDialog
+            entry={selectedEntry}
+            category={category}
+            onClose={() => dispatch({ type: 'patch', payload: { selectedEntry: null } })}
+            onSave={handleSaveEntry}
+            onDelete={handleDeleteEntry}
+            onRefreshEntry={loadLibraryEntries}
+          />
+        )}
       </div>
 
       <Sheet
-        open={isMobile && ctaMode === 'create'}
+        open={!isReadOnly && isMobile && ctaMode === 'create'}
         onOpenChange={open => {
           dispatch({ type: 'patch', payload: { ctaMode: open ? 'create' : null } });
         }}
@@ -1251,7 +1322,7 @@ export default function CategoryLibrary({
       </Sheet>
 
       <Sheet
-        open={ctaMode === 'suggestions'}
+        open={!isReadOnly && ctaMode === 'suggestions'}
         onOpenChange={open => {
           dispatch({ type: 'patch', payload: { ctaMode: open ? 'suggestions' : null } });
         }}
@@ -1271,6 +1342,7 @@ export default function CategoryLibrary({
             </SheetHeader>
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <SuggestionsPanel
+                category={category}
                 suggestions={suggestions}
                 isLoading={suggestionsLoading}
                 onOpenDialog={openEntryDialog}

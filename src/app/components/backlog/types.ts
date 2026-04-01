@@ -27,6 +27,7 @@ export type MediaEntry = {
   totalRuntime?: number;
   totalPages?: number;
   mediaId?: number;
+  externalId?: number;
   entryId?: number;
   igdbId?: number;
   // Game-specific fields
@@ -36,6 +37,8 @@ export type MediaEntry = {
   metacritic?: number;
   runtime?: number; // Hours for games
   igdbCategory?: number;
+  authors?: string[];
+  studios?: string[];
 };
 
 export type SearchResult = MediaEntry & {

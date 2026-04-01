@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Lightbulb, Plus } from 'lucide-react';
+import { Check, Copy, Lightbulb, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,7 @@ interface CategoryHeaderProps {
   onSteamSyncClick?: () => Promise<void>;
   onCreateClick: () => void;
   onSuggestionsClick: () => void;
+  isReadOnly?: boolean;
 }
 
 export default function CategoryHeader({
@@ -45,6 +47,7 @@ export default function CategoryHeader({
   onSteamSyncClick,
   onCreateClick,
   onSuggestionsClick,
+  isReadOnly = false,
 }: Readonly<CategoryHeaderProps>) {
   const config = CATEGORY_CONFIG[category];
   const Icon = config.icon;
@@ -53,10 +56,35 @@ export default function CategoryHeader({
   const routeCategory = searchParams.get('category');
   const hasSteamId = Boolean(steamId?.trim());
   const [steamConfirmOpen, setSteamConfirmOpen] = useState(false);
+  const [isShareCopied, setIsShareCopied] = useState(false);
 
   const showIntegrationMenu =
     pathname === '/backlog' &&
     (routeCategory === 'anime' || routeCategory === 'manga' || routeCategory === 'games');
+  const canShareBacklog = pathname === '/backlog' && Boolean(username?.trim());
+
+  const handleCopyShareLink = async () => {
+    if (!username?.trim() || typeof window === 'undefined') {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set('category', category);
+    const status = nextParams.get('status');
+    if (!status) {
+      nextParams.set('status', 'all');
+    }
+    const url = `${window.location.origin}/u/${encodeURIComponent(username)}/backlog?${nextParams.toString()}`;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setIsShareCopied(true);
+      toast.success('Share link copied');
+      setTimeout(() => setIsShareCopied(false), 1800);
+    } catch {
+      toast.error('Failed to copy share link');
+    }
+  };
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 sm:p-8">
@@ -85,7 +113,7 @@ export default function CategoryHeader({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          {!isReadOnly && <div className="flex flex-wrap items-center gap-2.5">
             <Button
               variant="primary"
               onClick={onCreateClick}
@@ -162,7 +190,22 @@ export default function CategoryHeader({
               <Lightbulb className="mr-2 h-4 w-4" />
               Personal Suggestions
             </Button>
-          </div>
+
+            {canShareBacklog ? (
+              <Button
+                variant="secondary"
+                onClick={() => void handleCopyShareLink()}
+                className="h-11 rounded-xl border-border/60 bg-card/60 px-4 text-muted-foreground"
+              >
+                {isShareCopied ? (
+                  <Check className="mr-2 h-4 w-4 text-primary" />
+                ) : (
+                  <Copy className="mr-2 h-4 w-4" />
+                )}
+                Share
+              </Button>
+            ) : null}
+          </div>}
         </div>
       </div>
 

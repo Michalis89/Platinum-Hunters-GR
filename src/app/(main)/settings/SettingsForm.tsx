@@ -43,6 +43,7 @@ import {
 import { useTheme } from '@/context/ThemeContext';
 import { useUserSettings } from '@/lib/settings/useUserSettings';
 import NotificationSettings from '@/app/components/settings/NotificationSettings';
+import ShareLinkCard from '@/app/components/settings/ShareLinkCard';
 
 const toFormState = (settings: UserSettingsData): UserSettingsValue => ({
   theme: settings.theme,
@@ -546,6 +547,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           </AlertDescription>
         </Alert>
       )}
+
+      <ShareLinkCard />
 
       <Card>
         <CardHeader>

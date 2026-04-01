@@ -4,11 +4,9 @@ import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail } from '@/lib/api/response';
-import {
-  buildBacklogPersonalMediaSuggestions,
-  type DashboardCategoryKey,
-} from '@/lib/dashboard/category-data';
+import type { DashboardCategoryKey } from '@/lib/dashboard/category-data';
 import { DEFAULT_COVER } from '@/lib/constants/messages';
+import type { RecommendationCategory } from '@/lib/recommendations/v2/types';
 
 const ALLOWED_CATEGORIES: DashboardCategoryKey[] = [
   'games',
@@ -23,6 +21,8 @@ function isDashboardCategory(value: string): value is DashboardCategoryKey {
   return ALLOWED_CATEGORIES.includes(value as DashboardCategoryKey);
 }
 
+const DB_ONLY_LIMITS = { backlog: 0, database: 4, databaseFallback: 4, total: 4 };
+
 async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -31,26 +31,42 @@ async function GETHandler(req: Request) {
 
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
+    const userId = session.user.id;
 
-    const suggestions = await buildBacklogPersonalMediaSuggestions(
-      supabase,
-      session.user.id,
-      category,
-      4,
-    );
+    let recommendations;
+    if (category === 'games') {
+      const { generateGameRecommendationsV2WithLimits } = await import(
+        '@/lib/recommendations/v2/games/games-recommender'
+      );
+      recommendations = await generateGameRecommendationsV2WithLimits(userId, DB_ONLY_LIMITS, {
+        platformFilterMode: 'owned-only',
+      });
+    } else {
+      const { generateGenericRecommendationsWithLimits } = await import(
+        '@/lib/recommendations/v2/generic/generic-recommender'
+      );
+      recommendations = await generateGenericRecommendationsWithLimits(
+        userId,
+        category as Exclude<RecommendationCategory, 'games'>,
+        DB_ONLY_LIMITS,
+      );
+    }
 
-    const items = suggestions.slice(0, 4).map(item => ({
-      source: 'local' as const,
-      id: `personal-${category}-${item.mediaId}`,
-      mediaId: item.mediaId,
-      title: item.title,
-      subtitle: item.reason,
-      status: 'planned' as const,
-      score: (item.confidence * 10).toFixed(1),
-      tags: item.genres ?? item.tags ?? [],
-      cover: item.cover || DEFAULT_COVER,
-      description: item.reason,
-    }));
+    const items = recommendations
+      .filter(r => r.source !== 'backlog')
+      .slice(0, 4)
+      .map(item => ({
+        source: 'local' as const,
+        id: `personal-${category}-${item.mediaId}`,
+        mediaId: item.mediaId,
+        title: item.title,
+        subtitle: item.reason,
+        status: 'planned' as const,
+        score: (item.confidence * 10).toFixed(1),
+        tags: item.genres ?? item.tags ?? [],
+        cover: item.cover || DEFAULT_COVER,
+        description: item.reason,
+      }));
 
     return NextResponse.json({ items });
   } catch (error) {

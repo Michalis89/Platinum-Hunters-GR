@@ -59,7 +59,7 @@ export function HobbyCard({ category, note, genreAffinity, showPsnId = true }: R
   const primaryDetails = details.keyAttributes.filter(item => item.value);
 
   return (
-    <article className="group rounded-2xl border border-border/55 bg-card/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-[0_18px_40px_-30px_rgba(139,92,246,0.8)]">
+    <article className="group rounded-2xl border border-border/55 bg-card/60 p-4 transition-all duration-300 hover:border-primary/25 hover:shadow-[0_10px_24px_-18px_hsl(var(--foreground)/0.35)]">
       <details className="group/details" open>
         <summary className="list-none cursor-pointer">
           <header className="mb-4 flex items-start gap-3">

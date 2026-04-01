@@ -10,6 +10,7 @@ export type MappedLibraryEntry = {
   id: string;
   entryId: number;
   mediaId: number;
+  externalId?: number;
   status: string;
   isFavorite: boolean;
   importSource?: string;
@@ -38,7 +39,19 @@ export type MappedLibraryEntry = {
   metacritic?: number;
   runtime?: number;
   igdbCategory?: number;
+  authors?: string[];
+  studios?: string[];
 };
+
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .filter((item): item is string | number => typeof item === 'string' || typeof item === 'number')
+    .map(item => String(item).trim())
+    .filter(Boolean);
+}
 
 function normalizeSteamCoverUrl(url: string | undefined, steamAppId?: number): string | undefined {
   if (!url) {
@@ -142,6 +155,10 @@ export function mapLibraryEntry(
     id: `entry-${row.id}`,
     entryId: row.id,
     mediaId: media.id as number,
+    externalId:
+      typeof media[config.externalId.field] === 'number'
+        ? (media[config.externalId.field] as number)
+        : undefined,
     status: row.status,
     isFavorite: row.is_favorite ?? false,
     importSource: row.import_source ?? undefined,
@@ -167,6 +184,8 @@ export function mapLibraryEntry(
       totalChapters: (media.chapters as number) ?? undefined,
       totalVolumes: (media.volumes as number) ?? undefined,
       format: (media.format as string) ?? undefined,
+      studios: toStringArray(media.studios),
+      authors: toStringArray(media.tags),
     };
   }
 
@@ -174,6 +193,7 @@ export function mapLibraryEntry(
     return {
       ...baseEntry,
       totalPages: (media.page_count as number) ?? undefined,
+      authors: toStringArray(media.tags),
     };
   }
 

@@ -2,22 +2,33 @@
 
 import { memo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { SearchResult } from './types';
+import type { MediaCategory, SearchResult } from './types';
 
 interface MediaSearchResultCardProps {
   entry: SearchResult;
   onOpenDialog: (entry: SearchResult) => void;
   variant?: 'compact' | 'default';
   isInLibrary?: boolean;
+  category?: MediaCategory;
 }
+
+const toMediaSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
 
 function MediaSearchResultCard({
   entry,
   onOpenDialog,
   variant = 'default',
   isInLibrary = false,
+  category,
 }: Readonly<MediaSearchResultCardProps>) {
   const handleOpenDialog = () => {
     if (isInLibrary) {
@@ -25,6 +36,9 @@ function MediaSearchResultCard({
     }
     onOpenDialog(entry);
   };
+  const mediaSlug = entry.title?.trim()
+    ? toMediaSlug(entry.title)
+    : String(entry.mediaId ?? entry.externalId ?? entry.id);
 
   return (
     <article
@@ -45,7 +59,16 @@ function MediaSearchResultCard({
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">{entry.title}</p>
+        {category ? (
+          <Link
+            href={`/media/${category}/${mediaSlug}`}
+            className="block truncate text-sm font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+          >
+            {entry.title}
+          </Link>
+        ) : (
+          <p className="truncate text-sm font-semibold text-foreground">{entry.title}</p>
+        )}
         <p className="truncate text-xs text-muted-foreground">
           {entry.subtitle} {entry.year ? `- ${entry.year}` : ''}
         </p>

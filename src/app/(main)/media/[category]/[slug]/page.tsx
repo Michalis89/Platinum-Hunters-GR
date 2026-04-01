@@ -299,7 +299,7 @@ const fetchPublishedMediaItemCached = unstable_cache(
       return fetchByExternalId(slug);
     } catch (error) {
       console.error('Failed to fetch media item for detail page:', error);
-      return null;
+      throw error;
     }
   },
   ['media-detail-by-category-slug'],
@@ -307,7 +307,11 @@ const fetchPublishedMediaItemCached = unstable_cache(
 );
 
 async function fetchMediaItem(category: string, slug: string): Promise<MediaItem | null> {
-  return fetchPublishedMediaItemCached(category, slug);
+  try {
+    return await fetchPublishedMediaItemCached(category, slug);
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({

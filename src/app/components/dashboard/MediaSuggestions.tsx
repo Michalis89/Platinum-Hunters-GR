@@ -19,6 +19,7 @@ import {
 type MediaSuggestionsProps = {
   suggestions: MediaSuggestion[];
   category: string;
+  hideWhenEmpty?: boolean;
 };
 const MIN_POSSIBLE_NEXT_CONFIDENCE = 0.2;
 
@@ -170,7 +171,11 @@ function generateSuggestionsLabel(suggestions: MediaSuggestion[]): string {
   return `${backlogCount} from backlog + ${dbCount} possible next`;
 }
 
-export default function MediaSuggestions({ suggestions, category }: MediaSuggestionsProps) {
+export default function MediaSuggestions({
+  suggestions,
+  category,
+  hideWhenEmpty = false,
+}: MediaSuggestionsProps) {
   const categoryLabelForSentence = category === 'TV' ? category : category.toLowerCase();
   const backlogSuggestions = suggestions.filter(s => s.source === 'backlog').slice(0, 4);
   const databaseSuggestions = suggestions
@@ -182,6 +187,10 @@ export default function MediaSuggestions({ suggestions, category }: MediaSuggest
     .slice(0, 4);
   const visibleSuggestions = [...backlogSuggestions, ...databaseSuggestions];
   const suggestionsLabel = generateSuggestionsLabel(visibleSuggestions);
+
+  if (hideWhenEmpty && visibleSuggestions.length === 0) {
+    return null;
+  }
 
   return (
     <section

@@ -3,7 +3,7 @@
 import { memo, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Heart, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -25,6 +25,9 @@ interface LibraryEntryRowProps {
   index: number;
   onOpenDialog: (entry: MediaEntry & Partial<SearchResult>) => void;
   onDelete: (entry: MediaEntry) => void;
+  isReadOnly?: boolean;
+  canToggleFavorite?: boolean;
+  onToggleFavorite?: (entry: MediaEntry) => void;
 }
 
 const ANIME_PLATFORM_LABELS: Record<string, string> = {
@@ -67,6 +70,9 @@ function LibraryEntryRow({
   index,
   onOpenDialog,
   onDelete,
+  isReadOnly = false,
+  canToggleFavorite = false,
+  onToggleFavorite,
 }: Readonly<LibraryEntryRowProps>) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const config = CATEGORY_CONFIG[category];
@@ -127,7 +133,7 @@ function LibraryEntryRow({
   return (
     <>
       <article
-        className={`group rounded-2xl border p-3 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg sm:p-4 ${
+        className={`group rounded-2xl border p-3 transition-colors duration-150 hover:border-primary/30 hover:bg-card sm:p-4 ${
           index % 2 === 0 ? 'border-border/70 bg-card/70' : 'border-border/60 bg-card/50'
         }`}
       >
@@ -186,7 +192,6 @@ function LibraryEntryRow({
           </div>
 
           <div className="hidden space-y-2 md:block">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Status</p>
             <span className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               {statusLabel}
             </span>
@@ -194,7 +199,6 @@ function LibraryEntryRow({
           </div>
 
           <div className="hidden space-y-2 md:block">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Score</p>
             <Badge
               variant="secondary"
               className="rounded-full border border-border/70 bg-card/80 px-3 py-1 text-xs"
@@ -203,30 +207,52 @@ function LibraryEntryRow({
             </Badge>
           </div>
 
-          <div className="col-span-2 flex items-center justify-end gap-2 pt-2 opacity-100 transition md:col-auto md:pt-0 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              onClick={() => onOpenDialog(entry)}
-              title="Edit"
-              aria-label="Edit"
-              className="h-9 w-9 rounded-[12px]"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              size="icon"
-              variant="destructive"
-              onClick={handleDeleteClick}
-              title="Delete"
-              aria-label="Delete"
-              className="h-9 w-9 rounded-[12px]"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {canToggleFavorite && (
+            <div className="col-span-2 flex items-center justify-end gap-1.5 pt-2 md:col-auto md:pt-0">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                onClick={() => onToggleFavorite?.(entry)}
+                title={entry.isFavorite ? 'Unfavorite' : 'Favorite'}
+                aria-label={entry.isFavorite ? 'Unfavorite' : 'Favorite'}
+                className={`h-8 w-8 rounded-xl ${
+                  entry.isFavorite
+                    ? 'text-primary hover:bg-primary/10 hover:text-primary'
+                    : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                }`}
+              >
+                <Heart className="h-3.5 w-3.5" fill={entry.isFavorite ? 'currentColor' : 'none'} />
+              </Button>
+            </div>
+          )}
+
+          {!isReadOnly && (
+            <div className="col-span-2 flex items-center justify-end gap-1.5 pt-2 md:col-auto md:pt-0">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                onClick={() => onOpenDialog(entry)}
+                title="Edit"
+                aria-label="Edit"
+                className="h-8 w-8 rounded-xl text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                onClick={handleDeleteClick}
+                title="Delete"
+                aria-label="Delete"
+                className="h-8 w-8 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
       </article>
 

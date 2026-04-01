@@ -34,12 +34,14 @@ type CategoryDashboardTabsProps = {
   enabledCategories: DashboardCategoryKey[];
   sections: Record<DashboardCategoryKey, CategoryDashboardSection>;
   stats: PersonalStats;
+  isReadOnly?: boolean;
 };
 
 export default function CategoryDashboardTabs({
   enabledCategories,
   sections,
   stats,
+  isReadOnly = false,
 }: CategoryDashboardTabsProps) {
   const visibleCategories = DASHBOARD_TAB_CATEGORIES.filter(category =>
     enabledCategories.includes(category),
@@ -117,6 +119,7 @@ export default function CategoryDashboardTabs({
                   category={category}
                   items={sections[category]?.topFive ?? []}
                   favorites={sections[category]?.favorites ?? []}
+                  isReadOnly={isReadOnly}
                 />
               </div>
               <div className="mt-9 md:mt-11">
@@ -129,6 +132,7 @@ export default function CategoryDashboardTabs({
                 <MediaSuggestions
                   suggestions={sections[category]?.mediaSuggestions ?? []}
                   category={CATEGORY_TITLES[category]}
+                  hideWhenEmpty={isReadOnly}
                 />
               </div>
               <div className="mt-11 md:mt-14">

@@ -37,7 +37,7 @@ type UserMenuProps = {
 };
 
 const itemClassName =
-  ' px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--easing-default)] focus:bg-accent/10 focus:text-foreground';
+  'cursor-pointer rounded-md px-2.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent))/0.22] hover:text-primary focus:bg-[hsl(var(--accent))/0.22] focus:text-primary data-[highlighted]:bg-[hsl(var(--accent))/0.22] data-[highlighted]:text-primary';
 
 export const UserMenu = React.memo(function UserMenu({
   user,
@@ -58,7 +58,9 @@ export const UserMenu = React.memo(function UserMenu({
           type="button"
           variant="secondary"
           className={cn(
-            'h-9 gap-2 rounded-md border border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-foreground shadow-none transition-[background-color,color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent-muted))/0.35] hover:text-primary active:scale-[0.99]',
+            'relative h-9 cursor-pointer gap-2 rounded-md border border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-foreground shadow-none',
+            'after:absolute after:bottom-[2px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-primary after:transition-transform after:duration-200 [transition-timing-function:var(--easing-default)]',
+            'transition-[background-color,color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent-muted))/0.35] hover:text-primary hover:after:scale-x-100 data-[state=open]:after:scale-x-100 active:scale-[0.99]',
           )}
         >
           <span className="relative inline-flex">

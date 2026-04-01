@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, X } from 'lucide-react';
 import EmptyState from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import MediaSearchResultCard from './MediaSearchResultCard';
@@ -72,19 +71,25 @@ export default function CreateEntryPanel({
   };
 
   return (
-    <section className="mt-6 rounded-[20px] p-4 sm:p-5">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <Button
+    <section className="mt-4 overflow-hidden rounded-2xl border border-border/70 bg-card/60">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-border/60 px-4 py-3 sm:px-5">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Add Entry</p>
+          <p className="text-xs text-muted-foreground">{config.searchPlaceholder}</p>
+        </div>
+        <button
           type="button"
-          variant="ghost"
           onClick={onClose}
-          className="h-9 rounded-[12px] px-3 text-muted-foreground"
+          aria-label="Close"
+          className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
-          Close
-        </Button>
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
-      <div className="mt-4">
+      {/* Search */}
+      <div className="px-4 pt-4 sm:px-5">
         <div className="relative">
           <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <Search size={16} />
@@ -94,29 +99,33 @@ export default function CreateEntryPanel({
             value={searchQuery}
             onChange={event => onSearchChange(event.target.value)}
             placeholder={config.searchPlaceholder}
-            className="pl-10"
+            className="h-10 rounded-xl border-border/60 bg-background/60 pl-10 text-sm"
           />
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
-        {searchResults.map(entry => (
-          <MediaSearchResultCard
-            key={`create-${entry.id}`}
-            entry={entry}
-            onOpenDialog={onOpenDialog}
-            variant="compact"
-            isInLibrary={isInLibrary(entry)}
-          />
-        ))}
-        {isLoading && (
-          <div className="rounded-[16px] px-4 py-5 text-center text-xs text-muted-foreground md:col-span-2">
-            Searching library...
-          </div>
-        )}
-        {!isLoading && searchResults.length === 0 && (
-          <EmptyState title="No results found." size="sm" className="md:col-span-2" />
-        )}
+      {/* Results */}
+      <div className="p-4 sm:p-5">
+        <div className="grid gap-3 md:grid-cols-2">
+          {searchResults.map(entry => (
+            <MediaSearchResultCard
+              key={`create-${entry.id}`}
+              entry={entry}
+              category={category}
+              onOpenDialog={onOpenDialog}
+              variant="compact"
+              isInLibrary={isInLibrary(entry)}
+            />
+          ))}
+          {isLoading && (
+            <div className="rounded-xl px-4 py-5 text-center text-xs text-muted-foreground md:col-span-2">
+              Searching...
+            </div>
+          )}
+          {!isLoading && searchResults.length === 0 && (
+            <EmptyState title="No results found." size="sm" className="md:col-span-2" />
+          )}
+        </div>
       </div>
     </section>
   );

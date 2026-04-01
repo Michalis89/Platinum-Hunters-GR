@@ -28,9 +28,20 @@ interface AlertDialogProps {
   children: React.ReactNode;
 }
 
-export function AlertDialog({ open = false, onOpenChange, children }: AlertDialogProps) {
+export function AlertDialog({ open, onOpenChange, children }: AlertDialogProps) {
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = open !== undefined;
+  const currentOpen = isControlled ? open : internalOpen;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(nextOpen);
+    }
+    onOpenChange?.(nextOpen);
+  };
+
   return (
-    <AlertDialogContext.Provider value={{ open, onOpenChange: onOpenChange || (() => {}) }}>
+    <AlertDialogContext.Provider value={{ open: currentOpen, onOpenChange: handleOpenChange }}>
       {children}
     </AlertDialogContext.Provider>
   );

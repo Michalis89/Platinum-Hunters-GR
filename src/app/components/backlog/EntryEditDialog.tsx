@@ -315,14 +315,14 @@ export default function EntryEditDialog({
                 >
                   Status
                 </label>
-                <Select
-                  value={editState.status}
-                  onValueChange={value => handleStatusChange(value as MediaStatus)}
-                >
+                <Select value={editState.status} onValueChange={value => handleStatusChange(value as MediaStatus)}>
                   <SelectTrigger id="entry-status-trigger" className="h-10 !min-h-0">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent portalContainer={selectPortalContainer ?? undefined}>
+                  <SelectContent
+                    portalContainer={selectPortalContainer ?? undefined}
+                    className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                  >
                     <SelectItem value="planned">{config.plannedLabel}</SelectItem>
                     {category !== 'movies' ? (
                       <SelectItem value="current">{config.currentLabel}</SelectItem>
@@ -357,7 +357,10 @@ export default function EntryEditDialog({
                     <SelectTrigger id="entry-platform-trigger" className="h-10 !min-h-0">
                       <SelectValue placeholder="Not selected" />
                     </SelectTrigger>
-                    <SelectContent portalContainer={selectPortalContainer ?? undefined}>
+                    <SelectContent
+                      portalContainer={selectPortalContainer ?? undefined}
+                      className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                    >
                       <SelectItem value={NO_PLATFORM_VALUE}>Not selected</SelectItem>
                       {isAnime
                         ? ANIME_PLATFORMS.map(platform => (

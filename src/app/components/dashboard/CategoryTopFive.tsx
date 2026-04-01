@@ -30,6 +30,7 @@ type CategoryTopFiveProps = {
   category: DashboardCategoryKey;
   items: DashboardTopFiveItem[];
   favorites?: DashboardTopFiveItem[];
+  isReadOnly?: boolean;
 };
 
 type DragStartPayload = Parameters<NonNullable<DragDropEventHandlers['onDragStart']>>[0];
@@ -55,6 +56,7 @@ function SortableFavoriteCard({
   canMoveDown,
   onMoveUp,
   onMoveDown,
+  isReadOnly = false,
 }: {
   item: DashboardTopFiveItem;
   rank: number;
@@ -64,6 +66,7 @@ function SortableFavoriteCard({
   canMoveDown: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  isReadOnly?: boolean;
 }) {
   const { ref, isDragging } = useSortable({
     id: item.entryId,
@@ -141,7 +144,7 @@ function SortableFavoriteCard({
           ) : null}
         </div>
 
-        {isMobile ? (
+        {isMobile && !isReadOnly ? (
           <div className="absolute bottom-3 right-3 inline-flex items-center gap-1">
             <button
               type="button"
@@ -221,6 +224,7 @@ function MobileFavoriteCard({
   canMoveDown,
   onMoveUp,
   onMoveDown,
+  isReadOnly = false,
 }: {
   item: DashboardTopFiveItem;
   rank: number;
@@ -228,6 +232,7 @@ function MobileFavoriteCard({
   canMoveDown: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  isReadOnly?: boolean;
 }) {
   const isTopFive = rank <= TOP_FIVE_LIMIT;
   const isPriorityImage = rank === 1;
@@ -284,26 +289,28 @@ function MobileFavoriteCard({
           ) : null}
         </div>
 
-        <div className="pointer-events-auto absolute bottom-3 right-3 z-10 inline-flex items-center gap-1">
-          <button
-            type="button"
-            aria-label={`Move ${item.title} up`}
-            onClick={onMoveUp}
-            disabled={!canMoveUp}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
-          >
-            <ChevronUp className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            aria-label={`Move ${item.title} down`}
-            onClick={onMoveDown}
-            disabled={!canMoveDown}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </button>
-        </div>
+        {!isReadOnly ? (
+          <div className="pointer-events-auto absolute bottom-3 right-3 z-10 inline-flex items-center gap-1">
+            <button
+              type="button"
+              aria-label={`Move ${item.title} up`}
+              onClick={onMoveUp}
+              disabled={!canMoveUp}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Move ${item.title} down`}
+              onClick={onMoveDown}
+              disabled={!canMoveDown}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/90 backdrop-blur-sm disabled:opacity-45"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
+          </div>
+        ) : null}
 
         {item.rating ? (
           <div className="absolute right-3 top-3">
@@ -395,7 +402,12 @@ function OverlayFavoriteCard({ item, rank }: { item: DashboardTopFiveItem; rank:
   );
 }
 
-export default function CategoryTopFive({ category, items, favorites = [] }: CategoryTopFiveProps) {
+export default function CategoryTopFive({
+  category,
+  items,
+  favorites = [],
+  isReadOnly = false,
+}: CategoryTopFiveProps) {
   const isMobile = useIsMobile();
   const initialOrder = useMemo(() => mergeFavorites(items, favorites), [items, favorites]);
   const [order, setOrder] = useState<DashboardTopFiveItem[]>(initialOrder);
@@ -450,6 +462,9 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
 
   const handleReorder = useCallback(
     async (newOrder: DashboardTopFiveItem[]) => {
+      if (isReadOnly) {
+        return;
+      }
       if (!newOrder.length) {
         return;
       }
@@ -467,7 +482,7 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
         throw new Error('Failed to reorder favorites');
       }
     },
-    [category],
+    [category, isReadOnly],
   );
 
   const handleMobileMove = useCallback(
@@ -627,8 +642,8 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
           className={`${DASH_RADIUS_SECTION} ${DASH_BORDER} ${DASH_SURFACE_SECTION} ${DASH_PADDING_STANDARD} ${DASH_PADDING_LARGE} shadow-sm`}
         >
           <DashboardSectionHeader
-            eyebrow={isMobile ? 'Reorder Controls' : 'Drag And Reorder'}
-            title="Reorder your favorites"
+            eyebrow={isReadOnly ? 'Favorite Highlights' : isMobile ? 'Reorder Controls' : 'Drag And Reorder'}
+            title={isReadOnly ? 'Favorite highlights' : 'Reorder your favorites'}
             className="mb-4"
           />
           <div
@@ -652,28 +667,29 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
                   <MobileFavoriteCard
                     key={item.entryId}
                     item={item}
-                  rank={index + 1}
-                  canMoveUp={index > 0}
-                  canMoveDown={index < order.length - 1}
-                  onMoveUp={() => void handleMobileMove(item.entryId, -1)}
-                  onMoveDown={() => void handleMobileMove(item.entryId, 1)}
-                />
+                    rank={index + 1}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < order.length - 1}
+                    onMoveUp={() => void handleMobileMove(item.entryId, -1)}
+                    onMoveDown={() => void handleMobileMove(item.entryId, 1)}
+                    isReadOnly={isReadOnly}
+                  />
               ))}
             </div>
           </div>
         </div>
       ) : (
         <DragDropProvider
-          sensors={[PointerSensor]}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
+          sensors={isReadOnly ? [] : [PointerSensor]}
+          onDragStart={isReadOnly ? undefined : handleDragStart}
+          onDragEnd={isReadOnly ? undefined : handleDragEnd}
         >
           <div
             className={`${DASH_RADIUS_SECTION} ${DASH_BORDER} ${DASH_SURFACE_SECTION} ${DASH_PADDING_STANDARD} ${DASH_PADDING_LARGE} shadow-sm`}
           >
             <DashboardSectionHeader
-              eyebrow="Drag And Reorder"
-              title="Reorder your favorites"
+              eyebrow={isReadOnly ? 'Favorite Highlights' : 'Drag And Reorder'}
+              title={isReadOnly ? 'Favorite highlights' : 'Reorder your favorites'}
               className="mb-4"
             />
             <div
@@ -698,19 +714,22 @@ export default function CategoryTopFive({ category, items, favorites = [] }: Cat
                     canMoveDown={false}
                     onMoveUp={() => {}}
                     onMoveDown={() => {}}
+                    isReadOnly={isReadOnly}
                   />
                 ))}
               </div>
             </div>
           </div>
-          <DragOverlay
-            dropAnimation={{
-              duration: 260,
-              easing: 'cubic-bezier(0.18, 0.9, 0.22, 1)',
-            }}
-          >
-            {activeItem ? <OverlayFavoriteCard item={activeItem} rank={activeRank} /> : null}
-          </DragOverlay>
+          {!isReadOnly ? (
+            <DragOverlay
+              dropAnimation={{
+                duration: 260,
+                easing: 'cubic-bezier(0.18, 0.9, 0.22, 1)',
+              }}
+            >
+              {activeItem ? <OverlayFavoriteCard item={activeItem} rank={activeRank} /> : null}
+            </DragOverlay>
+          ) : null}
         </DragDropProvider>
       )}
     </section>

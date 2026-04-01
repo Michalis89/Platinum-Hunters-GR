@@ -328,6 +328,22 @@ function toStringArray(value: unknown) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 }
 
+function toCsvList(value: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item): item is string | number => typeof item === 'string' || typeof item === 'number')
+      .map(item => String(item).trim())
+      .filter(Boolean);
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map(part => part.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 function appendUnmappedFields(
   note: Record<string, unknown>,
   usedKeys: Set<string>,
@@ -392,7 +408,6 @@ export function getCategoryCardData(
 
     const data: CategoryCardData = {
       keyAttributes: [
-        { label: 'Since', value: text(note.gaming_since) },
         { label: 'Favorite Platform', value: text(note.favorite_platform) },
       ],
       genres: getCategoryGenres(category, note, genreAffinity),
@@ -428,13 +443,13 @@ export function getCategoryCardData(
     const malUsername = toText(note.mal_username);
     const data: CategoryCardData = {
       keyAttributes: [
-        { label: 'Since', value: text(note.since) },
-        { label: 'Watching Format', value: text(note.format) },
         { label: 'Other Platform', value: text(note.platform_other) },
         { label: 'Notes', value: text(note.notes) },
       ],
       genres: getCategoryGenres(category, note, genreAffinity),
       listSections: [
+        { label: 'Watching Format', items: toCsvList(note.format) },
+        { label: 'Favorite Studios', items: toCsvList(note.favorite_studios) },
         { label: 'Platforms', items: list(note.platforms) },
       ],
       externalAccountsLabel: malUsername ? 'Anime Accounts' : undefined,
@@ -444,7 +459,16 @@ export function getCategoryCardData(
     };
     appendUnmappedFields(
       note,
-      new Set(['since', 'format', 'platform_other', 'notes', 'platforms', 'genres', 'mal_username']),
+      new Set([
+        'since',
+        'format',
+        'favorite_studios',
+        'platform_other',
+        'notes',
+        'platforms',
+        'genres',
+        'mal_username',
+      ]),
       data,
     );
     return data;
@@ -454,13 +478,13 @@ export function getCategoryCardData(
     const malUsername = toText(note.mal_username);
     const data: CategoryCardData = {
       keyAttributes: [
-        { label: 'Since', value: text(note.since) },
-        { label: 'Reading Format', value: text(note.format) },
-        { label: 'Favorite Authors', value: text(note.authors) },
         { label: 'Notes', value: text(note.notes) },
       ],
       genres: getCategoryGenres(category, note, genreAffinity),
-      listSections: [],
+      listSections: [
+        { label: 'Reading Format', items: toCsvList(note.format) },
+        { label: 'Favorite Authors', items: toCsvList(note.authors) },
+      ],
       externalAccountsLabel: malUsername ? 'Manga Accounts' : undefined,
       externalAccounts: malUsername
         ? [{ label: 'MAL Username', value: malUsername, href: getMalHref(malUsername) }]
@@ -477,18 +501,17 @@ export function getCategoryCardData(
   if (category === 'movies' || category === 'tv') {
     const data: CategoryCardData = {
       keyAttributes: [
-        { label: 'Since', value: text(note.since) },
-        {
-          label: category === 'movies' ? 'Watching Style' : 'Series Style',
-          value: text(note.style),
-        },
         { label: 'Other Service', value: text(note.service_other) },
-        { label: 'Favorite Directors', value: text(note.directors) },
-        { label: 'Favorite Actors', value: text(note.actors) },
-        { label: 'Favorite People', value: text(note.people) },
       ],
       genres: getCategoryGenres(category, note, genreAffinity),
       listSections: [
+        {
+          label: category === 'movies' ? 'Watching Style' : 'Series Style',
+          items: toCsvList(note.style),
+        },
+        { label: 'Favorite Directors', items: toCsvList(note.directors) },
+        { label: 'Favorite Actors', items: toCsvList(note.actors) },
+        { label: 'Favorite People', items: toCsvList(note.people) },
         {
           label: category === 'movies' ? 'Streaming Services' : 'Platforms / Services',
           items: list(note.services),
@@ -507,13 +530,14 @@ export function getCategoryCardData(
   if (category === 'books') {
     const data: CategoryCardData = {
       keyAttributes: [
-        { label: 'Since', value: text(note.since) },
-        { label: 'Reading Format', value: text(note.format) },
-        { label: 'Favorite Authors', value: text(note.authors) },
         { label: 'Notes', value: text(note.notes) },
       ],
       genres: getCategoryGenres(category, note, genreAffinity),
-      listSections: [{ label: 'Languages', items: toStringArray(note.languages) }],
+      listSections: [
+        { label: 'Reading Format', items: toCsvList(note.format) },
+        { label: 'Favorite Authors', items: toCsvList(note.authors) },
+        { label: 'Languages', items: toStringArray(note.languages) },
+      ],
       externalAccounts: [],
     };
     appendUnmappedFields(
@@ -527,7 +551,6 @@ export function getCategoryCardData(
   if (category === 'coding') {
     const data: CategoryCardData = {
       keyAttributes: [
-        { label: 'Since', value: text(note.since) },
         { label: 'Tools / Stack', value: text(note.tools) },
         { label: 'Notes', value: text(note.notes) },
       ],
@@ -548,7 +571,6 @@ export function getCategoryCardData(
         { label: 'Name', value: text(note.name) },
         { label: 'Type', value: text(note.type) },
         { label: 'Breed', value: text(note.breed) },
-        { label: 'Since', value: text(note.since) },
         { label: 'Stories', value: text(note.notes) },
       ],
       genres: [],
@@ -564,7 +586,6 @@ export function getCategoryCardData(
       keyAttributes: [
         { label: 'Device', value: text(note.device) },
         { label: 'Nicotine', value: text(note.nicotine) ? `${text(note.nicotine)} mg` : '' },
-        { label: 'Since', value: text(note.since) },
         { label: 'Notes', value: text(note.notes) },
       ],
       genres: [],

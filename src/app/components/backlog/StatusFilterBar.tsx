@@ -37,29 +37,32 @@ export default function StatusFilterBar({
   ];
 
   return (
-    <section className="sticky top-20 z-30 rounded-2xl border border-border/70 bg-background/95 p-4 shadow-sm supports-[backdrop-filter]:bg-background/95 sm:p-5">
-      <div className="flex flex-col gap-4">
-        <div className="relative">
+    <section className="sticky top-20 z-30 rounded-2xl border border-border/70 bg-background/95 px-4 py-3 shadow-sm supports-[backdrop-filter]:bg-background/95 sm:px-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        {/* Search — 1/3 */}
+        <div className="relative sm:basis-1/3 sm:shrink-0">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             value={search}
             onChange={event => onSearchChange(event.target.value)}
             placeholder={config.searchPlaceholder}
-            className="h-11 rounded-xl border-border/70 bg-card/70 pl-10"
+            className="h-10 rounded-xl border-border/60 bg-card/60 pl-10 text-sm"
           />
         </div>
 
+        {/* Filters — 2/3 */}
         <Tabs
           value={activeStatus}
           onValueChange={value => onStatusChange(value as MediaStatus | 'all')}
+          className="sm:flex-1"
         >
-          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl border border-border/70 bg-card/70 p-1 sm:flex sm:h-11 sm:justify-center">
+          <TabsList className="flex h-10 w-full items-center gap-0.5 rounded-xl border border-border/60 bg-card/60 p-1">
             {filters.map(filter => (
               <TabsTrigger
                 key={filter.key}
                 value={filter.key}
-                className="h-9 min-w-0 rounded-lg px-2 text-[11px] font-semibold sm:shrink-0 sm:px-4 sm:text-sm"
+                className="h-8 flex-1 rounded-lg px-2 text-[12px] font-semibold"
               >
                 {filter.label}
               </TabsTrigger>

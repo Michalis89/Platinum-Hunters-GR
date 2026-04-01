@@ -4,9 +4,10 @@ import { useMemo } from 'react';
 import { Lightbulb, Sparkles } from 'lucide-react';
 import EmptyState from '@/components/ui/empty';
 import MediaSearchResultCard from './MediaSearchResultCard';
-import type { MediaEntry, SearchResult } from './types';
+import type { MediaCategory, MediaEntry, SearchResult } from './types';
 
 interface SuggestionsPanelProps {
+  category: MediaCategory;
   suggestions: SearchResult[];
   isLoading: boolean;
   onOpenDialog: (entry: SearchResult) => void;
@@ -14,6 +15,7 @@ interface SuggestionsPanelProps {
 }
 
 export default function SuggestionsPanel({
+  category,
   suggestions,
   isLoading,
   onOpenDialog,
@@ -65,6 +67,7 @@ export default function SuggestionsPanel({
           <MediaSearchResultCard
             key={entry.id}
             entry={{ ...entry, source: 'local' }}
+            category={category}
             onOpenDialog={() => onOpenDialog({ ...entry, source: 'local' })}
             isInLibrary={isInLibrary(entry)}
             variant="compact"
