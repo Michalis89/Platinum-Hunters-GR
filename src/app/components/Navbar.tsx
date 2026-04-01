@@ -13,8 +13,6 @@ import { DesktopNav } from './navbar/DesktopNav';
 import { LogoBrand } from './navbar/LogoBrand';
 import { MobileNavSheet } from './navbar/MobileNavSheet';
 import {
-  DND_TOOLS,
-  getVisibleDndTools,
   getVisibleHobbyItems,
   getVisibleNavItems,
   HOBBY_ITEMS,
@@ -116,13 +114,6 @@ export default function Navbar() {
     [authResolved, isAuthenticated, userCategories, featureFilters],
   );
 
-  const dndTools = useMemo(() => {
-    if (!featureFilters.dnd) {
-      return [];
-    }
-    return getVisibleDndTools(DND_TOOLS, featureFilters.dnd_role ?? null);
-  }, [featureFilters.dnd, featureFilters.dnd_role]);
-
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname, queryKey]);
@@ -211,7 +202,6 @@ export default function Navbar() {
           pathname={pathname}
           navItems={navItems}
           hobbyItems={hobbyItems}
-          dndTools={dndTools}
           dndEnabled={featureFilters.dnd ?? false}
           authResolved={authResolved}
           isAuthenticated={isAuthenticated}
@@ -234,7 +224,6 @@ export default function Navbar() {
           pathname={pathname}
           hobbyItems={hobbyItems}
           navItems={navItems}
-          dndTools={dndTools}
           dndEnabled={featureFilters.dnd ?? false}
           authResolved={authResolved}
           isAuthenticated={isAuthenticated}

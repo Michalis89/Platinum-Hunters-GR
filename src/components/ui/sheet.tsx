@@ -98,7 +98,7 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
 
       if (open) {
         if (!dialog.open) {
-          dialog.showModal();
+          dialog.show();
           // Prevent body scroll on mobile
           document.body.style.overflow = 'hidden';
         }
@@ -140,13 +140,9 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
       };
     }, [onOpenChange, onClose]);
 
-    // Click outside to close
-    const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-      const dialog = dialogRef.current;
-      if (e.target === dialog) {
-        onOpenChange(false);
-        onClose?.();
-      }
+    const handleBackdropClick = () => {
+      onOpenChange(false);
+      onClose?.();
     };
 
     // Focus trap - Return focus to trigger on close
@@ -182,21 +178,25 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
     return createPortal(
       <dialog
         ref={dialogRef}
-        onClick={handleBackdropClick}
         className={cn(
           /* Reset default dialog styles */
           'm-0 max-h-none max-w-none border-0 p-0',
           /* Full viewport positioning */
           'fixed inset-0 h-full w-full',
-          /* Transparent dialog to show custom backdrop */
+          /* Transparent so backdrop div shows through */
           'bg-transparent',
-          /* Solid backdrop - NO BLUR (performance) */
-          'backdrop:bg-black/80 backdrop:duration-200 backdrop:animate-in backdrop:fade-in-0',
-          /* Ensure proper stacking */
+          /* Ensure proper stacking — use-show() so portals (Radix Select etc.) stay interactive */
           'z-50',
         )}
         aria-modal="true"
       >
+        {/* Backdrop — separate div so Radix portals rendered outside <dialog> remain interactive */}
+        {open && (
+          <div
+            className="fixed inset-0 bg-black/80 animate-in fade-in-0 duration-200"
+            onClick={handleBackdropClick}
+          />
+        )}
         <div
           ref={contentRef}
           className={cn(

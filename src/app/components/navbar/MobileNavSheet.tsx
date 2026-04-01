@@ -1,6 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import {
+  BookOpen,
+  Dice6,
   LogIn,
   LogOut,
   Menu,
@@ -17,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggleButton } from './ThemeToggleButton';
-import { isHrefActive, type DndToolItem, type HobbyItem, type NavbarLinkItem } from './navbar.data';
+import { isHrefActive, type HobbyItem, type NavbarLinkItem } from './navbar.data';
 import { mobileChipClass, NavItemContent } from './navbar.helpers';
 
 type Theme = 'dark' | 'light';
@@ -28,7 +30,6 @@ type MobileNavSheetProps = {
   pathname: string;
   hobbyItems: HobbyItem[];
   navItems: NavbarLinkItem[];
-  dndTools: DndToolItem[];
   dndEnabled: boolean;
   authResolved: boolean;
   isAuthenticated: boolean;
@@ -50,7 +51,6 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
   pathname,
   hobbyItems,
   navItems,
-  dndTools,
   dndEnabled,
   authResolved,
   isAuthenticated,
@@ -186,33 +186,37 @@ export const MobileNavSheet = React.memo(function MobileNavSheet({
                 </>
               )}
 
-              {dndEnabled && dndTools.length > 0 && (
+              {dndEnabled ? (
                 <>
                   <Separator className="h-[0.5px] bg-[var(--border)]" />
 
                   <section className="space-y-2">
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      D&D Tools
+                      D&D
                     </h3>
-                    <div className="-mx-1 touch-pan-x overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
-                      <div className="flex w-max min-w-max gap-2">
-                        {dndTools.map(tool => (
-                          <Button
-                            key={tool.href}
-                            asChild
-                            variant="secondary"
-                            className={mobileChipClass(isHrefActive(pathname, tool.href))}
-                          >
-                            <Link href={tool.href}>
-                              <NavItemContent icon={tool.icon} label={tool.label} />
-                            </Link>
-                          </Button>
-                        ))}
-                      </div>
+                    <div className="grid gap-2">
+                      <Button
+                        asChild
+                        variant="secondary"
+                        className={mobileChipClass(isHrefActive(pathname, '/dnd/campaigns'), true)}
+                      >
+                        <Link href="/dnd/campaigns">
+                          <NavItemContent icon={Dice6} label="Campaigns" />
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        variant="secondary"
+                        className={mobileChipClass(isHrefActive(pathname, '/dnd/reference'), true)}
+                      >
+                        <Link href="/dnd/reference">
+                          <NavItemContent icon={BookOpen} label="Reference" />
+                        </Link>
+                      </Button>
                     </div>
                   </section>
                 </>
-              )}
+              ) : null}
 
               <Separator className="h-[0.5px] bg-[var(--border)]" />
 

@@ -3,6 +3,7 @@ import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { getUserSettings } from '@/lib/settings';
 import { PageContainer } from '@/app/components/layout';
 import { PageHeader } from '@/app/components/layout/PageHeader';
+import { ReferenceLookupPanel } from '@/components/dnd/ReferenceLookupPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
@@ -38,6 +39,7 @@ export default async function DMDashboardPage() {
           description="Dungeon Master tools and campaign management"
           eyebrow="DM Only"
           align="left"
+          actions={<ReferenceLookupPanel asSheet />}
         />
         <Alert>
           <AlertTitle>End-to-End Encryption Setup Required</AlertTitle>

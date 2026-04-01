@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/og-image.png" alt="Hobbistas Logo" width="320">
+  <img src="public/og-image.jpg" alt="Hobbistas Logo" width="320">
 
   <h1>Hobbistas</h1>
 
@@ -91,36 +91,36 @@ Hobbistas is a full-stack hobby hub that consolidates games, anime, manga, movie
 
 ## Tech Stack
 
-| Layer              | Technology                          |
-| ------------------ | ----------------------------------- |
-| **Framework**      | Next.js 16 (App Router)             |
-| **UI**             | React 19, Tailwind CSS, Radix UI    |
-| **State**          | Redux Toolkit, SWR                  |
-| **Database**       | Supabase (PostgreSQL)               |
-| **Auth**           | Supabase Auth (JWT + SSR)           |
-| **Rich Text**      | Tiptap 3                            |
-| **Charts**         | Recharts                            |
-| **Drag & Drop**    | @dnd-kit                            |
-| **Animation**      | Framer Motion                       |
-| **PWA**            | @ducanh2912/next-pwa + Workbox      |
-| **Rate Limiting**  | Upstash Redis + @upstash/ratelimit  |
-| **Email**          | Resend                              |
-| **Virtualization** | @tanstack/react-virtual             |
-| **Testing**        | Jest, React Testing Library, Cypress|
-| **Deploy**         | Vercel                              |
-| **Analytics**      | Vercel Analytics + Speed Insights   |
+| Layer              | Technology                           |
+| ------------------ | ------------------------------------ |
+| **Framework**      | Next.js 16 (App Router)              |
+| **UI**             | React 19, Tailwind CSS, Radix UI     |
+| **State**          | Redux Toolkit, SWR                   |
+| **Database**       | Supabase (PostgreSQL)                |
+| **Auth**           | Supabase Auth (JWT + SSR)            |
+| **Rich Text**      | Tiptap 3                             |
+| **Charts**         | Recharts                             |
+| **Drag & Drop**    | @dnd-kit                             |
+| **Animation**      | Framer Motion                        |
+| **PWA**            | @ducanh2912/next-pwa + Workbox       |
+| **Rate Limiting**  | Upstash Redis + @upstash/ratelimit   |
+| **Email**          | Resend                               |
+| **Virtualization** | @tanstack/react-virtual              |
+| **Testing**        | Jest, React Testing Library, Cypress |
+| **Deploy**         | Vercel                               |
+| **Analytics**      | Vercel Analytics + Speed Insights    |
 
 ### External APIs
 
-| API                  | Purpose                         |
-| -------------------- | ------------------------------- |
-| **IGDB / RAWG**      | Game metadata and search        |
-| **MyAnimeList (MAL)**| Anime & manga database + OAuth  |
-| **TMDB**             | Movies and TV information       |
-| **Google Books**     | Book search and metadata        |
-| **Steam**            | Game library import             |
-| **PSN API**          | PlayStation game tracking       |
-| **Resend**           | Transactional email             |
+| API                   | Purpose                        |
+| --------------------- | ------------------------------ |
+| **IGDB / RAWG**       | Game metadata and search       |
+| **MyAnimeList (MAL)** | Anime & manga database + OAuth |
+| **TMDB**              | Movies and TV information      |
+| **Google Books**      | Book search and metadata       |
+| **Steam**             | Game library import            |
+| **PSN API**           | PlayStation game tracking      |
+| **Resend**            | Transactional email            |
 
 ---
 
@@ -130,17 +130,17 @@ Hobbistas is a full-stack hobby hub that consolidates games, anime, manga, movie
 
 ### Core Tables
 
-| Table                  | Purpose                                               |
-| ---------------------- | ----------------------------------------------------- |
-| `users`                | Accounts, roles, profile data                         |
-| `media_items`          | All media (games, anime, movies, books, TV, manga)    |
-| `user_media_entries`   | Per-user library entries — status, progress, priority |
-| `articles`             | News, reviews, community posts                        |
-| `article_likes`        | Unique-constrained like records per user/article      |
-| `article_comments`     | Comments with author profiles                         |
-| `activity_log`         | JSONB event log for the activity feed                 |
-| `push_subscriptions`   | PWA Web Push endpoint subscriptions                   |
-| `support_tickets`      | User support tickets with admin reply thread          |
+| Table                | Purpose                                               |
+| -------------------- | ----------------------------------------------------- |
+| `users`              | Accounts, roles, profile data                         |
+| `media_items`        | All media (games, anime, movies, books, TV, manga)    |
+| `user_media_entries` | Per-user library entries — status, progress, priority |
+| `articles`           | News, reviews, community posts                        |
+| `article_likes`      | Unique-constrained like records per user/article      |
+| `article_comments`   | Comments with author profiles                         |
+| `activity_log`       | JSONB event log for the activity feed                 |
+| `push_subscriptions` | PWA Web Push endpoint subscriptions                   |
+| `support_tickets`    | User support tickets with admin reply thread          |
 
 ### Media Categories
 
@@ -208,109 +208,109 @@ docs/private/                   # Architecture & audit playbooks
 
 ### Authentication
 
-| Method | Endpoint                      | Description             |
-| ------ | ----------------------------- | ----------------------- |
-| POST   | `/api/auth/login`             | User login              |
-| POST   | `/api/auth/register`          | User registration       |
-| POST   | `/api/auth/logout`            | User logout             |
-| GET    | `/api/auth/session`           | Get current session     |
-| POST   | `/api/auth/refresh`           | Refresh token           |
-| POST   | `/api/auth/forgot-password`   | Request password reset  |
-| POST   | `/api/auth/update-password`   | Update password         |
-| DELETE | `/api/auth/delete-account`    | Delete account          |
+| Method | Endpoint                    | Description            |
+| ------ | --------------------------- | ---------------------- |
+| POST   | `/api/auth/login`           | User login             |
+| POST   | `/api/auth/register`        | User registration      |
+| POST   | `/api/auth/logout`          | User logout            |
+| GET    | `/api/auth/session`         | Get current session    |
+| POST   | `/api/auth/refresh`         | Refresh token          |
+| POST   | `/api/auth/forgot-password` | Request password reset |
+| POST   | `/api/auth/update-password` | Update password        |
+| DELETE | `/api/auth/delete-account`  | Delete account         |
 
 ### Media Library (per `{category}`: games, anime, manga, movies, tv, books)
 
-| Method | Endpoint                      | Description                      |
-| ------ | ----------------------------- | -------------------------------- |
-| GET    | `/api/{category}/library`     | Get user's library               |
-| PATCH  | `/api/{category}/library`     | Update library entry             |
-| DELETE | `/api/{category}/library`     | Remove from library              |
-| GET    | `/api/{category}/search`      | Search media (local + API)       |
-| POST   | `/api/{category}/add`         | Add item to library              |
-| GET    | `/api/{category}/suggestions` | Personalised suggestions         |
+| Method | Endpoint                      | Description                |
+| ------ | ----------------------------- | -------------------------- |
+| GET    | `/api/{category}/library`     | Get user's library         |
+| PATCH  | `/api/{category}/library`     | Update library entry       |
+| DELETE | `/api/{category}/library`     | Remove from library        |
+| GET    | `/api/{category}/search`      | Search media (local + API) |
+| POST   | `/api/{category}/add`         | Add item to library        |
+| GET    | `/api/{category}/suggestions` | Personalised suggestions   |
 
 ### Articles & Social
 
-| Method | Endpoint                          | Description              |
-| ------ | --------------------------------- | ------------------------ |
-| GET    | `/api/articles`                   | List articles            |
-| POST   | `/api/articles`                   | Create article           |
-| GET    | `/api/articles/[id]`              | Get article              |
-| PATCH  | `/api/articles/[id]`              | Update article           |
-| DELETE | `/api/articles/[id]`              | Delete article           |
-| GET    | `/api/articles/[id]/like`         | Get like state           |
-| POST   | `/api/articles/[id]/like`         | Like / unlike article    |
-| GET    | `/api/articles/[id]/comments`     | Get comments             |
-| POST   | `/api/articles/[id]/comments`     | Add comment              |
+| Method | Endpoint                      | Description           |
+| ------ | ----------------------------- | --------------------- |
+| GET    | `/api/articles`               | List articles         |
+| POST   | `/api/articles`               | Create article        |
+| GET    | `/api/articles/[id]`          | Get article           |
+| PATCH  | `/api/articles/[id]`          | Update article        |
+| DELETE | `/api/articles/[id]`          | Delete article        |
+| GET    | `/api/articles/[id]/like`     | Get like state        |
+| POST   | `/api/articles/[id]/like`     | Like / unlike article |
+| GET    | `/api/articles/[id]/comments` | Get comments          |
+| POST   | `/api/articles/[id]/comments` | Add comment           |
 
 ### User & Dashboard
 
-| Method | Endpoint                             | Description                   |
-| ------ | ------------------------------------ | ----------------------------- |
-| GET    | `/api/me`                            | Current user info             |
-| GET    | `/api/me/category-profile`           | Per-category statistics       |
-| GET    | `/api/me/genre-affinity`             | Genre preference analysis     |
-| GET    | `/api/user/stats`                    | Library statistics            |
-| GET    | `/api/activity`                      | Activity feed                 |
-| GET    | `/api/dashboard/suggestions`         | Personalised suggestions      |
-| POST   | `/api/dashboard/reorder-favorites`   | Reorder favourites            |
-| POST   | `/api/dashboard/reorder-pins`        | Reorder pinned items          |
+| Method | Endpoint                           | Description               |
+| ------ | ---------------------------------- | ------------------------- |
+| GET    | `/api/me`                          | Current user info         |
+| GET    | `/api/me/category-profile`         | Per-category statistics   |
+| GET    | `/api/me/genre-affinity`           | Genre preference analysis |
+| GET    | `/api/user/stats`                  | Library statistics        |
+| GET    | `/api/activity`                    | Activity feed             |
+| GET    | `/api/dashboard/suggestions`       | Personalised suggestions  |
+| POST   | `/api/dashboard/reorder-favorites` | Reorder favourites        |
+| POST   | `/api/dashboard/reorder-pins`      | Reorder pinned items      |
 
 ### Integrations
 
-| Method | Endpoint                               | Description                |
-| ------ | -------------------------------------- | -------------------------- |
-| GET    | `/api/integrations/mal/start`          | Start MAL OAuth            |
-| GET    | `/api/integrations/mal/callback`       | MAL OAuth callback         |
-| POST   | `/api/integrations/mal/sync`           | Sync MAL library           |
-| POST   | `/api/integrations/steam/sync/start`   | Start Steam import         |
-| GET    | `/api/integrations/steam/sync/status`  | Check sync status          |
-| POST   | `/api/integrations/steam/sync/process` | Process Steam data         |
+| Method | Endpoint                               | Description        |
+| ------ | -------------------------------------- | ------------------ |
+| GET    | `/api/integrations/mal/start`          | Start MAL OAuth    |
+| GET    | `/api/integrations/mal/callback`       | MAL OAuth callback |
+| POST   | `/api/integrations/mal/sync`           | Sync MAL library   |
+| POST   | `/api/integrations/steam/sync/start`   | Start Steam import |
+| GET    | `/api/integrations/steam/sync/status`  | Check sync status  |
+| POST   | `/api/integrations/steam/sync/process` | Process Steam data |
 
 ### Notifications
 
-| Method | Endpoint                               | Description                     |
-| ------ | -------------------------------------- | ------------------------------- |
-| POST   | `/api/notifications/subscribe`         | Subscribe to push notifications |
-| DELETE | `/api/notifications/subscribe`         | Unsubscribe                     |
-| POST   | `/api/notifications/send`              | Send a push notification        |
-| POST   | `/api/notifications/events`            | Track notification interaction  |
+| Method | Endpoint                       | Description                     |
+| ------ | ------------------------------ | ------------------------------- |
+| POST   | `/api/notifications/subscribe` | Subscribe to push notifications |
+| DELETE | `/api/notifications/subscribe` | Unsubscribe                     |
+| POST   | `/api/notifications/send`      | Send a push notification        |
+| POST   | `/api/notifications/events`    | Track notification interaction  |
 
 ### Support
 
-| Method | Endpoint                                   | Description            |
-| ------ | ------------------------------------------ | ---------------------- |
-| GET    | `/api/support/tickets`                     | List user tickets      |
-| POST   | `/api/support/tickets`                     | Submit ticket          |
-| GET    | `/api/support/tickets/[id]`                | Get ticket             |
-| GET    | `/api/support/tickets/[id]/messages`       | Get ticket messages    |
-| POST   | `/api/support/tickets/[id]/messages`       | Add message            |
+| Method | Endpoint                             | Description         |
+| ------ | ------------------------------------ | ------------------- |
+| GET    | `/api/support/tickets`               | List user tickets   |
+| POST   | `/api/support/tickets`               | Submit ticket       |
+| GET    | `/api/support/tickets/[id]`          | Get ticket          |
+| GET    | `/api/support/tickets/[id]/messages` | Get ticket messages |
+| POST   | `/api/support/tickets/[id]/messages` | Add message         |
 
 ### Admin (requires `admin` or `owner` role)
 
-| Method | Endpoint                               | Description                |
-| ------ | -------------------------------------- | -------------------------- |
-| GET    | `/api/admin/support/tickets`           | All support tickets        |
-| PUT    | `/api/admin/support/tickets/[id]`      | Update ticket status       |
-| POST   | `/api/admin/support/tickets/[id]/reply`| Reply to ticket            |
-| GET    | `/api/admin/support/users`             | List all users             |
-| PUT    | `/api/admin/support/users/[id]`        | Update user role/status    |
-| GET    | `/api/admin/logs`                      | System logs                |
-| GET    | `/api/admin/media/entries`             | Browse media entries       |
-| POST   | `/api/admin/media/import/igdb`         | Bulk import from IGDB      |
-| POST   | `/api/admin/media/import/mal`          | Bulk import from MAL       |
-| POST   | `/api/admin/media/import/tmdb`         | Bulk import from TMDB      |
-| POST   | `/api/admin/media/import/books`        | Bulk import from Books     |
+| Method | Endpoint                                | Description             |
+| ------ | --------------------------------------- | ----------------------- |
+| GET    | `/api/admin/support/tickets`            | All support tickets     |
+| PUT    | `/api/admin/support/tickets/[id]`       | Update ticket status    |
+| POST   | `/api/admin/support/tickets/[id]/reply` | Reply to ticket         |
+| GET    | `/api/admin/support/users`              | List all users          |
+| PUT    | `/api/admin/support/users/[id]`         | Update user role/status |
+| GET    | `/api/admin/logs`                       | System logs             |
+| GET    | `/api/admin/media/entries`              | Browse media entries    |
+| POST   | `/api/admin/media/import/igdb`          | Bulk import from IGDB   |
+| POST   | `/api/admin/media/import/mal`           | Bulk import from MAL    |
+| POST   | `/api/admin/media/import/tmdb`          | Bulk import from TMDB   |
+| POST   | `/api/admin/media/import/books`         | Bulk import from Books  |
 
 ### Utilities
 
-| Method | Endpoint                   | Description              |
-| ------ | -------------------------- | ------------------------ |
-| POST   | `/api/track-view`          | Track content views      |
-| GET    | `/api/analytics/summary`   | Analytics overview       |
-| GET    | `/api/public/stats`        | Public platform stats    |
-| POST   | `/api/uploads/article-cover` | Upload article cover   |
+| Method | Endpoint                     | Description           |
+| ------ | ---------------------------- | --------------------- |
+| POST   | `/api/track-view`            | Track content views   |
+| GET    | `/api/analytics/summary`     | Analytics overview    |
+| GET    | `/api/public/stats`          | Public platform stats |
+| POST   | `/api/uploads/article-cover` | Upload article cover  |
 
 ---
 
@@ -386,19 +386,19 @@ Migrations live in `supabase-migrations/` and are numbered `01` through `26`.
 
 ## Scripts
 
-| Script                  | Description                                |
-| ----------------------- | ------------------------------------------ |
-| `npm run dev`           | Start development server                   |
-| `npm run build`         | Production build                           |
-| `npm run start`         | Start production server                    |
-| `npm run ci`            | Lint + test + build (CI pipeline)          |
-| `npm run lint`          | Run ESLint                                 |
-| `npm test`              | Run Jest unit tests with coverage          |
-| `npm run format`        | Run Prettier formatter                     |
-| `npm run analyze`       | Bundle analysis (webpack)                  |
-| `npm run sitemap`       | Generate sitemap                           |
-| `npm run cypress:open`  | Run Cypress E2E tests                      |
-| `npm run db:types`      | Re-generate Supabase TypeScript types      |
+| Script                 | Description                           |
+| ---------------------- | ------------------------------------- |
+| `npm run dev`          | Start development server              |
+| `npm run build`        | Production build                      |
+| `npm run start`        | Start production server               |
+| `npm run ci`           | Lint + test + build (CI pipeline)     |
+| `npm run lint`         | Run ESLint                            |
+| `npm test`             | Run Jest unit tests with coverage     |
+| `npm run format`       | Run Prettier formatter                |
+| `npm run analyze`      | Bundle analysis (webpack)             |
+| `npm run sitemap`      | Generate sitemap                      |
+| `npm run cypress:open` | Run Cypress E2E tests                 |
+| `npm run db:types`     | Re-generate Supabase TypeScript types |
 
 ---
 
@@ -410,22 +410,22 @@ Migrations live in `supabase-migrations/` and are numbered `01` through `26`.
 
 #### Required Environment Variables
 
-| Variable                        | Required | Notes                            |
-| ------------------------------- | -------- | -------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | ✅       | Public Supabase URL              |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅       | Public anon key                  |
-| `SUPABASE_SERVICE_ROLE_KEY`     | ✅       | Server-only — never expose       |
-| `SITE_URL`                      | ✅       | Canonical domain                 |
-| `RESEND_API_KEY`                | ✅       | Transactional email              |
-| `UPSTASH_REDIS_REST_URL`        | ✅       | Rate limiting                    |
-| `UPSTASH_REDIS_REST_TOKEN`      | ✅       | Rate limiting                    |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`  | ✳️       | Push notifications               |
-| `VAPID_PRIVATE_KEY`             | ✳️       | Push notifications               |
-| `TWITCH_CLIENT_ID`              | ✳️       | IGDB game data                   |
-| `TWITCH_CLIENT_SECRET`          | ✳️       | IGDB game data                   |
-| `MAL_CLIENT_ID`                 | ✳️       | Anime/manga data                 |
-| `MAL_CLIENT_SECRET`             | ✳️       | Anime/manga data                 |
-| `GOOGLE_BOOKS_API_KEY`          | ✳️       | Book metadata                    |
+| Variable                        | Required | Notes                      |
+| ------------------------------- | -------- | -------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | ✅       | Public Supabase URL        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅       | Public anon key            |
+| `SUPABASE_SERVICE_ROLE_KEY`     | ✅       | Server-only — never expose |
+| `SITE_URL`                      | ✅       | Canonical domain           |
+| `RESEND_API_KEY`                | ✅       | Transactional email        |
+| `UPSTASH_REDIS_REST_URL`        | ✅       | Rate limiting              |
+| `UPSTASH_REDIS_REST_TOKEN`      | ✅       | Rate limiting              |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`  | ✳️       | Push notifications         |
+| `VAPID_PRIVATE_KEY`             | ✳️       | Push notifications         |
+| `TWITCH_CLIENT_ID`              | ✳️       | IGDB game data             |
+| `TWITCH_CLIENT_SECRET`          | ✳️       | IGDB game data             |
+| `MAL_CLIENT_ID`                 | ✳️       | Anime/manga data           |
+| `MAL_CLIENT_SECRET`             | ✳️       | Anime/manga data           |
+| `GOOGLE_BOOKS_API_KEY`          | ✳️       | Book metadata              |
 
 ### Security Notes
 

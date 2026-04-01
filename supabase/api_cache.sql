@@ -6,3 +6,7 @@ create table if not exists public.api_cache (
 );
 
 create index if not exists idx_api_cache_expires_at on public.api_cache (expires_at);
+
+-- Only the service role (server-side) should access this table.
+-- Service role bypasses RLS, so no policies are needed here.
+alter table public.api_cache enable row level security;
