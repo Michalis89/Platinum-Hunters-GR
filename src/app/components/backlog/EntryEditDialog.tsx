@@ -187,14 +187,27 @@ export default function EntryEditDialog({
   };
 
   const clampProgress = category !== 'games';
+  const progressUnitLabel =
+    category === 'manga'
+      ? 'Vol'
+      : category === 'books'
+        ? 'pages'
+        : category === 'movies'
+          ? 'minutes'
+          : category === 'tv'
+            ? 'episodes'
+            : category === 'anime'
+              ? 'episodes'
+              : 'hours';
   const setProgress = (next: number) => {
     const nextValue = Math.max(0, next);
     const nextClamped = clampProgress && total ? Math.min(nextValue, total) : nextValue;
     const shouldComplete = clampProgress && total !== undefined && nextClamped >= total;
+    const shouldMoveToCurrent = nextClamped > 0 && !shouldComplete;
     setEditState(prev => ({
       ...prev,
       progress: String(nextClamped),
-      status: shouldComplete ? 'completed' : prev.status,
+      status: shouldComplete ? 'completed' : prev.status === 'planned' && shouldMoveToCurrent ? 'current' : prev.status,
     }));
   };
 
@@ -209,10 +222,11 @@ export default function EntryEditDialog({
     const parsed = Number.parseInt(value, 10);
     const shouldComplete =
       clampProgress && total !== undefined && Number.isFinite(parsed) && parsed >= total;
+    const shouldMoveToCurrent = Number.isFinite(parsed) && parsed > 0 && !shouldComplete;
     setEditState(prev => ({
       ...prev,
       progress: value,
-      status: shouldComplete ? 'completed' : prev.status,
+      status: shouldComplete ? 'completed' : prev.status === 'planned' && shouldMoveToCurrent ? 'current' : prev.status,
     }));
   };
 
@@ -403,7 +417,7 @@ export default function EntryEditDialog({
                   htmlFor="entry-progress"
                   className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
                 >
-                  Progress
+                  {`Progress (${progressUnitLabel})`}
                 </label>
                 {!isGames ? (
                   <span className="text-xs text-muted-foreground">

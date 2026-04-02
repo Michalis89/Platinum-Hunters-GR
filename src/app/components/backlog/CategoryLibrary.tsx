@@ -662,6 +662,9 @@ export default function CategoryLibrary({
       Number.isFinite(nextProgressValue) &&
       nextProgressValue > 0;
     let finalStatus = nextStatus;
+    if (finalStatus === 'planned' && hasPlayedHours) {
+      finalStatus = 'current';
+    }
     if (category === 'games' && nextStatus === 'current' && !hasPlayedHours) {
       finalStatus = 'planned';
     }
