@@ -67,6 +67,7 @@ export type MediaEntryState = {
   entryId: number;
   mediaId: number;
   status: MediaStatus;
+  updatedAt: string | null;
   rating: number | null;
   favorite: boolean | null;
   progress: number | null;

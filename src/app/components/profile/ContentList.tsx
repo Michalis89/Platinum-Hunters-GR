@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useLocale } from '@/context/LocaleContext';
 import EditArticleDialog from '@/app/components/articles/EditArticleDialog';
 import type { ArticleRow, ArticleStatus } from '@/types/database';
 import { CONTENT_TOPIC_META } from './profileData';
@@ -21,7 +22,7 @@ const STATUS_BADGE: Record<ArticleStatus, string> = {
   archived: 'border-border/60 text-muted-foreground',
 };
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) {
     return 'Unpublished';
   }
@@ -29,7 +30,7 @@ function formatDate(value?: string | null) {
   if (Number.isNaN(parsed.getTime())) {
     return 'Unpublished';
   }
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -37,6 +38,7 @@ function formatDate(value?: string | null) {
 }
 
 export function ContentList() {
+  const locale = useLocale();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ArticleStatus>('published');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
@@ -160,7 +162,9 @@ export function ContentList() {
                       {topicMeta.label}
                     </Badge>
                     <span className="text-[11px] text-muted-foreground">{article.category}</span>
-                    <span className="text-[11px] text-muted-foreground">{formatDate(article.published_at)}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {formatDate(article.published_at, locale)}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">

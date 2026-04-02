@@ -93,6 +93,8 @@ export async function handleLibraryPatch(
 
     // Parse request body
     const body = (await req.json()) as UpdateLibraryRequestBody;
+    const clientUpdatedAt =
+      typeof body.clientUpdatedAt === 'string' ? body.clientUpdatedAt.trim() : '';
     const normalizedSelectedPlatform =
       typeof body.selected_platform === 'string' ? body.selected_platform.trim() : body.selected_platform;
 
@@ -127,20 +129,25 @@ export async function handleLibraryPatch(
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: NO_UPDATES_PROVIDED }, { status: 400 });
     }
-
     const updatedAt = new Date().toISOString();
     updateData.updated_at = updatedAt;
 
     // Fetch existing entry for activity comparison
     const { data: existingEntry } = await supabase
       .from('user_media_entries')
-      .select('status,is_favorite,progress,selected_platform,priority,score,notes')
+      .select('status,is_favorite,progress,selected_platform,priority,score,notes,updated_at')
       .eq('user_id', session.user.id)
       .eq('media_id', body.mediaId)
       .maybeSingle();
 
     if (config.key === 'games' && !existingEntry && !normalizedSelectedPlatform) {
       return NextResponse.json({ error: 'Platform selection is required for games' }, { status: 400 });
+    }
+    if (!existingEntry) {
+      return NextResponse.json(
+        { error: 'Conflict: entry was modified. Please refresh and retry.' },
+        { status: 409 },
+      );
     }
 
     const existingStatus =
@@ -153,32 +160,30 @@ export async function handleLibraryPatch(
       typeof body.status === 'string' ? body.status : (existingStatus ?? 'planned');
     const nextProgress =
       typeof body.progress === 'number' && Number.isFinite(body.progress) ? body.progress : null;
-    const statusChanged = body.status !== undefined && body.status !== existingStatus;
-    const progressChanged = body.progress !== undefined && body.progress !== existingProgress;
-    const shouldTouchUpdatedAt = !existingEntry || statusChanged || progressChanged;
-
-    // Upsert entry
-    const upsertPayload: Database['public']['Tables']['user_media_entries']['Insert'] = {
-      user_id: session.user.id,
-      media_id: body.mediaId,
-      status: nextStatus as Database['public']['Tables']['user_media_entries']['Insert']['status'],
-      is_favorite: updateData.is_favorite ?? existingEntry?.is_favorite ?? false,
-      selected_platform: updateData.selected_platform ?? existingEntry?.selected_platform ?? null,
-      priority: updateData.priority ?? existingEntry?.priority ?? null,
-      score: updateData.score ?? existingEntry?.score ?? null,
-      progress: updateData.progress ?? existingEntry?.progress ?? null,
-      notes: updateData.notes ?? existingEntry?.notes ?? null,
-      ...(shouldTouchUpdatedAt ? { updated_at: updatedAt } : {}),
-    };
-
-    const { data, error } = await supabase
+    // Apply optimistic lock when the client supplies clientUpdatedAt.
+    // Older clients / cached pages that omit it get a best-effort update without the lock.
+    const baseUpdate = supabase
       .from('user_media_entries')
-      .upsert(upsertPayload, { onConflict: 'user_id,media_id' })
-      .select('*')
-      .single();
+      .update({
+        ...updateData,
+        status: nextStatus as Database['public']['Tables']['user_media_entries']['Update']['status'],
+      })
+      .eq('user_id', session.user.id)
+      .eq('media_id', body.mediaId);
+
+    const { data, error } = await (clientUpdatedAt
+      ? baseUpdate.lte('updated_at', clientUpdatedAt)
+      : baseUpdate
+    ).select('*').maybeSingle();
 
     if (error) {
       throw error;
+    }
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Conflict: entry was modified. Please refresh and retry.' },
+        { status: 409 },
+      );
     }
 
     // Recompute genre affinity in the background

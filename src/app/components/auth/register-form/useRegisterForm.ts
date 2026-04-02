@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   validateEmail,
@@ -52,6 +52,7 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
   const [captchaVisible, setCaptchaVisible] = useState(false);
   const [formData, setFormData] = useState<RegisterFormState>(initialState);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const submitInFlight = useRef(false);
 
   const passwordStrength = formData.password ? getPasswordStrength(formData.password) : null;
 
@@ -120,6 +121,10 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    if (submitInFlight.current) {
+      return;
+    }
+    submitInFlight.current = true;
     event.preventDefault();
     setAlert(null);
     setIsRedirecting(false);
@@ -218,6 +223,7 @@ export function useRegisterForm({ onSuccess }: UseRegisterFormOptions) {
         });
       }
     } finally {
+      submitInFlight.current = false;
       setLoading(false);
     }
   };

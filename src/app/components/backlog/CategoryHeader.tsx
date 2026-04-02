@@ -21,6 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useLocale } from '@/context/LocaleContext';
 import type { MediaCategory } from './types';
 import { CATEGORY_CONFIG } from './types';
 
@@ -49,6 +50,7 @@ export default function CategoryHeader({
   onSuggestionsClick,
   isReadOnly = false,
 }: Readonly<CategoryHeaderProps>) {
+  const locale = useLocale();
   const config = CATEGORY_CONFIG[category];
   const Icon = config.icon;
   const pathname = usePathname();
@@ -161,7 +163,7 @@ export default function CategoryHeader({
                             {isSteamRateLimited && steamRateLimitResetTime && (
                               <span className="text-xs text-muted-foreground">
                                 Rate limit - try after{' '}
-                                {steamRateLimitResetTime.toLocaleString('en-US', {
+                                {steamRateLimitResetTime.toLocaleString(locale, {
                                   month: 'short',
                                   day: 'numeric',
                                   hour: 'numeric',
@@ -217,7 +219,7 @@ export default function CategoryHeader({
               {isSteamRateLimited && steamRateLimitResetTime ? (
                 <span className="text-warning">
                   ⚠️ IGDB rate limit reached. Please try again after{' '}
-                  {steamRateLimitResetTime.toLocaleString('en-US', {
+                  {steamRateLimitResetTime.toLocaleString(locale, {
                     month: 'short',
                     day: 'numeric',
                     hour: 'numeric',

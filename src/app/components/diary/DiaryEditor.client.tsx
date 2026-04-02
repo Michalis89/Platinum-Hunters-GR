@@ -64,6 +64,7 @@ export default function DiaryEditor({
   const [entryDate, setEntryDate] = useState(entry?.entry_date ?? new Date().toISOString().slice(0, 10));
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const persistInFlightRef = useRef(false);
 
   const lastSavedSnapshotRef = useRef(
     snapshotValue({
@@ -107,6 +108,10 @@ export default function DiaryEditor({
   const isDirty = currentSnapshot !== lastSavedSnapshotRef.current;
 
   const persist = useCallback(async () => {
+    if (persistInFlightRef.current) {
+      return;
+    }
+
     if (!isDirty) {
       return;
     }
@@ -115,37 +120,42 @@ export default function DiaryEditor({
       return;
     }
 
+    persistInFlightRef.current = true;
     setSaveState('saving');
 
-    const saved = await onSave({
-      id: entryId,
-      title,
-      content,
-      mood,
-      entry_date: entryDate,
-      tags: [],
-    });
+    try {
+      const saved = await onSave({
+        id: entryId,
+        title,
+        content,
+        mood,
+        entry_date: entryDate,
+        tags: [],
+      });
 
-    if (!saved) {
-      setSaveState('error');
-      return;
+      if (!saved) {
+        setSaveState('error');
+        return;
+      }
+
+      setEntryId(saved.id);
+      setTitle(saved.title);
+      setContent(saved.content);
+      setMood(saved.mood);
+      setEntryDate(saved.entry_date);
+
+      const savedSnapshot = snapshotValue({
+        id: saved.id,
+        title: saved.title,
+        content: saved.content,
+        mood: saved.mood,
+        entryDate: saved.entry_date,
+      });
+      lastSavedSnapshotRef.current = savedSnapshot;
+      setSaveState('saved');
+    } finally {
+      persistInFlightRef.current = false;
     }
-
-    setEntryId(saved.id);
-    setTitle(saved.title);
-    setContent(saved.content);
-    setMood(saved.mood);
-    setEntryDate(saved.entry_date);
-
-    const savedSnapshot = snapshotValue({
-      id: saved.id,
-      title: saved.title,
-      content: saved.content,
-      mood: saved.mood,
-      entryDate: saved.entry_date,
-    });
-    lastSavedSnapshotRef.current = savedSnapshot;
-    setSaveState('saved');
   }, [content, entryDate, entryId, isDirty, mood, onSave, title]);
 
   useEffect(() => {

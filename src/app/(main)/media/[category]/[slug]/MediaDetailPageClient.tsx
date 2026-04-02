@@ -138,6 +138,7 @@ const buildEntry = (item: MediaItem, entryState: MediaEntryState | null) => {
 
   return {
     id: `media-${item.id}`,
+    updatedAt: entryState?.updatedAt ?? entryState?.completedAt ?? undefined,
     entryId: entryState?.entryId,
     mediaId: item.id,
     status: entryState?.status ?? 'planned',
@@ -530,6 +531,7 @@ export default function MediaDetailPageClient({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mediaId: mediaItem.id,
+            clientUpdatedAt: entryState?.updatedAt,
             status: editState.status,
             is_favorite: editState.isFavorite,
             selected_platform:
@@ -539,6 +541,16 @@ export default function MediaDetailPageClient({
             notes: nextNotes,
           }),
         });
+
+        if (response.status === 409) {
+          await refreshEntry();
+          setAlert({
+            type: 'error',
+            title: 'Conflict',
+            message: 'Your changes conflicted with another update. Entry refreshed.',
+          });
+          return;
+        }
 
         if (!response.ok) {
           throw new Error('Update failed');
@@ -640,9 +652,20 @@ export default function MediaDetailPageClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mediaId: mediaItem.id,
+          clientUpdatedAt: entryState?.updatedAt,
           is_favorite: !(entryState?.favorite ?? false),
         }),
       });
+
+      if (response.status === 409) {
+        await refreshEntry();
+        setAlert({
+          type: 'error',
+          title: 'Conflict',
+          message: 'Your changes conflicted with another update. Entry refreshed.',
+        });
+        return;
+      }
 
       if (!response.ok) {
         throw new Error('Favorite toggle failed');

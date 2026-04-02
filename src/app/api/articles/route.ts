@@ -210,17 +210,6 @@ async function POSTHandler(req: Request) {
 
     const normalizedSlug = normalizeSlug(slug);
 
-    // Check if slug already exists
-    const { data: existingArticle } = await supabase
-      .from('articles')
-      .select('id')
-      .eq('slug', normalizedSlug)
-      .maybeSingle();
-
-    if (existingArticle) {
-      return fail({ error: 'An article with this slug already exists', code: 'CONFLICT' }, 409);
-    }
-
     // Insert article
     const { data: article, error: insertError } = await supabase
       .from('articles')
@@ -247,6 +236,12 @@ async function POSTHandler(req: Request) {
       .single();
 
     if (insertError) {
+      if (insertError.code === '23505') {
+        return fail(
+          { error: 'An article with this slug already exists.', code: 'CONFLICT' },
+          409,
+        );
+      }
       console.error('Error inserting article:', insertError);
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }

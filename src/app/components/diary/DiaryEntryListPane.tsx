@@ -5,14 +5,9 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useLocale } from '@/context/LocaleContext';
 import { cn } from '@/lib/utils';
 import type { DiaryEntryDecrypted } from '@/lib/diary/types';
-
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-});
 const panelClassName =
   'flex h-full min-h-0 flex-col gap-3 rounded-[var(--radius-xl)] border border-[hsl(var(--border-default)/0.72)] bg-[hsl(var(--surface-raised)/0.94)] p-3 shadow-[var(--shadow-sm)]';
 const rowBaseClassName =
@@ -62,10 +57,12 @@ const DiaryEntryRow = memo(function DiaryEntryRow({
   entry,
   isSelected,
   onSelect,
+  dateFormatter,
 }: {
   entry: DiaryEntryDecrypted;
   isSelected: boolean;
   onSelect: (entryId: string) => void;
+  dateFormatter: Intl.DateTimeFormat;
 }) {
   const preview = useMemo(() => stripHtml(entry.content), [entry.content]);
 
@@ -110,6 +107,17 @@ export const DiaryEntryListPane = memo(function DiaryEntryListPane({
   onSelectEntry,
   onCreateNew,
 }: DiaryEntryListPaneProps) {
+  const locale = useLocale();
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    [locale],
+  );
+
   const filteredEntries = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
     if (!query) {
@@ -164,6 +172,7 @@ export const DiaryEntryListPane = memo(function DiaryEntryListPane({
               entry={entry}
               isSelected={selectedEntryId === entry.id}
               onSelect={onSelectEntry}
+              dateFormatter={dateFormatter}
             />
           ))
         )}

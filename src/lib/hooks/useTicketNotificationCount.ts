@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 
 type TicketNotificationSummary = {
@@ -11,6 +11,7 @@ type TicketNotificationSummary = {
 };
 
 export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000) {
+  const inFlightControllerRef = useRef<AbortController | null>(null);
   const [summary, setSummary] = useState<TicketNotificationSummary>({
     unread_count: 0,
     user_unread_count: 0,
@@ -20,6 +21,7 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
 
   const load = useCallback(async () => {
     if (!enabled) {
+      inFlightControllerRef.current?.abort();
       setSummary({
         unread_count: 0,
         user_unread_count: 0,
@@ -29,8 +31,14 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
       return;
     }
 
+    inFlightControllerRef.current?.abort();
+    const controller = new AbortController();
+    inFlightControllerRef.current = controller;
+
     try {
-      const response = await fetch('/api/notifications/tickets/summary');
+      const response = await fetch('/api/notifications/tickets/summary', {
+        signal: controller.signal,
+      });
       const payload = (await response.json().catch(() => null)) as
         | { data?: TicketNotificationSummary }
         | null;
@@ -51,7 +59,10 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
         admin_unread_count: payload?.data?.admin_unread_count ?? 0,
         enabled: payload?.data?.enabled ?? true,
       });
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
       setSummary({
         unread_count: 0,
         user_unread_count: 0,
@@ -99,6 +110,7 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
 
     return () => {
       window.clearInterval(timer);
+      inFlightControllerRef.current?.abort();
       void supabase.removeChannel(channel);
     };
   }, [enabled, intervalMs, load]);

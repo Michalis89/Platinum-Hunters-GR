@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { validateEmail, validatePassword } from '@/utils/validation/auth';
@@ -49,6 +49,7 @@ export function useLoginForm() {
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
   const [captchaVisible, setCaptchaVisible] = useState(false);
+  const submitInFlight = useRef(false);
 
   const revealCaptchaIfNeeded = () => {
     if (isCaptchaDisabled || captchaVisible) {
@@ -191,6 +192,10 @@ export function useLoginForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (submitInFlight.current) {
+      return;
+    }
+    submitInFlight.current = true;
     e.preventDefault();
     setAlert(null);
     setIsRedirecting(false);
@@ -319,6 +324,7 @@ export function useLoginForm() {
         message: errorMessage,
       });
     } finally {
+      submitInFlight.current = false;
       setLoading(false);
     }
   };

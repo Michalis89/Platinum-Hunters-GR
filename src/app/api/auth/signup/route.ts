@@ -187,6 +187,16 @@ async function POSTHandler(req: Request) {
       .single();
 
     if (updateError) {
+      if (updateError.code === '23505') {
+        await supabase.auth.admin.deleteUser(createdUser.id).catch(rollbackError => {
+          console.error(
+            'Signup rollback failed - orphaned auth user:',
+            createdUser.id,
+            rollbackError,
+          );
+        });
+        return fail({ error: 'Username or email is already in use.' }, 409);
+      }
       console.error('Profile upsert error:', updateError);
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
     }

@@ -25,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLocale } from '@/context/LocaleContext';
 
 const SITE_URL =
   typeof window !== 'undefined'
@@ -49,6 +50,7 @@ function inferExpirySelection(expiresAt: string | null): ShareExpiry {
 }
 
 export default function ShareLinkCard() {
+  const locale = useLocale();
   const [token, setToken] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -262,7 +264,9 @@ export default function ShareLinkCard() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {expiresAt ? `Expires at ${new Date(expiresAt).toLocaleString()}` : 'Does not expire'}
+                  {expiresAt
+                    ? `Expires at ${new Date(expiresAt).toLocaleString(locale)}`
+                    : 'Does not expire'}
                 </p>
               </>
             ) : (

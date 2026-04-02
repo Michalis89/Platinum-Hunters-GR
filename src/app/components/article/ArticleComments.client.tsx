@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
@@ -50,6 +50,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
   const [pendingDeleteConfirmId, setPendingDeleteConfirmId] = useState<number | null>(null);
+  const submitIdempotencyKeyRef = useRef<string | null>(null);
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -87,13 +88,26 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       const response = await fetch(`/api/articles/${articleId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: trimmed }),
+        body: JSON.stringify({
+          content: trimmed,
+          idempotency_key:
+            submitIdempotencyKeyRef.current ??
+            (() => {
+              const key =
+                typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+                  ? crypto.randomUUID()
+                  : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+              submitIdempotencyKeyRef.current = key;
+              return key;
+            })(),
+        }),
       });
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
         throw new Error(payload?.error || 'Failed to post comment');
       }
       setCommentText('');
+      submitIdempotencyKeyRef.current = null;
       setSuccessMessage('Your comment was posted.');
       await fetchComments();
     } catch (err) {
@@ -314,7 +328,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
               <label className="text-sm font-medium text-foreground">Your comment</label>
               <Textarea
                 value={commentText}
-                onChange={event => setCommentText(event.target.value)}
+                onChange={event => {
+                  submitIdempotencyKeyRef.current = null;
+                  setCommentText(event.target.value);
+                }}
                 rows={4}
                 placeholder="Share your thoughts"
                 className={error ? 'border-red-500 focus-visible:ring-red-500/30' : ''}

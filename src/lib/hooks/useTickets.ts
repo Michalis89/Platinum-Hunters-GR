@@ -1,7 +1,7 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type TicketMeta = {
   total: number;
@@ -120,7 +120,7 @@ export function useTickets<
     [buildQueryParams, filters],
   );
 
-  const loadTickets = useCallback(async () => {
+  const fetchTickets = useCallback(async (signal?: AbortSignal) => {
     if (!enabled) {
       setLoading(false);
       return;
@@ -131,7 +131,7 @@ export function useTickets<
 
     try {
       const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-      const response = await fetch(url);
+      const response = await fetch(url, signal ? { signal } : undefined);
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
@@ -141,54 +141,41 @@ export function useTickets<
       setTickets(mapData(payload));
       setMeta(mapMeta(payload));
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
       setError(err instanceof Error ? err.message : errorMessage);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }, [enabled, endpoint, errorMessage, mapData, mapMeta, queryString]);
 
+  // Ref so that rapid manual loadTickets() calls abort the previous in-flight request,
+  // matching the same behaviour as the useEffect path.
+  const loadTicketsControllerRef = useRef<AbortController | null>(null);
+
+  const loadTickets = useCallback(async () => {
+    loadTicketsControllerRef.current?.abort();
+    const controller = new AbortController();
+    loadTicketsControllerRef.current = controller;
+    await fetchTickets(controller.signal);
+  }, [fetchTickets]);
+
   useEffect(() => {
-    let ignore = false;
+    const controller = new AbortController();
 
     const run = async () => {
-      if (!enabled) {
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-        const response = await fetch(url);
-        const payload = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(getErrorMessage(payload, errorMessage));
-        }
-
-        if (!ignore) {
-          setTickets(mapData(payload));
-          setMeta(mapMeta(payload));
-        }
-      } catch (err) {
-        if (!ignore) {
-          setError(err instanceof Error ? err.message : errorMessage);
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
+      await fetchTickets(controller.signal);
     };
 
-    run();
+    void run();
 
     return () => {
-      ignore = true;
+      controller.abort();
     };
-  }, [enabled, endpoint, errorMessage, mapData, mapMeta, queryString]);
+  }, [fetchTickets]);
 
   return {
     tickets,

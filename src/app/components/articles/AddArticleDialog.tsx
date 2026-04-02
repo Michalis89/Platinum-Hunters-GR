@@ -201,6 +201,7 @@ export default function AddArticleDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
+  const submitInFlightRef = useRef(false);
 
   // Handle dialog open/close
   useEffect(() => {
@@ -336,6 +337,9 @@ export default function AddArticleDialog({
     !titleValidation.isValid || !descriptionValidation.isValid || !tagsValidation.isValid;
 
   const handleSubmit = async (saveStatus: ArticleStatus) => {
+    if (submitInFlightRef.current) {
+      return;
+    }
     if (noPermission) {
       setError('You do not have permission to create content.');
       return;
@@ -365,6 +369,7 @@ export default function AddArticleDialog({
       return;
     }
 
+    submitInFlightRef.current = true;
     setIsSubmitting(true);
     setError(null);
 
@@ -414,6 +419,7 @@ export default function AddArticleDialog({
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
+      submitInFlightRef.current = false;
       setIsSubmitting(false);
     }
   };

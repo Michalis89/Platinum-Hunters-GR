@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Heart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -127,6 +127,8 @@ export default function EntryEditDialog({
   const isMobile = useIsMobile();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectPortalContainer, setSelectPortalContainer] = useState<HTMLDivElement | null>(null);
+  const saveInFlightRef = useRef(false);
+  const deleteInFlightRef = useRef(false);
   const [editState, setEditState] = useState<EditState>({
     status: 'planned',
     progress: '',
@@ -185,6 +187,31 @@ export default function EntryEditDialog({
       return { ...prev, status: nextStatus };
     });
   };
+
+  const handleSave = useCallback(async () => {
+    if (saveInFlightRef.current) {
+      return;
+    }
+    saveInFlightRef.current = true;
+    try {
+      await onSave(editState);
+    } finally {
+      saveInFlightRef.current = false;
+    }
+  }, [editState, onSave]);
+
+  const handleDeleteConfirmed = useCallback(() => {
+    if (!entry || deleteInFlightRef.current) {
+      return;
+    }
+    deleteInFlightRef.current = true;
+    try {
+      setShowDeleteConfirm(false);
+      onDelete(entry);
+    } finally {
+      deleteInFlightRef.current = false;
+    }
+  }, [entry, onDelete]);
 
   const clampProgress = category !== 'games';
   const progressUnitLabel =
@@ -581,7 +608,7 @@ export default function EntryEditDialog({
             <Button
               type="button"
               variant="primary"
-              onClick={() => onSave(editState)}
+              onClick={() => void handleSave()}
               className="w-full sm:w-auto"
             >
               Save
@@ -635,10 +662,7 @@ export default function EntryEditDialog({
               </AlertDialogCancel>
               <AlertDialogAction
                 className="bg-accent text-white hover:brightness-110"
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  onDelete(entry);
-                }}
+                onClick={handleDeleteConfirmed}
               >
                 Delete
               </AlertDialogAction>

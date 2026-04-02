@@ -1,49 +1,28 @@
 /**
  * Rate Limiting Public API
  *
- * Production-ready rate limiter backed by Upstash Redis.
- * Provides consistent rate limiting across all Vercel serverless instances.
+ * Provides both in-memory (synchronous) and Upstash Redis (async) rate limiting.
  *
- * USAGE:
- * ======
+ * In-memory usage (for simple/test use cases):
  * ```typescript
- * import { rateLimit, rateLimitHeaders, getClientIp } from '@/lib/rate-limit';
- *
- * async function handler(req: Request) {
- *   const ip = getClientIp(req);
- *   const result = await rateLimit('loginIp', ip);
- *
- *   if (!result.success) {
- *     return new Response('Too Many Requests', {
- *       status: 429,
- *       headers: rateLimitHeaders(result),
- *     });
- *   }
- *
- *   // Process request...
- * }
+ * const result = rateLimit(identifier, { limit: 10, windowMs: 60_000 });
  * ```
  *
- * AVAILABLE LIMITERS:
- * ===================
- * - loginIp: 10 requests per 10 minutes per IP
- * - loginEmail: 5 requests per 10 minutes per email
- * - forgotIp: 3 requests per hour per IP
- * - forgotEmail: 3 requests per hour per email
- * - registerIp: 5 requests per hour per IP
- * - apiGeneral: 100 requests per minute (general API)
- * - apiStrict: 10 requests per minute (expensive operations)
+ * Upstash usage (for production serverless):
+ * ```typescript
+ * const result = await rateLimit('loginIp', clientIp);
+ * ```
  *
- * ENVIRONMENT VARIABLES REQUIRED:
- * ===============================
+ * ENVIRONMENT VARIABLES REQUIRED (Upstash only):
  * - UPSTASH_REDIS_REST_URL
  * - UPSTASH_REDIS_REST_TOKEN
  */
 
-import { getNamedLimiter, getLimiterConfig, type LimiterName } from './upstash';
-
 // Re-export getClientIp for convenience
 export { getClientIp } from './get-client-ip';
+
+// Type-only re-export — no runtime import, avoids ESM issues
+export type { LimiterName } from './upstash';
 
 /**
  * Result returned by the rateLimit function.
@@ -60,46 +39,16 @@ export type RateLimitResult = {
 };
 
 /**
- * Check rate limit for a given identifier using a named limiter.
- *
- * @param limiter - Named limiter preset (e.g., 'loginIp', 'forgotEmail')
- * @param key - Unique identifier (e.g., IP address, email, user ID)
- * @returns Promise resolving to rate limit result
- *
- * @example
- * ```typescript
- * // Rate limit login attempts by IP
- * const result = await rateLimit('loginIp', clientIp);
- *
- * // Composite key for IP + email protection
- * const result = await rateLimit('loginEmail', `${clientIp}:${email}`);
- * ```
+ * Legacy rate limit config type for backwards compatibility.
+ * @deprecated Use named limiters instead
  */
-export async function rateLimit(limiter: LimiterName, key: string): Promise<RateLimitResult> {
-  // Bypass rate limiting in development mode
-  if (process.env.NODE_ENV === 'development') {
-    const config = getLimiterConfig(limiter);
-    return {
-      success: true,
-      limit: config.limit,
-      remaining: config.limit,
-      reset: Date.now() + config.windowSec * 1000,
-    };
-  }
+export type RateLimitConfig = {
+  limit: number;
+  windowMs: number;
+};
 
-  const rateLimiter = getNamedLimiter(limiter);
-  const config = getLimiterConfig(limiter);
-
-  const result = await rateLimiter.limit(key);
-
-  return {
-    success: result.success,
-    limit: config.limit,
-    remaining: result.remaining,
-    // Upstash returns reset as Unix timestamp in milliseconds
-    reset: result.reset,
-  };
-}
+// In-memory store for simple rate limiting
+const _memStore = new Map<string, { count: number; resetAt: number }>();
 
 /**
  * Generate standard rate limit HTTP headers.
@@ -120,7 +69,6 @@ export function rateLimitHeaders(result: RateLimitResult): Record<string, string
     'X-RateLimit-Reset': String(result.reset),
   };
 
-  // Add Retry-After header when rate limited
   if (!result.success) {
     const retryAfterSec = Math.ceil((result.reset - Date.now()) / 1000);
     headers['Retry-After'] = String(Math.max(0, retryAfterSec));
@@ -130,10 +78,9 @@ export function rateLimitHeaders(result: RateLimitResult): Record<string, string
 }
 
 /**
- * Legacy preset configurations for backwards compatibility.
- * Use named limiters instead when possible.
+ * Rate limit presets.
  *
- * @deprecated Use rateLimit('loginIp', key) instead of rateLimit(key, RATE_LIMITS.login)
+ * @deprecated Use named limiters (e.g. rateLimit('loginIp', key)) instead
  */
 export const RATE_LIMITS = {
   auth: { limit: 5, windowMs: 60_000 },
@@ -144,10 +91,68 @@ export const RATE_LIMITS = {
 } as const;
 
 /**
- * Legacy rate limit config type for backwards compatibility.
- * @deprecated Use named limiters instead
+ * In-memory rate limiting (synchronous).
+ *
+ * Suitable for single-instance environments, tests, and simple use cases.
+ * Does NOT share state across serverless instances.
  */
-export type RateLimitConfig = {
-  limit: number;
-  windowMs: number;
-};
+export function rateLimit(id: string, config: RateLimitConfig): RateLimitResult;
+/**
+ * Upstash Redis rate limiting (async, production-ready).
+ *
+ * Shares state across all serverless instances via Redis.
+ */
+export function rateLimit(limiter: string, key: string): Promise<RateLimitResult>;
+export function rateLimit(
+  arg1: string,
+  arg2: RateLimitConfig | string,
+): RateLimitResult | Promise<RateLimitResult> {
+  if (typeof arg2 === 'object') {
+    // In-memory rate limiting
+    const now = Date.now();
+    const entry = _memStore.get(arg1);
+    if (!entry || now >= entry.resetAt) {
+      const resetAt = now + arg2.windowMs;
+      _memStore.set(arg1, { count: 1, resetAt });
+      return { success: true, remaining: arg2.limit - 1, limit: arg2.limit, reset: resetAt };
+    }
+    entry.count += 1;
+    if (entry.count > arg2.limit) {
+      return { success: false, remaining: 0, limit: arg2.limit, reset: entry.resetAt };
+    }
+    return {
+      success: true,
+      remaining: arg2.limit - entry.count,
+      limit: arg2.limit,
+      reset: entry.resetAt,
+    };
+  }
+
+  // Upstash rate limiting — lazy import to avoid pulling ESM modules at module load time
+  return (async () => {
+    // Bypass rate limiting in development mode
+    if (process.env.NODE_ENV === 'development') {
+      const { getLimiterConfig } = await import('./upstash');
+      const config = getLimiterConfig(arg1 as Parameters<typeof getLimiterConfig>[0]);
+      return {
+        success: true,
+        limit: config.limit,
+        remaining: config.limit,
+        reset: Date.now() + config.windowSec * 1000,
+      };
+    }
+
+    const { getNamedLimiter, getLimiterConfig } = await import('./upstash');
+    const limiterName = arg1 as Parameters<typeof getLimiterConfig>[0];
+    const rateLimiter = getNamedLimiter(limiterName);
+    const config = getLimiterConfig(limiterName);
+    const result = await rateLimiter.limit(arg2);
+
+    return {
+      success: result.success,
+      limit: config.limit,
+      remaining: result.remaining,
+      reset: result.reset,
+    };
+  })();
+}

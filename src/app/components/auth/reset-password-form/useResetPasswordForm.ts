@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { validatePassword } from '@/utils/validation/auth';
 import { supabase } from '@/lib/supabase-client';
@@ -29,6 +29,7 @@ export function useResetPasswordForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const submitInFlight = useRef(false);
 
   const passwordRequirements = useMemo(
     () => [
@@ -107,6 +108,10 @@ export function useResetPasswordForm({
   }, [allowDevPreview, hasRecoveryParams, router]);
 
   const handleSubmit = async (e: FormEvent) => {
+    if (submitInFlight.current) {
+      return;
+    }
+    submitInFlight.current = true;
     e.preventDefault();
     setError(null);
 
@@ -149,6 +154,7 @@ export function useResetPasswordForm({
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong.';
       setError(errorMessage);
     } finally {
+      submitInFlight.current = false;
       setSubmitting(false);
     }
   };

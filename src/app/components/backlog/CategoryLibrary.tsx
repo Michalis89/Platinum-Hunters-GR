@@ -19,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useLocale } from '@/context/LocaleContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { apiClient } from '@/lib/api/client';
 import { yieldToMain } from '@/lib/performance';
@@ -276,6 +277,7 @@ export default function CategoryLibrary({
   publicUserId?: string;
   shareToken?: string;
 }>) {
+  const locale = useLocale();
   const isMobile = useIsMobile();
   const [steamSyncing, setSteamSyncing] = useState(false);
   const [steamSyncProgress, setSteamSyncProgress] = useState<SteamSyncJobSnapshot | null>(null);
@@ -723,6 +725,7 @@ export default function CategoryLibrary({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mediaId: selectedEntry.mediaId,
+            clientUpdatedAt: selectedEntry.updatedAt,
             status: finalStatus,
             is_favorite: nextFavorite,
             selected_platform: shouldPersistPlatform ? normalizedSelectedPlatform || null : undefined,
@@ -731,8 +734,33 @@ export default function CategoryLibrary({
             notes: editState.notes || null,
           }),
         });
+        if (response.status === 409) {
+          dispatch({ type: 'patch', payload: { libraryEntries: previousEntries } });
+          await loadLibraryEntries(false, true);
+          showAlert({
+            type: 'warning',
+            title: 'Conflict',
+            message: 'Your changes conflicted with another update. Library refreshed.',
+          });
+          return;
+        }
         if (!response.ok) {
           throw new Error('Failed to update entry');
+        }
+        const payload = (await response.json().catch(() => null)) as
+          | { entry?: { updated_at?: string | null } }
+          | null;
+        const nextUpdatedAt =
+          typeof payload?.entry?.updated_at === 'string' ? payload.entry.updated_at : null;
+        if (nextUpdatedAt) {
+          dispatch({
+            type: 'patch',
+            payload: {
+              libraryEntries: libraryEntries.map(item =>
+                item.id === selectedEntry.id ? { ...item, updatedAt: nextUpdatedAt } : item,
+              ),
+            },
+          });
         }
 
         await yieldToMain();
@@ -897,11 +925,37 @@ export default function CategoryLibrary({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mediaId: entry.mediaId,
+            clientUpdatedAt: entry.updatedAt,
             is_favorite: nextFavorite,
           }),
         });
+        if (response.status === 409) {
+          dispatch({ type: 'patch', payload: { libraryEntries: previousEntries } });
+          await loadLibraryEntries();
+          showAlert({
+            type: 'warning',
+            title: 'Conflict',
+            message: 'Your changes conflicted with another update. Library refreshed.',
+          });
+          return;
+        }
         if (!response.ok) {
           throw new Error('Failed to update favorite');
+        }
+        const payload = (await response.json().catch(() => null)) as
+          | { entry?: { updated_at?: string | null } }
+          | null;
+        const nextUpdatedAt =
+          typeof payload?.entry?.updated_at === 'string' ? payload.entry.updated_at : null;
+        if (nextUpdatedAt) {
+          dispatch({
+            type: 'patch',
+            payload: {
+              libraryEntries: libraryEntries.map(item =>
+                item.id === entry.id ? { ...item, updatedAt: nextUpdatedAt } : item,
+              ),
+            },
+          });
         }
       } catch (error) {
         dispatch({ type: 'patch', payload: { libraryEntries: previousEntries } });
@@ -913,7 +967,7 @@ export default function CategoryLibrary({
         });
       }
     },
-    [apiBase, canToggleFavorite, libraryEntries, showAlert],
+    [apiBase, canToggleFavorite, libraryEntries, loadLibraryEntries, showAlert],
   );
 
   const normalizedProgressPercent = (() => {
@@ -1004,7 +1058,7 @@ export default function CategoryLibrary({
       if (isRateLimited()) {
         const resetTime = getRateLimitResetTime();
         const resetTimeStr = resetTime
-          ? resetTime.toLocaleString('en-US', {
+          ? resetTime.toLocaleString(locale, {
               month: 'short',
               day: 'numeric',
               hour: 'numeric',

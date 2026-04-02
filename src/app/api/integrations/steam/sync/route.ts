@@ -66,6 +66,16 @@ type SyncResult = {
   };
 };
 
+class SyncAlreadyRunningError extends Error {
+  jobId: string | null;
+
+  constructor(jobId: string | null) {
+    super('A sync is already in progress.');
+    this.name = 'SyncAlreadyRunningError';
+    this.jobId = jobId;
+  }
+}
+
 function extractErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) {
     return error.message;
@@ -116,11 +126,33 @@ async function createSyncJob(userId: string): Promise<string> {
   });
 
   if (error) {
+    if (error.code === '23505') {
+      const runningJob = await getRunningSyncJob(userId).catch(() => null);
+      throw new SyncAlreadyRunningError(runningJob?.id ?? null);
+    }
     console.error('Failed to create sync job:', error);
     throw new Error('Failed to create sync job');
   }
 
   return jobId;
+}
+
+async function getRunningSyncJob(userId: string): Promise<{ id: string } | null> {
+  const supabase = await createRouteHandlerClient();
+
+  const { data, error } = await supabase
+    .from('steam_sync_jobs')
+    .select('id,status')
+    .eq('user_id', userId)
+    .eq('status', 'running')
+    .maybeSingle();
+
+  if (error) {
+    console.error('Failed to check running sync job:', error);
+    throw new Error('Failed to check running sync job');
+  }
+
+  return data ? { id: data.id as string } : null;
 }
 
 async function updateSyncJob(jobId: string, updates: JobUpdate): Promise<void> {
@@ -971,6 +1003,13 @@ async function POSTHandler(req: Request) {
 
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
+    const runningJob = await getRunningSyncJob(session.user.id);
+    if (runningJob) {
+      return NextResponse.json(
+        { error: 'A sync is already in progress.', jobId: runningJob.id },
+        { status: 409 },
+      );
+    }
     jobId = await createSyncJob(session.user.id);
 
     const result = await syncSteamForUser({ includeDebug, jobId });
@@ -985,6 +1024,13 @@ async function POSTHandler(req: Request) {
 
     return NextResponse.json({ ...result, jobId });
   } catch (error) {
+    if (error instanceof SyncAlreadyRunningError) {
+      return NextResponse.json(
+        { error: 'A sync is already in progress.', jobId: error.jobId },
+        { status: 409 },
+      );
+    }
+
     if (jobId) {
       const errorMessage = extractErrorMessage(error, 'Unknown error');
       await updateSyncJob(jobId, {
@@ -1015,6 +1061,13 @@ async function GETHandler(req: Request) {
 
     const supabase = await createRouteHandlerClient();
     const session = await requireAuth(supabase);
+    const runningJob = await getRunningSyncJob(session.user.id);
+    if (runningJob) {
+      return NextResponse.json(
+        { error: 'A sync is already in progress.', jobId: runningJob.id },
+        { status: 409 },
+      );
+    }
     jobId = await createSyncJob(session.user.id);
 
     const result = await syncSteamForUser({ includeDebug, jobId });
@@ -1033,6 +1086,13 @@ async function GETHandler(req: Request) {
 
     return NextResponse.redirect(buildBacklogRedirect(req.url, 'success').toString());
   } catch (error) {
+    if (error instanceof SyncAlreadyRunningError) {
+      return NextResponse.json(
+        { error: 'A sync is already in progress.', jobId: error.jobId },
+        { status: 409 },
+      );
+    }
+
     if (jobId) {
       const errorMessage = extractErrorMessage(error, 'Unknown error');
       await updateSyncJob(jobId, {

@@ -10,6 +10,7 @@ export type MappedLibraryEntry = {
   id: string;
   entryId: number;
   mediaId: number;
+  updatedAt?: string;
   externalId?: number;
   status: string;
   isFavorite: boolean;
@@ -155,6 +156,7 @@ export function mapLibraryEntry(
     id: `entry-${row.id}`,
     entryId: row.id,
     mediaId: media.id as number,
+    updatedAt: row.updated_at ?? undefined,
     externalId:
       typeof media[config.externalId.field] === 'number'
         ? (media[config.externalId.field] as number)

@@ -6,6 +6,7 @@ export type MediaStatus = 'planned' | 'current' | 'completed' | 'dropped';
 
 export type MediaEntry = {
   id: string;
+  updatedAt?: string;
   title: string;
   subtitle: string;
   year?: string;

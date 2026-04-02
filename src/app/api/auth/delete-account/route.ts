@@ -45,20 +45,20 @@ async function POSTHandler(req: Request) {
       return fail({ error: 'Incorrect password' }, 401);
     }
 
-    // Delete user data first (auth deletion will cascade)
-    const { error: deleteError } = await supabase.from('users').delete().eq('id', userId);
-
-    if (deleteError) {
-      console.error('User deletion error:', deleteError);
-      return fail({ error: 'Account deletion error' }, 500);
-    }
-
-    // Delete from auth
+    // 1. Delete from auth first
     const supabaseAdmin = getSupabaseServer();
     const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (authDeleteError) {
-      console.error('Auth deletion error (continuing):', authDeleteError);
+      console.error('Auth deletion error:', authDeleteError);
+      return fail({ error: 'Account deletion error' }, 500);
+    }
+
+    // 2. After auth is deleted, best-effort delete profile row
+    const { error: deleteError } = await supabase.from('users').delete().eq('id', userId);
+
+    if (deleteError) {
+      console.error('User profile deletion error (auth already deleted):', deleteError);
     }
 
     try {

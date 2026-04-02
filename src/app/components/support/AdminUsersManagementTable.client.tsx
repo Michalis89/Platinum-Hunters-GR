@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ErrorAlert } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
 import EmptyState from '@/components/ui/empty';
+import { useLocale } from '@/context/LocaleContext';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   AlertDialog,
@@ -108,7 +109,7 @@ function normalizeRoleList(input: string[]): UserRole[] {
   return normalized.length > 0 ? normalized : ['user'];
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, locale: string): string {
   if (!value) {
     return '-';
   }
@@ -116,10 +117,11 @@ function formatDate(value: string | null): string {
   if (Number.isNaN(date.getTime())) {
     return '-';
   }
-  return date.toLocaleString();
+  return date.toLocaleString(locale);
 }
 
 export default function AdminUsersManagementTable() {
+  const locale = useLocale();
   const [rows, setRows] = useState<UserRow[]>([]);
   const [meta, setMeta] = useState<MetaState>(emptyMeta);
   const [filters, setFilters] = useState<FiltersState>(initialFilters);
@@ -452,10 +454,10 @@ export default function AdminUsersManagementTable() {
                         )}
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                        {formatDate(row.created_at)}
+                        {formatDate(row.created_at, locale)}
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                        {formatDate(row.last_login)}
+                        {formatDate(row.last_login, locale)}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">

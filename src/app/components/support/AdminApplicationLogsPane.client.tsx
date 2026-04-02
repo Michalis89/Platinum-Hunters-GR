@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { ErrorAlert } from '@/components/ui/alert';
 import EmptyState from '@/components/ui/empty';
 import { Badge } from '@/components/ui/badge';
+import { useLocale } from '@/context/LocaleContext';
 
 type AdminLog = {
   id: number;
@@ -46,6 +47,7 @@ const levelBadgeVariant: Record<AdminLog['level'], 'secondary' | 'outline' | 'de
 };
 
 export default function AdminApplicationLogsPane() {
+  const locale = useLocale();
   const [rows, setRows] = useState<AdminLog[]>([]);
   const [filters, setFilters] = useState<FiltersState>(initialFilters);
   const [page, setPage] = useState(1);
@@ -162,7 +164,7 @@ export default function AdminApplicationLogsPane() {
                     <span className="text-xs text-muted-foreground">{log.source}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(log.created_at).toLocaleString()}
+                    {new Date(log.created_at).toLocaleString(locale)}
                   </span>
                 </div>
                 <div className="mt-2 text-sm font-medium text-foreground">{log.message}</div>

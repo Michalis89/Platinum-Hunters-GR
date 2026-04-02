@@ -51,8 +51,12 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
 
     const session = await requireAuth(supabase);
 
-    const body = await req.json();
-    const { content } = body;
+    const body = (await req.json()) as { content?: unknown; idempotency_key?: unknown };
+    const content = typeof body.content === 'string' ? body.content : '';
+    const idempotencyKey =
+      typeof body.idempotency_key === 'string' && body.idempotency_key.trim().length > 0
+        ? body.idempotency_key.trim()
+        : null;
 
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
       return fail({ error: 'Comment content is required' }, 400);
@@ -76,19 +80,44 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
     // Get user info for activity log
     const userData = await getUserBasicInfo(supabase, session.user.id);
 
-    // Insert comment
-    const { data: comment, error: insertError } = await supabase
+    // Insert comment idempotently when an idempotency key is provided.
+    const insertPayload: Record<string, unknown> = {
+      article_id: Number.parseInt(id, 10),
+      user_id: session.user.id,
+      content: content.trim(),
+      ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
+    };
+
+    const { data: insertedCommentsRaw, error: insertError } = await supabase
       .from('article_comments')
-      .insert({
-        article_id: Number.parseInt(id, 10),
-        user_id: session.user.id,
-        content: content.trim(),
+      .upsert(insertPayload as never, {
+        onConflict: 'article_id,user_id,idempotency_key',
+        ignoreDuplicates: true,
       })
-      .select('*, users!user_id(username, display_name, avatar_url)')
-      .single();
+      .select('*, users!user_id(username, display_name, avatar_url)');
 
     if (insertError) {
       console.error('Error inserting comment:', insertError);
+      return fail({ error: 'Failed to add comment' }, 500);
+    }
+
+    const insertedComments = Array.isArray(insertedCommentsRaw) ? insertedCommentsRaw : [];
+    const insertedComment = insertedComments[0] ?? null;
+    if (!insertedComment) {
+      if (idempotencyKey) {
+        const { data: existingComment } = await supabase
+          .from('article_comments')
+          .select('*, users!user_id(username, display_name, avatar_url)')
+          .eq('article_id', Number.parseInt(id, 10))
+          .eq('user_id', session.user.id)
+          .eq('idempotency_key', idempotencyKey)
+          .maybeSingle();
+
+        if (existingComment) {
+          return ok({ message: 'Comment already processed', comment: existingComment });
+        }
+      }
+
       return fail({ error: 'Failed to add comment' }, 500);
     }
 
@@ -97,7 +126,7 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
       articleId: article.id,
       articleTitle: article.title,
       articleSlug: article.slug,
-      commentId: comment.id,
+      commentId: insertedComment.id,
       commentPreview: content.trim().substring(0, 100),
       username: userData?.username,
       display_name: userData?.display_name,
@@ -107,7 +136,7 @@ async function POSTHandler(req: Request, { params }: { params: Promise<{ id: str
     // Revalidate comment caches
     revalidateCache.articleComment(article.id);
 
-    return ok({ message: 'Comment added successfully', comment });
+    return ok({ message: 'Comment added successfully', comment: insertedComment });
   } catch (error) {
     console.error('Error adding comment:', error);
     if (error instanceof UnauthorizedError) {

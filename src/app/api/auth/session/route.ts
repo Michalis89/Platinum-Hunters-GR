@@ -29,6 +29,14 @@ async function GETHandler() {
       return ok({ user: null, session: null }, NO_STORE_HEADERS);
     }
 
+    // Treat expired JWTs as no session — avoids a PGRST303 from PostgREST
+    // and prevents a spurious 500 when the user simply hasn't logged in yet.
+    if (session.expires_at && session.expires_at * 1000 < Date.now()) {
+      await supabase.auth.signOut();
+      await clearAuthCookies();
+      return ok({ user: null, session: null }, NO_STORE_HEADERS);
+    }
+
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
       .select('*')
@@ -36,6 +44,13 @@ async function GETHandler() {
       .single();
 
     if (profileError) {
+      // PGRST303 = JWT expired (clock skew can slip past the expires_at check above)
+      // Treat it as no session rather than a server error.
+      if ('code' in profileError && profileError.code === 'PGRST303') {
+        await supabase.auth.signOut();
+        await clearAuthCookies();
+        return ok({ user: null, session: null }, NO_STORE_HEADERS);
+      }
       console.error('Profile fetch error:', profileError);
       return fail({ error: 'Profile loading error' }, 500, NO_STORE_HEADERS);
     }

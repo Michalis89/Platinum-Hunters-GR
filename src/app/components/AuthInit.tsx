@@ -96,31 +96,48 @@ async function clearAuthCachesInServiceWorker() {
  * This ensures the backend can read the latest tokens
  * Returns true if sync succeeded, false if it failed (e.g., 401 = cookies expired)
  */
-async function syncCookies(session: {
+// Coalesces concurrent syncCookies calls so only one POST /api/auth/refresh
+// is in-flight at a time. A new call while one is running reuses the same promise.
+let syncCookiesInflight: Promise<boolean> | null = null;
+
+export async function syncCookies(session: {
   access_token: string;
   refresh_token: string;
   expires_in?: number;
 }): Promise<boolean> {
-  try {
-    const response = await fetch('/api/auth/refresh', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-        expires_in: session.expires_in || 3600,
-        remember: isAuthPersistenceEnabled(),
-      }),
-    });
-    // If server returns 401, cookies have expired - session is invalid
-    if (response.status === 401) {
-      return false;
-    }
-    return response.ok;
-  } catch {
-    // Network errors - not critical, don't force logout
-    return true;
+  // If a sync is already running, the caller gets the same promise.
+  // This prevents two concurrent POST /api/auth/refresh calls from racing
+  // and the slower one overwriting the fresher token.
+  if (syncCookiesInflight) {
+    return syncCookiesInflight;
   }
+
+  syncCookiesInflight = (async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_in: session.expires_in || 3600,
+          remember: isAuthPersistenceEnabled(),
+        }),
+      });
+      // If server returns 401, cookies have expired - session is invalid
+      if (response.status === 401) {
+        return false;
+      }
+      return response.ok;
+    } catch {
+      // Network errors - not critical, don't force logout
+      return true;
+    } finally {
+      syncCookiesInflight = null;
+    }
+  })();
+
+  return syncCookiesInflight;
 }
 
 export default function AuthInit() {

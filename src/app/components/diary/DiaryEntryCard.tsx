@@ -1,15 +1,10 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useLocale } from '@/context/LocaleContext';
 import type { DiaryEntryDecrypted } from '@/lib/diary/types';
 import { cn } from '@/lib/utils';
-
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'long',
-  day: 'numeric',
-  year: 'numeric',
-});
 
 type DiaryEntryCardProps = {
   entry: DiaryEntryDecrypted;
@@ -18,6 +13,17 @@ type DiaryEntryCardProps = {
 };
 
 function DiaryEntryCardComponent({ entry, isActive, onSelect }: DiaryEntryCardProps) {
+  const locale = useLocale();
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    [locale],
+  );
+
   return (
     <button type="button" className="w-full text-left" onClick={() => onSelect(entry.id)}>
       <Card

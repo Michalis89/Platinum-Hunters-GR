@@ -274,6 +274,7 @@ async function GETHandler(req: Request) {
       entryId: data.id,
       mediaId: data.media_id,
       status,
+      updatedAt: data.updated_at ?? null,
       favorite: data.is_favorite ?? false,
       rating: data.score ?? null,
       progress: data.progress ?? null,

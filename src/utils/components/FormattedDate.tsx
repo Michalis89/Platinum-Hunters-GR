@@ -1,4 +1,6 @@
-import { SITE_LOCALE } from '@/config/site';
+'use client';
+
+import { useLocale } from '@/context/LocaleContext';
 
 const DEFAULT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -23,7 +25,7 @@ export function FormattedDate({
   className,
   as = 'span',
 }: FormattedDateProps) {
-  // Format date server-side
+  const browserLocale = useLocale();
   const formatted = (() => {
     if (!date) {
       return fallback;
@@ -32,10 +34,9 @@ export function FormattedDate({
     if (Number.isNaN(parsed.getTime())) {
       return fallback;
     }
-    return new Intl.DateTimeFormat(locale ?? SITE_LOCALE, options).format(parsed);
+    return new Intl.DateTimeFormat(locale ?? browserLocale, options).format(parsed);
   })();
 
-  // suppressHydrationWarning handles potential timezone differences between server/client
   if (as === 'time') {
     return (
       <time className={className} dateTime={date ?? undefined} suppressHydrationWarning>

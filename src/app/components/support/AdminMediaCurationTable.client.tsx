@@ -12,6 +12,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { ErrorAlert } from '@/components/ui/alert';
 import EmptyState from '@/components/ui/empty';
 import { Textarea } from '@/components/ui/textarea';
+import { useLocale } from '@/context/LocaleContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -261,6 +262,7 @@ function getExcludedReason(row: MediaRow): string | null {
 }
 
 export default function AdminMediaCurationTable() {
+  const locale = useLocale();
   const [rows, setRows] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1329,7 +1331,7 @@ export default function AdminMediaCurationTable() {
                         )}
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                        {row.updated_at ? new Date(row.updated_at).toLocaleString() : '-'}
+                        {row.updated_at ? new Date(row.updated_at).toLocaleString(locale) : '-'}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
