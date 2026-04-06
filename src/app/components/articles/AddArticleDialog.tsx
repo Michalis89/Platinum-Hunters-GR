@@ -279,7 +279,9 @@ export default function AddArticleDialog({
       setIsSearching(true);
       try {
         const sep = searchEndpoint.includes('?') ? '&' : '?';
-        const res = await fetch(`${searchEndpoint}${sep}q=${encodeURIComponent(mediaSearch.trim())}`);
+        const res = await fetch(
+          `${searchEndpoint}${sep}q=${encodeURIComponent(mediaSearch.trim())}`,
+        );
         if (res.ok) {
           const data = (await res.json()) as { items?: MediaSearchItem[] };
           setSearchResults((data.items ?? []).filter(i => i.mediaId).slice(0, 5));
@@ -649,7 +651,9 @@ export default function AddArticleDialog({
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
                     Linked item
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">(optional)</span>
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      (optional)
+                    </span>
                   </label>
 
                   {mediaId ? (
@@ -690,7 +694,14 @@ export default function AddArticleDialog({
                             className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted/50"
                           >
                             {item.cover ? (
-                              <img src={item.cover} alt="" className="h-9 w-6 shrink-0 rounded object-cover" />
+                              <div className="relative h-9 w-6 shrink-0 overflow-hidden rounded">
+                                <CoverThumbImage
+                                  src={item.cover}
+                                  alt=""
+                                  sizes="24px"
+                                  className="object-cover"
+                                />
+                              </div>
                             ) : (
                               <div className="h-9 w-6 shrink-0 rounded bg-muted" />
                             )}

@@ -52,7 +52,10 @@ async function GETHandler(req: Request) {
     } catch (error) {
       if (error instanceof ExternalFetchError) {
         const upstreamMessage = error.message.replace(/^\[[^\]]+\]\s*/, '');
-        return NextResponse.json({ error: upstreamMessage || 'TMDB fetch failed' }, { status: 502 });
+        return NextResponse.json(
+          { error: upstreamMessage || 'TMDB fetch failed' },
+          { status: 502 },
+        );
       }
       throw error;
     }

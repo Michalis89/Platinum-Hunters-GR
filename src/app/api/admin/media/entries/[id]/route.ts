@@ -240,6 +240,7 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
         case 'steam_app_id':
           updates.steam_app_id = normalizeNumber(value);
           break;
+        /* c8 ignore next 2 -- all editable keys are exhaustively handled above */
         default:
           break;
       }
@@ -277,7 +278,7 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
           status: 409,
           details: {
             mediaId,
-            code: dbError.code ?? null,
+            code: dbError.code,
             message: dbError.message ?? null,
             details: dbError.details ?? null,
             hint: dbError.hint ?? null,

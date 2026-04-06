@@ -116,8 +116,12 @@ const shouldRevalidateContinueHero = (
     return false;
   }
 
-  const prev = typeof previousProgress === 'number' && Number.isFinite(previousProgress) ? previousProgress : null;
-  const next = typeof nextProgress === 'number' && Number.isFinite(nextProgress) ? nextProgress : null;
+  const prev =
+    typeof previousProgress === 'number' && Number.isFinite(previousProgress)
+      ? previousProgress
+      : null;
+  const next =
+    typeof nextProgress === 'number' && Number.isFinite(nextProgress) ? nextProgress : null;
 
   return next !== null && next > 0 && prev !== next;
 };
@@ -707,7 +711,9 @@ export default function CategoryLibrary({
               ...entry,
               status: finalStatus,
               isFavorite: nextFavorite,
-              selectedPlatform: shouldPersistPlatform ? normalizedSelectedPlatform || undefined : undefined,
+              selectedPlatform: shouldPersistPlatform
+                ? normalizedSelectedPlatform || undefined
+                : undefined,
               progress: nextProgressValue ?? undefined,
               score: editState.score || undefined,
               notes: editState.notes || undefined,
@@ -728,7 +734,9 @@ export default function CategoryLibrary({
             clientUpdatedAt: selectedEntry.updatedAt,
             status: finalStatus,
             is_favorite: nextFavorite,
-            selected_platform: shouldPersistPlatform ? normalizedSelectedPlatform || null : undefined,
+            selected_platform: shouldPersistPlatform
+              ? normalizedSelectedPlatform || null
+              : undefined,
             progress: nextProgressValue,
             score: nextScore,
             notes: editState.notes || null,
@@ -747,18 +755,19 @@ export default function CategoryLibrary({
         if (!response.ok) {
           throw new Error('Failed to update entry');
         }
-        const payload = (await response.json().catch(() => null)) as
-          | { entry?: { updated_at?: string | null } }
-          | null;
+        const payload = (await response.json().catch(() => null)) as {
+          entry?: { updated_at?: string | null };
+        } | null;
         const nextUpdatedAt =
           typeof payload?.entry?.updated_at === 'string' ? payload.entry.updated_at : null;
         if (nextUpdatedAt) {
+          const syncedEntries = optimisticEntries.map(item =>
+            item.id === selectedEntry.id ? { ...item, updatedAt: nextUpdatedAt } : item,
+          );
           dispatch({
             type: 'patch',
             payload: {
-              libraryEntries: libraryEntries.map(item =>
-                item.id === selectedEntry.id ? { ...item, updatedAt: nextUpdatedAt } : item,
-              ),
+              libraryEntries: syncedEntries,
             },
           });
         }
@@ -881,8 +890,9 @@ export default function CategoryLibrary({
                   ...entry,
                   status: finalStatus,
                   isFavorite: nextFavorite,
-                  selectedPlatform:
-                    shouldPersistPlatform ? normalizedSelectedPlatform || undefined : undefined,
+                  selectedPlatform: shouldPersistPlatform
+                    ? normalizedSelectedPlatform || undefined
+                    : undefined,
                   progress: nextProgressValue ?? undefined,
                   score: editState.score || undefined,
                   notes: editState.notes || undefined,
@@ -907,12 +917,13 @@ export default function CategoryLibrary({
 
       const nextFavorite = !entry.isFavorite;
       const previousEntries = libraryEntries;
+      const optimisticEntries = libraryEntries.map(item =>
+        item.id === entry.id ? { ...item, isFavorite: nextFavorite } : item,
+      );
       dispatch({
         type: 'patch',
         payload: {
-          libraryEntries: libraryEntries.map(item =>
-            item.id === entry.id ? { ...item, isFavorite: nextFavorite } : item,
-          ),
+          libraryEntries: optimisticEntries,
         },
       });
 
@@ -942,18 +953,19 @@ export default function CategoryLibrary({
         if (!response.ok) {
           throw new Error('Failed to update favorite');
         }
-        const payload = (await response.json().catch(() => null)) as
-          | { entry?: { updated_at?: string | null } }
-          | null;
+        const payload = (await response.json().catch(() => null)) as {
+          entry?: { updated_at?: string | null };
+        } | null;
         const nextUpdatedAt =
           typeof payload?.entry?.updated_at === 'string' ? payload.entry.updated_at : null;
         if (nextUpdatedAt) {
+          const syncedEntries = optimisticEntries.map(item =>
+            item.id === entry.id ? { ...item, updatedAt: nextUpdatedAt } : item,
+          );
           dispatch({
             type: 'patch',
             payload: {
-              libraryEntries: libraryEntries.map(item =>
-                item.id === entry.id ? { ...item, updatedAt: nextUpdatedAt } : item,
-              ),
+              libraryEntries: syncedEntries,
             },
           });
         }

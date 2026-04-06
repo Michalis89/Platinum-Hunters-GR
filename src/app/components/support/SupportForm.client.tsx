@@ -376,7 +376,7 @@ export default function SupportForm({}: Readonly<{
   };
 
   return (
-    <div className="relative pb-10 pt-6 px-3 sm:px-4 md:pb-16 md:pt-8">
+    <div className="relative px-3 pb-10 pt-6 sm:px-4 md:pb-16 md:pt-8">
       <div className="relative mx-auto flex w-full max-w-screen-2xl flex-col gap-5 sm:gap-6">
         <section className="relative w-full overflow-hidden rounded-2xl border border-border/40 bg-card/30 px-6 py-7 text-center shadow-sm shadow-black/5 md:px-10 md:py-9">
           <div

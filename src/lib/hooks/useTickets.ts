@@ -120,37 +120,40 @@ export function useTickets<
     [buildQueryParams, filters],
   );
 
-  const fetchTickets = useCallback(async (signal?: AbortSignal) => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-      const response = await fetch(url, signal ? { signal } : undefined);
-      const payload = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(payload, errorMessage));
-      }
-
-      setTickets(mapData(payload));
-      setMeta(mapMeta(payload));
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
+  const fetchTickets = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!enabled) {
+        setLoading(false);
         return;
       }
-      setError(err instanceof Error ? err.message : errorMessage);
-    } finally {
-      if (!signal?.aborted) {
-        setLoading(false);
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const url = queryString ? `${endpoint}?${queryString}` : endpoint;
+        const response = await fetch(url, signal ? { signal } : undefined);
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(getErrorMessage(payload, errorMessage));
+        }
+
+        setTickets(mapData(payload));
+        setMeta(mapMeta(payload));
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
+        setError(err instanceof Error ? err.message : errorMessage);
+      } finally {
+        if (!signal?.aborted) {
+          setLoading(false);
+        }
       }
-    }
-  }, [enabled, endpoint, errorMessage, mapData, mapMeta, queryString]);
+    },
+    [enabled, endpoint, errorMessage, mapData, mapMeta, queryString],
+  );
 
   // Ref so that rapid manual loadTickets() calls abort the previous in-flight request,
   // matching the same behaviour as the useEffect path.

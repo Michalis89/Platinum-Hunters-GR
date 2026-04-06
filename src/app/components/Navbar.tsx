@@ -50,8 +50,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsMobileClient(
-      window.matchMedia('(max-width: 768px)').matches ||
-        window.matchMedia('(hover: none)').matches,
+      window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(hover: none)').matches,
     );
   }, []);
 
@@ -185,7 +184,15 @@ export default function Navbar() {
     } finally {
       setIsThemeSaving(false);
     }
-  }, [isThemeSaving, mutateSettings, setThemePreference, settings, shouldLoadSettings, theme, themePreference]);
+  }, [
+    isThemeSaving,
+    mutateSettings,
+    setThemePreference,
+    settings,
+    shouldLoadSettings,
+    theme,
+    themePreference,
+  ]);
 
   const handleLogout = async () => {
     await dispatch(logout());

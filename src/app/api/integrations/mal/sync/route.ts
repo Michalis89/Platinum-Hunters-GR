@@ -13,6 +13,7 @@ import {
   type MalAnimeListItem,
 } from '@/lib/integrations/mal';
 import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
+import { recomputeCategoryProfiles } from '@/lib/profile/recompute-category-profiles';
 
 type IntegrationRow = {
   user_id: string;
@@ -257,6 +258,9 @@ async function POSTHandler(req: Request) {
     // Recompute genre affinity after import
     if (userEntryPayload.length > 0) {
       void refreshGenreAffinity(supabase, session.user.id);
+      void recomputeCategoryProfiles(supabase, session.user.id, [syncCategory]).catch(error => {
+        console.warn('[MAL Sync] Derived profile recompute failed:', error);
+      });
     }
 
     const mediaInserted = uniqueMalItems.filter(item => !existingMalIds.has(item.node.id)).length;

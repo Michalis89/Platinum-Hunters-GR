@@ -37,9 +37,8 @@ async function GETHandler() {
     let adminUnreadCount = 0;
 
     if (canAccessAdminQueue) {
-      const { data: adminCountData, error: adminCountError } = await supabase.rpc(
-        'get_ticket_unread_count',
-      );
+      const { data: adminCountData, error: adminCountError } =
+        await supabase.rpc('get_ticket_unread_count');
 
       if (adminCountError) {
         console.error('Ticket notifications summary admin unread error:', adminCountError);

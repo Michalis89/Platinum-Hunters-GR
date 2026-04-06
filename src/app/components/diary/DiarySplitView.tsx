@@ -17,7 +17,9 @@ type DiarySplitViewProps = {
   onSyncOfflineDrafts?: () => Promise<number>;
   onSelectEntry: (entryId: string) => void;
   onCreateNew: () => void;
-  onUpdateDraft: (partial: Partial<Pick<DiaryEntryDraft, 'title' | 'content' | 'mood' | 'entry_date'>>) => void;
+  onUpdateDraft: (
+    partial: Partial<Pick<DiaryEntryDraft, 'title' | 'content' | 'mood' | 'entry_date'>>,
+  ) => void;
   onDeleteEntry: (entryId: string) => Promise<void>;
 };
 
@@ -47,11 +49,7 @@ export function DiarySplitView({
     return () => mediaQuery.removeEventListener('change', update);
   }, []);
 
-  useEffect(() => {
-    if (isDesktop) {
-      setMobileMode('list');
-    }
-  }, [isDesktop]);
+  const effectiveMobileMode: 'list' | 'editor' = isDesktop ? 'list' : mobileMode;
 
   const handleSelectEntry = useCallback(
     (entryId: string) => {
@@ -75,7 +73,7 @@ export function DiarySplitView({
       <aside
         className={[
           'min-h-0 lg:h-full lg:overflow-y-auto',
-          !isDesktop && mobileMode === 'editor' ? 'hidden' : 'block',
+          !isDesktop && effectiveMobileMode === 'editor' ? 'hidden' : 'block',
         ].join(' ')}
       >
         <DiaryEntryListPane
@@ -88,7 +86,7 @@ export function DiarySplitView({
         />
       </aside>
 
-      <div className="hidden min-h-0 lg:h-full lg:block">
+      <div className="hidden min-h-0 lg:block lg:h-full">
         <DiaryEditorPane
           entry={selectedEntry}
           saveStatus={saveStatus}
@@ -100,7 +98,7 @@ export function DiarySplitView({
         />
       </div>
 
-      {!isDesktop && mobileMode === 'editor' ? (
+      {!isDesktop && effectiveMobileMode === 'editor' ? (
         <div className="fixed inset-0 top-16 z-40 overflow-y-auto bg-[hsl(var(--surface-base))] px-3 pb-6 pt-3 sm:px-4 sm:pb-8 sm:pt-4">
           <DiaryEditorPane
             entry={selectedEntry}

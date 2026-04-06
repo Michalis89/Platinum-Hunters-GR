@@ -21,10 +21,7 @@ function bytesToBase64(bytes: Uint8Array): string {
 }
 
 function base64ToBytes(base64: string): Uint8Array {
-  const normalized = base64
-    .trim()
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const normalized = base64.trim().replace(/-/g, '+').replace(/_/g, '/');
   const remainder = normalized.length % 4;
   const padded = remainder === 0 ? normalized : `${normalized}${'='.repeat(4 - remainder)}`;
   const binary = atob(padded);

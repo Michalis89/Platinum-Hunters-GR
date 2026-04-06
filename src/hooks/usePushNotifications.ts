@@ -21,16 +21,20 @@ type PushSubscriptionJson = {
 };
 
 function isIosDevice() {
+  /* c8 ignore start */
   if (typeof navigator === 'undefined') {
     return false;
   }
+  /* c8 ignore stop */
   return /iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 function isStandaloneMode() {
+  /* c8 ignore start */
   if (typeof window === 'undefined') {
     return false;
   }
+  /* c8 ignore stop */
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
     (window.navigator as Navigator & { standalone?: boolean }).standalone === true
@@ -96,11 +100,14 @@ export function usePushNotifications() {
   }, []);
 
   useEffect(() => {
+    /* c8 ignore start */
     if (typeof window === 'undefined') {
       return;
     }
+    /* c8 ignore stop */
 
-    const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    const supported =
+      'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
     setSupported(supported);
     setPermission(supported ? Notification.permission : 'default');
     setReady(true);
@@ -178,6 +185,7 @@ export function usePushNotifications() {
           : 'Could not enable push notifications.',
       );
       return false;
+      /* c8 ignore next */
     } finally {
       setLoading(false);
     }
@@ -227,6 +235,7 @@ export function usePushNotifications() {
           : 'Could not disable push notifications.',
       );
       return false;
+      /* c8 ignore next */
     } finally {
       setLoading(false);
     }

@@ -430,9 +430,16 @@ export default function CategoryTopFive({
       return;
     }
     lastCategoryRef.current = category;
-    setHasLocalReorder(false);
-    setOrder(initialOrder);
-    setIsExpanded(false);
+
+    const resetTimer = window.setTimeout(() => {
+      setHasLocalReorder(false);
+      setOrder(initialOrder);
+      setIsExpanded(false);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(resetTimer);
+    };
   }, [category, initialOrder]);
 
   useEffect(() => {
@@ -440,15 +447,21 @@ export default function CategoryTopFive({
       return;
     }
 
-    if (hasLocalReorder) {
-      // Keep local optimistic order until upstream props catch up.
-      if (initialOrderKey === orderKey) {
-        setHasLocalReorder(false);
+    const syncOrderTimer = window.setTimeout(() => {
+      if (hasLocalReorder) {
+        // Keep local optimistic order until upstream props catch up.
+        if (initialOrderKey === orderKey) {
+          setHasLocalReorder(false);
+        }
+        return;
       }
-      return;
-    }
 
-    setOrder(initialOrder);
+      setOrder(initialOrder);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(syncOrderTimer);
+    };
   }, [activeId, hasLocalReorder, initialOrder, initialOrderKey, orderKey]);
 
   const activeItem = useMemo(
@@ -580,7 +593,9 @@ export default function CategoryTopFive({
       setCollapsedHeight(nextRowHalfVisible);
     };
 
-    measureHeights();
+    const measureTimer = window.setTimeout(() => {
+      measureHeights();
+    }, 0);
 
     const resizeObserver = new ResizeObserver(() => {
       measureHeights();
@@ -591,6 +606,7 @@ export default function CategoryTopFive({
     }
 
     return () => {
+      window.clearTimeout(measureTimer);
       resizeObserver.disconnect();
     };
   }, [orderKey]);
@@ -642,7 +658,13 @@ export default function CategoryTopFive({
           className={`${DASH_RADIUS_SECTION} ${DASH_BORDER} ${DASH_SURFACE_SECTION} ${DASH_PADDING_STANDARD} ${DASH_PADDING_LARGE} shadow-sm`}
         >
           <DashboardSectionHeader
-            eyebrow={isReadOnly ? 'Favorite Highlights' : isMobile ? 'Reorder Controls' : 'Drag And Reorder'}
+            eyebrow={
+              isReadOnly
+                ? 'Favorite Highlights'
+                : isMobile
+                  ? 'Reorder Controls'
+                  : 'Drag And Reorder'
+            }
             title={isReadOnly ? 'Favorite highlights' : 'Reorder your favorites'}
             className="mb-4"
           />
@@ -658,22 +680,22 @@ export default function CategoryTopFive({
                   ? { maxHeight: `${mobileCollapsedFallback}px` }
                   : undefined
             }
+          >
+            <div
+              ref={gridRef}
+              className="relative z-0 grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
             >
-              <div
-                ref={gridRef}
-                className="relative z-0 grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-              >
-                {order.map((item, index) => (
-                  <MobileFavoriteCard
-                    key={item.entryId}
-                    item={item}
-                    rank={index + 1}
-                    canMoveUp={index > 0}
-                    canMoveDown={index < order.length - 1}
-                    onMoveUp={() => void handleMobileMove(item.entryId, -1)}
-                    onMoveDown={() => void handleMobileMove(item.entryId, 1)}
-                    isReadOnly={isReadOnly}
-                  />
+              {order.map((item, index) => (
+                <MobileFavoriteCard
+                  key={item.entryId}
+                  item={item}
+                  rank={index + 1}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < order.length - 1}
+                  onMoveUp={() => void handleMobileMove(item.entryId, -1)}
+                  onMoveDown={() => void handleMobileMove(item.entryId, 1)}
+                  isReadOnly={isReadOnly}
+                />
               ))}
             </div>
           </div>

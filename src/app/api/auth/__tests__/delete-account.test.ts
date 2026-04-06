@@ -8,6 +8,9 @@ const mockEq = jest.fn();
 const mockDelete = jest.fn(() => ({ eq: mockEq }));
 const mockFrom = jest.fn(() => ({ delete: mockDelete }));
 const mockDeleteUser = jest.fn();
+const mockRequireAuth = jest.fn();
+const mockRateLimit = jest.fn();
+const mockRateLimitHeaders = jest.fn();
 
 const mockSupabase = {
   auth: {
@@ -33,15 +36,13 @@ jest.mock('@/lib/supabase-server', () => ({
 }));
 
 jest.mock('@/lib/api/auth', () => ({
-  requireAuth: jest.fn().mockResolvedValue({
-    user: { id: 'user-123', email: 'user@example.com' },
-  }),
+  requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
   UnauthorizedError: class UnauthorizedError extends Error {},
 }));
 
 jest.mock('@/lib/rate-limit', () => ({
-  rateLimit: jest.fn().mockResolvedValue({ success: true }),
-  rateLimitHeaders: jest.fn().mockReturnValue({}),
+  rateLimit: (...args: unknown[]) => mockRateLimit(...args),
+  rateLimitHeaders: (...args: unknown[]) => mockRateLimitHeaders(...args),
 }));
 
 jest.mock('@/lib/observability/withApiRoute', () => ({
@@ -51,6 +52,11 @@ jest.mock('@/lib/observability/withApiRoute', () => ({
 describe('POST /api/auth/delete-account', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRequireAuth.mockResolvedValue({
+      user: { id: 'user-123', email: 'user@example.com' },
+    });
+    mockRateLimit.mockResolvedValue({ success: true });
+    mockRateLimitHeaders.mockReturnValue({});
     mockSignInWithPassword.mockResolvedValue({ error: null });
     mockDeleteUser.mockResolvedValue({ error: null });
     mockEq.mockResolvedValue({ error: null });
@@ -114,6 +120,97 @@ describe('POST /api/auth/delete-account', () => {
       'User profile deletion error (auth already deleted):',
       expect.any(Error),
     );
+
+    errorSpy.mockRestore();
+  });
+
+  it('returns 429 when rate limit blocks request', async () => {
+    mockRateLimit.mockResolvedValueOnce({ success: false, limit: 1, remaining: 0, reset: 123 });
+    mockRateLimitHeaders.mockReturnValueOnce({ 'X-RateLimit-Remaining': '0' });
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+
+    const res = await POST(makeRequest());
+    const body = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(body).toEqual({ error: 'Too many attempts. Please try again later.' });
+    expect(mockRateLimitHeaders).toHaveBeenCalled();
+  });
+
+  it('returns 400 when password is missing or invalid', async () => {
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+
+    const noPasswordRes = await POST(
+      new Request('http://localhost/api/auth/delete-account', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    );
+    expect(noPasswordRes.status).toBe(400);
+
+    const invalidPasswordRes = await POST(
+      new Request('http://localhost/api/auth/delete-account', {
+        method: 'POST',
+        body: JSON.stringify({ password: 123 }),
+      }),
+    );
+    expect(invalidPasswordRes.status).toBe(400);
+  });
+
+  it('returns 400 when request body is invalid json', async () => {
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+    const res = await POST(
+      new Request('http://localhost/api/auth/delete-account', {
+        method: 'POST',
+        body: '{',
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when authenticated user has no email', async () => {
+    mockRequireAuth.mockResolvedValueOnce({ user: { id: 'user-123', email: undefined } });
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 401 when password verification fails', async () => {
+    mockSignInWithPassword.mockResolvedValueOnce({ error: { message: 'bad creds' } });
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(401);
+  });
+
+  it('still returns 200 when signOut throws warning', async () => {
+    mockSignOut.mockRejectedValueOnce(new Error('sign out failed'));
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(200);
+    expect(warnSpy).toHaveBeenCalledWith('SignOut warning (continuing anyway):', expect.any(Error));
+
+    warnSpy.mockRestore();
+  });
+
+  it('returns unauthorized response when requireAuth throws UnauthorizedError', async () => {
+    const { UnauthorizedError } = await import('@/lib/api/auth');
+    mockRequireAuth.mockRejectedValueOnce(new UnauthorizedError());
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(401);
+  });
+
+  it('returns internal error response for unexpected failures', async () => {
+    mockRateLimit.mockRejectedValueOnce(new Error('boom'));
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { POST } = await import('@/app/api/auth/delete-account/route');
+
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(500);
+    expect(errorSpy).toHaveBeenCalledWith('Delete account error:', expect.any(Error));
 
     errorSpy.mockRestore();
   });

@@ -63,9 +63,15 @@ describe('useFetch – refetch AbortController', () => {
     });
 
     // Trigger 3 rapid refetches
-    act(() => { result.current.refetch(); });
-    act(() => { result.current.refetch(); });
-    act(() => { result.current.refetch(); });
+    act(() => {
+      result.current.refetch();
+    });
+    act(() => {
+      result.current.refetch();
+    });
+    act(() => {
+      result.current.refetch();
+    });
 
     // There should be several pending fetches; resolve only the last one
     // The first two should have been aborted by successive refetch() calls.

@@ -24,7 +24,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useLocale } from '@/context/LocaleContext';
 
 const SITE_URL =
@@ -111,7 +117,9 @@ export default function ShareLinkCard() {
         body: JSON.stringify({ expiresInDays }),
       });
       const data = (await res.json()) as { token?: string; expiresAt?: string | null };
-      if (!res.ok || !data.token) throw new Error();
+      if (!res.ok || !data.token) {
+        throw new Error();
+      }
       setToken(data.token);
       setExpiresAt(data.expiresAt ?? null);
       toast.success('Share link generated');
@@ -126,7 +134,9 @@ export default function ShareLinkCard() {
     setIsBusy(true);
     try {
       const res = await fetch('/api/me/share-token', { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        throw new Error();
+      }
       setToken(null);
       setExpiresAt(null);
       toast.success('Share link revoked');
@@ -138,7 +148,9 @@ export default function ShareLinkCard() {
   };
 
   const handleCopy = async () => {
-    if (!shareUrl) return;
+    if (!shareUrl) {
+      return;
+    }
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     toast.success('Link copied to clipboard');
@@ -166,13 +178,17 @@ export default function ShareLinkCard() {
             <div className="grid gap-3 md:grid-cols-4">
               <div className="space-y-1.5">
                 <Label htmlFor="share-view">View</Label>
-                <Select modal={false} value={view} onValueChange={value => setView(value as ShareView)}>
+                <Select
+                  modal={false}
+                  value={view}
+                  onValueChange={value => setView(value as ShareView)}
+                >
                   <SelectTrigger id="share-view" className="h-10 !min-h-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent
                     portalContainer={selectPortalContainer ?? undefined}
-                    className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                    className="data-[state=closed]:animate-none data-[state=open]:animate-none"
                   >
                     <SelectItem value="backlog">Backlog</SelectItem>
                     <SelectItem value="dashboard">Dashboard</SelectItem>
@@ -182,13 +198,17 @@ export default function ShareLinkCard() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="share-expiry">Expires</Label>
-                <Select modal={false} value={expiry} onValueChange={value => setExpiry(value as ShareExpiry)}>
+                <Select
+                  modal={false}
+                  value={expiry}
+                  onValueChange={value => setExpiry(value as ShareExpiry)}
+                >
                   <SelectTrigger id="share-expiry" className="h-10 !min-h-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent
                     portalContainer={selectPortalContainer ?? undefined}
-                    className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                    className="data-[state=closed]:animate-none data-[state=open]:animate-none"
                   >
                     <SelectItem value="never">Never</SelectItem>
                     <SelectItem value="7">7 days</SelectItem>
@@ -201,13 +221,17 @@ export default function ShareLinkCard() {
                 <>
                   <div className="space-y-1.5">
                     <Label htmlFor="share-category">Category</Label>
-                    <Select modal={false} value={category} onValueChange={value => setCategory(value as ShareCategory)}>
+                    <Select
+                      modal={false}
+                      value={category}
+                      onValueChange={value => setCategory(value as ShareCategory)}
+                    >
                       <SelectTrigger id="share-category" className="h-10 !min-h-0">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent
                         portalContainer={selectPortalContainer ?? undefined}
-                        className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                        className="data-[state=closed]:animate-none data-[state=open]:animate-none"
                       >
                         <SelectItem value="games">Games</SelectItem>
                         <SelectItem value="anime">Anime</SelectItem>
@@ -221,13 +245,17 @@ export default function ShareLinkCard() {
 
                   <div className="space-y-1.5">
                     <Label htmlFor="share-status">Status</Label>
-                    <Select modal={false} value={status} onValueChange={value => setStatus(value as ShareStatus)}>
+                    <Select
+                      modal={false}
+                      value={status}
+                      onValueChange={value => setStatus(value as ShareStatus)}
+                    >
                       <SelectTrigger id="share-status" className="h-10 !min-h-0">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent
                         portalContainer={selectPortalContainer ?? undefined}
-                        className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                        className="data-[state=closed]:animate-none data-[state=open]:animate-none"
                       >
                         <SelectItem value="all">All</SelectItem>
                         <SelectItem value="planned">Planned</SelectItem>

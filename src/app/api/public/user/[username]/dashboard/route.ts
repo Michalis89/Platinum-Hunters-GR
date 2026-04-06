@@ -7,10 +7,7 @@ import {
   type DashboardCategoryKey,
 } from '@/lib/dashboard/category-data';
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ username: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ username: string }> }) {
   try {
     const { username } = await params;
     const supabase = getSupabaseServer();
@@ -43,7 +40,8 @@ export async function GET(
       (category): category is DashboardCategoryKey =>
         DASHBOARD_TAB_CATEGORIES.includes(category as DashboardCategoryKey),
     );
-    const mediaCategories = requestedCategories.length > 0 ? requestedCategories : fallbackCategories;
+    const mediaCategories =
+      requestedCategories.length > 0 ? requestedCategories : fallbackCategories;
     const sections = await fetchCategoryDashboardData(supabase, user.id, mediaCategories);
 
     return NextResponse.json({

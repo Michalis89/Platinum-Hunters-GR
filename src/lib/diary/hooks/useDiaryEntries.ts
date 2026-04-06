@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
-import type { DiaryEntryDecrypted, DiaryEntryDraft, DiaryEntryEncryptedRow } from '@/lib/diary/types';
+import type {
+  DiaryEntryDecrypted,
+  DiaryEntryDraft,
+  DiaryEntryEncryptedRow,
+} from '@/lib/diary/types';
 import { useDiaryCrypto } from '@/lib/diary/hooks/useDiaryCrypto';
 import {
   deleteOfflineDraft,
@@ -41,7 +45,10 @@ function normalizeEntry(row: DiaryEntryEncryptedRow, decoded: { title: string; c
 }
 
 function hasMeaningfulContent(entry: Pick<DiaryEntryDecrypted, 'title' | 'content'>) {
-  const plainContent = entry.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const plainContent = entry.content
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   return Boolean(entry.title.trim() || plainContent);
 }
 
@@ -167,7 +174,8 @@ export function useDiaryEntries() {
 
       const decrypted = decryptedResults
         .filter(
-          (result): result is PromiseFulfilledResult<DiaryEntryDecrypted> => result.status === 'fulfilled',
+          (result): result is PromiseFulfilledResult<DiaryEntryDecrypted> =>
+            result.status === 'fulfilled',
         )
         .map(result => result.value);
       const failedCount = decryptedResults.length - decrypted.length;
@@ -581,61 +589,64 @@ export function useDiaryEntries() {
     [isOnline, scheduleAutosave, selectedEntryId],
   );
 
-  const deleteEntry = useCallback(async (entryId: string) => {
-    if (autosaveTimeoutRef.current) {
-      clearTimeout(autosaveTimeoutRef.current);
-      autosaveTimeoutRef.current = null;
-    }
-
-    const previousEntries = entriesRef.current;
-    const previousSelection = selectedEntryId;
-
-    const remainingEntries = previousEntries.filter(entry => entry.id !== entryId);
-    setEntries(remainingEntries);
-    setSelectedEntryId(current => {
-      if (current !== entryId) {
-        return current;
+  const deleteEntry = useCallback(
+    async (entryId: string) => {
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+        autosaveTimeoutRef.current = null;
       }
-      return remainingEntries[0]?.id ?? null;
-    });
-    setSaveStatus('idle');
-    void deleteOfflineDraft(entryId).catch(() => undefined);
-    setOfflineDraftIds(prev => {
-      if (!prev.has(entryId)) {
-        return prev;
-      }
-      const next = new Set(prev);
-      next.delete(entryId);
-      return next;
-    });
 
-    if (!persistedIdsRef.current.has(entryId)) {
-      return;
-    }
+      const previousEntries = entriesRef.current;
+      const previousSelection = selectedEntryId;
 
-    setIsSaving(true);
-    setError(null);
-
-    const { error: deleteError } = await supabase
-      .from('diary_entries')
-      .delete()
-      .eq('id', entryId);
-
-    if (deleteError) {
-      setEntries(previousEntries);
-      setSelectedEntryId(previousSelection);
-      setError('Failed to delete diary entry');
-      setSaveStatus('error');
-    } else {
-      setPersistedEntryIds(prev => {
+      const remainingEntries = previousEntries.filter(entry => entry.id !== entryId);
+      setEntries(remainingEntries);
+      setSelectedEntryId(current => {
+        if (current !== entryId) {
+          return current;
+        }
+        return remainingEntries[0]?.id ?? null;
+      });
+      setSaveStatus('idle');
+      void deleteOfflineDraft(entryId).catch(() => undefined);
+      setOfflineDraftIds(prev => {
+        if (!prev.has(entryId)) {
+          return prev;
+        }
         const next = new Set(prev);
         next.delete(entryId);
         return next;
       });
-    }
 
-    setIsSaving(false);
-  }, [selectedEntryId]);
+      if (!persistedIdsRef.current.has(entryId)) {
+        return;
+      }
+
+      setIsSaving(true);
+      setError(null);
+
+      const { error: deleteError } = await supabase
+        .from('diary_entries')
+        .delete()
+        .eq('id', entryId);
+
+      if (deleteError) {
+        setEntries(previousEntries);
+        setSelectedEntryId(previousSelection);
+        setError('Failed to delete diary entry');
+        setSaveStatus('error');
+      } else {
+        setPersistedEntryIds(prev => {
+          const next = new Set(prev);
+          next.delete(entryId);
+          return next;
+        });
+      }
+
+      setIsSaving(false);
+    },
+    [selectedEntryId],
+  );
 
   const resetDiary = useCallback(async () => {
     if (autosaveTimeoutRef.current) {

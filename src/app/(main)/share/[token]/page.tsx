@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import getSupabaseServer from '@/lib/supabase-server';
 import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
@@ -22,11 +21,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const supabase = getSupabaseServer();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: tokenRow } = await (supabase as any)
+  const { data: tokenRow } = (await (supabase as any)
     .from('share_tokens')
     .select('user_id,expires_at')
     .eq('token', token)
-    .maybeSingle() as { data: { user_id: string; expires_at: string | null } | null };
+    .maybeSingle()) as { data: { user_id: string; expires_at: string | null } | null };
 
   if (!tokenRow || isTokenExpired(tokenRow.expires_at)) {
     return { title: 'Invalid Share Link | Hobbistas' };
@@ -79,11 +78,11 @@ export default async function ShareTokenPage({ params, searchParams }: PageProps
     const supabase = getSupabaseServer();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: tokenRow, error: tokenError } = await (supabase as any)
+    const { data: tokenRow, error: tokenError } = (await (supabase as any)
       .from('share_tokens')
       .select('user_id,expires_at')
       .eq('token', token)
-      .maybeSingle() as {
+      .maybeSingle()) as {
       data: { user_id: string; expires_at: string | null } | null;
       error: { message?: string } | null;
     };

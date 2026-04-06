@@ -121,14 +121,18 @@ export function DiaryUnlockDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lock className="h-4 w-4" />
-            {isInitializing ? 'Loading diary security' : isSetupMode ? 'Set diary passphrase' : 'Unlock diary'}
+            {isInitializing
+              ? 'Loading diary security'
+              : isSetupMode
+                ? 'Set diary passphrase'
+                : 'Unlock diary'}
           </DialogTitle>
           <DialogDescription>
             {isInitializing
               ? 'Preparing encryption metadata...'
               : isSetupMode
-              ? 'Passphrase is not stored. We cannot recover it. Keep it in a password manager before continuing.'
-              : 'Enter your diary passphrase to derive your local decryption key. Passphrase is not stored and cannot be recovered.'}
+                ? 'Passphrase is not stored. We cannot recover it. Keep it in a password manager before continuing.'
+                : 'Enter your diary passphrase to derive your local decryption key. Passphrase is not stored and cannot be recovered.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -140,67 +144,67 @@ export function DiaryUnlockDialog({
           </div>
         ) : (
           <div className="space-y-3 py-2">
-          <Input
-            type="password"
-            placeholder="Passphrase"
-            value={passphrase}
-            onChange={event => setPassphrase(event.target.value)}
-            autoFocus
-          />
-          {isSetupMode ? (
             <Input
               type="password"
-              placeholder="Confirm passphrase"
-              value={confirmPassphrase}
-              onChange={event => setConfirmPassphrase(event.target.value)}
+              placeholder="Passphrase"
+              value={passphrase}
+              onChange={event => setPassphrase(event.target.value)}
+              autoFocus
             />
-          ) : null}
-          {isSetupMode ? (
-            <label className="flex items-start gap-2 text-xs text-muted-foreground">
-              <input
-                type="checkbox"
-                className="mt-0.5"
-                checked={hasAcknowledgedRisk}
-                onChange={event => setHasAcknowledgedRisk(event.target.checked)}
+            {isSetupMode ? (
+              <Input
+                type="password"
+                placeholder="Confirm passphrase"
+                value={confirmPassphrase}
+                onChange={event => setConfirmPassphrase(event.target.value)}
               />
-              <span>
-                I understand this passphrase cannot be recovered. If I lose it, existing diary entries are
-                unrecoverable. If I reset and set a new passphrase, existing entries are deleted
-                automatically.
-              </span>
-            </label>
-          ) : null}
-          {!isSetupMode ? (
-            <AlertDialog open={isResetDialogOpen} onOpenChange={setResetDialogOpen}>
-              <AlertDialogTrigger asChild>
-                <Button type="button" variant="ghost" size="sm" className="px-0 text-destructive">
-                  Forgot passphrase? Reset diary encryption
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Reset diary encryption?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This permanently deletes all encrypted diary entries and resets your encryption metadata.
-                    You will set a new passphrase after reset.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isResetting}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="destructive"
-                    disabled={isResetting}
-                    onClick={() => void handleReset()}
-                  >
-                    {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Reset diary encryption
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : null}
-          {localNotice ? <p className="text-xs text-emerald-600">{localNotice}</p> : null}
-          {localError ? <p className="text-xs text-destructive">{localError}</p> : null}
+            ) : null}
+            {isSetupMode ? (
+              <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={hasAcknowledgedRisk}
+                  onChange={event => setHasAcknowledgedRisk(event.target.checked)}
+                />
+                <span>
+                  I understand this passphrase cannot be recovered. If I lose it, existing diary
+                  entries are unrecoverable. If I reset and set a new passphrase, existing entries
+                  are deleted automatically.
+                </span>
+              </label>
+            ) : null}
+            {!isSetupMode ? (
+              <AlertDialog open={isResetDialogOpen} onOpenChange={setResetDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" variant="ghost" size="sm" className="px-0 text-destructive">
+                    Forgot passphrase? Reset diary encryption
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset diary encryption?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This permanently deletes all encrypted diary entries and resets your
+                      encryption metadata. You will set a new passphrase after reset.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isResetting}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      variant="destructive"
+                      disabled={isResetting}
+                      onClick={() => void handleReset()}
+                    >
+                      {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      Reset diary encryption
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : null}
+            {localNotice ? <p className="text-xs text-emerald-600">{localNotice}</p> : null}
+            {localError ? <p className="text-xs text-destructive">{localError}</p> : null}
           </div>
         )}
 
@@ -210,7 +214,9 @@ export function DiaryUnlockDialog({
             onClick={() => void handleUnlock()}
             disabled={isInitializing || isUnlocking || isResetting}
           >
-            {isInitializing || isUnlocking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isInitializing || isUnlocking ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
             {isInitializing ? 'Loading...' : isSetupMode ? 'Set and unlock' : 'Unlock'}
           </Button>
         </DialogFooter>

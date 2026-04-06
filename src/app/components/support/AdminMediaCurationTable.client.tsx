@@ -582,9 +582,10 @@ export default function AdminMediaCurationTable() {
         }),
       });
 
-      const payload = (await response.json().catch(() => null)) as
-        | { data?: TmdbImportResult; error?: string }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        data?: TmdbImportResult;
+        error?: string;
+      } | null;
 
       if (!response.ok || !payload?.data) {
         throw new Error(payload?.error || 'TMDB import failed');
@@ -620,9 +621,10 @@ export default function AdminMediaCurationTable() {
         }),
       });
 
-      const payload = (await response.json().catch(() => null)) as
-        | { data?: MalImportResult; error?: string }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        data?: MalImportResult;
+        error?: string;
+      } | null;
 
       if (!response.ok || !payload?.data) {
         throw new Error(payload?.error || 'MAL import failed');
@@ -658,9 +660,10 @@ export default function AdminMediaCurationTable() {
         }),
       });
 
-      const payload = (await response.json().catch(() => null)) as
-        | { data?: BooksImportResult; error?: string }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        data?: BooksImportResult;
+        error?: string;
+      } | null;
 
       if (!response.ok || !payload?.data) {
         throw new Error(payload?.error || 'Books import failed');
@@ -694,9 +697,10 @@ export default function AdminMediaCurationTable() {
         }),
       });
 
-      const payload = (await response.json().catch(() => null)) as
-        | { data?: IgdbImportResult; error?: string }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        data?: IgdbImportResult;
+        error?: string;
+      } | null;
 
       if (!response.ok || !payload?.data) {
         throw new Error(payload?.error || 'IGDB import failed');
@@ -888,9 +892,7 @@ export default function AdminMediaCurationTable() {
               value={booksImportSubject}
               onChange={value =>
                 setBooksImportSubject(
-                  BOOKS_SUBJECT_OPTIONS.includes(
-                    value as (typeof BOOKS_SUBJECT_OPTIONS)[number],
-                  )
+                  BOOKS_SUBJECT_OPTIONS.includes(value as (typeof BOOKS_SUBJECT_OPTIONS)[number])
                     ? (value as (typeof BOOKS_SUBJECT_OPTIONS)[number])
                     : 'subject:fiction',
                 )
@@ -928,11 +930,7 @@ export default function AdminMediaCurationTable() {
               />
             </div>
             <div className="flex items-end">
-              <Button
-                type="button"
-                onClick={importBooksCatalog}
-                disabled={isImportingBooksCatalog}
-              >
+              <Button type="button" onClick={importBooksCatalog} disabled={isImportingBooksCatalog}>
                 {isImportingBooksCatalog ? 'Importing...' : 'Import from Google Books'}
               </Button>
             </div>

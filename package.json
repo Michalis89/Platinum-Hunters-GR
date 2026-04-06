@@ -1,6 +1,6 @@
 {
   "name": "hobbistas",
-  "version": "1.6.14",
+  "version": "1.6.15",
   "private": true,
   "type": "module",
   "scripts": {
@@ -132,6 +132,13 @@
     "minimatch": "^10.2.1",
     "ajv": "^8.18.0",
     "serialize-javascript": "^7.0.5",
-    "terser-webpack-plugin": "^5.3.17"
+    "terser-webpack-plugin": "^5.3.17",
+    "@eslint/eslintrc": {
+      "ajv": "^6.12.4",
+      "minimatch": "^3.1.2"
+    },
+    "eslint": {
+      "ajv": "^6.12.4"
+    }
   }
 }

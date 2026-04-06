@@ -137,47 +137,47 @@ export default async function AboutPage() {
     <>
       <StructuredData data={getBreadcrumbStructuredData(breadcrumb)} />
       <main className="pb-14 md:pb-20">
-          <AboutHero isAuthenticated={isAuthenticated} />
+        <AboutHero isAuthenticated={isAuthenticated} />
 
+        <AboutSectionShell>
+          <AboutFeatures />
+        </AboutSectionShell>
+
+        <div className="my-4 md:my-6">
+          <AboutSectionShell maxWidthClass="max-w-6xl">
+            <AboutHowItWorks />
+          </AboutSectionShell>
+        </div>
+
+        <AboutSectionShell maxWidthClass="max-w-6xl">
+          <AboutPhilosophy />
+        </AboutSectionShell>
+
+        <div className="my-4 md:my-6">
           <AboutSectionShell>
-            <AboutFeatures />
+            <AboutStatsLoader />
           </AboutSectionShell>
+        </div>
 
-          <div className="my-4 md:my-6">
-            <AboutSectionShell maxWidthClass="max-w-6xl">
-              <AboutHowItWorks />
-            </AboutSectionShell>
-          </div>
+        <AboutSectionShell maxWidthClass="max-w-6xl">
+          <AboutRoadmap />
+        </AboutSectionShell>
 
+        <div className="my-4 md:my-6">
           <AboutSectionShell maxWidthClass="max-w-6xl">
-            <AboutPhilosophy />
+            <AboutPeople team={team} />
           </AboutSectionShell>
+        </div>
 
-          <div className="my-4 md:my-6">
-            <AboutSectionShell>
-              <AboutStatsLoader />
-            </AboutSectionShell>
-          </div>
+        <AboutSectionShell maxWidthClass="max-w-4xl">
+          <AboutFAQ />
+        </AboutSectionShell>
 
-          <AboutSectionShell maxWidthClass="max-w-6xl">
-            <AboutRoadmap />
+        <div className="mt-4 md:mt-6">
+          <AboutSectionShell maxWidthClass="max-w-5xl">
+            <AboutFinalCTA isAuthenticated={isAuthenticated} />
           </AboutSectionShell>
-
-          <div className="my-4 md:my-6">
-            <AboutSectionShell maxWidthClass="max-w-6xl">
-              <AboutPeople team={team} />
-            </AboutSectionShell>
-          </div>
-
-          <AboutSectionShell maxWidthClass="max-w-4xl">
-            <AboutFAQ />
-          </AboutSectionShell>
-
-          <div className="mt-4 md:mt-6">
-            <AboutSectionShell maxWidthClass="max-w-5xl">
-              <AboutFinalCTA isAuthenticated={isAuthenticated} />
-            </AboutSectionShell>
-          </div>
+        </div>
       </main>
     </>
   );

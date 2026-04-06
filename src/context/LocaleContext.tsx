@@ -18,7 +18,9 @@ export function LocaleProvider({ children }: Readonly<{ children: ReactNode }>) 
   const locale = useBrowserLocale();
 
   return (
-    <LocaleContext.Provider value={{ locale, hasProvider: true }}>{children}</LocaleContext.Provider>
+    <LocaleContext.Provider value={{ locale, hasProvider: true }}>
+      {children}
+    </LocaleContext.Provider>
   );
 }
 

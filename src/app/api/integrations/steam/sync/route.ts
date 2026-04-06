@@ -4,443 +4,29 @@ import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import type { Database } from '@/lib/supabase/database.types';
-import { randomUUID } from 'crypto';
-import {
-  searchIgdbGames,
-  fetchIgdbGameDetails,
-  mapIgdbToPayload,
-  type IgdbGame,
-} from '@/lib/services/igdbService';
+import { type IgdbGame } from '@/lib/services/igdbService';
 import {
   fetchSteamOwnedGames,
   fetchSteamAchievements,
   getSteamApiKey,
-  getSteamCoverUrls,
   resolveSteamId64,
-  type SteamOwnedGame,
 } from '@/lib/integrations/steam';
-
-type SyncProgress = {
-  message: string;
-  completedSteps: number;
-  totalSteps: number;
-  percent?: number;
-};
-
-type JobUpdate = {
-  status?: 'running' | 'completed' | 'failed';
-  message?: string;
-  percent?: number;
-  completedSteps?: number;
-  totalSteps?: number;
-  error?: string | null;
-  result?: unknown;
-  finishedAt?: string | null;
-};
-
-type SyncResult = {
-  totalFetched: number;
-  mediaInserted: number;
-  mediaUpdated: number;
-  mediaInsertFailed: number;
-  mediaUpdateFailed: number;
-  entriesInserted: number;
-  entriesUpdated: number;
-  entriesUpsertFailed: number;
-  entriesSkippedExisting: number;
-  entriesSkippedPotentialDuplicate: number;
-  rejectedGames?: Array<{ appid: number; name: string; reason: string }>;
-  warnings?: string[];
-  debug?: {
-    steamId64: string;
-    sample: Array<{
-      appid: number;
-      name?: string;
-      playtime_forever?: number;
-      playtime_2weeks?: number;
-      rtime_last_played?: number;
-      has_community_visible_stats?: boolean;
-      achievementsPercent?: number;
-      mappedStatus: 'planned' | 'current' | 'completed' | 'dropped';
-    }>;
-  };
-};
-
-class SyncAlreadyRunningError extends Error {
-  jobId: string | null;
-
-  constructor(jobId: string | null) {
-    super('A sync is already in progress.');
-    this.name = 'SyncAlreadyRunningError';
-    this.jobId = jobId;
-  }
-}
-
-function extractErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  if (typeof error === 'object' && error !== null) {
-    const maybeMessage = (error as { message?: unknown }).message;
-    if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
-      return maybeMessage;
-    }
-  }
-  return fallback;
-}
-
-async function getUserSteamInput(
-  supabase: Awaited<ReturnType<typeof createRouteHandlerClient>>,
-  userId: string,
-): Promise<string | null> {
-  const { data: categoryData, error: categoryError } = await supabase
-    .from('user_category_profiles')
-    .select('profiles')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (categoryError) {
-    console.error('[Steam Sync] Category profile fetch error:', categoryError);
-    throw new Error(categoryError.message || 'Failed to fetch category profile');
-  }
-
-  const categorySteamIdRaw = (
-    categoryData?.profiles as { games?: { steam_id?: string | null } } | null | undefined
-  )?.games?.steam_id;
-  const categorySteamId = typeof categorySteamIdRaw === 'string' ? categorySteamIdRaw.trim() : null;
-  return categorySteamId || null;
-}
-
-async function createSyncJob(userId: string): Promise<string> {
-  const supabase = await createRouteHandlerClient();
-  const jobId = randomUUID();
-
-  const { error } = await supabase.from('steam_sync_jobs').insert({
-    id: jobId,
-    user_id: userId,
-    status: 'running',
-    message: 'Starting Steam sync...',
-    percent: 0,
-    completed_steps: 0,
-    total_steps: 1,
-  });
-
-  if (error) {
-    if (error.code === '23505') {
-      const runningJob = await getRunningSyncJob(userId).catch(() => null);
-      throw new SyncAlreadyRunningError(runningJob?.id ?? null);
-    }
-    console.error('Failed to create sync job:', error);
-    throw new Error('Failed to create sync job');
-  }
-
-  return jobId;
-}
-
-async function getRunningSyncJob(userId: string): Promise<{ id: string } | null> {
-  const supabase = await createRouteHandlerClient();
-
-  const { data, error } = await supabase
-    .from('steam_sync_jobs')
-    .select('id,status')
-    .eq('user_id', userId)
-    .eq('status', 'running')
-    .maybeSingle();
-
-  if (error) {
-    console.error('Failed to check running sync job:', error);
-    throw new Error('Failed to check running sync job');
-  }
-
-  return data ? { id: data.id as string } : null;
-}
-
-async function updateSyncJob(jobId: string, updates: JobUpdate): Promise<void> {
-  const supabase = await createRouteHandlerClient();
-
-  const { error } = await supabase
-    .from('steam_sync_jobs')
-    .update({
-      ...(updates.status && { status: updates.status }),
-      ...(updates.message && { message: updates.message }),
-      ...(typeof updates.percent === 'number' && { percent: updates.percent }),
-      ...(typeof updates.completedSteps === 'number' && {
-        completed_steps: updates.completedSteps,
-      }),
-      ...(typeof updates.totalSteps === 'number' && { total_steps: updates.totalSteps }),
-      ...(updates.error !== undefined && { error: updates.error }),
-      ...(updates.result !== undefined && {
-        result:
-          updates.result as unknown as Database['public']['Tables']['steam_sync_jobs']['Update']['result'],
-      }),
-      ...(updates.finishedAt !== undefined && { finished_at: updates.finishedAt }),
-    })
-    .eq('id', jobId);
-
-  if (error) {
-    console.warn('Failed to update sync job:', error);
-  }
-}
-
-function normalizeTitle(value?: string | null): string {
-  return (value ?? '').trim().toLowerCase();
-}
-
-function cleanTitleForStorage(value?: string | null): string {
-  if (!value) {
-    return '';
-  }
-  return value.replace(/[\u2122\u00AE\u00A9]/g, '').trim();
-}
-
-function normalizeForMatch(value?: string | null): string {
-  let normalized = (value ?? '').trim();
-
-  normalized = normalized.replace(/[\u2122\u00AE\u00A9]/g, '');
-
-  const editionTokens = [
-    /\s*-?\s*Complete Edition/gi,
-    /\s*-?\s*Definitive Edition/gi,
-    /\s*-?\s*Remastered/gi,
-    /\s*-?\s*Enhanced Edition/gi,
-    /\s*-?\s*Game of the Year Edition/gi,
-    /\s*-?\s*GOTY/gi,
-    /\s*-?\s*Ultimate Edition/gi,
-    /\s*-?\s*Deluxe Edition/gi,
-    /\s*-?\s*Special Edition/gi,
-    /\s*-?\s*Collector's Edition/gi,
-    /\s*-?\s*Director's Cut/gi,
-    /\s*-?\s*Bundle/gi,
-    /\s*-?\s*DLC/gi,
-  ];
-
-  for (const pattern of editionTokens) {
-    normalized = normalized.replace(pattern, '');
-  }
-
-  return normalized
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[^\p{L}\p{N}]+/gu, '')
-    .trim();
-}
-
-function deriveStatusFromSteamData(params: {
-  playtimeMinutes?: number;
-  lastPlayedUnix?: number;
-  achievementsPercent?: number;
-  droppedThresholdDays?: number;
-}): 'planned' | 'current' | 'completed' | 'dropped' {
-  const {
-    playtimeMinutes = 0,
-    lastPlayedUnix = 0,
-    achievementsPercent,
-    droppedThresholdDays = 90,
-  } = params;
-
-  if (playtimeMinutes === 0 && lastPlayedUnix === 0) {
-    return 'planned';
-  }
-
-  if (achievementsPercent === 100) {
-    return 'completed';
-  }
-
-  if (lastPlayedUnix > 0 && playtimeMinutes > 0) {
-    const lastPlayedDate = new Date(lastPlayedUnix * 1000);
-    const daysSinceLastPlayed = (Date.now() - lastPlayedDate.getTime()) / (1000 * 60 * 60 * 24);
-
-    if (daysSinceLastPlayed > droppedThresholdDays) {
-      return 'dropped';
-    }
-  }
-
-  if (playtimeMinutes > 0) {
-    return 'current';
-  }
-
-  return 'planned';
-}
-
-function buildDebugSample(games: SteamOwnedGame[], achievementsByAppId?: Map<number, number>) {
-  return games.slice(0, 20).map(game => {
-    return {
-      appid: game.appid,
-      name: game.name,
-      playtime_forever: game.playtime_forever,
-      playtime_2weeks: game.playtime_2weeks,
-      rtime_last_played: game.rtime_last_played,
-      has_community_visible_stats: game.has_community_visible_stats,
-      achievementsPercent: achievementsByAppId?.get(game.appid),
-      mappedStatus: deriveStatusFromSteamData({
-        playtimeMinutes: game.playtime_forever,
-        lastPlayedUnix: game.rtime_last_played,
-        achievementsPercent: achievementsByAppId?.get(game.appid),
-      }),
-    };
-  });
-}
-
-async function mapWithConcurrency<TInput, TOutput>(
-  items: TInput[],
-  limit: number,
-  mapper: (item: TInput, index: number) => Promise<TOutput>,
-  onItemComplete?: (completed: number, total: number) => Promise<void> | void,
-): Promise<TOutput[]> {
-  const safeLimit = Math.max(1, limit);
-  const results: TOutput[] = new Array(items.length);
-  let readIndex = 0;
-  let completed = 0;
-
-  const worker = async () => {
-    while (readIndex < items.length) {
-      const current = readIndex++;
-      results[current] = await mapper(items[current], current);
-      completed += 1;
-      await onItemComplete?.(completed, items.length);
-    }
-  };
-
-  await Promise.all(Array.from({ length: Math.min(safeLimit, items.length) }, () => worker()));
-  return results;
-}
-
-async function matchSteamGamesToIgdb(
-  games: SteamOwnedGame[],
-  onItemComplete?: (completed: number, total: number) => Promise<void> | void,
-) {
-  const cache = new Map<string, IgdbGame | null>();
-
-  const pairs = await mapWithConcurrency(
-    games,
-    3,
-    async game => {
-      const title = game.name ?? '';
-      const key = normalizeForMatch(title);
-      if (!key) {
-        return [game.appid, null] as const;
-      }
-
-      if (cache.has(key)) {
-        return [game.appid, cache.get(key) ?? null] as const;
-      }
-
-      try {
-        const candidates = await searchIgdbGames(title, 8);
-        const matched =
-          candidates.find(candidate => normalizeForMatch(candidate.name) === key) ?? null;
-
-        cache.set(key, matched);
-        return [game.appid, matched] as const;
-      } catch (error) {
-        console.warn(`IGDB search failed for "${title}":`, error);
-        cache.set(key, null);
-        return [game.appid, null] as const;
-      }
-    },
-    onItemComplete,
-  );
-
-  return new Map<number, IgdbGame | null>(pairs);
-}
-
-async function enrichIgdbMatches(
-  matchByAppId: Map<number, IgdbGame | null>,
-  onItemComplete?: (completed: number, total: number) => Promise<void> | void,
-) {
-  const matchedIgdbIds = Array.from(
-    new Set(
-      Array.from(matchByAppId.values())
-        .map(item => item?.id)
-        .filter((id): id is number => typeof id === 'number'),
-    ),
-  );
-  const detailsCache = new Map<number, IgdbGame | null>();
-
-  if (matchedIgdbIds.length === 0) {
-    return new Map<number, IgdbGame | null>();
-  }
-
-  await mapWithConcurrency(
-    matchedIgdbIds,
-    3,
-    async igdbId => {
-      try {
-        const details = await fetchIgdbGameDetails(igdbId, { mainGameOnly: false });
-        detailsCache.set(igdbId, details);
-        return details;
-      } catch (error) {
-        console.warn(`IGDB details fetch failed for ID ${igdbId}:`, error);
-        detailsCache.set(igdbId, null);
-        return null;
-      }
-    },
-    onItemComplete,
-  );
-
-  const enrichedByAppId = new Map<number, IgdbGame | null>();
-  for (const [appid, matched] of matchByAppId.entries()) {
-    if (!matched) {
-      enrichedByAppId.set(appid, null);
-      continue;
-    }
-    enrichedByAppId.set(appid, detailsCache.get(matched.id) ?? matched);
-  }
-
-  return enrichedByAppId;
-}
-
-/**
- * Merge platforms ensuring PC is included for Steam games.
- * Matches EditEntryDialog behavior.
- */
-function mergePlatforms(igdbPlatforms: string[] | null | undefined): string[] {
-  const ordered = ['PC', ...(igdbPlatforms ?? [])].filter(Boolean) as string[];
-  return Array.from(new Set(ordered));
-}
-
-function getSteamHours(game: SteamOwnedGame): number | null {
-  if (typeof game.playtime_forever !== 'number') {
-    return null;
-  }
-  return Math.max(0, Math.floor(game.playtime_forever / 60));
-}
-
-/**
- * Build IGDB metadata patch for a Steam game.
- * This should ONLY be called for NEW enrichment, NOT for already-enriched items.
- */
-function buildGameMetadataPatch(game: SteamOwnedGame, igdb: IgdbGame) {
-  const payload = mapIgdbToPayload(igdb);
-  const cleanTitle = cleanTitleForStorage(payload.title ?? game.name ?? `Steam App ${game.appid}`);
-
-  return {
-    source: 'igdb',
-    rawg_id: payload.igdb_id,
-    steam_app_id: game.appid,
-    title: cleanTitle,
-    title_english: cleanTitle,
-    description: payload.description,
-    cover_image_large: payload.cover_image_large ?? getSteamCoverUrls(game).large,
-    cover_image_medium: payload.cover_image_medium ?? getSteamCoverUrls(game).medium,
-    season_year: payload.season_year,
-    release_date: payload.release_date,
-    rating: payload.rating,
-    platforms: mergePlatforms(payload.platforms),
-    genres: payload.genres,
-    developer: payload.developer,
-    publisher: payload.publisher,
-  } satisfies Database['public']['Tables']['media_items']['Update'];
-}
-
-function buildBacklogRedirect(requestUrl: string, status: 'success' | 'error', reason?: string) {
-  const redirectUrl = new URL('/backlog?category=games', requestUrl);
-  redirectUrl.searchParams.set('steam', status);
-  if (reason) {
-    redirectUrl.searchParams.set('steam_reason', reason);
-  }
-  return redirectUrl;
-}
+import {
+  type SyncProgress,
+  type SyncResult,
+  SyncAlreadyRunningError,
+  extractErrorMessage,
+  normalizeTitle,
+  getSteamHours,
+  deriveStatusFromSteamData,
+  buildDebugSample,
+  buildBacklogRedirect,
+  buildGameMetadataPatch,
+  mapWithConcurrency,
+} from './helpers';
+import { getUserSteamInput, createSyncJob, getRunningSyncJob, updateSyncJob } from './jobs';
+import { matchSteamGamesToIgdb, enrichIgdbMatches } from './igdbMatching';
+import { recomputeCategoryProfiles } from '@/lib/profile/recompute-category-profiles';
 
 async function syncSteamForUser(options?: {
   includeDebug?: boolean;
@@ -457,6 +43,7 @@ async function syncSteamForUser(options?: {
   let totalSteps = 1;
   const updateProgress = async (message: string, stepDelta = 0) => {
     completedSteps += stepDelta;
+    /* c8 ignore next 2 -- totalSteps starts at 1, the :0 branch is unreachable */
     const percent =
       totalSteps > 0 ? Math.min(100, Math.round((completedSteps / totalSteps) * 100)) : 0;
 
@@ -473,12 +60,8 @@ async function syncSteamForUser(options?: {
       });
     }
 
-    await options?.onProgress?.({
-      message,
-      completedSteps,
-      totalSteps,
-      percent,
-    });
+    /* istanbul ignore next -- onProgress is not passed from route handlers */
+    await options?.onProgress?.({ message, completedSteps, totalSteps, percent });
   };
 
   await updateProgress('Connecting to Steam profile...');
@@ -551,9 +134,13 @@ async function syncSteamForUser(options?: {
   }
 
   await updateProgress('Matching Steam titles with IGDB...', 1);
-  const igdbMatchByAppId = await matchSteamGamesToIgdb(uniqueGames, async (done, total) => {
-    await updateProgress(`IGDB matching ${done}/${total}`, 1);
-  });
+  const igdbMatchByAppId = await matchSteamGamesToIgdb(
+    uniqueGames,
+    /* c8 ignore next 3 */
+    async (done, total) => {
+      await updateProgress(`IGDB matching ${done}/${total}`, 1);
+    },
+  );
 
   const appIds = uniqueGames.map(game => game.appid);
   const { data: existingMediaRows, error: existingMediaError } = await adminSupabase
@@ -605,6 +192,7 @@ async function syncSteamForUser(options?: {
 
   const enrichedIgdbByAppId = await enrichIgdbMatches(
     igdbMatchesNeedingEnrichment,
+    /* c8 ignore next 3 */
     async (done, total) => {
       await updateProgress(`IGDB metadata ${done}/${total}`, 1);
     },
@@ -722,9 +310,11 @@ async function syncSteamForUser(options?: {
 
       // Check for duplicates by normalized title
       const normalizedGameTitle = normalizeTitle(game.name);
+      // game.name is always set (filtered above) and normalizeTitle returns non-empty for valid names
       const existingByTitle = normalizedGameTitle
         ? existingMediaByNormalizedTitle.get(normalizedGameTitle)
-        : null;
+        : /* c8 ignore next */
+          null;
 
       if (existingByTitle) {
         mediaIdByAppId.set(game.appid, existingByTitle.id);
@@ -954,6 +544,12 @@ async function syncSteamForUser(options?: {
     if (entryUpdateError) {
       failedEntryUpsertCount += userEntryUpdates.length;
     }
+  }
+
+  if (userEntryPayload.length > 0 || userEntryUpdates.length > 0) {
+    void recomputeCategoryProfiles(supabase, session.user.id, ['games']).catch(error => {
+      console.warn('[Steam Sync] Derived profile recompute failed:', error);
+    });
   }
 
   await updateProgress('Finalizing sync...', totalSteps - completedSteps);

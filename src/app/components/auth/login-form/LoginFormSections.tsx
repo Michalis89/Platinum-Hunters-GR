@@ -291,9 +291,7 @@ export function ResetPanel({
         Password recovery
       </div>
 
-      <p className="text-sm text-foreground/80">
-        We&apos;ll send a recovery link to this email.
-      </p>
+      <p className="text-sm text-foreground/80">We&apos;ll send a recovery link to this email.</p>
 
       {resetAlert && (
         <Alert className={` ${alertToneClass(resetAlert.type)}`}>

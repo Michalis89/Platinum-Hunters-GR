@@ -45,7 +45,10 @@ const handler = withApiRoute(async request => {
   });
 
   if (error) {
-    return fail({ error: error.message || 'Failed to track notification event', code: 'TRACK_FAILED' }, 500);
+    return fail(
+      { error: error.message || 'Failed to track notification event', code: 'TRACK_FAILED' },
+      500,
+    );
   }
 
   return ok({ tracked: true });

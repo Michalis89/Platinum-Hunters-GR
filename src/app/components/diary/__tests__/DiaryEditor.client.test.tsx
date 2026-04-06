@@ -12,19 +12,17 @@ jest.mock('@/components/ui/alert-dialog', () => ({
   AlertDialogTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
   AlertDialogDescription: ({ children }: { children: ReactNode }) => <p>{children}</p>,
   AlertDialogFooter: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  AlertDialogCancel: ({
-    children,
-    ...props
-  }: ButtonHTMLAttributes<HTMLButtonElement>) => (
+  AlertDialogCancel: ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) => (
     <button type="button" {...props}>
       {children}
     </button>
   ),
   AlertDialogAction: ({
     children,
+    disabled,
     ...props
   }: ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <button type="button" {...props}>
+    <button type="button" {...props} data-ignored-disabled={disabled ? 'true' : 'false'}>
       {children}
     </button>
   ),

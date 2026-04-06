@@ -43,7 +43,12 @@ async function decryptFieldWithFallback(
   const plaintextFallback = field === 'title' ? entry.title : entry.content;
 
   try {
-    return await decryptDiaryField(cipherTextB64, ivB64, key, buildAad(entry.user_id, entry.id, field));
+    return await decryptDiaryField(
+      cipherTextB64,
+      ivB64,
+      key,
+      buildAad(entry.user_id, entry.id, field),
+    );
   } catch {
     try {
       // Legacy compatibility: older rows may have been encrypted without AAD.

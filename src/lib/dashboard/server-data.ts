@@ -3,7 +3,7 @@
  * Extracted from API routes for direct Server Component usage
  */
 
-import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createRouteHandlerClient>>;
 
@@ -278,8 +278,12 @@ export async function fetchContinueData(
       .in('media_items.category', normalizedCategories),
   ]);
 
-  if (currentError) throw currentError;
-  if (countError) throw countError;
+  if (currentError) {
+    throw currentError;
+  }
+  if (countError) {
+    throw countError;
+  }
 
   const entries = Array.isArray(currentEntriesData) ? (currentEntriesData as ContinueEntry[]) : [];
 

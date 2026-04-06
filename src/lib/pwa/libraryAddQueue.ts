@@ -57,7 +57,7 @@ async function withStore<T>(
 }
 
 export async function enqueueLibraryAddRequest(apiBase: string, body: Record<string, unknown>) {
-  return withStore('readwrite', (store) => {
+  return withStore('readwrite', store => {
     return new Promise<number>((resolve, reject) => {
       const request = store.add({
         createdAt: Date.now(),
@@ -85,7 +85,8 @@ export async function requestLibraryAddSync() {
 
   try {
     const registration = await navigator.serviceWorker.ready;
-    const syncManager = (registration as ServiceWorkerRegistration & { sync?: SyncManagerLike }).sync;
+    const syncManager = (registration as ServiceWorkerRegistration & { sync?: SyncManagerLike })
+      .sync;
     if (syncManager) {
       await syncManager.register(LIBRARY_SYNC_TAG);
       return;
@@ -106,12 +107,15 @@ export async function flushLibraryAddQueue(): Promise<number> {
   // items are never removed — causing them to be re-sent on every reconnect.
   let items: QueueRecord[] = [];
   try {
-    items = await withStore('readonly', (store) =>
-      new Promise<QueueRecord[]>((resolve, reject) => {
-        const request = store.getAll() as IDBRequest<QueueRecord[]>;
-        request.onsuccess = () => resolve(Array.isArray(request.result) ? request.result : []);
-        request.onerror = () => reject(request.error ?? new Error('Failed to read queued requests'));
-      }),
+    items = await withStore(
+      'readonly',
+      store =>
+        new Promise<QueueRecord[]>((resolve, reject) => {
+          const request = store.getAll() as IDBRequest<QueueRecord[]>;
+          request.onsuccess = () => resolve(Array.isArray(request.result) ? request.result : []);
+          request.onerror = () =>
+            reject(request.error ?? new Error('Failed to read queued requests'));
+        }),
     );
   } catch {
     return 0;
@@ -143,12 +147,15 @@ export async function flushLibraryAddQueue(): Promise<number> {
       // Step 3: Delete in its own fresh readwrite transaction so no async work
       // can cause an auto-commit before the delete request is issued.
       const idToDelete = item.id;
-      await withStore('readwrite', (store) =>
-        new Promise<void>((resolve, reject) => {
-          const request = store.delete(idToDelete);
-          request.onsuccess = () => resolve();
-          request.onerror = () => reject(request.error ?? new Error('Failed to delete queue item'));
-        }),
+      await withStore(
+        'readwrite',
+        store =>
+          new Promise<void>((resolve, reject) => {
+            const request = store.delete(idToDelete);
+            request.onsuccess = () => resolve();
+            request.onerror = () =>
+              reject(request.error ?? new Error('Failed to delete queue item'));
+          }),
       );
 
       syncedCount += 1;

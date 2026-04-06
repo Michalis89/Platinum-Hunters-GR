@@ -69,14 +69,16 @@ fromMock.mockImplementation((table: string) => {
   if (table === 'article_likes') {
     return {
       ...base,
-      select: jest.fn().mockImplementation((_cols: string, opts?: { count?: string; head?: boolean }) => {
-        if (opts?.count) {
-          // count query
-          return { eq: jest.fn().mockResolvedValue({ count: 1 }) };
-        }
-        // upsert select chain
-        return base.select();
-      }),
+      select: jest
+        .fn()
+        .mockImplementation((_cols: string, opts?: { count?: string; head?: boolean }) => {
+          if (opts?.count) {
+            // count query
+            return { eq: jest.fn().mockResolvedValue({ count: 1 }) };
+          }
+          // upsert select chain
+          return base.select();
+        }),
     };
   }
   return base;

@@ -24,7 +24,10 @@ export function AccountInfo({ user, identity }: Readonly<AccountInfoProps>) {
     >
       <header className="mb-4">
         <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Metadata</p>
-        <h2 id="account-info-heading" className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+        <h2
+          id="account-info-heading"
+          className="mt-1 text-xl font-semibold tracking-tight text-foreground"
+        >
           Account Info
         </h2>
       </header>
@@ -50,7 +53,11 @@ export function AccountInfo({ user, identity }: Readonly<AccountInfoProps>) {
             Last Login
           </dt>
           <dd className="text-sm font-medium text-foreground">
-            <FormattedDate date={identity?.lastLogin ?? user.last_login} options={DATE_OPTIONS} fallback="Unknown" />
+            <FormattedDate
+              date={identity?.lastLogin ?? user.last_login}
+              options={DATE_OPTIONS}
+              fallback="Unknown"
+            />
           </dd>
         </div>
 
@@ -59,7 +66,9 @@ export function AccountInfo({ user, identity }: Readonly<AccountInfoProps>) {
             <Shield className="h-3.5 w-3.5" />
             Status
           </dt>
-          <dd className="text-sm font-medium capitalize text-foreground">{user.account_status || 'active'}</dd>
+          <dd className="text-sm font-medium capitalize text-foreground">
+            {user.account_status || 'active'}
+          </dd>
         </div>
 
         <div className="rounded-xl border border-border/50 bg-card/65 p-3 transition-colors hover:border-primary/30">

@@ -13,7 +13,6 @@ type ProfileStats = {
   articles: number | null;
   reviews: number | null;
   entries: number | null;
-  lists: number | null;
 };
 
 type ProfileHeroProps = {
@@ -47,10 +46,9 @@ export function ProfileHero({
   const hasOwnerRole = Array.isArray(user.roles) && user.roles.includes('owner');
 
   const statsItems: Array<{ label: string; value: number | null }> = [
+    { label: 'Entries', value: stats.entries },
     { label: 'Articles', value: stats.articles },
     { label: 'Reviews', value: stats.reviews },
-    { label: 'Entries', value: stats.entries },
-    { label: 'Lists', value: stats.lists },
   ];
 
   return (
@@ -143,11 +141,11 @@ export function ProfileHero({
       </div>
 
       {showStats && (
-        <div className="relative mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="relative mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {statsItems.map(item => (
             <div
               key={item.label}
-              className="rounded-xl border border-border/60 bg-card/70 px-3 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/35"
+              className="rounded-xl border border-border/60 bg-card/70 px-3 py-3 transition-all duration-200 hover:border-primary/35"
             >
               <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                 {item.label}

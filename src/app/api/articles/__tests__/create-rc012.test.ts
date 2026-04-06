@@ -11,7 +11,6 @@ const mockValidateTipTapContent = jest.fn(() => ({ isValid: true }));
 const mockNormalizeSlug = jest.fn((slug: string) => slug);
 const mockInsertActivity = jest.fn();
 const mockRevalidateArticle = jest.fn();
-const mockArticleInsertSingle = jest.fn();
 const mockArticleInsert = jest.fn();
 
 const mockSupabase = {

@@ -27,7 +27,10 @@ type DiaryEntryListPaneProps = {
 };
 
 function stripHtml(value: string) {
-  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 const MoodDot = memo(function MoodDot({ mood }: { mood: DiaryEntryDecrypted['mood'] }) {
@@ -70,10 +73,7 @@ const DiaryEntryRow = memo(function DiaryEntryRow({
     <button
       type="button"
       onClick={() => onSelect(entry.id)}
-      className={cn(
-        rowBaseClassName,
-        isSelected ? rowActiveClassName : rowIdleClassName,
-      )}
+      className={cn(rowBaseClassName, isSelected ? rowActiveClassName : rowIdleClassName)}
     >
       <div className="flex items-center justify-between gap-3 text-xs text-[hsl(var(--text-secondary))]">
         <div className="flex items-center gap-2">
@@ -137,7 +137,9 @@ export const DiaryEntryListPane = memo(function DiaryEntryListPane({
   return (
     <section className={panelClassName}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold tracking-[0.01em] text-[hsl(var(--text-primary))]">Entries</h2>
+        <h2 className="text-sm font-semibold tracking-[0.01em] text-[hsl(var(--text-primary))]">
+          Entries
+        </h2>
         <Button
           type="button"
           size="sm"

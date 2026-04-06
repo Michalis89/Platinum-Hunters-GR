@@ -93,6 +93,8 @@ async function saveImportCursor(
   category: MalCategory,
   nextOffset: number,
 ): Promise<void> {
+  /* c8 ignore next 2 -- defensive normalization; handler computes bounded numeric offsets */
+  /* istanbul ignore next -- defensive normalization; handler computes bounded numeric offsets */
   const normalized = Number.isFinite(nextOffset) && nextOffset >= 0 ? nextOffset : 0;
   const expiresAt = new Date(Date.now() + CURSOR_TTL_SECONDS * 1000).toISOString();
 
@@ -191,19 +193,14 @@ async function POSTHandler(req: Request) {
     await requireAdminRole(supabase);
     const admin = createSupabaseAdminClient();
 
-    const body = (await req.json().catch(() => null)) as
-      | {
-          category?: MalCategory;
-          count?: number;
-          maxPages?: number;
-        }
-      | null;
+    const body = (await req.json().catch(() => null)) as {
+      category?: MalCategory;
+      count?: number;
+      maxPages?: number;
+    } | null;
 
     const category: MalCategory = body?.category === 'manga' ? 'manga' : 'anime';
-    const targetCount = Math.min(
-      Math.max(toPositiveInt(body?.count, DEFAULT_COUNT), 1),
-      MAX_COUNT,
-    );
+    const targetCount = Math.min(Math.max(toPositiveInt(body?.count, DEFAULT_COUNT), 1), MAX_COUNT);
     const maxPages = Math.max(toPositiveInt(body?.maxPages, DEFAULT_MAX_SCAN_PAGES), 1);
 
     const clientId = getMalClientId();
@@ -270,9 +267,12 @@ async function POSTHandler(req: Request) {
 
       for (const id of newIds) {
         const node = idToNode.get(id);
+        /* c8 ignore start -- defensive guard; map is built from the same ID set */
+        /* istanbul ignore next -- defensive guard; map is built from the same ID set */
         if (!node) {
           continue;
         }
+        /* c8 ignore stop */
 
         const result = await insertMediaRow(admin, buildMediaRow(category, node));
         if (result === 'inserted') {

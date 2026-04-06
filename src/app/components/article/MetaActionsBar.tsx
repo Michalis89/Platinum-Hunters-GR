@@ -68,7 +68,9 @@ export default function MetaActionsBar({
               ) : (
                 <User size={12} />
               )}
-              <span className="truncate">{article.users.display_name || article.users.username}</span>
+              <span className="truncate">
+                {article.users.display_name || article.users.username}
+              </span>
             </span>
           )}
 

@@ -42,17 +42,23 @@ export function DiaryPageClient() {
   const { settings, isLoading: isLoadingSettings } = useUserSettings(true);
 
   useEffect(() => {
-    if (isLocked) {
-      setUnlockDialogOpen(true);
-      return;
-    }
-    setUnlockDialogOpen(false);
+    const syncUnlockDialogTimer = window.setTimeout(() => {
+      if (isLocked) {
+        setUnlockDialogOpen(true);
+        return;
+      }
+      setUnlockDialogOpen(false);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(syncUnlockDialogTimer);
+    };
   }, [isLocked]);
 
   return (
     <main className="diary-route-root relative flex min-h-screen flex-col px-3 pb-6 pt-12 text-foreground sm:px-4 sm:pb-8 sm:pt-16">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(to_top,hsl(var(--accent-primary)/0.08),transparent)]" />
-      <div className="relative z-10 mx-auto flex w-full max-w-screen-2xl min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+      <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-screen-2xl flex-1 flex-col gap-3 sm:gap-4">
         <section className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-4 sm:p-6">
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.28),transparent_70%)]" />

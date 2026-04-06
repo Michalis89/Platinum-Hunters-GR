@@ -10,9 +10,7 @@ type SelectProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> &
   modal?: boolean;
 };
 
-const Select = ({ modal: _modal, ...props }: SelectProps) => (
-  <SelectPrimitive.Root {...props} />
-);
+const Select = ({ modal: _modal, ...props }: SelectProps) => <SelectPrimitive.Root {...props} />;
 
 const SelectGroup = SelectPrimitive.Group;
 

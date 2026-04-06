@@ -7,7 +7,6 @@ type TicketNotificationSummary = {
   unread_count: number;
   user_unread_count: number;
   admin_unread_count: number;
-  enabled: boolean;
 };
 
 export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000) {
@@ -16,18 +15,11 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
     unread_count: 0,
     user_unread_count: 0,
     admin_unread_count: 0,
-    enabled,
   });
 
   const load = useCallback(async () => {
     if (!enabled) {
       inFlightControllerRef.current?.abort();
-      setSummary({
-        unread_count: 0,
-        user_unread_count: 0,
-        admin_unread_count: 0,
-        enabled: false,
-      });
       return;
     }
 
@@ -39,16 +31,15 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
       const response = await fetch('/api/notifications/tickets/summary', {
         signal: controller.signal,
       });
-      const payload = (await response.json().catch(() => null)) as
-        | { data?: TicketNotificationSummary }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        data?: TicketNotificationSummary;
+      } | null;
 
       if (!response.ok) {
         setSummary({
           unread_count: 0,
           user_unread_count: 0,
           admin_unread_count: 0,
-          enabled: true,
         });
         return;
       }
@@ -57,7 +48,6 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
         unread_count: payload?.data?.unread_count ?? 0,
         user_unread_count: payload?.data?.user_unread_count ?? 0,
         admin_unread_count: payload?.data?.admin_unread_count ?? 0,
-        enabled: payload?.data?.enabled ?? true,
       });
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
@@ -67,17 +57,19 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
         unread_count: 0,
         user_unread_count: 0,
         admin_unread_count: 0,
-        enabled,
       });
     }
   }, [enabled]);
 
   useEffect(() => {
-    void load();
-
     if (!enabled) {
+      inFlightControllerRef.current?.abort();
       return;
     }
+
+    const initialLoadTimer = window.setTimeout(() => {
+      void load();
+    }, 0);
 
     const channel = supabase
       .channel(`ticket-notifications-${Math.random().toString(36).slice(2)}`)
@@ -109,6 +101,7 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
     }, fallbackInterval);
 
     return () => {
+      window.clearTimeout(initialLoadTimer);
       window.clearInterval(timer);
       inFlightControllerRef.current?.abort();
       void supabase.removeChannel(channel);
@@ -116,10 +109,10 @@ export function useTicketNotificationCount(enabled: boolean, intervalMs = 30000)
   }, [enabled, intervalMs, load]);
 
   return {
-    count: summary.unread_count,
-    userCount: summary.user_unread_count,
-    adminCount: summary.admin_unread_count,
-    totalCount: summary.unread_count,
+    count: enabled ? summary.unread_count : 0,
+    userCount: enabled ? summary.user_unread_count : 0,
+    adminCount: enabled ? summary.admin_unread_count : 0,
+    totalCount: enabled ? summary.unread_count : 0,
     refresh: load,
   };
 }

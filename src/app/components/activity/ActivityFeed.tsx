@@ -70,8 +70,7 @@ type ActivityFeedProps = {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-function timeAgo(date: string) {
-  const now = Date.now();
+function timeAgo(date: string, now = Date.now()) {
   const then = new Date(date).getTime();
   const diffSec = Math.max(0, Math.floor((now - then) / 1000));
   if (diffSec < 60) {
@@ -90,19 +89,18 @@ function timeAgo(date: string) {
 }
 
 function RelativeTime({ date }: { date: string }) {
-  const [relativeTime, setRelativeTime] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const relativeTime = timeAgo(date, now);
 
   useEffect(() => {
-    setRelativeTime(timeAgo(date));
-
-    const interval = setInterval(() => {
-      setRelativeTime(timeAgo(date));
+    const interval = window.setInterval(() => {
+      setNow(Date.now());
     }, 60000);
 
-    return () => clearInterval(interval);
-  }, [date]);
+    return () => window.clearInterval(interval);
+  }, []);
 
-  return <span suppressHydrationWarning>{relativeTime ?? '...'}</span>;
+  return <span suppressHydrationWarning>{relativeTime}</span>;
 }
 
 function renderText(item: ActivityItem) {

@@ -1,10 +1,17 @@
-// @ts-nocheck
-// deno-lint-ignore-file no-explicit-any
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import webpush from 'npm:web-push@3.6.7';
 
+type PushSubscription = {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+};
+
 type RequestBody = {
-  subscription?: Record<string, unknown>;
+  subscription?: PushSubscription;
   notification?: {
     notificationId?: string;
     title?: string;
@@ -46,7 +53,9 @@ serve(async request => {
   const body = (await request.json().catch(() => null)) as RequestBody | null;
   const subscription = body?.subscription;
   const notification = body?.notification;
-  if (!subscription || !notification?.notificationId) {
+  const hasValidSubscription =
+    Boolean(subscription?.endpoint) && Boolean(subscription?.keys?.p256dh) && Boolean(subscription?.keys?.auth);
+  if (!hasValidSubscription || !notification?.notificationId) {
     return json({ error: 'Invalid payload' }, 400);
   }
 
@@ -60,7 +69,7 @@ serve(async request => {
   });
 
   try {
-    await webpush.sendNotification(subscription as any, payload);
+    await webpush.sendNotification(subscription, payload);
     return json({ success: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Push send failed';

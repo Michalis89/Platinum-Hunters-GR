@@ -25,4 +25,3 @@ export const getLoginUrl = (redirectTo?: string) =>
   redirectTo ? `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}` : '/auth/login';
 
 export { LOGIN_REQUIRED_PREFIXES, DASHBOARD_PATH, HOME_PATHS, AUTH_ROUTES };
-

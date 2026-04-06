@@ -1,28 +1,19 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Spinner } from '@/components/ui/spinner';
-import { Skeleton } from '@/components/ui/skeleton';
 import CategoryLibrary from '@/app/components/backlog/CategoryLibrary';
-import { isMediaCategory, type MediaCategory, type MediaStatus } from '@/app/components/backlog/types';
+import {
+  isMediaCategory,
+  type MediaCategory,
+  type MediaStatus,
+} from '@/app/components/backlog/types';
 
 function BacklogFallback() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <Spinner className="size-8" />
-    </div>
-  );
-}
-
-function BacklogSkeleton() {
-  return (
-    <div className="pb-10 pt-6 md:pb-16 md:pt-8">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 md:px-6">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 w-full rounded-[32px]" />
-        ))}
-      </div>
     </div>
   );
 }
@@ -63,7 +54,6 @@ function PublicBacklogContent({
   shareToken,
 }: Readonly<PublicBacklogClientProps>) {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const categoryParam = searchParams.get('category');
   const statusParam = searchParams.get('status');

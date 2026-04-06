@@ -17,6 +17,7 @@ import type { UpdateLibraryRequestBody, LibraryRow, UserProfile } from '../types
 import { mapLibraryEntry } from '../utils/entry-mapper';
 import { resolveTitle } from '../utils/title-resolver';
 import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
+import { recomputeCategoryProfiles } from '@/lib/profile/recompute-category-profiles';
 
 /**
  * Generic handler for GET /api/{category}/library
@@ -96,7 +97,9 @@ export async function handleLibraryPatch(
     const clientUpdatedAt =
       typeof body.clientUpdatedAt === 'string' ? body.clientUpdatedAt.trim() : '';
     const normalizedSelectedPlatform =
-      typeof body.selected_platform === 'string' ? body.selected_platform.trim() : body.selected_platform;
+      typeof body.selected_platform === 'string'
+        ? body.selected_platform.trim()
+        : body.selected_platform;
 
     if (!body.mediaId) {
       return NextResponse.json({ error: MISSING_MEDIA_ID }, { status: 400 });
@@ -141,7 +144,10 @@ export async function handleLibraryPatch(
       .maybeSingle();
 
     if (config.key === 'games' && !existingEntry && !normalizedSelectedPlatform) {
-      return NextResponse.json({ error: 'Platform selection is required for games' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Platform selection is required for games' },
+        { status: 400 },
+      );
     }
     if (!existingEntry) {
       return NextResponse.json(
@@ -152,29 +158,25 @@ export async function handleLibraryPatch(
 
     const existingStatus =
       typeof existingEntry?.status === 'string' ? (existingEntry.status as string) : null;
-    const existingProgress =
-      typeof existingEntry?.progress === 'number' && Number.isFinite(existingEntry.progress)
-        ? existingEntry.progress
-        : null;
     const nextStatus =
       typeof body.status === 'string' ? body.status : (existingStatus ?? 'planned');
-    const nextProgress =
-      typeof body.progress === 'number' && Number.isFinite(body.progress) ? body.progress : null;
     // Apply optimistic lock when the client supplies clientUpdatedAt.
     // Older clients / cached pages that omit it get a best-effort update without the lock.
     const baseUpdate = supabase
       .from('user_media_entries')
       .update({
         ...updateData,
-        status: nextStatus as Database['public']['Tables']['user_media_entries']['Update']['status'],
+        status:
+          nextStatus as Database['public']['Tables']['user_media_entries']['Update']['status'],
       })
       .eq('user_id', session.user.id)
       .eq('media_id', body.mediaId);
 
-    const { data, error } = await (clientUpdatedAt
-      ? baseUpdate.lte('updated_at', clientUpdatedAt)
-      : baseUpdate
-    ).select('*').maybeSingle();
+    const { data, error } = await (
+      clientUpdatedAt ? baseUpdate.lte('updated_at', clientUpdatedAt) : baseUpdate
+    )
+      .select('*')
+      .maybeSingle();
 
     if (error) {
       throw error;
@@ -185,9 +187,6 @@ export async function handleLibraryPatch(
         { status: 409 },
       );
     }
-
-    // Recompute genre affinity in the background
-    void refreshGenreAffinity(supabase, session.user.id);
 
     // Fetch user profile and media info for activity logging
     const profileData = await getUserBasicInfo(supabase, session.user.id);
@@ -204,6 +203,12 @@ export async function handleLibraryPatch(
     const mediaCategory =
       ((mediaRow as unknown as Record<string, unknown>)?.category as string) ??
       config.defaultCategory;
+
+    // Recompute genre affinity in the background
+    void refreshGenreAffinity(supabase, session.user.id);
+    void recomputeCategoryProfiles(supabase, session.user.id, [mediaCategory]).catch(error => {
+      console.warn(`${config.logPrefix} derived profile recompute failed:`, error);
+    });
 
     const activityPayload = {
       category: mediaCategory,
@@ -282,6 +287,9 @@ export async function handleLibraryDelete(
 
     // Recompute genre affinity in the background
     void refreshGenreAffinity(supabase, session.user.id);
+    void recomputeCategoryProfiles(supabase, session.user.id).catch(error => {
+      console.warn(`${config.logPrefix} derived profile recompute failed:`, error);
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

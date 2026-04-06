@@ -39,7 +39,10 @@ function MoodPillsComponent({ value, disabled = false, onChange }: MoodPillsProp
           variant="outline"
           size="sm"
           disabled={disabled}
-          className={cn(chipBaseClassName, value === mood ? chipActiveClassName : chipIdleClassName)}
+          className={cn(
+            chipBaseClassName,
+            value === mood ? chipActiveClassName : chipIdleClassName,
+          )}
           aria-pressed={value === mood}
           onClick={() => onChange(mood)}
         >

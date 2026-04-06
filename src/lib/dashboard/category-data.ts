@@ -1,6 +1,6 @@
 import { subDays } from 'date-fns/subDays';
 import { format } from 'date-fns/format';
-import { createRouteHandlerClient } from '@/lib/supabase-route-handler';
+import type { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 import { DEFAULT_COVER } from '@/lib/constants/messages';
 
 export const DASHBOARD_TAB_CATEGORIES = [
@@ -1160,7 +1160,12 @@ function buildGamePlatformInsight(entries: CategoryEntryRow[]): PlatformInsightP
 
   for (const entry of entries) {
     const platform = normalizePlatformLabel(resolvePlatformForInsight(entry));
-    const current = platformMap.get(platform) ?? { total: 0, completed: 0, dropped: 0, attempts: 0 };
+    const current = platformMap.get(platform) ?? {
+      total: 0,
+      completed: 0,
+      dropped: 0,
+      attempts: 0,
+    };
 
     current.total += 1;
     if (entry.status === 'completed') {
@@ -1893,7 +1898,14 @@ const PERSONAL_PROGRESS_BOOST_MAX = {
   completed: 0.35,
   current: 0.55,
 } as const;
-const GENERIC_GENRE_NOISE_SET = new Set(['fantasy', 'drama', 'comedy', 'romance', 'sci-fi']);
+const GENERIC_GENRE_NOISE_SET = new Set([
+  'action',
+  'fantasy',
+  'drama',
+  'comedy',
+  'romance',
+  'sci-fi',
+]);
 const GENERIC_GAME_SUBGENRE_SET = new Set(['adventure']);
 const GENRE_ALIAS_MAP: Record<string, string> = {
   'role-playing': 'rpg',

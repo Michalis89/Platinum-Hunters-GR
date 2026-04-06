@@ -58,8 +58,13 @@ export function ContentList() {
   };
 
   useEffect(() => {
-    loadTab(activeTab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const loadTimer = window.setTimeout(() => {
+      loadTab(activeTab);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(loadTimer);
+    };
   }, [activeTab]);
 
   const title = useMemo(() => {
@@ -93,7 +98,10 @@ export function ContentList() {
     >
       <header className="mb-4">
         <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Publishing</p>
-        <h2 id="content-list-heading" className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+        <h2
+          id="content-list-heading"
+          className="mt-1 text-2xl font-semibold tracking-tight text-foreground"
+        >
           My Content
         </h2>
       </header>
@@ -158,7 +166,10 @@ export function ContentList() {
                     <Badge variant="secondary" className={`border ${STATUS_BADGE[article.status]}`}>
                       {article.status}
                     </Badge>
-                    <Badge variant="secondary" className="border border-border/60 text-muted-foreground">
+                    <Badge
+                      variant="secondary"
+                      className="border border-border/60 text-muted-foreground"
+                    >
                       {topicMeta.label}
                     </Badge>
                     <span className="text-[11px] text-muted-foreground">{article.category}</span>
@@ -169,7 +180,13 @@ export function ContentList() {
                 </div>
                 <div className="flex items-center gap-1">
                   {article.status === 'published' && (
-                    <Button variant="ghost" size="icon" asChild className="h-8 w-8" aria-label="View content">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      asChild
+                      className="h-8 w-8"
+                      aria-label="View content"
+                    >
                       <Link href={`${hrefBase}/${article.slug}`}>
                         <Eye className="h-3.5 w-3.5" />
                       </Link>

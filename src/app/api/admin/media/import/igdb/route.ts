@@ -61,7 +61,9 @@ function isDuplicateKeyError(error: unknown): boolean {
   return (error as { code?: string }).code === '23505';
 }
 
-async function loadImportCursor(admin: ReturnType<typeof createSupabaseAdminClient>): Promise<number> {
+async function loadImportCursor(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+): Promise<number> {
   const { data, error } = await admin
     .from('api_cache')
     .select('data')
@@ -81,7 +83,9 @@ async function loadImportCursor(admin: ReturnType<typeof createSupabaseAdminClie
   return nextOffset;
 }
 
-async function loadSeedCursor(admin: ReturnType<typeof createSupabaseAdminClient>): Promise<number> {
+async function loadSeedCursor(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+): Promise<number> {
   const { data, error } = await admin
     .from('api_cache')
     .select('data')
@@ -105,6 +109,7 @@ async function saveImportCursor(
   admin: ReturnType<typeof createSupabaseAdminClient>,
   nextOffset: number,
 ): Promise<void> {
+  /* c8 ignore next 2 -- defensive normalization; computed offsets are already bounded */
   const normalized =
     Number.isFinite(nextOffset) && nextOffset >= 0 && nextOffset <= MAX_OFFSET ? nextOffset : 0;
   const expiresAt = new Date(Date.now() + CURSOR_TTL_SECONDS * 1000).toISOString();
@@ -124,6 +129,7 @@ async function saveSeedCursor(
   admin: ReturnType<typeof createSupabaseAdminClient>,
   nextIndex: number,
 ): Promise<void> {
+  /* c8 ignore next 2 -- defensive normalization; seedIndex is incremented from valid numeric state */
   const normalized = Number.isFinite(nextIndex) && nextIndex >= 0 ? nextIndex : 0;
   const expiresAt = new Date(Date.now() + CURSOR_TTL_SECONDS * 1000).toISOString();
 
@@ -237,14 +243,12 @@ async function POSTHandler(req: Request) {
     await requireAdminRole(supabase);
     const admin = createSupabaseAdminClient();
 
-    const body = (await req.json().catch(() => null)) as
-      | { count?: number; maxPages?: number }
-      | null;
+    const body = (await req.json().catch(() => null)) as {
+      count?: number;
+      maxPages?: number;
+    } | null;
 
-    const targetCount = Math.min(
-      Math.max(toPositiveInt(body?.count, DEFAULT_COUNT), 1),
-      MAX_COUNT,
-    );
+    const targetCount = Math.min(Math.max(toPositiveInt(body?.count, DEFAULT_COUNT), 1), MAX_COUNT);
     const maxPages = Math.max(toPositiveInt(body?.maxPages, DEFAULT_MAX_SCAN_PAGES), 1);
 
     const startOffset = await loadImportCursor(admin);
@@ -303,6 +307,7 @@ async function POSTHandler(req: Request) {
 
       for (const id of newIds) {
         const game = idToGame.get(id);
+        /* c8 ignore next 3 -- defensive guard; map is built from the same ID set */
         if (!game) {
           continue;
         }
@@ -388,7 +393,10 @@ async function POSTHandler(req: Request) {
           .in('igdb_id', candidateIds);
 
         if (existingError) {
-          console.error('[Admin IGDB Import] Existing IDs query error (seed fallback):', existingError);
+          console.error(
+            '[Admin IGDB Import] Existing IDs query error (seed fallback):',
+            existingError,
+          );
           return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);
         }
 
@@ -406,6 +414,7 @@ async function POSTHandler(req: Request) {
 
         for (const id of newIds) {
           const game = idToGame.get(id);
+          /* c8 ignore next 3 -- defensive guard; map is built from the same ID set */
           if (!game) {
             continue;
           }

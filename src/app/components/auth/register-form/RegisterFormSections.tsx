@@ -212,11 +212,17 @@ export function RegisterTermsRow({ checked, error, loading, onChange }: Register
           className="text-[13px] font-medium tracking-[-0.008em] text-foreground"
         >
           I accept the{' '}
-          <Link href="/terms" className="font-semibold text-[hsl(var(--link))] transition hover:opacity-80">
+          <Link
+            href="/terms"
+            className="font-semibold text-[hsl(var(--link))] transition hover:opacity-80"
+          >
             terms of use
           </Link>{' '}
           and the{' '}
-          <Link href="/privacy" className="font-semibold text-[hsl(var(--link))] transition hover:opacity-80">
+          <Link
+            href="/privacy"
+            className="font-semibold text-[hsl(var(--link))] transition hover:opacity-80"
+          >
             privacy policy
           </Link>
         </Label>

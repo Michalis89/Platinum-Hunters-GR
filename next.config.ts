@@ -35,7 +35,7 @@ const withPWA = withPWAInit({
         handler: 'NetworkOnly',
       },
       {
-        urlPattern: /\/api\/me\//i,
+        urlPattern: /\/api\/me(?:\/|$)/i,
         handler: 'NetworkOnly',
       },
       {
@@ -82,7 +82,15 @@ const withPWA = withPWAInit({
       },
       {
         urlPattern: ({ url }: { url: URL }) => {
-          const publicPaths = ['/home', '/about', '/articles', '/review', '/media', '/terms', '/privacy'];
+          const publicPaths = [
+            '/home',
+            '/about',
+            '/articles',
+            '/review',
+            '/media',
+            '/terms',
+            '/privacy',
+          ];
           return (
             url.origin === self.location.origin &&
             publicPaths.some(path => url.pathname.startsWith(path))

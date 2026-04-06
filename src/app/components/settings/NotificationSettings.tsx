@@ -48,8 +48,8 @@ export default function NotificationSettings() {
           </Badge>
         </div>
         <CardDescription>
-          Get optional alerts for important updates. Payloads contain only a notification id and
-          the app fetches details after tap.
+          Get optional alerts for important updates. Payloads contain only a notification id and the
+          app fetches details after tap.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -57,8 +57,7 @@ export default function NotificationSettings() {
           <div>
             <p className="text-sm font-semibold">Enable push notifications</p>
             <p className="text-xs text-muted-foreground">
-              Works best on Android Chrome and on iOS only after installing the app to Home
-              Screen.
+              Works best on Android Chrome and on iOS only after installing the app to Home Screen.
             </p>
           </div>
           <Switch

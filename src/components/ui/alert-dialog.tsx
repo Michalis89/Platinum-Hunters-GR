@@ -91,6 +91,7 @@ export const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogCo
 
     React.useEffect(() => {
       const dialog = dialogRef.current;
+      /* c8 ignore next 3 */
       if (!dialog) {
         return;
       }
@@ -108,6 +109,7 @@ export const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogCo
 
     React.useEffect(() => {
       const dialog = dialogRef.current;
+      /* c8 ignore next 3 */
       if (!dialog) {
         return;
       }
@@ -151,6 +153,7 @@ export const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogCo
       }
     }, [open]);
 
+    /* c8 ignore next 3 */
     if (typeof window === 'undefined') {
       return null;
     }

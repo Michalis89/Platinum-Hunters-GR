@@ -1,5 +1,4 @@
 import type { DiaryMood } from '@/lib/diary/types';
-import { DIARY_FLUSH_EVENT } from '@/lib/diary/offlineEvents';
 
 const DB_NAME = 'hobbistas-pwa';
 const DB_VERSION = 1;

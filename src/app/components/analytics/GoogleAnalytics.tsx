@@ -28,15 +28,15 @@ export function GoogleAnalytics({ gaId }: Props) {
 
     const isHomeRoute = pathname === '/home';
     const isMobile =
-      window.matchMedia('(max-width: 768px)').matches ||
-      window.matchMedia('(hover: none)').matches;
+      window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(hover: none)').matches;
 
     if (isHomeRoute && isMobile) {
       const timerId = window.setTimeout(() => setShouldLoadScripts(true), 12000);
       return () => window.clearTimeout(timerId);
     }
 
-    setShouldLoadScripts(true);
+    const timerId = window.setTimeout(() => setShouldLoadScripts(true), 0);
+    return () => window.clearTimeout(timerId);
   }, [gaId, pathname]);
 
   // Optional: track SPA navigations (keep this for App Router certainty)

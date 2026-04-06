@@ -61,7 +61,9 @@ export default function DiaryEditor({
   const [title, setTitle] = useState(entry?.title ?? '');
   const [content, setContent] = useState(entry?.content ?? '');
   const [mood, setMood] = useState<DiaryMood | null>(entry?.mood ?? null);
-  const [entryDate, setEntryDate] = useState(entry?.entry_date ?? new Date().toISOString().slice(0, 10));
+  const [entryDate, setEntryDate] = useState(
+    entry?.entry_date ?? new Date().toISOString().slice(0, 10),
+  );
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const persistInFlightRef = useRef(false);
@@ -175,7 +177,9 @@ export default function DiaryEditor({
   if (!entry) {
     return (
       <div className="rounded-2xl border border-dashed border-border/70 bg-card/40 p-8 text-center">
-        <p className="text-2xl font-medium leading-8 text-foreground">A page for your inner weather.</p>
+        <p className="text-2xl font-medium leading-8 text-foreground">
+          A page for your inner weather.
+        </p>
         <p className="mt-2 text-sm text-muted-foreground">
           Start with a single thought and let it unfold.
         </p>
@@ -187,7 +191,7 @@ export default function DiaryEditor({
   }
 
   return (
-    <section className="animate-in rounded-2xl border border-border/80 bg-card/80 p-5 duration-200 md:p-6">
+    <section className="rounded-2xl border border-border/80 bg-card/80 p-5 duration-200 animate-in md:p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
         <p className="text-xs uppercase tracking-wide text-muted-foreground">Private draft</p>
         <div className="flex items-center gap-2">
@@ -260,7 +264,9 @@ export default function DiaryEditor({
       {saveState === 'error' ? (
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>Save failed</AlertTitle>
-          <AlertDescription>Unable to save this entry right now. Please try again.</AlertDescription>
+          <AlertDescription>
+            Unable to save this entry right now. Please try again.
+          </AlertDescription>
         </Alert>
       ) : null}
 
@@ -279,7 +285,10 @@ export default function DiaryEditor({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <label htmlFor="entry-date" className="text-xs uppercase tracking-wide text-muted-foreground">
+          <label
+            htmlFor="entry-date"
+            className="text-xs uppercase tracking-wide text-muted-foreground"
+          >
             Date
           </label>
           <Input

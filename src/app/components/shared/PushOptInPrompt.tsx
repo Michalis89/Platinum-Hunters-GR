@@ -13,15 +13,8 @@ const SESSION_DISMISS_KEY = 'push-optin-dismiss-session';
 
 export default function PushOptInPrompt() {
   const [visible, setVisible] = useState(false);
-  const {
-    isReady,
-    isSupported,
-    isSubscribed,
-    isLoading,
-    requiresIosInstall,
-    error,
-    subscribe,
-  } = usePushNotifications();
+  const { isReady, isSupported, isSubscribed, isLoading, requiresIosInstall, error, subscribe } =
+    usePushNotifications();
 
   useEffect(() => {
     if (typeof window === 'undefined') {

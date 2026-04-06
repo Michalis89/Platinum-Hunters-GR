@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CircleHelp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -137,18 +137,14 @@ export function ProfileCategoryTabs({
     });
   }, [categories]);
 
-  const [activeCategory, setActiveCategory] = useState(orderedCategories[0] ?? '');
+  const [selectedCategory, setActiveCategory] = useState(orderedCategories[0] ?? '');
 
-  useEffect(() => {
-    if (!orderedCategories.length) {
-      setActiveCategory('');
-      return;
-    }
-
-    if (!orderedCategories.includes(activeCategory)) {
-      setActiveCategory(orderedCategories[0]);
-    }
-  }, [orderedCategories, activeCategory]);
+  // Derive active tab during render — no effect needed
+  const activeCategory = !orderedCategories.length
+    ? ''
+    : orderedCategories.includes(selectedCategory)
+      ? selectedCategory
+      : orderedCategories[0];
 
   const getNote = (cat: string) =>
     ((categoryNotes?.[cat] as Record<string, unknown> | undefined) || {}) as Record<

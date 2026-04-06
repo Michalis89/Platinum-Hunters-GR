@@ -35,16 +35,14 @@ async function GETHandler(req: Request) {
 
     let recommendations;
     if (category === 'games') {
-      const { generateGameRecommendationsV2WithLimits } = await import(
-        '@/lib/recommendations/v2/games/games-recommender'
-      );
+      const { generateGameRecommendationsV2WithLimits } =
+        await import('@/lib/recommendations/v2/games/games-recommender');
       recommendations = await generateGameRecommendationsV2WithLimits(userId, DB_ONLY_LIMITS, {
         platformFilterMode: 'owned-only',
       });
     } else {
-      const { generateGenericRecommendationsWithLimits } = await import(
-        '@/lib/recommendations/v2/generic/generic-recommender'
-      );
+      const { generateGenericRecommendationsWithLimits } =
+        await import('@/lib/recommendations/v2/generic/generic-recommender');
       recommendations = await generateGenericRecommendationsWithLimits(
         userId,
         category as Exclude<RecommendationCategory, 'games'>,

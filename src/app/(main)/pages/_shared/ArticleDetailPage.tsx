@@ -1,12 +1,6 @@
-import { CoverHeroImage, CoverThumbImage } from '@/components/ui/cover-image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Calendar, Eye, FileText, Heart } from 'lucide-react';
 import type { ArticleCategory, ArticleRow, ArticleTopic } from '@/types/database';
-import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
-import Breadcrumbs from '@/components/ui/breadcrumbs';
 import ReadingProgress from '@/app/components/article/ReadingProgress.client';
-import EmptyState from '@/components/ui/empty';
 import { buildMetadata } from '@/utils/seo/metadata/helpers';
 import StructuredData from '@/utils/seo/StructuredData';
 import { getBreadcrumbStructuredData } from '@/utils/seo/metadata/structuredData';
@@ -15,14 +9,14 @@ import { CATEGORY_LABELS, TOPIC_LABELS } from '@/app/(main)/articles/constants';
 import { sanitizeHtmlContent } from '@/utils/security/sanitizeHtml';
 import getSupabaseServer from '@/lib/supabase-server';
 import { normalizeSlug } from '@/utils/slugify';
-import ArticleComments from '@/app/components/article/ArticleComments.client';
-import ArticleAuthHint from '@/app/components/article/ArticleAuthHint.client';
-import { FormattedDate } from '@/utils/components/FormattedDate';
 import { buildArticleJsonLd, buildReviewJsonLd } from '@/lib/seo/jsonld';
-import MetaActionsBar from '@/app/components/article/MetaActionsBar';
-import { ArticleContent } from '@/components/article/ArticleContent';
-import { ARTICLE_SUBTITLE, ARTICLE_TITLE } from '@/components/article/typography';
 import TrackArticleView from '@/app/components/article/TrackArticleView.client';
+import {
+  ArticleBodySection,
+  ArticleHeroSection,
+  RelatedArticlesSection,
+  type RelatedArticleCard,
+} from './ArticleDetailPage.sections';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -69,20 +63,6 @@ interface ArticleMetadataArgs {
   options: ArticleDetailPageOptions;
 }
 
-type RelatedArticle = Pick<
-  ArticleRow,
-  | 'id'
-  | 'slug'
-  | 'title'
-  | 'description'
-  | 'cover_image'
-  | 'category'
-  | 'topic'
-  | 'published_at'
-  | 'views'
-  | 'likes'
->;
-
 const buildSlugCandidates = (value: string) => {
   const normalized = normalizeSlug(value);
   return Array.from(
@@ -115,7 +95,7 @@ function enrichContentHeadings(html: string) {
       return match;
     }
 
-    const normalizedAttrs = attrs ?? '';
+    const normalizedAttrs = attrs;
     const existingIdMatch = normalizedAttrs.match(/id\s*=\s*["']([^"']+)["']/i);
     let headingId = existingIdMatch?.[1];
 
@@ -133,7 +113,7 @@ function enrichContentHeadings(html: string) {
 
     const attrsWithoutId = normalizedAttrs.replace(/id\s*=\s*["'][^"']+["']/i, '').trim();
     const attrWithId = attrsWithoutId ? `${attrsWithoutId} id="${headingId}"` : `id="${headingId}"`;
-    const normalizedAttrString = attrWithId.trim() ? ` ${attrWithId.trim()}` : '';
+    const normalizedAttrString = ` ${attrWithId.trim()}`;
 
     return `<h2${normalizedAttrString}>${inner}</h2>`;
   });
@@ -144,7 +124,7 @@ function enrichContentHeadings(html: string) {
 async function fetchRelatedArticles(
   article: ArticleWithAuthor,
   limit = 3,
-): Promise<RelatedArticle[]> {
+): Promise<RelatedArticleCard[]> {
   const supabase = getSupabaseServer();
   const buildQuery = (filters: { topic?: ArticleTopic | null; category?: string | null }) => {
     let query = supabase
@@ -173,7 +153,7 @@ async function fetchRelatedArticles(
       console.error('Related articles fetch error:', error);
       return null;
     }
-    return (data ?? []) as RelatedArticle[];
+    return (data ?? []) as RelatedArticleCard[];
   };
 
   const byTopicAndCategory = await execute({ topic: article.topic, category: article.category });
@@ -325,7 +305,6 @@ export default async function ArticleDetailPage({
     notFound();
   }
 
-  const listBasePath = article.topic === 'reviews' ? '/review' : '/articles';
   const hasCategory = Boolean(article.category);
   const ARTICLE_HEADER_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -345,7 +324,9 @@ export default async function ArticleDetailPage({
   const uiBreadcrumbs = [
     { label: 'Home', href: '/dashboard' },
     { label: breadcrumbLabel, href: basePath },
-    ...(hasCategory ? [{ label: categoryLabel, href: `${basePath}?category=${article.category}` }] : []),
+    ...(hasCategory
+      ? [{ label: categoryLabel, href: `${basePath}?category=${article.category}` }]
+      : []),
     { label: article.title },
   ];
 
@@ -393,157 +374,29 @@ export default async function ArticleDetailPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdMarkup }} />
       <StructuredData data={getBreadcrumbStructuredData(breadcrumbItems)} />
       <ReadingProgress />
-
-      {/* Hero */}
-      <div className="relative h-[clamp(280px,45vh,480px)] w-full">
-        {article.cover_image ? (
-          <CoverHeroImage
-            src={article.cover_image}
-            alt={article.title}
-            priority
-            sizes="(min-width: 1280px) 1120px, 100vw"
-            className="object-cover object-[center_35%]"
-          />
-        ) : (
-          <div className="h-full w-full bg-card" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-
-      </div>
-
-      {/* Masthead + Body */}
+      <ArticleHeroSection title={article.title} coverImage={article.cover_image} />
       <div className="relative mx-auto -mt-14 max-w-5xl px-3 pb-16 sm:px-4 md:-mt-20">
         <article className="rounded-3xl border border-border bg-card p-4 shadow-2xl sm:p-6 md:p-10">
-          <header className="mx-auto">
-            <Breadcrumbs items={uiBreadcrumbs} className="mb-4" />
-
-            <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              <span className="rounded-full border border-border bg-card/80 px-3 py-1">
-                {categoryLabel}
-              </span>
-              <span className="rounded-full border border-border bg-card/80 px-3 py-1">
-                {TOPIC_LABELS[article.topic]}
-              </span>
-              {article.topic === 'reviews' && article.score != null && (
-                <span className="rounded-full border border-border bg-card/80 px-3 py-1">
-                  ⭐ {article.score} / 10
-                </span>
-              )}
-            </div>
-
-            <h1 className={ARTICLE_TITLE}>{article.title}</h1>
-
-            {article.description && <p className={ARTICLE_SUBTITLE}>{article.description}</p>}
-          </header>
-
-          <div className="mt-8">
-            <div>
-              <MetaActionsBar
-                article={article}
-                readTime={readTime}
-                dateOptions={ARTICLE_HEADER_DATE_OPTIONS}
-                showEngagementMetrics={showEngagementUi}
-                showActions={showEngagementUi}
-              />
-
-              {showEngagementUi && (
-                <section className="mt-3 space-y-3">
-                  <ArticleAuthHint />
-                </section>
-              )}
-
-              {contentWithHeadingIds && <ArticleContent html={contentWithHeadingIds} />}
-              {showEngagementUi && <ArticleComments articleId={article.id} />}
-            </div>
-          </div>
-
-          <div className="mt-12 border-t border-border pt-10">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">
-                {`Related ${relatedContentLabel}`}
-              </h2>
-              <Link
-                href={basePath}
-                className="text-sm font-semibold text-primary underline-offset-4 transition hover:underline"
-              >
-                See all
-              </Link>
-            </div>
-            {relatedArticles.length > 0 ? (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedArticles.map(related => {
-                  const relatedHref = `${basePath}/${related.slug}`;
-
-                  return (
-                    <Card
-                      key={related.id}
-                      className="group rounded-3xl border border-border bg-card shadow-md transition hover:shadow-lg"
-                    >
-                      <Link href={relatedHref} className="block">
-                        <div className="relative h-36 w-full bg-muted">
-                          {related.cover_image ? (
-                            <CoverThumbImage
-                              src={related.cover_image}
-                              alt={related.title}
-                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                              className="object-cover transition duration-300 group-hover:scale-[1.02]"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center bg-primary/20">
-                              <FileText size={32} className="text-primary" />
-                            </div>
-                          )}
-                        </div>
-                      </Link>
-                      <CardContent className="px-4 pb-4 pt-3">
-                        <Link href={relatedHref}>
-                          <CardTitle className="text-[16px] leading-snug text-foreground transition-colors group-hover:text-primary">
-                            {related.title}
-                          </CardTitle>
-                        </Link>
-                        {related.description && (
-                          <CardDescription className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                            {related.description}
-                          </CardDescription>
-                        )}
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-                          {related.published_at && (
-                            <div className="flex items-center gap-1">
-                              <Calendar size={12} />
-                              <FormattedDate
-                                date={related.published_at}
-                                className="text-[10px]"
-                                fallback=""
-                              />
-                            </div>
-                          )}
-                          {showEngagementUi ? (
-                            <>
-                              <div className="flex items-center gap-1">
-                                <Eye size={12} />
-                                <span>{related.views ?? 0}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Heart size={12} />
-                                <span>{related.likes ?? 0}</span>
-                              </div>
-                            </>
-                          ) : null}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-border bg-card p-6">
-                <EmptyState
-                  title={`No related ${relatedContentLabel} yet`}
-                  description="Try refreshing the page or explore a different topic."
-                />
-              </div>
-            )}
-          </div>
+          <ArticleBodySection
+            uiBreadcrumbs={uiBreadcrumbs}
+            categoryLabel={categoryLabel}
+            topicLabel={TOPIC_LABELS[article.topic]}
+            isReview={article.topic === 'reviews'}
+            score={article.score}
+            title={article.title}
+            description={article.description}
+            article={article}
+            readTime={readTime}
+            dateOptions={ARTICLE_HEADER_DATE_OPTIONS}
+            showEngagementUi={showEngagementUi}
+            contentWithHeadingIds={contentWithHeadingIds}
+          />
+          <RelatedArticlesSection
+            relatedArticles={relatedArticles}
+            relatedContentLabel={relatedContentLabel}
+            basePath={basePath}
+            showEngagementUi={showEngagementUi}
+          />
         </article>
       </div>
     </div>

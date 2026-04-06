@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat src/app/\\\\\\(main\\\\\\)/backlog/page.tsx)",
+      "Bash(grep -A 20 \"export async function generateMetadata\" src/app/\\\\\\(main\\\\\\)/media/[category]/[slug]/page.tsx)",
+      "Bash(cat src/app/\\\\\\(main\\\\\\)/about/page.tsx)",
+      "Bash(ls -la \"c:/Users/karka/Υπολογιστής/Michalis/Code/NextJS/hobbistas-hub/src/app/\\(main\\)/pages/_shared/\")",
+      "Bash(xargs grep -l \"organizationStructuredData\\\\|websiteStructuredData\\\\|sameAs\")",
+      "Bash(sed 's/-[0-9]*\\\\.sql$//')",
+      "Bash(wc -l /c/Users/karka/Υπολογιστής/Michalis/Code/NextJS/hobbistas-hub/src/app/api/*/*route.ts)",
+      "Bash(ls -la c:UserskarkaΥπολογιστήςMichalisCodeNextJShobbistas-hub/src/app/\\\\\\(main\\\\\\))",
+      "Bash(npx jest:*)"
+    ]
+  }
+}

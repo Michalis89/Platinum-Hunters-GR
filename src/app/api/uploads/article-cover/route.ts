@@ -16,6 +16,8 @@ const sanitizeExtension = (fileName: string) => {
 };
 
 const buildStoragePath = (extension: string) => {
+  /* c8 ignore next 2 -- randomUUID exists in this runtime; fallback is defensive */
+  /* istanbul ignore next -- randomUUID exists in this runtime; fallback is defensive */
   const uuid = randomUUID
     ? randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;

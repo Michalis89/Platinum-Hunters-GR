@@ -105,9 +105,7 @@ export async function generateGenericRecommendationsWithLimits(
   // Determine split
   const numFromBacklog = Math.min(scoredBacklog.length, maxBacklog);
   const numFromDatabase =
-    numFromBacklog < maxBacklog
-      ? maxDatabaseFallback - numFromBacklog
-      : maxDatabase;
+    numFromBacklog < maxBacklog ? maxDatabaseFallback - numFromBacklog : maxDatabase;
 
   // Get backlog recommendations
   const backlogRecommendations = scoredBacklog.slice(0, numFromBacklog).map(item => ({
@@ -127,11 +125,7 @@ export async function generateGenericRecommendationsWithLimits(
 
   // Load and score database items
   const existingMediaIds = new Set(mediaHistory.map(e => e.mediaId));
-  const databaseItems = await loadDatabaseItems(
-    supabase,
-    category,
-    existingMediaIds,
-  );
+  const databaseItems = await loadDatabaseItems(supabase, category, existingMediaIds);
 
   const scoredDatabase = scoreDatabaseItems(databaseItems, preferences);
   const scoredDatabasePrimary = scoredDatabase.slice(0, numFromDatabase);
@@ -161,7 +155,10 @@ export async function generateGenericRecommendationsWithLimits(
     score: item.score,
   }));
 
-  const recommendations = [...backlogRecommendations, ...databaseRecommendations].slice(0, maxTotal);
+  const recommendations = [...backlogRecommendations, ...databaseRecommendations].slice(
+    0,
+    maxTotal,
+  );
 
   return recommendations;
 }

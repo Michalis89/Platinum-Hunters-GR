@@ -1,6 +1,14 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useSyncExternalStore,
+} from 'react';
 
 type Theme = 'dark' | 'light';
 type ThemePreference = 'system' | 'dark' | 'light';
@@ -32,6 +40,8 @@ function setThemePreferenceCookie(preference: ThemePreference) {
 }
 
 function getSystemTheme(): Theme {
+  /* istanbul ignore next -- SSR-only guard; jsdom tests always provide window */
+  /* c8 ignore next 3 */
   if (typeof window === 'undefined') {
     return 'dark';
   }
@@ -44,6 +54,45 @@ function resolveThemePreference(preference: ThemePreference): Theme {
     return getSystemTheme();
   }
   return preference;
+}
+
+function isThemePreference(value: string | null): value is ThemePreference {
+  return value === 'system' || value === 'dark' || value === 'light';
+}
+
+function readStoredThemePreference(fallback: ThemePreference): ThemePreference {
+  /* c8 ignore next */
+  if (typeof window === 'undefined') {
+    return fallback;
+  }
+
+  try {
+    const storedPreference = localStorage.getItem(THEME_STORAGE_KEY);
+    return isThemePreference(storedPreference) ? storedPreference : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function readInitialTheme(
+  initialTheme: Theme,
+  initialPreference: ThemePreference,
+): { theme: Theme; preference: ThemePreference } {
+  const preference = readStoredThemePreference(initialPreference);
+
+  try {
+    const storedPreference = localStorage.getItem(THEME_STORAGE_KEY);
+    if (isThemePreference(storedPreference)) {
+      return {
+        preference: storedPreference,
+        theme: resolveThemePreference(storedPreference),
+      };
+    }
+  } catch {
+    return { preference, theme: initialTheme };
+  }
+
+  return { preference, theme: initialTheme };
 }
 
 function applyThemeTransitionClass() {
@@ -78,39 +127,34 @@ export function ThemeProvider({
   initialTheme = 'dark',
   initialPreference = 'system',
 }: ThemeProviderProps) {
-  // Keep first client render aligned with SSR value.
-  const [theme, setThemeState] = useState<Theme>(initialTheme);
-  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(initialPreference);
-  const [hasMounted, setHasMounted] = useState(false);
+  const initialState = useMemo(
+    () => readInitialTheme(initialTheme, initialPreference),
+    [initialTheme, initialPreference],
+  );
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(() =>
+    initialState.preference,
+  );
+  const [theme, setThemeState] = useState<Theme>(() => initialState.theme);
+  const hasMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
-  // Initialize from localStorage and apply to DOM
+  // Keep DOM attributes/cookies/storage in sync with current theme state.
   useEffect(() => {
-    setHasMounted(true);
-
     try {
-      const storedPreference = localStorage.getItem(THEME_STORAGE_KEY) as ThemePreference | null;
-
-      if (
-        storedPreference &&
-        (storedPreference === 'system' ||
-          storedPreference === 'dark' ||
-          storedPreference === 'light')
-      ) {
-        setThemePreferenceState(storedPreference);
-        const resolvedTheme = resolveThemePreference(storedPreference);
-        setThemeState(resolvedTheme);
-        applyThemeToDom(resolvedTheme);
-        setThemePreferenceCookie(storedPreference);
-      } else {
-        localStorage.setItem(THEME_STORAGE_KEY, initialPreference);
-        setThemePreferenceCookie(initialPreference);
-        applyThemeToDom(initialTheme);
+      const storedPreference = localStorage.getItem(THEME_STORAGE_KEY);
+      if (!isThemePreference(storedPreference)) {
+        localStorage.setItem(THEME_STORAGE_KEY, themePreference);
       }
     } catch {
       // ignore storage failures
-      applyThemeToDom(initialTheme);
     }
-  }, [initialTheme, initialPreference]);
+
+    setThemePreferenceCookie(themePreference);
+    applyThemeToDom(theme);
+  }, [theme, themePreference]);
 
   // Follow OS theme changes when preference is 'system'
   useEffect(() => {

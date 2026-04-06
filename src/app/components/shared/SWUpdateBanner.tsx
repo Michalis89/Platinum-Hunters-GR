@@ -28,24 +28,32 @@ export default function SWUpdateBanner() {
     const bindRegistration = (registration: ServiceWorkerRegistration) => {
       if (registration.waiting) {
         waitingWorkerRef.current = registration.waiting;
-        if (mounted) setShow(true);
+        if (mounted) {
+          setShow(true);
+        }
       }
 
       registration.addEventListener('updatefound', () => {
         const worker = registration.installing;
-        if (!worker) return;
+        if (!worker) {
+          return;
+        }
 
         worker.addEventListener('statechange', () => {
           if (worker.state === 'installed' && navigator.serviceWorker.controller) {
             waitingWorkerRef.current = registration.waiting ?? worker;
-            if (mounted) setShow(true);
+            if (mounted) {
+              setShow(true);
+            }
           }
         });
       });
     };
 
     navigator.serviceWorker.getRegistration().then(registration => {
-      if (registration) bindRegistration(registration);
+      if (registration) {
+        bindRegistration(registration);
+      }
     });
 
     const handleControllerChange = () => {

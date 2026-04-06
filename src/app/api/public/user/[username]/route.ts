@@ -8,10 +8,7 @@ import getSupabaseServer from '@/lib/supabase-server';
  * Returns 403 if the profile is private.
  * Used by /u/[username]/backlog to identify the owner.
  */
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ username: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ username: string }> }) {
   try {
     const { username } = await params;
 

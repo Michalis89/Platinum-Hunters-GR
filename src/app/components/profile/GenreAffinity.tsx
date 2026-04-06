@@ -5,8 +5,17 @@ type GenreAffinityProps = {
 };
 
 export function GenreAffinity({ genreAffinity }: Readonly<GenreAffinityProps>) {
-  const supportedCategories: ProfileCategoryKey[] = ['games', 'tv', 'anime', 'movies', 'books', 'manga'];
-  const categories = supportedCategories.filter(category => (genreAffinity?.[category] || []).length > 0);
+  const supportedCategories: ProfileCategoryKey[] = [
+    'games',
+    'tv',
+    'anime',
+    'movies',
+    'books',
+    'manga',
+  ];
+  const categories = supportedCategories.filter(
+    category => (genreAffinity?.[category] || []).length > 0,
+  );
 
   return (
     <section
@@ -14,8 +23,13 @@ export function GenreAffinity({ genreAffinity }: Readonly<GenreAffinityProps>) {
       className="rounded-3xl border border-border/60 bg-card/50 p-5 sm:p-6"
     >
       <header className="mb-4">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Taste Profile</p>
-        <h2 id="genre-affinity-heading" className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+          Taste Profile
+        </p>
+        <h2
+          id="genre-affinity-heading"
+          className="mt-1 text-xl font-semibold tracking-tight text-foreground"
+        >
           Genre Affinity
         </h2>
       </header>
@@ -53,7 +67,9 @@ export function GenreAffinity({ genreAffinity }: Readonly<GenreAffinityProps>) {
           })}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">No affinity data yet. Keep using your library to build it.</p>
+        <p className="text-sm text-muted-foreground">
+          No affinity data yet. Keep using your library to build it.
+        </p>
       )}
     </section>
   );

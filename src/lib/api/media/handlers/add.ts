@@ -18,6 +18,7 @@ import { findExistingMedia } from '../utils/media-lookup';
 import '../handlers/enrichers'; // Import to initialize enricher functions in configs
 import { isAllowedIgdbGameCandidate } from '@/lib/igdb/categories';
 import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
+import { recomputeCategoryProfiles } from '@/lib/profile/recompute-category-profiles';
 import { revalidateCache } from '@/lib/cache/tags';
 
 /**
@@ -37,11 +38,16 @@ export async function handleMediaAdd(req: Request, config: MediaCategoryConfig):
     // 2. Parse request body
     const body = (await req.json()) as AddMediaRequestBody;
     const normalizedSelectedPlatform =
-      typeof body.selected_platform === 'string' ? body.selected_platform.trim() : body.selected_platform;
+      typeof body.selected_platform === 'string'
+        ? body.selected_platform.trim()
+        : body.selected_platform;
     body.selected_platform = normalizedSelectedPlatform || null;
 
     if (config.key === 'games' && !body.selected_platform) {
-      return NextResponse.json({ error: 'Platform selection is required for games' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Platform selection is required for games' },
+        { status: 400 },
+      );
     }
 
     // 3. Handle local source (existing media in database)
@@ -97,7 +103,10 @@ async function handleLocalSource(
     const row = mediaRow as unknown as Record<string, unknown>;
     const rowCategory = typeof row.category === 'string' ? row.category : null;
     if (!rowCategory || !config.subcategories.includes(rowCategory)) {
-      return NextResponse.json({ error: 'Media does not belong to this category' }, { status: 422 });
+      return NextResponse.json(
+        { error: 'Media does not belong to this category' },
+        { status: 422 },
+      );
     }
 
     if (config.key === 'games') {
@@ -112,7 +121,10 @@ async function handleLocalSource(
         slug: typeof row.igdb_slug === 'string' ? row.igdb_slug : null,
       });
       if (!candidateAllowed) {
-        return NextResponse.json({ ok: false, error: 'Unsupported IGDB category' }, { status: 422 });
+        return NextResponse.json(
+          { ok: false, error: 'Unsupported IGDB category' },
+          { status: 422 },
+        );
       }
     }
   }
@@ -144,6 +156,10 @@ async function handleLocalSource(
 
   // Recompute genre affinity in the background
   void refreshGenreAffinity(supabase, userId);
+  // Recompute derived profile fields in the background (directors/actors/authors/studios)
+  void recomputeCategoryProfiles(supabase, userId, [mediaCategory]).catch(error => {
+    console.warn(`${config.logPrefix} derived profile recompute failed:`, error);
+  });
 
   // Log activity
   await insertActivity(supabase, userId, 'media_added', {
@@ -242,10 +258,22 @@ async function handleExternalSource(
       .single();
 
     if (insertError) {
-      throw insertError;
+      // Duplicate key (23505) = another request inserted this media concurrently.
+      // Re-fetch the existing row instead of crashing.
+      if (insertError.code === '23505') {
+        mediaId = await findExistingMedia(
+          supabase,
+          config,
+          externalIdValue as number | string,
+          payload!.category as string,
+        );
+      } else {
+        throw insertError;
+      }
+    } else {
+      mediaId = (inserted as { id?: number } | null)?.id ?? null;
+      insertedNewMedia = true;
     }
-    mediaId = (inserted as { id?: number } | null)?.id ?? null;
-    insertedNewMedia = true;
   }
 
   if (!mediaId) {
@@ -279,6 +307,10 @@ async function handleExternalSource(
 
   // Recompute genre affinity in the background
   void refreshGenreAffinity(supabase, userId);
+  // Recompute derived profile fields in the background (directors/actors/authors/studios)
+  void recomputeCategoryProfiles(supabase, userId, [payload!.category as string]).catch(error => {
+    console.warn(`${config.logPrefix} derived profile recompute failed:`, error);
+  });
 
   // Resolve title from payload
   const mediaTitle = resolveTitle(payload!, config.titlePriority);

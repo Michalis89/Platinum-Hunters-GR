@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,15 +17,12 @@ export default function BackButton({
   className,
 }: BackButtonProps) {
   const router = useRouter();
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    setIsStandalone(
+  const [isStandalone] = useState(
+    () =>
       window.matchMedia('(display-mode: standalone)').matches ||
       // iOS legacy standalone flag
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true,
-    );
-  }, []);
+  );
 
   if (!isStandalone) {
     return null;

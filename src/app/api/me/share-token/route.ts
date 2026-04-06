@@ -24,11 +24,11 @@ export async function GET() {
 
     const db = getSupabaseServer();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (db as any)
+    const { data } = (await (db as any)
       .from('share_tokens')
       .select('token,created_at,expires_at')
       .eq('user_id', session.user.id)
-      .maybeSingle() as { data: ShareTokenRow | null };
+      .maybeSingle()) as { data: ShareTokenRow | null };
 
     return NextResponse.json({
       token: data?.token ?? null,
@@ -71,14 +71,14 @@ export async function POST(request: Request) {
 
     const db = getSupabaseServer();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (db as any)
+    const { data, error } = (await (db as any)
       .from('share_tokens')
       .upsert(
         { user_id: session.user.id, token: newToken, expires_at: expiresAt },
         { onConflict: 'user_id' },
       )
       .select('token,created_at,expires_at')
-      .single() as { data: ShareTokenRow | null; error: unknown };
+      .single()) as { data: ShareTokenRow | null; error: unknown };
 
     if (error) {
       throw error;

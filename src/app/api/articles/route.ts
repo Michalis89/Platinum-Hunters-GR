@@ -76,7 +76,9 @@ async function GETHandler(req: Request) {
     let authorId = authorIdParam;
     if (authorIdParam === 'me') {
       const supabase = await createRouteHandlerClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         return fail(API_ERRORS.UNAUTHORIZED, API_ERRORS.UNAUTHORIZED.status);
       }
@@ -237,10 +239,7 @@ async function POSTHandler(req: Request) {
 
     if (insertError) {
       if (insertError.code === '23505') {
-        return fail(
-          { error: 'An article with this slug already exists.', code: 'CONFLICT' },
-          409,
-        );
+        return fail({ error: 'An article with this slug already exists.', code: 'CONFLICT' }, 409);
       }
       console.error('Error inserting article:', insertError);
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);

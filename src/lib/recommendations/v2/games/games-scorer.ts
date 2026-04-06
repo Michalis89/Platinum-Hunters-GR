@@ -418,7 +418,9 @@ export function scoreDatabaseGames(
 ): ScoredCandidate[] {
   // Filter by minimum genre affinity
   const candidates = games.filter(game => {
-    const matchedGenres = game.genres.filter(g => getGenreAffinity(preferences, g) >= MIN_GENRE_AFFINITY);
+    const matchedGenres = game.genres.filter(
+      g => getGenreAffinity(preferences, g) >= MIN_GENRE_AFFINITY,
+    );
     if (matchedGenres.length === 0) {
       return false;
     }
@@ -562,7 +564,9 @@ function generateMatchReason(
     return `Combines ${topGenres} - your top genres`;
   }
 
-  const hasRecentGenre = game.genres.some(g => isGenreRecent(preferences, g) && !isBroadGameGenre(g));
+  const hasRecentGenre = game.genres.some(
+    g => isGenreRecent(preferences, g) && !isBroadGameGenre(g),
+  );
   if (hasRecentGenre) {
     return 'Matches your recent gaming interests';
   }
@@ -595,10 +599,18 @@ function isBroadGameGenre(genre: string): boolean {
 
 function formatGenreLabel(genre: string): string {
   const normalized = (getCanonicalKey(genre) ?? genre).toLowerCase().trim();
-  if (normalized === 'role-playing-rpg' || normalized === 'role-playing-game' || normalized === 'rpg') {
+  if (
+    normalized === 'role-playing-rpg' ||
+    normalized === 'role-playing-game' ||
+    normalized === 'rpg'
+  ) {
     return 'RPG';
   }
-  if (normalized === 'turn-based' || normalized === 'turn-based-strategy-tbs' || normalized === 'tbs') {
+  if (
+    normalized === 'turn-based' ||
+    normalized === 'turn-based-strategy-tbs' ||
+    normalized === 'tbs'
+  ) {
     return 'Turn-based';
   }
   return normalized
@@ -626,7 +638,8 @@ function findRelatedLovedGame(
     if (entry.status !== 'completed') {
       continue;
     }
-    const isStrongSignal = entry.isFavorite || (typeof entry.score === 'number' && entry.score >= 8);
+    const isStrongSignal =
+      entry.isFavorite || (typeof entry.score === 'number' && entry.score >= 8);
     if (!isStrongSignal) {
       continue;
     }
@@ -651,7 +664,7 @@ function findRelatedLovedGame(
       continue;
     }
 
-    const strength = relationScore + (entry.isFavorite ? 0.75 : 0) + ((entry.score ?? 0) / 20);
+    const strength = relationScore + (entry.isFavorite ? 0.75 : 0) + (entry.score ?? 0) / 20;
     if (!best || strength > best.score) {
       best = { entry, score: strength };
     }

@@ -4,6 +4,7 @@ import { requireAuth, UnauthorizedError } from '@/lib/api/auth';
 import { API_ERRORS } from '@/lib/api/errors';
 import { fail, ok } from '@/lib/api/response';
 import type { User } from '@/types/user';
+import type { Database } from '@/lib/supabase/database.types';
 import type { CategoryProfiles } from '@/lib/validation/profile';
 import { fetchTopGenres } from '@/lib/profile/genre-affinity';
 
@@ -22,11 +23,15 @@ const handler = withApiRoute(async (request: Request) => {
 
     if (request.method === 'GET') {
       // Fetch user profile
+      type UserRow = Database['public']['Tables']['users']['Row'];
+      // Explicit column list — update if new columns are added to users table
       const { data: user, error: userError } = await supabase
         .from('users')
-        .select('*')
+        .select(
+          'id, email, username, full_name, display_name, bio, avatar_url, date_of_birth, country, timezone, language_preference, roles, social_links, privacy_settings, notification_settings, location_city, account_status, email_verified, last_login, created_at, updated_at',
+        )
         .eq('id', userId)
-        .single();
+        .single<UserRow>();
 
       if (userError) {
         return fail({ error: 'Failed to fetch user profile' }, 500);

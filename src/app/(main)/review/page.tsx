@@ -17,7 +17,9 @@ type ReviewsPageProps = {
 const DEFAULT_DESCRIPTION =
   'Explore honest, community-written reviews across games, anime, manga, movies, TV, books, and more.';
 
-type ReviewsClientInitialArticles = NonNullable<ComponentProps<typeof ReviewsPageClient>['initialArticles']>;
+type ReviewsClientInitialArticles = NonNullable<
+  ComponentProps<typeof ReviewsPageClient>['initialArticles']
+>;
 
 export async function generateMetadata({ searchParams }: ReviewsPageProps): Promise<Metadata> {
   const resolvedParams = await searchParams;

@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+export {};
 
 const sw = globalThis as unknown as ServiceWorkerGlobalScope;
 
@@ -159,7 +160,10 @@ function parsePushPayload(event: PushEvent): PushPayload {
   }
 }
 
-async function trackNotificationEvent(action: 'received' | 'open' | 'dismiss', payload: PushPayload) {
+async function trackNotificationEvent(
+  action: 'received' | 'open' | 'dismiss',
+  payload: PushPayload,
+) {
   if (!payload.notificationId) {
     return;
   }
@@ -242,23 +246,19 @@ sw.addEventListener('notificationclick', event => {
         notificationId: maybeData.notificationId,
         url: targetUrl,
       }),
-      sw.clients
-        .matchAll({ type: 'window', includeUncontrolled: true })
-        .then(windowClients => {
-          // Find a client that belongs to this origin so we don't hijack an
-          // unrelated tab that happens to have a 'focus' method.
-          const appClient = windowClients.find(c =>
-            c.url.startsWith(sw.location.origin),
-          );
-          if (appClient && 'focus' in appClient) {
-            void appClient.focus();
-            if ('navigate' in appClient) {
-              void appClient.navigate(targetUrl);
-            }
-            return;
+      sw.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+        // Find a client that belongs to this origin so we don't hijack an
+        // unrelated tab that happens to have a 'focus' method.
+        const appClient = windowClients.find(c => c.url.startsWith(sw.location.origin));
+        if (appClient && 'focus' in appClient) {
+          void appClient.focus();
+          if ('navigate' in appClient) {
+            void appClient.navigate(targetUrl);
           }
-          return sw.clients.openWindow(targetUrl);
-        }),
+          return;
+        }
+        return sw.clients.openWindow(targetUrl);
+      }),
     ]),
   );
 });

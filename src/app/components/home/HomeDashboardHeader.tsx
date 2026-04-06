@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 type HomeDashboardHeaderProps = {
   username: string;
@@ -8,11 +8,12 @@ type HomeDashboardHeaderProps = {
 };
 
 function useGreeting() {
-  const [greeting, setGreeting] = useState<string>('Hello');
-
-  useEffect(() => {
-    setGreeting(getGreeting());
-  }, []);
+  const [greeting] = useState<string>(() => {
+    if (typeof window === 'undefined') {
+      return 'Hello';
+    }
+    return getGreeting();
+  });
 
   return greeting;
 }

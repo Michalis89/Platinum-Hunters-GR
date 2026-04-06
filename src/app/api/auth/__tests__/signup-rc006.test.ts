@@ -10,7 +10,6 @@ const mockSendConfirmEmail = jest.fn();
 const mockResolveSiteUrl = jest.fn(() => 'http://localhost:3000');
 
 const mockMaybeSingle = jest.fn();
-const mockUpsertSingle = jest.fn();
 const mockUsersUpsert = jest.fn();
 const mockCategoryUpsert = jest.fn();
 const mockCreateUser = jest.fn();
@@ -151,13 +150,11 @@ describe('POST /api/auth/signup RC-006', () => {
         }),
     );
 
-    mockUsersUpsert
-      .mockReturnValueOnce(makeUserUpsertChain({ error: null }))
-      .mockReturnValueOnce(
-        makeUserUpsertChain({
-          error: { code: '23505', message: 'duplicate key value violates unique constraint' },
-        }),
-      );
+    mockUsersUpsert.mockReturnValueOnce(makeUserUpsertChain({ error: null })).mockReturnValueOnce(
+      makeUserUpsertChain({
+        error: { code: '23505', message: 'duplicate key value violates unique constraint' },
+      }),
+    );
 
     const { POST } = await import('@/app/api/auth/signup/route');
 

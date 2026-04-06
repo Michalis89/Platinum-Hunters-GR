@@ -334,14 +334,26 @@ function NewsPageContent() {
   return (
     <PageContainer size="lg" className="py-10 sm:py-12">
       <div className="rounded-lg p-3 sm:p-4">
-        <section className="animate-fade-in-up mb-6 rounded-lg p-5 sm:p-7">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">
-                Editorial Desk
-              </p>
-              <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">{pageTitle}</h1>
-              <p className="max-w-2xl text-[14px] text-muted-foreground">{subtitle}</p>
+        <section className="animate-fade-in-up relative mb-6 overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 sm:p-8">
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.28),transparent_70%)]" />
+            <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.18),transparent_70%)]" />
+          </div>
+
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex items-start gap-4 sm:gap-5">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary sm:h-20 sm:w-20">
+                <FileText className="h-8 w-8" />
+              </div>
+              <div className="space-y-3">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground sm:text-xs">
+                  Editorial Desk
+                </p>
+                <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
+                  {pageTitle}
+                </h1>
+                <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">{subtitle}</p>
+              </div>
             </div>
             <span className="inline-flex w-fit items-center px-3 py-1.5 text-xs font-medium text-muted-foreground">
               {metaLine}

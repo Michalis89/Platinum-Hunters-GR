@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import {
@@ -98,21 +98,18 @@ export function HomeSuggestions({ enabledCategories, fallbackByCategory }: HomeS
     () => categoryConfigs.filter(config => enabledCategories.includes(config.key)),
     [enabledCategories],
   );
-  const [activeTab, setActiveTab] = useState<string | null>(() => visibleConfigs[0]?.key ?? null);
-
-  useEffect(() => {
+  const [selectedTab, setSelectedTab] = useState<string | null>(null);
+  const activeTab = useMemo(() => {
     if (visibleConfigs.length === 0) {
-      if (activeTab !== null) {
-        setActiveTab(null);
-      }
-      return;
+      return null;
     }
 
-    const hasActiveTab = activeTab ? visibleConfigs.some(config => config.key === activeTab) : false;
-    if (!hasActiveTab) {
-      setActiveTab(visibleConfigs[0].key);
+    if (selectedTab && visibleConfigs.some(config => config.key === selectedTab)) {
+      return selectedTab;
     }
-  }, [activeTab, visibleConfigs]);
+
+    return visibleConfigs[0].key;
+  }, [selectedTab, visibleConfigs]);
 
   const activeConfig = visibleConfigs.find(c => c.key === activeTab);
   const activeFallbackItems = activeConfig ? fallbackByCategory?.[activeConfig.key] : undefined;
@@ -153,7 +150,7 @@ export function HomeSuggestions({ enabledCategories, fallbackByCategory }: HomeS
                 <Button
                   variant="secondary"
                   key={config.key}
-                  onClick={() => setActiveTab(config.key)}
+                  onClick={() => setSelectedTab(config.key)}
                   className={`h-9 rounded-full px-4 text-sm transition ${
                     isActiveTab ? '' : 'bg-transparent text-muted-foreground'
                   }`}

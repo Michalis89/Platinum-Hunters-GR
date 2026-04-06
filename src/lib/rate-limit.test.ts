@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { rateLimit, getClientIp, rateLimitHeaders, RATE_LIMITS } from './rate-limit';
 
 describe('rate-limit', () => {

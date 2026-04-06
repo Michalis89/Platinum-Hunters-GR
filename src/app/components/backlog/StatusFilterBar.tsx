@@ -40,7 +40,7 @@ export default function StatusFilterBar({
     <section className="sticky top-20 z-30 rounded-2xl border border-border/70 bg-background/95 px-4 py-3 shadow-sm supports-[backdrop-filter]:bg-background/95 sm:px-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         {/* Search — 1/3 */}
-        <div className="relative sm:basis-1/3 sm:shrink-0">
+        <div className="relative sm:shrink-0 sm:basis-1/3">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"

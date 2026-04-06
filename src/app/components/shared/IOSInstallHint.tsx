@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -9,33 +9,44 @@ const VISITS_KEY = 'pwa-visit-count';
 const MIN_VISITS = 3;
 
 function isIOSDevice() {
-  if (typeof navigator === 'undefined') return false;
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
   const ua = navigator.userAgent;
   return /iPhone|iPad|iPod/i.test(ua);
 }
 
 function isStandaloneMode() {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {
+    return false;
+  }
   return window.matchMedia('(display-mode: standalone)').matches;
 }
 
 export default function IOSInstallHint() {
   const [visible, setVisible] = useState(false);
-  const [visits, setVisits] = useState(0);
+  const [visits] = useState(() => {
+    if (typeof window === 'undefined') { return 0; }
+    return Number(window.localStorage.getItem(VISITS_KEY) ?? '0');
+  });
   const isIOS = useMemo(() => isIOSDevice(), []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const current = Number(window.localStorage.getItem(VISITS_KEY) ?? '0');
-    setVisits(current);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!isIOS || isStandaloneMode()) return;
-    if (!navigator.onLine) return;
-    if (visits < MIN_VISITS) return;
-    if (window.localStorage.getItem(DISMISS_KEY) === '1') return;
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (!isIOS || isStandaloneMode()) {
+      return;
+    }
+    if (!navigator.onLine) {
+      return;
+    }
+    if (visits < MIN_VISITS) {
+      return;
+    }
+    if (window.localStorage.getItem(DISMISS_KEY) === '1') {
+      return;
+    }
 
     const timer = window.setTimeout(() => setVisible(true), 1500);
     return () => window.clearTimeout(timer);

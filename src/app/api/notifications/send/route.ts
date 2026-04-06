@@ -18,14 +18,6 @@ const sendSchema = z.object({
   badge: z.string().max(512).optional(),
 });
 
-import type { Json } from '@/lib/supabase/database.types';
-
-type PushSubscriptionRecord = {
-  user_id: string;
-  endpoint: string;
-  subscription: Json;
-};
-
 function getEdgeFunctionUrl() {
   const explicitUrl = process.env.PUSH_EDGE_FUNCTION_URL;
   if (explicitUrl) {
@@ -62,7 +54,8 @@ const handler = withApiRoute(async request => {
     if (!functionUrl || !serviceRoleKey) {
       return fail(
         {
-          error: 'Missing PUSH_EDGE_FUNCTION_URL (or NEXT_PUBLIC_SUPABASE_URL) / SUPABASE_SERVICE_ROLE_KEY',
+          error:
+            'Missing PUSH_EDGE_FUNCTION_URL (or NEXT_PUBLIC_SUPABASE_URL) / SUPABASE_SERVICE_ROLE_KEY',
           code: 'MISSING_PUSH_ENV',
         },
         500,
@@ -76,7 +69,13 @@ const handler = withApiRoute(async request => {
       ? await baseQuery.eq('user_id', parsed.data.userId)
       : await baseQuery;
     if (result.error) {
-      return fail({ error: result.error.message || 'Failed to fetch subscriptions', code: 'SUBS_FETCH_FAILED' }, 500);
+      return fail(
+        {
+          error: result.error.message || 'Failed to fetch subscriptions',
+          code: 'SUBS_FETCH_FAILED',
+        },
+        500,
+      );
     }
 
     const subscriptions = result.data ?? [];

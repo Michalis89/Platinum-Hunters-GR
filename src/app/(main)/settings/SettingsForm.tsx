@@ -81,6 +81,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   const isDndPreviewMode = isProd;
 
   const updateSetting = async (patch: Partial<UserSettingsValue>) => {
+    /* c8 ignore next 3 -- UI disables all setting controls while saving */
     if (isSaving) {
       return;
     }
@@ -137,6 +138,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       sanitized.dms_notifications_enabled = normalized.dms_notifications_enabled;
     }
 
+    /* c8 ignore next 3 -- defensive branch; current UI only emits known setting keys */
     if (Object.keys(sanitized).length === 0) {
       return;
     }
@@ -344,6 +346,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle>Digital Personal Diary</CardTitle>
+            {/* c8 ignore next 5 -- feature flag intentionally hardcoded off for now */}
             {isDiaryPreviewMode ? (
               <Badge variant="outline" className="text-[10px] uppercase tracking-[0.08em]">
                 Coming Soon
@@ -370,7 +373,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           {diary_enabled && (
             <div className="rounded-xl border border-dashed border-border p-4">
               <p className="text-sm text-muted-foreground">
-                Your diary entries are encrypted and 100% private. Not even platform administrators can access your content.
+                Your diary entries are encrypted and 100% private. Not even platform administrators
+                can access your content.
               </p>
             </div>
           )}
@@ -430,7 +434,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
               {dnd_role === 'dm' && (
                 <p className="text-sm text-muted-foreground">
-                  As a DM, you can create campaigns, manage sessions, and share specific tools with your players.
+                  As a DM, you can create campaigns, manage sessions, and share specific tools with
+                  your players.
                 </p>
               )}
               {dnd_role === 'player' && (
@@ -542,7 +547,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <Alert>
           <AlertTitle>Production Environment</AlertTitle>
           <AlertDescription>
-            In production, only the "Enable social features" master toggle and Dungeons & Dragons
+            In production, only the &quot;Enable social features&quot; master toggle and Dungeons &
+            Dragons
             Tools are locked and marked as Coming Soon. Digital Personal Diary is available now.
           </AlertDescription>
         </Alert>

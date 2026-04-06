@@ -60,3 +60,4 @@ supabase/.temp
 /issues
 /generated_issues.txt
 /scripts
+.claude

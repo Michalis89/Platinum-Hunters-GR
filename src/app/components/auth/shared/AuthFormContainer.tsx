@@ -52,9 +52,7 @@ export function AuthFormContainer({
 
           <span className="flex flex-col leading-tight">
             <span className="font-semibold">{title}</span>
-            <span className="mt-1 text-[0.93rem] font-normal text-foreground/75">
-              {subtitle}
-            </span>
+            <span className="mt-1 text-[0.93rem] font-normal text-foreground/75">{subtitle}</span>
           </span>
         </CardTitle>
       </CardHeader>

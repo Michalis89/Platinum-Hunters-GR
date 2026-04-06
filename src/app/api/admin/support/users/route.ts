@@ -36,7 +36,9 @@ async function fetchDistinctStatuses(admin: ReturnType<typeof createSupabaseAdmi
     new Set(
       (data ?? [])
         .map(row => row.account_status)
-        .filter((status): status is string => typeof status === 'string' && status.trim().length > 0),
+        .filter(
+          (status): status is string => typeof status === 'string' && status.trim().length > 0,
+        ),
     ),
   ).sort((a, b) => a.localeCompare(b));
 }
@@ -83,7 +85,10 @@ async function GETHandler(req: Request) {
       );
     }
 
-    const [{ data, error, count }, statuses] = await Promise.all([request, fetchDistinctStatuses(admin)]);
+    const [{ data, error, count }, statuses] = await Promise.all([
+      request,
+      fetchDistinctStatuses(admin),
+    ]);
 
     if (error) {
       console.error('Admin users list error:', error);

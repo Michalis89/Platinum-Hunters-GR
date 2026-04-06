@@ -9,7 +9,10 @@ const mockInsertActivity = jest.fn();
 const mockRevalidateArticleComment = jest.fn();
 
 const state = {
-  commentsByKey: new Map<string, { id: number; content: string; user_id: string; article_id: number }>(),
+  commentsByKey: new Map<
+    string,
+    { id: number; content: string; user_id: string; article_id: number }
+  >(),
   nextCommentId: 100,
 };
 
@@ -30,24 +33,51 @@ const mockSupabase = {
 
     if (table === 'article_comments') {
       return {
-        upsert: jest.fn((payload: {
-          article_id: number;
-          user_id: string;
-          content: string;
-          idempotency_key?: string;
-        }) => {
-          return {
-            select: jest.fn().mockImplementation(async () => {
-              const key = payload.idempotency_key ?? '';
-              if (!key) {
-                const id = state.nextCommentId++;
+        upsert: jest.fn(
+          (payload: {
+            article_id: number;
+            user_id: string;
+            content: string;
+            idempotency_key?: string;
+          }) => {
+            return {
+              select: jest.fn().mockImplementation(async () => {
+                const key = payload.idempotency_key ?? '';
+                if (!key) {
+                  const id = state.nextCommentId++;
+                  return {
+                    data: [
+                      {
+                        id,
+                        article_id: payload.article_id,
+                        user_id: payload.user_id,
+                        content: payload.content,
+                        users: {
+                          username: 'tester',
+                          display_name: 'Tester',
+                          avatar_url: null,
+                        },
+                      },
+                    ],
+                    error: null,
+                  };
+                }
+
+                const existing = state.commentsByKey.get(key);
+                if (existing) {
+                  return { data: [], error: null };
+                }
+                const created = {
+                  id: state.nextCommentId++,
+                  article_id: payload.article_id,
+                  user_id: payload.user_id,
+                  content: payload.content,
+                };
+                state.commentsByKey.set(key, created);
                 return {
                   data: [
                     {
-                      id,
-                      article_id: payload.article_id,
-                      user_id: payload.user_id,
-                      content: payload.content,
+                      ...created,
                       users: {
                         username: 'tester',
                         display_name: 'Tester',
@@ -57,35 +87,10 @@ const mockSupabase = {
                   ],
                   error: null,
                 };
-              }
-
-              const existing = state.commentsByKey.get(key);
-              if (existing) {
-                return { data: [], error: null };
-              }
-              const created = {
-                id: state.nextCommentId++,
-                article_id: payload.article_id,
-                user_id: payload.user_id,
-                content: payload.content,
-              };
-              state.commentsByKey.set(key, created);
-              return {
-                data: [
-                  {
-                    ...created,
-                    users: {
-                      username: 'tester',
-                      display_name: 'Tester',
-                      avatar_url: null,
-                    },
-                  },
-                ],
-                error: null,
-              };
-            }),
-          };
-        }),
+              }),
+            };
+          },
+        ),
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
@@ -179,8 +184,8 @@ describe('RC-030 comments idempotency', () => {
 
     expect(resA.status).toBe(200);
     expect(resB.status).toBe(200);
-    expect(bodyA.comment?.id).toBeDefined();
-    expect(bodyB.comment?.id).toBeDefined();
+    expect(bodyA.data.comment?.id).toBeDefined();
+    expect(bodyB.data.comment?.id).toBeDefined();
     expect(mockInsertActivity).toHaveBeenCalledTimes(1);
     expect(mockRevalidateArticleComment).toHaveBeenCalledTimes(1);
   });

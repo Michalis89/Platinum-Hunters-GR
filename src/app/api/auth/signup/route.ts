@@ -152,7 +152,10 @@ async function POSTHandler(req: Request) {
 
     if (authError) {
       console.error('Admin create user error:', authError);
-      if (authError.message.toLowerCase().includes('already')) {
+      if (
+        authError.message.toLowerCase().includes('already') ||
+        authError.status === 422
+      ) {
         return fail({ error: 'An account with these details already exists.' }, 409);
       }
       return fail(API_ERRORS.INTERNAL, API_ERRORS.INTERNAL.status);

@@ -630,11 +630,14 @@ export default function EditArticleDialog({
                             className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted/50"
                           >
                             {item.cover ? (
-                              <img
-                                src={item.cover}
-                                alt=""
-                                className="h-9 w-6 shrink-0 rounded object-cover"
-                              />
+                              <div className="relative h-9 w-6 shrink-0 overflow-hidden rounded">
+                                <CoverThumbImage
+                                  src={item.cover}
+                                  alt=""
+                                  sizes="24px"
+                                  className="object-cover"
+                                />
+                              </div>
                             ) : (
                               <div className="h-9 w-6 shrink-0 rounded bg-muted" />
                             )}

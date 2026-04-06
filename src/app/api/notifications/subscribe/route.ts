@@ -56,7 +56,10 @@ const handler = withApiRoute(async request => {
 
       if (error) {
         return fail(
-          { error: error.message || 'Failed to store push subscription', code: 'PUSH_SUBSCRIBE_FAILED' },
+          {
+            error: error.message || 'Failed to store push subscription',
+            code: 'PUSH_SUBSCRIBE_FAILED',
+          },
           500,
         );
       }
@@ -84,7 +87,10 @@ const handler = withApiRoute(async request => {
 
       if (error) {
         return fail(
-          { error: error.message || 'Failed to remove push subscription', code: 'PUSH_UNSUBSCRIBE_FAILED' },
+          {
+            error: error.message || 'Failed to remove push subscription',
+            code: 'PUSH_UNSUBSCRIBE_FAILED',
+          },
           500,
         );
       }

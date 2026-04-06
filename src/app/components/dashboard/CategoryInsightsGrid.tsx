@@ -256,7 +256,10 @@ const READING_FORMAT_LABELS: Record<string, string> = {
   digital: 'Digital',
 };
 
-function formatPlatformLabelByCategory(category: DashboardCategoryKey, value: string | null | undefined) {
+function formatPlatformLabelByCategory(
+  category: DashboardCategoryKey,
+  value: string | null | undefined,
+) {
   const normalized = value?.trim();
   if (!normalized) {
     return 'Unspecified';

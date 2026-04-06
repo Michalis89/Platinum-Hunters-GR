@@ -211,6 +211,7 @@ async function GETHandler() {
     const platformCandidates = Array.from(platformStats.entries())
       .map(([platform, stats]) => ({
         platform,
+        /* istanbul ignore next: total is always > 0 when platformStats entry exists */
         dropRate: stats.total > 0 ? stats.dropped / stats.total : 0,
         total: stats.total,
       }))

@@ -75,6 +75,8 @@ function canAssignRoles(actorRoles: string[], nextRoles: UserRole[]) {
     return !nextRoles.includes('owner') && !nextRoles.includes('admin');
   }
 
+  /* c8 ignore next -- unreachable after requireAdminRole gate ensures admin/mod/owner actor */
+  /* istanbul ignore next -- unreachable after requireAdminRole gate ensures admin/mod/owner actor */
   return false;
 }
 
@@ -89,7 +91,9 @@ async function PATCHHandler(req: Request, context: { params: Promise<{ id: strin
       return fail(API_ERRORS.BAD_REQUEST, API_ERRORS.BAD_REQUEST.status);
     }
 
-    const body = (await req.json().catch(() => null)) as { updates?: Record<string, unknown> } | null;
+    const body = (await req.json().catch(() => null)) as {
+      updates?: Record<string, unknown>;
+    } | null;
     const input = body?.updates;
     if (!input || typeof input !== 'object') {
       return fail(API_ERRORS.BAD_REQUEST, API_ERRORS.BAD_REQUEST.status);

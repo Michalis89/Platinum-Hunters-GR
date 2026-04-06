@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,7 +95,9 @@ const READING_FORMATS = [
 
 function formatMediaFormatLabel(value?: string | null) {
   const raw = value?.trim();
-  if (!raw) return '-';
+  if (!raw) {
+    return '-';
+  }
 
   const normalized = raw.toLowerCase();
   const specialMap: Record<string, string> = {
@@ -234,7 +236,11 @@ export default function EntryEditDialog({
     setEditState(prev => ({
       ...prev,
       progress: String(nextClamped),
-      status: shouldComplete ? 'completed' : prev.status === 'planned' && shouldMoveToCurrent ? 'current' : prev.status,
+      status: shouldComplete
+        ? 'completed'
+        : prev.status === 'planned' && shouldMoveToCurrent
+          ? 'current'
+          : prev.status,
     }));
   };
 
@@ -253,7 +259,11 @@ export default function EntryEditDialog({
     setEditState(prev => ({
       ...prev,
       progress: value,
-      status: shouldComplete ? 'completed' : prev.status === 'planned' && shouldMoveToCurrent ? 'current' : prev.status,
+      status: shouldComplete
+        ? 'completed'
+        : prev.status === 'planned' && shouldMoveToCurrent
+          ? 'current'
+          : prev.status,
     }));
   };
 
@@ -356,13 +366,16 @@ export default function EntryEditDialog({
                 >
                   Status
                 </label>
-                <Select value={editState.status} onValueChange={value => handleStatusChange(value as MediaStatus)}>
+                <Select
+                  value={editState.status}
+                  onValueChange={value => handleStatusChange(value as MediaStatus)}
+                >
                   <SelectTrigger id="entry-status-trigger" className="h-10 !min-h-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent
                     portalContainer={selectPortalContainer ?? undefined}
-                    className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                    className="data-[state=closed]:animate-none data-[state=open]:animate-none"
                   >
                     <SelectItem value="planned">{config.plannedLabel}</SelectItem>
                     {category !== 'movies' ? (
@@ -400,7 +413,7 @@ export default function EntryEditDialog({
                     </SelectTrigger>
                     <SelectContent
                       portalContainer={selectPortalContainer ?? undefined}
-                      className="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                      className="data-[state=closed]:animate-none data-[state=open]:animate-none"
                     >
                       <SelectItem value={NO_PLATFORM_VALUE}>Not selected</SelectItem>
                       {isAnime
@@ -559,10 +572,7 @@ export default function EntryEditDialog({
                 aria-pressed={editState.isFavorite}
                 className="h-10 w-full justify-start gap-2"
               >
-                <Heart
-                  className="h-4 w-4"
-                  fill={editState.isFavorite ? 'currentColor' : 'none'}
-                />
+                <Heart className="h-4 w-4" fill={editState.isFavorite ? 'currentColor' : 'none'} />
                 {editState.isFavorite ? 'Favorited' : 'Mark as favorite'}
               </Button>
             </div>

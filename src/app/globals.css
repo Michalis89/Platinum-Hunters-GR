@@ -54,7 +54,7 @@
     --shadow-md: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 2px 4px -1px hsl(0 0% 0% / 0.16);
     --shadow-lg: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 4px 6px -1px hsl(0 0% 0% / 0.16);
     --shadow-xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 8px 10px -1px hsl(0 0% 0% / 0.16);
-    --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.40);
+    --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.4);
     --tracking-normal: -0.025em;
     --spacing: 0.27rem;
 
@@ -98,8 +98,7 @@
     --scrollbar-thumb: 240 10% 70%;
     --scrollbar-thumb-hover: 240 10% 60%;
     --shadow-diary:
-      0px 12px 24px -22px hsl(248 38% 46% / 0.38),
-      0px 4px 10px -8px hsl(240 16% 24% / 0.2);
+      0px 12px 24px -22px hsl(248 38% 46% / 0.38), 0px 4px 10px -8px hsl(240 16% 24% / 0.2);
     --shadow-offset-x: 0px;
     --shadow-offset-y: 2px;
     --letter-spacing: -0.025em;
@@ -164,8 +163,7 @@
     --scrollbar-thumb: 240 4% 30%;
     --scrollbar-thumb-hover: 240 4% 40%;
     --shadow-diary:
-      0px 14px 30px -24px hsl(248 70% 8% / 0.65),
-      0px 6px 14px -10px hsl(248 70% 6% / 0.45);
+      0px 14px 30px -24px hsl(248 70% 8% / 0.65), 0px 6px 14px -10px hsl(248 70% 6% / 0.45);
   }
   html {
     background: hsl(var(--background));

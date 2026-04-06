@@ -59,7 +59,10 @@ export function ActivityTimeline({ limit = 12 }: Readonly<ActivityTimelineProps>
       <header className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Timeline</p>
-          <h2 id="activity-timeline-heading" className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+          <h2
+            id="activity-timeline-heading"
+            className="mt-1 text-2xl font-semibold tracking-tight text-foreground"
+          >
             Recent Activity
           </h2>
         </div>

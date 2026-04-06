@@ -108,7 +108,7 @@ export const CATEGORY_META: Record<ProfileCategoryKey, CategoryMeta> = {
     key: 'books',
     title: 'Books',
     description: 'Reading formats and genres',
-    group: 'Creative',
+    group: 'Entertainment',
     icon: BookOpen,
   },
   coding: {
@@ -152,7 +152,9 @@ export function getEnabledCategories(
     if (!socialLayerEnabled && ['coding', 'pet', 'vape'].includes(cat)) {
       return false;
     }
-    return fromProfile.includes(cat) || (isPrivileged && hasCategoryData(user?.category_profile?.[cat]));
+    return (
+      fromProfile.includes(cat) || (isPrivileged && hasCategoryData(user?.category_profile?.[cat]))
+    );
   });
 }
 
@@ -189,7 +191,8 @@ export function resolveProfileIdentity(
   authUser?: SupabaseAuthUser | null,
 ): ResolvedProfileIdentity {
   const authMeta = (authUser?.user_metadata ?? {}) as Record<string, unknown>;
-  const displayName = toText(user.display_name) || toText(user.full_name) || toText(authMeta.full_name);
+  const displayName =
+    toText(user.display_name) || toText(user.full_name) || toText(authMeta.full_name);
   const username = toText(user.username) || toText(authMeta.username);
   const fullName = toText(user.full_name) || toText(authMeta.full_name);
   const email = toText(user.email) || toText(authUser?.email) || toText(authMeta.email);
@@ -325,13 +328,17 @@ function toLabel(key: string) {
 }
 
 function toStringArray(value: unknown) {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
 }
 
 function toCsvList(value: unknown) {
   if (Array.isArray(value)) {
     return value
-      .filter((item): item is string | number => typeof item === 'string' || typeof item === 'number')
+      .filter(
+        (item): item is string | number => typeof item === 'string' || typeof item === 'number',
+      )
       .map(item => String(item).trim())
       .filter(Boolean);
   }
@@ -364,7 +371,9 @@ function appendUnmappedFields(
 
     if (Array.isArray(value)) {
       const items = value
-        .filter((item): item is string | number | boolean => ['string', 'number', 'boolean'].includes(typeof item))
+        .filter((item): item is string | number | boolean =>
+          ['string', 'number', 'boolean'].includes(typeof item),
+        )
         .map(item => String(item).trim())
         .filter(Boolean);
       if (items.length > 0) {
@@ -407,11 +416,9 @@ export function getCategoryCardData(
     const nintendoId = toText(note.nintendo_id);
 
     const data: CategoryCardData = {
-      keyAttributes: [
-        { label: 'Favorite Platform', value: text(note.favorite_platform) },
-      ],
+      keyAttributes: [],
       genres: getCategoryGenres(category, note, genreAffinity),
-      listSections: [],
+      listSections: [{ label: 'Favorite Platform', items: toCsvList(note.favorite_platform) }],
       externalAccountsLabel: 'Gaming Accounts',
       externalAccounts: [
         options?.showPsnId !== false && psnId
@@ -477,9 +484,7 @@ export function getCategoryCardData(
   if (category === 'manga') {
     const malUsername = toText(note.mal_username);
     const data: CategoryCardData = {
-      keyAttributes: [
-        { label: 'Notes', value: text(note.notes) },
-      ],
+      keyAttributes: [{ label: 'Notes', value: text(note.notes) }],
       genres: getCategoryGenres(category, note, genreAffinity),
       listSections: [
         { label: 'Reading Format', items: toCsvList(note.format) },
@@ -500,9 +505,7 @@ export function getCategoryCardData(
 
   if (category === 'movies' || category === 'tv') {
     const data: CategoryCardData = {
-      keyAttributes: [
-        { label: 'Other Service', value: text(note.service_other) },
-      ],
+      keyAttributes: [{ label: 'Other Service', value: text(note.service_other) }],
       genres: getCategoryGenres(category, note, genreAffinity),
       listSections: [
         {
@@ -521,7 +524,16 @@ export function getCategoryCardData(
     };
     appendUnmappedFields(
       note,
-      new Set(['since', 'style', 'service_other', 'directors', 'actors', 'people', 'genres', 'services']),
+      new Set([
+        'since',
+        'style',
+        'service_other',
+        'directors',
+        'actors',
+        'people',
+        'genres',
+        'services',
+      ]),
       data,
     );
     return data;
@@ -529,9 +541,7 @@ export function getCategoryCardData(
 
   if (category === 'books') {
     const data: CategoryCardData = {
-      keyAttributes: [
-        { label: 'Notes', value: text(note.notes) },
-      ],
+      keyAttributes: [{ label: 'Notes', value: text(note.notes) }],
       genres: getCategoryGenres(category, note, genreAffinity),
       listSections: [
         { label: 'Reading Format', items: toCsvList(note.format) },

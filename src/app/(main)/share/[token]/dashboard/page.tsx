@@ -54,10 +54,20 @@ function InvalidLink({ message }: { message: string }) {
   );
 }
 
-export default async function ShareDashboardPage({ params }: PageProps) {
-  const { token } = await params;
-  const supabase = getSupabaseServer();
+type ShareDashboardLoadResult =
+  | { kind: 'invalid'; message: string }
+  | {
+      kind: 'ok';
+      displayName: string;
+      mediaCategories: DashboardCategoryKey[];
+      sections: Awaited<ReturnType<typeof fetchCategoryDashboardData>>;
+      stats: Awaited<ReturnType<typeof fetchUserStats>>;
+    };
 
+async function loadShareDashboardData(
+  token: string,
+  supabase: ReturnType<typeof getSupabaseServer>,
+): Promise<ShareDashboardLoadResult> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: tokenRow, error: tokenError } = await ((supabase as any)
@@ -71,11 +81,11 @@ export default async function ShareDashboardPage({ params }: PageProps) {
 
     if (tokenError) {
       console.error('[share/token/dashboard] DB error:', tokenError);
-      return <InvalidLink message="Could not verify this share link. Please try again later." />;
+      return { kind: 'invalid', message: 'Could not verify this share link. Please try again later.' };
     }
 
     if (!tokenRow || isTokenExpired(tokenRow.expires_at)) {
-      return <InvalidLink message="This share link is invalid or has been revoked." />;
+      return { kind: 'invalid', message: 'This share link is invalid or has been revoked.' };
     }
 
     const { data: user } = await supabase
@@ -85,7 +95,7 @@ export default async function ShareDashboardPage({ params }: PageProps) {
       .maybeSingle();
 
     if (!user) {
-      return <InvalidLink message="The owner of this link could not be found." />;
+      return { kind: 'invalid', message: 'The owner of this link could not be found.' };
     }
 
     const [stats, continueData] = await Promise.all([
@@ -106,30 +116,42 @@ export default async function ShareDashboardPage({ params }: PageProps) {
     const sections = await fetchCategoryDashboardData(supabase, user.id, mediaCategories);
     const displayName = user.display_name ?? user.username;
 
-    return (
-      <div className="w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
-        <section className="px-4 pb-8 pt-12 md:px-6 md:pb-10 md:pt-16">
-          <div className="mx-auto max-w-screen-2xl space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">Shared dashboard</p>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
-              {displayName}&apos;s Dashboard
-            </h1>
-            <p className="max-w-3xl text-sm text-muted-foreground md:text-base">
-              Read-only insights, favorites, and recommendations.
-            </p>
-          </div>
-        </section>
-
-        <HomeDashboardSections
-          mediaCategories={mediaCategories}
-          categorySections={sections}
-          stats={stats}
-          isReadOnly
-        />
-      </div>
-    );
+    return { kind: 'ok', displayName, mediaCategories, sections, stats };
   } catch (error) {
     console.error('[share/token/dashboard] Unexpected error:', error);
-    return <InvalidLink message="Something went wrong. Please try again later." />;
+    return { kind: 'invalid', message: 'Something went wrong. Please try again later.' };
   }
+}
+
+export default async function ShareDashboardPage({ params }: PageProps) {
+  const { token } = await params;
+  const supabase = getSupabaseServer();
+  const result = await loadShareDashboardData(token, supabase);
+
+  if (result.kind === 'invalid') {
+    return <InvalidLink message={result.message} />;
+  }
+
+  return (
+    <div className="w-full px-2 pb-10 pt-2 md:px-4 md:pb-14 md:pt-4">
+      <section className="px-4 pb-8 pt-12 md:px-6 md:pb-10 md:pt-16">
+        <div className="mx-auto max-w-screen-2xl space-y-3">
+          <p className="text-sm font-medium text-muted-foreground">Shared dashboard</p>
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
+            {result.displayName}&apos;s Dashboard
+          </h1>
+          <p className="max-w-3xl text-sm text-muted-foreground md:text-base">
+            Read-only insights, favorites, and recommendations.
+          </p>
+        </div>
+      </section>
+
+      <HomeDashboardSections
+        mediaCategories={result.mediaCategories}
+        categorySections={result.sections}
+        stats={result.stats}
+        isReadOnly
+      />
+    </div>
+  );
 }

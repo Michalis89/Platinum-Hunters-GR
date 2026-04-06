@@ -64,17 +64,11 @@ export const DesktopNav = React.memo(function DesktopNav({
   isThemeSaving,
 }: DesktopNavProps) {
   const featureMoreItems = navItems.filter(
-    item =>
-      item.feature === 'diary' ||
-      item.feature === 'articles' ||
-      item.feature === 'reviews',
+    item => item.feature === 'diary' || item.feature === 'articles' || item.feature === 'reviews',
   );
   const moreNavItems = featureMoreItems;
   const coreNavItems = navItems.filter(
-    item =>
-      item.feature !== 'diary' &&
-      item.feature !== 'articles' &&
-      item.feature !== 'reviews',
+    item => item.feature !== 'diary' && item.feature !== 'articles' && item.feature !== 'reviews',
   );
   const supportItem = coreNavItems.find(item => item.href === '/support') ?? null;
   const coreWithoutSupport = coreNavItems.filter(item => item.href !== '/support');

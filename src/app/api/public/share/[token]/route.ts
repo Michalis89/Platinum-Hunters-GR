@@ -11,10 +11,7 @@ const isTokenExpired = (expiresAt: string | null | undefined) =>
  * Used by /share/[token] page to identify the owner.
  * No auth required — the token itself is the credential.
  */
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ token: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { token } = await params;
 
@@ -25,11 +22,11 @@ export async function GET(
     const supabase = getSupabaseServer();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: tokenRow, error: tokenError } = await (supabase as any)
+    const { data: tokenRow, error: tokenError } = (await (supabase as any)
       .from('share_tokens')
       .select('user_id,expires_at')
       .eq('token', token)
-      .maybeSingle() as {
+      .maybeSingle()) as {
       data: { user_id: string; expires_at: string | null } | null;
       error: unknown;
     };

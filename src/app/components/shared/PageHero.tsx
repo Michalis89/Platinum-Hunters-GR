@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cn } from '@/utils/utils';
+import { cn } from '@/lib/utils';
 
 type PageHeroProps = {
   eyebrow?: ReactNode;

@@ -13,10 +13,7 @@ function findConfigForCategory(category: string) {
   );
 }
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ token: string }> },
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { token } = await params;
     const { searchParams } = new URL(req.url);

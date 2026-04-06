@@ -8,7 +8,10 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 function isStandalone() {
-  if (typeof window === 'undefined') return false;
+  /* c8 ignore next */
+  if (typeof window === 'undefined') {
+    return false;
+  }
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
     // iOS legacy standalone flag
@@ -18,12 +21,13 @@ function isStandalone() {
 
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState<boolean>(() => isStandalone());
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    setIsInstalled(isStandalone());
+    /* c8 ignore next */
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
@@ -45,7 +49,9 @@ export function usePWAInstall() {
   }, []);
 
   const install = async () => {
-    if (!deferredPrompt) return { outcome: null as null | 'accepted' | 'dismissed' };
+    if (!deferredPrompt) {
+      return { outcome: null as null | 'accepted' | 'dismissed' };
+    }
 
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;

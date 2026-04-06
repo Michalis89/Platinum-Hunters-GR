@@ -103,6 +103,7 @@ export default function CaptchaWidget({
   helperText,
   resetSignal,
 }: CaptchaWidgetProps) {
+  const configError = SITE_KEY ? null : 'CAPTCHA is not configured correctly.';
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
   const onTokenRef = useRef(onTokenChange);
@@ -124,7 +125,6 @@ export default function CaptchaWidget({
     }
 
     if (!SITE_KEY) {
-      setError('CAPTCHA is not configured correctly.');
       onTokenRef.current(null);
       return;
     }
@@ -204,7 +204,9 @@ export default function CaptchaWidget({
 
     const loaderWindow = window as Window & { turnstile: TurnstileWindow };
     loaderWindow.turnstile.reset(widgetIdRef.current);
-    setReady(false);
+    window.setTimeout(() => {
+      setReady(false);
+    }, 0);
     onTokenRef.current(null);
   }, [resetSignal]);
 
@@ -225,9 +227,9 @@ export default function CaptchaWidget({
     <div className="space-y-2 px-4 py-4">
       <div ref={containerRef} />
       {helperText && <p className="text-xs text-foreground/75">{helperText}</p>}
-      {error && (
+      {(configError ?? error) && (
         <div className="space-y-2">
-          <p className="text-xs text-destructive">{error}</p>
+          <p className="text-xs text-destructive">{configError ?? error}</p>
           <p className="text-xs text-foreground/75">
             If this keeps happening, retry CAPTCHA and then refresh the page.
           </p>
@@ -240,7 +242,9 @@ export default function CaptchaWidget({
           </button>
         </div>
       )}
-      {!error && !ready && <p className="text-xs text-foreground/75">Loading CAPTCHA...</p>}
+      {!configError && !error && !ready && (
+        <p className="text-xs text-foreground/75">Loading CAPTCHA...</p>
+      )}
     </div>
   );
 }

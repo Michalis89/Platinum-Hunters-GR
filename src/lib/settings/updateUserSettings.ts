@@ -29,7 +29,11 @@ export async function updateUserSettings(
     normalized.social_enabled = true;
   }
 
-  if (updates.dnd_role !== undefined && updates.dnd_role !== null && updates.dnd_enabled === undefined) {
+  if (
+    updates.dnd_role !== undefined &&
+    updates.dnd_role !== null &&
+    updates.dnd_enabled === undefined
+  ) {
     normalized.dnd_enabled = true;
   }
 

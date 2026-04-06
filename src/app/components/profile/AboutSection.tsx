@@ -15,15 +15,21 @@ function normalizeSocialUrl(value: string) {
   return `https://${value}`;
 }
 
-const SOCIAL_ORDER = ['website', 'youtube', 'twitter', 'twitch', 'instagram', 'discord', 'reddit'] as const;
+const SOCIAL_ORDER = [
+  'website',
+  'youtube',
+  'twitter',
+  'twitch',
+  'instagram',
+  'discord',
+  'reddit',
+] as const;
 
 function toSocialLabel(key: string) {
   if (key === 'twitter') {
     return 'X / Twitter';
   }
-  return key
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, char => char.toUpperCase());
+  return key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
 }
 
 export function AboutSection({ user, identity }: Readonly<AboutSectionProps>) {
@@ -60,7 +66,9 @@ export function AboutSection({ user, identity }: Readonly<AboutSectionProps>) {
       className="rounded-3xl border border-border/60 bg-card/50 p-5 transition-colors hover:border-border sm:p-6"
     >
       <header className="mb-5">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Profile Story</p>
+        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+          Profile Story
+        </p>
         <h2 id="about-heading" className="mt-1 text-xl font-semibold text-foreground">
           About
         </h2>

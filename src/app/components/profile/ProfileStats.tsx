@@ -170,9 +170,7 @@ export function ProfileStats({ category, mediaStats }: Readonly<ProfileStatsProp
                     </p>
                     <p className="flex items-center justify-center gap-2 text-sm font-medium text-foreground">
                       {stat.label}
-                      {tipText && (
-                        <ProfileStatsInfoTooltip text={tipText} />
-                      )}
+                      {tipText && <ProfileStatsInfoTooltip text={tipText} />}
                     </p>
                     {stat.note && <p className="mt-1 text-xs text-muted-foreground">{stat.note}</p>}
                   </div>

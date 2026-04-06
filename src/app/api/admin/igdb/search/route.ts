@@ -43,7 +43,8 @@ limit 40;
   const strictRows = Array.isArray(strictResponse) ? strictResponse : [];
   const fallbackResponse =
     strictRows.length === 0 ? ((await igdbPost('/games', fallbackBody)) as IgdbSearchGame[]) : [];
-  const mergedRows = strictRows.length > 0 ? strictRows : Array.isArray(fallbackResponse) ? fallbackResponse : [];
+  const mergedRows =
+    strictRows.length > 0 ? strictRows : Array.isArray(fallbackResponse) ? fallbackResponse : [];
 
   const normalized = mergedRows
     .map(game => {
@@ -69,13 +70,14 @@ limit 40;
       };
     })
     .filter((game): game is NonNullable<typeof game> => Boolean(game))
-    .filter(game =>
-      isAllowedIgdbCategory(game.category) ||
-      isAllowedIgdbGameCandidate({
-        category: game.category,
-        name: game.name,
-        slug: game.slug ?? null,
-      }),
+    .filter(
+      game =>
+        isAllowedIgdbCategory(game.category) ||
+        isAllowedIgdbGameCandidate({
+          category: game.category,
+          name: game.name,
+          slug: game.slug ?? null,
+        }),
     )
     .slice(0, 20);
 

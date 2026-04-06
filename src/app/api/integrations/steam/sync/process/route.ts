@@ -16,6 +16,7 @@ import {
   mapWithConcurrency,
 } from '@/lib/integrations/steam-sync-helpers';
 import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
+import { recomputeCategoryProfiles } from '@/lib/profile/recompute-category-profiles';
 
 type ProcessResult = {
   processed: number;
@@ -404,6 +405,12 @@ async function POSTHandler(req: Request) {
       await supabase
         .from('user_media_entries')
         .upsert(userEntryUpdates, { onConflict: 'user_id,media_id' });
+    }
+
+    if (userEntryPayload.length > 0 || userEntryUpdates.length > 0) {
+      void recomputeCategoryProfiles(supabase, session.user.id, ['games']).catch(error => {
+        console.warn('[Steam Sync Process] Derived profile recompute failed:', error);
+      });
     }
 
     const newProcessedCount = processedCount + batch.length;

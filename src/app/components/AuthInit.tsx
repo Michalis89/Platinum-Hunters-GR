@@ -242,7 +242,10 @@ export default function AuthInit() {
         // this covers the common dev-server-restart case where cookies survive
         // but localStorage was cleared.
         try {
-          const cookieRes = await fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' });
+          const cookieRes = await fetch('/api/auth/session', {
+            credentials: 'include',
+            cache: 'no-store',
+          });
           if (cookieRes.ok) {
             const cookieData = await cookieRes.json();
             if (cookieData?.data?.session && cookieData?.data?.user) {
@@ -296,7 +299,11 @@ export default function AuthInit() {
       // the effect never fires again after initialFetchInFlight becomes false.
       // Redirect to /home (safe public page) when auth init ends without a user and
       // we are on a route that requires authentication.
-      if (!authSucceeded && typeof window !== 'undefined' && shouldRedirectToLogin(window.location.pathname)) {
+      if (
+        !authSucceeded &&
+        typeof window !== 'undefined' &&
+        shouldRedirectToLogin(window.location.pathname)
+      ) {
         router.replace('/home');
       }
     };
@@ -342,6 +349,7 @@ export default function AuthInit() {
     return () => {
       subscription?.subscription?.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, forceLogout, validateSession, redirectAfterLogout]);
 
   // Keep session fresh on visibility change/interval to avoid stale "logged-in" UI after expiry
@@ -470,6 +478,7 @@ export default function AuthInit() {
           await dispatch(logout());
           dispatch(setUser(null));
           clearAuthStorage();
+          await clearAuthCachesInServiceWorker();
           redirectAfterLogout();
         }
       }, IDLE_LIMIT_MS);

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { cn } from '@/utils/utils';
+import { cn } from '@/lib/utils';
 import { FieldError } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
 

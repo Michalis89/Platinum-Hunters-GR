@@ -59,7 +59,9 @@ function LibraryEntryList({
   const parentRef = useRef<HTMLDivElement>(null);
 
   const sortedEntries = useMemo(() => {
-    if (!sortByScore) return entries;
+    if (!sortByScore) {
+      return entries;
+    }
     return [...entries].sort((a, b) => {
       const aScore = toNumericScore(a.score);
       const bScore = toNumericScore(b.score);
@@ -78,6 +80,8 @@ function LibraryEntryList({
 
   const ScoreIcon = sortByScore ? (sortDir === 'desc' ? ChevronDown : ChevronUp) : ChevronsUpDown;
 
+  // TanStack Virtual exposes non-memoizable functions; keep this call local and suppress compiler warning.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: sortedEntries.length,
     getScrollElement: () => parentRef.current,
@@ -102,9 +106,7 @@ function LibraryEntryList({
             onClick={handleScoreSort}
             className={cn(
               'flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.18em] transition-colors',
-              sortByScore
-                ? 'text-primary'
-                : 'text-muted-foreground hover:text-foreground',
+              sortByScore ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             Score

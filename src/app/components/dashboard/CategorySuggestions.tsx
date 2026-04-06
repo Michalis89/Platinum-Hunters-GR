@@ -7,6 +7,7 @@ import DashboardSectionHeader from './DashboardSectionHeader';
 type CategorySuggestionsProps = {
   category: DashboardCategoryKey;
   items: CategoryTasteProfileItem[];
+  categoryNote?: Record<string, unknown> | null;
 };
 
 const CATEGORY_LABELS: Record<DashboardCategoryKey, string> = {
@@ -18,7 +19,11 @@ const CATEGORY_LABELS: Record<DashboardCategoryKey, string> = {
   tv: 'TV',
 };
 
-export default function CategorySuggestions({ category, items }: CategorySuggestionsProps) {
+export default function CategorySuggestions({
+  category,
+  items,
+  categoryNote,
+}: CategorySuggestionsProps) {
   const categoryLabel = CATEGORY_LABELS[category];
   const categoryLabelForSentence =
     categoryLabel === 'TV' ? categoryLabel : categoryLabel.toLowerCase();
@@ -37,7 +42,7 @@ export default function CategorySuggestions({ category, items }: CategorySuggest
         }
       />
       <div className="grid gap-4 md:grid-cols-2 md:gap-5">
-        <CategoryTasteProfileCard category={category} items={items} />
+        <CategoryTasteProfileCard category={category} items={items} profileNote={categoryNote} />
       </div>
     </section>
   );

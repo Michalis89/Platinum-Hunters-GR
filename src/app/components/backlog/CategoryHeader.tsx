@@ -115,99 +115,101 @@ export default function CategoryHeader({
             </div>
           </div>
 
-          {!isReadOnly && <div className="flex flex-wrap items-center gap-2.5">
-            <Button
-              variant="primary"
-              onClick={onCreateClick}
-              className="h-11 rounded-xl px-5 text-sm shadow-md"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Entry
-            </Button>
+          {!isReadOnly && (
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Button
+                variant="primary"
+                onClick={onCreateClick}
+                className="h-11 rounded-xl px-5 text-sm shadow-md"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Entry
+              </Button>
 
-            {showIntegrationMenu ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    className="h-11 rounded-xl border-border/60 bg-card/60 px-4 text-muted-foreground"
-                  >
-                    Sync
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-56">
-                  {routeCategory === 'anime' || routeCategory === 'manga' ? (
-                    <>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onSelect={() => {
-                          window.location.href = `/api/integrations/mal/start?category=${routeCategory}`;
-                        }}
-                      >
-                        MyAnimeList
-                      </DropdownMenuItem>
-                      <DropdownMenuItem disabled>AniList (soon)</DropdownMenuItem>
-                    </>
-                  ) : null}
-
-                  {routeCategory === 'games' ? (
-                    <>
-                      {hasSteamId ? (
+              {showIntegrationMenu ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="h-11 rounded-xl border-border/60 bg-card/60 px-4 text-muted-foreground"
+                    >
+                      Sync
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-56">
+                    {routeCategory === 'anime' || routeCategory === 'manga' ? (
+                      <>
                         <DropdownMenuItem
                           className="cursor-pointer"
-                          onSelect={() => setSteamConfirmOpen(true)}
-                          disabled={isSteamSyncing || isSteamRateLimited}
+                          onSelect={() => {
+                            window.location.href = `/api/integrations/mal/start?category=${routeCategory}`;
+                          }}
                         >
-                          <div className="flex flex-col">
-                            <span>Steam</span>
-                            {isSteamRateLimited && steamRateLimitResetTime && (
-                              <span className="text-xs text-muted-foreground">
-                                Rate limit - try after{' '}
-                                {steamRateLimitResetTime.toLocaleString(locale, {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                })}
-                              </span>
-                            )}
-                          </div>
+                          MyAnimeList
                         </DropdownMenuItem>
-                      ) : null}
-                      <DropdownMenuItem disabled>PlayStation Network (soon)</DropdownMenuItem>
-                      <DropdownMenuItem disabled>Xbox (soon)</DropdownMenuItem>
-                      <DropdownMenuItem disabled>Epic Games (soon)</DropdownMenuItem>
-                      <DropdownMenuItem disabled>GOG (soon)</DropdownMenuItem>
-                    </>
-                  ) : null}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
+                        <DropdownMenuItem disabled>AniList (soon)</DropdownMenuItem>
+                      </>
+                    ) : null}
 
-            <Button
-              variant="secondary"
-              onClick={onSuggestionsClick}
-              className="h-11 rounded-xl border-border/60 bg-card/60 px-4 text-muted-foreground"
-            >
-              <Lightbulb className="mr-2 h-4 w-4" />
-              Personal Suggestions
-            </Button>
+                    {routeCategory === 'games' ? (
+                      <>
+                        {hasSteamId ? (
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onSelect={() => setSteamConfirmOpen(true)}
+                            disabled={isSteamSyncing || isSteamRateLimited}
+                          >
+                            <div className="flex flex-col">
+                              <span>Steam</span>
+                              {isSteamRateLimited && steamRateLimitResetTime && (
+                                <span className="text-xs text-muted-foreground">
+                                  Rate limit - try after{' '}
+                                  {steamRateLimitResetTime.toLocaleString(locale, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                        ) : null}
+                        <DropdownMenuItem disabled>PlayStation Network (soon)</DropdownMenuItem>
+                        <DropdownMenuItem disabled>Xbox (soon)</DropdownMenuItem>
+                        <DropdownMenuItem disabled>Epic Games (soon)</DropdownMenuItem>
+                        <DropdownMenuItem disabled>GOG (soon)</DropdownMenuItem>
+                      </>
+                    ) : null}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
 
-            {canShareBacklog ? (
               <Button
                 variant="secondary"
-                onClick={() => void handleCopyShareLink()}
+                onClick={onSuggestionsClick}
                 className="h-11 rounded-xl border-border/60 bg-card/60 px-4 text-muted-foreground"
               >
-                {isShareCopied ? (
-                  <Check className="mr-2 h-4 w-4 text-primary" />
-                ) : (
-                  <Copy className="mr-2 h-4 w-4" />
-                )}
-                Share
+                <Lightbulb className="mr-2 h-4 w-4" />
+                Personal Suggestions
               </Button>
-            ) : null}
-          </div>}
+
+              {canShareBacklog ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => void handleCopyShareLink()}
+                  className="h-11 rounded-xl border-border/60 bg-card/60 px-4 text-muted-foreground"
+                >
+                  {isShareCopied ? (
+                    <Check className="mr-2 h-4 w-4 text-primary" />
+                  ) : (
+                    <Copy className="mr-2 h-4 w-4" />
+                  )}
+                  Share
+                </Button>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
 

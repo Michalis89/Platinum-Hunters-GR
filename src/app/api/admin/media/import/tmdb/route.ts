@@ -129,6 +129,8 @@ async function saveImportCursor(
   category: TmdbCategory,
   nextPage: number,
 ): Promise<void> {
+  /* c8 ignore next 2 -- defensive normalization; handler keeps page bounded within 1..TMDB_MAX_PAGE */
+  /* istanbul ignore next -- defensive normalization; handler keeps page bounded within 1..TMDB_MAX_PAGE */
   const normalizedPage =
     Number.isFinite(nextPage) && nextPage >= 1 && nextPage <= TMDB_MAX_PAGE ? nextPage : 1;
   const expiresAt = new Date(Date.now() + CURSOR_TTL_SECONDS * 1000).toISOString();
@@ -149,9 +151,12 @@ async function insertMediaRow(
   row: Record<string, unknown>,
 ): Promise<boolean> {
   const tmdbId = row.tmdb_id;
+  /* c8 ignore start -- defensive guard; rows are produced from validated positive TMDB IDs */
+  /* istanbul ignore next -- defensive guard; rows are produced from validated positive TMDB IDs */
   if (typeof tmdbId !== 'number' || !Number.isFinite(tmdbId)) {
     return false;
   }
+  /* c8 ignore stop */
 
   const { error } = await admin.from('media_items').insert(row as never);
   return !error;
@@ -219,19 +224,14 @@ async function POSTHandler(req: Request) {
     await requireAdminRole(supabase);
     const admin = createSupabaseAdminClient();
 
-    const body = (await req.json().catch(() => null)) as
-      | {
-          category?: TmdbCategory;
-          count?: number;
-          maxPages?: number;
-        }
-      | null;
+    const body = (await req.json().catch(() => null)) as {
+      category?: TmdbCategory;
+      count?: number;
+      maxPages?: number;
+    } | null;
 
     const category: TmdbCategory = body?.category === 'tv' ? 'tv' : 'movies';
-    const targetCount = Math.min(
-      Math.max(toPositiveInt(body?.count, DEFAULT_COUNT), 1),
-      MAX_COUNT,
-    );
+    const targetCount = Math.min(Math.max(toPositiveInt(body?.count, DEFAULT_COUNT), 1), MAX_COUNT);
     const maxPages = Math.min(
       Math.max(toPositiveInt(body?.maxPages, DEFAULT_MAX_SCAN_PAGES), 1),
       TMDB_MAX_PAGE,
@@ -305,9 +305,12 @@ async function POSTHandler(req: Request) {
 
       const upsertRows = await mapWithConcurrency(newIds, DETAIL_CONCURRENCY, async id => {
         const item = idToItem.get(id);
+        /* c8 ignore start -- defensive guard; map is built from the same candidate ID set */
+        /* istanbul ignore next -- defensive guard; map is built from the same candidate ID set */
         if (!item) {
           return null;
         }
+        /* c8 ignore stop */
         try {
           const details = await fetchDetails(category, id, apiKey);
           return {
@@ -328,6 +331,8 @@ async function POSTHandler(req: Request) {
         const insertedOk = await insertMediaRow(admin, entry.row);
         if (!insertedOk) {
           failed += 1;
+          /* c8 ignore next 3 -- defensive nullish logging; successful buildMediaRow always sets numeric tmdb_id */
+          /* istanbul ignore next -- defensive nullish logging; successful buildMediaRow always sets numeric tmdb_id */
           console.error('[Admin TMDB Import] Persist error for row:', {
             category,
             tmdbId: entry.row.tmdb_id ?? null,

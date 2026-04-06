@@ -100,7 +100,9 @@ export function buildNarrative(input: UnifiedNarrativeInput): string | null {
   }
 
   if (isDominant) {
-    return clampNarrativeLength(`Lately, you've been mostly focused on ${toCategoryLabel(top.key)}.`);
+    return clampNarrativeLength(
+      `Lately, you've been mostly focused on ${toCategoryLabel(top.key)}.`,
+    );
   }
 
   if (!second) {

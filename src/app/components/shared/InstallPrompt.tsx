@@ -11,12 +11,16 @@ const VISITS_KEY = 'pwa-visit-count';
 const MIN_VISITS = 3;
 
 function isIOS() {
-  if (typeof navigator === 'undefined') return false;
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
   return /iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 function isAndroid() {
-  if (typeof navigator === 'undefined') return false;
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
   return /Android/i.test(navigator.userAgent);
 }
 
@@ -24,23 +28,28 @@ export default function InstallPrompt() {
   const { canInstall, install, isInstalled } = usePWAInstall();
   const isMobile = useIsMobile();
   const [visible, setVisible] = useState(false);
-  const [visits, setVisits] = useState(0);
+  const [visits] = useState(() => {
+    if (typeof window === 'undefined') { return 0; }
+    const current = Number(window.localStorage.getItem(VISITS_KEY) ?? '0') + 1;
+    window.localStorage.setItem(VISITS_KEY, String(current));
+    return current;
+  });
   const isiOS = useMemo(() => isIOS(), []);
   const isAndroidDevice = useMemo(() => isAndroid(), []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const current = Number(window.localStorage.getItem(VISITS_KEY) ?? '0') + 1;
-    window.localStorage.setItem(VISITS_KEY, String(current));
-    setVisits(current);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!isMobile || !isAndroidDevice || isiOS || isInstalled || !canInstall) return;
-    if (visits < MIN_VISITS) return;
-    if (window.localStorage.getItem(DISMISS_KEY) === '1') return;
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (!isMobile || !isAndroidDevice || isiOS || isInstalled || !canInstall) {
+      return;
+    }
+    if (visits < MIN_VISITS) {
+      return;
+    }
+    if (window.localStorage.getItem(DISMISS_KEY) === '1') {
+      return;
+    }
 
     const timer = window.setTimeout(() => setVisible(true), 1200);
     return () => window.clearTimeout(timer);

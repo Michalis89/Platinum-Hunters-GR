@@ -130,17 +130,14 @@ export async function generateGameRecommendationsV2WithLimits(
   // Determine split
   const numFromBacklog = Math.min(scoredBacklog.length, maxBacklog);
   const numFromDatabase =
-    numFromBacklog < maxBacklog
-      ? maxDatabaseFallback - numFromBacklog
-      : maxDatabase;
+    numFromBacklog < maxBacklog ? maxDatabaseFallback - numFromBacklog : maxDatabase;
 
   // Get backlog recommendations
   const backlogRecommendations = scoredBacklog.slice(0, numFromBacklog).map(item => ({
     mediaId: item.entry.mediaId,
     category: 'games' as const,
     title: item.entry.media.title,
-    cover:
-      item.entry.media.coverImageLarge || item.entry.media.coverImageMedium || '',
+    cover: item.entry.media.coverImageLarge || item.entry.media.coverImageMedium || '',
     slug: titleToSlug(item.entry.media.title),
     reason: item.reason,
     confidence: item.finalScore / 100, // Direct mapping from score (0-100) to confidence (0-1)
@@ -189,7 +186,10 @@ export async function generateGameRecommendationsV2WithLimits(
     score: item.finalScore,
   }));
 
-  const recommendations = [...backlogRecommendations, ...databaseRecommendations].slice(0, maxTotal);
+  const recommendations = [...backlogRecommendations, ...databaseRecommendations].slice(
+    0,
+    maxTotal,
+  );
 
   return recommendations;
 }
@@ -600,9 +600,15 @@ function normalizeGameIdentityKey(value: string): string {
     normalized = normalized
       .replace(/-(?:game-of-the-year(?:-edition)?|goty(?:-edition)?)$/, '')
       .replace(/-(?:director-s-cut|directors-cut)$/, '')
-      .replace(/-(?:definitive|complete|enhanced|ultimate|deluxe|gold|anniversary|standard)-edition$/, '')
+      .replace(
+        /-(?:definitive|complete|enhanced|ultimate|deluxe|gold|anniversary|standard)-edition$/,
+        '',
+      )
       .replace(/-(?:hd-remaster(?:ed)?|remaster(?:ed)?|remake)$/, '')
-      .replace(/-(?:definitive|complete|enhanced|ultimate|deluxe|gold|anniversary|standard|edition)$/, '')
+      .replace(
+        /-(?:definitive|complete|enhanced|ultimate|deluxe|gold|anniversary|standard|edition)$/,
+        '',
+      )
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
   }

@@ -26,8 +26,13 @@ export function HobbySection({
       className="rounded-3xl border border-border/60 bg-card/50 p-5 sm:p-6"
     >
       <header className="mb-6">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Identity Dashboard</p>
-        <h2 id="hobby-grid-heading" className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+          Identity Dashboard
+        </p>
+        <h2
+          id="hobby-grid-heading"
+          className="mt-1 text-2xl font-semibold tracking-tight text-foreground"
+        >
           Hobby Identity
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">

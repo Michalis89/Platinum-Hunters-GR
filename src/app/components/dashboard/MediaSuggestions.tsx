@@ -13,7 +13,6 @@ import {
   DASH_PADDING_LARGE,
   DASH_PADDING_STANDARD,
   DASH_RADIUS_SECTION,
-  DASH_SURFACE_SECTION,
 } from './dashboard-ui-tokens';
 
 type MediaSuggestionsProps = {
@@ -35,33 +34,35 @@ function SuggestionCard({ suggestion }: { suggestion: MediaSuggestion }) {
           className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           sizes={IMAGE_SIZES.grid3}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/46 to-white/10 dark:hidden" />
-        <div className="absolute inset-0 bg-gradient-to-r from-white/34 via-transparent to-white/10 dark:hidden" />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white/80 via-white/42 to-transparent dark:hidden" />
-        <div className="absolute inset-0 hidden bg-gradient-to-t from-black/90 via-black/46 to-black/10 dark:block" />
-        <div className="absolute inset-0 hidden bg-gradient-to-r from-black/34 via-transparent to-black/10 dark:block" />
-        <div className="absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-black/80 via-black/42 to-transparent dark:block" />
+        <div className="via-white/46 absolute inset-0 bg-gradient-to-t from-white/90 to-white/10 dark:hidden" />
+        <div className="from-white/34 absolute inset-0 bg-gradient-to-r via-transparent to-white/10 dark:hidden" />
+        <div className="via-white/42 absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white/80 to-transparent dark:hidden" />
+        <div className="via-black/46 absolute inset-0 hidden bg-gradient-to-t from-black/90 to-black/10 dark:block" />
+        <div className="from-black/34 absolute inset-0 hidden bg-gradient-to-r via-transparent to-black/10 dark:block" />
+        <div className="via-black/42 absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-black/80 to-transparent dark:block" />
       </div>
 
-        <div className="relative z-10 flex h-full min-w-0 flex-col justify-end p-3.5 sm:p-4">
-          <div className="space-y-2">
-            <p className="min-w-0 text-balance break-words text-base font-semibold leading-tight text-black dark:text-white dark:drop-shadow-[0_10px_24px_rgba(0,0,0,0.9)] sm:text-[18px]">
-              {suggestion.title}
+      <div className="relative z-10 flex h-full min-w-0 flex-col justify-end p-3.5 sm:p-4">
+        <div className="space-y-2">
+          <p className="min-w-0 text-balance break-words text-base font-semibold leading-tight text-black dark:text-white dark:drop-shadow-[0_10px_24px_rgba(0,0,0,0.9)] sm:text-[18px]">
+            {suggestion.title}
+          </p>
+          <p className="text-black/82 dark:text-white/84 min-w-0 break-words text-xs leading-relaxed dark:drop-shadow-[0_6px_18px_rgba(0,0,0,0.8)] sm:text-[13px]">
+            {suggestion.reason}
+          </p>
+        </div>
+
+        <div className="mt-3.5 flex items-end justify-between gap-3">
+          <div className="min-w-0 space-y-0.5">
+            <p className="text-black/68 dark:text-white/74 text-[10px] uppercase tracking-[0.22em] dark:drop-shadow-[0_6px_18px_rgba(0,0,0,0.8)]">
+              Confidence
             </p>
-            <p className="min-w-0 break-words text-xs leading-relaxed text-black/82 dark:text-white/84 dark:drop-shadow-[0_6px_18px_rgba(0,0,0,0.8)] sm:text-[13px]">
-              {suggestion.reason}
+            <p className="text-xs font-semibold text-black dark:text-white/95 dark:drop-shadow-[0_8px_20px_rgba(0,0,0,0.88)] sm:text-sm">
+              {Math.round(suggestion.confidence * 100)}%
             </p>
           </div>
-
-          <div className="mt-3.5 flex items-end justify-between gap-3">
-            <div className="min-w-0 space-y-0.5">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-black/68 dark:text-white/74 dark:drop-shadow-[0_6px_18px_rgba(0,0,0,0.8)]">Confidence</p>
-              <p className="text-xs font-semibold text-black dark:text-white/95 dark:drop-shadow-[0_8px_20px_rgba(0,0,0,0.88)] sm:text-sm">
-                {Math.round(suggestion.confidence * 100)}%
-              </p>
-            </div>
           {href && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-black/80 dark:text-white/92 dark:drop-shadow-[0_8px_20px_rgba(0,0,0,0.88)] transition-transform duration-200 group-hover:translate-x-0.5 group-focus-within:translate-x-0.5">
+            <span className="dark:text-white/92 inline-flex items-center gap-1 text-xs font-semibold text-black/80 transition-transform duration-200 group-focus-within:translate-x-0.5 group-hover:translate-x-0.5 dark:drop-shadow-[0_8px_20px_rgba(0,0,0,0.88)]">
               View details
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </span>
@@ -74,7 +75,7 @@ function SuggestionCard({ suggestion }: { suggestion: MediaSuggestion }) {
   if (href) {
     return (
       <Card
-        className={`group relative min-h-[184px] min-w-0 overflow-hidden bg-card/[0.98] shadow-[0_14px_34px_-26px_rgba(255,255,255,0.96)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-28px_rgba(255,255,255,1)] focus-within:ring-2 focus-within:ring-primary/70 focus-within:ring-offset-2 focus-within:ring-offset-background dark:bg-card/90 dark:shadow-[0_18px_34px_-26px_rgba(0,0,0,0.82)] dark:hover:shadow-[0_18px_34px_-26px_rgba(0,0,0,0.82)] ${DASH_RADIUS_CARD} ${DASH_BORDER}`}
+        className={`group relative min-h-[184px] min-w-0 overflow-hidden bg-card/[0.98] shadow-[0_14px_34px_-26px_rgba(255,255,255,0.96)] transition-all duration-200 focus-within:ring-2 focus-within:ring-primary/70 focus-within:ring-offset-2 focus-within:ring-offset-background hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-28px_rgba(255,255,255,1)] dark:bg-card/90 dark:shadow-[0_18px_34px_-26px_rgba(0,0,0,0.82)] dark:hover:shadow-[0_18px_34px_-26px_rgba(0,0,0,0.82)] ${DASH_RADIUS_CARD} ${DASH_BORDER}`}
       >
         <Link href={href} className="block h-full focus-visible:outline-none">
           {cardContent}
@@ -136,7 +137,9 @@ function EmptyState({ category }: { category: string }) {
           <Sparkles className="h-6 w-6 text-muted-foreground" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-base font-semibold text-foreground">Not enough activity yet for {category}</h3>
+          <h3 className="text-base font-semibold text-foreground">
+            Not enough activity yet for {category}
+          </h3>
           <p className="text-sm text-muted-foreground">
             Add a few more titles and this space will start to fill in.
           </p>

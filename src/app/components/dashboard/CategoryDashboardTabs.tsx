@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DASHBOARD_TAB_CATEGORIES } from '@/lib/dashboard/category-data';
@@ -34,6 +34,7 @@ type CategoryDashboardTabsProps = {
   enabledCategories: DashboardCategoryKey[];
   sections: Record<DashboardCategoryKey, CategoryDashboardSection>;
   stats: PersonalStats;
+  categoryProfile?: Record<string, unknown> | null;
   isReadOnly?: boolean;
 };
 
@@ -41,24 +42,27 @@ export default function CategoryDashboardTabs({
   enabledCategories,
   sections,
   stats,
+  categoryProfile = null,
   isReadOnly = false,
 }: CategoryDashboardTabsProps) {
   const visibleCategories = DASHBOARD_TAB_CATEGORIES.filter(category =>
     enabledCategories.includes(category),
   );
   const firstCategory = useMemo(() => visibleCategories[0], [visibleCategories]);
-  const [activeCategory, setActiveCategory] = useState<DashboardCategoryKey | undefined>(
+  const [selectedCategory, setSelectedCategory] = useState<DashboardCategoryKey | undefined>(
     firstCategory,
   );
-
-  useEffect(() => {
+  const activeCategory = useMemo(() => {
     if (!visibleCategories.length) {
-      return;
+      return undefined;
     }
-    if (!activeCategory || !visibleCategories.includes(activeCategory)) {
-      setActiveCategory(visibleCategories[0]);
+
+    if (selectedCategory && visibleCategories.includes(selectedCategory)) {
+      return selectedCategory;
     }
-  }, [activeCategory, visibleCategories]);
+
+    return visibleCategories[0];
+  }, [selectedCategory, visibleCategories]);
 
   if (!visibleCategories.length) {
     return null;
@@ -92,10 +96,10 @@ export default function CategoryDashboardTabs({
   return (
     <Tabs
       value={activeCategory}
-      onValueChange={value => setActiveCategory(value as DashboardCategoryKey)}
+      onValueChange={value => setSelectedCategory(value as DashboardCategoryKey)}
       className="min-w-0 space-y-8 overflow-x-hidden md:space-y-10"
     >
-      <div className="-mx-4 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:px-0 sm:flex sm:justify-center">
+      <div className="-mx-4 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:flex sm:justify-center sm:px-0">
         <TabsList className="inline-flex h-auto min-w-max items-center justify-start gap-1 rounded-2xl border border-black/10 bg-card/80 p-1 shadow-sm dark:border-white/10 sm:min-w-0 sm:flex-wrap sm:justify-center">
           {visibleCategories.map(category => (
             <TabsTrigger
@@ -113,7 +117,10 @@ export default function CategoryDashboardTabs({
         {visibleCategories.map(category => (
           <TabsContent key={category} value={category} className="mt-0">
             <div className="flex flex-col">
-              <DashboardCategoryStats category={category} stats={resolveStatsForCategory(category)} />
+              <DashboardCategoryStats
+                category={category}
+                stats={resolveStatsForCategory(category)}
+              />
               <div className="mt-9 md:mt-11">
                 <CategoryTopFive
                   category={category}
@@ -126,6 +133,11 @@ export default function CategoryDashboardTabs({
                 <CategorySuggestions
                   category={category}
                   items={sections[category]?.tasteProfileItems ?? []}
+                  categoryNote={
+                    categoryProfile && typeof categoryProfile[category] === 'object'
+                      ? (categoryProfile[category] as Record<string, unknown>)
+                      : null
+                  }
                 />
               </div>
               <div className="mt-11 md:mt-14">

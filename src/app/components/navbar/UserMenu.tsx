@@ -59,8 +59,8 @@ export const UserMenu = React.memo(function UserMenu({
           variant="secondary"
           className={cn(
             'relative h-9 cursor-pointer gap-2 rounded-md border border-transparent bg-transparent pl-1.5 pr-2 text-[13px] font-medium tracking-[-0.01em] text-foreground shadow-none',
-            'after:absolute after:bottom-[2px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-primary after:transition-transform after:duration-200 [transition-timing-function:var(--easing-default)]',
-            'transition-[background-color,color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent-muted))/0.35] hover:text-primary hover:after:scale-x-100 data-[state=open]:after:scale-x-100 active:scale-[0.99]',
+            '[transition-timing-function:var(--easing-default)] after:absolute after:bottom-[2px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-primary after:transition-transform after:duration-200',
+            'transition-[background-color,color,opacity,transform] duration-200 [transition-timing-function:var(--easing-default)] hover:bg-[hsl(var(--accent-muted))/0.35] hover:text-primary hover:after:scale-x-100 active:scale-[0.99] data-[state=open]:after:scale-x-100',
           )}
         >
           <span className="relative inline-flex">

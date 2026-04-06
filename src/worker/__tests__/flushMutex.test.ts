@@ -1,16 +1,6 @@
-/**
- * flushLibrarySyncQueue mutex — simulation test
- *
- * The actual worker file cannot be imported in jsdom (ServiceWorker globals).
- * This test re-implements the mutex pattern verbatim and verifies it in isolation.
- *
- * It proves that the added `flushInProgress` guard:
- *   - Lets the first call proceed normally
- *   - Short-circuits (returns 0 immediately) for any concurrent second call
- *   - Resets the flag after completion so sequential calls work correctly
- */
+export {};
 
-type QueueRecord = {
+type TestQueueRecord = {
   id: number;
   createdAt: number;
   apiBase: string;
@@ -18,7 +8,7 @@ type QueueRecord = {
 };
 
 function makeFlusher(
-  getQueue: () => Promise<QueueRecord[]>,
+  getQueue: () => Promise<TestQueueRecord[]>,
   doFetch: (url: string) => Promise<{ ok: boolean }>,
   deleteItem: (id: number) => Promise<void>,
 ) {
@@ -26,11 +16,15 @@ function makeFlusher(
 
   async function _doFlush() {
     const queue = await getQueue();
-    if (queue.length === 0) return 0;
+    if (queue.length === 0) {
+      return 0;
+    }
     let count = 0;
     for (const item of queue) {
       const res = await doFetch(`${item.apiBase}/add`);
-      if (!res.ok) continue;
+      if (!res.ok) {
+        continue;
+      }
       await deleteItem(item.id);
       count += 1;
     }
@@ -38,7 +32,9 @@ function makeFlusher(
   }
 
   async function flush() {
-    if (flushInProgress) return 0;
+    if (flushInProgress) {
+      return 0;
+    }
     flushInProgress = true;
     try {
       return await _doFlush();
@@ -54,7 +50,7 @@ describe('flushLibrarySyncQueue mutex', () => {
   it('calls fetch for each item when called once', async () => {
     const mockFetch = jest.fn().mockResolvedValue({ ok: true });
     const mockDelete = jest.fn().mockResolvedValue(undefined);
-    const queue: QueueRecord[] = [
+    const queue: TestQueueRecord[] = [
       { id: 1, createdAt: 1, apiBase: 'https://example.com/api/library', body: {} },
       { id: 2, createdAt: 2, apiBase: 'https://example.com/api/library', body: {} },
     ];
@@ -76,7 +72,7 @@ describe('flushLibrarySyncQueue mutex', () => {
           resolveFirst = () => res({ ok: true });
         }),
     );
-    const queue: QueueRecord[] = [
+    const queue: TestQueueRecord[] = [
       { id: 1, createdAt: 1, apiBase: 'https://x.com/api/library', body: {} },
     ];
     const flush = makeFlusher(() => Promise.resolve(queue), slowFetch, mockDelete);
@@ -99,7 +95,7 @@ describe('flushLibrarySyncQueue mutex', () => {
   it('allows a sequential flush after the first completes (flag is cleared in finally)', async () => {
     const mockFetch = jest.fn().mockResolvedValue({ ok: true });
     const mockDelete = jest.fn().mockResolvedValue(undefined);
-    const queue: QueueRecord[] = [
+    const queue: TestQueueRecord[] = [
       { id: 1, createdAt: 1, apiBase: 'https://x.com/api/library', body: {} },
     ];
     const flush = makeFlusher(() => Promise.resolve(queue), mockFetch, mockDelete);

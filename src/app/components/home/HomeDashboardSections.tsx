@@ -4,12 +4,16 @@ import { DASHBOARD_TAB_CATEGORIES } from '@/lib/dashboard/category-data';
 import type { CategoryDashboardSection, DashboardCategoryKey } from '@/lib/dashboard/category-data';
 import CategoryDashboardTabs from '@/app/components/dashboard/CategoryDashboardTabs';
 import UnifiedOverviewRow from '@/app/components/dashboard/UnifiedOverviewRow';
-import type { UnifiedOverviewCategory, UnifiedOverviewInput } from '@/lib/dashboard/unified-overview';
+import type {
+  UnifiedOverviewCategory,
+  UnifiedOverviewInput,
+} from '@/lib/dashboard/unified-overview';
 
 type HomeDashboardSectionsProps = {
   mediaCategories: DashboardCategoryKey[];
   categorySections: Record<DashboardCategoryKey, CategoryDashboardSection>;
   stats: PersonalStats;
+  categoryProfile?: Record<string, unknown> | null;
   isReadOnly?: boolean;
 };
 
@@ -19,11 +23,21 @@ function buildUnifiedOverviewCategories(
   stats: PersonalStats,
 ): UnifiedOverviewCategory[] {
   const resolveStatsForCategory = (category: DashboardCategoryKey) => {
-    if (category === 'games') return stats.games;
-    if (category === 'anime') return stats.anime;
-    if (category === 'manga') return stats.manga;
-    if (category === 'movies') return stats.movies;
-    if (category === 'tv') return stats.tv;
+    if (category === 'games') {
+      return stats.games;
+    }
+    if (category === 'anime') {
+      return stats.anime;
+    }
+    if (category === 'manga') {
+      return stats.manga;
+    }
+    if (category === 'movies') {
+      return stats.movies;
+    }
+    if (category === 'tv') {
+      return stats.tv;
+    }
     return stats.books;
   };
 
@@ -47,6 +61,7 @@ export function HomeDashboardSections({
   mediaCategories,
   categorySections,
   stats,
+  categoryProfile = null,
   isReadOnly = false,
 }: HomeDashboardSectionsProps) {
   const overviewData: UnifiedOverviewInput = {
@@ -65,6 +80,7 @@ export function HomeDashboardSections({
               enabledCategories={mediaCategories}
               sections={categorySections}
               stats={stats}
+              categoryProfile={categoryProfile}
               isReadOnly={isReadOnly}
             />
           </div>
