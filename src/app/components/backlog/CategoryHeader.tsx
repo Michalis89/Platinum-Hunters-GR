@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Check, Copy, Lightbulb, Plus } from 'lucide-react';
+import { Check, Copy, Download, Lightbulb, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -35,6 +35,7 @@ interface CategoryHeaderProps {
   onSteamSyncClick?: () => Promise<void>;
   onCreateClick: () => void;
   onSuggestionsClick: () => void;
+  onExportClick?: (format: 'csv' | 'excel' | 'json') => void;
   isReadOnly?: boolean;
 }
 
@@ -48,6 +49,7 @@ export default function CategoryHeader({
   onSteamSyncClick,
   onCreateClick,
   onSuggestionsClick,
+  onExportClick,
   isReadOnly = false,
 }: Readonly<CategoryHeaderProps>) {
   const locale = useLocale();
@@ -193,6 +195,31 @@ export default function CategoryHeader({
                 <Lightbulb className="mr-2 h-4 w-4" />
                 Personal Suggestions
               </Button>
+
+              {onExportClick ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="h-11 rounded-xl border-border/60 bg-card/60 px-4 text-muted-foreground"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Export
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-44">
+                    <DropdownMenuItem onSelect={() => onExportClick('csv')}>
+                      Export to CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onExportClick('excel')}>
+                      Export to Excel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onExportClick('json')}>
+                      Export to JSON
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
 
               {canShareBacklog ? (
                 <Button

@@ -22,6 +22,11 @@ import {
 import { useLocale } from '@/context/LocaleContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { apiClient } from '@/lib/api/client';
+import {
+  exportBacklogAsCSV,
+  exportBacklogAsExcel,
+  exportBacklogAsJSON,
+} from '@/lib/export/backlogExport';
 import { yieldToMain } from '@/lib/performance';
 import dynamic from 'next/dynamic';
 import { enqueueLibraryAddRequest, requestLibraryAddSync } from '@/lib/pwa/libraryAddQueue';
@@ -533,6 +538,21 @@ export default function CategoryLibrary({
       { planned: 0, current: 0, completed: 0, dropped: 0 },
     );
   }, [libraryEntries]);
+
+  const handleExport = useCallback(
+    (format: 'csv' | 'excel' | 'json') => {
+      if (format === 'csv') {
+        exportBacklogAsCSV(libraryEntries, category);
+        return;
+      }
+      if (format === 'excel') {
+        void exportBacklogAsExcel(libraryEntries, category);
+        return;
+      }
+      exportBacklogAsJSON(libraryEntries, category);
+    },
+    [category, libraryEntries],
+  );
 
   const [, startTransition] = useTransition();
   const openEntryDialog = useCallback(
@@ -1297,6 +1317,7 @@ export default function CategoryLibrary({
             onSuggestionsClick={() =>
               dispatch({ type: 'patch', payload: { ctaMode: 'suggestions' } })
             }
+            onExportClick={!isReadOnly ? handleExport : undefined}
             isReadOnly={isReadOnly}
           />
 

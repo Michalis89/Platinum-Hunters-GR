@@ -1,6 +1,6 @@
 {
   "name": "hobbistas",
-  "version": "1.6.16",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -88,6 +88,7 @@
     "swr": "^2.3.6",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "xlsx": "^0.18.5",
     "xml2js": "^0.6.2",
     "zod": "^4.3.6"
   },
