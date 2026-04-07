@@ -8,10 +8,10 @@ export function HomeFinalCTA() {
 
       <div className="relative mx-auto max-w-3xl rounded-xl p-7 text-center md:p-10">
         <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
-          Start tracking today
+          Your hobbies deserve better than five different apps
         </h2>
         <p className="mx-auto mb-8 max-w-xl text-base text-muted-foreground md:text-lg">
-          Your personal hobby hub is ready. Create an account and add your first entry.
+          Hobbistas is free. No credit card, no ads. Just a clean space for everything you watch, play, and read.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">

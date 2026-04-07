@@ -78,9 +78,9 @@ export default function GameSuggestions() {
                 </p>
               </div>
               <div className="mt-auto">
-                {suggestion.slug && (
+                {suggestion.igdbId && (
                   <Button size="sm" variant="outline" asChild>
-                    <Link href={`/media/games/${suggestion.slug}`}>View details</Link>
+                    <Link href={`/media/games/${suggestion.igdbId}`}>View details</Link>
                   </Button>
                 )}
               </div>

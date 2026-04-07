@@ -30,7 +30,7 @@ export function AboutFinalCTA({ isAuthenticated = false }: AboutFinalCTAProps) {
           </Link>
 
           <Link
-            href="#"
+            href="/support"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-base font-semibold text-foreground transition hover:border-primary/60 hover:text-foreground"
           >
             <Mail className="h-4 w-4" />

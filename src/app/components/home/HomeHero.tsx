@@ -8,12 +8,12 @@ export function HomeHero() {
       eyebrow="Welcome to Hobbistas"
       title={
         <>
-          <span className="text-foreground">Your hobbies.</span>
+          <span className="text-foreground">One place for all</span>
           <br />
-          <span className="text-primary">Your space.</span>
+          <span className="text-primary">your hobbies.</span>
         </>
       }
-      subtitle="Track games, anime, manga, movies, series, and books. Update progress, add notes, and see your stats all in one place."
+      subtitle="Track your anime, games, manga, movies, books, and series in a single app — with recommendations that connect your taste across all of them."
       sectionClassName="px-4 pb-14 pt-14 md:px-6 md:pb-20 md:pt-20"
       titleClassName="mb-5 text-balance text-[2.35rem] font-semibold leading-[1.08] md:text-6xl"
       subtitleClassName=" max-w-[46rem] text-[15px] text-muted-foreground md:text-[1.15rem]"
@@ -24,25 +24,25 @@ export function HomeHero() {
             className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:w-auto"
           >
             <Sparkles className="h-5 w-5" />
-            Start now
+            Start for free
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
 
           <Link
-            href="/backlog"
+            href="/about"
             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold text-foreground transition hover:border-primary/20 hover:bg-accent/10 sm:w-auto"
           >
-            Browse backlog
+            How it works
           </Link>
         </div>
       }
       badges={
         <>
           <span className="px-4 py-1.5 text-xs font-medium tracking-[-0.01em]">
-            6 media types supported
+            Free to use
           </span>
           <span className="px-4 py-1.5 text-xs font-medium tracking-[-0.01em]">
-            Steam & MAL import
+            Steam import supported
           </span>
           <span className="px-4 py-1.5 text-xs font-medium tracking-[-0.01em]">
             Private by default

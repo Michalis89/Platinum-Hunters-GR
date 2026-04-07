@@ -46,13 +46,13 @@ export function AboutHero({ isAuthenticated = false }: AboutHeroProps) {
       badges={
         <>
           <span className="rounded-full border border-border bg-card px-3 py-1">
-            Personal-first design
+            Free to use
           </span>
           <span className="rounded-full border border-border bg-card px-3 py-1">
-            Modular by choice
+            No ads, no tracking
           </span>
           <span className="rounded-full border border-border bg-card px-3 py-1">
-            Built in public
+            Works offline
           </span>
         </>
       }

@@ -19,9 +19,9 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    title: 'Personal Library',
+    title: 'All Hobbies, One Library',
     description:
-      'Track games, anime, manga, books, movies, and TV shows. Add items manually or import from supported sources.',
+      'Games, anime, manga, books, movies, and TV shows — all tracked in one place instead of five different apps.',
     icon: <Layers className="h-6 w-6" />,
   },
   {
@@ -32,43 +32,44 @@ const features: Feature[] = [
   },
   {
     title: 'Personal Statistics',
-    description: 'View time invested, completion status, and in-progress counts per category.',
+    description:
+      'See time invested, completion rates, and in-progress counts per category at a glance.',
     icon: <BarChart3 className="h-6 w-6" />,
   },
   {
     title: 'Ratings & Reflections',
     description:
-      'Rate each entry on a 1–10 scale and add short reflections to capture your thoughts.',
+      'Rate entries on a 1–10 scale and write short notes to remember your thoughts on each one.',
     icon: <Star className="h-6 w-6" />,
   },
   {
-    title: 'Digital Personal Diary',
+    title: 'Private Diary',
     description:
-      'Write private entries in a dedicated diary module with local encryption controls and optional auto-lock.',
+      'Write personal journal entries encrypted locally on your device. The server never sees the content.',
     icon: <NotebookPen className="h-6 w-6" />,
   },
   {
-    title: 'Status Management',
+    title: 'Smart Status & Backlog',
     description:
-      'Organize your library with statuses: Planned, Current, Completed, or Dropped. Mark favorites.',
+      'Keep your library organized with Planned, Current, Completed, and Dropped. Mark favorites.',
     icon: <StickyNote className="h-6 w-6" />,
   },
   {
-    title: 'Gaming Fields',
+    title: 'Steam Import',
     description:
-      'Select platforms, import playtime from Steam, and set personal difficulty ratings for games.',
+      'Connect your Steam account and import your full game library with playtime in seconds.',
     icon: <Trophy className="h-6 w-6" />,
   },
   {
-    title: 'Articles & Reviews (Optional)',
+    title: 'Smart Recommendations',
     description:
-      'Optional module enabled in Application Settings. Users with Author or Reviewer roles can publish content; likes and comments are available when the module is active. Role access is managed through Support.',
+      'Get suggestions based on the genres, themes, and ratings from your actual library — not what is trending.',
     icon: <Film className="h-6 w-6" />,
   },
   {
-    title: 'External Library Sync',
+    title: 'Works Offline (PWA)',
     description:
-      'Import your Steam library with playtime. Anime and manga sync from MyAnimeList is being finalized.',
+      'Install Hobbistas on your phone or desktop. Your library stays accessible even without an internet connection.',
     icon: <RefreshCw className="h-6 w-6" />,
   },
 ];
@@ -79,14 +80,13 @@ export function AboutFeatures() {
       <div className="mx-auto max-w-screen-2xl">
         <div className="mb-12 text-center md:mb-16">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-primary">
-            What&apos;s implemented
+            What you get
           </p>
           <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
-            Core features available today
+            Everything in one place
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            These are the features that exist and work right now. Not a roadmap—actual
-            functionality.
+            All of this is available right now, for free. No setup required beyond creating an account.
           </p>
         </div>
 

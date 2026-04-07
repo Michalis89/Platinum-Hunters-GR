@@ -117,7 +117,12 @@ function LibraryEntryRow({
     return `Score ${entry.score}`;
   }, [entry.score]);
   const mediaSlug = useMemo(
-    () => (entry.title?.trim() ? toMediaSlug(entry.title) : String(entry.mediaId ?? entry.id)),
+    () =>
+      Number.isFinite(entry.mediaId)
+        ? String(entry.mediaId)
+        : entry.title?.trim()
+          ? toMediaSlug(entry.title)
+          : String(entry.id),
     [entry.id, entry.mediaId, entry.title],
   );
 

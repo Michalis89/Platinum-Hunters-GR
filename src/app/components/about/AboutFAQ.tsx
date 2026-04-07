@@ -17,32 +17,32 @@ const faqItems: FAQItem[] = [
   {
     question: 'Is Hobbistas free?',
     answer:
-      'Yes, the core features are completely free. Backlog, progress tracking, notes, and access to all articles and reviews cost nothing. We may add premium features for advanced users in the future.',
+      'Yes. Tracking, backlog management, progress, ratings, and personal statistics are all completely free. There is no trial period and no credit card required.',
   },
   {
     question: 'Which hobby categories are supported?',
     answer:
-      'We currently support Games, Anime, Manga, Movies, Series/TV Shows, and Books. Each category has its own metadata and progress fields.',
+      'Games, Anime, Manga, Movies, TV Shows, and Books — each with its own metadata and progress fields. More categories are planned.',
   },
   {
     question: 'Can I import my backlog from other services?',
     answer:
-      'We are working on integrations with popular services like IGDB, TMDB, and MyAnimeList. For now, you can add entries manually using quick add.',
+      'Steam import is fully supported — connect your account and your game library with playtime appears instantly. We are also working on MyAnimeList import for anime and manga.',
   },
   {
     question: 'Is my data safe?',
     answer:
-      'Yes. Data is stored on a trusted cloud infrastructure and is only accessible through your account. We do not sell personal data. You can export or delete your information at any time.',
+      'Yes. Your data is stored securely and is only accessible through your account. We do not sell personal data. Your diary entries are encrypted locally on your device — we never see their contents.',
   },
   {
     question: 'Is there a mobile app?',
     answer:
-      'Not yet, but it is on the roadmap. The web app is fully responsive and works smoothly in mobile browsers.',
+      'Hobbistas is a Progressive Web App (PWA). You can install it on your phone or desktop from your browser and it works offline. No app store required.',
   },
   {
-    question: 'How can I contribute or suggest features?',
+    question: 'How can I suggest a feature or report a bug?',
     answer:
-      'Send a feature request or bug report using the contact form. If you can, share 2–3 sentences describing the issue or idea, how you imagine it working, and ideally a screenshot. We read everything and queue items by priority.',
+      'Use the Support page to send a request or report. Describe what you expected, what happened instead, and a screenshot if possible. Everything is read and prioritized.',
   },
 ];
 

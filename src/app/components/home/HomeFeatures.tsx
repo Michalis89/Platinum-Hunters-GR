@@ -18,56 +18,57 @@ type Feature = {
 };
 const features: Feature[] = [
   {
-    title: 'Personal Library',
+    title: 'All Hobbies, One Library',
     description:
-      'Track games, anime, manga, books, movies, and TV shows. Add items manually or import from supported sources.',
+      'Games, anime, manga, books, movies, TV shows — everything in one place. No more switching between five different apps.',
     icon: <Layers className="h-6 w-6" />,
   },
   {
     title: 'Progress Tracking',
     description:
-      'Update hours played, episodes watched, chapters read, or pages finished as you go.',
+      'Update hours played, episodes watched, chapters read, or pages finished as you go. Pick up exactly where you left off.',
     icon: <ListTodo className="h-6 w-6" />,
   },
   {
     title: 'Personal Statistics',
-    description: 'View time invested, completion status, and in-progress counts per category.',
+    description:
+      'See how much time you invest in each hobby, your completion rate, and what you have in progress.',
     icon: <BarChart3 className="h-6 w-6" />,
   },
   {
     title: 'Ratings & Reflections',
     description:
-      'Rate each entry on a 1–10 scale and add short reflections to capture your thoughts.',
+      'Rate entries on a 1–10 scale and write short notes to capture your thoughts while they are still fresh.',
     icon: <Star className="h-6 w-6" />,
   },
   {
-    title: 'Digital Personal Diary',
+    title: 'Private Diary',
     description:
-      'Keep private journal entries protected with local encryption controls and optional auto-lock.',
+      'A dedicated space for personal journal entries, encrypted locally on your device. Only you can read it.',
     icon: <NotebookPen className="h-6 w-6" />,
   },
   {
-    title: 'Status Management',
+    title: 'Smart Status & Backlog',
     description:
-      'Organize your library with statuses: Planned, Current, Completed, or Dropped. Mark favorites.',
+      'Organize everything with Planned, Current, Completed, or Dropped. Your backlog stays under control.',
     icon: <StickyNote className="h-6 w-6" />,
   },
   {
-    title: 'Gaming Fields',
+    title: 'Steam Import',
     description:
-      'Select platforms, import playtime from Steam, and set personal difficulty ratings for games.',
+      'Connect Steam and import your full game library with playtime. Your backlog appears in seconds.',
     icon: <Trophy className="h-6 w-6" />,
   },
   {
-    title: 'Articles & Reviews (Optional)',
+    title: 'Smart Recommendations',
     description:
-      'Optional module enabled in Application Settings. Users with Author or Reviewer roles can publish content; likes and comments are available when the module is active. Role access is managed through Support.',
+      'Get suggestions based on your actual taste — genres, themes, and ratings you have already given across all your hobbies.',
     icon: <Film className="h-6 w-6" />,
   },
   {
-    title: 'External Library Sync',
+    title: 'Works Offline',
     description:
-      'Import your Steam library with playtime. Anime and manga sync from MyAnimeList is being finalized.',
+      'Hobbistas is a PWA — install it on your phone or desktop and keep tracking even without an internet connection.',
     icon: <RefreshCw className="h-6 w-6" />,
   },
 ];
@@ -78,13 +79,13 @@ export function HomeFeatures() {
       <div className="mx-auto max-w-screen-2xl">
         <div className="mb-10 text-center md:mb-12">
           <p className="mb-3 text-xs uppercase tracking-[0.28em] text-foreground/80">
-            What you can do
+            Everything you need
           </p>
           <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">
-            Add, track, and organize
+            One app, every hobby
           </h2>
           <p className="mx-auto max-w-xl text-muted-foreground">
-            Your library, your progress, your stats. Start with any hobby category.
+            Everything you need to track, organize, and discover across all your hobbies — free.
           </p>
         </div>
 
