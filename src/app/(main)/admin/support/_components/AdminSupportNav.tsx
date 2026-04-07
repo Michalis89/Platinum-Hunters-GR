@@ -51,7 +51,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function AdminSupportNav({ pathname, onNavigate }: AdminSupportNavProps) {
-  const { adminCount: ticketUnreadCount } = useTicketNotificationCount(true);
+  const { adminCount: ticketUnreadCount } = useTicketNotificationCount();
 
   return (
     <nav className="space-y-1">

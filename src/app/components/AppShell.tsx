@@ -2,6 +2,7 @@ import React from 'react';
 import NavbarWrapper from './NavbarWrapper';
 import { Footer } from './layout/Footer';
 import AppRuntimeEnhancements from './shared/AppRuntimeEnhancements';
+import { TicketNotificationProvider } from '@/context/TicketNotificationContext';
 
 type Props = {
   children: React.ReactNode;
@@ -22,17 +23,19 @@ export default function AppShell({ children }: Props) {
       />
 
       {/* Content wrapper with flex layout for sticky footer */}
-      <div className="relative flex min-h-screen flex-col">
-        <NavbarWrapper />
-        <main
-          id="main-content"
-          className="app-main-shell flex-1"
-          style={{ scrollPaddingBlockStart: '6rem' }}
-        >
-          {children}
-        </main>
-        <Footer />
-      </div>
+      <TicketNotificationProvider>
+        <div className="relative flex min-h-screen flex-col">
+          <NavbarWrapper />
+          <main
+            id="main-content"
+            className="app-main-shell flex-1"
+            style={{ scrollPaddingBlockStart: '6rem' }}
+          >
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </TicketNotificationProvider>
     </div>
   );
 }

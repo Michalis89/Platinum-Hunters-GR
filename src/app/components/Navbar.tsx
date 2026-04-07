@@ -75,7 +75,7 @@ export default function Navbar() {
     userCount: userTicketUnreadCount,
     adminCount: adminTicketUnreadCount,
     totalCount: totalTicketUnreadCount,
-  } = useTicketNotificationCount(shouldLoadSettings);
+  } = useTicketNotificationCount();
   const [isThemeSaving, setIsThemeSaving] = useState(false);
 
   const isNavbarLoading = !authResolved;
