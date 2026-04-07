@@ -20,6 +20,7 @@ import { isAllowedIgdbGameCandidate } from '@/lib/igdb/categories';
 import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
 import { recomputeCategoryProfiles } from '@/lib/profile/recompute-category-profiles';
 import { revalidateCache } from '@/lib/cache/tags';
+import { revalidateUserMediaMutation } from '../utils/revalidation';
 
 /**
  * Generic handler for POST /api/{category}/add
@@ -171,6 +172,8 @@ async function handleLocalSource(
     display_name: (profileData as UserProfile)?.display_name,
     avatar_url: (profileData as UserProfile)?.avatar_url,
   });
+
+  revalidateUserMediaMutation(userId, config.key);
 
   return NextResponse.json({ entry });
 }
@@ -329,6 +332,8 @@ async function handleExternalSource(
   if (insertedNewMedia) {
     revalidateCache.publicStats();
   }
+
+  revalidateUserMediaMutation(userId, config.key);
 
   return NextResponse.json({ entry, mediaId });
 }

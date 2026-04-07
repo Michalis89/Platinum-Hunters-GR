@@ -1,13 +1,13 @@
-import type { createRouteHandlerClient } from '@/lib/supabase-route-handler';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
+﻿import type { createRouteHandlerClient } from '@/lib/supabase-route-handler';
 
 type AffinityCategory = 'games' | 'anime' | 'manga' | 'books' | 'movies' | 'tv';
 
 type AffinityEntry = {
+  title: string | null;
   status: string;
   score: number | null;
   is_favorite: boolean | null;
+  progress: number | null;
   genres: string[];
   category: string;
 };
@@ -21,7 +21,15 @@ type GenreScore = {
 
 type GenreAffinityResult = Partial<Record<AffinityCategory, GenreScore[]>>;
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+type GenreStats = {
+  label: string;
+  score: number;
+  itemCount: number;
+  strongSignalCount: number;
+  favoriteCount: number;
+  completedCount: number;
+  highRatingCompletedCount: number;
+};
 
 const AFFINITY_CATEGORIES: AffinityCategory[] = [
   'games',
@@ -34,28 +42,52 @@ const AFFINITY_CATEGORIES: AffinityCategory[] = [
 
 const STATUS_WEIGHT = {
   completed: 1.5,
-  current: 1.0,
-  planned: 0.2,
+  current: 0.9,
+  planned: 0.15,
 } as const;
 
-const FAVORITE_BONUS = 3.0;
+const FAVORITE_MULTIPLIER = 1.4;
 
 const DROPPED_WEIGHT = {
   NO_RATING: -0.2,
-  LOW_RATING: -1.0, // rating <= 5
-  HIGH_RATING: 0, // rating >= 7
-} as const;
-
-const RATING_BOOST = {
-  HIGH: 0.8, // 8–10
-  MEDIUM: 0.3, // 6–7
+  LOW_RATING: -1.0,
+  HIGH_RATING: 0,
 } as const;
 
 const MIN_ITEMS_DEFAULT = 2;
 const SMALL_LIBRARY_THRESHOLD = 10;
 const TOP_GENRES_LIMIT = 8;
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+const ANIME_CURRENT_MAX_WITHOUT_SCORE = 0.75;
+const ANIME_CURRENT_MAX_WITH_SCORE = 1.05;
+
+const AFFINITY_DEBUG_ANIME = process.env.HB_DEBUG_AFFINITY_ANIME === '1';
+
+const ANIME_WEAK_METADATA_GENRES = new Set([
+  'adult cast',
+  'award winning',
+  'children',
+  'josei',
+  'kids',
+  'school',
+  'seinen',
+  'shoujo',
+  'shounen',
+  'workplace',
+]);
+
+const ANIME_SECONDARY_GENRES = new Set([
+  'isekai',
+  'martial arts',
+  'military',
+  'parody',
+  'reincarnation',
+  'strategy game',
+  'super power',
+  'survival',
+  'time travel',
+  'urban fantasy',
+]);
 
 function normalizeGenreKey(value: string): string {
   return value.trim().replace(/\s+/g, ' ').toLowerCase();
@@ -72,28 +104,42 @@ function getBaseWeight(status: string, score: number | null): number {
     if (score >= 7) {
       return DROPPED_WEIGHT.HIGH_RATING;
     }
-    // 5 < score < 7 (e.g. 6): treat as no-rating dropped
     return DROPPED_WEIGHT.NO_RATING;
   }
 
   return STATUS_WEIGHT[status as keyof typeof STATUS_WEIGHT] ?? 0;
 }
 
-function getRatingBoost(score: number | null): number {
+function getRatingMultiplier(score: number | null, status: string): number {
   if (score === null || score === undefined) {
-    return 0;
+    return 1;
+  }
+
+  if (status === 'dropped') {
+    if (score <= 5) {
+      return 1.25;
+    }
+    return 1;
+  }
+
+  if (score >= 9) {
+    return 1.35;
   }
   if (score >= 8) {
-    return RATING_BOOST.HIGH;
+    return 1.2;
   }
   if (score >= 6) {
-    return RATING_BOOST.MEDIUM;
+    return 1.05;
   }
-  return 0;
+  if (score <= 5) {
+    return 0.9;
+  }
+
+  return 1;
 }
 
-function getFavoriteBonus(isFavorite: boolean | null): number {
-  return isFavorite ? FAVORITE_BONUS : 0;
+function getFavoriteMultiplier(isFavorite: boolean | null): number {
+  return isFavorite ? FAVORITE_MULTIPLIER : 1;
 }
 
 function isStrongSignal(entry: AffinityEntry): boolean {
@@ -110,10 +156,105 @@ function hasHighRatingCompleted(entry: AffinityEntry): boolean {
   return entry.status === 'completed' && typeof entry.score === 'number' && entry.score >= 8;
 }
 
-// ─── Core Algorithm ──────────────────────────────────────────────────────────
+function normalizeTitleForFranchise(title: string): string {
+  let normalized = title.toLowerCase().trim();
+
+  normalized = normalized
+    .replace(/:\s+.+$/u, '')
+    .replace(/\bseason\s+\d+\b/giu, '')
+    .replace(/\bpart\s+\d+\b/giu, '')
+    .replace(/\bcour\s+\d+\b/giu, '')
+    .replace(/\b(ova|ona|special|movie|arc|the final chapters?)\b/giu, '')
+    .replace(/\(\s*\d{4}\s*\)/gu, '')
+    .replace(/\s+-\s+.+$/u, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  normalized = normalized.replace(/\b\d+\b$/u, '').trim();
+  return normalized || title.toLowerCase().trim();
+}
+
+function getFranchiseAffinityMultiplier(seenCount: number): number {
+  if (seenCount <= 0) {
+    return 1;
+  }
+  if (seenCount === 1) {
+    return 0.55;
+  }
+  if (seenCount === 2) {
+    return 0.35;
+  }
+  return 0.2;
+}
+
+function getGenreSignalMultiplier(category: AffinityCategory, genre: string): number {
+  if (category !== 'anime') {
+    return 1;
+  }
+
+  const key = normalizeGenreKey(genre);
+  if (ANIME_WEAK_METADATA_GENRES.has(key)) {
+    return 0.28;
+  }
+  if (ANIME_SECONDARY_GENRES.has(key)) {
+    return 0.7;
+  }
+
+  return 1;
+}
+
+function applyCategoryEntryCap(
+  category: AffinityCategory,
+  entry: AffinityEntry,
+  computedWeight: number,
+): number {
+  if (category !== 'anime' || entry.status !== 'current' || computedWeight <= 0) {
+    return computedWeight;
+  }
+
+  const hasExplicitScore = typeof entry.score === 'number';
+  const hasProgressSignal = typeof entry.progress === 'number' && entry.progress > 0;
+
+  if (!hasExplicitScore && !hasProgressSignal) {
+    return Math.min(computedWeight, ANIME_CURRENT_MAX_WITHOUT_SCORE);
+  }
+
+  return Math.min(computedWeight, ANIME_CURRENT_MAX_WITH_SCORE);
+}
+
+function meetsDefaultEvidence(stats: {
+  itemCount: number;
+  favoriteCount: number;
+  completedCount: number;
+  highRatingCompletedCount: number;
+}): boolean {
+  if (stats.itemCount < MIN_ITEMS_DEFAULT) {
+    return false;
+  }
+
+  const hasFavorite = stats.favoriteCount >= 1;
+  const hasTwoCompleted = stats.completedCount >= 2;
+  const hasHighRatedCompleted = stats.highRatingCompletedCount >= 1;
+
+  return hasFavorite || hasTwoCompleted || hasHighRatedCompleted;
+}
+
+function meetsSmallLibraryEvidence(stats: {
+  itemCount: number;
+  favoriteCount: number;
+  completedCount: number;
+  highRatingCompletedCount: number;
+  score: number;
+}): boolean {
+  if (stats.itemCount >= MIN_ITEMS_DEFAULT) {
+    return meetsDefaultEvidence(stats);
+  }
+
+  return stats.favoriteCount >= 1 || stats.highRatingCompletedCount >= 1;
+}
 
 export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityResult {
-  // Group entries by category
   const byCategory = new Map<AffinityCategory, AffinityEntry[]>();
 
   for (const entry of entries) {
@@ -138,41 +279,65 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
       continue;
     }
 
-    const totalItemsInCategory = categoryEntries.length;
-    const isSmallLibrary = totalItemsInCategory < SMALL_LIBRARY_THRESHOLD;
+    const isSmallLibrary = categoryEntries.length < SMALL_LIBRARY_THRESHOLD;
+    const genreMap = new Map<string, GenreStats>();
+    const franchiseSeenCount = new Map<string, number>();
 
-    // Accumulate genre stats
-    const genreMap = new Map<
-      string,
-      {
-        label: string;
-        score: number;
-        itemCount: number;
-        strongSignalCount: number;
-        favoriteCount: number;
-        completedCount: number;
-        highRatingCompletedCount: number;
-      }
-    >();
+    const animeDebugRows: Array<{
+      title: string | null;
+      status: string;
+      score: number | null;
+      favorite: boolean;
+      progress: number | null;
+      baseWeight: number;
+      ratingMultiplier: number;
+      favoriteMultiplier: number;
+      franchiseKey: string | null;
+      franchiseMultiplier: number;
+      totalWeight: number;
+      genres: Array<{ genre: string; signalMultiplier: number; weightedContribution: number }>;
+    }> = [];
 
     for (const entry of categoryEntries) {
       const baseWeight = getBaseWeight(entry.status, entry.score);
-      const ratingBoost = getRatingBoost(entry.score);
-      const favoriteBonus = getFavoriteBonus(entry.is_favorite);
-      const totalWeight = baseWeight + ratingBoost + favoriteBonus;
+      const ratingMultiplier = getRatingMultiplier(entry.score, entry.status);
+      const favoriteMultiplier = getFavoriteMultiplier(entry.is_favorite);
 
-      // Multi-genre balancing: distribute weight using sqrt
+      const franchiseKey =
+        category === 'anime' && entry.title?.trim()
+          ? normalizeTitleForFranchise(entry.title)
+          : null;
+      const seenCount = franchiseKey ? (franchiseSeenCount.get(franchiseKey) ?? 0) : 0;
+      const franchiseMultiplier =
+        category === 'anime' ? getFranchiseAffinityMultiplier(seenCount) : 1;
+
+      const weightedBeforeCap =
+        baseWeight * ratingMultiplier * favoriteMultiplier * franchiseMultiplier;
+      const totalWeight = applyCategoryEntryCap(category, entry, weightedBeforeCap);
+
+      if (franchiseKey) {
+        franchiseSeenCount.set(franchiseKey, seenCount + 1);
+      }
+
       const genreCount = entry.genres.length;
       const weightPerGenre = totalWeight / Math.sqrt(genreCount);
-
       const strong = isStrongSignal(entry);
       const highRatedCompleted = hasHighRatingCompleted(entry);
+
+      const entryDebugGenres: Array<{
+        genre: string;
+        signalMultiplier: number;
+        weightedContribution: number;
+      }> = [];
 
       for (const rawGenre of entry.genres) {
         const label = rawGenre.trim();
         if (!label) {
           continue;
         }
+
+        const signalMultiplier = getGenreSignalMultiplier(category, label);
+        const weightedContribution = weightPerGenre * signalMultiplier;
 
         const key = normalizeGenreKey(label);
         const current = genreMap.get(key) ?? {
@@ -185,8 +350,9 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
           highRatingCompletedCount: 0,
         };
 
-        current.score += weightPerGenre;
+        current.score += weightedContribution;
         current.itemCount += 1;
+
         if (strong) {
           current.strongSignalCount += 1;
         }
@@ -201,20 +367,42 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
         }
 
         genreMap.set(key, current);
+
+        if (AFFINITY_DEBUG_ANIME && category === 'anime') {
+          entryDebugGenres.push({
+            genre: label,
+            signalMultiplier,
+            weightedContribution: Math.round(weightedContribution * 1000) / 1000,
+          });
+        }
+      }
+
+      if (AFFINITY_DEBUG_ANIME && category === 'anime') {
+        animeDebugRows.push({
+          title: entry.title,
+          status: entry.status,
+          score: entry.score,
+          favorite: Boolean(entry.is_favorite),
+          progress: entry.progress,
+          baseWeight: Math.round(baseWeight * 1000) / 1000,
+          ratingMultiplier: Math.round(ratingMultiplier * 1000) / 1000,
+          favoriteMultiplier: Math.round(favoriteMultiplier * 1000) / 1000,
+          franchiseKey,
+          franchiseMultiplier: Math.round(franchiseMultiplier * 1000) / 1000,
+          totalWeight: Math.round(totalWeight * 1000) / 1000,
+          genres: entryDebugGenres,
+        });
       }
     }
 
-    // Apply minimum evidence rule & clamp scores
     const qualified: GenreScore[] = [];
 
     for (const stats of genreMap.values()) {
-      // Clamp to minimum 0
       const clampedScore = Math.max(0, stats.score);
       if (clampedScore === 0) {
         continue;
       }
 
-      // Check minimum evidence
       const meetsEvidence = isSmallLibrary
         ? meetsSmallLibraryEvidence(stats)
         : meetsDefaultEvidence(stats);
@@ -231,7 +419,6 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
       });
     }
 
-    // Sort descending by score, then by item count, then alphabetically
     qualified.sort((a, b) => {
       if (b.score !== a.score) {
         return b.score - a.score;
@@ -245,51 +432,30 @@ export function computeGenreAffinity(entries: AffinityEntry[]): GenreAffinityRes
     if (qualified.length > 0) {
       result[category] = qualified.slice(0, TOP_GENRES_LIMIT);
     }
+
+    if (AFFINITY_DEBUG_ANIME && category === 'anime') {
+      const genreDebugSummary = Array.from(genreMap.values())
+        .map(genre => ({
+          genre: genre.label,
+          score: Math.round(Math.max(0, genre.score) * 1000) / 1000,
+          itemCount: genre.itemCount,
+          strongSignalCount: genre.strongSignalCount,
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      console.warn(
+        '[GenreAffinity Debug][anime]',
+        JSON.stringify({
+          entries: animeDebugRows,
+          genres: genreDebugSummary,
+          topGenres: result[category] ?? [],
+        }),
+      );
+    }
   }
 
   return result;
 }
-
-// ─── Evidence Rules ──────────────────────────────────────────────────────────
-
-function meetsDefaultEvidence(stats: {
-  itemCount: number;
-  favoriteCount: number;
-  completedCount: number;
-  highRatingCompletedCount: number;
-}): boolean {
-  if (stats.itemCount < MIN_ITEMS_DEFAULT) {
-    return false;
-  }
-
-  // At least 1 strong signal:
-  // 1 favorite OR 2 completed OR 1 completed + rating >= 8
-  const hasFavorite = stats.favoriteCount >= 1;
-  const hasTwoCompleted = stats.completedCount >= 2;
-  const hasHighRatedCompleted = stats.highRatingCompletedCount >= 1;
-
-  return hasFavorite || hasTwoCompleted || hasHighRatedCompleted;
-}
-
-function meetsSmallLibraryEvidence(stats: {
-  itemCount: number;
-  favoriteCount: number;
-  completedCount: number;
-  highRatingCompletedCount: number;
-  score: number;
-}): boolean {
-  // Relaxed: 1 item is enough BUT only if favorite or rating >= 9
-  // We check favoriteCount (direct) or highRatingCompletedCount as proxy
-  // Note: for rating >= 9 specifically, we rely on the score being high enough
-  if (stats.itemCount >= MIN_ITEMS_DEFAULT) {
-    return meetsDefaultEvidence(stats);
-  }
-
-  // 1 item: must be favorite or have a very high-rated completed
-  return stats.favoriteCount >= 1 || stats.highRatingCompletedCount >= 1;
-}
-
-// ─── Supabase Integration ────────────────────────────────────────────────────
 
 type SupabaseClient = Awaited<ReturnType<typeof createRouteHandlerClient>>;
 
@@ -299,7 +465,7 @@ export async function fetchEntriesForAffinity(
 ): Promise<AffinityEntry[]> {
   const { data, error } = await supabase
     .from('user_media_entries')
-    .select('status,score,is_favorite,media_items!inner(category,genres)')
+    .select('status,score,is_favorite,progress,media_items!inner(category,genres,title,original_title)')
     .eq('user_id', userId)
     .in('media_items.category', AFFINITY_CATEGORIES);
 
@@ -328,10 +494,19 @@ export async function fetchEntriesForAffinity(
       ? (media.genres as string[]).filter((g): g is string => typeof g === 'string')
       : [];
 
+    const titleRaw =
+      typeof media.title === 'string' && media.title.trim()
+        ? media.title
+        : typeof media.original_title === 'string' && media.original_title.trim()
+          ? media.original_title
+          : null;
+
     entries.push({
+      title: titleRaw,
       status: typeof row.status === 'string' ? row.status : '',
       score: typeof row.score === 'number' ? row.score : null,
       is_favorite: typeof row.is_favorite === 'boolean' ? row.is_favorite : false,
+      progress: typeof row.progress === 'number' ? row.progress : null,
       genres,
       category,
     });
@@ -345,10 +520,8 @@ export async function storeGenreAffinity(
   userId: string,
   affinity: GenreAffinityResult,
 ): Promise<void> {
-  // Delete existing affinity rows for this user
   await supabase.from('user_genre_affinity').delete().eq('user_id', userId);
 
-  // Build rows to insert
   const rows: Array<{
     user_id: string;
     category: string;
@@ -362,6 +535,7 @@ export async function storeGenreAffinity(
     if (!genres) {
       continue;
     }
+
     for (const g of genres) {
       rows.push({
         user_id: userId,
@@ -379,10 +553,6 @@ export async function storeGenreAffinity(
   }
 }
 
-/**
- * Recomputes genre affinity for a user and stores it in user_genre_affinity.
- * Fire-and-forget friendly — safe to call with `void refreshGenreAffinity(...)`.
- */
 export async function refreshGenreAffinity(
   supabase: SupabaseClient,
   userId: string,
@@ -392,21 +562,8 @@ export async function refreshGenreAffinity(
   await storeGenreAffinity(supabase, userId, affinity);
 }
 
-/**
- * Minimum percentage of the top genre's score a genre must reach to be
- * considered a "favorite". Genres below this threshold are filtered out.
- * E.g. 0.5 means a genre must have at least 50% of the top genre's score.
- */
 const FAVORITE_THRESHOLD_RATIO = 0.5;
 
-/**
- * Fetches all top genres from user_genre_affinity (up to 8 per category).
- * Returns genres ordered by score (highest first) with NO threshold filtering.
- *
- * This represents the user's **Top Genres** based on weighted volume.
- *
- * @returns Map like { games: ["RPG", "Action", ...], anime: ["Shounen", ...] }
- */
 export async function fetchTopGenres(
   supabase: SupabaseClient,
   userId: string,
@@ -421,7 +578,6 @@ export async function fetchTopGenres(
     return {};
   }
 
-  // Group by category, keeping score order (already sorted desc)
   const grouped = new Map<string, Array<{ genre: string; score: number }>>();
   for (const row of data) {
     const list = grouped.get(row.category) ?? [];
@@ -429,8 +585,6 @@ export async function fetchTopGenres(
     grouped.set(row.category, list);
   }
 
-  // Return all genres per category (up to TOP_GENRES_LIMIT)
-  // Enforce limit at fetch-time for defensive programming / future-proofing
   const result: Record<string, string[]> = {};
   for (const [category, genres] of grouped) {
     if (genres.length > 0) {
@@ -441,14 +595,6 @@ export async function fetchTopGenres(
   return result;
 }
 
-/**
- * Fetches favorite genres from user_genre_affinity using threshold filtering.
- * Returns only genres scoring >= 50% of the top genre in their category.
- *
- * This represents the user's **Favorite Genres** (a more selective subset).
- *
- * @returns Map like { games: ["RPG", "Action"], anime: ["Shounen"] }
- */
 export async function fetchFavoriteGenres(
   supabase: SupabaseClient,
   userId: string,
@@ -463,7 +609,6 @@ export async function fetchFavoriteGenres(
     return {};
   }
 
-  // Group by category, keeping score order (already sorted desc)
   const grouped = new Map<string, Array<{ genre: string; score: number }>>();
   for (const row of data) {
     const list = grouped.get(row.category) ?? [];
@@ -471,11 +616,8 @@ export async function fetchFavoriteGenres(
     grouped.set(row.category, list);
   }
 
-  // Filter: only keep genres >= 50% of the top genre's score per category
-  // Enforce TOP_GENRES_LIMIT first, then apply threshold filtering
   const result: Record<string, string[]> = {};
   for (const [category, genres] of grouped) {
-    // Limit to top N genres per category (defensive / future-proof)
     const topGenres = genres.slice(0, TOP_GENRES_LIMIT);
     const topScore = topGenres[0]?.score ?? 0;
     if (topScore <= 0) {
@@ -493,8 +635,4 @@ export async function fetchFavoriteGenres(
   return result;
 }
 
-/**
- * @deprecated Use fetchFavoriteGenres() or fetchTopGenres() for semantic clarity.
- * This alias is kept for backward compatibility.
- */
 export const fetchGenreAffinityMap = fetchFavoriteGenres;

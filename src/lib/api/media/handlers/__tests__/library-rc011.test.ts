@@ -11,6 +11,7 @@ const mockGetUserBasicInfo = jest.fn().mockResolvedValue({
   avatar_url: null,
 });
 const mockRefreshGenreAffinity = jest.fn();
+const mockRevalidateUserMediaMutation = jest.fn();
 
 jest.mock('@/lib/supabase-route-handler', () => ({
   createRouteHandlerClient: (...args: unknown[]) => mockCreateRouteHandlerClient(...args),
@@ -34,6 +35,10 @@ jest.mock('@/lib/services/userService', () => ({
 
 jest.mock('@/lib/profile/genre-affinity', () => ({
   refreshGenreAffinity: (...args: unknown[]) => mockRefreshGenreAffinity(...args),
+}));
+
+jest.mock('@/lib/api/media/utils/revalidation', () => ({
+  revalidateUserMediaMutation: (...args: unknown[]) => mockRevalidateUserMediaMutation(...args),
 }));
 
 type EntryRow = {

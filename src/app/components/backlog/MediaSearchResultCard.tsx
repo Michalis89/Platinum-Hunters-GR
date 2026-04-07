@@ -36,9 +36,11 @@ function MediaSearchResultCard({
     }
     onOpenDialog(entry);
   };
-  const mediaSlug = entry.title?.trim()
-    ? toMediaSlug(entry.title)
-    : String(entry.mediaId ?? entry.externalId ?? entry.id);
+  const mediaSlug = Number.isFinite(entry.mediaId)
+    ? String(entry.mediaId)
+    : entry.title?.trim()
+      ? toMediaSlug(entry.title)
+      : String(entry.externalId ?? entry.id);
 
   return (
     <article

@@ -18,6 +18,7 @@ import { mapLibraryEntry } from '../utils/entry-mapper';
 import { resolveTitle } from '../utils/title-resolver';
 import { refreshGenreAffinity } from '@/lib/profile/genre-affinity';
 import { recomputeCategoryProfiles } from '@/lib/profile/recompute-category-profiles';
+import { revalidateUserMediaMutation } from '../utils/revalidation';
 
 /**
  * Generic handler for GET /api/{category}/library
@@ -241,6 +242,8 @@ export async function handleLibraryPatch(
       });
     }
 
+    revalidateUserMediaMutation(session.user.id, config.key);
+
     return NextResponse.json({ entry: data });
   } catch (error) {
     if (error instanceof UnauthorizedError) {
@@ -290,6 +293,8 @@ export async function handleLibraryDelete(
     void recomputeCategoryProfiles(supabase, session.user.id).catch(error => {
       console.warn(`${config.logPrefix} derived profile recompute failed:`, error);
     });
+
+    revalidateUserMediaMutation(session.user.id, config.key);
 
     return NextResponse.json({ success: true });
   } catch (error) {

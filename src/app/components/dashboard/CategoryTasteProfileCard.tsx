@@ -38,6 +38,25 @@ const GAME_VISIBLE_BUCKETS: InsightTagBucket[] = ['subgenre', 'mechanic', 'theme
 
 const MIN_VISIBLE_PERCENTAGE = 0;
 const MAX_TRAITS_PER_BUCKET = 5;
+const MAX_SPLIT_TRAITS_PER_BUCKET = 10;
+
+const WEAK_METADATA_GENRES = new Set([
+  'adult cast',
+  'award winning',
+  'children',
+  'josei',
+  'kids',
+  'school',
+  'seinen',
+  'shoujo',
+  'shounen',
+  'workplace',
+]);
+
+const shouldSplitGenreBuckets = (category: DashboardCategoryKey) =>
+  category === 'anime' || category === 'manga';
+
+const isWeakMetadataGenre = (genre: string) => WEAK_METADATA_GENRES.has(genre.toLowerCase());
 
 type TasteProfileBarTrait = {
   name: string;
@@ -181,7 +200,12 @@ export default function CategoryTasteProfileCard({
           }
           return a.name.localeCompare(b.name);
         })
-        .slice(0, MAX_TRAITS_PER_BUCKET),
+        .slice(
+          0,
+          shouldSplitGenreBuckets(category) && bucket.bucketKey === 'genre'
+            ? MAX_SPLIT_TRAITS_PER_BUCKET
+            : MAX_TRAITS_PER_BUCKET,
+        ),
     }))
     .filter(bucket => (category === 'games' ? true : bucket.traits.length > 0));
 
@@ -273,17 +297,84 @@ export default function CategoryTasteProfileCard({
                   {BUCKET_LABELS[bucket.bucketKey]}
                 </h4>
                 <div className="space-y-3">
-                  {bucket.traits.map(trait => (
-                    <div key={`${bucket.bucketKey}-${trait.name}`} className="min-w-0 space-y-1.5">
-                      <div className="flex items-center justify-between gap-3 text-sm leading-tight">
-                        <span className="min-w-0 break-words text-foreground">{trait.name}</span>
-                        <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
-                          {trait.percentageLabel}
-                        </span>
+                  {shouldSplitGenreBuckets(category) && bucket.bucketKey === 'genre' ? (
+                    (() => {
+                      const nonWeak = bucket.traits.filter(
+                        trait => !isWeakMetadataGenre(trait.name),
+                      );
+                      const weak = bucket.traits.filter(trait => isWeakMetadataGenre(trait.name));
+                      const topTraits = (nonWeak.length > 0 ? nonWeak : bucket.traits).slice(
+                        0,
+                        MAX_TRAITS_PER_BUCKET,
+                      );
+                      const supportingTraits = (
+                        weak.length > 0
+                          ? weak
+                          : nonWeak.slice(MAX_TRAITS_PER_BUCKET, MAX_SPLIT_TRAITS_PER_BUCKET)
+                      ).slice(0, MAX_TRAITS_PER_BUCKET);
+
+                      return (
+                        <>
+                          <div className="space-y-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted-foreground/80">
+                              Top Genres
+                            </p>
+                            {topTraits.map(trait => (
+                              <div
+                                key={`${bucket.bucketKey}-top-${trait.name}`}
+                                className="min-w-0 space-y-1.5"
+                              >
+                                <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                                  <span className="min-w-0 break-words text-foreground">
+                                    {trait.name}
+                                  </span>
+                                  <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                                    {trait.percentageLabel}
+                                  </span>
+                                </div>
+                                <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
+                              </div>
+                            ))}
+                          </div>
+                          {supportingTraits.length > 0 ? (
+                            <div className="space-y-3 pt-1">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted-foreground/80">
+                                Supporting Genres
+                              </p>
+                              {supportingTraits.map(trait => (
+                                <div
+                                  key={`${bucket.bucketKey}-support-${trait.name}`}
+                                  className="min-w-0 space-y-1.5"
+                                >
+                                  <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                                    <span className="min-w-0 break-words text-foreground">
+                                      {trait.name}
+                                    </span>
+                                    <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                                      {trait.percentageLabel}
+                                    </span>
+                                  </div>
+                                  <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
+                                </div>
+                              ))}
+                            </div>
+                          ) : null}
+                        </>
+                      );
+                    })()
+                  ) : (
+                    bucket.traits.map(trait => (
+                      <div key={`${bucket.bucketKey}-${trait.name}`} className="min-w-0 space-y-1.5">
+                        <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                          <span className="min-w-0 break-words text-foreground">{trait.name}</span>
+                          <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                            {trait.percentageLabel}
+                          </span>
+                        </div>
+                        <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
                       </div>
-                      <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </section>
             ))}

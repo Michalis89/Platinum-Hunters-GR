@@ -23,7 +23,12 @@ type MediaSuggestionsProps = {
 const MIN_POSSIBLE_NEXT_CONFIDENCE = 0.2;
 
 function SuggestionCard({ suggestion }: { suggestion: MediaSuggestion }) {
-  const href = suggestion.slug ? `/media/${suggestion.category}/${suggestion.slug}` : null;
+  const hasMediaId = Number.isFinite(suggestion.mediaId);
+  const href = hasMediaId
+    ? `/media/${suggestion.category}/${suggestion.mediaId}`
+    : suggestion.slug
+      ? `/media/${suggestion.category}/${suggestion.slug}`
+      : null;
 
   const cardContent = (
     <>

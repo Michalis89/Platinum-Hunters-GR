@@ -103,8 +103,10 @@ export type PersonalSuggestionCard = {
 export type TasteProfileStatus = 'planned' | 'current' | 'completed' | 'dropped';
 
 export type CategoryTasteProfileItem = {
+  title?: string | null;
   status: TasteProfileStatus;
   score: number | null;
+  progress?: number | null;
   isFavorite?: boolean;
   genres: string[];
   tags: string[];
@@ -185,6 +187,38 @@ export const TASTE_PROFILE_UNRATED_WEIGHT = 0.35;
 export const TASTE_PROFILE_FAVORITE_MULT = 1.35;
 export const TASTE_PROFILE_MAX_WEIGHT =
   (TASTE_PROFILE_BASE_WEIGHT + TASTE_PROFILE_RATING_BOOST) * TASTE_PROFILE_FAVORITE_MULT;
+const TASTE_PROFILE_ANIME_CURRENT_UNRATED_CAP = 0.75;
+const TASTE_PROFILE_ANIME_CURRENT_RATED_CAP = 1.05;
+const TASTE_PROFILE_ANIME_STATUS_MULTIPLIER: Record<TasteProfileStatus, number> = {
+  completed: 1.15,
+  current: 0.78,
+  planned: 0.35,
+  dropped: 0.25,
+};
+const TASTE_PROFILE_ANIME_WEAK_METADATA_GENRES = new Set([
+  'adult cast',
+  'award winning',
+  'children',
+  'josei',
+  'kids',
+  'school',
+  'seinen',
+  'shoujo',
+  'shounen',
+  'workplace',
+]);
+const TASTE_PROFILE_ANIME_SECONDARY_GENRES = new Set([
+  'isekai',
+  'martial arts',
+  'military',
+  'parody',
+  'reincarnation',
+  'strategy game',
+  'super power',
+  'survival',
+  'time travel',
+  'urban fantasy',
+]);
 
 const CATEGORY_ENTRY_SELECT = `
   id,
@@ -350,8 +384,14 @@ const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSe
   mediaSuggestions: [],
 });
 
-function normalizeTasteProfileLabels(item: CategoryTasteProfileItem): string[] {
+function normalizeTasteProfileLabels(
+  item: CategoryTasteProfileItem,
+  category?: DashboardCategoryKey,
+): string[] {
   if (item.genres.length > 0) {
+    if (category === 'anime' || category === 'manga') {
+      return Array.from(new Set(item.genres.map(normalizeGenreLabel).filter(Boolean)));
+    }
     return pickTopGenresForItem(item.genres);
   }
 
@@ -457,6 +497,52 @@ function formatTasteProfileLabel(label: string): string {
   return label.replace(/\b\w/g, char => char.toUpperCase());
 }
 
+function normalizeTitleForFranchise(title: string): string {
+  let normalized = title.toLowerCase().trim();
+  normalized = normalized
+    .replace(/:\s+.+$/u, '')
+    .replace(/\bseason\s+\d+\b/giu, '')
+    .replace(/\bpart\s+\d+\b/giu, '')
+    .replace(/\bcour\s+\d+\b/giu, '')
+    .replace(/\b(ova|ona|special|movie|arc|the final chapters?)\b/giu, '')
+    .replace(/\(\s*\d{4}\s*\)/gu, '')
+    .replace(/\s+-\s+.+$/u, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  normalized = normalized.replace(/\b\d+\b$/u, '').trim();
+  return normalized || title.toLowerCase().trim();
+}
+
+function getAnimeFranchiseMultiplier(seenCount: number): number {
+  if (seenCount <= 0) {
+    return 1;
+  }
+  if (seenCount === 1) {
+    return 0.55;
+  }
+  if (seenCount === 2) {
+    return 0.35;
+  }
+  return 0.2;
+}
+
+function getTasteGenreSignalMultiplier(
+  category: DashboardCategoryKey | undefined,
+  label: string,
+): number {
+  if (category !== 'anime' && category !== 'manga') {
+    return 1;
+  }
+  if (TASTE_PROFILE_ANIME_WEAK_METADATA_GENRES.has(label)) {
+    return 0.28;
+  }
+  if (TASTE_PROFILE_ANIME_SECONDARY_GENRES.has(label)) {
+    return 0.7;
+  }
+  return 1;
+}
+
 function isValidTasteProfileScore(score: number | null | undefined): score is number {
   return (
     typeof score === 'number' &&
@@ -544,10 +630,34 @@ export function buildTasteProfile(
   let ratedCount = 0;
   let favoriteCount = 0;
   const useBucketMode = category === 'games';
+  const franchiseSeenCount = new Map<string, number>();
 
   for (const item of trackedItems) {
     const { weight: baseWeight, rated } = getTasteProfileWeight(item.score);
-    const weight = applyFavoriteTasteProfileBoost(baseWeight, item.isFavorite);
+    const favoriteBoostedWeight = applyFavoriteTasteProfileBoost(baseWeight, item.isFavorite);
+    let weight = favoriteBoostedWeight;
+
+    if (category === 'anime' || category === 'manga') {
+      const statusMultiplier = TASTE_PROFILE_ANIME_STATUS_MULTIPLIER[item.status] ?? 1;
+      weight *= statusMultiplier;
+
+      if (item.title?.trim()) {
+        const franchiseKey = normalizeTitleForFranchise(item.title);
+        const seenCount = franchiseSeenCount.get(franchiseKey) ?? 0;
+        weight *= getAnimeFranchiseMultiplier(seenCount);
+        franchiseSeenCount.set(franchiseKey, seenCount + 1);
+      }
+
+      if (item.status === 'current') {
+        const hasProgressSignal = typeof item.progress === 'number' && item.progress > 0;
+        if (!rated && !hasProgressSignal) {
+          weight = Math.min(weight, TASTE_PROFILE_ANIME_CURRENT_UNRATED_CAP);
+        } else {
+          weight = Math.min(weight, TASTE_PROFILE_ANIME_CURRENT_RATED_CAP);
+        }
+      }
+    }
+
     totalWeight += weight;
     if (rated) {
       ratedCount += 1;
@@ -574,13 +684,28 @@ export function buildTasteProfile(
       continue;
     }
 
-    const labels = normalizeTasteProfileLabels(item);
+    const labels = normalizeTasteProfileLabels(item, category);
     const distributionLabels = labels.length > 0 ? labels : [TASTE_PROFILE_UNKNOWN_GENRE_KEY];
+    const signalWeightedEntries = distributionLabels.map(label => ({
+      label,
+      signalMultiplier: getTasteGenreSignalMultiplier(category, label),
+    }));
+    const signalWeightSum = signalWeightedEntries.reduce(
+      (sum, entry) => sum + entry.signalMultiplier,
+      0,
+    );
     const distributedWeight =
-      distributionLabels.length > 0 ? weight / distributionLabels.length : 0;
-    for (const label of distributionLabels) {
+      signalWeightSum > 0
+        ? weight / signalWeightSum
+        : distributionLabels.length > 0
+          ? weight / distributionLabels.length
+          : 0;
+    for (const { label, signalMultiplier } of signalWeightedEntries) {
       genreCounts.set(label, (genreCounts.get(label) ?? 0) + 1);
-      genreWeightSums.set(label, (genreWeightSums.get(label) ?? 0) + distributedWeight);
+      genreWeightSums.set(
+        label,
+        (genreWeightSums.get(label) ?? 0) + distributedWeight * signalMultiplier,
+      );
     }
   }
 
@@ -857,8 +982,16 @@ function buildCategoryTasteProfileItems(
   gameTagMap?: Map<number, Partial<Record<InsightTagBucket, string[]>>>,
 ): CategoryTasteProfileItem[] {
   return entries.map(entry => ({
+    title:
+      entry.media_items?.title ??
+      entry.media_items?.title_english ??
+      entry.media_items?.title_romaji ??
+      entry.media_items?.title_native ??
+      entry.media_items?.original_title ??
+      null,
     status: entry.status,
     score: typeof entry.score === 'number' && Number.isFinite(entry.score) ? entry.score : null,
+    progress: typeof entry.progress === 'number' && Number.isFinite(entry.progress) ? entry.progress : null,
     isFavorite: Boolean(entry.is_favorite),
     genres: Array.isArray(entry.media_items?.genres)
       ? entry.media_items?.genres.filter((genre): genre is string => Boolean(genre?.trim()))
