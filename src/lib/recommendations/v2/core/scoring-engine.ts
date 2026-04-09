@@ -88,9 +88,11 @@ export const AVOIDED_GENRE_PENALTIES = {
 } as const;
 
 /**
- * Strong affinity threshold (for trusted combinations)
+ * Strong affinity threshold (for trusted combinations).
+ * Calibrated for the multiplicative scoring algorithm: ~5 completed
+ * high-rated games in a single genre yields a score around 8–10.
  */
-export const STRONG_AFFINITY_THRESHOLD = 70;
+export const STRONG_AFFINITY_THRESHOLD = 8.0;
 
 /**
  * Recommendation limits
@@ -103,9 +105,12 @@ export const RECOMMENDATION_LIMITS = {
 } as const;
 
 /**
- * Minimum affinity score for database recommendations
+ * Minimum affinity score for database recommendations.
+ * Calibrated for the multiplicative scoring algorithm in genre-affinity.ts.
+ * A score of 3.0 represents approximately 2 completed games in a single genre
+ * (2 × 1.5 baseWeight), the minimum to pass meetsDefaultEvidence.
  */
-export const MIN_GENRE_AFFINITY = 30.0;
+export const MIN_GENRE_AFFINITY = 3.0;
 
 /**
  * Minimum popularity gate (users who tracked the game)

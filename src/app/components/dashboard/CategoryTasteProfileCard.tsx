@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -53,6 +52,20 @@ const WEAK_METADATA_GENRES = new Set([
   'workplace',
 ]);
 
+const TRAIT_LABEL_OVERRIDES: Record<string, string> = {
+  'role-playing-rpg': 'RPG',
+  'real-time-strategy-rts': 'RTS',
+  'turn-based-strategy-tbs': 'Turn-Based Strategy',
+  'hack-and-slash': 'Hack and Slash',
+  'single-player narrative immersion': 'Single-Player Narrative Immersion',
+  'cinematic campaign preference': 'Cinematic Campaign Preference',
+  'narrative-driven worlds': 'Narrative-Driven Worlds',
+  'cozy simulator aversion': 'Cozy Simulator Aversion',
+  'low-engagement simulator loop aversion': 'Low-Engagement Simulator Loop Aversion',
+  'puzzle-first indie aversion': 'Puzzle-First Indie Aversion',
+  'multiplayer live-service aversion': 'Multiplayer / Live-Service Aversion',
+};
+
 const shouldSplitGenreBuckets = (category: DashboardCategoryKey) =>
   category === 'anime' || category === 'manga';
 
@@ -79,6 +92,38 @@ type CategoryTasteProfileCardProps = {
   category: DashboardCategoryKey;
   items: CategoryTasteProfileItem[];
   profileNote?: Record<string, unknown> | null;
+};
+
+type IdentitySignal = { name: string; weight: number };
+type GamesIdentityProfile = {
+  summary: string;
+  coreGenres: IdentitySignal[];
+  themes: IdentitySignal[];
+  playerStyles: IdentitySignal[];
+  negativeSignals: IdentitySignal[];
+};
+type AnimeIdentityProfile = {
+  summary: string;
+  coreGenres: IdentitySignal[];
+  topThemes: IdentitySignal[];
+  viewerStyles: IdentitySignal[];
+  premiumSignals: IdentitySignal[];
+  negativeSignals: IdentitySignal[];
+};
+type MovieIdentityProfile = {
+  summary: string;
+  cinematicAxes: IdentitySignal[];
+  toneSignals: IdentitySignal[];
+};
+type TvIdentityProfile = {
+  summary: string;
+  coreAxes: IdentitySignal[];
+  behavioralAxes: IdentitySignal[];
+};
+type BooksIdentityProfile = {
+  summary: string;
+  coreAxes: IdentitySignal[];
+  readingSignals: IdentitySignal[];
 };
 
 const toStringArray = (value: unknown): string[] => {
@@ -159,11 +204,498 @@ const buildExtraSectionsFromProfile = (
   return sections;
 };
 
+const toIdentitySignals = (value: unknown, limit: number): IdentitySignal[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map(item => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+      const obj = item as Record<string, unknown>;
+      const name = typeof obj.name === 'string' ? obj.name.trim() : '';
+      const weight = typeof obj.weight === 'number' ? obj.weight : Number(obj.weight ?? NaN);
+      if (!name || !Number.isFinite(weight) || weight <= 0) {
+        return null;
+      }
+      return { name, weight };
+    })
+    .filter((item): item is IdentitySignal => Boolean(item))
+    .slice(0, limit);
+};
+
+const parseGamesIdentityProfile = (value: Record<string, unknown> | null | undefined): GamesIdentityProfile | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+  const summary = typeof value.summary === 'string' ? value.summary.trim() : '';
+  const coreGenres = toIdentitySignals(value.coreGenres, 3);
+  const themes = toIdentitySignals(value.themes, 3);
+  const playerStyles = toIdentitySignals(value.playerStyles, 2);
+  const negativeSignals = toIdentitySignals(value.negativeSignals, 4);
+  if (!summary || coreGenres.length === 0) {
+    return null;
+  }
+  return {
+    summary,
+    coreGenres,
+    themes,
+    playerStyles,
+    negativeSignals,
+  };
+};
+
+const parseAnimeIdentityProfile = (
+  value: Record<string, unknown> | null | undefined,
+): AnimeIdentityProfile | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+  const summary = typeof value.summary === 'string' ? value.summary.trim() : '';
+  const coreGenres = toIdentitySignals(value.coreGenres, 3);
+  const topThemes = toIdentitySignals(value.topThemes, 4);
+  const viewerStyles = toIdentitySignals(value.viewerStyles, 3);
+  const premiumSignals = toIdentitySignals(value.premiumSignals, 4);
+  const negativeSignals = toIdentitySignals(value.negativeSignals, 4);
+  if (!summary || coreGenres.length === 0) {
+    return null;
+  }
+  return {
+    summary,
+    coreGenres,
+    topThemes,
+    viewerStyles,
+    premiumSignals,
+    negativeSignals,
+  };
+};
+
+const parseMovieIdentityProfile = (
+  value: Record<string, unknown> | null | undefined,
+): MovieIdentityProfile | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const summary = typeof value.summary === 'string' ? value.summary.trim() : '';
+  const cinematicAxes = toIdentitySignals(value.topClusters, 5).map(signal => ({
+    name: signal.name.replace(/^core:/i, '').trim(),
+    weight: signal.weight,
+  }));
+
+  const toneProfile = (value.toneProfile ?? null) as
+    | { primaryTone?: unknown; toneLabels?: unknown }
+    | null;
+  const toneLabels = Array.isArray(toneProfile?.toneLabels)
+    ? toneProfile?.toneLabels
+    : [];
+  const toneSignals = toneLabels
+    .filter((tone): tone is string => typeof tone === 'string' && tone.trim().length > 0)
+    .slice(0, 4)
+    .map((tone, index) => ({
+      name: tone.trim(),
+      weight: Math.max(1, 100 - index * 18),
+    }));
+
+  if (!summary || cinematicAxes.length === 0) {
+    return null;
+  }
+
+  return {
+    summary,
+    cinematicAxes,
+    toneSignals,
+  };
+};
+
+const parseTvIdentityProfile = (
+  value: Record<string, unknown> | null | undefined,
+): TvIdentityProfile | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const summaryCandidate =
+    typeof value.tvIdentitySummary === 'string'
+      ? value.tvIdentitySummary
+      : typeof value.summary === 'string'
+        ? value.summary
+        : '';
+  const summary = summaryCandidate.trim();
+  const coreAxes = toIdentitySignals(value.coreAxes, 5);
+  const behavioralAxes = toIdentitySignals(value.behavioralAxes, 5);
+
+  if (!summary || coreAxes.length === 0) {
+    return null;
+  }
+
+  return {
+    summary,
+    coreAxes,
+    behavioralAxes,
+  };
+};
+
+const parseBooksIdentityProfile = (
+  value: Record<string, unknown> | null | undefined,
+): BooksIdentityProfile | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const summaryCandidate =
+    typeof value.booksIdentitySummary === 'string'
+      ? value.booksIdentitySummary
+      : typeof value.summary === 'string'
+        ? value.summary
+        : '';
+  const summary = summaryCandidate.trim();
+  const coreAxes = toIdentitySignals(value.coreAxes, 5);
+  const readingSignals = toIdentitySignals(value.readingSignals, 5);
+
+  if (!summary || coreAxes.length === 0) {
+    return null;
+  }
+
+  return {
+    summary,
+    coreAxes,
+    readingSignals,
+  };
+};
+
+const toIdentityTraits = (signals: IdentitySignal[]): TasteProfileBarTrait[] => {
+  const total = signals.reduce((sum, item) => sum + item.weight, 0);
+  if (total <= 0) {
+    return [];
+  }
+  return signals.map(item => {
+    const pct = (item.weight / total) * 100;
+    return {
+      name: item.name,
+      count: 1,
+      percentageValue: Math.max(0, Math.min(100, pct)),
+      percentageLabel: `${Math.round(pct)}%`,
+    };
+  });
+};
+
+const formatIdentitySummary = (summary: string): string =>
+  summary
+    .replace(/\s\+\s/g, ' and ')
+    .replace(/role-playing-rpg/gi, 'RPG');
+
+const formatTasteTraitLabel = (name: string): string => {
+  const raw = (name ?? '').trim();
+  if (!raw) {
+    return raw;
+  }
+
+  const normalized = raw.toLowerCase();
+  const override = TRAIT_LABEL_OVERRIDES[normalized];
+  if (override) {
+    return override;
+  }
+
+  return raw
+    .split('-')
+    .join(' ')
+    .split(/\s+/)
+    .map(word => (word ? `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}` : word))
+    .join(' ');
+};
+
 export default function CategoryTasteProfileCard({
   category,
   items,
   profileNote,
 }: CategoryTasteProfileCardProps) {
+  const gamesIdentity = category === 'games' ? parseGamesIdentityProfile(profileNote) : null;
+  const animeIdentity = category === 'anime' ? parseAnimeIdentityProfile(profileNote) : null;
+  const moviesIdentity = category === 'movies' ? parseMovieIdentityProfile(profileNote) : null;
+  const tvIdentity = category === 'tv' ? parseTvIdentityProfile(profileNote) : null;
+  const booksIdentity = category === 'books' ? parseBooksIdentityProfile(profileNote) : null;
+  const visibleExtraSections = buildExtraSectionsFromProfile(category, profileNote)
+    .map(section => ({
+      ...section,
+      traits: [...section.traits]
+        .filter(trait => trait.percentageValue >= MIN_VISIBLE_PERCENTAGE)
+        .sort((a, b) => {
+          if (b.percentageValue !== a.percentageValue) {
+            return b.percentageValue - a.percentageValue;
+          }
+          return a.name.localeCompare(b.name);
+        })
+        .slice(0, MAX_TRAITS_PER_BUCKET),
+    }))
+    .filter(section => section.traits.length > 0);
+  if (category === 'games' && gamesIdentity) {
+    const negativeTraits = toIdentityTraits(gamesIdentity.negativeSignals);
+    const identityBuckets: Array<{ label: string; traits: TasteProfileBarTrait[] }> = [
+      { label: 'Core Genres', traits: toIdentityTraits(gamesIdentity.coreGenres) },
+      { label: 'Top Themes', traits: toIdentityTraits(gamesIdentity.themes) },
+      { label: 'Player Styles', traits: toIdentityTraits(gamesIdentity.playerStyles) },
+      ...(negativeTraits.length > 0
+        ? [{ label: 'Lower-Confidence Avoid Patterns', traits: negativeTraits }]
+        : []),
+    ];
+
+    return (
+      <Card
+        className={`col-span-full w-full min-w-0 ${DASH_RADIUS_SECTION} ${DASH_BORDER} bg-muted/[0.055] shadow-none`}
+      >
+        <CardHeader className="pb-3">
+          <DashboardSectionHeader
+            eyebrow="Games Taste Profile"
+            title="Identity-based profile from completed and in-progress games"
+          />
+        </CardHeader>
+        <CardContent className="space-y-5 overflow-hidden pt-2">
+          <p className="text-sm text-muted-foreground">
+            {formatIdentitySummary(gamesIdentity.summary)}
+          </p>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {identityBuckets.map(bucket => (
+              <section
+                key={bucket.label}
+                className={`min-w-0 space-y-3 ${DASH_RADIUS_CARD} ${DASH_BORDER} ${DASH_SURFACE_CARD} p-3.5 shadow-none`}
+              >
+                <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
+                  {bucket.label}
+                </h4>
+                <div className="space-y-3">
+                  {bucket.traits.map(trait => (
+                    <div key={`${bucket.label}-${trait.name}`} className="min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                        <span className="min-w-0 break-words text-foreground">
+                          {formatTasteTraitLabel(trait.name)}
+                        </span>
+                        <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                          {trait.percentageLabel}
+                        </span>
+                      </div>
+                      <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (category === 'anime' && animeIdentity) {
+    const premiumTraits = toIdentityTraits(animeIdentity.premiumSignals);
+    const negativeTraits = toIdentityTraits(animeIdentity.negativeSignals);
+    const identityBuckets: Array<{ label: string; traits: TasteProfileBarTrait[] }> = [
+      { label: 'Core Axis', traits: toIdentityTraits(animeIdentity.coreGenres) },
+      { label: 'Top Themes', traits: toIdentityTraits(animeIdentity.topThemes) },
+      { label: 'Viewer Styles', traits: toIdentityTraits(animeIdentity.viewerStyles) },
+      ...(premiumTraits.length > 0 ? [{ label: 'Premium Signals', traits: premiumTraits }] : []),
+      ...(negativeTraits.length > 0 ? [{ label: 'Negative Signals', traits: negativeTraits }] : []),
+    ];
+
+    return (
+      <Card
+        className={`col-span-full w-full min-w-0 ${DASH_RADIUS_SECTION} ${DASH_BORDER} bg-muted/[0.055] shadow-none`}
+      >
+        <CardHeader className="pb-3">
+          <DashboardSectionHeader
+            eyebrow="Anime Taste Profile"
+            title="Identity-based profile from completed and in-progress anime"
+          />
+        </CardHeader>
+        <CardContent className="space-y-5 overflow-hidden pt-2">
+          <p className="text-sm text-muted-foreground">
+            {formatIdentitySummary(animeIdentity.summary)}
+          </p>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {identityBuckets.map(bucket => (
+              <section
+                key={bucket.label}
+                className={`min-w-0 space-y-3 ${DASH_RADIUS_CARD} ${DASH_BORDER} ${DASH_SURFACE_CARD} p-3.5 shadow-none`}
+              >
+                <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
+                  {bucket.label}
+                </h4>
+                <div className="space-y-3">
+                  {bucket.traits.map(trait => (
+                    <div key={`${bucket.label}-${trait.name}`} className="min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                        <span className="min-w-0 break-words text-foreground">
+                          {formatTasteTraitLabel(trait.name)}
+                        </span>
+                        <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                          {trait.percentageLabel}
+                        </span>
+                      </div>
+                      <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (category === 'movies' && moviesIdentity) {
+    const identityBuckets: Array<{ label: string; traits: TasteProfileBarTrait[] }> = [
+      { label: 'Cinematic Axes', traits: toIdentityTraits(moviesIdentity.cinematicAxes) },
+      { label: 'Tone Signals', traits: toIdentityTraits(moviesIdentity.toneSignals) },
+    ].filter(bucket => bucket.traits.length > 0);
+
+    return (
+      <Card
+        className={`col-span-full w-full min-w-0 ${DASH_RADIUS_SECTION} ${DASH_BORDER} bg-muted/[0.055] shadow-none`}
+      >
+        <CardHeader className="pb-3">
+          <DashboardSectionHeader
+            eyebrow="Movies Taste Profile"
+            title="Identity-based cinematic profile from completed and in-progress movies"
+          />
+        </CardHeader>
+        <CardContent className="space-y-5 overflow-hidden pt-2">
+          <p className="text-sm text-muted-foreground">
+            {formatIdentitySummary(moviesIdentity.summary)}
+          </p>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
+            {identityBuckets.map(bucket => (
+              <section
+                key={bucket.label}
+                className={`min-w-0 space-y-3 ${DASH_RADIUS_CARD} ${DASH_BORDER} ${DASH_SURFACE_CARD} p-3.5 shadow-none`}
+              >
+                <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
+                  {bucket.label}
+                </h4>
+                <div className="space-y-3">
+                  {bucket.traits.map(trait => (
+                    <div key={`${bucket.label}-${trait.name}`} className="min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                        <span className="min-w-0 break-words text-foreground">
+                          {formatTasteTraitLabel(trait.name)}
+                        </span>
+                        <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                          {trait.percentageLabel}
+                        </span>
+                      </div>
+                      <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (category === 'tv' && tvIdentity) {
+    const identityBuckets: Array<{ label: string; traits: TasteProfileBarTrait[] }> = [
+      { label: 'Core Series Axes', traits: toIdentityTraits(tvIdentity.coreAxes) },
+      { label: 'Retention Signals', traits: toIdentityTraits(tvIdentity.behavioralAxes) },
+    ].filter(bucket => bucket.traits.length > 0);
+
+    return (
+      <Card
+        className={`col-span-full w-full min-w-0 ${DASH_RADIUS_SECTION} ${DASH_BORDER} bg-muted/[0.055] shadow-none`}
+      >
+        <CardHeader className="pb-3">
+          <DashboardSectionHeader
+            eyebrow="TV Taste Profile"
+            title="Identity-based long-form profile from completed and in-progress series"
+          />
+        </CardHeader>
+        <CardContent className="space-y-5 overflow-hidden pt-2">
+          <p className="text-sm text-muted-foreground">
+            {formatIdentitySummary(tvIdentity.summary)}
+          </p>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
+            {identityBuckets.map(bucket => (
+              <section
+                key={bucket.label}
+                className={`min-w-0 space-y-3 ${DASH_RADIUS_CARD} ${DASH_BORDER} ${DASH_SURFACE_CARD} p-3.5 shadow-none`}
+              >
+                <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
+                  {bucket.label}
+                </h4>
+                <div className="space-y-3">
+                  {bucket.traits.map(trait => (
+                    <div key={`${bucket.label}-${trait.name}`} className="min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                        <span className="min-w-0 break-words text-foreground">
+                          {formatTasteTraitLabel(trait.name)}
+                        </span>
+                        <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                          {trait.percentageLabel}
+                        </span>
+                      </div>
+                      <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (category === 'books' && booksIdentity) {
+    const identityBuckets: Array<{ label: string; traits: TasteProfileBarTrait[] }> = [
+      { label: 'Core Book Axes', traits: toIdentityTraits(booksIdentity.coreAxes) },
+      { label: 'Reading Signals', traits: toIdentityTraits(booksIdentity.readingSignals) },
+    ].filter(bucket => bucket.traits.length > 0);
+
+    return (
+      <Card
+        className={`col-span-full w-full min-w-0 ${DASH_RADIUS_SECTION} ${DASH_BORDER} bg-muted/[0.055] shadow-none`}
+      >
+        <CardHeader className="pb-3">
+          <DashboardSectionHeader
+            eyebrow="Books Taste Profile"
+            title="Identity-based profile from completed and in-progress books"
+          />
+        </CardHeader>
+        <CardContent className="space-y-5 overflow-hidden pt-2">
+          <p className="text-sm text-muted-foreground">
+            {formatIdentitySummary(booksIdentity.summary)}
+          </p>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
+            {identityBuckets.map(bucket => (
+              <section
+                key={bucket.label}
+                className={`min-w-0 space-y-3 ${DASH_RADIUS_CARD} ${DASH_BORDER} ${DASH_SURFACE_CARD} p-3.5 shadow-none`}
+              >
+                <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
+                  {bucket.label}
+                </h4>
+                <div className="space-y-3">
+                  {bucket.traits.map(trait => (
+                    <div key={`${bucket.label}-${trait.name}`} className="min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-3 text-sm leading-tight">
+                        <span className="min-w-0 break-words text-foreground">
+                          {formatTasteTraitLabel(trait.name)}
+                        </span>
+                        <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
+                          {trait.percentageLabel}
+                        </span>
+                      </div>
+                      <Progress value={trait.percentageValue} className="h-1.5 bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const tasteProfile = buildTasteProfile(items, category);
   const categoryLabel = CATEGORY_LABELS[category] ?? 'Category';
   const profileBuckets: TasteProfileBarBucket[] =
@@ -208,25 +740,6 @@ export default function CategoryTasteProfileCard({
         ),
     }))
     .filter(bucket => (category === 'games' ? true : bucket.traits.length > 0));
-
-  const visibleExtraSections = useMemo(
-    () =>
-      buildExtraSectionsFromProfile(category, profileNote)
-        .map(section => ({
-          ...section,
-          traits: [...section.traits]
-            .filter(trait => trait.percentageValue >= MIN_VISIBLE_PERCENTAGE)
-            .sort((a, b) => {
-              if (b.percentageValue !== a.percentageValue) {
-                return b.percentageValue - a.percentageValue;
-              }
-              return a.name.localeCompare(b.name);
-            })
-            .slice(0, MAX_TRAITS_PER_BUCKET),
-        }))
-        .filter(section => section.traits.length > 0),
-    [category, profileNote],
-  );
 
   const nonGamesCardCount = visibleBuckets.length + visibleExtraSections.length;
   const nonGamesGridClass =
@@ -273,7 +786,9 @@ export default function CategoryTasteProfileCard({
                         className="min-w-0 space-y-1.5"
                       >
                         <div className="flex items-center justify-between gap-3 text-sm leading-tight">
-                          <span className="min-w-0 break-words text-foreground">{trait.name}</span>
+                          <span className="min-w-0 break-words text-foreground">
+                            {formatTasteTraitLabel(trait.name)}
+                          </span>
                           <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
                             {trait.percentageLabel}
                           </span>
@@ -326,7 +841,7 @@ export default function CategoryTasteProfileCard({
                               >
                                 <div className="flex items-center justify-between gap-3 text-sm leading-tight">
                                   <span className="min-w-0 break-words text-foreground">
-                                    {trait.name}
+                                    {formatTasteTraitLabel(trait.name)}
                                   </span>
                                   <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
                                     {trait.percentageLabel}
@@ -348,7 +863,7 @@ export default function CategoryTasteProfileCard({
                                 >
                                   <div className="flex items-center justify-between gap-3 text-sm leading-tight">
                                     <span className="min-w-0 break-words text-foreground">
-                                      {trait.name}
+                                      {formatTasteTraitLabel(trait.name)}
                                     </span>
                                     <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
                                       {trait.percentageLabel}
@@ -366,7 +881,9 @@ export default function CategoryTasteProfileCard({
                     bucket.traits.map(trait => (
                       <div key={`${bucket.bucketKey}-${trait.name}`} className="min-w-0 space-y-1.5">
                         <div className="flex items-center justify-between gap-3 text-sm leading-tight">
-                          <span className="min-w-0 break-words text-foreground">{trait.name}</span>
+                          <span className="min-w-0 break-words text-foreground">
+                            {formatTasteTraitLabel(trait.name)}
+                          </span>
                           <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
                             {trait.percentageLabel}
                           </span>
@@ -390,7 +907,9 @@ export default function CategoryTasteProfileCard({
                   {section.traits.map(trait => (
                     <div key={`${section.label}-${trait.name}`} className="min-w-0 space-y-1.5">
                       <div className="flex items-center justify-between gap-3 text-sm leading-tight">
-                        <span className="min-w-0 break-words text-foreground">{trait.name}</span>
+                        <span className="min-w-0 break-words text-foreground">
+                          {formatTasteTraitLabel(trait.name)}
+                        </span>
                         <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground/80">
                           {trait.percentageLabel}
                         </span>

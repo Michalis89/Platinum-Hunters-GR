@@ -67,7 +67,7 @@ function SuggestionCard({ suggestion }: { suggestion: MediaSuggestion }) {
             </p>
           </div>
           {href && (
-            <span className="dark:text-white/92 inline-flex items-center gap-1 text-xs font-semibold text-black/80 transition-transform duration-200 group-focus-within:translate-x-0.5 group-hover:translate-x-0.5 dark:drop-shadow-[0_8px_20px_rgba(0,0,0,0.88)]">
+            <span className="text-black/68 dark:text-white/74 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.22em] transition-transform duration-200 group-focus-within:translate-x-0.5 group-hover:translate-x-0.5 dark:drop-shadow-[0_6px_18px_rgba(0,0,0,0.8)]">
               View details
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </span>

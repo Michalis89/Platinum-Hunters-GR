@@ -162,6 +162,7 @@ export type CategoryDashboardSection = {
   favorites: DashboardTopFiveItem[];
   favoritesCount: number;
   mediaSuggestions: MediaSuggestion[];
+  recommenderTasteProfile?: Record<string, unknown> | null;
 };
 
 const CATEGORY_LABELS: Record<DashboardCategoryKey, string> = {
@@ -382,6 +383,7 @@ const createEmptySection = (category: DashboardCategoryKey): CategoryDashboardSe
   favorites: [],
   favoritesCount: 0,
   mediaSuggestions: [],
+  recommenderTasteProfile: null,
 });
 
 function normalizeTasteProfileLabels(
@@ -825,65 +827,43 @@ export async function fetchCategoryDashboardData(
   });
 
   const mediaSuggestionsPromises = requestedCategories.map(async category => {
-    if (category === 'games') {
-      // Use V2 recommendation system for games (data-driven, adaptive)
-      const { generateGameRecommendationsV2WithLimits } =
-        await import('@/lib/recommendations/v2/games/games-recommender');
-      const recommendations = await generateGameRecommendationsV2WithLimits(
-        userId,
-        {
-          backlog: 4,
-          database: 4,
-          databaseFallback: 8,
-          total: 8,
-        },
-        {
-          platformFilterMode: 'owned-only',
-        },
-      );
-
-      // Convert to MediaSuggestion format
-      return recommendations.map(rec => ({
-        mediaId: rec.mediaId,
-        category: rec.category as DashboardCategoryKey,
-        title: rec.title,
-        cover: rec.cover,
-        slug: rec.slug,
-        reason: rec.reason,
-        confidence: rec.confidence,
-        source: rec.source,
-        genres: rec.genres,
-        tags: rec.tags,
-      }));
-    }
-
-    // Use generic V2 recommender for other categories
-    const { generateGenericRecommendationsWithLimits } =
-      await import('@/lib/recommendations/v2/generic/generic-recommender');
-    const recommendations = await generateGenericRecommendationsWithLimits(
+    const { generateRecommendationsV3 } = await import('@/lib/recommendations/v3/recommender');
+    const response = await generateRecommendationsV3(
       userId,
-      category as Exclude<'games' | 'anime' | 'manga' | 'movies' | 'tv' | 'books', 'games'>,
-      {
-        backlog: 4,
-        database: 4,
-        databaseFallback: 8,
-        total: 8,
-      },
+      category as 'games' | 'anime' | 'manga' | 'movies' | 'tv' | 'books',
     );
 
-    // Convert to MediaSuggestion format
-    return recommendations.map(rec => ({
-      mediaId: rec.mediaId,
-      category: rec.category as DashboardCategoryKey,
-      title: rec.title,
-      cover: rec.cover,
-      slug: rec.slug,
-      reason: rec.reason,
-      confidence: rec.confidence,
-      source: rec.source,
-      genres: rec.genres,
-      tags: rec.tags,
-    }));
+    return {
+      suggestions: [
+        ...response.fromBacklog.slice(0, 4).map(item => ({
+          mediaId: item.mediaDbId,
+          category: item.category as DashboardCategoryKey,
+          title: item.title,
+          cover: item.cover,
+          slug: item.slug,
+          reason: item.reason,
+          confidence: item.confidence,
+          // Hard source separation: anything in fromBacklog is backlog.
+          source: 'backlog' as MediaSuggestion['source'],
+          genres: [],
+          tags: item.matchedSignals,
+        })),
+        ...response.possibleNext.slice(0, 4).map(item => ({
+          mediaId: item.mediaDbId,
+          category: item.category as DashboardCategoryKey,
+          title: item.title,
+          cover: item.cover,
+          slug: item.slug,
+          reason: item.reason,
+          confidence: item.confidence,
+          // Hard source separation: anything in possibleNext is database.
+          source: 'database' as MediaSuggestion['source'],
+          genres: [],
+          tags: item.matchedSignals,
+        })),
+      ],
+      tasteProfile: response.tasteProfile as Record<string, unknown>,
+    };
   });
 
   // All 4 operations run as concurrently as possible:
@@ -920,7 +900,8 @@ export async function fetchCategoryDashboardData(
       ),
       favorites: buildFavoriteEntryCards(entries, excludedIds, category),
       favoritesCount,
-      mediaSuggestions: mediaSuggestionsResults[index] ?? [],
+      mediaSuggestions: mediaSuggestionsResults[index]?.suggestions ?? [],
+      recommenderTasteProfile: mediaSuggestionsResults[index]?.tasteProfile ?? null,
     };
   });
 

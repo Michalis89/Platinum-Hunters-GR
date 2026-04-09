@@ -134,9 +134,10 @@ export default function CategoryDashboardTabs({
                   category={category}
                   items={sections[category]?.tasteProfileItems ?? []}
                   categoryNote={
-                    categoryProfile && typeof categoryProfile[category] === 'object'
+                    sections[category]?.recommenderTasteProfile ??
+                    (categoryProfile && typeof categoryProfile[category] === 'object'
                       ? (categoryProfile[category] as Record<string, unknown>)
-                      : null
+                      : null)
                   }
                 />
               </div>
