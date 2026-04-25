@@ -136,13 +136,24 @@ export async function handleLibraryPatch(
     const updatedAt = new Date().toISOString();
     updateData.updated_at = updatedAt;
 
-    // Fetch existing entry for activity comparison
-    const { data: existingEntry } = await supabase
-      .from('user_media_entries')
-      .select('status,is_favorite,progress,selected_platform,priority,score,notes,updated_at')
-      .eq('user_id', session.user.id)
-      .eq('media_id', body.mediaId)
-      .maybeSingle();
+    // Fetch existing entry for activity comparison.
+    // Prefer lookup by primary key (entryId) when provided — avoids false negatives
+    // if duplicate rows exist for the same (user_id, media_id).
+    const entryId = typeof body.entryId === 'number' ? body.entryId : null;
+    const existingEntryQuery = entryId
+      ? supabase
+          .from('user_media_entries')
+          .select('status,is_favorite,progress,selected_platform,priority,score,notes,updated_at')
+          .eq('user_id', session.user.id)
+          .eq('id', entryId)
+      : supabase
+          .from('user_media_entries')
+          .select('status,is_favorite,progress,selected_platform,priority,score,notes,updated_at')
+          .eq('user_id', session.user.id)
+          .eq('media_id', body.mediaId)
+          .limit(1);
+
+    const { data: existingEntry } = await existingEntryQuery.maybeSingle();
 
     if (config.key === 'games' && !existingEntry && !normalizedSelectedPlatform) {
       return NextResponse.json(
@@ -163,21 +174,32 @@ export async function handleLibraryPatch(
       typeof body.status === 'string' ? body.status : (existingStatus ?? 'planned');
     // Apply optimistic lock when the client supplies clientUpdatedAt.
     // Older clients / cached pages that omit it get a best-effort update without the lock.
-    const baseUpdate = supabase
-      .from('user_media_entries')
-      .update({
-        ...updateData,
-        status:
-          nextStatus as Database['public']['Tables']['user_media_entries']['Update']['status'],
-      })
-      .eq('user_id', session.user.id)
-      .eq('media_id', body.mediaId);
+    // Use primary key (entryId) when available for a precise single-row update.
+    const updateFilter = entryId
+      ? supabase
+          .from('user_media_entries')
+          .update({
+            ...updateData,
+            status:
+              nextStatus as Database['public']['Tables']['user_media_entries']['Update']['status'],
+          })
+          .eq('user_id', session.user.id)
+          .eq('id', entryId)
+      : supabase
+          .from('user_media_entries')
+          .update({
+            ...updateData,
+            status:
+              nextStatus as Database['public']['Tables']['user_media_entries']['Update']['status'],
+          })
+          .eq('user_id', session.user.id)
+          .eq('media_id', body.mediaId);
 
-    const { data, error } = await (
-      clientUpdatedAt ? baseUpdate.lte('updated_at', clientUpdatedAt) : baseUpdate
-    )
-      .select('*')
-      .maybeSingle();
+    const baseUpdate = clientUpdatedAt
+      ? updateFilter.lte('updated_at', clientUpdatedAt)
+      : updateFilter;
+
+    const { data, error } = await baseUpdate.select('*').maybeSingle();
 
     if (error) {
       throw error;

@@ -751,6 +751,7 @@ export default function CategoryLibrary({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mediaId: selectedEntry.mediaId,
+            entryId: selectedEntry.entryId,
             clientUpdatedAt: selectedEntry.updatedAt,
             status: finalStatus,
             is_favorite: nextFavorite,
@@ -956,6 +957,7 @@ export default function CategoryLibrary({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mediaId: entry.mediaId,
+            entryId: entry.entryId,
             clientUpdatedAt: entry.updatedAt,
             is_favorite: nextFavorite,
           }),

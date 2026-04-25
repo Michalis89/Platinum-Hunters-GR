@@ -43,6 +43,7 @@ export type AddMediaRequestBody = {
  */
 export type UpdateLibraryRequestBody = {
   mediaId: number;
+  entryId?: number;
   clientUpdatedAt?: string;
   status?: 'planned' | 'current' | 'completed' | 'dropped';
   is_favorite?: boolean | null;

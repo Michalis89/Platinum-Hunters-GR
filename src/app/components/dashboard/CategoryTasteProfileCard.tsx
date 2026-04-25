@@ -201,6 +201,11 @@ const buildExtraSectionsFromProfile = (
     return sections;
   }
 
+  if (category === 'games') {
+    pushIfAny('Favorite Studios', toStringArray(profileNote.favorite_developers));
+    return sections;
+  }
+
   return sections;
 };
 
