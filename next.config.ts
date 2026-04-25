@@ -13,7 +13,7 @@ const withPWA = withPWAInit({
   customWorkerSrc: 'src/worker',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  reloadOnOnline: true,
+  reloadOnOnline: false,
   fallbacks: {
     document: '/offline',
   },
